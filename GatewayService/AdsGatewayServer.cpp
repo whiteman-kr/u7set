@@ -507,7 +507,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 
 		if (header.payloadSize > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
-			sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 			stc->errCount++;
 			recvBufSize = 0;
 			return;
@@ -524,7 +524,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 
 		if (requestSize > AGL::ADSGW_MAX_PAYLOAD_SIZE)
 		{
-			sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 			stc->errCount++;
 			recvBufSize = 0;
 			return;
@@ -543,7 +543,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 		case AGL::GwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
 			break;
 		default:
-			sendErrReply(stc, header, AGL::GWC_INVALID_REQUEST);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_INVALID_REQUEST);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
@@ -569,7 +569,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 			logErr(QString("request %1 error CRC 0x%2 (expected 0x%3)").
 				   arg(header.requestID).arg(receivedCrc, 8, 16, QChar('0')).arg(calcCrc, 8, 16, QChar('0')));
 
-			sendErrReply(stc, header, AGL::GWC_CRC_ERROR);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_CRC_ERROR);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
@@ -578,7 +578,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 		if (requestID != AGL::GwRequestId::ADSGW_HANDSHAKE &&
 			stc->handshakeCompleted == false)
 		{
-			sendErrReply(stc, header, AGL::GWC_HANDSHAKE_REQUIRED);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
@@ -647,7 +647,7 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 	{
 		logErr("HANDSHAKE request error, clientName is NOT null-terminated");
 
-		sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
@@ -660,7 +660,7 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 					arg(request.protocolVersion, 4, 16, QChar('0')).
 					arg(AGL::ADSGW_PROTOCOL_VERSION, 4, 16, QChar('0')));
 
-		sendErrReply(stc, header, AGL::GWC_UNSUPPORTED_VERSION);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_UNSUPPORTED_VERSION);
 		return false;
 	}
 
@@ -734,7 +734,7 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 
 	if (request.part >= static_cast<uint32_t>(partCount))
 	{
-		sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
@@ -754,7 +754,7 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 		{
 			Q_ASSERT(false);
 			logErr("AdsGatewayServer::processSignalListNextRequest payload size exceed!");
-			sendErrReply(stc, header, AGL::GWC_INTERNAL_ERROR);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_INTERNAL_ERROR);
 			return false;
 		}
 
@@ -826,7 +826,7 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 
 	if (request.part >= static_cast<uint32_t>(partCount))
 	{
-		sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
@@ -846,7 +846,7 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 		{
 			Q_ASSERT(false);
 			logErr("AdsGatewayServer::processSignalParamNextRequest payload size exceed!");
-			sendErrReply(stc, header, AGL::GWC_INTERNAL_ERROR);
+			sendErrReply(stc, header, AGL::GwErrorCode::GWC_INTERNAL_ERROR);
 			return false;
 		}
 
@@ -907,13 +907,13 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 
 	if (request.signalCount > AGL::GW_MAX_SIGNAL_STATES)
 	{
-		sendErrReply(stc, header, AGL::GWC_TOO_MANY_SIGNALS);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
 		return false;
 	}
 
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
-		sendErrReply(stc, header, AGL::GWC_NO_ADS_CONNECTION);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
 	}
 
@@ -937,7 +937,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 			{
 				Q_ASSERT(false);
 				logErr("AdsGatewayServer::processSignalStateRequest payload size exceed!");
-				sendErrReply(stc, header, AGL::GWC_INTERNAL_ERROR);
+				sendErrReply(stc, header, AGL::GwErrorCode::GWC_INTERNAL_ERROR);
 				return false;
 			}
 
@@ -1006,7 +1006,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
-		sendErrReply(stc, header, AGL::GWC_NO_ADS_CONNECTION);
+		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
 	}
 
@@ -1059,7 +1059,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
 	const char *recvBuf, const size_t recvBufSize, GatewayClientLib::GwErrorCode& errCode)
 {
-	errCode = AGL::GWC_REQUEST_FORMAT_ERROR;
+	errCode = AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR;
 
 	TEST_PTR_RETURN_FALSE(recvBuf);
 
@@ -1155,7 +1155,7 @@ void AdsGatewayServer::sendOkReply(SessionShared stc,
 	const GatewayClientLib::GwMessageHeader& requestHeader,
 	const char* payloadData, size_t payloadSize)
 {
-	sendReply(stc, requestHeader.requestID, AGL::GWC_SUCCESS, payloadData, payloadSize);
+	sendReply(stc, requestHeader.requestID, AGL::GwErrorCode::GWC_SUCCESS, payloadData, payloadSize);
 }
 
 void AdsGatewayServer::sendReply(SessionShared stc,
@@ -1171,10 +1171,10 @@ void AdsGatewayServer::sendReply(SessionShared stc,
 		Q_ASSERT(false);
 		payloadData = nullptr;
 		payloadSize = 0;
-		errCode = AGL::GWC_INTERNAL_ERROR;
+		errCode = AGL::GwErrorCode::GWC_INTERNAL_ERROR;
 	}
 
-	if (errCode != AGL::GWC_SUCCESS)
+	if (errCode != AGL::GwErrorCode::GWC_SUCCESS)
 	{
 		Q_ASSERT(payloadData == nullptr);
 		Q_ASSERT(payloadSize == 0);

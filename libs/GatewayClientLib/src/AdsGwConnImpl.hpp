@@ -119,7 +119,7 @@ namespace GatewayClientLib
 			writeUint32(static_cast<uint32_t>(requestId));
 			writeUint32(
 				static_cast<uint32_t>(sizeof(RequestT) + requestVariablePart.size() * sizeof(RequestVariablePartT))); // Payload size
-			writeUint32(static_cast<uint32_t>(GWC_SUCCESS)); // Status code for request is always 0
+			writeUint32(static_cast<uint32_t>(GwErrorCode::GWC_SUCCESS)); // Status code for request is always 0
 
 			// Write request payload (struct + variable part)
 			//
@@ -174,14 +174,14 @@ namespace GatewayClientLib
 			};
 			uint32_t respRequestId = readUint32(responseHeader);
 			uint32_t respPayloadSize = readUint32(responseHeader);
-			uint32_t respStatusCode = readUint32(responseHeader);
+			GwErrorCode respStatusCode = static_cast<GwErrorCode>(readUint32(responseHeader));
 
 			if (respRequestId != static_cast<uint32_t>(requestId))
 			{
 				throw std::runtime_error{std::format("Invalid response request ID: {}", respRequestId)};
 			}
 
-			if (respStatusCode != GWC_SUCCESS)
+			if (respStatusCode != GwErrorCode::GWC_SUCCESS)
 			{
 				// Receive CRC32 for error response (no payload)
 				//
@@ -255,7 +255,7 @@ namespace GatewayClientLib
 				throw std::runtime_error{std::format("Response CRC32 mismatch, request={}", requestId)};
 			}
 
-			return GWC_SUCCESS;
+			return GwErrorCode::GWC_SUCCESS;
 		}
 
 	protected:

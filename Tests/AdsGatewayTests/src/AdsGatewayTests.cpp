@@ -156,7 +156,7 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 				GatewayClientLib::GwHandshakeRequest request{};
 				GatewayClientLib::GwHandshakeResponse response{};
 
-				sendRequest(static_cast<GatewayClientLib::GwRequestId>(GatewayClientLib::ADSGW_HANDSHAKE + 19999), request, response, {});
+				sendRequest(static_cast<GatewayClientLib::GwRequestId>(199999), request, response, {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -219,9 +219,9 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 					offset += sizeof(value);
 				};
 
-				writeUint32(static_cast<uint32_t>(GatewayClientLib::ADSGW_HANDSHAKE));
-				writeUint32(static_cast<uint32_t>(sizeof(request)));            // Payload size
-				writeUint32(static_cast<uint32_t>(GatewayClientLib::GWC_SUCCESS)); // Status code for request is always 0
+				writeUint32(static_cast<uint32_t>(GatewayClientLib::GwRequestId::ADSGW_HANDSHAKE));
+				writeUint32(static_cast<uint32_t>(sizeof(request)));                            // Payload size
+				writeUint32(static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS)); // Status code for request is always 0
 
 				// Write request payload (struct)
 				//
@@ -242,7 +242,10 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 				// Receive response
 				//
 				m_lastStatusCode =
-					receiveResponsePacket<GatewayClientLib::GwHandshakeResponse>(GatewayClientLib::ADSGW_HANDSHAKE, response, {}, {});
+					receiveResponsePacket<GatewayClientLib::GwHandshakeResponse>(GatewayClientLib::GwRequestId::ADSGW_HANDSHAKE,
+																				 response,
+																				 {},
+																				 {});
 
 				return;
 			}
@@ -645,13 +648,14 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 
 				std::array<std::byte, 32> payload{};
 
-				m_lastStatusCode = sendRequest<GatewayClientLib::GwHandshakeRequest, std::byte, GatewayClientLib::GwHandshakeResponse, std::byte>(
-					GatewayClientLib::ADSGW_HANDSHAKE,
-					request,
-					std::span<const std::byte>(payload),
-					response,
-					{},
-					{});
+				m_lastStatusCode =
+					sendRequest<GatewayClientLib::GwHandshakeRequest, std::byte, GatewayClientLib::GwHandshakeResponse, std::byte>(
+						GatewayClientLib::GwRequestId::ADSGW_HANDSHAKE,
+						request,
+						std::span<const std::byte>(payload),
+						response,
+						{},
+						{});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -702,7 +706,7 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 				FakeHandshakeRequest request{};
 				GatewayClientLib::GwHandshakeResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_HANDSHAKE, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_HANDSHAKE, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -748,14 +752,15 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 				GatewayClientLib::GwSignalListStartResponse response{};
 
 				std::array<std::byte, 16> extraPayload;
-				m_lastStatusCode =
-					sendRequest<GatewayClientLib::GwSignalListStartRequest, std::byte, GatewayClientLib::GwSignalListStartResponse, std::byte>(
-						GatewayClientLib::ADSGW_SIGNAL_LIST_START,
-						request,
-						std::span<const std::byte>(extraPayload),
-						response,
-						std::span<std::byte>{},
-						{});
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalListStartRequest,
+											   std::byte,
+											   GatewayClientLib::GwSignalListStartResponse,
+											   std::byte>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_START,
+														  request,
+														  std::span<const std::byte>(extraPayload),
+														  response,
+														  std::span<std::byte>{},
+														  {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -801,7 +806,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 				FakeSignalListStartRequest badRequest{};
 				GatewayClientLib::GwSignalListStartResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, badRequest, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_START, badRequest, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -842,8 +847,8 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 				// Ensure server is ready to accept NEXT by issuing START once.
 				GatewayClientLib::GwSignalListStartRequest startReq{};
 				GatewayClientLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -855,14 +860,15 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 				GatewayClientLib::GwSignalListNextResponse nextResp{};
 				std::array<std::byte, 32> extraPayload{};
 
-				m_lastStatusCode =
-					sendRequest<GatewayClientLib::GwSignalListNextRequest, std::byte, GatewayClientLib::GwSignalListNextResponse, std::byte>(
-						GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT,
-						nextReq,
-						std::span<const std::byte>(extraPayload),
-						nextResp,
-						std::span<std::byte>{},
-						{});
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalListNextRequest,
+											   std::byte,
+											   GatewayClientLib::GwSignalListNextResponse,
+											   std::byte>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_NEXT,
+														  nextReq,
+														  std::span<const std::byte>(extraPayload),
+														  nextResp,
+														  std::span<std::byte>{},
+														  {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -901,8 +907,8 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 
 				GatewayClientLib::GwSignalListStartRequest startReq{};
 				GatewayClientLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -917,7 +923,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 				badReq.part = 0;
 
 				GatewayClientLib::GwSignalListNextResponse response{};
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT, badReq, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_NEXT, badReq, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -958,14 +964,15 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 				GatewayClientLib::GwSignalParamStartResponse response{};
 
 				std::array<std::byte, 32> extraPayload{};
-				m_lastStatusCode =
-					sendRequest<GatewayClientLib::GwSignalParamStartRequest, std::byte, GatewayClientLib::GwSignalParamStartResponse, std::byte>(
-						GatewayClientLib::ADSGW_SIGNAL_PARAM_START,
-						request,
-						std::span<const std::byte>(extraPayload),
-						response,
-						std::span<std::byte>{},
-						{});
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalParamStartRequest,
+											   std::byte,
+											   GatewayClientLib::GwSignalParamStartResponse,
+											   std::byte>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_START,
+														  request,
+														  std::span<const std::byte>(extraPayload),
+														  response,
+														  std::span<std::byte>{},
+														  {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1010,7 +1017,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 				FakeSignalParamStartRequest badRequest{};
 				GatewayClientLib::GwSignalParamStartResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, badRequest, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_START, badRequest, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1050,8 +1057,8 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 				// Start phase so NEXT is valid.
 				GatewayClientLib::GwSignalParamStartRequest startReq{};
 				GatewayClientLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -1063,14 +1070,15 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 				GatewayClientLib::GwSignalParamNextResponse nextResp{};
 				std::array<std::byte, 32> extraPayload{};
 
-				m_lastStatusCode =
-					sendRequest<GatewayClientLib::GwSignalParamNextRequest, std::byte, GatewayClientLib::GwSignalParamNextResponse, std::byte>(
-						GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT,
-						nextReq,
-						std::span<const std::byte>(extraPayload),
-						nextResp,
-						std::span<std::byte>{},
-						{});
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalParamNextRequest,
+											   std::byte,
+											   GatewayClientLib::GwSignalParamNextResponse,
+											   std::byte>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
+														  nextReq,
+														  std::span<const std::byte>(extraPayload),
+														  nextResp,
+														  std::span<std::byte>{},
+														  {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1109,8 +1117,8 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 
 				GatewayClientLib::GwSignalParamStartRequest startReq{};
 				GatewayClientLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -1125,7 +1133,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 				badReq.part = 0;
 
 				GatewayClientLib::GwSignalParamNextResponse response{};
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT, badReq, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_NEXT, badReq, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1172,12 +1180,12 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
 											   GatewayClientLib::GwSignalStateResponse,
-											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
-																				request,
-																				std::span<const uint64_t>(hashes),
-																				response,
-																				std::span<GatewayClientLib::GwAppSignalState>(states),
-																				{});
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE,
+																				   request,
+																				   std::span<const uint64_t>(hashes),
+																				   response,
+																				   std::span<GatewayClientLib::GwAppSignalState>(states),
+																				   {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1224,12 +1232,12 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
 											   GatewayClientLib::GwSignalStateResponse,
-											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
-																				request,
-																				std::span<const uint64_t>(hashes),
-																				response,
-																				std::span<GatewayClientLib::GwAppSignalState>(states),
-																				{});
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE,
+																				   request,
+																				   std::span<const uint64_t>(hashes),
+																				   response,
+																				   std::span<GatewayClientLib::GwAppSignalState>(states),
+																				   {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1274,7 +1282,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 
 				GatewayClientLib::GwSignalStateChangesResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE_CHANGES, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1316,7 +1324,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 				} request{};
 				GatewayClientLib::GwSignalStateChangesResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE_CHANGES, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1356,8 +1364,8 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 				// Ensure server is ready to accept NEXT by issuing START once.
 				GatewayClientLib::GwSignalListStartRequest startReq{};
 				GatewayClientLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -1374,7 +1382,7 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 					responseVariablePartBuffer.resize(startResp.itemsPerPart);
 					std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
 
-					m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT,
+					m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_LIST_NEXT,
 												   request,
 												   std::span<const std::byte>{},
 												   response,
@@ -1420,8 +1428,8 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 				// Ensure server is ready to accept NEXT by issuing START once.
 				GatewayClientLib::GwSignalParamStartRequest startReq{};
 				GatewayClientLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != GatewayClientLib::GWC_SUCCESS)
+				auto startStatus = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GwErrorCode::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -1435,7 +1443,7 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 					std::vector<GatewayClientLib::GwAppSignalParam> responseVariablePartBuffer{};
 					responseVariablePartBuffer.resize(startResp.itemsPerPart);
 
-					m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT,
+					m_lastStatusCode = sendRequest(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
 												   request,
 												   std::span<const std::byte>{},
 												   response,
@@ -1489,12 +1497,12 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
 											   GatewayClientLib::GwSignalStateResponse,
-											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
-																				request,
-																				std::span<const uint64_t>(hashes),
-																				response,
-																				std::span<GatewayClientLib::GwAppSignalState>(states),
-																				{});
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE,
+																				   request,
+																				   std::span<const uint64_t>(hashes),
+																				   response,
+																				   std::span<GatewayClientLib::GwAppSignalState>(states),
+																				   {});
 				returnedSignalStates = static_cast<int>(response.stateCount);
 			}
 			catch (const std::runtime_error&)
@@ -1546,12 +1554,12 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
 											   GatewayClientLib::GwSignalStateResponse,
-											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
-																				request,
-																				std::span<const uint64_t>(hashes),
-																				response,
-																				std::span<GatewayClientLib::GwAppSignalState>(states),
-																				{});
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE,
+																				   request,
+																				   std::span<const uint64_t>(hashes),
+																				   response,
+																				   std::span<GatewayClientLib::GwAppSignalState>(states),
+																				   {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1623,12 +1631,12 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   Radiy::Hash,
 											   GatewayClientLib::GwSignalStateResponse,
-											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
-																				request,
-																				std::span<const Radiy::Hash>(hashes),
-																				response,
-																				std::span<GatewayClientLib::GwAppSignalState>(states),
-																				{});
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::GwRequestId::ADSGW_SIGNAL_STATE,
+																				   request,
+																				   std::span<const Radiy::Hash>(hashes),
+																				   response,
+																				   std::span<GatewayClientLib::GwAppSignalState>(states),
+																				   {});
 				returnedSignalStates = response.stateCount;
 			}
 			catch (const std::runtime_error&)

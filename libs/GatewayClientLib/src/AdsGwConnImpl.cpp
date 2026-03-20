@@ -114,14 +114,14 @@ namespace GatewayClientLib
 		try
 		{
 			m_logger.logTrace("Sending handshake request to ADS Gateway...");
-			requestResult = sendRequest(ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
+			requestResult = sendRequest(GwRequestId::ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
 		}
 		catch (const std::runtime_error& e)
 		{
 			throw std::runtime_error{std::format("Handshake error: {}", e.what())};
 		}
 
-		if (requestResult != GWC_SUCCESS)
+		if (requestResult != GwErrorCode::GWC_SUCCESS)
 		{
 			throw std::runtime_error{std::format("Handshake server error: {}", requestResult)};
 		}
@@ -175,9 +175,9 @@ namespace GatewayClientLib
 			GwSignalListStartRequest request{};
 			GwSignalListStartResponse startResponse{};
 
-			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
+			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
 
-			if (requestResult != GWC_SUCCESS)
+			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{
 				throw std::runtime_error{std::format("server error {}", requestResult)};
 			}
@@ -208,13 +208,13 @@ namespace GatewayClientLib
 				responseVariablePartBuffer.resize(itemsPerPart);
 				std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
 
-				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_LIST_NEXT,
+				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_LIST_NEXT,
 														request,
 														std::span<const std::byte>{},
 														response,
 														std::span<AppSignalIdNetworkT>{responseVariablePartBuffer},
 														m_isCancelledFunc);
-				if (requestResult != GWC_SUCCESS)
+				if (requestResult != GwErrorCode::GWC_SUCCESS)
 				{
 					throw std::runtime_error{std::format("server error {}", requestResult)};
 				}
@@ -269,9 +269,9 @@ namespace GatewayClientLib
 			GwSignalParamStartResponse startResponse{};
 
 			m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_START...");
-			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
+			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
 
-			if (requestResult != GWC_SUCCESS)
+			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{
 				throw std::runtime_error{std::format("server error {}", requestResult)};
 			}
@@ -304,13 +304,13 @@ namespace GatewayClientLib
 
 				m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_NEXT, part {}/{}...", part + 1, partsCount);
 
-				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_NEXT,
+				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
 														request,
 														std::span<const std::byte>{},
 														response,
 														std::span<GwAppSignalParam>{responseVariablePartBuffer},
 														m_isCancelledFunc);
-				if (requestResult != GWC_SUCCESS)
+				if (requestResult != GwErrorCode::GWC_SUCCESS)
 				{
 					throw std::runtime_error{std::format("server error {}", requestResult)};
 				}
@@ -365,19 +365,19 @@ namespace GatewayClientLib
 				GwSignalStateChangesRequest request{};
 				GwSignalStateChangesResponse response{};
 
-				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_STATE_CHANGES,
+				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_STATE_CHANGES,
 														request,
 														std::span<const std::byte>{},
 														response,
 														std::span{m_statesBuffer},
 														m_isCancelledFunc);
 
-				if (requestResult == GWC_NO_ADS_CONNECTION)
+				if (requestResult == GwErrorCode::GWC_NO_ADS_CONNECTION)
 				{
 					return;
 				}
 
-				if (requestResult != GWC_SUCCESS)
+				if (requestResult != GwErrorCode::GWC_SUCCESS)
 				{
 					throw std::runtime_error{std::format("server error {}", requestResult)};
 				}
@@ -439,19 +439,19 @@ namespace GatewayClientLib
 
 			// Send request
 			//
-			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_STATE,
+			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_STATE,
 													request,
 													std::span<const Radiy::Hash>{m_hashBuffer},
 													response,
 													std::span{m_statesBuffer},
 													m_isCancelledFunc);
 
-			if (requestResult == GWC_NO_ADS_CONNECTION)
+			if (requestResult == GwErrorCode::GWC_NO_ADS_CONNECTION)
 			{
 				return;
 			}
 
-			if (requestResult != GWC_SUCCESS)
+			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{
 				throw std::runtime_error{std::format("server error {}", requestResult)};
 			}

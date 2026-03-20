@@ -17,7 +17,7 @@ namespace GatewayClientLib
 
 	constexpr size_t GW_APP_SIGNAL_ID_SIZE = STRING_LENGTH_128;
 
-	enum GwErrorCode : uint32_t
+	enum class GwErrorCode : uint32_t
 	{
 		GWC_SUCCESS = 0,
 		GWC_INVALID_REQUEST = 0x0201,
@@ -33,18 +33,18 @@ namespace GatewayClientLib
 	constexpr std::string_view to_string(GwErrorCode ec) noexcept
 	{
 		// clang-format off
-		using enum GwErrorCode;
 		switch (ec)
 		{
+		using enum GwErrorCode;
 		case GWC_SUCCESS:				return "GWC_SUCCESS(0)";
-		case GWC_INVALID_REQUEST:		return "GWC_INVALID_REQUEST(1)";
-		case GWC_UNSUPPORTED_VERSION:	return "GWC_UNSUPPORTED_VERSION(2)";
-		case GWC_NO_ADS_CONNECTION:		return "GWC_NO_ADS_CONNECTION(3)";
-		case GWC_TOO_MANY_SIGNALS:		return "GWC_TOO_MANY_SIGNALS(4)";
-		case GWC_HANDSHAKE_REQUIRED:	return "GWC_HANDSHAKE_REQUIRED(5)";
-		case GWC_REQUEST_FORMAT_ERROR:	return "GWC_REQUEST_FORMAT_ERROR(6)";
-		case GWC_INTERNAL_ERROR:		return "GWC_INTERNAL_ERROR(7)";
-		case GWC_CRC_ERROR:				return "GWC_CRC_ERROR(10)";
+		case GWC_INVALID_REQUEST:		return "GWC_INVALID_REQUEST(0x0201)";
+		case GWC_UNSUPPORTED_VERSION:	return "GWC_UNSUPPORTED_VERSION(0x0202)";
+		case GWC_NO_ADS_CONNECTION:		return "GWC_NO_ADS_CONNECTION(0x0203)";
+		case GWC_TOO_MANY_SIGNALS:		return "GWC_TOO_MANY_SIGNALS(0x0204)";
+		case GWC_HANDSHAKE_REQUIRED:	return "GWC_HANDSHAKE_REQUIRED(0x0205)";
+		case GWC_REQUEST_FORMAT_ERROR:	return "GWC_REQUEST_FORMAT_ERROR(0x0206)";
+		case GWC_INTERNAL_ERROR:		return "GWC_INTERNAL_ERROR(0x0207)";
+		case GWC_CRC_ERROR:				return "GWC_CRC_ERROR(0x020A)";
 		}
 		// clang-format on
 
@@ -65,7 +65,7 @@ struct std::formatter<GatewayClientLib::GwErrorCode> : std::formatter<std::strin
 
 namespace GatewayClientLib
 {
-	enum GwRequestId : uint32_t
+	enum class GwRequestId : uint32_t
 	{
 		ADSGW_HANDSHAKE = 0x0001,
 		ADSGW_SIGNAL_LIST_START = 0x0100,
