@@ -102,8 +102,8 @@ namespace GatewayClientLib
 	//
 	void AdsGwConnImpl::requestHandshake(std::string_view equipmentId, uint16_t protocolVersion)
 	{
-		GwHandshakeRequest request{};
-		GwHandshakeResponse response{};
+		AdsGwHandshakeRequest request{};
+		AdsGwHandshakeResponse response{};
 		m_handshakeResponse = {};
 
 		request.protocolVersion = protocolVersion;
@@ -114,7 +114,7 @@ namespace GatewayClientLib
 		try
 		{
 			m_logger.logTrace("Sending handshake request to ADS Gateway...");
-			requestResult = sendRequest(GwRequestId::ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
+			requestResult = sendRequest(AdsGwRequestId::ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -172,10 +172,10 @@ namespace GatewayClientLib
 		//
 		try
 		{
-			GwSignalListStartRequest request{};
-			GwSignalListStartResponse startResponse{};
+			AdsGwSignalListStartRequest request{};
+			AdsGwSignalListStartResponse startResponse{};
 
-			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
+			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
 
 			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{
@@ -201,14 +201,14 @@ namespace GatewayClientLib
 
 			for (uint32_t part = 0; part < partsCount; part++)
 			{
-				GwSignalListNextRequest request{};
-				GwSignalListNextResponse response{};
+				AdsGwSignalListNextRequest request{};
+				AdsGwSignalListNextResponse response{};
 				request.part = part;
 
 				responseVariablePartBuffer.resize(itemsPerPart);
 				std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
 
-				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_LIST_NEXT,
+				GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT,
 														request,
 														std::span<const std::byte>{},
 														response,
@@ -265,11 +265,11 @@ namespace GatewayClientLib
 		//
 		try
 		{
-			GwSignalParamStartRequest request{};
-			GwSignalParamStartResponse startResponse{};
+			AdsGwSignalParamStartRequest request{};
+			AdsGwSignalParamStartResponse startResponse{};
 
 			m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_START...");
-			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
+			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
 
 			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{
@@ -295,8 +295,8 @@ namespace GatewayClientLib
 
 			for (uint32_t part = 0; part < partsCount; part++)
 			{
-				GwSignalParamNextRequest request{};
-				GwSignalParamNextResponse response{};
+				AdsGwSignalParamNextRequest request{};
+				AdsGwSignalParamNextResponse response{};
 				request.part = part;
 
 				responseVariablePartBuffer.resize(itemsPerPart);
@@ -304,7 +304,7 @@ namespace GatewayClientLib
 
 				m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_NEXT, part {}/{}...", part + 1, partsCount);
 
-				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
+				GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
 														request,
 														std::span<const std::byte>{},
 														response,
@@ -362,10 +362,10 @@ namespace GatewayClientLib
 					break;
 				}
 
-				GwSignalStateChangesRequest request{};
-				GwSignalStateChangesResponse response{};
+				AdsGwSignalStateChangesRequest request{};
+				AdsGwSignalStateChangesResponse response{};
 
-				GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_STATE_CHANGES,
+				GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES,
 														request,
 														std::span<const std::byte>{},
 														response,
@@ -424,14 +424,14 @@ namespace GatewayClientLib
 #endif
 			auto requestCount = std::min(partSize, m_appSignalHashes.size() - m_nextStateIndexToRequest);
 
-			GwSignalStateRequest request{};
+			AdsGwSignalStateRequest request{};
 			request.signalCount = static_cast<uint32_t>(requestCount);
 
 			m_hashBuffer.clear();
 			m_hashBuffer.reserve(requestCount);
 			std::copy_n(m_appSignalHashes.data() + m_nextStateIndexToRequest, requestCount, std::back_inserter(m_hashBuffer));
 
-			GwSignalStateResponse response{};
+			AdsGwSignalStateResponse response{};
 			m_statesBuffer.clear();
 			m_statesBuffer.resize(requestCount);
 
@@ -439,7 +439,7 @@ namespace GatewayClientLib
 
 			// Send request
 			//
-			GwErrorCode requestResult = sendRequest(GwRequestId::ADSGW_SIGNAL_STATE,
+			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_STATE,
 													request,
 													std::span<const Radiy::Hash>{m_hashBuffer},
 													response,

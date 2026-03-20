@@ -1,71 +1,13 @@
 #pragma once
 
-#include <cassert>
-#include <cstdint>
-#include <format>
-#include <string_view>
+#include "GwClient.hpp"
 
 namespace GatewayClientLib
 {
-	constexpr uint16_t ADSGW_PORT = 5566;
+	constexpr uint16_t ADS_GW_PORT = 5566;
+	constexpr uint16_t ADS_GW_PROTOCOL_VERSION = 0x0100;
 
-	constexpr uint16_t ADSGW_PROTOCOL_VERSION = 0x0100;
-	constexpr uint32_t ADSGW_MAX_PAYLOAD_SIZE = 2 * 1024 * 1024; // 2 MB
-
-	constexpr size_t STRING_LENGTH_128 = 128;
-	constexpr size_t STRING_LENGTH_256 = 256;
-
-	constexpr size_t GW_APP_SIGNAL_ID_SIZE = STRING_LENGTH_128;
-
-	enum class GwErrorCode : uint32_t
-	{
-		GWC_SUCCESS = 0,
-		GWC_INVALID_REQUEST = 0x0201,
-		GWC_UNSUPPORTED_VERSION = 0x0202,
-		GWC_NO_ADS_CONNECTION = 0x0203,
-		GWC_TOO_MANY_SIGNALS = 0x0204,
-		GWC_HANDSHAKE_REQUIRED = 0x0205,
-		GWC_REQUEST_FORMAT_ERROR = 0x0206,
-		GWC_INTERNAL_ERROR = 0x0207,
-		GWC_CRC_ERROR = 0x020A
-	};
-
-	constexpr std::string_view to_string(GwErrorCode ec) noexcept
-	{
-		// clang-format off
-		switch (ec)
-		{
-		using enum GwErrorCode;
-		case GWC_SUCCESS:				return "GWC_SUCCESS(0)";
-		case GWC_INVALID_REQUEST:		return "GWC_INVALID_REQUEST(0x0201)";
-		case GWC_UNSUPPORTED_VERSION:	return "GWC_UNSUPPORTED_VERSION(0x0202)";
-		case GWC_NO_ADS_CONNECTION:		return "GWC_NO_ADS_CONNECTION(0x0203)";
-		case GWC_TOO_MANY_SIGNALS:		return "GWC_TOO_MANY_SIGNALS(0x0204)";
-		case GWC_HANDSHAKE_REQUIRED:	return "GWC_HANDSHAKE_REQUIRED(0x0205)";
-		case GWC_REQUEST_FORMAT_ERROR:	return "GWC_REQUEST_FORMAT_ERROR(0x0206)";
-		case GWC_INTERNAL_ERROR:		return "GWC_INTERNAL_ERROR(0x0207)";
-		case GWC_CRC_ERROR:				return "GWC_CRC_ERROR(0x020A)";
-		}
-		// clang-format on
-
-		assert(false);
-		return "GwErrorCode(unknown)";
-	}
-} // namespace GatewayClientLib
-
-template<>
-struct std::formatter<GatewayClientLib::GwErrorCode> : std::formatter<std::string_view>
-{
-	template<typename FormatContext>
-	auto format(GatewayClientLib::GwErrorCode code, FormatContext& ctx) const
-	{
-		return std::formatter<std::string_view>::format(to_string(code), ctx);
-	}
-};
-
-namespace GatewayClientLib
-{
-	enum class GwRequestId : uint32_t
+	enum class AdsGwRequestId : uint32_t
 	{
 		ADSGW_HANDSHAKE = 0x0001,
 		ADSGW_SIGNAL_LIST_START = 0x0100,
@@ -76,10 +18,10 @@ namespace GatewayClientLib
 		ADSGW_SIGNAL_STATE_CHANGES = 0x0301
 	};
 
-	constexpr std::string_view to_string(GwRequestId requestId) noexcept
+	constexpr std::string_view to_string(AdsGwRequestId requestId) noexcept
 	{
 		// clang-format off
-		using enum GwRequestId;
+		using enum AdsGwRequestId;
 		switch (requestId)
 		{
 		case ADSGW_HANDSHAKE:				return "ADSGW_HANDSHAKE(0x0001)";
@@ -92,41 +34,23 @@ namespace GatewayClientLib
 		}
 		// clang-format on
 
-		return "GwRequestId(unknown)";
+		return "AdsGwRequestId(unknown)";
 	}
 } // namespace GatewayClientLib
 
 template<>
-struct std::formatter<GatewayClientLib::GwRequestId> : std::formatter<std::string_view>
+struct std::formatter<GatewayClientLib::AdsGwRequestId> : std::formatter<std::string_view>
 {
 	template<typename FormatContext>
-	auto format(GatewayClientLib::GwRequestId requestId, FormatContext& ctx) const
+	auto format(GatewayClientLib::AdsGwRequestId requestId, FormatContext& ctx) const
 	{
 		return std::formatter<std::string_view>::format(to_string(requestId), ctx);
 	}
 };
 
-namespace GatewayClientLib
-{
-	struct GwMessageHeader
-	{
-		uint32_t requestID;
-		uint32_t payloadSize;
-		uint32_t statusCode;
-	};
-
-	static_assert(sizeof(GwMessageHeader) == 12);
-
-	constexpr size_t GW_MSG_HEADER_SIZE = sizeof(GwMessageHeader);
-	constexpr size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
-
-	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
-} // namespace GatewayClientLib
 
 namespace GatewayClientLib
 {
-	constexpr size_t GW_APP_SIGNAL_HASH_SIZE = sizeof(uint64_t);
-
 	// Structure defining application signal parameters
 	//
 	struct GwAppSignalParam
@@ -265,17 +189,17 @@ namespace GatewayClientLib
 {
 	// Request ADSGW_HANDSHAKE
 	//
-	struct GwHandshakeRequest
+	struct AdsGwHandshakeRequest
 	{
 		uint16_t protocolVersion; // Protocol version client supports (e.g., 0x0100 for v1.0)
 		uint16_t reserved1;       // Reserved for future use
 		char clientName[128];     // Null-terminated client name
 	};
 
-	static_assert(sizeof(GwHandshakeRequest) == 132);
-	constexpr size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
+	static_assert(sizeof(AdsGwHandshakeRequest) == 132);
+	constexpr size_t ADS_GW_HANDSHAKE_REQUEST_SIZE = sizeof(AdsGwHandshakeRequest);
 
-	struct GwHandshakeResponse
+	struct AdsGwHandshakeResponse
 	{
 		uint16_t protocolVersion; // Server protocol version (must match request for success)
 		uint16_t reserved;        // Reserved (must be 0)
@@ -287,38 +211,38 @@ namespace GatewayClientLib
 		uint32_t sizeof_GwAppSignalState; // See Section 7.2
 	};
 
-	static_assert(sizeof(GwHandshakeResponse) == 16);
+	static_assert(sizeof(AdsGwHandshakeResponse) == 16);
 
 	// Request ARGW_SIGNAL_LIST_START
 	//
-	struct GwSignalListStartRequest
+	struct AdsGwSignalListStartRequest
 	{
 		uint32_t reserved;
 	};
 
-	static_assert(sizeof(GwSignalListStartRequest) == 4);
-	constexpr size_t GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(GwSignalListStartRequest);
+	static_assert(sizeof(AdsGwSignalListStartRequest) == 4);
+	constexpr size_t ADS_GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(AdsGwSignalListStartRequest);
 
-	struct GwSignalListStartResponse
+	struct AdsGwSignalListStartResponse
 	{
 		uint32_t totalItemCount; // Total number of AppSignalIDs in system
 		uint32_t partCount;      // Total number of parts (pages) to retrieve
 		uint32_t itemsPerPart;   // Maximum number of AppSignalIDs per part
 	};
 
-	static_assert(sizeof(GwSignalListStartResponse) == 12);
+	static_assert(sizeof(AdsGwSignalListStartResponse) == 12);
 
 	// Request ARGW_SIGNAL_LIST_NEXT
 	//
-	struct GwSignalListNextRequest
+	struct AdsGwSignalListNextRequest
 	{
 		uint32_t part; // Part number to retrieve (0-based index)
 	};
 
-	static_assert(sizeof(GwSignalListNextRequest) == 4);
-	constexpr size_t GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(GwSignalListNextRequest);
+	static_assert(sizeof(AdsGwSignalListNextRequest) == 4);
+	constexpr size_t ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(AdsGwSignalListNextRequest);
 
-	struct GwSignalListNextResponse
+	struct AdsGwSignalListNextResponse
 	{
 		uint32_t part;             // Part number of this response
 		uint32_t appSignalIdCount; // Number of AppSignalIDs in this response
@@ -332,39 +256,40 @@ namespace GatewayClientLib
 #endif
 	};
 
-	constexpr size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
-	constexpr size_t GW_MAX_APP_SIGNAL_ID_COUNT = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
+	constexpr size_t ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(AdsGwSignalListNextResponse);
+	constexpr size_t ADS_GW_MAX_APP_SIGNAL_ID_COUNT =
+		(GW_MAX_MSG_PAYLOAD_SIZE - ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
-	struct GwSignalParamStartRequest
+	struct AdsGwSignalParamStartRequest
 	{
 		uint32_t reserved;
 	};
 
-	static_assert(sizeof(GwSignalParamStartRequest) == 4);
-	constexpr size_t GW_SIGNAL_PARAM_START_REQUEST_SIZE = sizeof(GwSignalParamStartRequest);
+	static_assert(sizeof(AdsGwSignalParamStartRequest) == 4);
+	constexpr size_t ADS_GW_SIGNAL_PARAM_START_REQUEST_SIZE = sizeof(AdsGwSignalParamStartRequest);
 
-	struct GwSignalParamStartResponse
+	struct AdsGwSignalParamStartResponse
 	{
 		uint32_t totalItemCount; // Total number of GwAppSignalParams in system
 		uint32_t partCount;      // Total number of parts (pages) to retrieve
 		uint32_t itemsPerPart;   // Maximum number of GwAppSignalParams per part
 	};
 
-	static_assert(sizeof(GwSignalParamStartResponse) == 12);
+	static_assert(sizeof(AdsGwSignalParamStartResponse) == 12);
 
 	// Request ARGW_SIGNAL_PARAM_NEXT
 	//
-	struct GwSignalParamNextRequest
+	struct AdsGwSignalParamNextRequest
 	{
 		uint32_t part; // Part number to retrieve (0-based index)
 	};
 
-	static_assert(sizeof(GwSignalParamNextRequest) == 4);
-	constexpr size_t GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE = sizeof(GwSignalParamNextRequest);
+	static_assert(sizeof(AdsGwSignalParamNextRequest) == 4);
+	constexpr size_t ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE = sizeof(AdsGwSignalParamNextRequest);
 
-	struct GwSignalParamNextResponse
+	struct AdsGwSignalParamNextResponse
 	{
 		uint32_t part;       // Part number of this response
 		uint32_t paramCount; // Number of GwAppSignalParams in this response
@@ -373,12 +298,13 @@ namespace GatewayClientLib
 #endif
 	};
 
-	constexpr size_t GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE = sizeof(GwSignalParamNextResponse);
-	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
+	constexpr size_t ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE = sizeof(AdsGwSignalParamNextResponse);
+	constexpr size_t ADS_GW_MAX_SIGNAL_PARAMS =
+		(GW_MAX_MSG_PAYLOAD_SIZE - ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
 
 	// Request ARGW_SIGNAL_STATE
 	//
-	struct GwSignalStateRequest
+	struct AdsGwSignalStateRequest
 	{
 		uint32_t signalCount; // Number of signals requested
 #if 0
@@ -386,9 +312,9 @@ namespace GatewayClientLib
 #endif
 	};
 
-	constexpr size_t GW_SIGNAL_STATE_REQUEST_SIZE = sizeof(GwSignalStateRequest);
+	constexpr size_t ADS_GW_SIGNAL_STATE_REQUEST_SIZE = sizeof(AdsGwSignalStateRequest);
 
-	struct GwSignalStateResponse
+	struct AdsGwSignalStateResponse
 	{
 		uint32_t stateCount; // Number of states returned
 
@@ -397,20 +323,20 @@ namespace GatewayClientLib
 #endif
 	};
 
-	constexpr size_t GW_SIGNAL_STATE_RESPONSE_SIZE = sizeof(GwSignalStateResponse);
-	constexpr size_t GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+	constexpr size_t ADS_GW_SIGNAL_STATE_RESPONSE_SIZE = sizeof(AdsGwSignalStateResponse);
+	constexpr size_t ADS_GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - ADS_GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 
 	// Request ARGW_SIGNAL_STATE_CHANGES
 	//
-	struct GwSignalStateChangesRequest
+	struct AdsGwSignalStateChangesRequest
 	{
 		uint32_t reserved;
 	};
 
-	static_assert(sizeof(GwSignalStateChangesRequest) == 4);
-	constexpr size_t GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE = sizeof(GwSignalStateChangesRequest);
+	static_assert(sizeof(AdsGwSignalStateChangesRequest) == 4);
+	constexpr size_t ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE = sizeof(AdsGwSignalStateChangesRequest);
 
-	struct GwSignalStateChangesResponse
+	struct AdsGwSignalStateChangesResponse
 	{
 		uint32_t pendingStatesCount; // Number of state changes still in queue (not returned in this response)
 		uint32_t stateCount;         // Number of states in this response
@@ -419,9 +345,9 @@ namespace GatewayClientLib
 #endif
 	};
 
-	constexpr size_t GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE = sizeof(GwSignalStateChangesResponse);
-	constexpr size_t GW_MAX_SIGNAL_STATE_CHANGES =
-		(GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+	constexpr size_t ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE = sizeof(AdsGwSignalStateChangesResponse);
+	constexpr size_t ADS_GW_MAX_SIGNAL_STATE_CHANGES =
+		(GW_MAX_MSG_PAYLOAD_SIZE - ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 
 
 } // namespace GatewayClientLib

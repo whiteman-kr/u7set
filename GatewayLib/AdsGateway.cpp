@@ -86,7 +86,7 @@ namespace Gateway
 			break;
 
 		case E::Setting::ClientRequestIP1:
-			addrPort.setAddressPortStr(sv.value.toString(), GatewayClientLib::ADSGW_PORT);
+			addrPort.setAddressPortStr(sv.value.toString(), GatewayClientLib::ADS_GW_PORT);
 			m_clientRequestIP1 = addrPort;
 			break;
 		}

@@ -35,7 +35,7 @@ namespace GatewayClientLib
 		// Requests:
 		//
 	protected:
-		void requestHandshake(std::string_view equipmentId, uint16_t protocolVersion = ADSGW_PROTOCOL_VERSION);
+		void requestHandshake(std::string_view equipmentId, uint16_t protocolVersion = ADS_GW_PROTOCOL_VERSION);
 		std::vector<std::string> requestSignalList();
 		std::vector<GwAppSignalParam> requestSignalParams();
 		void requestStateChanges();
@@ -47,7 +47,7 @@ namespace GatewayClientLib
 		// Throws std::runtime_error on communication errors.
 		//
 		template<typename RequestT, typename ResponseT, typename cancellableFuncT = std::function<bool()>>
-		GwErrorCode sendRequest(GwRequestId requestId,
+		GwErrorCode sendRequest(AdsGwRequestId requestId,
 								const RequestT& request,
 								ResponseT& response,
 								const cancellableFuncT& isCancelledFunc = {})
@@ -70,7 +70,7 @@ namespace GatewayClientLib
 				 typename ResponseT,
 				 typename ResponseVariablePartT,
 				 typename cancellableFuncT = std::function<bool()>>
-		GwErrorCode sendRequest(GwRequestId requestId,
+		GwErrorCode sendRequest(AdsGwRequestId requestId,
 								const RequestT& request,
 								std::span<const RequestVariablePartT> requestVariablePart,
 								ResponseT& response,
@@ -90,7 +90,7 @@ namespace GatewayClientLib
 		}
 
 		template<typename RequestT, typename RequestVariablePartT = char, typename cancellableFuncT = std::function<bool()>>
-		void sendRequestPacket(GwRequestId requestId,
+		void sendRequestPacket(AdsGwRequestId requestId,
 							   const RequestT& request,
 							   std::span<const RequestVariablePartT> requestVariablePart,
 							   const cancellableFuncT& isCancelledFunc)
@@ -149,7 +149,7 @@ namespace GatewayClientLib
 		}
 
 		template<typename ResponseT, typename ResponseVariablePartT = char, typename cancellableFuncT = std::function<bool()>>
-		GwErrorCode receiveResponsePacket(GwRequestId requestId,
+		GwErrorCode receiveResponsePacket(AdsGwRequestId requestId,
 										  ResponseT& response,
 										  std::span<ResponseVariablePartT> responseVariablePart,
 										  const cancellableFuncT& isCancelledFunc = {})
@@ -204,7 +204,7 @@ namespace GatewayClientLib
 				return static_cast<GwErrorCode>(respStatusCode);
 			}
 
-			if (respPayloadSize > ADSGW_MAX_PAYLOAD_SIZE)
+			if (respPayloadSize > GW_MAX_PAYLOAD_SIZE)
 			{
 				throw std::runtime_error{std::format("Response {} payload size too large: {}", requestId, respPayloadSize)};
 			}
@@ -267,7 +267,7 @@ namespace GatewayClientLib
 	protected:
 		std::optional<GwErrorCode> m_lastStatusCode;
 
-		GwHandshakeResponse m_handshakeResponse{};
+		AdsGwHandshakeResponse m_handshakeResponse{};
 		std::vector<std::string> m_appSignalIds{};
 		std::vector<Radiy::Hash> m_appSignalHashes{};
 

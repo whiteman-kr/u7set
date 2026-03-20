@@ -928,7 +928,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 516 (0x0204) | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
 | 517 (0x0205) | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
 | 518 (0x0206) | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
-| 519 (0x0207) | GWC_INTERNAL_ERROR | Internal server error |
+| 519 (0x0207) | GWC_GATEWAY_INTERNAL_ERROR | Internal server error |
 | 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---

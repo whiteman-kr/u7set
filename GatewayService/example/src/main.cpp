@@ -72,7 +72,7 @@ int main()
 	printHelp();
 
 	std::string_view address = "127.0.0.1";
-	uint16_t port = GatewayClientLib::ADSGW_PORT;
+	uint16_t port = GatewayClientLib::ADS_GW_PORT;
 
 	GatewayClientLib::SignalManager signalManager;
 

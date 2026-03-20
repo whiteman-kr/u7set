@@ -11,6 +11,7 @@ add_library(${TARGET} STATIC
   ./include/GatewayClientLib/ISignalUpdater.hpp
   ./include/GatewayClientLib/Logger.hpp
   ./include/GatewayClientLib/SignalManager.hpp
+  ./include/GatewayClientLib/TuningGwProtocol.hpp
 
   ./src/AdsGwConnection.cpp
   ./src/AdsGwConnImpl.cpp
