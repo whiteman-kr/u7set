@@ -366,6 +366,7 @@ namespace Metrology
 		SignalState& state() { return m_state; }
 		const SignalState& state() const { return m_state; }
 		void setState(const Metrology::SignalState& state) { m_state = state; }
+		void invalidate() { m_state.setValid(false); }
 
 	private:
 

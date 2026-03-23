@@ -26,6 +26,15 @@ AppSignalStateUpdater::AppSignalStateUpdater(SignalBase& signalBase) :
 {
 }
 
+void AppSignalStateUpdater::adsConnected()
+{
+}
+
+void AppSignalStateUpdater::adsDisconnected()
+{
+	m_signalBase.invalidateSignals();
+}
+
 void AppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 {
 	Metrology::SignalState mst;

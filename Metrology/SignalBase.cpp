@@ -1647,6 +1647,18 @@ void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::invalidateSignals()
+{
+	QMutexLocker l(&m_signalMutex);
+
+	for(Metrology::Signal& ms : m_signalList)
+	{
+		ms.invalidate();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal)
 {
 	const Metrology::SignalParam& param = signal.param();

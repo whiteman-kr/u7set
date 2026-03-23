@@ -80,26 +80,17 @@ namespace Gateway
 
 	void Handler::runAppDataSrvClient()
 	{
-/*		std::lock_guard lg(m_appDataSrvClientMutex);
-
-		m_appDataSrvClientThread =
-			std::make_unique<AppDataServiceClientThread>( m_swInfo,
-														 m_settings.appDataService1.address,
-														 m_settings.appDataService2.address,
-														 QString("GatewayService %1").arg(m_swInfo.equipmentID()),
-														 *this, m_log);
-		m_appDataSrvClientThread->start();*/
 	}
 
 	void Handler::stopAppDataSrvClient()
 	{
-/*		std::lock_guard lg(m_appDataSrvClientMutex);
+		std::lock_guard lg(m_adsClientMutex);
 
-		if (m_appDataSrvClientThread != nullptr)
+		if (m_adsClient != nullptr)
 		{
-			m_appDataSrvClientThread->quitAndWait();
-			m_appDataSrvClientThread.reset();
-		}*/
+			m_adsClient->stop();
+			m_adsClient.reset();
+		}
 	}
 
 	void Handler::onAppDataSrvConnected()

@@ -228,6 +228,7 @@ public:
 	void setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
 	void setSignalState(const Hash& hash, const Metrology::SignalState& state);
 	void setSignalState(int index, const Metrology::SignalState& state);
+	void invalidateSignals();
 
 	bool enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal);
 

@@ -16,26 +16,38 @@ GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 	size_t stateRequestInterval,
 	const RequestType stateChangesRequest,
 	size_t stateChangesMaxCount,
-	IAppSignalStateUpdater* updater) :
-	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, false),
-	m_updater(updater)
-{
-	init(stateRequest, stateRequestInterval, stateChangesRequest, stateChangesMaxCount);
-}
-
-GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
-	const std::vector<HostAddressPort>& serverAddress,
-	const QString& clientDescription,
-	CircularLoggerShared log,
-	const RequestType stateRequest,
-	size_t stateRequestInterval,
-	const RequestType stateChangesRequest,
-	size_t stateChangesMaxCount,
 	IAppSignalStateUpdaterShared updaterShared) :
 	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, false),
 	m_updaterShared(updaterShared)
 {
-	init(stateRequest, stateRequestInterval, stateChangesRequest, stateChangesMaxCount);
+	Q_ASSERT(stateRequest == RequestType::NoRequest ||
+			 stateRequest == RequestType::GetAppSignalState ||
+			 stateRequest == RequestType::GetAppSignalStateConstSize);
+
+	Q_ASSERT(stateChangesRequest == RequestType::NoRequest ||
+			 stateChangesRequest == RequestType::GetAppSignalStateChanges ||
+			 stateChangesRequest == RequestType::GetGatewayAppSignalStateChanges);
+
+	Q_ASSERT(stateRequest != RequestType::NoRequest ||
+			 stateChangesRequest != RequestType::NoRequest);
+
+	Q_ASSERT(m_updaterShared != nullptr);
+
+	static constexpr size_t MIN_STATE_REQUEST_INTERVAL = 10;
+	static constexpr size_t MAX_STATE_REQUEST_INTERVAL = 2000;
+
+	m_stateRequest = stateRequest;
+	m_stateRequestInterval = std::clamp(stateRequestInterval,
+										MIN_STATE_REQUEST_INTERVAL,
+										MAX_STATE_REQUEST_INTERVAL);
+
+	static constexpr size_t MIN_STATE_CHANGES_REQUEST_COUNT = 1;
+	static constexpr size_t MAX_STATE_CHANGES_REQUEST_COUNT = 20;
+
+	m_stateChangesRequest = stateChangesRequest;
+	m_stateChangesMaxCount = std::clamp(stateChangesMaxCount,
+										MIN_STATE_CHANGES_REQUEST_COUNT,
+										MAX_STATE_CHANGES_REQUEST_COUNT);
 }
 
 GrpcAdsClient::~GrpcAdsClient()
@@ -54,41 +66,6 @@ void GrpcAdsClient::setHashesToRequestGatewayStateChanges(const std::vector<Hash
 	std::lock_guard lg(m_hashesToRequestGatewayStateChangesMutex);
 	m_hashesToRequestGatewayStateChanges = hashes;
 	m_updateHashesToRequestGatewayStateChanges = true;
-}
-
-void GrpcAdsClient::init(const RequestType stateRequest,
-						size_t stateRequestInterval,
-						const RequestType stateChangesRequest,
-						size_t stateChangesMaxCount)
-{
-	Q_ASSERT(stateRequest == RequestType::NoRequest ||
-			 stateRequest == RequestType::GetAppSignalState ||
-			 stateRequest == RequestType::GetAppSignalStateConstSize);
-
-	Q_ASSERT(stateChangesRequest == RequestType::NoRequest ||
-			 stateChangesRequest == RequestType::GetAppSignalStateChanges ||
-			 stateChangesRequest == RequestType::GetGatewayAppSignalStateChanges);
-
-	Q_ASSERT(stateRequest != RequestType::NoRequest ||
-			 stateChangesRequest != RequestType::NoRequest);
-
-	Q_ASSERT(m_updater != nullptr);
-
-	static constexpr size_t MIN_STATE_REQUEST_INTERVAL = 10;
-	static constexpr size_t MAX_STATE_REQUEST_INTERVAL = 2000;
-
-	m_stateRequest = stateRequest;
-	m_stateRequestInterval = std::clamp(stateRequestInterval,
-										MIN_STATE_REQUEST_INTERVAL,
-										MAX_STATE_REQUEST_INTERVAL);
-
-	static constexpr size_t MIN_STATE_CHANGES_REQUEST_COUNT = 1;
-	static constexpr size_t MAX_STATE_CHANGES_REQUEST_COUNT = 20;
-
-	m_stateChangesRequest = stateChangesRequest;
-	m_stateChangesMaxCount = std::clamp(stateChangesMaxCount,
-										MIN_STATE_CHANGES_REQUEST_COUNT,
-										MAX_STATE_CHANGES_REQUEST_COUNT);
 }
 
 void GrpcAdsClient::run()
@@ -260,11 +237,6 @@ bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRe
 		return false;
 	}
 
-	if (m_updater != nullptr)
-	{
-		m_updater->updateAppSignalStates(reply);
-	}
-
 	if (m_updaterShared != nullptr)
 	{
 		m_updaterShared->updateAppSignalStates(reply);
@@ -296,11 +268,6 @@ bool GrpcAdsClient::sendGetAppStateChangesRequest(bool* hasPendingChanges)
 	if (st.ok() == false)
 	{
 		return false;
-	}
-
-	if (m_updater != nullptr)
-	{
-		m_updater->processAppSignalStateChanges(reply);
 	}
 
 	if (m_updaterShared != nullptr)
@@ -343,11 +310,6 @@ bool GrpcAdsClient::sendGetGatewayAppStateChangesRequest(bool* hasPendingChanges
 	if (st.ok() == false)
 	{
 		return false;
-	}
-
-	if (m_updater != nullptr)
-	{
-		m_updater->processGatewayAppSignalStateChanges(reply);
 	}
 
 	if (m_updaterShared != nullptr)

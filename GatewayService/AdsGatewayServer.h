@@ -56,6 +56,7 @@ public:
 
 	void updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply);
 	void processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply);
+	void invalidateSignals();
 
 	void setConnectedToAppDataSrv(bool connected);
 

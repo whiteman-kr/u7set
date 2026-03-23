@@ -14,6 +14,8 @@ namespace Gateway
 		void updateState(const Proto::AppSignalState& protoState);
 		const SimpleAppSignalState& getState() const;
 
+		void invalidate();
+
 		Hash hash() const;
 		void setHash(Hash h);
 

@@ -62,7 +62,7 @@ namespace Gateway
 		IvsImpulseCommThreadWorker(IvsImpulseHandler& handler);
 
 	public slots:
-		void onSendStateChanges();
+		void onSendGateayStateChanges();
 
 	private:
 		virtual void onThreadStarted() override;
@@ -143,6 +143,6 @@ namespace Gateway
 	{
 	public:
 		IvsImpulseCommThread(IvsImpulseHandler& handler);
-		void connect(GrpcAdsClient *client);
+		void connect(IvsImpulseHandler* handler);
 	};
 }

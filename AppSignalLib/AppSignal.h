@@ -711,6 +711,8 @@ public:
 	std::vector<AppSignal>::iterator end();
 	std::vector<AppSignal>::const_iterator end() const;
 
+	std::vector<Hash> getHashes() const;
+
 private:
 	std::vector<AppSignal> m_signals;
 	std::unordered_map<Hash, int> m_hashToSignal;		// Hash => index in m_signals

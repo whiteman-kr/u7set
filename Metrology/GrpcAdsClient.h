@@ -9,6 +9,9 @@ class IAppSignalStateUpdater
 public:
 	virtual ~IAppSignalStateUpdater() = default;
 
+	virtual void adsConnected() = 0;
+	virtual void adsDisconnected() = 0;
+
 	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) = 0;
 	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) = 0;
 	virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) = 0;
@@ -45,16 +48,6 @@ public:
 				  size_t stateRequestInterval,
 				  const RequestType stateChangesRequest,
 				  size_t stateChangesMaxCount,
-				  IAppSignalStateUpdater* updater);
-
-	GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
-				  const std::vector<HostAddressPort>& serverAddress,
-				  const QString& clientDescription,
-				  CircularLoggerShared log,
-				  const RequestType stateRequest,
-				  size_t stateRequestInterval,
-				  const RequestType stateChangesRequest,
-				  size_t stateChangesMaxCount,
 				  IAppSignalStateUpdaterShared updaterShared);
 
 	virtual ~GrpcAdsClient();
@@ -63,11 +56,6 @@ public:
 	void setHashesToRequestGatewayStateChanges(const std::vector<Hash>& hashes);
 
 private:
-	void init(const RequestType stateRequest,
-			  size_t stateRequestInterval,
-			  const RequestType stateChangesRequest,
-			  size_t stateChangesMaxCount);
-
 	virtual void run() override;
 
 	bool sendStateRequests();
@@ -88,7 +76,6 @@ private:
 	RequestType m_stateChangesRequest = RequestType::GetAppSignalStateChanges;
 	size_t m_stateChangesMaxCount = 5;
 
-	IAppSignalStateUpdater* m_updater = nullptr;
 	IAppSignalStateUpdaterShared m_updaterShared;
 
 	//

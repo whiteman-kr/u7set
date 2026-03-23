@@ -34,6 +34,7 @@ struct SimpleAppSignalState
 		state.m_value = value;
 	}
 
+	void invalidate() { flags.valid = 0; }
 	bool isValid() const { return flags.valid == 1; }
 
 	void save(Proto::AppSignalState* protoState) const;

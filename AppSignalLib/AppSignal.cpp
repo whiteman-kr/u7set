@@ -2942,3 +2942,18 @@ std::vector<AppSignal>::const_iterator AppSignals::end() const
 {
 	return m_signals.cend();
 }
+
+std::vector<Hash> AppSignals::getHashes() const
+{
+	std::vector<Hash> hashes;
+
+	hashes.reserve(count());
+
+	for(const AppSignal& s : m_signals)
+	{
+		hashes.push_back(s.hash());
+	}
+
+	return hashes;
+}
+

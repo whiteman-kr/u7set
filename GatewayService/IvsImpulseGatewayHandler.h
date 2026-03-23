@@ -35,8 +35,10 @@ namespace Gateway
 
 	using IvsImpulseListInfoShared = std::shared_ptr<IvsImpulseListInfo>;
 
-	class IvsImpulseHandler : public Handler, public IAppSignalStateUpdater
+	class IvsImpulseHandler : public QObject, public Handler
 	{
+		Q_OBJECT
+
 	public:
 		IvsImpulseHandler(const SoftwareInfo& swInfo,
 						  const GatewayServiceSettings& settings,
@@ -54,12 +56,16 @@ namespace Gateway
 		virtual void onAppDataSrvDisconnected() override;
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
-		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
-		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
-		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+		void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
+		void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply);
+		void invalidateSignals();
+
+	signals:
+		void sendGatewayStateChanges();
 
 	private:
 		bool init();
+		virtual void runAppDataSrvClient() override;
 		virtual void prepareRequests() override;
 
 	private:
@@ -82,4 +88,21 @@ namespace Gateway
 	};
 
 	using IvsImpulseHandlerShared = std::shared_ptr<IvsImpulseHandler>;
+
+	class IvsImpulseAppSignalStateUpdater : public IAppSignalStateUpdater
+	{
+	public:
+		IvsImpulseAppSignalStateUpdater(IvsImpulseHandler& handler);
+
+		virtual void adsConnected() override;
+		virtual void adsDisconnected() override;
+
+		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+
+	private:
+		IvsImpulseHandler& m_handler;
+	};
+
 }

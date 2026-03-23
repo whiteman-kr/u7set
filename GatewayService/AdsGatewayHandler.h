@@ -9,13 +9,13 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "AdsGatewayServer.h"
-#include "../Metrology/GrpcAdsClient.h""
+#include "../Metrology/GrpcAdsClient.h"
 
 using namespace asio;
 
 namespace Gateway
 {
-	class AdsGatewayHandler : public Handler, public IAppSignalStateUpdater
+	class AdsGatewayHandler : public Handler
 	{
 	public:
 		AdsGatewayHandler(const SoftwareInfo& swInfo,
@@ -37,15 +37,14 @@ namespace Gateway
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
-		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
-		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
-		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+		void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
+		void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply);
+		void invalidateSignals();
 
 	private:
 		virtual void prepareRequests() override;
 
 		virtual void runAppDataSrvClient() override;
-		virtual void stopAppDataSrvClient() override;
 
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();
@@ -58,4 +57,20 @@ namespace Gateway
 	};
 
 	using AdsGatewayHandlerShared = std::shared_ptr<AdsGatewayHandler>;
+
+	class AdsGatewayAppSignalStateUpdater : public IAppSignalStateUpdater
+	{
+	public:
+		AdsGatewayAppSignalStateUpdater(AdsGatewayHandler& handler);
+
+		virtual void adsConnected() override;
+		virtual void adsDisconnected() override;
+
+		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+
+	private:
+		AdsGatewayHandler& m_handler;
+	};
 }
