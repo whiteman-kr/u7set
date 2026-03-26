@@ -42,8 +42,7 @@ public:
 				   const QString& rootFolder,
 				   const QString& clientDescription,
 				   CircularLoggerShared log,
-				   int pingPeriodMs,
-				   bool startClient = true);
+				   int pingPeriodMs);
 
 	GrpcFileClient(const GrpcFileClient&) = delete;
 	GrpcFileClient& operator=(const GrpcFileClient&) = delete;

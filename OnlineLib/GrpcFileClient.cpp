@@ -11,9 +11,8 @@ GrpcFileClient::GrpcFileClient(const SoftwareInfo& localSoftwareInfo,
 	const QString& rootFolder,
 	const QString& clientDescription,
 	CircularLoggerShared log,
-	int pingPeriodMs,
-	bool startClient) :
-	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, pingPeriodMs, startClient),
+	int pingPeriodMs) :
+	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, pingPeriodMs),
 	m_rootFolder(QDir::cleanPath(rootFolder))
 {
 }

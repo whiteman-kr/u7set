@@ -3373,52 +3373,51 @@ void MainWindow::runSignalSocket()
 
 	// m_pSignalSocketThread->start();
 
+	std::lock_guard lg(m_grpcAdsClientMutex);
+
+	std::vector<HostAddressPort> serverAddress;
+
+	HostAddressPort addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+
+	if (addr.isSet())
 	{
-		std::lock_guard lg(m_grpcAdsClientMutex);
-
-		std::vector<HostAddressPort> serverAddress;
-
-		HostAddressPort addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
-
-		if (addr.isSet())
-		{
-			serverAddress.push_back(addr);
-		}
-
-		addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
-
-		if (addr.isSet())
-		{
-			serverAddress.push_back(addr);
-		}
-
-		auto updater = std::make_shared<AppSignalStateUpdater>(theSignalBase);
-
-		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo,
-									serverAddress,
-									"Metrology GrpcAdsClient",
-									m_log,
-									GrpcAdsClient::RequestType::GetAppSignalState, 50,
-									GrpcAdsClient::RequestType::NoRequest, 1, updater);
-
-		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
-		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
-		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-
-		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
-
-		m_grpcAdsClient->start();
+		serverAddress.push_back(addr);
 	}
+
+	addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+
+	if (addr.isSet())
+	{
+		serverAddress.push_back(addr);
+	}
+
+	auto updater = std::make_shared<AppSignalStateUpdater>(theSignalBase);
+
+	m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo,
+								serverAddress,
+								"Metrology GrpcAdsClient",
+								m_log,
+								GrpcAdsClient::RequestType::GetAppSignalState, 50,
+								GrpcAdsClient::RequestType::NoRequest, 1, updater);
+
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+
+	m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
+
+	m_grpcAdsClient->start();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopSignalSocket()
 {
-	{
-		std::lock_guard lg(m_grpcAdsClientMutex);
+	std::lock_guard lg(m_grpcAdsClientMutex);
 
+	if (m_grpcAdsClient != nullptr)
+	{
 		m_grpcAdsClient->stop();
 		m_grpcAdsClient.reset();
 	}

@@ -2102,8 +2102,7 @@ namespace Tcp
 
 			break;
 
-		default:
-			Q_ASSERT(false);
+		default: ;
 		}
 	}
 

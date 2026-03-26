@@ -284,7 +284,7 @@ void GrpcCfgLoader::startGrpcFileClient()
 	}
 
 	m_grpcFileClient = std::make_unique<GrpcFileClient>(m_swInfo, m_serverAddrs, m_rootFolder,
-														QStringLiteral("GrpcCfgLoader"), getLog(), 5000, false);
+														QStringLiteral("GrpcCfgLoader"), getLog(), 5000);
 
 	m_grpcFileClient->setEmitFileReady(true);
 

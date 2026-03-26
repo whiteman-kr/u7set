@@ -17,7 +17,7 @@ GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 	const RequestType stateChangesRequest,
 	size_t stateChangesMaxCount,
 	IAppSignalStateUpdaterShared updaterShared) :
-	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, false),
+	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, 5000),
 	m_updaterShared(updaterShared)
 {
 	Q_ASSERT(stateRequest == RequestType::NoRequest ||
@@ -106,7 +106,7 @@ void GrpcAdsClient::run()
 		{
 			if (sendPingRequest() == true)
 			{
-				m_lastRequestTime = currentMSecsUTC();
+				updateLastRequestTime();
 
 			}
 			else
@@ -226,10 +226,14 @@ bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRe
 	if (constSizeRequest)
 	{
 		st = stub()->GetAppSignalStateConstSize(&ctx, request, &reply);
+
+		qDebug() << "Send GetAppSignalStateConstSize";
 	}
 	else
 	{
 		st = stub()->GetAppSignalState(&ctx, request, &reply);
+
+		qDebug() << "Send GetAppSignalState";
 	}
 
 	if (st.ok() == false)
@@ -264,6 +268,8 @@ bool GrpcAdsClient::sendGetAppStateChangesRequest(bool* hasPendingChanges)
 	reply.Clear();
 
 	grpc::Status st = stub()->GetAppSignalStateChangesNoStream(&ctx, request, &reply);
+
+	qDebug() << "Send GetAppSignalStateChangesNoStream";
 
 	if (st.ok() == false)
 	{
@@ -306,6 +312,8 @@ bool GrpcAdsClient::sendGetGatewayAppStateChangesRequest(bool* hasPendingChanges
 	}
 
 	grpc::Status st = stub()->GetGatewayAppSignalStateChanges(&ctx, request, &reply);
+
+	qDebug() << "Send GetGatewayAppSignalStateChanges";
 
 	if (st.ok() == false)
 	{

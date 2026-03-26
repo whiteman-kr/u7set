@@ -51,8 +51,7 @@ public:
 			   const std::vector<HostAddressPort>& serverAddress,
 			   const QString& clientDescription,
 			   CircularLoggerShared log,
-			   int pingPeriodMs,
-			   bool startClient = true)  :
+			   int pingPeriodMs)  :
 		LogWrapper(log),
 		m_localSwInfo(localSoftwareInfo),
 		m_serverAddress(serverAddress),
@@ -63,11 +62,6 @@ public:
 		Q_ASSERT(m_serverAddress.size() > 0);
 
 		m_state.localSoftwareInfo = localSoftwareInfo;
-
-		if (startClient)
-		{
-			start();
-		}
 	}
 
 	virtual ~GrpcClient()
@@ -120,6 +114,8 @@ public:
 		m_quitRequested.store(false, std::memory_order::relaxed);
 		m_thread = std::thread(&GrpcClient::run, this);
 		m_threadStarted.store(true, std::memory_order::release);
+
+		qDebug() << C_STR(QString("%1 started").arg(m_clientDescription));
 	}
 
 	void stop()
@@ -139,6 +135,8 @@ public:
 		}
 
 		m_threadStarted.store(false, std::memory_order::release);
+
+		qDebug() << C_STR(QString("%1 stoped").arg(m_clientDescription));
 	}
 
 	bool isThreadStarted() const { return m_threadStarted.load(std::memory_order::acquire); }
