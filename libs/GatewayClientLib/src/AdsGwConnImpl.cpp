@@ -8,6 +8,9 @@
 
 namespace GatewayClientLib
 {
+	using AppSignalIdNetworkT = std::array<char, STRING_LENGTH_128>;
+
+
 	void AdsGwConnImpl::run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId)
 	{
 		m_isCancelledFunc = [stoken]()
@@ -79,8 +82,6 @@ namespace GatewayClientLib
 			{
 				m_conn.close();
 
-				// todo: Logger, now just print to stdout.
-				//
 				m_logger.logError(e.what());
 
 				std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -107,7 +108,10 @@ namespace GatewayClientLib
 		m_handshakeResponse = {};
 
 		request.protocolVersion = protocolVersion;
-		std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
+		
+		const size_t clientNameLen = std::min(equipmentId.size(), sizeof(request.clientName) - 1);
+		std::memcpy(request.clientName, equipmentId.data(), clientNameLen);
+		request.clientName[clientNameLen] = '\0';
 
 		GwErrorCode requestResult{};
 

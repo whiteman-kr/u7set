@@ -51,6 +51,36 @@ struct std::formatter<GatewayClientLib::AdsGwRequestId> : std::formatter<std::st
 
 namespace GatewayClientLib
 {
+	enum class Channel : uint8_t
+	{
+		A = 0,
+		B = 1,
+		C = 2,
+		D = 3
+	};
+
+	enum class InOutType : uint8_t
+	{
+		Input = 0,
+		Output = 1,
+		Internal = 2,
+		SoftwareCalculated = 3
+	};
+
+	enum class SignalType : uint8_t
+	{
+		Discrete = 0x00,
+		SignedInt32 = 0x10,
+		Float32 = 0x11,
+		Bus = 0x20
+	};
+
+	enum class AnalogFormat : uint8_t
+	{
+		SignedInt32 = 1,
+		Float = 2
+	};
+
 	// Structure defining application signal parameters
 	//
 	struct GwAppSignalParam
@@ -65,9 +95,9 @@ namespace GatewayClientLib
 		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
 		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
 
-		uint8_t channel;                        // Channel code (see Section 7.3)
-		uint8_t inOutType;                      // I/O type code (see Section 7.4)
-		uint8_t type;                           // Signal type code (see Section 7.5)
+		Channel channel;                        // Channel code (A/B/C/D. See Section 7.3)
+		InOutType inOutType;                    // I/O type code (Input/Output/Internal. See Section 7.4)
+		SignalType type;                        // Signal type code (Discrete/Analog/Bus. See Section 7.5)
 		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
 
 		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)

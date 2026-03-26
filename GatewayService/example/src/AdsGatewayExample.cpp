@@ -47,15 +47,57 @@ void printSignalParam(const GatewayClientLib::SignalManager& signalManager, std:
 		return;
 	}
 
+	std::string_view ioTypeStr;
+	switch (signalParam->inOutType)
+	{
+	case GatewayClientLib::InOutType::Input:
+		ioTypeStr = "Input";
+		break;
+	case GatewayClientLib::InOutType::Output:
+		ioTypeStr = "Output";
+		break;
+	case GatewayClientLib::InOutType::Internal:
+		ioTypeStr = "Internal";
+		break;
+	case GatewayClientLib::InOutType::SoftwareCalculated:
+		ioTypeStr = "SoftwareCalculated";
+		break;
+	default:
+		assert(false);
+		ioTypeStr = "Unknown";
+		break;
+	}
+
+	std::string_view typeStr;
+	switch (signalParam->type)
+	{
+	case GatewayClientLib::SignalType::Discrete:
+		typeStr = "Discrete";
+		break;
+	case GatewayClientLib::SignalType::SignedInt32:
+		typeStr = "Analog(SignedInt32)";
+		break;
+	case GatewayClientLib::SignalType::Float32:
+		typeStr = "Analog(Float32)";
+		break;
+	case GatewayClientLib::SignalType::Bus:
+		typeStr = "Bus";
+		break;
+	default:
+		assert(false);
+		typeStr = "Unknown";
+		break;
+	}
+
 	std::cout << "Signal ID: " << signalId << "\n"
 			  << "  Caption: " << signalParam->caption << "\n"
 			  << "  Equipment ID: " << signalParam->equipmentId << "\n"
 			  << "  LogicModule Equipment ID: " << signalParam->lmEquipmentId << "\n"
 			  << "  Units: " << signalParam->units << "\n"
 			  << "  Tags: " << signalParam->tags << "\n"
-			  << "  Channel: " << static_cast<int>(signalParam->channel) << "\n"
-			  << "  I/O Type: " << static_cast<int>(signalParam->inOutType) << "\n"
-			  << "  Type: " << static_cast<int>(signalParam->type) << "\n"
+			  << "  Channel: " << ('A' + static_cast<char>(signalParam->channel)) << "\n"
+			  << "  I/O Type: " << ioTypeStr << "\n"
+			  << "  Type: " << typeStr << "\n"
 			  << "  Decimal Places: " << static_cast<int>(signalParam->decimalPlaces) << "\n"
 			  << "  Tuning: " << (signalParam->tuning != 0 ? "Tunable" : "Non-tunable") << "\n"
 			  << "  Low Valid Range: " << signalParam->lowValidRange << "\n"

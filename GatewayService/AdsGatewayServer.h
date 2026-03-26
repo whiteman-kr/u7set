@@ -97,7 +97,6 @@ private:
 	QString getIpPortStr(const tcp::socket& socket) const;
 
 	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
-	uint8_t channelChar(E::Channel ch) const;
 
 	void updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
 

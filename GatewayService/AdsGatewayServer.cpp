@@ -853,7 +853,7 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 
 		TEST_PTR_CONTINUE(appSignal);
 
-		AGL::GwAppSignalParam p;
+		AGL::GwAppSignalParam p{};
 
 		p.hash = TO_UINT64(appSignal->hash());
 		copyStr(p.appSignalId, AGL::STRING_LENGTH_128, appSignal->appSignalID());
@@ -863,9 +863,33 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 		copyStr(p.lmEquipmentId, AGL::STRING_LENGTH_128, appSignal->lmEquipmentID());
 		copyStr(p.units, AGL::STRING_LENGTH_128, appSignal->unit());
 		copyStr(p.tags, AGL::STRING_LENGTH_256, appSignal->tagsStr());
-		p.channel = channelChar(appSignal->channel());
-		p.inOutType = TO_UINT8(appSignal->inOutType());
-		p.type = TO_UINT8(appSignal->signalType());
+		p.channel = static_cast<AGL::Channel>(appSignal->channel());
+		p.inOutType = static_cast<AGL::InOutType>(appSignal->inOutType());
+		
+		switch (appSignal->signalType())
+		{
+		case E::SignalType::Discrete:
+			p.type = AGL::SignalType::Discrete; 
+			break;
+		case E::SignalType::Analog:
+			switch (appSignal->analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::SignedInt32:
+				p.type = AGL::SignalType::SignedInt32;
+				break;
+			case E::AnalogAppSignalFormat::Float32:
+				p.type = AGL::SignalType::Float32;
+				break;
+			default:
+				Q_ASSERT(false);
+				p.type = AGL::SignalType::Discrete; 
+			}
+			break; 
+		default:
+			Q_ASSERT(false);
+			p.type = AGL::SignalType::Discrete; 
+		}
+
 		p.decimalPlaces = TO_UINT8(appSignal->decimalPlaces());
 		p.tuning = TO_UINT8(appSignal->enableTuning());
 		p.reserved1 = 0;
@@ -1252,20 +1276,6 @@ void AdsGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& from
 		std::memcpy(toStr, fromData.constData(), fromLen);
 		std::memset(toStr + fromLen, 0, toStrLen - fromLen);
 	}
-}
-
-uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
-{
-	switch(ch)
-	{
-	case E::Channel::A: return TO_UINT8('A');
-	case E::Channel::B: return TO_UINT8('B');
-	case E::Channel::C: return TO_UINT8('C');
-	case E::Channel::D: return TO_UINT8('D');
-	default: ;
-	}
-
-	return 0;
 }
 
 void AdsGatewayServer::updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)

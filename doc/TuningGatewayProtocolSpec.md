@@ -543,7 +543,7 @@ Total size: 12 bytes
 #### Request Payload (TGW_GET_TUNING_SOURCES_NEXT)
 ```cpp
 struct GwGetTuningSourcesNextRequest {
-    uint32_t partNo;        // Part number to retrieve (0-based)
+    uint32_t part;      // Part number to retrieve (0-based)
 };
 
 static_assert(sizeof(GwGetTuningSourcesNextRequest) == 4);

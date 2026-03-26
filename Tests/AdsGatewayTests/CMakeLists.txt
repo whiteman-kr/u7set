@@ -15,6 +15,7 @@ add_executable(${TARGET}
 	./src/HashTests.cpp
 	./src/main.cpp
 	./src/TestSettings.hpp
+	./src/TuningSourcesTests.cpp
 )
 
 target_link_libraries(${TARGET} PRIVATE Threads::Threads GTest::gtest GTest::gmock)

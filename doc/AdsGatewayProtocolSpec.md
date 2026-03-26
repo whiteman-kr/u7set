@@ -1,8 +1,8 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.3  
+**Document Version:** 1.4  
 **Protocol Version:** 1.0  
-**Date:** 18 Mar 2026  
+**Date:** 26 Mar 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Released
 
@@ -763,9 +763,9 @@ struct GwAppSignalParam {
     char units[128];            // Engineering units (UTF-8, null-terminated)
     char tags[256];             // Tags, space-separated (ASCII, null-terminated)
 
-    uint8_t channel;            // Channel code (see Section 7.3)
-    uint8_t inOutType;          // I/O type code (see Section 7.4)
-    uint8_t type;               // Signal type code (see Section 7.5)
+    uint8_t channel;            // Channel code (A/B/C/D. See Section 7.3)
+    uint8_t inOutType;          // I/O type code (Input/Output/Internal. See Section 7.4)
+    uint8_t type;               // Signal type code (Discrete/Analog(SI32, FP)/Bus. See Section 7.5)
     uint8_t decimalPlaces;      // Number of decimal places for analog signals
 
     uint8_t tuning;             // Tuning flag (0 = non-tunable, 1 = tunable)
@@ -886,14 +886,16 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 0 | Input | Input signal type |
 | 1 | Output | Output signal type |
 | 2 | Internal | Internal signal type |
+| 3 | SoftwareCalculated | Signal calculated in software (not directly from LM) |
 
 <a id="75-signal-type-codes" name="75-signal-type-codes"></a>
 ### 7.5 Signal Type Codes
 | Code | Name | Description |
 |------|------|-------------|
-| 0 | Analog | Analog signal type |
-| 1 | Discrete | Discrete (binary/digital) signal type |
-| 2 | Bus | Bus signal type |
+| 0x00 | Discrete | Discrete signal type |
+| 0x10 | Analog SignedInt32 | 32-bit signed integer format |
+| 0x11 | Analog Float32 | 32-bit floating point format |
+| 0x20 | Bus | Bus signal type |
 
 ---
 
@@ -1155,3 +1157,4 @@ uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialC
 | 1.1 | 09 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Normalized terminology across docs |
 | 1.2 | 02 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed error code values |
 | 1.3 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added TOC and internal navigation links |
+| 1.4 | 26 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added AnalogFormat to signal type |

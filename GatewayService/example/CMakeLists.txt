@@ -1,10 +1,21 @@
 cmake_minimum_required(VERSION 3.16)
 
-project (AdsGatewayExample LANGUAGES CXX)
+project (GatewayClientExample LANGUAGES CXX)
 
-add_executable(AdsGatewayExample 
-    ./src/main.cpp
+# AdsGatewayExample
+#
+add_executable(AdsGatewayExample
+    src/AdsGatewayExample.cpp
 )
 
 target_compile_features(AdsGatewayExample PRIVATE cxx_std_20)
 target_link_libraries(AdsGatewayExample PRIVATE GatewayClientLib)
+
+# TuningGatewayExample
+#
+add_executable(TuningGatewayExample
+    src/TuningGatewayExample.cpp
+)
+
+target_compile_features(TuningGatewayExample PRIVATE cxx_std_20)
+target_link_libraries(TuningGatewayExample PRIVATE GatewayClientLib)

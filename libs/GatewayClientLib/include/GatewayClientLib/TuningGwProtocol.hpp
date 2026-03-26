@@ -50,22 +50,132 @@ struct std::formatter<GatewayClientLib::TuningGwRequestId> : std::formatter<std:
 	}
 };
 
- namespace GatewayClientLib
+namespace GatewayClientLib
 {
-//	struct GwMessageHeader
-//	{
-//		uint32_t requestID;
-//		uint32_t payloadSize;
-//		uint32_t statusCode;
-//	};
-//
-//	static_assert(sizeof(GwMessageHeader) == 12);
-//
-//	constexpr size_t GW_MSG_HEADER_SIZE = sizeof(GwMessageHeader);
-//	constexpr size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
-//
-//	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = GW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
-// } // namespace GatewayClientLib
+	// GwTuningSourceState - contains the current state of a tuning source (LogicModule).
+	//
+	struct GwTuningSourceState
+	{
+		// Tuning Source channel identification
+		//
+		uint64_t sourceId;           // Unique source ID
+		char moduleEquipmentId[128]; // Module equipment ID (ASCII, null-terminated)
+		char lanEquipmentId[128];    // LAN equipment ID (ASCII, null-terminated)
+
+		// Tuning Source processing states (boolean fields: 0 = false, 1 = true)
+		//
+		uint8_t isReplying;         // TuningService receives data from LM's tuning LAN
+		uint8_t controlIsActive;    // Control is active for this tuning source
+		uint8_t setSOR;             // Safety Override (SOR) will be set when LM switches
+									// from TuningMode
+		uint8_t writingDisabled;    // Writing to LM is disabled (non-safety LMs only;
+									// ignore for safety LMs)
+		uint8_t buildMismatch;      // Non-zero when LM build mismatches the loaded build
+		uint8_t hasUnappliedParams; // LM has written tuning signal states that were not
+									// applied yet
+									// these states will be reset if LM leaves tuning mode.
+									// Note: This flag is calculated by TuningService and
+									// resets if TuningService is reloaded.
+		uint8_t reservedFlags[2];   // Reserved (alignment to 8 bytes)
+
+		int64_t lmTime;             // LM time: milliseconds since Unix epoch,
+									// as reported by the LogicModule's own clock
+	};
+
+	static_assert(sizeof(GwTuningSourceState) == 280);
+
+	// GwTuningSignalState - contains the current tuning state of a tunable signal.
+	//
+	struct GwTuningSignalState
+	{
+		uint64_t hash;      // AppSignalID hash (as defined in Section 1.7.2)
+		uint32_t errorCode; // Error code, 0 = GWC_SUCCESS, Section 7.2
+
+		uint32_t flags;     // TuningSignalStateFlags bitmask (see below)
+		double value;       // Current signal value
+
+							// All times are ms since Unix epoch
+		int64_t successfulReadTime;        // Last successful read time, server UTC
+		int64_t writeRequestTime;          // Last write request time, server UTC
+		int64_t successfulWriteTime;       // Last successful write time, server UTC
+		int64_t unsuccessfulWriteTime;     // Last unsuccessful write time, server UTC
+
+		int64_t lmTime;                    // LogicModule plant time assigned to the state
+		uint64_t fotipProcessingNumerator; // Source processing numerator/counter
+	};
+
+	static_assert(sizeof(GwTuningSignalState) == 72);
+}
+
+namespace GatewayClientLib
+{
+	// Request TGW_HANDSHAKE
+	//
+	struct TuningGwHandshakeRequest
+	{
+		uint16_t protocolVersion; // Protocol version client supports (e.g., 0x0100 for v1.0)
+		uint16_t reserved1;       // Reserved for future use
+		char clientName[128];     // Null-terminated client name
+	};
+
+	static_assert(sizeof(TuningGwHandshakeRequest) == 132);
+
+	constexpr size_t TUNING_GW_HANDSHAKE_REQUEST_SIZE = sizeof(TuningGwHandshakeRequest);
+
+	struct TuningGwHandshakeResponse
+	{
+		uint16_t protocolVersion;            // Server protocol version
+											 // (must match request for success)
+		uint16_t reserved;                   // Reserved
+		uint32_t maxStateRequest;            // Max tuning signal states per request
+											 // (TGW_TUNING_SIGNALS_READ)
+		uint32_t maxStateWrite;              // Max tuning signal write commands per request
+											 // (TGW_TUNING_SIGNALS_WRITE)
+
+		uint32_t sizeof_GwTuningSourceState; // See Section 5.3, struct GwTuningSourceState
+		uint32_t sizeof_GwTuningSignalState; // See Section 6.1
+	};
+
+	static_assert(sizeof(TuningGwHandshakeResponse) == 20);
+
+	// Request TGW_GET_TUNING_SOURCES_START
+	//
+	struct GwGetTuningSourcesStartRequest
+	{
+		uint32_t reserved;
+	};
+
+	static_assert(sizeof(GwGetTuningSourcesStartRequest) == 4);
+
+	struct GwGetTuningSourcesStartResponse
+	{
+		uint32_t totalSize;   // Total file size in bytes
+		uint32_t maxPartSize; // Maximum size of each part in bytes
+		uint32_t partCount;   // Total number of parts to retrieve via TGW_GET_TUNING_SOURCES_NEXT
+	};
+
+	static_assert(sizeof(GwGetTuningSourcesStartResponse) == 12);
+
+	// Request TGW_GET_TUNING_SOURCES_NEXT
+	//
+	struct GwGetTuningSourcesNextRequest
+	{
+		uint32_t part; // Part number to retrieve (0-based)
+	};
+
+	static_assert(sizeof(GwGetTuningSourcesNextRequest) == 4);
+
+	struct GwGetTuningSourcesNextResponse
+	{
+		uint32_t part;     // Current part number (matches request)
+		uint32_t partSize; // Size of data in this part (bytes)
+#if 0
+		char data[partSize]; // Part data (UTF-8 encoded)
+#endif
+	};
+
+	
+	// } // namespace GatewayClientLib
 //
 // namespace GatewayClientLib
 //{
