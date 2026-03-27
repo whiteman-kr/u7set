@@ -47,6 +47,9 @@ public:
 	double doubleValue() const;
 	void setDoubleValue(double doubleValue);
 
+	uint64_t bitCastUint64Value() const;
+	void setBitCastUint64Value(uint64_t uint64Value);
+
 	void setValue(const TuningValue& tv);
 	void setValue(TuningValueType valueType, qint64 int32Value, double doubleValue);
 	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint64 intValue, double doubleValue);

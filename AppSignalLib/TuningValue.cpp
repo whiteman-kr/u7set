@@ -138,6 +138,53 @@ void TuningValue::setDoubleValue(double doubleValue)
 	m_double = doubleValue;
 }
 
+uint64_t TuningValue::bitCastUint64Value() const
+{
+	switch(m_type)
+	{
+	case TuningValueType::Discrete:
+		return (m_int64 == 0 ? 0ULL : 1ULL);
+
+	case TuningValueType::SignedInt32:
+	case TuningValueType::SignedInt64:
+		return std::bit_cast<uint64_t>(m_int64);
+
+	case TuningValueType::Float:
+	case TuningValueType::Double:
+		return std::bit_cast<uint64_t>(m_double);
+
+	default:
+		Q_ASSERT(false);
+		break;
+	}
+
+	return 0ULL;
+}
+
+void TuningValue::setBitCastUint64Value(uint64_t uint64Value)
+{
+	switch(m_type)
+	{
+	case TuningValueType::Discrete:
+		m_int64 = (uint64Value == 0 ? 0LL : 1LL);
+		break;
+
+	case TuningValueType::SignedInt32:
+	case TuningValueType::SignedInt64:
+		m_int64 = std::bit_cast<int64_t>(uint64Value);
+		break;
+
+	case TuningValueType::Float:
+	case TuningValueType::Double:
+		m_double = std::bit_cast<double>(uint64Value);
+		break;
+
+	default:
+		Q_ASSERT(false);
+		break;
+	}
+}
+
 void TuningValue::setValue(const TuningValue& tv)
 {
 	m_type = tv.m_type;

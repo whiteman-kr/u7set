@@ -1078,8 +1078,13 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_VALUE_TYPE_STR, m_tuningDefaultValue.typeStr());
 
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, tuningDefaultValue().toString());
+		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, tuningDefaultValue().bitCastUint64Value(), true);
+
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, tuningLowBound().toString());
+		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, tuningLowBound().bitCastUint64Value(), true);
+
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, tuningHighBound().toString());
+		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, tuningHighBound().bitCastUint64Value(), true);
 
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ADDR, m_tuningAddr);
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, m_tuningAddr);
@@ -1213,20 +1218,16 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 		Q_ASSERT(m_tuningDefaultValue.type() == tvt);
 
-		QString sv;
-		bool ok = true;
+		uint64_t v64;
 
-		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, &sv);
-		m_tuningDefaultValue.fromString(sv, &ok);
-		result &= ok;
+		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v64);
+		m_tuningDefaultValue.setBitCastUint64Value(v64);
 
-		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, &sv);
-		m_tuningLowBound.fromString(sv, &ok);
-		result &= ok;
+		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v64);
+		m_tuningLowBound.setBitCastUint64Value(v64);
 
-		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, &sv);
-		m_tuningHighBound.fromString(sv, &ok);
-		result &= ok;
+		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v64);
+		m_tuningHighBound.setBitCastUint64Value(v64);
 
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ADDR, &m_tuningAddr);
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, &m_tuningAbsAddr);

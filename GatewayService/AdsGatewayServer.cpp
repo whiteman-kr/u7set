@@ -212,11 +212,23 @@ void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
 {
 	m_connectedToAppDataSrv.store(connected, std::memory_order_relaxed);
 
-	std::lock_guard lg(m_sessionsMutex);
-
-	for(SessionShared session : m_sessions)
 	{
-		session->connectedToAppDataSrv.store(connected, std::memory_order_relaxed);
+		std::lock_guard lg(m_sessionsMutex);
+
+		for(SessionShared session : m_sessions)
+		{
+			session->connectedToAppDataSrv.store(connected, std::memory_order_relaxed);
+		}
+	}
+
+	if (connected == false)
+	{
+		std::lock_guard lg(m_signalStatesMutex);
+
+		for(SimpleAppSignalState st : m_signalStates)
+		{
+			st.flags.valid = 0;
+		}
 	}
 }
 

@@ -824,8 +824,11 @@ namespace AppSignalPropNames
 	inline const QString TUNING_VALUE_TYPE("TuningValueType");
 	inline const QString TUNING_VALUE_TYPE_STR("TuningValueTypeStr");
 	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
+	inline const QString TUNING_DEFAULT_VALUE_HEX("TuningDefaultValueHex");
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
+	inline const QString TUNING_LOW_BOUND_HEX("TuningLowBoundHex");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+	inline const QString TUNING_HIGH_BOUND_HEX("TuningHighBoundHex");
 
 	inline const QString SPEC_PROP_STRUCT("SpecPropStruct");
 	inline const QString SPECIFIC_PROPERTIES_STRUCT("SpecificPropertiesStruct");
