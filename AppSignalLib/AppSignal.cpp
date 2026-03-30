@@ -1218,7 +1218,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 		Q_ASSERT(m_tuningDefaultValue.type() == tvt);
 
-		uint64_t v64;
+		quint64 v64;
 
 		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v64);
 		m_tuningDefaultValue.setBitCastUint64Value(v64);

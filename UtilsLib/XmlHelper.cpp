@@ -403,7 +403,7 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 	return true;
 }
 
-bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong* value)
+bool XmlReadHelper::readInt64Attribute(const QString& name, qint64 *value)
 {
 	TEST_PTR_RETURN_FALSE(value);
 
@@ -418,7 +418,7 @@ bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong* value)
 	return result;
 }
 
-bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong* value)
+bool XmlReadHelper::readUInt64Attribute(const QString& name, quint64* value)
 {
 	TEST_PTR_RETURN_FALSE(value);
 

@@ -138,7 +138,7 @@ void TuningValue::setDoubleValue(double doubleValue)
 	m_double = doubleValue;
 }
 
-uint64_t TuningValue::bitCastUint64Value() const
+quint64 TuningValue::bitCastUint64Value() const
 {
 	switch(m_type)
 	{
@@ -147,11 +147,11 @@ uint64_t TuningValue::bitCastUint64Value() const
 
 	case TuningValueType::SignedInt32:
 	case TuningValueType::SignedInt64:
-		return std::bit_cast<uint64_t>(m_int64);
+		return std::bit_cast<quint64>(m_int64);
 
 	case TuningValueType::Float:
 	case TuningValueType::Double:
-		return std::bit_cast<uint64_t>(m_double);
+		return std::bit_cast<quint64>(m_double);
 
 	default:
 		Q_ASSERT(false);
@@ -161,7 +161,7 @@ uint64_t TuningValue::bitCastUint64Value() const
 	return 0ULL;
 }
 
-void TuningValue::setBitCastUint64Value(uint64_t uint64Value)
+void TuningValue::setBitCastUint64Value(quint64 uint64Value)
 {
 	switch(m_type)
 	{

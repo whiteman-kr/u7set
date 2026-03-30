@@ -47,8 +47,8 @@ public:
 	double doubleValue() const;
 	void setDoubleValue(double doubleValue);
 
-	uint64_t bitCastUint64Value() const;
-	void setBitCastUint64Value(uint64_t uint64Value);
+	quint64 bitCastUint64Value() const;
+	void setBitCastUint64Value(quint64 uint64Value);
 
 	void setValue(const TuningValue& tv);
 	void setValue(TuningValueType valueType, qint64 int32Value, double doubleValue);
