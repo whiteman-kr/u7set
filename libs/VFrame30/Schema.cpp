@@ -957,7 +957,7 @@ namespace VFrame30
 
 			if (si->ufbSchemaVersion() != ufb->version())
 			{
-				bool ok = si->updateUfbElement(ufb, errorMessage);
+				bool ok = si->updateUfbElement(*ufb, errorMessage);
 
 				if (ok == true)
 				{

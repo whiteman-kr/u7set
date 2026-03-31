@@ -6469,7 +6469,7 @@ void EditSchemaWidget::addUfbElement()
 		qDebug() << "UserFunctionalBlock selected " << ufb->caption();
 
 		QString errorMsg;
-		addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), ufb.get(), &errorMsg));
+		addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), *ufb, &errorMsg));
 
 		if (errorMsg.isEmpty() == false)
 		{

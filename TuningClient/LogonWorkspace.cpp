@@ -109,7 +109,7 @@ void LogonWidget::onTimer()
 
 			QTime logoutTime(0, 0, 0);
 			logoutTime = logoutTime.addSecs(s);
-			m_logoutPendingTime->setText(DateTimeToString::timeSec(logoutTime));
+			m_logoutPendingTime->setText(logoutTime.toString("hh:mm:ss"));
 
 			if (s <= 0)
 			{

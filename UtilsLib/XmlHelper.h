@@ -128,8 +128,8 @@ public:
 	bool readStringListAttribute(const QString& name, QStringList* list);
 	bool readIntAttribute(const QString& name, int* value);
 	bool readBoolAttribute(const QString& name, bool* value);
-	bool readInt64Attribute(const QString& name, qlonglong* value);
-	bool readUInt64Attribute(const QString& name, qulonglong* value);
+	bool readInt64Attribute(const QString& name, qint64* value);
+	bool readUInt64Attribute(const QString& name, quint64 *value);
 	bool readUInt32Attribute(const QString& name, quint32* value);
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readFloatAttribute(const QString& name, float* value);

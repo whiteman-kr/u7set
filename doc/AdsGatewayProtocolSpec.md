@@ -1,23 +1,72 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.1  
+**Document Version:** 1.3  
 **Protocol Version:** 1.0  
-**Date:** 09 Feb 2026  
+**Date:** 18 Mar 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Released
 
+## Table of Contents
+
+- [1. Introduction](#1-introduction)
+    - [1.1 Purpose](#11-purpose)
+    - [1.2 Scope](#12-scope)
+    - [1.3 System Overview](#13-system-overview)
+- [2. Connection Specification](#2-connection-specification)
+    - [2.1 Transport Protocol](#21-transport-protocol)
+    - [2.2 Connection Establishment](#22-connection-establishment)
+    - [2.3 Connection Management](#23-connection-management)
+- [3. Message Structure](#3-message-structure)
+    - [3.1 General Message Format](#31-general-message-format)
+    - [3.2 Field Descriptions](#32-field-descriptions)
+    - [3.3 Byte Order](#33-byte-order)
+    - [3.4 CRC32 Calculation](#34-crc32-calculation)
+    - [3.5 Error Response Structure](#35-error-response-structure)
+- [4. Request IDs and Operations](#4-request-ids-and-operations)
+    - [4.1 Request ID List](#41-request-id-list)
+    - [4.2 Response Convention](#42-response-convention)
+- [5. Signal Identification](#5-signal-identification)
+    - [5.1 AppSignalID](#51-appsignalid)
+    - [5.2 AppSignalID Hash](#52-appsignalid-hash)
+- [6. Request/Response Specifications](#6-requestresponse-specifications)
+    - [6.1 ADSGW_HANDSHAKE](#61-adsgw_handshake)
+    - [6.2 ADSGW_SIGNAL_LIST_START / ADSGW_SIGNAL_LIST_NEXT](#62-adsgw_signal_list_start--adsgw_signal_list_next)
+    - [6.3 ADSGW_SIGNAL_PARAM_START / ADSGW_SIGNAL_PARAM_NEXT](#63-adsgw_signal_param_start--adsgw_signal_param_next)
+    - [6.4 ADSGW_SIGNAL_STATE](#64-adsgw_signal_state)
+    - [6.5 ADSGW_SIGNAL_STATE_CHANGES](#65-adsgw_signal_state_changes)
+- [7. Data Structures](#7-data-structures)
+    - [7.1 GwAppSignalParam Structure](#71-gwappsignalparam-structure)
+    - [7.2 GwAppSignalState Structure](#72-gwappsignalstate-structure)
+    - [7.3 Channel Codes](#73-channel-codes)
+    - [7.4 Signal I/O Type Codes](#74-signal-io-type-codes)
+    - [7.5 Signal Type Codes](#75-signal-type-codes)
+- [8. Error Handling](#8-error-handling)
+    - [8.1 Error Response Format](#81-error-response-format)
+    - [8.2 Error Codes](#82-error-codes)
+- [9. Redundancy and Reliability](#9-redundancy-and-reliability)
+    - [9.1 Data Source Redundancy](#91-data-source-redundancy)
+    - [9.2 Connection Redundancy](#92-connection-redundancy)
+- [Appendices](#appendices)
+    - [Appendix A: Example Message Flows](#appendix-a-example-message-flows)
+    - [Appendix B: CRC32 Reference Implementation](#appendix-b-crc32-reference-implementation)
+- [Document Revision History](#document-revision-history)
+
 ---
 
+<a id="1-introduction" name="1-introduction"></a>
 ## 1. Introduction
 
+<a id="11-purpose" name="11-purpose"></a>
 ### 1.1 Purpose
-This document specifies the communication protocol between Radiy's AppDataService Gateway software and external monitoring systems.
+This document specifies the communication protocol between Radiy's Gateway software operating in AdsGateway (AppDataService gateway) mode and external monitoring systems.
 
 **Protocol Version Scope:** This document describes **Protocol Version 1.0**.
 
+<a id="12-scope" name="12-scope"></a>
 ### 1.2 Scope
 The protocol defines the message structure, request/response patterns, and data exchange mechanisms for signal monitoring and state management in industrial automation environments.
 
+<a id="13-system-overview" name="13-system-overview"></a>
 ### 1.3 System Overview
 
 ```mermaid
@@ -36,7 +85,7 @@ flowchart LR
     GW <-->|TCP/IP| EMS
 ```
 
-> **Note:** In this document, when we refer to `AdsGateway`, we mean the `Gateway` program configured to work in mode `AdsGateway`.
+> **Note:** In this document, when we refer to `AdsGateway` or `Gateway`, we mean the `Gateway` program configured to work in mode `AdsGateway`.
 
 The AdsGateway acts as a bridge between Radiy's equipment and external monitoring systems, providing:
 - Signal parameter retrieval
@@ -46,26 +95,30 @@ The AdsGateway acts as a bridge between Radiy's equipment and external monitorin
 
 ---
 
+<a id="2-connection-specification" name="2-connection-specification"></a>
 ## 2. Connection Specification
 
+<a id="21-transport-protocol" name="21-transport-protocol"></a>
 ### 2.1 Transport Protocol
 - **Protocol:** TCP/IP
 - **Default Port:** 5566 (configurable)
 - **Connection Model:** Server/Client
-  - **Server:** Radiy AdsGateway
+  - **Server:** Radiy Gateway in AdsGateway mode
   - **Client:** External Monitoring System
 - **Connection Mode:** Persistent connection with keep-alive
 - **Maximum payload size:** 2 MB
 
 **Data Integrity:**
-TCP provides built-in transport-level data integrity and reliability. Additionally, this protocol implements application-level CRC32 checksums (Section 3.4) for end-to-end message integrity verification.
+TCP provides built-in transport-level data integrity and reliability. Additionally, this protocol implements application-level CRC32 checksums ([Section 3.4](#34-crc32-calculation)) for end-to-end message integrity verification.
 
+<a id="22-connection-establishment" name="22-connection-establishment"></a>
 ### 2.2 Connection Establishment
 1. Client initiates TCP connection to AdsGateway on configured port
 2. Client sends `ADSGW_HANDSHAKE` request
 3. AdsGateway validates and responds with handshake acknowledgment
 4. Connection is established and ready for data exchange
 
+<a id="23-connection-management" name="23-connection-management"></a>
 ### 2.3 Connection Management
 - Client is responsible for maintaining connection
 - Heartbeat/keep-alive mechanism recommended
@@ -73,8 +126,10 @@ TCP provides built-in transport-level data integrity and reliability. Additional
 
 ---
 
+<a id="3-message-structure" name="3-message-structure"></a>
 ## 3. Message Structure
 
+<a id="31-general-message-format" name="31-general-message-format"></a>
 ### 3.1 General Message Format
 All messages (requests and responses) follow this binary structure:
 
@@ -86,36 +141,39 @@ All messages (requests and responses) follow this binary structure:
 ```
 
 **Protocol Version Handling:**
-- Server implements a **single fixed protocol version** (see document header)
-- Protocol version is verified during the `ADSGW_HANDSHAKE` exchange (Section 6.1)
-- Client and server must use **identical protocol versions** - no negotiation or compatibility layer
+- Server implements a single fixed protocol version (see document header)
+- Protocol version is verified during the `ADSGW_HANDSHAKE` exchange ([Section 6.1](#61-adsgw_handshake))
+- Client and server must use identical protocol versions - no negotiation or compatibility layer
 - Version mismatch during handshake results in connection rejection
 
 **Request/Response Flow:**
 - Client sends a request with a specific Request ID, Status Code = 0, and request-specific payload
-- Server responds with the **same Request ID**, Status Code indicating success or error, and response-specific payload
-- Status Code = 0 indicates success; non-zero values indicate errors (see Section 8.2)
+- Server responds with the same Request ID, Status Code indicating success or error, and response-specific payload
+- Status Code = 0 indicates success; non-zero values indicate errors (see [Section 8.2](#82-error-codes))
 - Client examines Status Code to determine if payload is present
 
+<a id="32-field-descriptions" name="32-field-descriptions"></a>
 ### 3.2 Field Descriptions
 
 | Field | Size | Type | Description |
 |-------|------|------|-------------|
 | Request ID | 4 bytes | uint32 | Identifies the request/response type |
 | Payload Size | 4 bytes | uint32 | Size of the payload in bytes (0 for errors, excluding header and CRC) |
-| Status Code | 4 bytes | uint32 | 0 = success, non-zero = error code (see Section 8.2) |
+| Status Code | 4 bytes | uint32 | 0 = success, non-zero = error code (see [Section 8.2](#82-error-codes)) |
 | Payload | Variable | Binary | Request/response specific data (present only when Status Code = 0) |
 | CRC32 | 4 bytes | uint32 | CRC32 checksum of entire message (excluding CRC field itself) |
 
 **Payload Interpretation:**
-- **Requests:** Payload contains request-specific data (see Section 6)
-- **Success Responses (Status Code = 0):** Payload contains operation-specific success data (see Section 6)
+- **Requests:** Payload contains request-specific data (see [Section 6](#6-requestresponse-specifications))
+- **Success Responses (Status Code = 0):** Payload contains operation-specific success data (see [Section 6](#6-requestresponse-specifications))
 - **Error Responses (Status Code ≠ 0):** Payload is not present
 
+<a id="33-byte-order" name="33-byte-order"></a>
 ### 3.3 Byte Order
 - **Endianness:** Little-endian (all multi-byte fields)
 - **Floating-point format:** IEEE 754
 
+<a id="34-crc32-calculation" name="34-crc32-calculation"></a>
 ### 3.4 CRC32 Calculation
 - **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7, reflected: 0xEDB88320)
 - **Input reflection**: yes (process least-significant bit first; equivalent to reflecting each byte)
@@ -124,23 +182,26 @@ All messages (requests and responses) follow this binary structure:
 - **Final XOR:** 0xFFFFFFFF
 - **Calculation Range:** From Request ID through end of Payload
 
-For reference implementation, see **Appendix B**.
+For reference implementation, see [Appendix B](#appendix-b-crc32-reference-implementation).
 
+<a id="35-error-response-structure" name="35-error-response-structure"></a>
 ### 3.5 Error Response Structure
-When Status Code is non-zero (error condition):
-- **Payload Size = 0** (no payload data)
-- **Error code** is indicated only by the Status Code field value (see Section 8.2)
+**When Status Code is non-zero (error condition):**
+- Payload Size = 0 (no payload data)
+- Error code is indicated only by the Status Code field value (see [Section 8.2](#82-error-codes))
 - No additional error message or data is transmitted
 
 **Special Cases:**
-- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
-- **Malformed Request:** Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR` (6)
-- **CRC Failure:** Server may respond with Status Code = `GWC_CRC_ERROR` (10)
+- Unknown Request ID: Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST`
+- Malformed Request: Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR`
+- CRC Failure: Server may respond with Status Code = `GWC_CRC_ERROR`
 
 ---
 
+<a id="4-request-ids-and-operations" name="4-request-ids-and-operations"></a>
 ## 4. Request IDs and Operations
 
+<a id="41-request-id-list" name="41-request-id-list"></a>
 ### 4.1 Request ID List
 
 | Request ID | Value (hex) | Description |
@@ -153,16 +214,19 @@ When Status Code is non-zero (error condition):
 | ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
 | ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
 
+<a id="42-response-convention" name="42-response-convention"></a>
 ### 4.2 Response Convention
 - Response uses the same Request ID as the corresponding request
 - **Status Code field indicates success (0) or error (non-zero)**
-- Status Code = 0: Payload contains operation-specific success data (see Section 6)
-- Status Code ≠ 0: No payload, Payload Size = 0 (see Section 8.2 for error codes)
+- Status Code = 0: Payload contains operation-specific success data (see [Section 6](#6-requestresponse-specifications))
+- Status Code ≠ 0: No payload, Payload Size = 0 (see [Section 8.2](#82-error-codes) for error codes)
 
 ---
 
+<a id="5-signal-identification" name="5-signal-identification"></a>
 ## 5. Signal Identification
 
+<a id="51-appsignalid" name="51-appsignalid"></a>
 ### 5.1 AppSignalID
 - **Type:** C-style null-terminated string (ASCII encoding)
 - **Character Set:** Limited to ASCII characters: `#`, `A-Z`, `a-z`, `0-9`, `_` (underscore), `.` (dot)
@@ -174,6 +238,7 @@ When Status Code is non-zero (error condition):
   - **`.` (dot)** - Special separator used in generated signals from the Bus signal (e.g., `#BUSSIGNALID.subsignal`)
   - **`_` (underscore)** - General-purpose separator
 
+<a id="52-appsignalid-hash" name="52-appsignalid-hash"></a>
 ### 5.2 AppSignalID Hash
 - **Algorithm:** Custom hash algorithm (see implementation below)
 - **HashType:** uint64 (64-bit unsigned integer)
@@ -219,26 +284,28 @@ inline constexpr Hash UNDEFINED_HASH = 0x0000000000000000ULL;
 
 ---
 
+<a id="6-requestresponse-specifications" name="6-requestresponse-specifications"></a>
 ## 6. Request/Response Specifications
 
 **Request Prerequisites:**
-- All requests **except** `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
-- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` (5) and no payload.
-- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- All requests except `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
+- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` and no payload.
+- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
+<a id="61-adsgw_handshake" name="61-adsgw_handshake"></a>
 ### 6.1 ADSGW_HANDSHAKE
 
 #### Purpose
 Initial connection handshake to establish protocol version and capabilities.
 
 **Protocol Version Negotiation:**
-- Server implements a **single fixed protocol version** (no multi-version support)
+- Server implements a single fixed protocol version (no multi-version support)
 - Client specifies the protocol version it supports in the request
 - Server compares client version with its own implemented version:
-  - **Match:** Server responds with Status Code = 0 and handshake succeeds
-  - **Mismatch:** Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` (2) and connection should be closed
-- **No version negotiation or downgrading** - client and server must use identical protocol versions
-- Server and client are **incompatible** if protocol versions differ
+  - Match: Server responds with Status Code = 0 and handshake succeeds
+  - Mismatch: Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` and connection should be closed
+- No version negotiation or downgrading - client and server must use identical protocol versions
+- Server and client are incompatible if protocol versions differ
 
 #### Request Payload
 ```
@@ -294,17 +361,18 @@ Total size: 16 bytes
 
 | Field | Expected value (bytes) | Notes |
 |------|-------------------------|-------|
-| `sizeof_GwAppSignalParam` | 1208 | See Section 7.1 |
-| `sizeof_GwAppSignalState` | 48 | See Section 7.2 |
+| `sizeof_GwAppSignalParam` | 1208 | See [Section 7.1](#71-gwappsignalparam-structure) |
+| `sizeof_GwAppSignalState` | 48 | See [Section 7.2](#72-gwappsignalstate-structure) |
 
 **Compatibility Check (Client):**
 - Client can compare `sizeof_GwAppSignalParam` and `sizeof_GwAppSignalState` against its locally compiled `sizeof(GwAppSignalParam)` and `sizeof(GwAppSignalState)`.
 - A mismatch indicates protocol incompatibility (likely packing/alignment or definition mismatch) and the client should reject the connection.
 - If client version == server version: Status Code = 0, handshake response with matching version
-- If client version ≠ server version: Status Code = 2 (`GWC_UNSUPPORTED_VERSION`), no payload
+- If client version ≠ server version: Status Code = `GWC_UNSUPPORTED_VERSION`, no payload
 
 ---
 
+<a id="62-adsgw_signal_list_start--adsgw_signal_list_next" name="62-adsgw_signal_list_start--adsgw_signal_list_next"></a>
 ### 6.2 ADSGW_SIGNAL_LIST_START / ADSGW_SIGNAL_LIST_NEXT
 
 #### Purpose
@@ -393,7 +461,7 @@ Total size: `8 + (appSignalIdCount * 128)` bytes
 
 **Response Behavior:**
 - Server returns the requested part number along with the AppSignalIDs for that part
-- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in Section 5.1)
+- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in [Section 5.1](#51-appsignalid))
 - Last part may contain fewer items than `itemsPerPart` if total count is not evenly divisible
 
 **Example Flow:**
@@ -413,12 +481,13 @@ Server -> Client: ADSGW_SIGNAL_LIST_NEXT (part=2, 250 AppSignalIDs)
 
 ---
 
+<a id="63-adsgw_signal_param_start--adsgw_signal_param_next" name="63-adsgw_signal_param_start--adsgw_signal_param_next"></a>
 ### 6.3 ADSGW_SIGNAL_PARAM_START / ADSGW_SIGNAL_PARAM_NEXT
 
 #### Purpose
 Retrieve detailed descriptions and parameters for all signals. Uses pagination similar to signal list retrieval.
 
-For the complete `GwAppSignalParam` structure definition, see **Section 7.1**.
+For the complete `GwAppSignalParam` structure definition, see [Section 7.1](#71-gwappsignalparam-structure).
 
 ---
 
@@ -523,12 +592,13 @@ Server -> Client: ADSGW_SIGNAL_PARAM_NEXT (part=2, 200 GwAppSignalParams)
 
 ---
 
+<a id="64-adsgw_signal_state" name="64-adsgw_signal_state"></a>
 ### 6.4 ADSGW_SIGNAL_STATE
 
 #### Purpose
 Request current states of specific signals by their hashes.
 
-For the complete `GwAppSignalState` structure definition, see **Section 7.2**.
+For the complete `GwAppSignalState` structure definition, see [Section 7.2](#72-gwappsignalstate-structure).
 
 ---
 
@@ -551,9 +621,8 @@ Total size: `8 + (signalCount * 8)` bytes
 
 **Request Behavior:**
 - Client specifies an array of signal hashes to request
-- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS` (4).
-- **Missing signals**: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
-- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- Maximum number of signals per request: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` ([Section 6.1](#61-adsgw_handshake)). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS`.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
 #### Response Payload
 ```
@@ -575,9 +644,10 @@ struct GwSignalStateResponse {
 Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 **Response Behavior:**
-- Server returns states for all **found** signals
-- **`stateCount` may be less than requested `signalCount`** if some signal hashes are not found
+- Server returns states for all found signals
 - States are returned in the same order as requested hashes (for found signals only)
+- `stateCount` may be less than requested `signalCount` if some signal hashes are not found
+- Missing signals: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response. 
 - If none of the requested signals are found, `stateCount` will be 0 (empty response, but Status Code = 0)
 
 **Example Flow:**
@@ -597,6 +667,7 @@ Server -> Client: ADSGW_SIGNAL_STATE (Status=0, stateCount=0)
 
 ---
 
+<a id="65-adsgw_signal_state_changes" name="65-adsgw_signal_state_changes"></a>
 ### 6.5 ADSGW_SIGNAL_STATE_CHANGES
 
 #### Purpose
@@ -633,14 +704,15 @@ Total size: 4 bytes
 **Request Behavior:**
 - Client sends request to retrieve accumulated state changes
 - Server returns pending changes from the client's dedicated queue
-- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
 ---
 
 #### Response Payload
 ```
 struct GwSignalStateChangesResponse {
-    uint32_t pendingStatesCount; // Number of state changes still in queue (not returned in this response)
+    uint32_t pendingStatesCount; // Number of state changes still in queue 
+                                 // (not returned in this response)
     uint32_t stateCount;         // Number of states in this response
     
     // Array of GwAppSignalState structures
@@ -657,10 +729,10 @@ struct GwSignalStateChangesResponse {
 Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 **Response Behavior:**
-- **`pendingStatesCount`**: Indicates how many additional state changes remain in the queue after this response
-  - If >= `GwHandshakeResponse.maxStateRequest`: Client should immediately request again to retrieve remaining changes
-- **`stateCount`**: Number of state changes included in this response
-- **`states`**: Array of changed signal states, each following the `GwAppSignalState` structure (Section 6.4)
+- `pendingStatesCount`: Indicates how many additional state changes remain in the queue after this response
+- If >= `GwHandshakeResponse.maxStateRequest`: Client should immediately request again to retrieve remaining changes
+- `stateCount`: Number of state changes included in this response
+- `states`: Array of changed signal states, each following the `GwAppSignalState` structure ([Section 7.2](#72-gwappsignalstate-structure))
 - States are returned in chronological order (oldest changes first)
 
 **Recommended Polling Strategy:**
@@ -671,8 +743,10 @@ Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 ---
 
+<a id="7-data-structures" name="7-data-structures"></a>
 ## 7. Data Structures
 
+<a id="71-gwappsignalparam-structure" name="71-gwappsignalparam-structure"></a>
 ### 7.1 GwAppSignalParam Structure
 
 The `GwAppSignalParam` structure contains detailed parameters and metadata for each signal.
@@ -737,12 +811,13 @@ static_assert(sizeof(GwAppSignalParam) == 1208);
 Total size: 1208 bytes
 
 **String Field Encoding:**
-- **ASCII (7-bit) fields:** `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
-- **UTF-8 fields:** `customSignalId`, `caption`, `units`
+- ASCII (7-bit) fields: `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
+- UTF-8 fields: `customSignalId`, `caption`, `units`
 - All strings are null-terminated C-style strings with fixed maximum lengths as shown above
 
 ---
 
+<a id="72-gwappsignalstate-structure" name="72-gwappsignalstate-structure"></a>
 ### 7.2 GwAppSignalState Structure
 
 The `GwAppSignalState` structure contains the current state and value of a signal.
@@ -795,6 +870,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 9-15 | Reserved | Reserved for future state flags |
 | 16-31 | Internal Use Only | Reserved for internal system use (archiving, trending). Clients should ignore these bits. |
 
+<a id="73-channel-codes" name="73-channel-codes"></a>
 ### 7.3 Channel Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -803,6 +879,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 2 | Channel C | Represents channel C |
 | 3 | Channel D | Represents channel D |
 
+<a id="74-signal-io-type-codes" name="74-signal-io-type-codes"></a>
 ### 7.4 Signal I/O Type Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -810,6 +887,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 1 | Output | Output signal type |
 | 2 | Internal | Internal signal type |
 
+<a id="75-signal-type-codes" name="75-signal-type-codes"></a>
 ### 7.5 Signal Type Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -819,58 +897,66 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 
 ---
 
+<a id="8-error-handling" name="8-error-handling"></a>
 ## 8. Error Handling
 
+<a id="81-error-response-format" name="81-error-response-format"></a>
 ### 8.1 Error Response Format
-Error responses are identified by a non-zero Status Code in the message header (Section 3.2).
+Error responses are identified by a non-zero Status Code in the message header ([Section 3.2](#32-field-descriptions)).
 
 **Error Response Structure:**
 - **Status Code ≠ 0:** Error condition
 - **Payload Size = 0:** No payload data
-- **Error identification:** Status Code value indicates the specific error (see Section 8.2)
+- **Error identification:** Status Code value indicates the specific error (see [Section 8.2](#82-error-codes))
 
 **Processing errors:**
 1. Client receives response with same Request ID as request
 2. Client checks Status Code field
-3. If Status Code = 0: Parse payload as successful response (Section 6)
-4. If Status Code ≠ 0: No payload to parse, handle error based on Status Code value (Section 8.2)
+3. If Status Code = 0: Parse payload as successful response ([Section 6](#6-requestresponse-specifications))
+4. If Status Code ≠ 0: No payload to parse, handle error based on Status Code value ([Section 8.2](#82-error-codes))
 
 
+<a id="82-error-codes" name="82-error-codes"></a>
 ### 8.2 Error Codes
 
 | Code | Name | Description |
 |------|------|-------------|
 | 0 | GWC_SUCCESS | Operation successful |
-| 1 | GWC_INVALID_REQUEST | Request format is invalid |
-| 2 | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
-| 3 | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
-| 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
-| 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
-| 6 | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
-| 7 | GWC_INTERNAL_ERROR | Internal server error |
-| 10 | GWC_CRC_ERROR | CRC checksum verification failed |
+| 513 (0x0201) | GWC_INVALID_REQUEST | Request format is invalid |
+| 514 (0x0202) | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
+| 515 (0x0203) | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
+| 516 (0x0204) | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
+| 517 (0x0205) | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 518 (0x0206) | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
+| 519 (0x0207) | GWC_INTERNAL_ERROR | Internal server error |
+| 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---
 
+<a id="9-redundancy-and-reliability" name="9-redundancy-and-reliability"></a>
 ## 9. Redundancy and Reliability
 
+<a id="91-data-source-redundancy" name="91-data-source-redundancy"></a>
 ### 9.1 Data Source Redundancy
 LogicModules provide two redundant communication channels connected to separate AppDataServices.
 
 **Implementation Options:**
-1. **Single Channel Mode:** AdsGateway uses one AppDataService, provides simplified operation
-2. **Redundant Mode:** AdsGateway monitors both channels, implements failover logic
+1. Single Channel Mode: AdsGateway uses one AppDataService, provides simplified operation
+2. Redundant Mode: AdsGateway monitors both channels, implements failover logic
 
-**Decision Required:** To be confirmed based on system requirements and reliability goals.
+Decision Required: To be confirmed based on system requirements and reliability goals.
 
+<a id="92-connection-redundancy" name="92-connection-redundancy"></a>
 ### 9.2 Connection Redundancy
 - Client should support automatic reconnection on connection loss
 - AdsGateway should handle multiple simultaneous client connections
 
 ---
 
+<a id="appendices" name="appendices"></a>
 ## Appendices
 
+<a id="appendix-a-example-message-flows" name="appendix-a-example-message-flows"></a>
 ### Appendix A: Example Message Flows
 
 #### A.1 Initial Connection and Setup
@@ -889,13 +975,14 @@ flowchart TD
 
 **Usage Recommendation:**
 - `ADSGW_SIGNAL_STATE_CHANGES` is suitable for efficiently receiving only changed states and reducing bandwidth.
-- However, it is **strongly recommended** to periodically refresh full signal states using `ADSGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
+- However, it is strongly recommended to periodically refresh full signal states using `ADSGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
   - Resynchronize after potential missed changes (queue overflows, network issues).
   - Validate that client state remains consistent with the server.
   - Recover from any lost `ADSGW_SIGNAL_STATE_CHANGES` requests or replies.
 
 ---
 
+<a id="appendix-b-crc32-reference-implementation" name="appendix-b-crc32-reference-implementation"></a>
 ### Appendix B: CRC32 Reference Implementation
 
 **CRC32 Reference Implementation:**
@@ -920,40 +1007,40 @@ flowchart TD
 
 namespace Radiy 
 {
-    constexpr uint32_t Crc32Residue = 0x2144DF1C;   // Expected residue when appending CRC to data
-    constexpr uint32_t Crc32Init = 0xFFFFFFFF;      // Initial CRC value
-    constexpr uint32_t Crc32FinalXor = 0xFFFFFFFF;  // Final XOR value
+constexpr uint32_t Crc32Residue = 0x2144DF1C;   // Expected residue when appending CRC to data
+constexpr uint32_t Crc32Init = 0xFFFFFFFF;      // Initial CRC value
+constexpr uint32_t Crc32FinalXor = 0xFFFFFFFF;  // Final XOR value
 
-    /**
-     * Calculates the CRC-32 checksum for the given data.
-     *
-     * @param data Input data as a span of bytes.
-     * @param finalize Whether to finalize the CRC calculation (default: true).
-     * @param initialCrc Initial CRC value (default: Crc32Init).
-     * @return The computed CRC-32 checksum.
-     */
-    uint32_t CRC32(std::span<const std::byte> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
+/**
+    * Calculates the CRC-32 checksum for the given data.
+    *
+    * @param data Input data as a span of bytes.
+    * @param finalize Whether to finalize the CRC calculation (default: true).
+    * @param initialCrc Initial CRC value (default: Crc32Init).
+    * @return The computed CRC-32 checksum.
+    */
+uint32_t CRC32(std::span<const std::byte> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
 
-    /**
-     * Convenience overload for char data (text/strings).
-     *
-     * @param data Input data as a span of char.
-     * @param finalize Whether to finalize the CRC calculation (default: true).
-     * @param initialCrc Initial CRC value (default: Crc32Init).
-     * @return The computed CRC-32 checksum.
-     */
-    uint32_t CRC32(std::span<const char> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
+/**
+    * Convenience overload for char data (text/strings).
+    *
+    * @param data Input data as a span of char.
+    * @param finalize Whether to finalize the CRC calculation (default: true).
+    * @param initialCrc Initial CRC value (default: Crc32Init).
+    * @return The computed CRC-32 checksum.
+    */
+uint32_t CRC32(std::span<const char> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
 
-    /**
-     * C-style interface with pointer and size.
-     *
-     * @param data Pointer to the input data buffer.
-     * @param length Length of the input data buffer in bytes.
-     * @param finalize Whether to finalize the CRC calculation (default: true).
-     * @param initialCrc Initial CRC value (default: Crc32Init).
-     * @return The computed CRC-32 checksum.
-     */
-    uint32_t CRC32(const char* data, size_t length, bool finalize = true, uint32_t initialCrc = Crc32Init);
+/**
+    * C-style interface with pointer and size.
+    *
+    * @param data Pointer to the input data buffer.
+    * @param length Length of the input data buffer in bytes.
+    * @param finalize Whether to finalize the CRC calculation (default: true).
+    * @param initialCrc Initial CRC value (default: Crc32Init).
+    * @return The computed CRC-32 checksum.
+    */
+uint32_t CRC32(const char* data, size_t length, bool finalize = true, uint32_t initialCrc = Crc32Init);
 } // namespace Radiy
 ```
 
@@ -966,94 +1053,96 @@ namespace Radiy
 
 namespace
 {
-    // Pre-computed CRC-32 lookup table for polynomial 0xEDB88320 (reflected)
-    //
-    constexpr std::array<uint32_t, 256> Crc32Table =
+// Pre-computed CRC-32 lookup table for polynomial 0xEDB88320 (reflected)
+//
+constexpr std::array<uint32_t, 256> Crc32Table =
+{
+    0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+    0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+    0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+    0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+    0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+    0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+    0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+    0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+    0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+    0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
+    0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+    0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+    0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+    0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+    0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+    0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+    0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
+    0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+    0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+    0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+    0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+    0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+    0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+    0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+    0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
+    0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
+    0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+    0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+    0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+    0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+    0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+    0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+};
+
+constexpr uint32_t CRC32_Impl(const char* buffer, size_t length, bool finalize, uint32_t initialCrc)
+{
+    uint32_t crc = initialCrc;
+
+    while (length--)
     {
-        0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
-        0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
-        0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
-        0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
-        0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
-        0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
-        0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
-        0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
-        0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
-        0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
-        0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
-        0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
-        0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
-        0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
-        0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
-        0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
-        0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
-        0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
-        0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
-        0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
-        0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
-        0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
-        0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
-        0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
-        0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
-        0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
-        0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
-        0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
-        0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
-        0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
-        0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
-        0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
-    };
-
-    constexpr uint32_t CRC32_Impl(const char* buffer, size_t length, bool finalize, uint32_t initialCrc)
-    {
-        uint32_t crc = initialCrc;
-
-        while (length--)
-        {
-            crc = (crc >> 8) ^ Crc32Table[(crc ^ static_cast<uint8_t>(*buffer)) & 0xFF];
-            buffer++;
-        }
-
-        return finalize ? (crc ^ Radiy::Crc32FinalXor) : crc;
+        crc = (crc >> 8) ^ Crc32Table[(crc ^ static_cast<uint8_t>(*buffer)) & 0xFF];
+        buffer++;
     }
 
-    // Standard test vector: CRC32("123456789") should equal 0xCBF43926
-    //
-    static_assert(CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor) == 0xCBF43926);
+    return finalize ? (crc ^ Radiy::Crc32FinalXor) : crc;
+}
 
-    // Test incremental update: CRC32("1234") then CRC32("56789") should equal CRC32("123456789")
-    //
-    static_assert(CRC32_Impl("56789", 5, true, CRC32_Impl("1234", 4, false, Radiy::Crc32FinalXor)) ==
-        CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor));
+// Standard test vector: CRC32("123456789") should equal 0xCBF43926
+//
+static_assert(CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor) == 0xCBF43926);
 
-    /*
-      CRC Residue Property Test
-        Append CRC in little-endian: "123456789" + {0x26, 0x39, 0xF4, 0xCB}
-        CRC32(combined_data) == 0x2144DF1C (always the same residue value)
-    */
-    static_assert(CRC32_Impl("123456789\x26\x39\xF4\xCB", 13, true, Radiy::Crc32FinalXor) == Radiy::Crc32Residue);
+// Test incremental update: CRC32("1234") then CRC32("56789") should equal CRC32("123456789")
+//
+static_assert(CRC32_Impl("56789", 5, true, CRC32_Impl("1234", 4, false, Radiy::Crc32FinalXor)) ==
+    CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor));
+
+/*
+    CRC Residue Property Test
+    Append CRC in little-endian: "123456789" + {0x26, 0x39, 0xF4, 0xCB}
+    CRC32(combined_data) == 0x2144DF1C (always the same residue value)
+*/
+static_assert(CRC32_Impl("123456789\x26\x39\xF4\xCB", 13, true, Radiy::Crc32FinalXor) == 
+    Radiy::Crc32Residue);
 } // namespace
 
 namespace Radiy
 {
-    uint32_t CRC32(std::span<const std::byte> data, bool finalize, uint32_t initialCrc)
-    {
-        return CRC32_Impl(reinterpret_cast<const char*>(data.data()), data.size(), finalize, initialCrc);
-    }
+uint32_t CRC32(std::span<const std::byte> data, bool finalize, uint32_t initialCrc)
+{
+    return CRC32_Impl(reinterpret_cast<const char*>(data.data()), data.size(), finalize, initialCrc);
+}
 
-    uint32_t CRC32(std::span<const char> data, bool finalize, uint32_t initialCrc)
-    {
-        return CRC32_Impl(data.data(), data.size(), finalize, initialCrc);
-    }
+uint32_t CRC32(std::span<const char> data, bool finalize, uint32_t initialCrc)
+{
+    return CRC32_Impl(data.data(), data.size(), finalize, initialCrc);
+}
 
-    uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialCrc)
-    {
-        return CRC32_Impl(data, length, finalize, initialCrc);
-    }
+uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialCrc)
+{
+    return CRC32_Impl(data, length, finalize, initialCrc);
+}
 } // namespace Radiy
 ```
 ---
 
+<a id="document-revision-history" name="document-revision-history"></a>
 ## Document Revision History
 
 | Document Version | Date | Protocol Version | Author | Changes |
@@ -1064,3 +1153,5 @@ namespace Radiy
 | 0.4 | 02/2026 | 1.0 (0x0100) | Serhiy Malokhatko | 6.1 Updated sizeof_GwAppSignalParam expected value |
 | 1.0 | 06 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |
 | 1.1 | 09 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Normalized terminology across docs |
+| 1.2 | 02 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed error code values |
+| 1.3 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added TOC and internal navigation links |
