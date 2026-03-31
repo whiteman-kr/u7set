@@ -58,6 +58,9 @@ public:
 private:
 	virtual void run() override;
 
+	virtual void adsConnected() override;
+	virtual void adsDisconnected() override;
+
 	bool sendStateRequests();
 	bool sendStateChangesRequests();
 
@@ -72,9 +75,9 @@ private:
 
 private:
 	RequestType m_stateRequest = RequestType::GetAppSignalState;
-	size_t m_stateRequestInterval = 500;
+	int64_t m_stateRequestInterval = 500;
 	RequestType m_stateChangesRequest = RequestType::GetAppSignalStateChanges;
-	size_t m_stateChangesMaxCount = 5;
+	int64_t m_stateChangesMaxCount = 5;
 
 	IAppSignalStateUpdaterShared m_updaterShared;
 

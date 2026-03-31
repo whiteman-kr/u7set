@@ -175,6 +175,7 @@ public:
 	{
 		m_stub.reset();
 		m_authToken.clear();
+		adsDisconnected();
 		emit signal_disconnection();
 	}
 
@@ -195,7 +196,7 @@ public:
 
 	void setPingPeriod(int timeoutMs)
 	{
-		static constexpr int MIN_PING_TIMEOUT = 1000;
+		static constexpr int MIN_PING_TIMEOUT = 500;
 
 		timeoutMs = std::max(timeoutMs, MIN_PING_TIMEOUT);
 
@@ -288,6 +289,14 @@ protected:
 		return !isQuitRequested();
 	}
 
+	virtual void adsConnected()
+	{
+	}
+
+	virtual void adsDisconnected()
+	{
+	}
+
 	virtual void createStubAndHandshake(grpc::Status* status = nullptr)
 	{
 		logMsg(QString("%1::createStubAndHandshake").arg(clientDescription()));
@@ -342,6 +351,7 @@ protected:
 			logMsg(QString("%1::createStubAndHandshake - Handshake Ok").arg(clientDescription()));
 
 			emit signal_connection();
+			adsConnected();
 			return;
 		}
 
@@ -393,13 +403,17 @@ protected:
 
 		grpc::Status st = m_stub->Ping(&ctx, req, &rep);
 
-		if (st.ok() == false)
+		bool result = (req.authtoken() == rep.authtoken());
+
+		if (st.ok() == false || result == false)
 		{
-			logErr(QString("%1::sendPingRequest - error"));
+			logErr(QString("%1::sendPingRequest - error").arg(clientDescription()));
 			return false;
 		}
 
-		return (req.authtoken() == rep.authtoken());
+//		logErr(QString("%1::sendPingRequest - Ok").arg(clientDescription()));
+
+		return result;
 	}
 
 	static std::chrono::system_clock::time_point makeDeadlineMs(int ms)
@@ -415,7 +429,7 @@ private:
 	const SoftwareInfo m_localSwInfo;
 	std::vector<HostAddressPort> m_serverAddress;
 	QString m_clientDescription;
-	std::atomic<int> m_pingPeriodMs {5000};
+	std::atomic<int64_t> m_pingPeriodMs {5000};
 
 	//
 

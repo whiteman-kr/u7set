@@ -41,6 +41,8 @@ void GrpcSessionGuard::start()
 
 void GrpcSessionGuard::stop() noexcept
 {
+	clearSessions();
+
 	if (m_sessionGuardThread.joinable())
 	{
 		m_sessionGuardThread.request_stop();
@@ -217,6 +219,14 @@ bool GrpcSessionGuard::validateAuthToken(const std::string& authToken)
 	it->second = newExpiresAt;
 
 	return true;
+}
+
+void GrpcSessionGuard::clearSessions()
+{
+	std::lock_guard<std::mutex> lock(m_sessionsMutex);
+
+	m_sessionExpirations.clear();
+	m_clientsInfo.clear();
 }
 
 bool GrpcSessionGuard::isValidClient(const Grpc::HandshakeRequest* request, std::string& errMsg) const

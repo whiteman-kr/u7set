@@ -42,6 +42,8 @@ public:
 
 	~GrpcAppDataSrv();
 
+	virtual void stop() override;
+
 	grpc::Status Handshake(grpc::ServerContext* context,
 						const Grpc::HandshakeRequest* request,
 						Grpc::HandshakeReply* reply) override;

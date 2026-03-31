@@ -33,8 +33,12 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
 {
+}
+
+void GrpcAppDataSrv::stop()
+{
 	unregisterAllQueues();
-	stop();
+	GrpcServer::stop();
 }
 
 grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
@@ -416,7 +420,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChangesNoStream(grpc::ServerContex
 
 	reply->set_pendingstatescount(pendingStatesCount);
 
-	return grpc::Status::CANCELLED;
+	return grpc::Status::OK;
 }
 
 grpc::Status GrpcAppDataSrv::GetGatewayAppSignalStateChanges(grpc::ServerContext* context,

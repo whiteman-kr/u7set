@@ -48,6 +48,7 @@ public:
 
 private:
 	bool validateAuthToken(const std::string& authToken);
+	void clearSessions();
 
 	bool isValidClient(const Grpc::HandshakeRequest* request, std::string& errMsg) const;
 	void sessionGuardLoop(std::stop_token stopToken) noexcept;

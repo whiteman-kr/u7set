@@ -31,8 +31,8 @@ public:
 
 	virtual ~GrpcServer();
 
-	void start();
-	void stop();
+	virtual void start();
+	virtual void stop();
 
 	HostAddressPort listenIP() const;
 

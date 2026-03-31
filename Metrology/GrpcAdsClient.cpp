@@ -28,9 +28,6 @@ GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 			 stateChangesRequest == RequestType::GetAppSignalStateChanges ||
 			 stateChangesRequest == RequestType::GetGatewayAppSignalStateChanges);
 
-	Q_ASSERT(stateRequest != RequestType::NoRequest ||
-			 stateChangesRequest != RequestType::NoRequest);
-
 	Q_ASSERT(m_updaterShared != nullptr);
 
 	static constexpr size_t MIN_STATE_REQUEST_INTERVAL = 10;
@@ -83,6 +80,7 @@ void GrpcAdsClient::run()
 			}
 
 			m_updateHashesToRequestGatewayStateChanges = true;
+			m_requestsCycleStartTime = currentMSecsUTC();
 			updateLastRequestTime();
 		}
 
@@ -98,26 +96,45 @@ void GrpcAdsClient::run()
 			continue;
 		}
 
-		//
+		int64_t pingRequestTime = m_lastRequestTime + pingPeriod();
 
-		waitUntilOrQuit(m_requestsCycleStartTime + m_stateRequestInterval);
-
-		if (currentMSecsUTC() - m_lastRequestTime > pingPeriod())
+		if (currentMSecsUTC() > pingRequestTime)
 		{
 			if (sendPingRequest() == true)
 			{
 				updateLastRequestTime();
-
 			}
 			else
 			{
 				m_lastRequestTime = 0;
 				resetStub();
 			}
+
+			continue;
 		}
+
+		int64_t stateRequestTime = m_requestsCycleStartTime + m_stateRequestInterval;
+
+		waitUntilOrQuit(stateRequestTime);
 	}
 
 	resetStub();
+}
+
+void GrpcAdsClient::adsConnected()
+{
+	if (m_updaterShared)
+	{
+		m_updaterShared->adsConnected();
+	}
+}
+
+void GrpcAdsClient::adsDisconnected()
+{
+	if (m_updaterShared)
+	{
+		m_updaterShared->adsDisconnected();
+	}
 }
 
 bool GrpcAdsClient::sendStateRequests()
@@ -176,7 +193,7 @@ bool GrpcAdsClient::sendStateChangesRequests()
 		return true;
 	}
 
-	size_t requestCount = 0;
+	int64_t requestCount = 0;
 	bool hasPendingChanges = true;
 	bool res = true;
 
@@ -200,6 +217,7 @@ bool GrpcAdsClient::sendStateChangesRequests()
 
 		if (res == false)
 		{
+			resetStub();
 			return false;
 		}
 
@@ -227,13 +245,13 @@ bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRe
 	{
 		st = stub()->GetAppSignalStateConstSize(&ctx, request, &reply);
 
-		qDebug() << "Send GetAppSignalStateConstSize";
+//		qDebug() << "Send GetAppSignalStateConstSize";
 	}
 	else
 	{
 		st = stub()->GetAppSignalState(&ctx, request, &reply);
 
-		qDebug() << "Send GetAppSignalState";
+//		qDebug() << "Send GetAppSignalState";
 	}
 
 	if (st.ok() == false)
