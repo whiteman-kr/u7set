@@ -23,10 +23,6 @@ GrpcServer::GrpcServer(const SoftwareInfo& serverSwInfo,
 
 GrpcServer::~GrpcServer()
 {
-	if (m_running.load(std::memory_order::relaxed) == true)
-	{
-		stop();
-	}
 }
 
 void GrpcServer::start()
@@ -39,6 +35,9 @@ void GrpcServer::start()
 
 	m_stopRequested.store(false, std::memory_order_relaxed);
 	m_binded.store(false, std::memory_order_relaxed);
+	m_running.store(true, std::memory_order::relaxed);
+
+	m_sessionGuard.start();
 
 	m_thread = std::thread
 	{
@@ -47,10 +46,11 @@ void GrpcServer::start()
 			try
 			{
 				int selectedPort = 0;
+				grpc::Server* serverRaw = nullptr;
 
-				while(m_server == nullptr && selectedPort == 0)
+				while(selectedPort == 0)
 				{
-					if (m_stopRequested.load(std::memory_order_relaxed))
+					if (isStopRequested())
 					{
 						logMsg(QString("%1 stopRequested!").arg(serviceName()));
 						return;
@@ -70,12 +70,16 @@ void GrpcServer::start()
 					QString ipStr = m_listenIP.addressPortStr();
 					builder.AddListeningPort(ipStr.toStdString(), grpc::InsecureServerCredentials(), &selectedPort);
 
-					m_server = builder.BuildAndStart();
+					{
+						std::lock_guard lg(m_serverMutex);
+						m_server = builder.BuildAndStart();
+						serverRaw = m_server.get();
+					}
 
 #ifdef VLD_IS_INCLUDED
 					::VLDEnable();
 #endif
-					if (m_server == nullptr)
+					if (serverRaw == nullptr)
 					{
 						logErr(QString("%1 (%2) NOT started!").arg(serviceName()).arg(m_listenIP.addressPortStr()));
 						std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -86,8 +90,17 @@ void GrpcServer::start()
 					{
 						qDebug() << C_STR(QString("%1 (%2) started, but selectedPort == 0").arg(serviceName()).arg(m_listenIP.addressPortStr()));
 
-						m_server->Shutdown();
-						m_server.reset();
+						{
+							std::lock_guard lg(m_serverMutex);
+
+							if (m_server != nullptr)
+							{
+								m_server->Shutdown();
+								m_server.reset();
+								serverRaw = nullptr;
+							}
+						}
+
 						std::this_thread::sleep_for(std::chrono::seconds(3));
 						continue;
 					}
@@ -96,14 +109,15 @@ void GrpcServer::start()
 					break;
 				}
 
-				m_binded.store(true, std::memory_order_relaxed);
-
 #ifdef VLD_IS_INCLUDED
 				::VLDDisable();
 #endif
-
-				logMsg(QString("%1 in Wait state").arg(serviceName()));
-				m_server->Wait();		// unblocked by m_server->Shutdown in destructor
+				if (serverRaw != nullptr)
+				{
+					m_binded.store(true, std::memory_order_relaxed);
+					logMsg(QString("%1 in Wait state").arg(serviceName()));
+					serverRaw->Wait();		// unblocked by m_server->Shutdown in stop
+				}
 
 #ifdef VLD_IS_INCLUDED
 				::VLDEnable();
@@ -121,26 +135,28 @@ void GrpcServer::start()
 			}
 		}
 	};
-
-	m_sessionGuard.start();
-	m_running.store(true, std::memory_order::relaxed);
 }
 
 void GrpcServer::stop()
 {
-	if (m_running.load(std::memory_order::relaxed) == false)
+	if (m_running.exchange(false, std::memory_order_acq_rel) == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	m_sessionGuard.stop();
-
 	m_stopRequested.store(true, std::memory_order_relaxed);
 
-	if (m_server)
+	grpc::Server* serverRaw = nullptr;
+
 	{
-		m_server->Shutdown();
+		std::lock_guard lg(m_serverMutex);
+		serverRaw = m_server.get();
+	}
+
+	if (serverRaw != nullptr)
+	{
+		serverRaw->Shutdown();
 	}
 
 	if (m_thread.joinable())
@@ -148,12 +164,12 @@ void GrpcServer::stop()
 		m_thread.join();
 	}
 
-	if (m_server)
+	m_sessionGuard.stop();
+
 	{
+		std::lock_guard lg(m_serverMutex);
 		m_server.reset();
 	}
-
-	m_running.store(false, std::memory_order::relaxed);
 }
 
 HostAddressPort GrpcServer::listenIP() const
@@ -174,6 +190,11 @@ bool GrpcServer::isBinded() const
 bool GrpcServer::isRunning() const
 {
 	return m_running.load(std::memory_order_relaxed);
+}
+
+bool GrpcServer::isStopRequested() const
+{
+	return m_stopRequested.load(std::memory_order_relaxed);
 }
 
 grpc::Status GrpcServer::handshake(grpc::ServerContext* context,

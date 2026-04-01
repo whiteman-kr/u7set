@@ -536,11 +536,17 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 															m_appDataReceiver, m_appSignals,
 															m_appSignalStates, m_discretesLogWriter,
 															logger()));
+		m_grpcAppDataSrvs.back()->start();
 	}
 }
 
 void AppDataServiceWorker::stopGrpcAppDataSrv()
 {
+	for(auto& srv : m_grpcAppDataSrvs)
+	{
+		srv->stop();
+	}
+
 	m_grpcAppDataSrvs.clear();
 }
 

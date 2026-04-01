@@ -267,6 +267,7 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
+	SimpleAppSignalState getCurrentState(Hash hash) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 

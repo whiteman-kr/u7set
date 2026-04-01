@@ -122,8 +122,6 @@ void AppSignalState::save(Proto::AppSignalState* protoState) const
 		return;
 	}
 
-	assert(m_hash != 0);
-
 	protoState->set_hash(m_hash);
 	protoState->set_value(m_value);
 	protoState->set_flags(m_flags.all);

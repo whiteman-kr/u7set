@@ -1071,6 +1071,18 @@ bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) c
 	return true;
 }
 
+SimpleAppSignalState DynamicAppSignalStates::getCurrentState(Hash hash) const
+{
+	const DynamicAppSignalState* stateEx = getValueOrNullptr(m_hash2State, hash);
+
+	if (stateEx == nullptr)
+	{
+		return SimpleAppSignalState{};
+	}
+
+	return stateEx->current();
+}
+
 void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {
 	autoArchivingGroupsCount = std::max(autoArchivingGroupsCount, 4);

@@ -9,6 +9,88 @@
 
 #include "GrpcAppDataSrv.h"
 
+// ------------------------------------------------------------------------------------
+//
+// SignalStateQueueGuard class implementation
+//
+// ------------------------------------------------------------------------------------
+
+class SignalStateQueueGuard
+{
+public:
+	SignalStateQueueGuard(AppDataReceiver* receiver, size_t queueSize, const std::string& authToken) :
+		m_receiver(receiver)
+	{
+		if (m_receiver == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_queue = std::make_shared<SimpleAppSignalStatesQueue>(TO_INT(queueSize));
+		m_receiver->registerDestSignalStatesQueue(m_queue, false,
+												  QString("GrpcAppDataSrv[%1]::statesQueue").
+												  arg(QString::fromStdString(authToken)));
+	}
+
+	~SignalStateQueueGuard()
+	{
+		if (m_receiver != nullptr && m_queue != nullptr)
+		{
+			m_receiver->unregisterDestSignalStatesQueue(m_queue);
+		}
+	}
+
+	SimpleAppSignalStatesQueueShared queue() const { return m_queue; }
+
+private:
+	AppDataReceiver* m_receiver = nullptr;
+	SimpleAppSignalStatesQueueShared m_queue;
+};
+
+// ------------------------------------------------------------------------------------
+//
+// DiscretesLogReaderGuard class implementation
+//
+// ------------------------------------------------------------------------------------
+
+class DiscretesLogReaderGuard
+{
+public:
+	DiscretesLogReaderGuard(std::shared_ptr<DiscretesLogWriter> dsLogWriter, CircularLoggerShared log) :
+		m_dsLogWriter(dsLogWriter)
+	{
+		if (m_dsLogWriter == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_dsLogReader = std::make_shared<DiscretesLogReader>(log);
+		m_dsLogWriter->registerLogReader(m_dsLogReader);
+	}
+
+	~DiscretesLogReaderGuard()
+	{
+		if (m_dsLogWriter != nullptr && m_dsLogReader != nullptr)
+		{
+			m_dsLogWriter->unregisterLogReader(m_dsLogReader);
+		}
+	}
+
+	std::shared_ptr<DiscretesLogReader> reader() const { return m_dsLogReader; }
+
+private:
+	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;
+	std::shared_ptr<DiscretesLogReader> m_dsLogReader;
+};
+
+// ------------------------------------------------------------------------------------
+//
+// GrpcAppDataSrv class implementation
+//
+// ------------------------------------------------------------------------------------
+
 GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 								bool allowAllClients,
 								const std::vector<ClientInfo>& clients,
@@ -28,17 +110,11 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 	m_dsLogWriter(dsLogWriter)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
-	start();
 }
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
 {
-}
-
-void GrpcAppDataSrv::stop()
-{
 	unregisterAllQueues();
-	GrpcServer::stop();
 }
 
 grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
@@ -91,14 +167,22 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 		ctr++;
 
-		if ((ctr & 0x3FFF) == 0 && context->IsCancelled())
+		if ((ctr & 0x3FFF) == 0)
 		{
-			logMsg("GetAppSignalList: context CANCELLED");
-			return grpc::Status::CANCELLED;
+			if (context->IsCancelled() || isStopRequested())
+			{
+				logMsg("GetAppSignalList: context CANCELLED");
+				return grpc::Status::CANCELLED;
+			}
 		}
 
 		if (ctr >= IDS_MAX_COUNT)
 		{
+			if (isStopRequested())
+			{
+				return grpc::Status::CANCELLED;
+			}
+
 			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				return writeStatus;
@@ -111,6 +195,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	if (ctr > 0)
 	{
+		if (isStopRequested())
+		{
+			return grpc::Status::CANCELLED;
+		}
+
 		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
@@ -165,6 +254,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 				reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 				reply.set_replysignalindex(index);
 
+				if (context->IsCancelled() || isStopRequested())
+				{
+					return grpc::Status::CANCELLED;
+				}
+
 				if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 				{
 					return writeStatus;
@@ -181,6 +275,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 		{
 			reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 			reply.set_replysignalindex(index);
+
+			if (context->IsCancelled() || isStopRequested())
+			{
+				return grpc::Status::CANCELLED;
+			}
 
 			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
@@ -209,6 +308,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 				reply.set_totalsize(request->signalhashes_size());
 				reply.set_replysignalindex(index);
 
+				if (context->IsCancelled() || isStopRequested())
+				{
+					return grpc::Status::CANCELLED;
+				}
+
 				if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 				{
 					return writeStatus;
@@ -225,6 +329,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 		{
 			reply.set_totalsize(request->signalhashes_size());
 			reply.set_replysignalindex(index);
+
+			if (context->IsCancelled() || isStopRequested())
+			{
+				return grpc::Status::CANCELLED;
+			}
 
 			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
@@ -276,12 +385,14 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 
 	//
 
-	SimpleAppSignalStatesQueueShared statesQueue =
-		std::make_shared<SimpleAppSignalStatesQueue>(TO_INT(m_appSignals.count() * 5));
+	SignalStateQueueGuard queueGuard(m_appDataReceiver, m_appSignals.count() * 5, authToken);
+	SimpleAppSignalStatesQueueShared statesQueue = queueGuard.queue();
 
-	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
-													 QString("GrpcAppDataSrv[%1]::statesQueue").
-													 arg(QString::fromStdString(authToken)));
+	if (statesQueue == nullptr)
+	{
+		return grpc::Status::CANCELLED;
+	}
+
 	//
 
 	Grpc::GetAppSignalStateChangesReply reply;
@@ -297,7 +408,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	constexpr int SEND_PACKET_SIZE = 2048;
 	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{50};
 
-	while(context->IsCancelled() == false)
+	while(context->IsCancelled() == false && isStopRequested() == false)
 	{
 		int statesCount = reply.appsignalstates_size();
 
@@ -324,7 +435,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		{
 			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
-				m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 				return writeStatus;
 			}
 
@@ -340,8 +450,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			waitCtr++;
 		}
 	}
-
-	m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 
 	return grpc::Status::CANCELLED;
 }
@@ -539,9 +647,14 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 
 	//
 
-	std::shared_ptr<DiscretesLogReader> dlReader = std::make_shared<DiscretesLogReader>(getLog());
+	DiscretesLogReaderGuard dlReaderGuard(m_dsLogWriter, getLog());
 
-	m_dsLogWriter->registerLogReader(dlReader);
+	std::shared_ptr<DiscretesLogReader> dlReader = dlReaderGuard.reader();
+
+	if (dlReader == nullptr)
+	{
+		return grpc::Status::CANCELLED;
+	}
 
 	//
 
@@ -554,7 +667,7 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 	constexpr int SEND_PACKET_SIZE = 100;
 	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{200};
 
-	while(context->IsCancelled() == false)
+	while(context->IsCancelled() == false && isStopRequested() == false)
 	{
 		dlReader->getDiscretesLog(&reply);
 
@@ -566,7 +679,6 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		{
 			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
-				m_dsLogWriter->unregisterLogReader(dlReader);
 				return writeStatus;
 			}
 
@@ -577,8 +689,6 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
-
-	m_dsLogWriter->unregisterLogReader(dlReader);
 
 	return grpc::Status::CANCELLED;
 }

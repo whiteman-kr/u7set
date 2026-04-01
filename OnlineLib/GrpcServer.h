@@ -31,14 +31,15 @@ public:
 
 	virtual ~GrpcServer();
 
-	virtual void start();
-	virtual void stop();
+	void start();
+	void stop();
 
 	HostAddressPort listenIP() const;
 
 	void setSessionTimeout(int seconds);
 	bool isBinded() const;
 	bool isRunning() const;
+	bool isStopRequested() const;
 
 	virtual void eraseAuthToken(const std::string& authToken) { Q_UNUSED(authToken) }
 
@@ -57,6 +58,7 @@ protected:
 protected:
 	HostAddressPort m_listenIP;
 
+	std::mutex m_serverMutex;
 	std::unique_ptr<grpc::Server> m_server;
 	std::atomic_bool m_stopRequested {false};
 	std::thread m_thread;

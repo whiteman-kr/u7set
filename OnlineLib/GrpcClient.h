@@ -66,7 +66,6 @@ public:
 
 	virtual ~GrpcClient()
 	{
-		stop();
 	}
 
 	const SoftwareInfo& localSwInfo() const
