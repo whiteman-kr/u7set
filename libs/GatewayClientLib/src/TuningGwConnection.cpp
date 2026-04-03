@@ -1,12 +1,11 @@
 #include <GatewayClientLib/TuningGwConnection.hpp>
-#include <GatewayClientLib/ISignalUpdater.hpp>
 
 #include "TuningGwConnImpl.hpp"
 
 
 namespace GatewayClientLib
 {
-	TuningGwConnection::TuningGwConnection(ISignalUpdater& signalUpdater, ILogger& logger) :
+	TuningGwConnection::TuningGwConnection(ITuningSignalUpdater& signalUpdater, ILogger& logger) :
 		m_signalUpdater{signalUpdater},
 		m_logger{logger}
 	{

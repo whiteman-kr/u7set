@@ -1,8 +1,8 @@
 #include "TestSettings.hpp"
 
 #include <GatewayClientLib/../../src/AdsGwConnImpl.hpp>
+#include <GatewayClientLib/AdsSignalManager.hpp>
 #include <GatewayClientLib/Logger.hpp>
-#include <GatewayClientLib/SignalManager.hpp>
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock.h>
@@ -16,7 +16,7 @@
 class AdsGatewayTests : public testing::Test
 {
 public:
-	GatewayClientLib::SignalManager signalManager{};
+	GatewayClientLib::AdsSignalManager signalManager{};
 	GatewayClientLib::ConsoleLogger logger{};
 
 	std::string clientEquipmentId = "TEST_CLIENT_EQUIPMENT_ID";

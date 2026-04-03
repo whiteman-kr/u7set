@@ -1,12 +1,11 @@
 #include <GatewayClientLib/AdsGwConnection.hpp>
-#include <GatewayClientLib/ISignalUpdater.hpp>
 
 #include "AdsGwConnImpl.hpp"
 
 
 namespace GatewayClientLib
 {
-	AdsGwConnection::AdsGwConnection(ISignalUpdater& signalUpdater, ILogger& logger) :
+	AdsGwConnection::AdsGwConnection(IAdsSignalUpdater& signalUpdater, ILogger& logger) :
 		m_signalUpdater{signalUpdater},
 		m_logger{logger}
 	{

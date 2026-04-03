@@ -2,290 +2,212 @@
 
 #include <pugixml/pugixml.hpp>
 
+#include <algorithm>
 #include <charconv>
-#include <system_error>
-#include <unordered_set>
+#include <ranges>
+
 
 namespace
 {
-	//std::string trim(std::string_view value)
-	//{
-	//	const auto begin = value.find_first_not_of(" \t\r\n");
-	//	if (begin == std::string_view::npos)
-	//	{
-	//		return {};
-	//	}
 
-	//	const auto end = value.find_last_not_of(" \t\r\n");
-	//	return std::string{value.substr(begin, end - begin + 1)};
-	//}
 
-	//void addError(std::vector<std::string>& errors, std::string message)
-	//{
-	//	errors.push_back(std::move(message));
-	//}
+	GatewayClientLib::TuningSource parseDataSource(const pugi::xml_node& dataSource, std::vector<std::string>& errors)
+	{
+		assert(dataSource.name() == std::string_view{"DataSource"});
 
-	//std::string getRequiredAttribute(
-	//	const pugi::xml_node& node,
-	//	const char* attributeName,
-	//	std::vector<std::string>& errors,
-	//	std::string_view context)
-	//{
-	//	const auto attribute = node.attribute(attributeName);
-	//	if (!attribute)
-	//	{
-	//		addError(errors, std::string{context} + ": missing attribute '" + attributeName + "'");
-	//		return {};
-	//	}
+		GatewayClientLib::TuningSource tuningSource;
+		tuningSource.moduleEquipmentId = dataSource.attribute("ModuleEquipmentID").as_string();
+		tuningSource.moduleCaption = dataSource.attribute("Caption").as_string();
+		tuningSource.subsystemId = dataSource.attribute("SubsystemID").as_string();
 
-	//	return attribute.as_string();
-	//}
+		std::string channelStr = dataSource.attribute("SubsystemChannel").as_string();
+		if (channelStr.size() != 1 || channelStr[0] < 'A' || channelStr[0] > 'D')
+		{
+			errors.push_back(std::string{"DataSource '"} + tuningSource.moduleEquipmentId + "': invalid SubsystemChannel value '" +
+							 channelStr + "'. Expected 'A', 'B', 'C' or 'D'.");
+		}
+		else
+		{
+			static_assert(static_cast<int>(GatewayClientLib::Channel::A) == 0);
+			static_assert(static_cast<int>(GatewayClientLib::Channel::B) == 1);
+			static_assert(static_cast<int>(GatewayClientLib::Channel::C) == 2);
+			static_assert(static_cast<int>(GatewayClientLib::Channel::D) == 3);
 
-	//std::optional<uint16_t> parseUint16(
-	//	const pugi::xml_node& node,
-	//	const char* attributeName,
-	//	std::vector<std::string>& errors,
-	//	std::string_view context)
-	//{
-	//	const auto attribute = node.attribute(attributeName);
-	//	if (!attribute)
-	//	{
-	//		return std::nullopt;
-	//	}
+			tuningSource.channel = static_cast<GatewayClientLib::Channel>(channelStr[0] - 'A');
+		}
 
-	//	uint16_t value = 0;
-	//	const std::string_view text{attribute.value()};
-	//	const auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), value);
-	//	if (ec != std::errc{} || ptr != text.data() + text.size())
-	//	{
-	//		addError(errors, std::string{context} + ": invalid uint16 attribute '" + attributeName + "' value '" +
-	//			std::string{text} + "'");
-	//		return std::nullopt;
-	//	}
+		return tuningSource;
+	}
 
-	//	return value;
-	//}
+	void parseSignals(const pugi::xml_node& node,
+					  GatewayClientLib::SignalType signalType,
+					  GatewayClientLib::TuningSource& targetTuningSource,
+					  std::vector<std::string>& errors)
+	{
+		if (not node)
+		{
+			errors.push_back("Missing element '" + std::string{node.name()} + "'");
+			return;
+		}
 
-	//std::optional<double> parseDouble(
-	//	const pugi::xml_node& node,
-	//	const char* attributeName,
-	//	std::vector<std::string>& errors,
-	//	std::string_view context)
-	//{
-	//	const auto attribute = node.attribute(attributeName);
-	//	if (!attribute)
-	//	{
-	//		return std::nullopt;
-	//	}
+		for (const auto& signalNode : node.children("Signal"))
+		{
+			std::string appSignalId = signalNode.attribute("AppSignalID").as_string();
+			auto hash = Radiy::calcHash(appSignalId);
 
-	//	double value = 0.0;
-	//	const std::string_view text{attribute.value()};
-	//	const auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), value);
-	//	if (ec != std::errc{} || ptr != text.data() + text.size())
-	//	{
-	//		addError(errors, std::string{context} + ": invalid numeric attribute '" + attributeName + "' value '" +
-	//			std::string{text} + "'");
-	//		return std::nullopt;
-	//	}
 
-	//	return value;
-	//}
+			GatewayClientLib::GwAppSignalParam sp{};
 
-	//std::vector<std::string> parseTuningSignalIds(std::string_view text)
-	//{
-	//	std::vector<std::string> result;
-	//	size_t begin = 0;
+			sp.hash = hash;
+			std::snprintf(sp.appSignalId, sizeof(sp.appSignalId), "%s", appSignalId.c_str());
+			std::snprintf(sp.customSignalId, sizeof(sp.customSignalId), "%s", signalNode.attribute("CustomAppSignalID").as_string());
+			std::snprintf(sp.caption, sizeof(sp.caption), "%s", signalNode.attribute("Caption").as_string());
+			std::snprintf(sp.equipmentId, sizeof(sp.equipmentId), "%s", signalNode.attribute("EquipmentID").as_string());
+			std::snprintf(sp.lmEquipmentId, sizeof(sp.lmEquipmentId), "%s", signalNode.attribute("EquipmentID").as_string());
+			std::snprintf(sp.units, sizeof(sp.units), "%s", signalNode.attribute("Unit").as_string());
 
-	//	while (begin < text.size())
-	//	{
-	//		const auto end = text.find(',', begin);
-	//		const auto token = trim(text.substr(begin, end == std::string_view::npos ? text.size() - begin : end - begin));
-	//		if (!token.empty())
-	//		{
-	//			result.push_back(token);
-	//		}
+			// Tags in file are comma separated, but GwAppSignalParam expects space separated, so replace ',' with ' '.
+			//
+			std::snprintf(sp.tags, sizeof(sp.tags), "%s", signalNode.attribute("Tags").as_string());
+			std::replace(std::begin(sp.tags), std::end(sp.tags), ',', ' ');
 
-	//		if (end == std::string_view::npos)
-	//		{
-	//			break;
-	//		}
+			sp.channel = targetTuningSource.channel;
+			sp.inOutType = GatewayClientLib::InOutType::Internal;
+			sp.type = signalType;
+			sp.decimalPlaces = static_cast<uint8_t>(signalNode.attribute("DecimalPlaces").as_uint(0));
+			sp.tuning = true;
 
-	//		begin = end + 1;
-	//	}
+			// TO DO: Read valid range and tuning bounds as hex values from "xxxxHex" attribute.
+			// sending to the gateway.
+			//
+			switch (signalType)
+			{
+			case GatewayClientLib::SignalType::Discrete:
+				[[fallthrough]];
+			case GatewayClientLib::SignalType::SignedInt32:
+				{
+					auto hexStrToInt = [](const char* hexStr) -> int
+					{
+						int value = 0;
+						std::from_chars(hexStr, hexStr + std::strlen(hexStr), value, 16);
+						return value;
+					};
 
-	//	return result;
-	//}
+					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_int();
+					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_int();
+					sp.tuningDefaultValue = hexStrToInt(signalNode.attribute("TuningDefaultValueHex").as_string());
+					sp.tuningLowBound = hexStrToInt(signalNode.attribute("TuningLowBoundHex").as_string());
+					sp.tuningHighBound = hexStrToInt(signalNode.attribute("TuningHighBoundHex").as_string());
+				}
+				break;
 
-	//pugi::xml_node findTuningParamsNode(const pugi::xml_node& dataSource)
-	//{
-	//	const auto lanControllers = dataSource.child("LanControllers");
-	//	for (const auto lanController : lanControllers.children("LanController"))
-	//	{
-	//		const auto type = std::string_view{lanController.attribute("LanControllerType").as_string()};
-	//		if (type == "Tuning")
-	//		{
-	//			return lanController.child("TuningParams");
-	//		}
-	//	}
+			case GatewayClientLib::SignalType::Float32:
+				{
+					auto hexStrToDouble = [](const char* hexStr) -> double
+					{
+						uint32_t intValue = 0;
+						std::from_chars(hexStr, hexStr + std::strlen(hexStr), intValue, 16);
+						float value;
+						std::memcpy(&value, &intValue, sizeof(float));
+						return value;
+					};
 
-	//	return {};
-	//}
+					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_double();
+					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_double();
+					sp.tuningDefaultValue = hexStrToDouble(signalNode.attribute("TuningDefaultValueHex").as_string());
+					sp.tuningLowBound = hexStrToDouble(signalNode.attribute("TuningLowBoundHex").as_string());
+					sp.tuningHighBound = hexStrToDouble(signalNode.attribute("TuningHighBoundHex").as_string());
+				}
+				break;
+			};
 
-	//void parseSignalGroup(
-	//	const pugi::xml_node& signalGroup,
-	//	std::string_view groupType,
-	//	std::vector<GatewayClientLib::TuningSignal>& signals,
-	//	std::vector<std::string>& errors,
-	//	std::string_view moduleEquipmentId)
-	//{
-	//	for (const auto signalNode : signalGroup.children("Signal"))
-	//	{
-	//		GatewayClientLib::TuningSignal signal;
-	//		signal.type = signalNode.attribute("Type").as_string(groupType.data());
-	//		signal.tuningValueType = signalNode.attribute("TuningValueTypeStr").as_string();
-	//		signal.customAppSignalId = signalNode.attribute("CustomAppSignalID").as_string();
-	//		signal.caption = signalNode.attribute("Caption").as_string();
-	//		signal.equipmentId = signalNode.attribute("EquipmentID").as_string();
-	//		signal.enableTuning = signalNode.attribute("EnableTuning").as_bool(false);
+			targetTuningSource.signalIds.push_back(appSignalId);
+			targetTuningSource.signals.emplace(hash, sp);
+		}
 
-	//		const auto context = std::string{"DataSource '"} + std::string{moduleEquipmentId} + "' Signal";
-	//		signal.appSignalId = getRequiredAttribute(signalNode, "AppSignalID", errors, context);
-	//		if (signal.appSignalId.empty())
-	//		{
-	//			continue;
-	//		}
-
-	//		signal.hash = Radiy::calcHash(signal.appSignalId);
-	//		signal.tuningDefaultValue = parseDouble(signalNode, "TuningDefaultValue", errors, context);
-	//		signal.tuningLowBound = parseDouble(signalNode, "TuningLowBound", errors, context);
-	//		signal.tuningHighBound = parseDouble(signalNode, "TuningHighBound", errors, context);
-
-	//		signals.push_back(std::move(signal));
-	//	}
-	//}
-
-	//GatewayClientLib::TuningSource parseDataSource(const pugi::xml_node& dataSource, std::vector<std::string>& errors)
-	//{
-	//	GatewayClientLib::TuningSource tuningSource;
-	//	tuningSource.moduleEquipmentId = dataSource.attribute("ModuleEquipmentID").as_string();
-	//	tuningSource.profile = dataSource.attribute("Profile").as_string();
-	//	tuningSource.caption = dataSource.attribute("Caption").as_string();
-
-	//	const auto tuningContext = std::string{"DataSource '"} + tuningSource.moduleEquipmentId + "'";
-	//	const auto tuningParams = findTuningParamsNode(dataSource);
-	//	if (!tuningParams)
-	//	{
-	//		addError(errors, tuningContext + ": missing LanControllers/LanController[@LanControllerType='Tuning']/TuningParams");
-	//	}
-	//	else
-	//	{
-	//		tuningSource.tuningEnabled = tuningParams.attribute("TuningEnable").as_bool(false);
-	//		tuningSource.tuningIp = tuningParams.attribute("TuningIP").as_string();
-	//		tuningSource.tuningServiceId = tuningParams.attribute("TuningServiceID").as_string();
-	//		tuningSource.tuningServiceIp = tuningParams.attribute("TuningServiceIP").as_string();
-	//		tuningSource.tuningServiceNetmask = tuningParams.attribute("TuningServiceNetmask").as_string();
-
-	//		if (const auto port = parseUint16(tuningParams, "TuningPort", errors, tuningContext))
-	//		{
-	//			tuningSource.tuningPort = *port;
-	//		}
-
-	//		if (const auto servicePort = parseUint16(tuningParams, "TuningServicePort", errors, tuningContext))
-	//		{
-	//			tuningSource.tuningServicePort = *servicePort;
-	//		}
-	//	}
-
-	//	const auto lanControllers = dataSource.child("LanControllers");
-	//	for (const auto lanController : lanControllers.children("LanController"))
-	//	{
-	//		const auto type = std::string_view{lanController.attribute("LanControllerType").as_string()};
-	//		if (type == "Tuning")
-	//		{
-	//			tuningSource.lanEquipmentId = lanController.attribute("EquipmentID").as_string();
-	//			break;
-	//		}
-	//	}
-
-	//	tuningSource.tuningSignalIds = parseTuningSignalIds(dataSource.child("TuningSignals").text().as_string());
-
-	//	const auto tuningData = dataSource.child("TuningData");
-	//	if (tuningData)
-	//	{
-	//		parseSignalGroup(tuningData.child("AnalogFloatSignals"), "AnalogFloat", tuningSource.signals, errors, tuningSource.moduleEquipmentId);
-	//		parseSignalGroup(tuningData.child("AnalogInt32Signals"), "AnalogInt32", tuningSource.signals, errors, tuningSource.moduleEquipmentId);
-	//		parseSignalGroup(tuningData.child("DiscreteSignals"), "Discrete", tuningSource.signals, errors, tuningSource.moduleEquipmentId);
-	//	}
-
-	//	return tuningSource;
-	//}
+		return;
+	}
 } // namespace
 
 namespace GatewayClientLib
 {
-	//ParseTuningSourceXmlResult parseTuningSourcesXml(std::string_view xmlContent)
-	//{
-	//	ParseTuningSourceXmlResult result;
+	ParseTuningSourceXmlResult parseTuningSourcesXml(std::span<const std::byte> xmlContent)
+	{
+		ParseTuningSourceXmlResult result;
 
-		//pugi::xml_document document;
-		//const auto parseResult = document.load_buffer(xmlContent.data(), xmlContent.size(), pugi::parse_default, pugi::encoding_utf8);
-		//if (!parseResult)
-		//{
-		//	result.errors.push_back(std::string{"XML parse error: "} + parseResult.description());
-		//	return result;
-		//}
+		pugi::xml_document doc;
+		pugi::xml_parse_result parseResult = doc.load_buffer(xmlContent.data(), xmlContent.size());
+		if (parseResult == false)
+		{
+			result.errors.push_back(std::string{"XML parse error: "} + parseResult.description());
+			return result;
+		}
 
-		//const auto content = document.child("Content");
-		//if (!content)
-		//{
-		//	result.errors.push_back("Missing root element 'Content'");
-		//	return result;
-		//}
+		const pugi::xml_node contentNode = doc.child("Content");
+		if (not contentNode)
+		{
+			result.errors.push_back("Missing root element 'Content'");
+			return result;
+		}
 
-		//const auto dataSourcesNode = content.child("DataSources");
-		//if (!dataSourcesNode)
-		//{
-		//	result.errors.push_back("Missing element 'Content/DataSources'");
-		//	return result;
-		//}
+		// Getting project and build info
+		//
+		{
+			auto buildInfoNode = contentNode.child("BuildInfo");
+			if (buildInfoNode.empty() == true)
+			{
+				result.errors.push_back("Missing element 'Content/BuildInfo'");
+				return result;
+			}
 
-		//std::unordered_set<std::string> modulesWithDefaultProfile;
-		//for (const auto dataSource : dataSourcesNode.children("DataSource"))
-		//{
-		//	const auto moduleEquipmentId = std::string{dataSource.attribute("ModuleEquipmentID").as_string()};
-		//	const auto profile = std::string_view{dataSource.attribute("Profile").as_string()};
-		//	if (!moduleEquipmentId.empty() && profile == "Default")
-		//	{
-		//		modulesWithDefaultProfile.insert(moduleEquipmentId);
-		//	}
-		//}
+			result.project.name = buildInfoNode.attribute("Project").as_string();
+			result.project.buildNo = buildInfoNode.attribute("ID").as_int(0);
+			result.project.buildDate = buildInfoNode.attribute("Date").as_string();
+			result.project.buildUser = buildInfoNode.attribute("User").as_string();
+		}
 
-		//std::unordered_set<std::string> addedModules;
-		//for (const auto dataSource : dataSourcesNode.children("DataSource"))
-		//{
-		//	const auto moduleEquipmentId = getRequiredAttribute(
-		//		dataSource,
-		//		"ModuleEquipmentID",
-		//		result.errors,
-		//		"Content/DataSources/DataSource");
-		//	if (moduleEquipmentId.empty())
-		//	{
-		//		continue;
-		//	}
+		// Getting tuning sources
+		//
+		const auto dataSourcesNode = contentNode.child("DataSources");
+		if (not dataSourcesNode)
+		{
+			result.errors.push_back("Missing element 'Content/DataSources'");
+			return result;
+		}
 
-		//	const auto profile = std::string_view{dataSource.attribute("Profile").as_string()};
-		//	const bool hasDefaultProfile = modulesWithDefaultProfile.contains(moduleEquipmentId);
-		//	const bool isDefaultProfile = profile == "Default";
+		// Skip all not "Default" profiles.
+		//
+		auto defaultProfileFilter = [](const pugi::xml_node& node)
+		{
+			return std::string_view{node.attribute("Profile").as_string()} == "Default";
+		};
 
-		//	if ((hasDefaultProfile && !isDefaultProfile) || addedModules.contains(moduleEquipmentId))
-		//	{
-		//		continue;
-		//	}
+		auto defaultDataSource = dataSourcesNode.children("DataSource") | std::views::filter(defaultProfileFilter);
 
-		//	result.tuningSources.push_back(parseDataSource(dataSource, result.errors));
-		//	addedModules.insert(moduleEquipmentId);
-		//}
+		result.tuningSources.reserve(std::ranges::distance(defaultDataSource));
 
-	//	return result;
-	//}
+		for (const auto dataSourceNode : defaultDataSource)
+		{
+			auto& current = result.tuningSources.emplace_back(parseDataSource(dataSourceNode, result.errors));
+
+			// Signals - DataSource/TuningData/*Signals/Signal
+			//
+			auto tuningDataNode = dataSourceNode.child("TuningData");
+			if (not tuningDataNode)
+			{
+				result.errors.push_back("Missing element 'DataSource/TuningData'");
+				continue;
+			}
+
+			const size_t signalCount = tuningDataNode.attribute("SignalsCount").as_uint();
+			current.signalIds.reserve(signalCount);
+			current.signals.reserve(signalCount);
+
+			parseSignals(tuningDataNode.child("AnalogFloatSignals"), SignalType::Float32, current, result.errors);
+			parseSignals(tuningDataNode.child("AnalogInt32Signals"), SignalType::SignedInt32, current, result.errors);
+			parseSignals(tuningDataNode.child("DiscreteSignals"), SignalType::Discrete, current, result.errors);
+		}
+
+		return result;
+	}
 } // namespace GatewayClientLib

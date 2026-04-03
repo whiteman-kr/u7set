@@ -1,7 +1,5 @@
 #include "AdsGwConnImpl.hpp"
 
-#include <GatewayClientLib/ISignalUpdater.hpp>
-
 #include <algorithm>
 #include <cstring>
 
@@ -10,6 +8,11 @@ namespace GatewayClientLib
 {
 	using AppSignalIdNetworkT = std::array<char, STRING_LENGTH_128>;
 
+	AdsGwConnImpl::AdsGwConnImpl(IAdsSignalUpdater& signalUpdater, ILogger& logger) :
+		GwConnImpl{logger},
+		m_signalUpdater{signalUpdater}
+	{
+	}
 
 	void AdsGwConnImpl::run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId)
 	{
@@ -108,7 +111,7 @@ namespace GatewayClientLib
 		m_handshakeResponse = {};
 
 		request.protocolVersion = protocolVersion;
-		
+
 		const size_t clientNameLen = std::min(equipmentId.size(), sizeof(request.clientName) - 1);
 		std::memcpy(request.clientName, equipmentId.data(), clientNameLen);
 		request.clientName[clientNameLen] = '\0';

@@ -1,7 +1,6 @@
 #include <GatewayClientLib/AdsGwConnection.hpp>
-#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/AdsSignalManager.hpp>
 #include <GatewayClientLib/Logger.hpp>
-#include <GatewayClientLib/SignalManager.hpp>
 
 #include <iostream>
 #include <string>
@@ -19,7 +18,7 @@ void printHelp()
 								<< std::endl;
 }
 
-void printSignalValue(const GatewayClientLib::SignalManager& signalManager, std::string_view signalId)
+void printSignalValue(const GatewayClientLib::AdsSignalManager& signalManager, std::string_view signalId)
 {
 	auto signalState = signalManager.getSignalState(signalId);
 	if (signalState.has_value() == false)
@@ -38,7 +37,7 @@ void printSignalValue(const GatewayClientLib::SignalManager& signalManager, std:
 	return;
 }
 
-void printSignalParam(const GatewayClientLib::SignalManager& signalManager, std::string_view signalId)
+void printSignalParam(const GatewayClientLib::AdsSignalManager& signalManager, std::string_view signalId)
 {
 	auto signalParam = signalManager.getSignalParam(signalId);
 	if (signalParam.has_value() == false)
@@ -116,9 +115,9 @@ int main()
 	std::string_view address = "127.0.0.1";
 	uint16_t port = GatewayClientLib::ADS_GW_PORT;
 
-	GatewayClientLib::SignalManager signalManager;
+	GatewayClientLib::AdsSignalManager signalManager{};
 
-	GatewayClientLib::ConsoleLogger logger;
+	GatewayClientLib::ConsoleLogger logger{};
 	logger.setTraceEnabled(false);
 
 	{

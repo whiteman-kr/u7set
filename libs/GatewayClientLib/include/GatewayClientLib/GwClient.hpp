@@ -119,3 +119,101 @@ namespace GatewayClientLib
 
 	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = GW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
 } // namespace GatewayClientLib
+
+namespace GatewayClientLib
+{
+	enum class Channel : uint8_t
+	{
+		A = 0,
+		B = 1,
+		C = 2,
+		D = 3
+	};
+
+	constexpr std::string_view to_string(Channel ec) noexcept
+	{
+		// clang-format off
+		switch (ec)
+		{
+		using enum Channel;
+		case A: return "A";
+		case B: return "B";
+		case C: return "C";
+		case D: return "D";
+		}
+		// clang-format on
+
+		assert(false);
+		return "Channel(unknown)";
+	}
+} // namespace GatewayClientLib
+
+template<>
+struct std::formatter<GatewayClientLib::Channel> : std::formatter<std::string_view>
+{
+	template<typename FormatContext>
+	auto format(GatewayClientLib::Channel code, FormatContext& ctx) const
+	{
+		return std::formatter<std::string_view>::format(to_string(code), ctx);
+	}
+};
+
+namespace GatewayClientLib
+{
+	enum class InOutType : uint8_t
+	{
+		Input = 0,
+		Output = 1,
+		Internal = 2,
+		SoftwareCalculated = 3
+	};
+
+	enum class SignalType : uint8_t
+	{
+		Discrete = 0x00,
+		SignedInt32 = 0x10,
+		Float32 = 0x11,
+		Bus = 0x20
+	};
+
+	enum class AnalogFormat : uint8_t
+	{
+		SignedInt32 = 1,
+		Float = 2
+	};
+
+	// Structure defining application signal parameters
+	//
+	struct GwAppSignalParam
+	{
+		uint64_t hash;                          // Signal hash (as defined in Section 5.2)
+		char appSignalId[STRING_LENGTH_128];    // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
+		char customSignalId[STRING_LENGTH_128]; // Custom Signal ID (UTF-8, null-terminated)
+
+		char caption[STRING_LENGTH_256];        // Signal caption/description (UTF-8, null-terminated)
+		char equipmentId[STRING_LENGTH_128];    // EquipmentID (ASCII, null-terminated)
+		char lmEquipmentId[STRING_LENGTH_128];  // LogicModule EquipmentID (ASCII, null-terminated)
+		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
+		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
+
+		Channel channel;                        // Channel code (A/B/C/D. See Section 7.3)
+		InOutType inOutType;                    // I/O type code (Input/Output/Internal. See Section 7.4)
+		SignalType type;                        // Signal type code (Discrete/Analog/Bus. See Section 7.5)
+		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
+
+		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
+		uint8_t reserved1;
+		uint8_t reserved2;
+		uint8_t reserved3;
+
+		double lowValidRange;                   // Low valid range for analog signals
+		double highValidRange;                  // High valid range for analog signals
+
+		double tuningDefaultValue;              // Default tuning value
+		double tuningLowBound;                  // Low bound for tuning value
+		double tuningHighBound;                 // High bound for tuning value
+	};
+
+	static_assert(sizeof(GwAppSignalParam) == 1208);
+	constexpr size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
+} // namespace GatewayClientLib

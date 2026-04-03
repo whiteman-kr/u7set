@@ -2,21 +2,15 @@
 
 #include "GwConnImpl.hpp"
 
-#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/IAdsSignalUpdater.hpp>
 
 
 namespace GatewayClientLib
 {
-	class ISignalUpdater;
-
 	class AdsGwConnImpl : public GwConnImpl<AdsGwRequestId>
 	{
 	public:
-		AdsGwConnImpl(ISignalUpdater& signalUpdater, ILogger& logger) :
-			GwConnImpl{logger},
-			m_signalUpdater{signalUpdater}
-		{
-		}
+		AdsGwConnImpl(IAdsSignalUpdater& signalUpdater, ILogger& logger);
 
 		void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId) override;
 
@@ -30,7 +24,7 @@ namespace GatewayClientLib
 		void requestSignalStates();
 
 	protected:
-		ISignalUpdater& m_signalUpdater;
+		IAdsSignalUpdater& m_signalUpdater;
 		std::function<bool()> m_isCancelledFunc;
 
 	protected:

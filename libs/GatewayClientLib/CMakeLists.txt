@@ -6,13 +6,17 @@ set(TARGET GatewayClientLib)
 add_library(${TARGET} STATIC
   ./include/GatewayClientLib/AdsGwConnection.hpp
   ./include/GatewayClientLib/AdsGwProtocol.hpp
+  ./include/GatewayClientLib/AdsSignalManager.hpp
   ./include/GatewayClientLib/GwCrc32.hpp
   ./include/GatewayClientLib/GwHash.hpp
+  ./include/GatewayClientLib/IAdsSignalUpdater.hpp
   ./include/GatewayClientLib/ISignalUpdater.hpp
+  ./include/GatewayClientLib/ITuningSignalUpdater.hpp
   ./include/GatewayClientLib/Logger.hpp
   ./include/GatewayClientLib/SignalManager.hpp
   ./include/GatewayClientLib/TuningGwConnection.hpp
   ./include/GatewayClientLib/TuningGwProtocol.hpp
+  ./include/GatewayClientLib/TuningSignalManager.hpp
 
    #./lib/pugixml/pugixml.cpp # pugiconfig.hpp is configured to header only library, so we don't need to compile it separately
   ./lib/pugixml/pugixml.hpp
@@ -23,7 +27,6 @@ add_library(${TARGET} STATIC
   ./src/AdsGwConnImpl.hpp
   ./src/GwConnImpl.hpp
   ./src/GwCrc32.cpp
-  ./src/SignalManager.cpp
   ./src/TcpConnection.cpp
   ./src/TuningGwConnection.cpp
   ./src/TuningGwConnImpl.cpp

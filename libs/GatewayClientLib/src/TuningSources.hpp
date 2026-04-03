@@ -1,52 +1,52 @@
 #pragma once
 
+#include <GatewayClientLib/GwClient.hpp>
 #include <GatewayClientLib/GwHash.hpp>
 
-#include <cstdint>
-#include <optional>
+#include <span>
 #include <string>
-#include <string_view>
+#include <unordered_map>
 #include <vector>
+
 
 namespace GatewayClientLib
 {
-	//struct TuningSignal
-	//{
-	//	std::string appSignalId;
-	//	Radiy::Hash hash = Radiy::UNDEFINED_HASH;
-	//	std::string customAppSignalId;
-	//	std::string caption;
-	//	std::string equipmentId;
-	//	std::string type;
-	//	std::string tuningValueType;
-	//	
-	//	double tuningDefaultValue{};
-	//	double tuningLowBound{};
-	//	double tuningHighBound{};
-	//};
+	// TuningSources.xml: Content/BuildInfo
+	//
+	struct Project
+	{
+		std::string name;        // [@Project]
+		int buildNo{};           // [@ID]
+		std::string buildDate{}; // [@Date]
+		std::string buildUser{}; // [@User]
+	};
 
-	//struct TuningSource
-	//{
-	//	std::string moduleEquipmentId;
-	//	std::string profile;
-	//	std::string caption;
-	//	std::string lanEquipmentId;
-	//	bool tuningEnabled = false;
-	//	std::string tuningIp;
-	//	uint16_t tuningPort = 0;
-	//	std::string tuningServiceId;
-	//	std::string tuningServiceIp;
-	//	uint16_t tuningServicePort = 0;
-	//	std::string tuningServiceNetmask;
-	//	std::vector<std::string> tuningSignalIds;
-	//	std::vector<TuningSignal> signals;
-	//};
+	// TuningSources.xml: Content/DataSources/DataSource
+	//
+	struct TuningSource
+	{
+		std::string moduleEquipmentId;                             // [@ModuleEquipmentID]
+		std::string moduleCaption;                                 // [@Caption]
+		std::string subsystemId;                                   // [@SubsystemID]
+		Channel channel = Channel::A;                              // [@SubsystemChannel]
 
-	//struct ParseTuningSourceXmlResult
-	//{
-	//	std::vector<TuningSource> tuningSources;
-	//	std::vector<std::string> errors;
-	//};
+		std::vector<std::string> signalIds;                        // TuningData/*Signals/Signal
+		std::unordered_map<Radiy::Hash, GwAppSignalParam> signals; // TuningData/*Signals/Signal
+	};
 
-	//[[nodiscard]] ParseTuningSourceXmlResult parseTuningSourcesXml(std::string_view xmlContent);
+	// Result of parsing TuningSources.xml
+	//
+	struct ParseTuningSourceXmlResult
+	{
+		Project project;                         // Content/BuildInfo
+		std::vector<TuningSource> tuningSources; // Content/DataSources/DataSource
+
+		std::vector<std::string> errors;
+	};
+
+	// Parsing function for TuningSources.xml content. Returns a struct containing the parsed project info, tuning sources and any errors
+	// encountered during parsing.
+	//
+	[[nodiscard]] ParseTuningSourceXmlResult parseTuningSourcesXml(std::span<const std::byte> xmlContent);
+
 } // namespace GatewayClientLib

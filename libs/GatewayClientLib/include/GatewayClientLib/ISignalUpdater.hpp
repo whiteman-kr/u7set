@@ -1,12 +1,10 @@
 #pragma once
-
-#include "AdsGwProtocol.hpp"
-
 #include <span>
 
 
 namespace GatewayClientLib
 {
+	template<typename SignalParamT, typename SignalStateT>
 	class ISignalUpdater
 	{
 	public:
@@ -19,7 +17,7 @@ namespace GatewayClientLib
 
 		// Set signal params.
 		//
-		virtual void addSignals(std::span<const GatewayClientLib::GwAppSignalParam> signals) = 0;
+		virtual void addSignals(std::span<const SignalParamT> signals) = 0;
 
 		// Invalidate all signal states.
 		//
@@ -27,6 +25,6 @@ namespace GatewayClientLib
 
 		// Set signal states by sources.
 		//
-		virtual void setStates(std::span<const GatewayClientLib::GwAppSignalState> states) = 0;
+		virtual void setStates(std::span<const SignalStateT> states) = 0;
 	};
 } // namespace GatewayClientLib
