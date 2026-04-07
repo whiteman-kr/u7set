@@ -1,8 +1,8 @@
 #pragma once
 #include "TcpConnection.hpp"
 
-#include <GatewayClientLib/Logger.hpp>
 #include <GatewayClientLib/GwClient.hpp>
+#include <GatewayClientLib/Logger.hpp>
 
 #include <GatewayClientLib/GwCrc32.hpp>
 #include <GatewayClientLib/GwHash.hpp>
@@ -25,6 +25,8 @@ namespace GatewayClientLib
 			m_logger{logger}
 		{
 		}
+
+		virtual ~GwConnImpl() = default;
 
 		virtual void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId) = 0;
 

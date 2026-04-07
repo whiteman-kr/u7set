@@ -1,8 +1,8 @@
 ﻿# Radiy TuningService Gateway Protocol Specification
 
-**Document Version:** 0.1  
+**Document Version:** 0.2  
 **Protocol Version:** 1.0  
-**Date:** 18 Mar 2026  
+**Date:** 06 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
@@ -638,7 +638,8 @@ The response contains an array of tuning source states.
 ```cpp
 struct GwGetTuningSourceStatesResponse {
     uint32_t count;                             // Number of tuning source states in response
-    uint32_t reserved;
+    uint8_t clientIsActive;                     // Current client is active
+    uint8_t reserved[3];
     GwTuningSourceState sourceStates[count];    // Array of tuning source states
 };
 ```
@@ -646,7 +647,8 @@ struct GwGetTuningSourceStatesResponse {
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `count` |
-| 4 | 4 | `uint32_t` | `reserved` |
+| 4 | 1 | `uint8_t` | `clientIsActive` |
+| 5 | 3 | `uint8_t[3]` | `reserved` |
 | 8 | `count * sizeof(GwTuningSourceState)` | `GwTuningSourceState[]` | `sourceStates[]` |
 
 Total size: `8 + (count * sizeof(GwTuningSourceState))` bytes
@@ -980,10 +982,11 @@ Total size: 4 bytes
 ### 5.7 TGW_CHANGE_CONTROLLED_TUNING_SOURCE
 
 #### Purpose
-Select a tuning source (LogicModule) and enable/disable its control.
+Select a tuning source (LogicModule), activate the current client, and enable or disable control for the selected tuning source.
 
 This request is intended for systems where TuningService is configured with `SingleLmControl = true` ([Section 1.6](#16-single-lm-control-mode-singlelmcontrol)). It is used to:
 - Make the current client active
+- Select a tuning source
 - Activate or deactivate LM control for a specified tuning source
 
 The tuning source is identified by `moduleEquipmentId`, which corresponds to `DataSource/@ModuleEquipmentID` in `TuningSources.xml` (Appendix C).
@@ -995,11 +998,9 @@ The tuning source is identified by `moduleEquipmentId`, which corresponds to `Da
 struct GwChangeControlledTuningSourceRequest {
     char     moduleEquipmentId[128];  // Tuning source module equipment ID 
                                       // (ASCII, null-terminated)
-    uint8_t  activateControl;         // 1 = activate control for this tuning source,
-                                      // 0 = deactivate control
-    uint8_t  takeControl;             // 1 = force take control (make this client active),
-                                      // 0 = do not force (fail if another client is active)
-    uint8_t  reserved[2];             // Reserved
+    uint8_t  activateControl;         // 1 = activate tuning source,
+                                      // 0 = deactivate tuning source
+    uint8_t  reserved[3];             // Reserved
 };
 
 static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
@@ -1009,8 +1010,7 @@ static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
 |--------|------|------|-------|
 | 0 | 128 | `char[128]` | `moduleEquipmentId` |
 | 128 | 1 | `uint8_t` | `activateControl` |
-| 129 | 1 | `uint8_t` | `takeControl` |
-| 130 | 2 | `uint8_t[2]` | `reserved` |
+| 129 | 3 | `uint8_t[3]` | `reserved` |
 
 Total size: 132 bytes
 
@@ -1020,14 +1020,11 @@ Total size: 132 bytes
 |-------|-------------|
 | `moduleEquipmentId` | Identifies the tuning source to control. Must match `GwTuningSourceState.moduleEquipmentId` ([Section 5.3](#53-tgw_get_tuning_source_states)) and `DataSource/@ModuleEquipmentID` in `TuningSources.xml` ([Appendix C](#appendix-c-tuningsourcesxml-file-format)). |
 | `activateControl` | Controls whether LM control is active for this tuning source after the request. |
-| `takeControl` | When `SingleLmControl = true`, forces the server to make the current client active even if another client is currently active. |
 
 **Request Behavior:**
 - This request requires the Gateway to be connected to TuningService. If not connected, the server responds with Status Code = `GWC_NO_TS_CONNECTION` and no payload.
 - If the `moduleEquipmentId` does not match any configured tuning source, the server responds with Status Code = `GWC_UNKNOWN_TUNING_SOURCE_ID` and no payload.
 - If `SingleLmControl = false`, the server responds with Status Code = `GWC_SINGLE_LM_CONTROL_DISABLED` and no payload.
-- If another client is active and `takeControl = 0`, the server responds with Status Code = `GWC_CLIENT_IS_NOT_ACTIVE` and no payload.
-- If another client is active and `takeControl = 1`, the server makes the current client active and proceeds.
 
 ---
 
@@ -1061,7 +1058,6 @@ Total size: 132 bytes
 ```
 Client -> Server: TGW_CHANGE_CONTROLLED_TUNING_SOURCE (
     moduleEquipmentId="SDS_SPC1_WS_LM1",
-    takeControl=0,
     activateControl=1)
 
 Server -> Client: TGW_CHANGE_CONTROLLED_TUNING_SOURCE (Status=0,
@@ -1536,3 +1532,4 @@ Within each `DataSource` element:
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
 | 0.1 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.2 | 06 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated TGW_CHANGE_CONTROLLED_TUNING_SOURCE |

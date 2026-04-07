@@ -4,7 +4,9 @@
 #include "TuningSources.hpp"
 
 #include <GatewayClientLib/ITuningSignalUpdater.hpp>
+#include <GatewayClientLib/TuningGwConnection.hpp>
 
+#include <future>
 #include <queue>
 
 namespace GatewayClientLib
@@ -16,30 +18,74 @@ namespace GatewayClientLib
 
 		void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId) override;
 
-		// Enqueues a command to activate or deactivate control for a tuning source. The command will be sent to the server in the next
-		// request cycle.
+		// Enqueues a command to activate or deactivate control for a tuning source.
 		//
-		void commandSendActivateTuningSource(uint64_t sourceId, bool activate);
+		std::future<GwErrorCode> commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate);
 
-		// Enqueues commands to write tuning signal values. The commands will be sent to the server in the next request cycle.
+		// Enqueues commands to write tuning signal values.
 		//
-		void commandWriteSignalValues(std::span<const GwTuningSignalState> states);
+		std::future<WriteValueResult> commandWriteSignalValues(std::span<const GwTuningWriteValue> states,
+															   std::string_view user,
+															   bool apply);
 
-		// Enqueues a command to apply(commit) previously written tuning signal values. The command will be sent to the server in the next
-		// request cycle.
+		// Enqueues a command to apply(commit) previously written tuning signal values.
 		//
-		void commandApplyWrittenSignalValues();
+		std::future<GwErrorCode> commandApplyWrittenSignals();
 
 		// Requests: All requests throw std::runtime_error on communication errors.
 		//
 	protected:
 		void requestHandshake(std::string_view equipmentId, uint16_t protocolVersion = TUNING_GW_PROTOCOL_VERSION);
-
 		void requestTuningSources();
 		void requestTuningSourceStates();
+		[[nodiscard]]
+		std::vector<GwTuningSignalState> requestSignalStates(std::span<const Radiy::Hash> appSignals);
 
-		[[nodiscard]] std::vector<GwTuningSignalState> requestSignalStates(std::span<const Radiy::Hash> appSignals);
+		// Command requests error handling:
+		// * TuningService errors are returned to the caller as std::future<GwErrorCode>, so the caller can handle them (e.g. by showing an
+		//   error message to the user, etc.).
+		// * all other errors (communication or Gateway-side) are reported via std::runtime_error,
+		//   which is handled by the communication loop and causes the connection to be reset.
+		//
 
+		template<typename SharedPromiseT, typename RequestFunc, typename... RequestArgs>
+		void doCommandRequest(SharedPromiseT&& promise, RequestFunc&& requestFunc, RequestArgs&&... args)
+		{
+			try
+			{
+				auto result = std::invoke(std::forward<RequestFunc>(requestFunc), this, std::forward<RequestArgs>(args)...);
+
+				GwErrorCode errorCode = static_cast<GwErrorCode>(result);
+				if (errorCode > GwErrorCode::GWC_GATEWAY_SERVICE_ERROR_BASE)
+				{
+					// Treat GatewayService errors as runtime errors, they likely indicate a problem that cannot be resolved
+					// by retrying the command (e.g. invalid request, unsupported protocol version, etc.)
+					//
+					throw std::runtime_error{std::format("Command failed with gateway error: {}", errorCode)};
+				}
+				// This result was returned by the TuningService and should be reported to the caller.
+				//
+				promise->set_value(result);
+			}
+			catch (const std::runtime_error&)
+			{
+				promise->set_value(GwErrorCode::GWC_COMMUNICATION_ERROR);
+
+				// Rethrowing exception to the main loop to trigger connection reset, as this error likely indicates a
+				// communication problem that need s to be handled by re-establishing the connection.
+				//
+				throw;
+			}
+		}
+
+		[[nodiscard]] GwErrorCode requestActivateTuningSource(std::string_view tuningSourceId, bool activate);
+		[[nodiscard]] WriteValueResult requestWriteSignalValues(std::span<const GwTuningWriteValue> states,
+																std::string_view user,
+																bool apply);
+		[[nodiscard]] WriteValueResult requestWriteSignalValuesPart(std::span<const GwTuningWriteValue> states,
+																	std::string_view user,
+																	bool apply);
+		[[nodiscard]] GwErrorCode requestApplyWrittenSignals();
 
 		// --
 		//
@@ -65,6 +111,7 @@ namespace GatewayClientLib
 		//
 		struct
 		{
+			bool clientIsActive{};
 			std::vector<GwTuningSourceState> tuningSourceStates{};
 		} m_state{};
 
@@ -73,6 +120,6 @@ namespace GatewayClientLib
 		std::mutex m_commandQueueMutex{};
 		std::condition_variable_any m_commandQueueCv{};
 
-		std::queue<std::function<void()>> m_commandQueue{};
+		std::queue<std::function<void(bool)>> m_commandQueue{}; // arg bool is to cancel command.
 	};
 } // namespace GatewayClientLib

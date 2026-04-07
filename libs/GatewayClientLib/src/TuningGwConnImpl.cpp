@@ -4,6 +4,28 @@
 #include <cstring>
 #include <ranges>
 
+namespace
+{
+	template<size_t N>
+	size_t cStringBufferLength(const char (&buffer)[N])
+	{
+		return static_cast<size_t>(std::find(buffer, buffer + N, '\0') - buffer);
+	}
+
+	template<size_t N1, size_t N2>
+	bool cStringBuffersEqual(const char (&lhs)[N1], const char (&rhs)[N2])
+	{
+		const size_t lhsLen = cStringBufferLength(lhs);
+		const size_t rhsLen = cStringBufferLength(rhs);
+
+		if (lhsLen != rhsLen)
+		{
+			return false;
+		}
+
+		return std::memcmp(lhs, rhs, lhsLen) == 0;
+	}
+} // namespace
 
 namespace GatewayClientLib
 {
@@ -104,7 +126,7 @@ namespace GatewayClientLib
 
 							// Execute command.
 							//
-							command();
+							command(false);
 						}
 					} while (thereAreMoreCommands);
 				} // while (stoken.stop_requested() == false)
@@ -131,54 +153,92 @@ namespace GatewayClientLib
 		return;
 	}
 
-	void TuningGwConnImpl::commandSendActivateTuningSource(uint64_t sourceId, bool activate)
+	std::future<GwErrorCode> TuningGwConnImpl::commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate)
 	{
-		m_logger.logTrace("Enqueue command: {} control for tuning source {}", activate ? "Activate" : "Deactivate", sourceId);
+		m_logger.logTrace("Enqueue command: {} control for tuning source {}", activate ? "Activate" : "Deactivate", tuningSourceId);
 
-		std::lock_guard lock{m_commandQueueMutex};
+		// Use shared_ptr for promise because std::function must be copyable (std::move_only_function is c++23, which can be unavailable for
+		// some customers).
+		//
+		auto sharedPromise = std::make_shared<std::promise<GwErrorCode>>();
+		auto future = sharedPromise->get_future();
 
-		m_commandQueue.push(
-			[sourceId, activate]()
-			{
-				return;
-			});
+		{
+			std::lock_guard lock{m_commandQueueMutex};
+
+			m_commandQueue.push(
+				[this, sharedPromise, tuningSourceIdStr = std::string{tuningSourceId}, activate](bool cancel)
+				{
+					if (cancel == true)
+					{
+						sharedPromise->set_value(GwErrorCode::GWC_COMMAND_CANCELED);
+						return;
+					}
+					return doCommandRequest(sharedPromise, &TuningGwConnImpl::requestActivateTuningSource, tuningSourceIdStr, activate);
+				});
+		}
 
 		m_commandQueueCv.notify_one();
-		return;
+		return future;
 	}
 
-	void TuningGwConnImpl::commandWriteSignalValues(std::span<const GwTuningSignalState> states)
+	std::future<WriteValueResult> TuningGwConnImpl::commandWriteSignalValues(std::span<const GwTuningWriteValue> states,
+																			 std::string_view user,
+																			 bool apply)
 	{
 		m_logger.logTrace("Enqueue command: Write values for {} tuning signals", states.size());
 
-		std::vector<GwTuningSignalState> s{states.begin(), states.end()};
+		auto sharedPromise = std::make_shared<std::promise<WriteValueResult>>();
+		auto future = sharedPromise->get_future();
 
-		std::lock_guard lock{m_commandQueueMutex};
+		{
+			std::lock_guard lock{m_commandQueueMutex};
 
-		m_commandQueue.push(
-			[states = std::move(s)]()
-			{
-				return;
-			});
+			m_commandQueue.push(
+				[this,
+				 sharedPromise,
+				 m_states = std::vector<GwTuningWriteValue>{states.begin(), states.end()},
+				 m_user = std::string{user},
+				 m_apply = apply](bool cancel)
+				{
+					if (cancel == true)
+					{
+						sharedPromise->set_value(GwErrorCode::GWC_COMMAND_CANCELED);
+						return;
+					}
+					return doCommandRequest(sharedPromise, &TuningGwConnImpl::requestWriteSignalValues, m_states, m_user, m_apply);
+				});
+		}
 
 		m_commandQueueCv.notify_one();
-		return;
+		return future;
 	}
 
-	void TuningGwConnImpl::commandApplyWrittenSignalValues()
+	std::future<GwErrorCode> TuningGwConnImpl::commandApplyWrittenSignals()
 	{
 		m_logger.logTrace("Enqueue command: Apply written tuning signal values");
 
-		std::lock_guard lock{m_commandQueueMutex};
+		auto sharedPromise = std::make_shared<std::promise<GwErrorCode>>();
+		auto future = sharedPromise->get_future();
 
-		m_commandQueue.push(
-			[]()
-			{
-				return;
-			});
+		{
+			std::lock_guard lock{m_commandQueueMutex};
+
+			m_commandQueue.push(
+				[this, sharedPromise](bool cancel)
+				{
+					if (cancel == true)
+					{
+						sharedPromise->set_value(GwErrorCode::GWC_COMMAND_CANCELED);
+						return;
+					}
+
+					return doCommandRequest(sharedPromise, &TuningGwConnImpl::requestApplyWrittenSignals);
+				});
+		}
 
 		m_commandQueueCv.notify_one();
-		return;
+		return future;
 	}
 
 	// Performs handshake with the Tuning Gateway (TGW_HANDSHAKE).
@@ -240,6 +300,18 @@ namespace GatewayClientLib
 			response.maxStateWrite,
 			response.sizeof_GwTuningSourceState,
 			response.sizeof_GwTuningSignalState);
+
+		if (response.maxStateWrite == 0)
+		{
+			m_conn.close();
+			throw std::runtime_error{"Handshake error: MaxStateWrite is zero"};
+		}
+
+		if (response.maxStateRequest == 0)
+		{
+			m_conn.close();
+			throw std::runtime_error{"Handshake error: MaxStateRequest is zero"};
+		}
 
 		m_workset.handshakeResponse = response;
 
@@ -337,7 +409,7 @@ namespace GatewayClientLib
 
 		// Parse received TuningSources.xml content
 		//
-		auto result = GatewayClientLib::parseTuningSourcesXml(tuningSourcesXmlContent);
+		auto result = parseTuningSourcesXml(tuningSourcesXmlContent);
 		if (result.errors.empty() == false)
 		{
 			std::string allErrors;
@@ -356,16 +428,15 @@ namespace GatewayClientLib
 
 		// Fill appSignalHashes with all signal hashes.
 		//
+		for (const auto& tuningSource : m_workset.tuningSources)
 		{
-			auto calcHash = [](const std::string& appSignalId)
-			{
-				return Radiy::calcHash(appSignalId);
-			};
-
-			for (const auto& tuningSource : m_workset.tuningSources)
-			{
-				m_workset.appSignalHashes.append_range(tuningSource.signalIds | std::views::transform(calcHash));
-			}
+			std::transform(tuningSource.signalIds.begin(),
+						   tuningSource.signalIds.end(),
+						   std::back_inserter(m_workset.appSignalHashes),
+						   [](const std::string& appSignalId)
+						   {
+							   return Radiy::calcHash(appSignalId);
+						   });
 		}
 
 		return;
@@ -398,6 +469,7 @@ namespace GatewayClientLib
 													 response.count)};
 			}
 
+			m_state.clientIsActive = response.clientIsActive != 0;
 			m_state.tuningSourceStates = std::move(tuningSourceStates);
 		}
 		catch (const std::runtime_error& e)
@@ -470,13 +542,137 @@ namespace GatewayClientLib
 		return tuningSignalStates;
 	}
 
+	GwErrorCode TuningGwConnImpl::requestActivateTuningSource(std::string_view tuningSourceId, bool activate)
+	{
+		try
+		{
+			GwChangeControlledTuningSourceRequest request{};
+			GwChangeControlledTuningSourceResponse response{};
+
+			const size_t idLen = std::min(tuningSourceId.size(), sizeof(request.moduleEquipmentId) - 1);
+			std::copy_n(tuningSourceId.data(), idLen, request.moduleEquipmentId);
+			request.moduleEquipmentId[idLen] = '\0';
+			request.activateControl = activate ? 1 : 0;
+
+			auto result = sendRequest(TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response, m_isCancelledFunc);
+
+			if (result == GwErrorCode::GWC_SUCCESS)
+			{
+				// Check echoed values in response to detect possible errors.
+				//
+				if (response.controlIsActive != request.activateControl ||
+					cStringBuffersEqual(request.moduleEquipmentId, response.controlledModuleEquipmentId) == false)
+				{
+					// Treat this as an internal error. Later all gateway errors (code > GWC_GATEWAY_SERVICE_ERROR_BASE) are treated
+					// as runtime errors in the communication loop, which triggers connection reset and thus is a way to recover from
+					// this error.
+					//
+					result = GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR;
+				}
+			}
+
+			return result;
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("TGW_CHANGE_CONTROLLED_TUNING_SOURCE error: {}", e.what())};
+		}
+	}
+
+	WriteValueResult TuningGwConnImpl::requestWriteSignalValues(std::span<const GwTuningWriteValue> states,
+																std::string_view user,
+																bool apply)
+	{
+		WriteValueResult result{};
+		result.signalResults.reserve(states.size());
+
+		// Split write requests in parts if they exceed maxStateWrite limit from handshake response
+		//
+		for (size_t offset = 0; offset < states.size(); offset += m_workset.handshakeResponse.maxStateWrite)
+		{
+			size_t partSize = std::min(static_cast<size_t>(m_workset.handshakeResponse.maxStateWrite), states.size() - offset);
+
+			auto partResult = requestWriteSignalValuesPart(std::span{states.data() + offset, partSize}, user, apply);
+
+			std::copy(partResult.signalResults.begin(), partResult.signalResults.end(), std::back_inserter(result.signalResults));
+
+			if (partResult.errorCode != GwErrorCode::GWC_SUCCESS)
+			{
+				result.errorCode = partResult.errorCode;
+				return result;
+			}
+		}
+
+		return result;
+	}
+
+	WriteValueResult TuningGwConnImpl::requestWriteSignalValuesPart(std::span<const GwTuningWriteValue> states,
+																	std::string_view user,
+																	bool apply)
+	{
+		assert(states.size() <= m_workset.handshakeResponse.maxStateWrite);
+
+		try
+		{
+			WriteValueResult result;
+
+			GwTuningSignalsWriteRequest request{};
+			GwTuningSignalsWriteResponse response{};
+
+			// Safe set for user name and signal values count, as the server will validate them and return an error code if they exceed
+			// limits.
+			const size_t userLen = std::min(user.size(), sizeof(request.user) - 1);
+			std::copy_n(user.data(), userLen, request.user);
+			request.user[userLen] = '\0';
+			request.apply = apply ? 1 : 0;
+			request.count = static_cast<uint32_t>(states.size());
+
+			result.signalResults.resize(states.size());
+
+			result.errorCode = sendRequest(TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE,
+										   request,
+										   std::span{states},
+										   response,
+										   std::span{result.signalResults},
+										   m_isCancelledFunc);
+			return result;
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("TGW_TUNING_SIGNALS_WRITE error: {}", e.what())};
+		}
+	}
+
+	GwErrorCode TuningGwConnImpl::requestApplyWrittenSignals()
+	{
+		try
+		{
+			GwTuningSignalsApplyRequest request{};
+			GwTuningSignalsApplyResponse response{};
+
+			return sendRequest(TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY, request, response, m_isCancelledFunc);
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("TGW_TUNING_SIGNALS_APPLY error: {}", e.what())};
+		}
+	}
+
 	void TuningGwConnImpl::clear()
 	{
 		m_workset = {};
 		m_state = {};
 
-		std::lock_guard lock{m_commandQueueMutex};
-		m_commandQueue = {};
+		// Clear command queue, set all pending command promises to canceled.
+		//
+		{
+			std::lock_guard lock{m_commandQueueMutex};
+			while (m_commandQueue.empty() == false)
+			{
+				m_commandQueue.front()(true);
+				m_commandQueue.pop();
+			}
+		}
 
 		return;
 	}
@@ -488,219 +684,4 @@ namespace GatewayClientLib
 
 		return;
 	}
-
-	// Requests the list of signal parameters from the ADS Gateway.
-	// Throws std::runtime_error on errors.
-	//
-	// std::vector<GwAppSignalParam> TuningGwConnImpl::requestSignalParams()
-	//{
-	//	std::vector<GwAppSignalParam> result{};
-	//	uint32_t totalItems{};
-	//	uint32_t itemsPerPart{};
-	//	uint32_t partsCount{};
-
-	//	// Start
-	//	//
-	//	try
-	//	{
-	//		AdsGwSignalParamStartRequest request{};
-	//		AdsGwSignalParamStartResponse startResponse{};
-
-	//		m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_START...");
-	//		GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
-
-	//		if (requestResult != GwErrorCode::GWC_SUCCESS)
-	//		{
-	//			throw std::runtime_error{std::format("server error {}", requestResult)};
-	//		}
-
-	//		totalItems = startResponse.totalItemCount;
-	//		itemsPerPart = startResponse.itemsPerPart;
-	//		partsCount = startResponse.partCount;
-	//	}
-	//	catch (const std::runtime_error& e)
-	//	{
-	//		throw std::runtime_error{std::format("ADSGW_SIGNAL_PARAM_START error: {}", e.what())};
-	//	}
-
-	//	// Next
-	//	//
-	//	try
-	//	{
-	//		result.reserve(totalItems);
-
-	//		std::vector<GwAppSignalParam> responseVariablePartBuffer{};
-
-	//		for (uint32_t part = 0; part < partsCount; part++)
-	//		{
-	//			AdsGwSignalParamNextRequest request{};
-	//			AdsGwSignalParamNextResponse response{};
-	//			request.part = part;
-
-	//			responseVariablePartBuffer.resize(itemsPerPart);
-	//			std::fill(std::begin(responseVariablePartBuffer), std::end(responseVariablePartBuffer), GwAppSignalParam{});
-
-	//			m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_NEXT, part {}/{}...", part + 1, partsCount);
-
-	//			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT,
-	//													request,
-	//													std::span<const std::byte>{},
-	//													response,
-	//													std::span<GwAppSignalParam>{responseVariablePartBuffer},
-	//													m_isCancelledFunc);
-	//			if (requestResult != GwErrorCode::GWC_SUCCESS)
-	//			{
-	//				throw std::runtime_error{std::format("server error {}", requestResult)};
-	//			}
-
-	//			if (response.part != part)
-	//			{
-	//				throw std::runtime_error{std::format("part mismatch: requested {}, got {}", part, response.part)};
-	//			}
-
-	//			if (response.paramCount > itemsPerPart)
-	//			{
-	//				throw std::runtime_error{std::format("invalid paramCount: {}", response.paramCount)};
-	//			}
-
-	//			std::copy_n(std::begin(responseVariablePartBuffer), static_cast<size_t>(response.paramCount), std::back_inserter(result));
-	//		}
-	//	}
-	//	catch (const std::runtime_error& e)
-	//	{
-	//		throw std::runtime_error{std::format("ADSGW_SIGNAL_PARAM_NEXT error: {}", e.what())};
-	//	}
-
-	//	if (result.size() != totalItems)
-	//	{
-	//		assert(result.size() == totalItems);
-	//		throw std::runtime_error{std::format("Getting signal params error: total expected {}, got {}", totalItems, result.size())};
-	//	}
-
-	//	return result;
-	//}
-
-	// void TuningGwConnImpl::requestStateChanges()
-	//{
-	//	try
-	//	{
-	//		m_statesBuffer.resize(m_handshakeResponse.maxStateRequest); // We do not expect more than maxStateRequest states in one request.
-
-	//		const uint32_t RepeatRequestThreshold =
-	//			m_handshakeResponse.maxStateRequest / 4;                // The real m_handshakeResponse.maxStateRequest is about 40K.
-
-	//		uint32_t pendingChangesCount = 0;
-	//		int attempts = 0;                                           // Just for safety to avoid infinite loops
-	//		const int MaxAttempts = 10;                                 // Safety cap: limit the number of repeat requests per call
-
-	//		do
-	//		{
-	//			if (m_isCancelledFunc && m_isCancelledFunc() == true)
-	//			{
-	//				break;
-	//			}
-
-	//			AdsGwSignalStateChangesRequest request{};
-	//			AdsGwSignalStateChangesResponse response{};
-
-	//			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES,
-	//													request,
-	//													std::span<const std::byte>{},
-	//													response,
-	//													std::span{m_statesBuffer},
-	//													m_isCancelledFunc);
-
-	//			if (requestResult == GwErrorCode::GWC_NO_ADS_CONNECTION)
-	//			{
-	//				return;
-	//			}
-
-	//			if (requestResult != GwErrorCode::GWC_SUCCESS)
-	//			{
-	//				throw std::runtime_error{std::format("server error {}", requestResult)};
-	//			}
-
-	//			m_signalUpdater.setStates(std::span{m_statesBuffer.data(), response.stateCount});
-
-	//			pendingChangesCount = response.pendingStatesCount;
-	//			attempts++;
-
-	//		} while (pendingChangesCount >= RepeatRequestThreshold && attempts < MaxAttempts);
-
-	//		m_logger.logTrace("ADSGW_SIGNAL_STATE_CHANGES completed. Attempts={}, PendingChanges={}", attempts, pendingChangesCount);
-	//	}
-	//	catch (const std::runtime_error& e)
-	//	{
-	//		throw std::runtime_error{std::format("ADSGW_SIGNAL_STATE_CHANGES error: {}", e.what())};
-	//	}
-	//}
-
-	// Request the next page of signal states from the ADS Gateway.
-	//
-	//	void TuningGwConnImpl::requestSignalStates()
-	//	{
-	//		if (m_appSignalHashes.empty() == true)
-	//		{
-	//			return;
-	//		}
-	//
-	//		try
-	//		{
-	//			if (m_nextStateIndexToRequest >= m_appSignalHashes.size())
-	//			{
-	//				m_nextStateIndexToRequest = 0;
-	//			}
-	//
-	// #if 0
-	//			const size_t partSize = m_handshakeResponse.maxStateRequest; // is abou 40K, it can overload the network
-	// #else
-	//			const size_t partSize = 2500; // Reasonable value, not too big to overload the network (2500 * 48bytes * 10rps =
-	//~1.2Mbytes/s).
-	//										  // This value can be tuned if needed.
-	//										  // If we have 100K signals, and request 2500 per 100ms, full refresh takes 4 seconds.
-	//										  // If signal value changes during this time to the value >= aperture,
-	//										  // it will be caught by requestStateChanges().
-	// #endif
-	//			auto requestCount = std::min(partSize, m_appSignalHashes.size() - m_nextStateIndexToRequest);
-	//
-	//			AdsGwSignalStateRequest request{};
-	//			request.signalCount = static_cast<uint32_t>(requestCount);
-	//
-	//			m_hashBuffer.clear();
-	//			m_hashBuffer.reserve(requestCount);
-	//			std::copy_n(m_appSignalHashes.data() + m_nextStateIndexToRequest, requestCount, std::back_inserter(m_hashBuffer));
-	//
-	//			AdsGwSignalStateResponse response{};
-	//			m_statesBuffer.clear();
-	//			m_statesBuffer.resize(requestCount);
-	//
-	//			m_nextStateIndexToRequest += requestCount;
-	//
-	//			// Send request
-	//			//
-	//			GwErrorCode requestResult = sendRequest(AdsGwRequestId::ADSGW_SIGNAL_STATE,
-	//													request,
-	//													std::span<const Radiy::Hash>{m_hashBuffer},
-	//													response,
-	//													std::span{m_statesBuffer},
-	//													m_isCancelledFunc);
-	//
-	//			if (requestResult == GwErrorCode::GWC_NO_ADS_CONNECTION)
-	//			{
-	//				return;
-	//			}
-	//
-	//			if (requestResult != GwErrorCode::GWC_SUCCESS)
-	//			{
-	//				throw std::runtime_error{std::format("server error {}", requestResult)};
-	//			}
-	//
-	//			m_signalUpdater.setStates(std::span{m_statesBuffer.data(), response.stateCount});
-	//		}
-	//		catch (const std::runtime_error& e)
-	//		{
-	//			throw std::runtime_error{std::format("ADSGW_SIGNAL_STATE error: {}", e.what())};
-	//		}
-	//	}
-
 } // namespace GatewayClientLib

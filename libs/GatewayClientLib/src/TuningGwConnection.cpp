@@ -23,11 +23,12 @@ namespace GatewayClientLib
 			close();
 		}
 
+		m_conn = std::make_unique<GatewayClientLib::TuningGwConnImpl>(m_signalUpdater, m_logger);
+
 		m_thread =
 			std::jthread{[addressStr = std::string{address}, port, equipmentIdStr = std::string{equipmentId}, this](std::stop_token stoken)
 						 {
-							 TuningGwConnImpl conn{m_signalUpdater, m_logger};
-							 conn.run(stoken, addressStr, port, equipmentIdStr);
+							 m_conn->run(stoken, addressStr, port, equipmentIdStr);
 						 }};
 	}
 
@@ -41,7 +42,51 @@ namespace GatewayClientLib
 		m_thread.request_stop();
 		m_thread.join();
 
+		assert(m_conn != nullptr);
+		m_conn.reset();
+
 		m_signalUpdater.reset();
 		return;
+	}
+
+	std::future<GwErrorCode> TuningGwConnection::commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate)
+	{
+		if (m_conn == nullptr)
+		{
+			std::promise<GatewayClientLib::GwErrorCode> promise;
+			promise.set_value(GwErrorCode::GWC_COMMUNICATION_ERROR);
+			return promise.get_future();
+		}
+
+		return m_conn->commandSendActivateTuningSource(tuningSourceId, activate);
+	}
+
+	std::future<WriteValueResult> TuningGwConnection::commandWriteSignalValues(std::span<const GwTuningWriteValue> states,
+																			   std::string_view user,
+																			   bool apply)
+	{
+		if (m_conn == nullptr)
+		{
+			GatewayClientLib::WriteValueResult result{};
+			result.errorCode = GwErrorCode::GWC_COMMUNICATION_ERROR;
+
+			std::promise<GatewayClientLib::WriteValueResult> promise;
+			promise.set_value(result);
+			return promise.get_future();
+		}
+
+		return m_conn->commandWriteSignalValues(states, user, apply);
+	}
+
+	std::future<GwErrorCode> TuningGwConnection::commandApplyWrittenSignals()
+	{
+		if (m_conn == nullptr)
+		{
+			std::promise<GatewayClientLib::GwErrorCode> promise;
+			promise.set_value(GwErrorCode::GWC_COMMUNICATION_ERROR);
+			return promise.get_future();
+		}
+
+		return m_conn->commandApplyWrittenSignals();
 	}
 } // namespace GatewayClientLib

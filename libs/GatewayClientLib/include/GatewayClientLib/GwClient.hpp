@@ -18,6 +18,8 @@ namespace GatewayClientLib
 	{
 		GWC_SUCCESS = 0,
 
+		// AppDataService and TuningService error codes
+		//
 		GWC_WRONG_PART_NO = 0x0001,
 		GWC_REQUEST_PARAM_EXCEED = 0x0002,
 		GWC_REQUEST_STATE_EXCEED = 0x0003,
@@ -38,6 +40,15 @@ namespace GatewayClientLib
 		GWC_SIGNAL_IS_NOT_ALLOWED_TO_CONTROL = 0x0016,
 		GWC_UNKNOWN_TUNING_SOURCE_ID = 0x0017,
 
+		GWC_COMMUNICATION_ERROR = 0x0018, // Not a server error code. Used internally by gateway client to indicate communication errors
+										  // (e.g. connection lost, send/receive failure, etc.)
+		GWC_COMMAND_CANCELED = 0x0019,    // Not a server error code. Used internally by gateway client to indicate that a command was
+										  // canceled (e.g. by client shutdown)
+
+		// Gateway service error codes - reported by gateway service when it fails to process a request (e.g. due to invalid request,
+		// unsupported protocol version, etc.)
+		//
+		GWC_GATEWAY_SERVICE_ERROR_BASE = 0x0200, // Base code for gateway service errors (for internal use, not returned by server)
 		GWC_INVALID_REQUEST = 0x0201,
 		GWC_UNSUPPORTED_VERSION = 0x0202,
 		GWC_NO_ADS_CONNECTION = 0x0203,

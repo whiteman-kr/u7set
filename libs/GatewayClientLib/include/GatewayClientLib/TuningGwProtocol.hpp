@@ -105,10 +105,67 @@ namespace GatewayClientLib
 	};
 
 	static_assert(sizeof(GwTuningSignalState) == 72);
+
+	enum GwTuningSignalStateFlags : uint32_t
+	{
+		TGWF_VALID = 0x00000001,              // Signal value is valid and reliable
+		TGWF_OUT_OF_RANGE = 0x00000002,       // Signal value is outside [lowBound, highBound]
+		TGWF_WRITE_IN_PROGRESS = 0x00000004,  // A write request is currently in progress
+		TGWF_CONTROL_IS_ENABLED = 0x00000008, // LogicModule control is enabled for the tuning source
+		TGWF_WRITING_IS_ENABLED = 0x00000010, // Signal allows writing (tuning is enabled and not administratively blocked)
+		TGWF_TUNING_DEFAULT = 0x00000020      // Current value equals tuning default value
+	};
+
+	constexpr std::string to_string(GwTuningSignalStateFlags f) noexcept
+	{
+		std::string result;
+
+		if (f & TGWF_VALID)
+		{
+			result += "VLD ";
+		}
+		else
+		{
+			result += "NONVLD ";
+		}
+
+		if (f & TGWF_OUT_OF_RANGE)
+		{
+			result += "OUT_OF_RANGE ";
+		}
+
+		if (f & TGWF_WRITE_IN_PROGRESS)
+		{
+			result += "WRITE_IN_PROGRESS ";
+		}
+
+		if (f & TGWF_CONTROL_IS_ENABLED)
+		{
+			result += "CONTROL_IS_ENABLED ";
+		}
+
+		if (f & TGWF_WRITING_IS_ENABLED)
+		{
+			result += "WRITING_IS_ENABLED ";
+		}
+
+		if (f & TGWF_TUNING_DEFAULT)
+		{
+			result += "TUNING_DEFAULT ";
+		}
+
+		if (result.empty() == false && result.back() == ' ')
+		{
+			result.pop_back();
+		}
+
+		return result;
+	}
 } // namespace GatewayClientLib
 
 namespace GatewayClientLib
 {
+	//
 	// Request TGW_HANDSHAKE
 	//
 	struct TuningGwHandshakeRequest
@@ -138,6 +195,7 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(TuningGwHandshakeResponse) == 20);
 
+	//
 	// Request TGW_GET_TUNING_SOURCES_START
 	//
 	struct GwGetTuningSourcesStartRequest
@@ -156,6 +214,7 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwGetTuningSourcesStartResponse) == 12);
 
+	//
 	// Request TGW_GET_TUNING_SOURCES_NEXT
 	//
 	struct GwGetTuningSourcesNextRequest
@@ -174,6 +233,7 @@ namespace GatewayClientLib
 #endif
 	};
 
+	//
 	// Request TGW_GET_TUNING_SOURCE_STATES
 	//
 	struct GwGetTuningSourceStatesRequest
@@ -185,13 +245,15 @@ namespace GatewayClientLib
 
 	struct GwGetTuningSourceStatesResponse
 	{
-		uint32_t count; // Number of tuning source states in response
-		uint32_t reserved;
+		uint32_t count;         // Number of tuning source states in response
+		uint8_t clientIsActive; // Current client is active
+		uint8_t reserved[3];
 #if 0
 		GwTuningSourceState sourceStates[count]; // Array of tuning source states
 #endif
 	};
 
+	//
 	// Request TGW_TUNING_SIGNALS_READ
 	//
 	struct GwTuningSignalsReadRequest
@@ -212,317 +274,91 @@ namespace GatewayClientLib
 #endif
 	};
 
-	// } // namespace GatewayClientLib
 	//
-	// namespace GatewayClientLib
-	//{
-	//	constexpr size_t GW_APP_SIGNAL_HASH_SIZE = sizeof(uint64_t);
+	// Request TGW_TUNING_SIGNALS_APPLY
 	//
-	//	// Structure defining application signal parameters
-	//	//
-	//	struct GwAppSignalParam
-	//	{
-	//		uint64_t hash;                          // Signal hash (as defined in Section 5.2)
-	//		char appSignalId[STRING_LENGTH_128];    // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
-	//		char customSignalId[STRING_LENGTH_128]; // Custom Signal ID (UTF-8, null-terminated)
+	struct GwTuningSignalsApplyRequest
+	{
+		uint32_t reserved; // Reserved (must be 0)
+	};
+
+	static_assert(sizeof(GwTuningSignalsApplyRequest) == 4);
+
+	struct GwTuningSignalsApplyResponse
+	{
+		uint32_t reserved; // Reserved
+	};
+
+	static_assert(sizeof(GwTuningSignalsApplyResponse) == 4);
+
 	//
-	//		char caption[STRING_LENGTH_256];        // Signal caption/description (UTF-8, null-terminated)
-	//		char equipmentId[STRING_LENGTH_128];    // EquipmentID (ASCII, null-terminated)
-	//		char lmEquipmentId[STRING_LENGTH_128];  // LogicModule EquipmentID (ASCII, null-terminated)
-	//		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
-	//		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
+	// Request TGW_TUNING_SIGNALS_WRITE
 	//
-	//		uint8_t channel;                        // Channel code (see Section 7.3)
-	//		uint8_t inOutType;                      // I/O type code (see Section 7.4)
-	//		uint8_t type;                           // Signal type code (see Section 7.5)
-	//		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
+	struct GwTuningWriteValue
+	{
+		uint64_t hash; // AppSignalID hash (see Section 1.7.2)
+		double value;  // New tuning value (must be finite: not NaN, +Inf, or -Inf)
+	};
+
+	static_assert(sizeof(GwTuningWriteValue) == 16);
+
+	struct GwTuningSignalsWriteRequest
+	{
+		char user[128];      // User name (ASCII, null-terminated)
+		uint8_t apply;       // 1 = apply values after write (auto-apply),
+							 // 0 = write only, requires separate TGW_TUNING_SIGNALS_APPLY
+		uint8_t reserved[3]; // Reserved (must be 0)
+		uint32_t count;      // Number of write commands
+#if 0
+		GwTuningWriteValue values[count]; // Array of write commands
+#endif
+	};
+
+	static_assert(sizeof(GwTuningSignalsWriteRequest) == 136);
+
+	struct GwTuningSignalWriteResult
+	{
+		uint64_t hash;     // AppSignalID hash
+		int32_t status;    // Per-signal status: 0 = GWC_SUCCESS (command queued),
+						   // non-zero = error code (see Section 7.2)
+		uint32_t reserved; // Reserved
+	};
+
+	static_assert(sizeof(GwTuningSignalWriteResult) == 16);
+
+	struct GwTuningSignalsWriteResponse
+	{
+		uint32_t count;    // Number of results
+		uint32_t reserved; // Reserved
+#if 0
+		GwTuningSignalWriteResult results[count]; // Per-signal write results
+#endif
+	};
+
+	static_assert(sizeof(GwTuningSignalsWriteResponse) == 8);
+
 	//
-	//		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
-	//		uint8_t reserved1;
-	//		uint8_t reserved2;
-	//		uint8_t reserved3;
+	// Request TGW_CHANGE_CONTROLLED_TUNING_SOURCE
 	//
-	//		double lowValidRange;                   // Low valid range for analog signals
-	//		double highValidRange;                  // High valid range for analog signals
-	//
-	//		double tuningDefaultValue;              // Default tuning value
-	//		double tuningLowBound;                  // Low bound for tuning value
-	//		double tuningHighBound;                 // High bound for tuning value
-	//	};
-	//
-	//	static_assert(sizeof(GwAppSignalParam) == 1208);
-	//	constexpr size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
-	//
-	//	// Structure defining application signal state
-	//	//
-	//	struct GwAppSignalState
-	//	{
-	//		uint64_t hash;      // Signal hash (as defined in Section 5.2)
-	//		int64_t systemTime; // Server system time (UTC+0) when the state was acquired
-	//		int64_t localTime;  // systemTime adjusted to Local time zone
-	//		int64_t plantTime;  // Timestamp assigned in LogicModule (local time zone)
-	//		double value;       // Signal value (for discrete: 0=false, 1=true)
-	//		uint32_t flags;     // State flags (see Section 7.3 for bit definitions)
-	//		uint32_t reserved;  // Reserved for future use
-	//	};
-	//
-	//	static_assert(sizeof(GwAppSignalState) == 48);
-	//
-	//	constexpr size_t GW_APP_SIGNAL_STATE_SIZE = sizeof(GwAppSignalState);
-	//
-	//	// Signal state flags
-	//	//
-	//
-	//	enum GwAppSignalStateFlags : uint32_t
-	//	{
-	//		GWF_VALID = 0x00000001,
-	//		GWF_STATE_AVAILABLE = 0x00000002,
-	//		GWF_SIMULATED = 0x00000004,
-	//		GWF_BLOCKED = 0x00000008,
-	//		GWF_MISMATCH = 0x00000010,
-	//		GWF_ABOVE_HIGH_LIMIT = 0x00000020,
-	//		GWF_BELOW_LOW_LIMIT = 0x00000040,
-	//		GWF_SW_SIMULATED = 0x00000080,
-	//		GWF_TUNING_DEFAULT = 0x00000100
-	//	};
-	//
-	//	constexpr std::string to_string(GwAppSignalStateFlags f) noexcept
-	//	{
-	//		std::string result;
-	//
-	//		if (f & GWF_VALID)
-	//		{
-	//			result += "VLD ";
-	//		}
-	//		else
-	//		{
-	//			result += "NONVLD ";
-	//		}
-	//
-	//		if (f & GWF_STATE_AVAILABLE)
-	//		{
-	//			result += "ST_AVAIL ";
-	//		}
-	//		else
-	//		{
-	//			result += "ST_UNAVAIL ";
-	//		}
-	//
-	//		if (f & GWF_SIMULATED)
-	//		{
-	//			result += "SIM ";
-	//		}
-	//
-	//		if (f & GWF_BLOCKED)
-	//		{
-	//			result += "BLK ";
-	//		}
-	//
-	//		if (f & GWF_MISMATCH)
-	//		{
-	//			result += "MISMATCH ";
-	//		}
-	//
-	//		if (f & GWF_ABOVE_HIGH_LIMIT)
-	//		{
-	//			result += "ABOVE_HIGH_LIMIT ";
-	//		}
-	//
-	//		if (f & GWF_BELOW_LOW_LIMIT)
-	//		{
-	//			result += "BELOW_LOW_LIMIT ";
-	//		}
-	//
-	//		if (f & GWF_SW_SIMULATED)
-	//		{
-	//			result += "SW_SIMULATED ";
-	//		}
-	//
-	//		if (f & GWF_TUNING_DEFAULT)
-	//		{
-	//			result += "TUNING_DEFAULT ";
-	//		}
-	//
-	//		if (result.empty() == false && result.back() == ' ')
-	//		{
-	//			result.pop_back();
-	//		}
-	//
-	//		return result;
-	//	}
-	// } // namespace GatewayClientLib
-	//
-	// namespace GatewayClientLib
-	//{
-	//	// Request ADSGW_HANDSHAKE
-	//	//
-	//	struct GwHandshakeRequest
-	//	{
-	//		uint16_t protocolVersion; // Protocol version client supports (e.g., 0x0100 for v1.0)
-	//		uint16_t reserved1;       // Reserved for future use
-	//		char clientName[128];     // Null-terminated client name
-	//	};
-	//
-	//	static_assert(sizeof(GwHandshakeRequest) == 132);
-	//	constexpr size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
-	//
-	//	struct GwHandshakeResponse
-	//	{
-	//		uint16_t protocolVersion; // Server protocol version (must match request for success)
-	//		uint16_t reserved;        // Reserved (must be 0)
-	//
-	//		uint32_t maxStateRequest; // Max signal states per request (ADSGW_SIGNAL_STATE)
-	//
-	//		// Structure size compatibility fields (bytes)
-	//		uint32_t sizeof_GwAppSignalParam; // See Section 7.1
-	//		uint32_t sizeof_GwAppSignalState; // See Section 7.2
-	//	};
-	//
-	//	static_assert(sizeof(GwHandshakeResponse) == 16);
-	//
-	//	// Request ARGW_SIGNAL_LIST_START
-	//	//
-	//	struct GwSignalListStartRequest
-	//	{
-	//		uint32_t reserved;
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalListStartRequest) == 4);
-	//	constexpr size_t GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(GwSignalListStartRequest);
-	//
-	//	struct GwSignalListStartResponse
-	//	{
-	//		uint32_t totalItemCount; // Total number of AppSignalIDs in system
-	//		uint32_t partCount;      // Total number of parts (pages) to retrieve
-	//		uint32_t itemsPerPart;   // Maximum number of AppSignalIDs per part
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalListStartResponse) == 12);
-	//
-	//	// Request ARGW_SIGNAL_LIST_NEXT
-	//	//
-	//	struct GwSignalListNextRequest
-	//	{
-	//		uint32_t part; // Part number to retrieve (0-based index)
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalListNextRequest) == 4);
-	//	constexpr size_t GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(GwSignalListNextRequest);
-	//
-	//	struct GwSignalListNextResponse
-	//	{
-	//		uint32_t part;             // Part number of this response
-	//		uint32_t appSignalIdCount; // Number of AppSignalIDs in this response
-	//
-	//								   // Array of AppSignalID strings
-	// #if 0
-	//		struct
-	//		{
-	//			char appSignalId[STRING_LENGTH_128]; // AppSignalID (null-terminated, max STRING_LENGTH_128 bytes including '\0')
-	//		} appSignalIds[appSignalIdCount];
-	// #endif
-	//	};
-	//
-	//	constexpr size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
-	//	constexpr size_t GW_MAX_APP_SIGNAL_ID_COUNT = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
-	//
-	//	// Request ARGW_SIGNAL_PARAM_START
-	//	//
-	//	struct GwSignalParamStartRequest
-	//	{
-	//		uint32_t reserved;
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalParamStartRequest) == 4);
-	//	constexpr size_t GW_SIGNAL_PARAM_START_REQUEST_SIZE = sizeof(GwSignalParamStartRequest);
-	//
-	//	struct GwSignalParamStartResponse
-	//	{
-	//		uint32_t totalItemCount; // Total number of GwAppSignalParams in system
-	//		uint32_t partCount;      // Total number of parts (pages) to retrieve
-	//		uint32_t itemsPerPart;   // Maximum number of GwAppSignalParams per part
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalParamStartResponse) == 12);
-	//
-	//	// Request ARGW_SIGNAL_PARAM_NEXT
-	//	//
-	//	struct GwSignalParamNextRequest
-	//	{
-	//		uint32_t part; // Part number to retrieve (0-based index)
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalParamNextRequest) == 4);
-	//	constexpr size_t GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE = sizeof(GwSignalParamNextRequest);
-	//
-	//	struct GwSignalParamNextResponse
-	//	{
-	//		uint32_t part;       // Part number of this response
-	//		uint32_t paramCount; // Number of GwAppSignalParams in this response
-	// #if 0
-	//		GwAppSignalParam params[paramCount]; // Array of GwAppSignalParam structures
-	// #endif
-	//	};
-	//
-	//	constexpr size_t GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE = sizeof(GwSignalParamNextResponse);
-	//	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
-	//
-	//	// Request ARGW_SIGNAL_STATE
-	//	//
-	//	struct GwSignalStateRequest
-	//	{
-	//		uint32_t signalCount; // Number of signals requested
-	// #if 0
-	//		uint64_t signalHashes[signalCount]; // Array of signal hashes
-	// #endif
-	//	};
-	//
-	//	constexpr size_t GW_SIGNAL_STATE_REQUEST_SIZE = sizeof(GwSignalStateRequest);
-	//
-	//	struct GwSignalStateResponse
-	//	{
-	//		uint32_t stateCount; // Number of states returned
-	//
-	// #if 0
-	//		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
-	// #endif
-	//	};
-	//
-	//	constexpr size_t GW_SIGNAL_STATE_RESPONSE_SIZE = sizeof(GwSignalStateResponse);
-	//	constexpr size_t GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
-	//
-	//	// Request ARGW_SIGNAL_STATE_CHANGES
-	//	//
-	//	struct GwSignalStateChangesRequest
-	//	{
-	//		uint32_t reserved;
-	//	};
-	//
-	//	static_assert(sizeof(GwSignalStateChangesRequest) == 4);
-	//	constexpr size_t GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE = sizeof(GwSignalStateChangesRequest);
-	//
-	//	struct GwSignalStateChangesResponse
-	//	{
-	//		uint32_t pendingStatesCount; // Number of state changes still in queue (not returned in this response)
-	//		uint32_t stateCount;         // Number of states in this response
-	// #if 0
-	//		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
-	// #endif
-	//	};
-	//
-	//	constexpr size_t GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE = sizeof(GwSignalStateChangesResponse);
-	//	constexpr size_t GW_MAX_SIGNAL_STATE_CHANGES =
-	//		(GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
-	//
-	//
-	// } // namespace GatewayClientLib
-	//
-	// template<>
-	// struct std::formatter<GatewayClientLib::GwAppSignalStateFlags> : std::formatter<std::string_view>
-	//{
-	//	template<typename FormatContext>
-	//	auto format(GatewayClientLib::GwAppSignalStateFlags flags, FormatContext& ctx) const
-	//	{
-	//		return std::formatter<std::string_view>::format(to_string(flags), ctx);
-	//	}
+	struct GwChangeControlledTuningSourceRequest
+	{
+		char moduleEquipmentId[128]; // Tuning source module equipment ID
+									 // (ASCII, null-terminated)
+		uint8_t activateControl;     // 1 = activate tuning source,
+									 // 0 = deactivate tuning source
+		uint8_t reserved[3];         // Reserved
+	};
+
+	static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
+
+	struct GwChangeControlledTuningSourceResponse
+	{
+		char controlledModuleEquipmentId[128]; // Controlled tuning source module equipment ID
+											   // (ASCII, null-terminated)
+		uint8_t controlIsActive;               // 1 = control is active,
+											   // 0 = control is not active
+		uint8_t reserved[3];                   // Reserved
+	};
+
+	static_assert(sizeof(GwChangeControlledTuningSourceResponse) == 132);
 }; // namespace GatewayClientLib
