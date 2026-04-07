@@ -91,7 +91,7 @@ private:
 
 	std::mutex m_hashesToRequestGatewayStateChangesMutex;
 	std::vector<Hash> m_hashesToRequestGatewayStateChanges;
-	bool m_updateHashesToRequestGatewayStateChanges = false;
+	bool m_updateHashesToRequestGatewayStateChanges = true;
 
 	//
 

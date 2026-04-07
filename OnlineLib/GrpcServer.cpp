@@ -1,3 +1,7 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Do not include this file in the project! Link OnlineLib instead.
+#endif
+
 #include "GrpcServer.h"
 
 #include <chrono>
@@ -23,11 +27,12 @@ GrpcServer::GrpcServer(const SoftwareInfo& serverSwInfo,
 
 GrpcServer::~GrpcServer()
 {
+	Q_ASSERT(m_threadStarted.load(std::memory_order_acquire) == false);		// server must be stopped
 }
 
 void GrpcServer::start()
 {
-	if (m_running.load(std::memory_order::relaxed) == true)
+	if (m_threadStarted.load(std::memory_order::relaxed) == true)
 	{
 		Q_ASSERT(false);
 		return;
@@ -35,7 +40,7 @@ void GrpcServer::start()
 
 	m_stopRequested.store(false, std::memory_order_relaxed);
 	m_binded.store(false, std::memory_order_relaxed);
-	m_running.store(true, std::memory_order::relaxed);
+	m_threadStarted.store(true, std::memory_order::relaxed);
 
 	m_sessionGuard.start();
 
@@ -82,7 +87,7 @@ void GrpcServer::start()
 					if (serverRaw == nullptr)
 					{
 						logErr(QString("%1 (%2) NOT started!").arg(serviceName()).arg(m_listenIP.addressPortStr()));
-						std::this_thread::sleep_for(std::chrono::seconds(3));
+						std::this_thread::sleep_for(std::chrono::seconds(2));
 						continue;
 					}
 
@@ -139,9 +144,8 @@ void GrpcServer::start()
 
 void GrpcServer::stop()
 {
-	if (m_running.exchange(false, std::memory_order_acq_rel) == false)
+	if (m_threadStarted.exchange(false, std::memory_order::acquire) == false)
 	{
-		Q_ASSERT(false);
 		return;
 	}
 
@@ -189,7 +193,7 @@ bool GrpcServer::isBinded() const
 
 bool GrpcServer::isRunning() const
 {
-	return m_running.load(std::memory_order_relaxed);
+	return m_threadStarted.load(std::memory_order_relaxed);
 }
 
 bool GrpcServer::isStopRequested() const

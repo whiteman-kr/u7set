@@ -66,6 +66,7 @@ public:
 
 	virtual ~GrpcClient()
 	{
+		Q_ASSERT(m_threadStarted.load(std::memory_order::acquire) == false);		// client must be stopped!
 	}
 
 	const SoftwareInfo& localSwInfo() const
@@ -119,7 +120,7 @@ public:
 
 	void stop()
 	{
-		if (m_threadStarted.load(std::memory_order::acquire) == false)
+		if (m_threadStarted.exchange(false, std::memory_order::acquire) == false)
 		{
 			return;
 		}

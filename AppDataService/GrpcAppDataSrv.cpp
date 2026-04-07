@@ -592,7 +592,7 @@ grpc::Status GrpcAppDataSrv::GetGatewayAppSignalStateChanges(grpc::ServerContext
 
 	if (queue == nullptr)
 	{
-		return grpc::Status::CANCELLED;
+		return grpc::Status::OK;
 	}
 
 	GatewayAppSignalStateQueueMask state;

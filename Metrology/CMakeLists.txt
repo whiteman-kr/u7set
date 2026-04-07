@@ -138,10 +138,7 @@ add_executable(${TARGET} WIN32
 	${METROLOGY_FORMS}
 	${METROLOGY_SOURCES}
 	${METROLOGY_RESOURCES}
-	GrpcAdsClient.h GrpcAdsClient.cpp
 )
-
-# set_target_properties(${TARGET} PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
 
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes
@@ -220,22 +217,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/Hash.h>
 
 	<Network.pb.h>
-
-#	"../AppSignalLib/AppSignal.h"
-#	"../AppSignalLib/AppSignalParam.h"
-#	"../AppSignalLib/AppSignalState.h"
 )
 
-# set_target_properties(${TARGET}
-# 	PROPERTIES
-# 		OUTPUT_NAME Metrology
-# )
-
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-# Reuse precompiled headers from SchemaClientLib
-#
-#target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 

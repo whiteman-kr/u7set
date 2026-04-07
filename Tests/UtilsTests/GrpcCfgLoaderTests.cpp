@@ -30,6 +30,8 @@ std::shared_ptr<GrpcCfgServer> StartGrpcCfgServer(const HostAddressPort& listenI
 
 	std::shared_ptr<GrpcCfgServer> server = std::make_shared<GrpcCfgServer>(si, sp, clients, checkHostName,
 											  listenIP, buildPath, logger);
+
+	server->start();
 	return server;
 }
 
@@ -65,6 +67,8 @@ TEST(GrpcCfgLoaderTests, WrongHostname)
 
 		EXPECT_TRUE(wrongHostName);
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, WrongClientID)
@@ -99,6 +103,8 @@ TEST(GrpcCfgLoaderTests, WrongClientID)
 
 		EXPECT_TRUE(wrongClientID);
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, ConfigurationReady)
@@ -135,6 +141,8 @@ TEST(GrpcCfgLoaderTests, ConfigurationReady)
 
 		EXPECT_TRUE(cfgReady);
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, CheckBuildFiles)
@@ -197,6 +205,8 @@ TEST(GrpcCfgLoaderTests, CheckBuildFiles)
 
 		EXPECT_TRUE(it2 != buildFileArray.end());
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, GetFileBlocked)
@@ -260,6 +270,8 @@ TEST(GrpcCfgLoaderTests, GetFileBlocked)
 			}
 		}
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, GetFileBlockedByID)
@@ -328,6 +340,8 @@ TEST(GrpcCfgLoaderTests, GetFileBlockedByID)
 			}
 		}
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, GetWrongFileBlocked)
@@ -378,6 +392,8 @@ TEST(GrpcCfgLoaderTests, GetWrongFileBlocked)
 		EXPECT_FALSE(res);
 		EXPECT_FALSE(errorStr.isEmpty());
 	}
+
+	server->stop();
 }
 
 TEST(GrpcCfgLoaderTests, GetWrongFileBlockedByID)
@@ -428,4 +444,6 @@ TEST(GrpcCfgLoaderTests, GetWrongFileBlockedByID)
 		EXPECT_FALSE(res);
 		EXPECT_FALSE(errorStr.isEmpty());
 	}
+
+	server->stop();
 }

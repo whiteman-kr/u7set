@@ -4,7 +4,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../Metrology/GrpcAdsClient.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 namespace Gateway
 {

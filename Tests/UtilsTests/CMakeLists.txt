@@ -46,8 +46,6 @@ add_executable(${TARGET}
 	../../AppDataService/SignalStatesProcessingThread.h
 	../../ConfigurationService/GrpcCfgServer.cpp
 	../../ConfigurationService/GrpcCfgServer.h
-	../../Metrology/GrpcAdsClient.cpp
-	../../Metrology/GrpcAdsClient.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -36,6 +36,7 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 												 listenIP, appDataSources, appDataReceiver.get(),
 												 appSignals, appSignalStates,
 												 dsLogWriter, logger);
+	outServer->start();
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
@@ -115,29 +116,29 @@ TEST(GrpcAppDataSrvTest, RunSeveralServersOnSamePort)
 {
 	qDebug() << "Start server 1";
 	std::unique_ptr<GrpcAppDataSrv> server1;
-	auto stub1 = StartServerAndMakeClient({"127.0.0.1", 13990} , server1, nullptr);
+	auto stub1 = StartServerAndMakeClient({"127.0.0.1", 14011} , server1, nullptr);
 
 	QThread::sleep(3);
 
 	qDebug() << "Start server 2";
 	std::unique_ptr<GrpcAppDataSrv> server2;
-	auto stub2 = StartServerAndMakeClient({"127.0.0.1", 13990} , server2, nullptr);
+	auto stub2 = StartServerAndMakeClient({"127.0.0.1", 14011} , server2, nullptr);
 
 	QThread::sleep(3);
 
 	EXPECT_TRUE(server1->isBinded());
 	EXPECT_FALSE(server2->isBinded());
 
-	qDebug() << "Reset server 1";
-	server1.reset();
+	qDebug() << "Stop server 1";
+	server1->stop();
 
 	qDebug() << "Wait while server 2 bind";
 	QThread::sleep(7);
 
 	EXPECT_TRUE(server2->isBinded());
 
-	qDebug() << "Reset server 2";
-	server2.reset();
+	qDebug() << "Stop server 2";
+	server2->stop();
 }
 
 TEST(GrpcAppDataSrvTest, HandshakeNormal)
@@ -152,7 +153,7 @@ TEST(GrpcAppDataSrvTest, HandshakeNormal)
 	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
 	EXPECT_EQ(authToken.empty(), false);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, HandshakeWrongClientID)
@@ -172,7 +173,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongClientID)
 	EXPECT_EQ(status.error_message(), Grpc::WRONG_CLIENT_EQUIPMENT_ID);
 	EXPECT_EQ(authToken.empty(), true);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, HandshakeWrongClientID_Allowed)
@@ -192,7 +193,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongClientID_Allowed)
 	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
 	EXPECT_EQ(authToken.empty(), false);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, HandshakeWrongHostName)
@@ -214,7 +215,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongHostName)
 	EXPECT_EQ(status.error_message(), Grpc::WRONG_HOST_NAME);
 	EXPECT_EQ(authToken.empty(), true);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, HandshakeWrongHostName_Allowed)
@@ -233,7 +234,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongHostName_Allowed)
 	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
 	EXPECT_EQ(authToken.empty(), false);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, SessionTimeout)
@@ -266,7 +267,7 @@ TEST(GrpcAppDataSrvTest, SessionTimeout)
 	EXPECT_TRUE(status.ok());
 	ASSERT_FALSE(authToken.empty());
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
@@ -300,7 +301,7 @@ TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 	EXPECT_TRUE(st.ok());
 	EXPECT_TRUE(any);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
@@ -363,7 +364,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 
 	EXPECT_EQ(res, true);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
@@ -413,7 +414,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 
 	EXPECT_EQ(checkReceivedParams(receivedParams), true);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
@@ -473,7 +474,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 
 	EXPECT_EQ(checkReceivedParams(receivedParams), true);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalState)
@@ -552,7 +553,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState)
 
 	EXPECT_TRUE(equal);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
@@ -582,7 +583,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
 	EXPECT_EQ(st.error_code(), grpc::StatusCode::OUT_OF_RANGE);
 	EXPECT_EQ(st.error_message(), Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
@@ -677,7 +678,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 		stateChangesProducerThread.join();
 	}
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetDiscretesLog)
@@ -853,7 +854,7 @@ TEST(GrpcAppDataSrvTest, GetDiscretesLog)
 
 	st = reader->Finish();
 
-	server.reset();
+	server->stop();
 
 	stopDiscretesLogWriter(dsLogWriter);
 }
@@ -897,7 +898,7 @@ TEST(GrpcAppDataSrvTest, GetAppDataSourcesInfo)
 		EXPECT_EQ(dsi.SerializeAsString(), dsi2.SerializeAsString());
 	}
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppDataSourcesState)
@@ -939,7 +940,7 @@ TEST(GrpcAppDataSrvTest, GetAppDataSourcesState)
 		EXPECT_EQ(dsi.SerializeAsString(), dsi2.SerializeAsString());
 	}
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcAppDataSrvTest, GetServerTime)
@@ -974,5 +975,5 @@ TEST(GrpcAppDataSrvTest, GetServerTime)
 	EXPECT_TRUE(reply.servertimelocal() <= local);
 	EXPECT_TRUE(reply.servertimelocal() >= local - 1000);
 
-	server.reset();
+	server->stop();
 }

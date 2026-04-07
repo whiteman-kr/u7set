@@ -15,7 +15,11 @@ AppSignals appSignals;
 
 DynamicAppSignalStates appSignalStates;
 
+SimpleAppSignalStatesArchiveFlagQueue signalStatesQueue(1000);
+GatewayAppSignalStatesQueue gatewaySignalStatesQueue(1000);
+
 std::shared_ptr<AppDataReceiver> appDataReceiver;
+std::shared_ptr<DiscretesLogWriter> discretesLogWriter;
 
 bool isGTestDeathChild(const QStringList& args)
 {
@@ -144,6 +148,16 @@ void createAndInitSignalStates()
 	AppDataSrvTools::createAndInitSignalStates(appSignals, appSignalStates, 4);
 }
 
+void prepareAppDataSources()
+{
+	for(AppDataSource* ads : appDataSources)
+	{
+		TEST_PTR_CONTINUE(ads);
+
+		ads->prepare(appSignals, &appSignalStates, discretesLogWriter, 1, logger);
+	}
+}
+
 void createAndStartAppDataReceiver()
 {
 	appDataReceiver = std::make_shared<AppDataReceiver>(HostAddressPort("192.168.11.254", PORT_APP_DATA_SERVICE_DATA),
@@ -151,7 +165,6 @@ void createAndStartAppDataReceiver()
 														appSignalStates,
 														4, E::SoftwareRunMode::Normal,
 														logger);
-
 	appDataReceiver->setEnableLog(false);
 	appDataReceiver->start();
 }
@@ -159,6 +172,17 @@ void createAndStartAppDataReceiver()
 void stopAppDataReceiver()
 {
 	appDataReceiver->quitAndWait();
+}
+
+
+void clearSourcesSignalStatesQueue()
+{
+	for(AppDataSource* ads : appDataSources)
+	{
+		TEST_PTR_CONTINUE(ads);
+
+		ads->clearSignalStatesQueue();
+	}
 }
 
 //

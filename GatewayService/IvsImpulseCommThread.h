@@ -8,7 +8,7 @@
 #include "../GatewayLib/IvsImpulseGateway.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"
-#include "../Metrology/GrpcAdsClient.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 namespace Gateway
 {

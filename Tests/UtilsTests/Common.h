@@ -22,7 +22,11 @@ extern AppSignals appSignals;
 
 extern DynamicAppSignalStates appSignalStates;
 
+extern SimpleAppSignalStatesArchiveFlagQueue signalStatesQueue;
+extern GatewayAppSignalStatesQueue gatewaySignalStatesQueue;
+
 extern std::shared_ptr<AppDataReceiver> appDataReceiver;
+extern std::shared_ptr<DiscretesLogWriter> discretesLogWriter;
 
 //
 
@@ -49,9 +53,11 @@ bool loadConfiguration();
 bool loadAppDataSources();
 bool loadAppSignals();
 void createAndInitSignalStates();
-
+void prepareAppDataSources();
 void createAndStartAppDataReceiver();
 void stopAppDataReceiver();
+
+void clearSourcesSignalStatesQueue();
 
 std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& project, const QString& equipmentID);
 void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter);

@@ -286,8 +286,6 @@ private:
 				const std::size_t size = sizeof(Rup::SimFrame);
 
 				m_socket->send_to(asio::buffer(data, size), m_targetEndpoint, 0, ec);
-
-				DEBUG_STOP;
 			}
 			else
 			{
@@ -295,8 +293,6 @@ private:
 				const std::size_t size = sizeof(Rup::Frame);
 
 				m_socket->send_to(asio::buffer(data, size), m_targetEndpoint, 0, ec);
-
-				DEBUG_STOP;
 			}
 
 			m_queueMutex.lock();

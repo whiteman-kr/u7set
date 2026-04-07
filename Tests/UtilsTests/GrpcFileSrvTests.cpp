@@ -29,6 +29,8 @@ std::unique_ptr<Grpc::FileSrv::Stub> StartServerAndMakeClient(const HostAddressP
 	outServer = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false,
 												 listenIP, buildPath, logger);
 
+	outServer->start();
+
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
@@ -113,7 +115,7 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 
 	EXPECT_TRUE(st.ok());
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_LongFile)
@@ -180,7 +182,7 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 		EXPECT_TRUE(st.ok());
 	}
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_WrongFile)
@@ -219,19 +221,20 @@ TEST(GrpcFileSrvTest, GetFile_WrongFile)
 
 	EXPECT_TRUE(st.ok());
 
-	server.reset();
+	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_ShortFile)
 {
 	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
 
-	//HostAddressPort serverAddr("127.0.0.1", 14103);
 	HostAddressPort serverAddr("127.0.0.1", 13312);
 
 	std::unique_ptr<GrpcFileSrv> server =
 		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
 									serverAddr, buildPath, logger);
+
+	server->start();
 
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
@@ -242,6 +245,10 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 						  tempDir, "GrpcFileClientTest", logger, 3000);
+
+	client->start();
+
+	QThread::sleep(1);
 
 	QString fileName(File::SLASH_BUILD_XML);
 
@@ -267,8 +274,8 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	EXPECT_EQ(md5, fr.md5);
 
-	client.reset();
-	server.reset();
+	client->stop();
+	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_LongFile)
@@ -281,6 +288,8 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
 									  serverAddr, buildPath, logger);
 
+	server->start();
+
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
 	QDir().mkpath(tempDir);
@@ -289,6 +298,10 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 																			  tempDir, "GrpcFileClientTest", logger, 3000);
+
+	client->start();
+
+	QThread::sleep(1);
 
 	QString fileName("/Reports/Equipment.json");
 
@@ -314,8 +327,8 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	EXPECT_EQ(md5, fr.md5);
 
-	client.reset();
-	server.reset();
+	client->stop();
+	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_WrongFile)
@@ -328,6 +341,8 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
 									  serverAddr, buildPath, logger);
 
+	server->start();
+
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
 	QDir().mkpath(tempDir);
@@ -336,6 +351,10 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 																			  tempDir, "GrpcFileClientTest", logger, 3000);
+
+	client->start();
+
+	QThread::sleep(1);
 
 	QString fileName("/qqq111.txt");
 
@@ -349,8 +368,8 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 	EXPECT_TRUE(fr.fileData.size() == 0);
 	EXPECT_TRUE(fr.md5.size() == 0);
 
-	client.reset();
-	server.reset();
+	client->stop();
+	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
@@ -363,12 +382,16 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
 									  serverAddr, buildPath, logger);
 
+	server->start();
+
 	const QString tempDir = "P:/temp";
 
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 																			  tempDir, "GrpcFileClientTest", logger, 3000);
+
+	client->start();
 
 	QString fileName(File::SLASH_BUILD_XML);
 
@@ -381,6 +404,6 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 	EXPECT_TRUE(fr.fileData.size() == 0);
 	EXPECT_TRUE(fr.md5.size() == 0);
 
-	client.reset();
-	server.reset();
+	client->stop();
+	server->stop();
 }

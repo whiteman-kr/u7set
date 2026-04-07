@@ -32,6 +32,8 @@ public:
 	bool getSignalState(SimpleAppSignalStateArchiveFlag* state);
 	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState);
 
+	void clearSignalStatesQueue();
+
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
 	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
@@ -54,10 +56,10 @@ public:
 
 	void checkInputPlantTime(Rup::TimeStamp plantTime);
 
+	void wakeupStatesProcessingThread();
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
-
-	void wakeupStatesProcessingThread();
 
 	int getAutoArchivingGroup(qint64 currentSysTime);
 

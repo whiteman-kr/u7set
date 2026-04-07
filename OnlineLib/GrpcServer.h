@@ -62,7 +62,7 @@ protected:
 	std::unique_ptr<grpc::Server> m_server;
 	std::atomic_bool m_stopRequested {false};
 	std::thread m_thread;
-	std::atomic_bool m_running {false};
+	std::atomic_bool m_threadStarted {false};
 	std::atomic_bool m_binded {false};
 
 	GrpcSessionGuard m_sessionGuard;

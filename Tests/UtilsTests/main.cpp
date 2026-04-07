@@ -91,14 +91,21 @@ int main(int argc, char *argv[])
 
 	//
 
-	if (!loadConfiguration() ||
-		!loadAppDataSources() ||
-		!loadAppSignals())
-	{
-		return 1;
-	}
+	discretesLogWriter = startDiscretesLogWriter("TEST_COMPILER", "EQUIPMENT_ID");
+
+	bool res = true;
+
+	res &= loadConfiguration();
+	RETURN_VALUE_IF_FALSE(res, 1);
+
+	res &= loadAppSignals();
+	RETURN_VALUE_IF_FALSE(res, 2);
+
+	res &= loadAppDataSources();
+	RETURN_VALUE_IF_FALSE(res, 3);
 
 	createAndInitSignalStates();
+	prepareAppDataSources();
 	createAndStartAppDataReceiver();
 
 	//
@@ -108,6 +115,7 @@ int main(int argc, char *argv[])
 	auto result = RUN_ALL_TESTS();
 
 	stopAppDataReceiver();
+	stopDiscretesLogWriter(discretesLogWriter);
 
 	return result;
 }

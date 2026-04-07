@@ -1,3 +1,7 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Do not include this file in the project! Link OnlineLib instead.
+#endif
+
 #include "GrpcFileSrv.h"
 
 // -------------------------------------------------------------------------------------
@@ -16,12 +20,10 @@ GrpcFileSrv::GrpcFileSrv(const SoftwareInfo& serverSwInfo,
 	GrpcServer(serverSwInfo, allowAllClients, clients, checkHostName, listenIP, log),
 	m_rootFolder(QDir::cleanPath(rootFolder))
 {
-	start();
 }
 
 GrpcFileSrv::~GrpcFileSrv()
 {
-	stop();
 }
 
 grpc::Status GrpcFileSrv::Handshake(grpc::ServerContext* context,

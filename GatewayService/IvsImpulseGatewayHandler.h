@@ -4,7 +4,7 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "IvsImpulseCommThread.h"
-#include "../Metrology/GrpcAdsClient.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 namespace Gateway
 {

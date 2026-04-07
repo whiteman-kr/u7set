@@ -118,7 +118,7 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_signalStatesQueue.resize(queueSize);
 
-	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+	queueSize = std::max(m_acquiredSignalsCount / 2, SIGNAL_STATES_QUEUE_MIN_SIZE);
 
 	m_gatewaySignalStatesQueue.resize(queueSize);
 
@@ -241,6 +241,11 @@ bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwStat
 	return result;
 }
 
+void AppDataSource::clearSignalStatesQueue()
+{
+	m_signalStatesQueue.clear();
+}
+
 void AppDataSource::invalidateSignals()
 {
 	int pushedStatesCount = 0;
@@ -316,6 +321,19 @@ void AppDataSource::checkInputPlantTime(Rup::TimeStamp plantTime)
 	}
 
 	m_lastPlantTime = plantTime;
+}
+
+void AppDataSource::wakeupStatesProcessingThread()
+{
+	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
+	Q_ASSERT(m_statesProcessingRequired != nullptr);
+	Q_ASSERT(m_statesProcessingRequiredCondition != nullptr);
+
+	std::lock_guard lg(*m_statesProcessigRequiredMutex);
+	m_statesProcessingRequired->push(this);
+	m_statesProcessingRequiredCondition->notify_all();
+
+	Q_UNUSED(lg);
 }
 
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
@@ -463,19 +481,6 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
 	readBuffer.prepareToWriting();
 
 	return true;
-}
-
-void AppDataSource::wakeupStatesProcessingThread()
-{
-	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
-	Q_ASSERT(m_statesProcessingRequired != nullptr);
-	Q_ASSERT(m_statesProcessingRequiredCondition != nullptr);
-
-	std::lock_guard lg(*m_statesProcessigRequiredMutex);
-	m_statesProcessingRequired->push(this);
-	m_statesProcessingRequiredCondition->notify_all();
-
-	Q_UNUSED(lg);
 }
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)

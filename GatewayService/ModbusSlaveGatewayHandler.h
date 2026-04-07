@@ -7,7 +7,7 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "ModbusProtocol.h"
-#include "../Metrology/GrpcAdsClient.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 using namespace Modbus;
 using namespace asio;

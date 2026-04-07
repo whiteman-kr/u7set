@@ -128,6 +128,8 @@ public:
 	int onArchSignalsTimer();
 	inline void clearStatesSavedCounter() { m_statesSaved = 0; }
 
+	void testsSetNewCurState(const SimpleAppSignalState& st);		// for testing only!
+
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
@@ -276,6 +278,12 @@ public:
 
 	void overrideAperture(const ApertureRecord& ar, QString& logMsg);
 	void clearStatesSavedCounters();
+
+	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+					GatewayAppSignalStatesQueue* gatewaySignalStatesQueue,
+					std::vector<SimpleAppSignalState>* logQueue);
+
+	void testsSetNewCurState(const Hash h, const SimpleAppSignalState& st);		// for testing only!
 
 private:
 	std::vector<DynamicAppSignalState*> m_appSignalState;

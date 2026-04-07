@@ -1,3 +1,7 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Do not include this file in the project! Link OnlineLib instead.
+#endif
+
 #include <vector>
 #include <set>
 #include <algorithm>
@@ -220,8 +224,6 @@ bool GrpcAdsClient::sendStateChangesRequests()
 			resetStub();
 			return false;
 		}
-
-		updateLastRequestTime();
 	}
 
 	return true;
@@ -287,12 +289,14 @@ bool GrpcAdsClient::sendGetAppStateChangesRequest(bool* hasPendingChanges)
 
 	grpc::Status st = stub()->GetAppSignalStateChangesNoStream(&ctx, request, &reply);
 
-	qDebug() << "Send GetAppSignalStateChangesNoStream";
+	// qDebug() << "Send GetAppSignalStateChangesNoStream";
 
 	if (st.ok() == false)
 	{
 		return false;
 	}
+
+	updateLastRequestTime();
 
 	if (m_updaterShared != nullptr)
 	{
@@ -325,18 +329,26 @@ bool GrpcAdsClient::sendGetGatewayAppStateChangesRequest(bool* hasPendingChanges
 
 	if (m_updateHashesToRequestGatewayStateChanges)
 	{
-		fillGetGatewayStateChangesRequest(&request);
 		m_updateHashesToRequestGatewayStateChanges = false;
+
+		if (m_hashesToRequestGatewayStateChanges.size() == 0)
+		{
+			return true;		// ok, no hashes to request
+		}
+
+		fillGetGatewayStateChangesRequest(&request);
 	}
 
 	grpc::Status st = stub()->GetGatewayAppSignalStateChanges(&ctx, request, &reply);
 
-	qDebug() << "Send GetGatewayAppSignalStateChanges";
+//	qDebug() << "Send GetGatewayAppSignalStateChanges";
 
 	if (st.ok() == false)
 	{
 		return false;
 	}
+
+	updateLastRequestTime();
 
 	if (m_updaterShared != nullptr)
 	{

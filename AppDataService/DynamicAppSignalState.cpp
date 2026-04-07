@@ -758,6 +758,11 @@ int DynamicAppSignalState::onArchSignalsTimer()
 	return inMinuteSaved;
 }
 
+void DynamicAppSignalState::testsSetNewCurState(const SimpleAppSignalState& st)
+{
+	setStateParsed(st.time, 1, st.value, st.flags, 1);
+}
+
 bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
 	Q_UNUSED(rupDataSize);
@@ -1163,6 +1168,28 @@ void DynamicAppSignalStates::clearStatesSavedCounters()
 	{
 		TEST_PTR_CONTINUE(ds);
 		ds->clearStatesSavedCounter();
+	}
+}
+
+void DynamicAppSignalStates::setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+	GatewayAppSignalStatesQueue* gatewaySignalStatesQueue, std::vector<SimpleAppSignalState>* logQueue)
+{
+	for(DynamicAppSignalState* dst : m_appSignalState)
+	{
+		if (dst != nullptr)
+		{
+			dst->setQueues(signalStatesQueue, gatewaySignalStatesQueue, logQueue);
+		}
+	}
+}
+
+void DynamicAppSignalStates::testsSetNewCurState(const Hash h, const SimpleAppSignalState& st)
+{
+	DynamicAppSignalState* dst = getValueOrNullptr(m_hash2State, h);
+
+	if (dst != nullptr)
+	{
+		dst->testsSetNewCurState(st);
 	}
 }
 

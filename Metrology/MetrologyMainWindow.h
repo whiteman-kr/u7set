@@ -12,12 +12,10 @@
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 #include "CalibratorBase.h"
 #include "ConfigSocket.h"
-//#include "SignalSocket.h"
-//#include "GrpcSignalSocket.h"
-#include "GrpcAdsClient.h"
 #include "TuningSocket.h"
 #include "SelectSignalWidget.h"
 #include "MeasureView.h"
@@ -27,8 +25,6 @@
 #include "PanelSignalInfo.h"
 #include "PanelComparatorInfo.h"
 #include "DialogCalculator.h"
-
-#include "GrpcAdsClient.h"
 
 class AppSignalStateUpdater : public IAppSignalStateUpdater
 {
