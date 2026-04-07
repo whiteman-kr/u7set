@@ -49,7 +49,7 @@ namespace GatewayClientLib
 		return;
 	}
 
-	std::future<GwErrorCode> TuningGwConnection::commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate)
+	std::future<GwErrorCode> TuningGwConnection::commandActivateTuningSource(std::string_view tuningSourceId)
 	{
 		if (m_conn == nullptr)
 		{
@@ -58,7 +58,19 @@ namespace GatewayClientLib
 			return promise.get_future();
 		}
 
-		return m_conn->commandSendActivateTuningSource(tuningSourceId, activate);
+		return m_conn->commandActivateTuningSource(tuningSourceId, true);
+	}
+
+	std::future<GwErrorCode> TuningGwConnection::commandDeactivateTuningSource()
+	{
+		if (m_conn == nullptr)
+		{
+			std::promise<GatewayClientLib::GwErrorCode> promise;
+			promise.set_value(GwErrorCode::GWC_COMMUNICATION_ERROR);
+			return promise.get_future();
+		}
+
+		return m_conn->commandActivateTuningSource("", false);
 	}
 
 	std::future<WriteValueResult> TuningGwConnection::commandWriteSignalValues(std::span<const GwTuningWriteValue> states,
@@ -88,5 +100,25 @@ namespace GatewayClientLib
 		}
 
 		return m_conn->commandApplyWrittenSignals();
+	}
+
+	bool TuningGwConnection::clientIsActive() const
+	{
+		if (m_conn == nullptr)
+		{
+			return {};
+		}
+
+		return m_conn->clientIsActive();
+	}
+
+	std::vector<GatewayClientLib::GwTuningSourceState> TuningGwConnection::tuningSources() const
+	{
+		if (m_conn == nullptr)
+		{
+			return {};
+		}
+
+		return m_conn->tuningSources();
 	}
 } // namespace GatewayClientLib

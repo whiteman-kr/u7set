@@ -153,7 +153,7 @@ namespace GatewayClientLib
 		return;
 	}
 
-	std::future<GwErrorCode> TuningGwConnImpl::commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate)
+	std::future<GwErrorCode> TuningGwConnImpl::commandActivateTuningSource(std::string_view tuningSourceId, bool activate)
 	{
 		m_logger.logTrace("Enqueue command: {} control for tuning source {}", activate ? "Activate" : "Deactivate", tuningSourceId);
 
@@ -241,6 +241,18 @@ namespace GatewayClientLib
 		return future;
 	}
 
+	bool TuningGwConnImpl::clientIsActive() const
+	{
+		std::lock_guard locker{m_stateMutex};
+		return m_state.clientIsActive;
+	}
+
+	std::vector<GatewayClientLib::GwTuningSourceState> TuningGwConnImpl::tuningSources() const
+	{
+		std::lock_guard locker{m_stateMutex};
+		return m_state.tuningSourceStates;
+	}
+
 	// Performs handshake with the Tuning Gateway (TGW_HANDSHAKE).
 	// Throws std::runtime_error on errors.
 	//
@@ -326,7 +338,11 @@ namespace GatewayClientLib
 	{
 		m_workset.project = {};
 		m_workset.tuningSources.clear();
-		m_state.tuningSourceStates.clear();
+
+		{
+			std::lock_guard locker{m_stateMutex};
+			m_state.tuningSourceStates.clear();
+		}
 
 		std::vector<std::byte> tuningSourcesXmlContent{};
 		uint32_t totalSize{};
@@ -469,8 +485,11 @@ namespace GatewayClientLib
 													 response.count)};
 			}
 
-			m_state.clientIsActive = response.clientIsActive != 0;
-			m_state.tuningSourceStates = std::move(tuningSourceStates);
+			{
+				std::lock_guard locker{m_stateMutex};
+				m_state.clientIsActive = response.clientIsActive != 0;
+				m_state.tuningSourceStates = std::move(tuningSourceStates);
+			}
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -510,7 +529,7 @@ namespace GatewayClientLib
 
 				GwErrorCode requestResult = sendRequest(TuningGwRequestId::TGW_TUNING_SIGNALS_READ,
 														request,
-														std::span{appSignals.cbegin() + requestOffset, partSize},
+														std::span{appSignals.begin() + requestOffset, partSize},
 														response,
 														std::span{tuningSignalStates.begin() + stateOffset, partSize},
 														m_isCancelledFunc);
@@ -661,7 +680,11 @@ namespace GatewayClientLib
 	void TuningGwConnImpl::clear()
 	{
 		m_workset = {};
-		m_state = {};
+
+		{
+			std::lock_guard locker{m_stateMutex};
+			m_state = {};
+		}
 
 		// Clear command queue, set all pending command promises to canceled.
 		//

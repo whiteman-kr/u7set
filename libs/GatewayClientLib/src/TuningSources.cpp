@@ -86,6 +86,7 @@ namespace
 				[[fallthrough]];
 			case GatewayClientLib::SignalType::SignedInt32:
 				{
+#if 0
 					auto hexStrToInt = [](const char* hexStr) -> int
 					{
 						int value = 0;
@@ -98,11 +99,20 @@ namespace
 					sp.tuningDefaultValue = hexStrToInt(signalNode.attribute("TuningDefaultValueHex").as_string());
 					sp.tuningLowBound = hexStrToInt(signalNode.attribute("TuningLowBoundHex").as_string());
 					sp.tuningHighBound = hexStrToInt(signalNode.attribute("TuningHighBoundHex").as_string());
+#else
+					int to_do_getting_data_as_hex = 0;
+					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_int();
+					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_int();
+					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValue").as_int();
+					sp.tuningLowBound = signalNode.attribute("TuningLowBound").as_int();
+					sp.tuningHighBound = signalNode.attribute("TuningHighBound").as_int();
+#endif
 				}
 				break;
 
 			case GatewayClientLib::SignalType::Float32:
 				{
+#if 0
 					auto hexStrToDouble = [](const char* hexStr) -> double
 					{
 						uint32_t intValue = 0;
@@ -117,6 +127,14 @@ namespace
 					sp.tuningDefaultValue = hexStrToDouble(signalNode.attribute("TuningDefaultValueHex").as_string());
 					sp.tuningLowBound = hexStrToDouble(signalNode.attribute("TuningLowBoundHex").as_string());
 					sp.tuningHighBound = hexStrToDouble(signalNode.attribute("TuningHighBoundHex").as_string());
+#else
+					int to_do_getting_data_as_hex = 0;
+					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_double();
+					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_double();
+					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValueHex").as_double();
+					sp.tuningLowBound = signalNode.attribute("TuningLowBoundHex").as_double();
+					sp.tuningHighBound = signalNode.attribute("TuningHighBoundHex").as_double();
+#endif
 				}
 				break;
 			};

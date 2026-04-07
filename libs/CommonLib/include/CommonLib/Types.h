@@ -760,8 +760,9 @@ public:
 		SignalIsNotAllowedToControl = 0x0016,
 		UnknownTuningSourceID = 0x0017,
 
-		CommunicationError = 0x0030, // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
-		CommandCanceled = 0x0031     // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
+		CommunicationError = 0x0030,  // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
+		CommandCanceled = 0x0031,     // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
+		ClientInternalError = 0x0032  // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
 	};
 	Q_ENUM(NetworkError)
 

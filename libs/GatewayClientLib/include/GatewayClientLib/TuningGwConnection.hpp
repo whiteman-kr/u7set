@@ -9,6 +9,7 @@
 #include <memory>
 #include <string_view>
 #include <thread>
+#include <vector>
 
 
 namespace GatewayClientLib
@@ -53,7 +54,8 @@ namespace GatewayClientLib
 
 		// Enqueues a command to activate or deactivate control of a tuning source.
 		//
-		std::future<GatewayClientLib::GwErrorCode> commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate);
+		std::future<GatewayClientLib::GwErrorCode> commandActivateTuningSource(std::string_view tuningSourceId);
+		std::future<GatewayClientLib::GwErrorCode> commandDeactivateTuningSource();
 
 		// Enqueues commands to write tuning signal values. The contents of `states` are copied, so the
 		// caller does not need to keep them alive after this function returns.
@@ -65,6 +67,10 @@ namespace GatewayClientLib
 		// Enqueues a command to apply(commit) previously written tuning signal values.
 		//
 		std::future<GatewayClientLib::GwErrorCode> commandApplyWrittenSignals();
+
+	public:
+		bool clientIsActive() const;
+		std::vector<GatewayClientLib::GwTuningSourceState> tuningSources() const;
 
 	private:
 		ITuningSignalUpdater& m_signalUpdater;

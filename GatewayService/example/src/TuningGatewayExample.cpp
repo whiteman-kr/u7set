@@ -3,8 +3,12 @@
 #include <GatewayClientLib/TuningGwProtocol.hpp>
 #include <GatewayClientLib/TuningSignalManager.hpp>
 
+#include <algorithm>
+#include <cctype>
+#include <format>
 #include <iomanip>
 #include <iostream>
+#include <span>
 #include <string>
 #include <syncstream>
 
@@ -12,14 +16,37 @@
 void printHelp()
 {
 	std::osyncstream(std::cout) << "Available commands:\n"
-								<< "  help, h - Show this help message\n"
+								<< "  help, h, ? - Show this help message\n"
 								<< "  exit, bye, quit, q - Exit the program\n"
 								<< "  tt, t - Toggle trace logging\n"
+								<< "\nSignals:\n"
 								<< "  value, v #SIGNALID - Get the current value of a signal\n"
 								<< "  param, p #SIGNALID - Get the parameters of a signal\n"
-								<< "  <Enter> - Repeat last command\n"
+								<< "\nTuning Sources:\n"
+								<< "  ts list - Get the list of tuning sources, short 'ts l'\n"
+								<< "  ts status LM_EQUIPMENT_ID - Get tuning source information, short 'ts s ID'\n"
+								<< "  ts activate LM_EQUIPMENT_ID - Activate tuning source, short 'ts a ID'\n"
+								<< "  ts deactivate - Deactivate current tuning source, short 'ts d' \n"
+								<< "  \n<Enter> - Repeat last command\n"
 								<< std::endl;
 	return;
+}
+
+std::string activeTuningSourceId(std::span<const GatewayClientLib::GwTuningSourceState> tuningSources)
+{
+	auto it = std::find_if(tuningSources.begin(),
+						   tuningSources.end(),
+						   [](const GatewayClientLib::GwTuningSourceState& ts)
+						   {
+							   return ts.controlIsActive != 0;
+						   });
+
+	if (it == tuningSources.end())
+	{
+		return {};
+	}
+
+	return std::string{it->moduleEquipmentId};
 }
 
 void printSignalValue(const GatewayClientLib::TuningSignalManager& signalManager, std::string_view signalId)
@@ -74,6 +101,114 @@ void printSignalParam(const GatewayClientLib::TuningSignalManager& signalManager
 	return;
 }
 
+void printTuningSourceState(const GatewayClientLib::GwTuningSourceState& tuningSourceState)
+{
+	auto yesNo = [](uint8_t value)
+	{
+		return value != 0 ? "Yes" : "No";
+	};
+
+	std::cout << "Tuning Source:\n"
+			  << "  Source ID: 0x" << std::hex << std::setw(16) << std::setfill('0') << tuningSourceState.sourceId << std::dec << "\n"
+			  << "  Module Equipment ID: " << tuningSourceState.moduleEquipmentId << "\n"
+			  << "  LAN Equipment ID: " << tuningSourceState.lanEquipmentId << "\n"
+			  << "  Is Replying: " << yesNo(tuningSourceState.isReplying) << "\n"
+			  << "  Control Is Active: " << yesNo(tuningSourceState.controlIsActive) << "\n"
+			  << "  Set SOR: " << yesNo(tuningSourceState.setSOR) << "\n"
+			  << "  Writing Disabled: " << yesNo(tuningSourceState.writingDisabled) << "\n"
+			  << "  Build Mismatch: " << yesNo(tuningSourceState.buildMismatch) << "\n"
+			  << "  Has Unapplied Params: " << yesNo(tuningSourceState.hasUnappliedParams) << "\n"
+			  << "  LogicModule Time: " << tuningSourceState.lmTime << "\n"
+			  << std::endl;
+
+	return;
+}
+
+void printTuningSourceState(std::span<const GatewayClientLib::GwTuningSourceState> tuningSources, std::string_view equipmentId)
+{
+	auto it = std::find_if(tuningSources.begin(),
+						   tuningSources.end(),
+						   [equipmentId](const GatewayClientLib::GwTuningSourceState& ts)
+						   {
+							   return std::string_view{ts.moduleEquipmentId} == equipmentId;
+						   });
+	if (it == tuningSources.end())
+	{
+		std::cout << equipmentId << " not found.\n";
+		std::cout << " Available tuning sources:\n";
+		for (const auto& ts : tuningSources)
+		{
+			std::cout << "\t" << std::string_view{ts.moduleEquipmentId} << "\n";
+		}
+	}
+	else
+	{
+		printTuningSourceState(*it);
+	}
+
+	return;
+}
+
+void printTuningSourceList(std::span<const GatewayClientLib::GwTuningSourceState> tuningSources)
+{
+	for (const auto& ts : tuningSources)
+	{
+		printTuningSourceState(ts);
+	}
+
+	return;
+}
+
+GatewayClientLib::GwErrorCode printCommandResult(std::future<GatewayClientLib::GwErrorCode> future)
+{
+	if (future.valid() == false)
+	{
+		assert(future.valid());
+		std::cout << "Invalid command result.\n";
+		return GatewayClientLib::GwErrorCode::GWC_CLIENT_INTERNAL_ERROR;
+	}
+
+	if (future.wait_for(std::chrono::seconds(5)) == std::future_status::ready)
+	{
+		GatewayClientLib::GwErrorCode errorCode = future.get();
+		std::cout << "Command result: " << to_string(errorCode) << "\n";
+		return errorCode;
+	}
+	else
+	{
+		std::cout << "Command result not available yet.\n";
+		return GatewayClientLib::GwErrorCode::GWC_CLIENT_INTERNAL_ERROR;
+	}
+}
+
+std::string trim(std::string_view s)
+{
+	std::string result{s};
+
+	// Left trim
+	//
+	result.erase(result.begin(),
+				 std::find_if(result.begin(),
+							  result.end(),
+							  [](unsigned char ch)
+							  {
+								  return !std::isspace(ch);
+							  }));
+
+	// Right trim
+	//
+	result.erase(std::find_if(result.rbegin(),
+							  result.rend(),
+							  [](unsigned char ch)
+							  {
+								  return !std::isspace(ch);
+							  })
+					 .base(),
+				 result.end());
+
+	return result;
+}
+
 int main()
 {
 	std::cout << "Tuning Gateway Client Example\n";
@@ -99,6 +234,14 @@ int main()
 
 		while (true)
 		{
+			// Prompt: "A [TS: SDS_RC11_CH01_LM01]>", "O [TS: SDS_RC11_CH01_LM01]>"
+			//
+			std::string_view clientStatus = conn.clientIsActive() ? "A" : "O";
+			std::string prompt = std::format("{} [TS:{}] >", clientStatus, activeTuningSourceId(conn.tuningSources()));
+			std::cout << prompt;
+
+			// Get command
+			//
 			std::string line;
 			std::getline(std::cin, line);
 			line.erase(0, line.find_first_not_of(" \t\r\n"));
@@ -111,7 +254,7 @@ int main()
 
 			lastLine = line;
 
-			if (line == "help" || line == "h")
+			if (line == "help" || line == "h" || line == "?")
 			{
 				printHelp();
 				continue;
@@ -155,6 +298,68 @@ int main()
 
 				std::string signalId = line.substr(spacePos + 1);
 				printSignalParam(signalManager, signalId);
+				continue;
+			}
+
+			if (line.starts_with("ts "))
+			{
+				size_t spacePos = line.find(' ');
+				if (spacePos == std::string::npos || spacePos + 1 >= line.size())
+				{
+					std::cout << "Invalid command format." << std::endl;
+					continue;
+				}
+
+				std::string argument = trim(line.substr(spacePos + 1));
+
+				if (argument == "list" || argument == "l")
+				{
+					printTuningSourceList(conn.tuningSources());
+					continue;
+				}
+
+				if (argument.starts_with("status ") == true || argument.starts_with("s ") == true)
+				{
+					std::string equipmentId = argument.starts_with("status ") ? trim(std::string_view{argument}.substr(7)) :
+																				trim(std::string_view{argument}.substr(2));
+
+					if (equipmentId.empty() == true)
+					{
+						std::cout << "Invalid command format. Usage: ts status LM_EQUIPMENT_ID" << std::endl;
+						continue;
+					}
+
+					printTuningSourceState(conn.tuningSources(), equipmentId);
+					continue;
+				}
+
+				if (argument.starts_with("activate ") == true || argument.starts_with("a ") == true)
+				{
+					std::string equipmentId = argument.starts_with("activate ") ? trim(std::string_view{argument}.substr(9)) :
+																				  trim(std::string_view{argument}.substr(2));
+
+					if (equipmentId.empty() == true)
+					{
+						std::cout << "Invalid command format. Usage: ts activate LM_EQUIPMENT_ID" << std::endl;
+						continue;
+					}
+
+					auto future = conn.commandActivateTuningSource(equipmentId);
+					printCommandResult(std::move(future));
+					continue;
+				}
+
+				if (argument == "deactivate" || argument == "d")
+				{
+					std::cout << "Deactivate current tuning source" << std::endl;
+
+					auto future = conn.commandDeactivateTuningSource();
+					printCommandResult(std::move(future));
+					continue;
+				}
+
+				std::cout << "Invalid command format.\n";
+				printHelp();
 				continue;
 			}
 		}

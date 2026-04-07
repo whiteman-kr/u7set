@@ -20,7 +20,7 @@ namespace GatewayClientLib
 
 		// Enqueues a command to activate or deactivate control for a tuning source.
 		//
-		std::future<GwErrorCode> commandSendActivateTuningSource(std::string_view tuningSourceId, bool activate);
+		std::future<GwErrorCode> commandActivateTuningSource(std::string_view tuningSourceId, bool activate);
 
 		// Enqueues commands to write tuning signal values.
 		//
@@ -31,6 +31,10 @@ namespace GatewayClientLib
 		// Enqueues a command to apply(commit) previously written tuning signal values.
 		//
 		std::future<GwErrorCode> commandApplyWrittenSignals();
+
+	public:
+		[[nodiscard]] bool clientIsActive() const;
+		[[nodiscard]] std::vector<GatewayClientLib::GwTuningSourceState> tuningSources() const;
 
 		// Requests: All requests throw std::runtime_error on communication errors.
 		//
@@ -109,6 +113,7 @@ namespace GatewayClientLib
 
 		// Operative buffers used in requests
 		//
+		mutable std::mutex m_stateMutex;
 		struct
 		{
 			bool clientIsActive{};

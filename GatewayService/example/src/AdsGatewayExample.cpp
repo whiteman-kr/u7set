@@ -9,7 +9,7 @@
 void printHelp()
 {
 	std::osyncstream(std::cout) << "Available commands:\n"
-								<< "  help, h - Show this help message\n"
+								<< "  help, h, ? - Show this help message\n"
 								<< "  exit, bye, quit, q - Exit the program\n"
 								<< "  tt, t - Toggle trace logging\n"
 								<< "  value, v #SIGNALID - Get the current value of a signal\n"
@@ -144,7 +144,7 @@ int main()
 
 			lastLine = line;
 
-			if (line == "help" || line == "h")
+			if (line == "help" || line == "h" || line == "?")
 			{
 				printHelp();
 				continue;
