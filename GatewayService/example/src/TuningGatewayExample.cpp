@@ -5,6 +5,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
+#include <cmath>
+#include <cstdlib>
 #include <format>
 #include <iomanip>
 #include <iostream>
@@ -13,21 +16,46 @@
 #include <syncstream>
 
 
+namespace
+{
+	std::string initialCurrentUser()
+	{
+		if (auto user = std::getenv("USERNAME"); user != nullptr && user[0] != '\0')
+		{
+			return user;
+		}
+
+		if (auto user = std::getenv("USER"); user != nullptr && user[0] != '\0')
+		{
+			return user;
+		}
+
+		return "unknown_user";
+	}
+} // namespace
+
+std::string g_currentUser = initialCurrentUser();
+
+
 void printHelp()
 {
 	std::osyncstream(std::cout) << "Available commands:\n"
-								<< "  help, h, ? - Show this help message\n"
-								<< "  exit, bye, quit, q - Exit the program\n"
-								<< "  tt, t - Toggle trace logging\n"
+								<< "    help, h, ? - Show this help message\n"
+								<< "    exit, bye, quit, q - Exit the program\n"
+								<< "    tt, t - Toggle trace logging\n"
+								<< "     user [NAME] - Show current user or set user name for write commands\n"
 								<< "\nSignals:\n"
-								<< "  value, v #SIGNALID - Get the current value of a signal\n"
-								<< "  param, p #SIGNALID - Get the parameters of a signal\n"
+								<< "    value, v #SIGNALID - Get the current value of a signal\n"
+								<< "    param, p #SIGNALID - Get the parameters of a signal\n"
 								<< "\nTuning Sources:\n"
-								<< "  ts list - Get the list of tuning sources, short 'ts l'\n"
-								<< "  ts status LM_EQUIPMENT_ID - Get tuning source information, short 'ts s ID'\n"
-								<< "  ts activate LM_EQUIPMENT_ID - Activate tuning source, short 'ts a ID'\n"
-								<< "  ts deactivate - Deactivate current tuning source, short 'ts d' \n"
-								<< "  \n<Enter> - Repeat last command\n"
+								<< "    ts list, ts l - Get the list of tuning sources\n"
+								<< "    ts status LM_EQUIPMENT_ID, ts s ID - Get tuning source information\n"
+								<< "    ts activate LM_EQUIPMENT_ID, ts a ID - Activate tuning source\n"
+								<< "    ts deactivate, ts d - Deactivate current tuning source\n"
+								<< "\nWriting Values:\n"
+								<< "    write, w #SIGNALID=value [#SIGNALID=value ...] - Write tuning signal values\n"
+								<< "    apply - Apply (commit) the written tuning signal values\n"
+								<< "\n<Enter> - Repeat last command\n"
 								<< std::endl;
 	return;
 }
@@ -209,6 +237,98 @@ std::string trim(std::string_view s)
 	return result;
 }
 
+void handleWriteCommand(GatewayClientLib::TuningGwConnection& conn,
+						const GatewayClientLib::TuningSignalManager& signalManager,
+						std::string_view argument)
+{
+	auto nextToken = [&](std::string_view text, size_t& offset) -> std::string_view
+	{
+		offset = text.find_first_not_of(" \t\r\n", offset);
+		if (offset == std::string_view::npos)
+		{
+			return {};
+		}
+
+		const size_t end = text.find_first_of(" \t\r\n", offset);
+		const std::string_view token = text.substr(offset, end == std::string_view::npos ? text.size() - offset : end - offset);
+		offset = end == std::string_view::npos ? text.size() : end;
+		return token;
+	};
+
+	auto parseFiniteDouble = [](std::string_view text, double& value) -> bool
+	{
+		const auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), value, std::chars_format::general);
+		return ec == std::errc{} && ptr == text.data() + text.size() && std::isfinite(value);
+	};
+
+	std::vector<GatewayClientLib::GwTuningWriteValue> writeValues;
+
+	for (size_t offset = 0;;)
+	{
+		const std::string_view assignment = nextToken(argument, offset);
+		if (assignment.empty() == true)
+		{
+			break;
+		}
+
+		const size_t separatorPos = assignment.find('=');
+		if (separatorPos == std::string_view::npos)
+		{
+			std::cout << "Invalid format: '" << assignment << "'. Expected #SIGNALID=value" << std::endl;
+			return;
+		}
+
+		std::string_view signalId = assignment.substr(0, separatorPos);
+		std::string_view valueText = assignment.substr(separatorPos + 1);
+
+		if (signalId.empty() == true || valueText.empty() == true)
+		{
+			std::cout << "Invalid format: '" << assignment << "'. Expected #SIGNALID=value" << std::endl;
+			return;
+		}
+
+		double value{};
+		if (parseFiniteDouble(valueText, value) == false)
+		{
+			std::cout << "Invalid value '" << valueText << "' for signal '" << signalId << "'" << std::endl;
+			return;
+		}
+
+		writeValues.push_back({
+			.hash = Radiy::calcHash(signalId),
+			.value = value,
+		});
+
+		std::cout << "  " << signalId << " = " << value << " (hash: 0x" << std::hex << writeValues.back().hash << std::dec << ")"
+				  << std::endl;
+	}
+
+	if (writeValues.empty())
+	{
+		std::cout << "No signals to write." << std::endl;
+		return;
+	}
+
+	std::cout << "Writing " << writeValues.size() << " signal(s)..." << std::endl;
+
+	auto future = conn.commandWriteSignalValues(writeValues, g_currentUser, false);
+	auto result = future.get();
+
+	std::cout << "Write result: " << to_string(result.errorCode) << std::endl;
+	if (result.signalResults.empty() == false)
+	{
+		std::cout << "Per-signal results:" << std::endl;
+		for (const auto& sigResult : result.signalResults)
+		{
+			auto signalParam = signalManager.getSignalParam(sigResult.hash);
+
+			std::cout << "  " << (signalParam.has_value() ? signalParam->customSignalId : "<unknown signal>") << " (hash: 0x" << std::hex
+					  << sigResult.hash << std::dec << "): " << to_string(static_cast<GatewayClientLib::GwErrorCode>(sigResult.status))
+					  << std::endl;
+		}
+	}
+}
+
 int main()
 {
 	std::cout << "Tuning Gateway Client Example\n";
@@ -238,7 +358,7 @@ int main()
 			//
 			std::string_view clientStatus = conn.clientIsActive() ? "A" : "O";
 			std::string prompt = std::format("{} [TS:{}] >", clientStatus, activeTuningSourceId(conn.tuningSources()));
-			std::cout << prompt;
+			std::cout << prompt << std::flush;
 
 			// Get command
 			//
@@ -270,6 +390,26 @@ int main()
 				bool traceEnabled = logger.isTraceEnabled();
 				logger.setTraceEnabled(!traceEnabled);
 				std::cout << "Trace logging " << (traceEnabled ? "disabled." : "enabled.") << std::endl;
+				continue;
+			}
+
+			if (line == "user")
+			{
+				std::cout << "Current user: " << g_currentUser << std::endl;
+				continue;
+			}
+
+			if (line.starts_with("user ") == true)
+			{
+				std::string userName = trim(line.substr(5));
+				if (userName.empty() == true)
+				{
+					std::cout << "Invalid command format. Usage: user NAME" << std::endl;
+					continue;
+				}
+
+				g_currentUser = std::move(userName);
+				std::cout << "Current user set to: " << g_currentUser << std::endl;
 				continue;
 			}
 
@@ -351,8 +491,6 @@ int main()
 
 				if (argument == "deactivate" || argument == "d")
 				{
-					std::cout << "Deactivate current tuning source" << std::endl;
-
 					auto future = conn.commandDeactivateTuningSource();
 					printCommandResult(std::move(future));
 					continue;
@@ -360,6 +498,27 @@ int main()
 
 				std::cout << "Invalid command format.\n";
 				printHelp();
+				continue;
+			} // ts
+
+			if (line == "apply")
+			{
+				auto future = conn.commandApplyWrittenSignals();
+				printCommandResult(std::move(future));
+				continue;
+			}
+
+			if (line.starts_with("write ") == true || line.starts_with("w ") == true)
+			{
+				size_t spacePos = line.find(' ');
+				if (spacePos == std::string::npos || spacePos + 1 >= line.size())
+				{
+					std::cout << "Invalid command format.\nUsage: write #SIGNALID=value [#SIGNALID=value ...]" << std::endl;
+					continue;
+				}
+
+				std::string argument = line.substr(spacePos + 1);
+				handleWriteCommand(conn, signalManager, argument);
 				continue;
 			}
 		}

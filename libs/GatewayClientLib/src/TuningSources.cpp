@@ -131,9 +131,9 @@ namespace
 					int to_do_getting_data_as_hex = 0;
 					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_double();
 					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_double();
-					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValueHex").as_double();
-					sp.tuningLowBound = signalNode.attribute("TuningLowBoundHex").as_double();
-					sp.tuningHighBound = signalNode.attribute("TuningHighBoundHex").as_double();
+					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValue").as_double();
+					sp.tuningLowBound = signalNode.attribute("TuningLowBound").as_double();
+					sp.tuningHighBound = signalNode.attribute("TuningHighBound").as_double();
 #endif
 				}
 				break;
