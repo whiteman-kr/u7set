@@ -902,8 +902,8 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 	AGL::GwSignalStateRequest request;
 	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::GW_SIGNAL_STATE_REQUEST_SIZE);
 
-	logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
-		   arg(stc->clientName).arg(request.signalCount));
+	// logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
+	// 	   arg(stc->clientName).arg(request.signalCount));
 
 	if (request.signalCount > AGL::GW_MAX_SIGNAL_STATES)
 	{
@@ -987,7 +987,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
-	logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
+	// logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
 
 	return true;
 }
@@ -999,7 +999,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	Q_UNUSED(recvBuf);
 	Q_UNUSED(requestSize);
 
-	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
+//	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
 
 	AGL::GwSignalStateChangesRequest request;
 	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
@@ -1051,8 +1051,8 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
-	logMsg(QString("Sent %1 signal state changes, pending states %2").
-						arg(reply.stateCount).arg(reply.pendingStatesCount));
+	// logMsg(QString("Sent %1 signal state changes, pending states %2").
+	// 					arg(reply.stateCount).arg(reply.pendingStatesCount));
 	return true;
 }
 
