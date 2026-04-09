@@ -215,11 +215,18 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 											m_cfgServiceSettings.clients,
 											m_cfgServiceSettings.checkHostname,
 											clientRequestIP, buildPath, logger()));
+		m_grpcCfgServers.back()->start();
 	}
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
+	for(auto& srv : m_grpcCfgServers)
+	{
+		TEST_PTR_CONTINUE(srv);
+		srv->stop();
+	}
+
 	m_grpcCfgServers.clear();
 }
 
