@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <QDateTime>
+#include <CommonLib/Hash.h>
 
 #include "../UtilsLib/Address16.h"
 #include "TuningValue.h"
@@ -50,6 +51,7 @@ public:
 	AppSignal();
 	AppSignal(const AppSignal& s);
 	AppSignal(const ID_AppSignalID& ids);
+	AppSignal(const Proto::AppSignal& proto);
 	virtual ~AppSignal();
 
 	QString initFromDeviceSignal(const QString& deviceSignalEquipmentID,
@@ -402,6 +404,8 @@ public:
 	void saveToProto(Proto::AppSignal* s) const;
 	void loadFromProto(const Proto::AppSignal &s);
 
+	bool equalWithAppSignal(const AppSignal& s) const;
+
 	void initCalculatedProperties();
 
 	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
@@ -679,18 +683,21 @@ private:
 class AppSignals
 {
 public:
-	~AppSignals();
+	AppSignals();
+	virtual ~AppSignals();
 
 	void clear();
 
+	void reserve(int expectedSignalsCount);
+
 	void insert(const ::Proto::AppSignal& protoAppSignal);
 
-	bool containsID(const QString& appSignalID) const;
+	bool containsAppSignalID(const QString& appSignalID) const;
 	bool containsHash(Hash hash) const;
 
-	const AppSignal* getSignalByID(const QString& appSignalID) const;		// rename => getByAppSignalID
-
-	const AppSignal* getSignalByHash(Hash hash) const;
+	const AppSignal* getByAppSignalID(const QString& appSignalID) const;
+	const AppSignal* getByHash(Hash hash) const;
+	const AppSignal* getByIndex(int index) const;
 
 	const AppSignal* getSignalByIndex(size_t index) const;
 	const AppSignal* getSignalByIndex(int index) const;
@@ -698,15 +705,17 @@ public:
 	bool isEmpty() const;
 	size_t count() const;
 
-	std::vector<AppSignal*>::iterator begin();
-	std::vector<AppSignal*>::const_iterator begin() const;
+	std::vector<AppSignal>::iterator begin();
+	std::vector<AppSignal>::const_iterator begin() const;
 
-	std::vector<AppSignal*>::iterator end();
-	std::vector<AppSignal*>::const_iterator end() const;
+	std::vector<AppSignal>::iterator end();
+	std::vector<AppSignal>::const_iterator end() const;
+
+	std::vector<Hash> getHashes() const;
 
 private:
-	std::vector<AppSignal*> m_signals;				// dynamic AppSignal object owner
-	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
+	std::vector<AppSignal> m_signals;
+	std::unordered_map<Hash, int> m_hashToSignal;		// Hash => index in m_signals
 };
 
 

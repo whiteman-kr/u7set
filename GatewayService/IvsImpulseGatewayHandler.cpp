@@ -33,7 +33,7 @@ namespace Gateway
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
 
-		m_ivsImpulseCommThread->connect(appDataServiceClient());
+		m_ivsImpulseCommThread->connect(this);
 
 		m_ivsImpulseCommThread->start();
 	}
@@ -84,13 +84,13 @@ namespace Gateway
 		}
 	}
 
-	void IvsImpulseHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	void IvsImpulseHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
-		int replyStatesSize = getStatesReply.appsignalstates_size();
+		int replyStatesSize = reply.appsignalstates_size();
 
 		for(int i = 0; i < replyStatesSize; i++)
 		{
-			const Proto::AppSignalState& appSignalState = getStatesReply.appsignalstates(i);
+			const Proto::AppSignalState& appSignalState = reply.appsignalstates(i);
 
 			auto it = m_hashToStatesIndexes.find(appSignalState.hash());
 
@@ -113,9 +113,9 @@ namespace Gateway
 		m_signalStatesUpdated = true;
 	}
 
-	void IvsImpulseHandler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void IvsImpulseHandler::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
 	{
-		int statesCount = getStateChangesReply.appsignalstates_size();
+		int statesCount = reply.appsignalstates_size();
 
 		if (statesCount == 0)
 		{
@@ -131,7 +131,7 @@ namespace Gateway
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const ::Network::GatewayAppSignalState& protoState = getStateChangesReply.appsignalstates(i);
+			const ::Network::GatewayAppSignalState& protoState = reply.appsignalstates(i);
 
 			state.loadFromProto(protoState);
 
@@ -161,6 +161,18 @@ namespace Gateway
 
 			list->stateChangesMutex.unlock();
 		}
+
+		emit sendGatewayStateChanges();
+	}
+
+	void IvsImpulseHandler::invalidateSignals()
+	{
+		for(AppSignalState& st : m_states)
+		{
+			st.invalidate();
+		}
+
+		m_signalStatesUpdated = true;
 	}
 
 	bool IvsImpulseHandler::init()
@@ -197,7 +209,7 @@ namespace Gateway
 
 			for(const QString& id : ids)
 			{
-				const AppSignal* s = m_appSignals.getSignalByID(id);
+				const AppSignal* s = m_appSignals.getByAppSignalID(id);
 
 				if (s != nullptr)
 				{
@@ -277,6 +289,38 @@ namespace Gateway
 		return true;
 	}
 
+	void IvsImpulseHandler::runAppDataSrvClient()
+	{
+		std::lock_guard lg(m_adsClientMutex);
+
+		std::vector<HostAddressPort> srvAddrs;
+
+		if (m_settings.appDataService1.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService1.address);
+		}
+
+		if (m_settings.appDataService2.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService2.address);
+		}
+
+		auto updater = std::make_shared<IvsImpulseAppSignalStateUpdater>(*this);
+
+		m_adsClient = std::make_unique<GrpcAdsClient>(m_swInfo, srvAddrs,
+													  QString("GatewayService %1").arg(m_swInfo.equipmentID()), m_log,
+													  GrpcAdsClient::RequestType::GetAppSignalStateConstSize, 100,
+													  GrpcAdsClient::RequestType::GetGatewayAppSignalStateChanges, 20,
+													  updater);
+
+		std::vector<Hash> hashes = m_appSignals.getHashes();
+
+		m_adsClient->setHashesToRequestStates(hashes);
+		m_adsClient->setHashesToRequestGatewayStateChanges(hashes);
+
+		m_adsClient->start();
+	}
+
 	void IvsImpulseHandler::prepareRequests()
 	{
 		m_requests.clear();
@@ -295,7 +339,7 @@ namespace Gateway
 
 		{
 			Network::GetAppSignalStateRequest rq;
-			Network::GatewayGetAppSignalStateChangesRequest chRq;
+			Network::GetGatewayAppSignalStateChangesRequest chRq;
 
 			for(size_t p = 0; p < partCount; p++)
 			{
@@ -349,7 +393,7 @@ namespace Gateway
 
 					PreparedRequest& stateChangesRequest = m_requests.emplace_back(PreparedRequest{});
 
-					stateChangesRequest.ID = ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES;
+					stateChangesRequest.ID = ADS_GET_GATEWAY_APP_SIGNAL_STATE_CHANGES;
 
 					stateChangesRequest.data.resize(requestSize);
 
@@ -357,5 +401,40 @@ namespace Gateway
 				}
 			}
 		}
+	}
+
+	// ------------------------------------------------------------------------------------
+	//
+	// IvsImpulseAppSignalStateUpdater class implementation
+	//
+	// ------------------------------------------------------------------------------------
+
+	IvsImpulseAppSignalStateUpdater::IvsImpulseAppSignalStateUpdater(IvsImpulseHandler& handler) :
+		m_handler(handler)
+	{
+	}
+
+	void IvsImpulseAppSignalStateUpdater::adsConnected()
+	{
+	}
+
+	void IvsImpulseAppSignalStateUpdater::adsDisconnected()
+	{
+		m_handler.invalidateSignals();
+	}
+
+	void IvsImpulseAppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
+	{
+		m_handler.updateAppSignalStates(reply);
+	}
+
+	void IvsImpulseAppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
+	{
+		Q_UNUSED(reply);
+	}
+
+	void IvsImpulseAppSignalStateUpdater::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+	{
+		m_handler.processGatewayAppSignalStateChanges(reply);
 	}
 }

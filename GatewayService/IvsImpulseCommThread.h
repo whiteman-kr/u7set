@@ -8,6 +8,7 @@
 #include "../GatewayLib/IvsImpulseGateway.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 namespace Gateway
 {
@@ -61,7 +62,7 @@ namespace Gateway
 		IvsImpulseCommThreadWorker(IvsImpulseHandler& handler);
 
 	public slots:
-		void onSendStateChanges();
+		void onSendGateayStateChanges();
 
 	private:
 		virtual void onThreadStarted() override;
@@ -142,6 +143,6 @@ namespace Gateway
 	{
 	public:
 		IvsImpulseCommThread(IvsImpulseHandler& handler);
-		void connect(AppDataServiceClient* client);
+		void connect(IvsImpulseHandler* handler);
 	};
 }

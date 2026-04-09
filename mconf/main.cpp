@@ -2,7 +2,7 @@
 #include "version.h"
 
 #include <CommonLib/ConstStrings.h>
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 #include <LicenseLib/AppLicenser.h>
 #include <UiLib/OverrideWindows11Style.h>
 

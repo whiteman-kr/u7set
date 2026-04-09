@@ -15,14 +15,37 @@ set(TARGET UtilsTests)
 
 add_executable(${TARGET}
 
+	AppDataReceiverTests.cpp
+	Common.cpp
 	Common.h
 	DiscretesLogTests.cpp
+	GrpcAppDataSrvTests.cpp
+	GrpcAdsClientTests.cpp
+	GrpcCfgLoaderTests.cpp
+	GrpcFileSrvTests.cpp
 	main.cpp
+	RupFrameProducer.h
 	SimpleThreadTests.cpp
 	SpinLockTests.cpp
 
+	../../AppDataService/AppDataReceiver.cpp
+	../../AppDataService/AppDataReceiver.h
+	../../AppDataService/AppDataSource.cpp
+	../../AppDataService/AppDataSource.h
+	../../AppDataService/AppDataSrvTools.cpp
+	../../AppDataService/AppDataSrvTools.h
 	../../AppDataService/DiscretesLog.cpp
 	../../AppDataService/DiscretesLog.h
+	../../AppDataService/DynamicAppSignalState.cpp
+	../../AppDataService/DynamicAppSignalState.h
+	../../AppDataService/GrpcAppDataSrv.cpp
+	../../AppDataService/GrpcAppDataSrv.h
+	../../AppDataService/RtTrendsServer.cpp
+	../../AppDataService/RtTrendsServer.h
+	../../AppDataService/SignalStatesProcessingThread.cpp
+	../../AppDataService/SignalStatesProcessingThread.h
+	../../ConfigurationService/GrpcCfgServer.cpp
+	../../ConfigurationService/GrpcCfgServer.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -38,6 +61,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<condition_variable>
 	<chrono>
 	<type_traits>
+
+	<asio/io_context.hpp>
+	<asio/ip/udp.hpp>
+	<asio/steady_timer.hpp>
 
 	<gtest/gtest.h>
 	<gmock/gmock.h>
@@ -61,10 +88,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../UtilsLib/SpinLock.h"
 )
 
+target_include_directories(${TARGET} PRIVATE
+	${CMAKE_BINARY_DIR}/libs/GrpcLib
+)
+
 target_compile_definitions(${TARGET} PRIVATE UNDER_GTEST=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock Qt6::Sql)
-target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib)
+target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib AppSignalLib GrpcLib)
 
 #add_test(NAME ${TARGET} COMMAND UtilsTests "--gtest_filter=-SimpleThreadTests.*")
 

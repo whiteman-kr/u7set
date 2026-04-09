@@ -1,22 +1,28 @@
 #pragma once
+
+#include "../OnlineLib/TcpConnectionState.h"
+#include <QMutex>
 #include <set>
 #include <vector>
-#include <QMutex>
-#include "../OnlineLib/TcpConnectionState.h"
-
 
 namespace Tcp
 {
 	class Client;
 }
 
-
-class TcpClientStatistics
+class ClientConnectionStatistics
 {
 protected:
-	TcpClientStatistics() = delete;
-	TcpClientStatistics(Tcp::Client* client);
-	virtual ~TcpClientStatistics();
+	ClientConnectionStatistics();
+	virtual ~ClientConnectionStatistics();
+
+	Q_DISABLE_COPY_MOVE(ClientConnectionStatistics);
+
+public:
+	virtual void statsReconnect() = 0;
+	virtual QString statsObjectName() = 0;
+	virtual QString statsServerId() = 0;
+	virtual Tcp::ConnectionState statsConnectionState() = 0;
 
 public:
 	struct Statistics
@@ -29,20 +35,33 @@ public:
 		{
 		}
 
-		uintptr_t id;		// is a pointer to TcpClientInstance
+		uintptr_t id; // is a pointer to TcpClientInstance
 		QString objectName;
 		QString serverId;
 		Tcp::ConnectionState state;
 	};
 
 	static std::vector<Statistics> statistics();
-	static void reconnect(uintptr_t id);
+	static void reconnectClient(uintptr_t id);
 
 private:
-	Tcp::Client* m_client = nullptr;
-
 	static QMutex s_mutex;
-	static std::set<Tcp::Client*> s_clients;
+	static std::set<ClientConnectionStatistics*> s_clients;
 };
 
 
+class TcpClientStatistics : public ClientConnectionStatistics
+{
+public:
+	TcpClientStatistics(Tcp::Client* client);
+	virtual ~TcpClientStatistics() = default;
+
+public:
+	virtual void statsReconnect() override;
+	virtual QString statsObjectName() override;
+	virtual QString statsServerId() override;
+	virtual Tcp::ConnectionState statsConnectionState() override;
+
+private:
+	Tcp::Client* m_client = nullptr;
+};

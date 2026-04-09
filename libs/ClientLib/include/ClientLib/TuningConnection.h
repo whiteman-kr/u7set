@@ -4,13 +4,13 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
-#include <ClientLib/ITuningAuthorization.h>
-#include <ClientLib/ITuningConnection.h>
-#include "IRecentAppSignals.h"
 #include "ITuningLog.h"
 #include "ITuningSignalUpdater.h"
 #include "TuningSourceState.h"
 #include "TuningWriteCommand.h"
+#include <AppSignalLibStd/IRecentAppSignals.h>
+#include <ClientLib/ITuningAuthorization.h>
+#include <ClientLib/ITuningConnection.h>
 
 
 namespace ClientLib

@@ -1,11 +1,13 @@
 #include "MetrologyMainWindow.h"
 #include "Options.h"
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 #include <UiLib/OverrideWindows11Style.h>
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
+#include "../OnlineLib/CircularLogger.h"
 
-
+#include <QApplication>
+#include <QLockFile>
 
 int main(int argc, char* argv[])
 {
@@ -51,18 +53,28 @@ int main(int argc, char* argv[])
 
 	SoftwareInfo si(E::SoftwareType::Metrology, equipmentID);
 
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT(logger, QString(), equipmentID);
+
+	logger->setLogCodeInfo(false);
+
 	// in order to keep the dumpMemoryLeaks() list clean, the MainWindow is created using "new".
 	// MainWindow w(si);
 	// w.show();
 	//
-	MainWindow* pMainWindow = new MainWindow(si);
+	MainWindow* pMainWindow = new MainWindow(si, logger);
 	pMainWindow->show();
 
 	int result = app.exec();
 
 	delete pMainWindow;
 
+	LOGGER_SHUTDOWN(logger);
+
 	google::protobuf::ShutdownProtobufLibrary();
+
+	grpc_shutdown();
 
 	return result;
 }

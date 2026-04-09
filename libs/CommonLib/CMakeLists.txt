@@ -21,30 +21,18 @@ qt_add_library(${TARGET} STATIC
   ./include/CommonLib/Times.h
   ./include/CommonLib/Types.h
   ./include/CommonLib/expected.hpp
-  ./include/CommonLib/u7_vld.h
   AfbParamValue.cpp
   PropertyObject.cpp
   Times.cpp
   Types.cpp
-  u7_vld.cpp
 )
 
-
-target_precompile_headers(${TARGET} PRIVATE
-	<QReadWriteLock>
-	<QReadLocker>
-	<QWriteLocker>
-	<QRegularExpression>
+target_precompile_headers(${TARGET} PUBLIC
+	<chrono>
 )
-
-#target_precompile_headers(${TARGET} PUBLIC
-#	"Types.h"
-#	"Hash.h"
-#	"PropertyObject.h"
-#	"AfbParamValue.h"
-#)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core)
+target_link_libraries(${TARGET} PUBLIC CommonStdLib)
 
 target_compile_definitions(${TARGET} PRIVATE COMMON_LIB_DOMAIN)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

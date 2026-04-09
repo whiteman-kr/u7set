@@ -52,7 +52,7 @@ namespace Gateway
 
 		Network::GetAppSignalStateReply m_getStatesReply;
 		Network::GetAppSignalStateChangesReply m_getStateChangesReply;
-		Network::GatewayGetAppSignalStateChangesReply m_gwGetStateChangesReply;
+		Network::GetGatewayAppSignalStateChangesReply m_gwGetStateChangesReply;
 
 		PreparedRequest m_request;
 	};

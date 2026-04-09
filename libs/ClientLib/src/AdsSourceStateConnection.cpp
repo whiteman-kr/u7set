@@ -1,14 +1,20 @@
+#include <ClientLib/AdsSourceStateConnection.h>
+
 #ifndef CLIENT_LIB_DOMAIN
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "AdsSourceStateConnectionPrivate.h"
-#include <ClientLib/AdsSourceStateConnection.h>
+#ifdef USE_GRPC_ADS_CONNECTION
+	#include "AdsSourceStateConnectionPrivate2.h"
+#else
+	#include "AdsSourceStateConnectionPrivate.h"
+#endif
+
 
 namespace ClientLib
 {
 	AdsSourceStateConnection::AdsSourceStateConnection(ILogFile* logFile) :
-		m_pimpl{std::make_unique<AdsSourceStateConnectionPrivate>(logFile)}
+		m_pimpl{std::make_unique<AdsConnectionType>(logFile)}
 	{
 		return;
 	}
@@ -21,7 +27,7 @@ namespace ClientLib
 		return m_pimpl->updateConnections(softwareInfo, appDataService);
 	}
 
-	std::vector<Tcp::ConnectionState> AdsSourceStateConnection::adsConnectionStates() const
+	std::vector<ServiceConnectionState> AdsSourceStateConnection::adsConnectionStates() const
 	{
 		return m_pimpl->adsConnectionStates();
 	}

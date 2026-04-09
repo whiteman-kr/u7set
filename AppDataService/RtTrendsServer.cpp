@@ -1,4 +1,3 @@
-#include "AppDataService.h"
 #include "RtTrendsServer.h"
 
 namespace RtTrends
@@ -30,10 +29,9 @@ namespace RtTrends
 
 	std::atomic<int> Session::m_globalID = 0;
 
-	Session::Session(AppDataServiceWorker& service) :
+	Session::Session(const DynamicAppSignalStates& signalStates) :
 		m_id(m_globalID.fetch_add(1)),
-		m_signalStates(service.appSignalStates())
-//		m_signalToSources(service.signalsToSources())
+		m_signalStates(signalStates)
 	{
 	}
 
@@ -107,18 +105,24 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	Server::Server(AppDataServiceWorker& appDataService) :
-		Tcp::Server(appDataService.softwareInfo(), "RtTrendsServer"),
-		m_appDataService(appDataService),
-		m_signalStates(appDataService.appSignalStates()),
-		m_log(appDataService.logger()),
-		m_session(std::make_shared<Session>(appDataService))
+	Server::Server(	const SoftwareInfo& softwareInfo,
+					const AppDataSources& appDataSources,
+					DynamicAppSignalStates& signalStates,
+					CircularLoggerShared log) :
+		Tcp::Server(softwareInfo, "RtTrendsServer"),
+		m_appDataSources(appDataSources),
+		m_signalStates(signalStates),
+		m_log(log),
+		m_session(std::make_shared<Session>(m_signalStates))
 	{
 	}
 
 	Tcp::Server* Server::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
-		RtTrends::Server* newServer = new Server(m_appDataService);
+		RtTrends::Server* newServer = new Server(localSoftwareInfo(),
+												m_appDataSources,
+												m_signalStates,
+												m_log);
 		newServer->setListenAddress(listenAddr);
 		return newServer;
 	}
@@ -208,7 +212,7 @@ namespace RtTrends
 
 		for(Hash signalHash : trackedSignalHashes)
 		{
-			AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
+			const AppDataSource* source = m_appDataSources.getSignalSource(signalHash);
 
 			TEST_PTR_CONTINUE(source);
 
@@ -243,7 +247,7 @@ namespace RtTrends
 			return true;
 		}
 
-		AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
+		const AppDataSource* source = m_appDataSources.getSignalSource(signalHash);
 
 		if (source == nullptr)
 		{
@@ -261,10 +265,7 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
-		if (state->signal() != nullptr)
-		{
-			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) append signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
-		}
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) append signal %2").arg(m_session->id()).arg(state->appSignalID()));
 
 		m_session->appendSignal(signalHash);
 
@@ -299,10 +300,7 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
-		if (state->signal() != nullptr)
-		{
-			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) remove signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
-		}
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) remove signal %2").arg(m_session->id()).arg(state->appSignalID()));
 
 		state->removeRtSession(signalHash, QThread::currentThread(), m_session);
 
@@ -437,8 +435,12 @@ namespace RtTrends
 	// -----------------------------------------------------------------------------------------------
 
 	ServerThread::ServerThread(const std::vector<Tcp::ListenAddress>& listenAddresses,
-							   AppDataServiceWorker& appDataService) :
-		Tcp::ListenerThread(listenAddresses, new Server(appDataService), appDataService.logger())
+								const SoftwareInfo& softwareInfo,
+								const AppDataSources& appDataSources,
+								DynamicAppSignalStates& signalStates,
+								CircularLoggerShared log) :
+		Tcp::ListenerThread(listenAddresses,
+							  new Server(softwareInfo, appDataSources, signalStates, log), log)
 	{
 		setObjectName("RtTrends::ServerThread");
 	}

@@ -13,15 +13,11 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 set(TARGET ClientLib)
 
 qt_add_library(${TARGET} STATIC
-	./include/ClientLib/AdsConnection.h
 	./include/ClientLib/AdsSourceStateConnection.h
 	./include/ClientLib/AppDataSourceState.h
 	./include/ClientLib/AppSignalManager.h
 	./include/ClientLib/ClientTranslator.h
 	./include/ClientLib/ConfigController.h
-	./include/ClientLib/IAppSignalUpdater.h
-	./include/ClientLib/IRecentAppSignals.h
-	./include/ClientLib/ISignalDataServer.h
 	./include/ClientLib/ITestObserver.h
 	./include/ClientLib/ITuningAuthorization.h
 	./include/ClientLib/ITuningConnection.h
@@ -37,13 +33,14 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/TuningSourceState.h
 	./include/ClientLib/TuningUserManager.h
 	./include/ClientLib/TuningWriteCommand.h
+	./include/ClientLib/LoggerStdAdapter.h
+	./include/ClientLib/ServiceEndpoint.h
 	
-	./src/AdsConnection.cpp
-	./src/AdsConnectionPrivate.cpp
-	./src/AdsConnectionPrivate.h
 	./src/AdsSourceStateConnection.cpp
 	./src/AdsSourceStateConnectionPrivate.cpp
 	./src/AdsSourceStateConnectionPrivate.h
+	./src/AdsSourceStateConnectionPrivate2.cpp
+	./src/AdsSourceStateConnectionPrivate2.h
 	./src/AppDataSourceState.cpp
 	./src/AppSignalManager.cpp
 	./src/ClientTranslator.cpp
@@ -90,28 +87,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<unordered_set>
 	<vector>
 
-	<QApplication>
-	<QComboBox>
-	<QCoreApplication>
 	<QDateTime>
-	<QDialog>
-	<QDomDocument>
-	<QHBoxLayout>
-	<QJSEngine>
-	<QLabel>
-	<QLineEdit>
-	<QLocale>
-	<QMessageBox>
 	<QThread>
-	<QPushButton>
 	<QReadWriteLock>
-	<QSharedMemory>
-	<QThread>
-	<QTimeZone>
-	<QTranslator>
-	<QVBoxLayout>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
@@ -119,22 +97,24 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	<ProtoSerialization.h>
 	<Network.pb.h>
+	<GrpcAppDataSrv.grpc.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
 	"../../AppSignalLib/TuningValue.h"
 
-	"../../OnlineLib/Tcp.h"
+#	"../../OnlineLib/Tcp.h"
 )
 
 target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)
+target_compile_definitions(${TARGET} PRIVATE USE_GRPC_ADS_CONNECTION)
 
 #Add translations
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib OnlineLib AppSignalLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib OnlineLib AppSignalLib TrendView ProtobufEx AdsConnectionLib)
 
 if (MSVC)
 	target_link_libraries(${TARGET} PUBLIC Advapi32)

@@ -2,24 +2,20 @@
 #include "AdsBridgeLogFile.h"
 #include <AdsBridge/AdsBridge.h>
 
-#include <QCoreApplication>
-#include <QFile>
-#include <QTimer>
+#include <grpcpp/grpcpp.h>
 
-#include <latch>
-#include <thread>
+#include <fstream>
 
-#include <QDebug>
 
 namespace
 {
-	std::jthread g_appThread;
-	std::atomic<QCoreApplication*> g_app = nullptr; // Atomic is not necessary, but it is used to make sure that the compiler does not
-													// optimize the code and the value is always up to date.
-	AdsBridge::LogFile g_log;
-	AdsBridge::AdsBridgeFacade g_adsBridge{&g_log};
+	const std::string DefaultProfile = "Default";
 
-	QByteArray g_lastLoadedConfiguration;
+	AdsBridge::Resources g_resources;
+	AdsBridge::LogFile g_log;
+	std::unique_ptr<AdsBridge::AdsBridgeFacade> g_adsBridge;
+
+	std::vector<char> g_lastLoadedConfiguration;
 } // namespace
 
 #define ADSB_API_VERSION 0x00000001 ///< API version of the AdsBridge library.
@@ -59,173 +55,144 @@ void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
 	return;
 }
 
-bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
+bool AdsInit(const char* equipmentId)
 {
 	g_log.writeMessage("AdsInit()");
 
-	if (g_appThread.joinable() == true || g_app != nullptr)
+	if (g_adsBridge != nullptr)
 	{
-		g_log.writeError("AdsInit(): QCoreApplication already exists, call AdsShutdown() first.");
+		g_log.writeError("AdsInit(): AdsBridge is already initialized.");
 		return false;
 	}
 
-	if (isQtApplication == false)
-	{
-		assert(QCoreApplication::instance() == nullptr);
-		g_log.writeMessage("AdsInit(): QCoreApplication::instance() == nullptr, create new thread, start message loop.");
+	grpc_init();
+	[[maybe_unused]] auto _ = std::chrono::current_zone(); // A call to this function that is the first reference to the time zonedatabase
+														   // will cause it to be initialized.
 
-		std::latch done{2};
+	g_adsBridge = std::make_unique<AdsBridge::AdsBridgeFacade>(g_resources, g_log);
 
-		g_appThread = std::jthread(
-			[argc, argv, &done]()
-			{
-				int argcc = argc;
-				char** argvv = argv;
-
-				g_app.store(new QCoreApplication{argcc, argvv});
-
-				done.count_down();
-
-				g_app.load()->exec();
-
-				delete g_app.exchange(nullptr);
-			});
-
-		// wait for QCoreApplication to be created
-		//
-		done.arrive_and_wait();
-	}
-	else
-	{
-		g_log.writeMessage("AdsInit(): QCoreApplication already exists");
-	}
-
-	g_adsBridge.setEquipmentId(equipmentId);
+	g_adsBridge->setEquipmentId(equipmentId);
 	return true;
 }
 
 const char* AdsGetSoftwareId()
 {
-	return g_adsBridge.getStringConstPointer(g_adsBridge.equipmentId());
+	return g_resources.getString(g_adsBridge->equipmentId());
 }
 
 bool AdsLoadConfiguration(const char* fileName)
 {
 	g_lastLoadedConfiguration.clear();
 
-	QFile file{fileName};
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+	std::ifstream file{fileName, std::ios::binary | std::ios::ate};
+	if (file.is_open() == false)
 	{
-		g_log.writeError(QString("AdsLoadConfiguration(): Cannot open file: %1, error: %2").arg(fileName).arg(file.errorString()));
+		g_log.writeError(std::format("AdsLoadConfiguration(): Cannot open file: {}", fileName));
 		return false;
 	}
 
-	g_lastLoadedConfiguration = file.readAll();
-	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, SettingsProfile::DEFAULT);
+	auto fileSize = file.tellg();
+	file.seekg(0);
+
+	g_lastLoadedConfiguration.resize(fileSize);
+	file.read(g_lastLoadedConfiguration.data(), fileSize);
+
+	return g_adsBridge->setConfiguration(g_lastLoadedConfiguration, DefaultProfile);
 }
 
 bool AdsSetConfiguration(const char* configurationXml, size_t size)
 {
-	g_lastLoadedConfiguration = QByteArray::fromRawData(configurationXml, size);
-	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, SettingsProfile::DEFAULT);
+	g_lastLoadedConfiguration = std::vector<char>(configurationXml, configurationXml + size);
+	return g_adsBridge->setConfiguration(g_lastLoadedConfiguration, DefaultProfile);
 }
 
 bool AdsSetConfigurationProfile(const char* profile)
 {
-	if (g_lastLoadedConfiguration.isEmpty() == true)
+	if (g_lastLoadedConfiguration.empty() == true)
 	{
 		g_log.writeError("AdsSetConfigurationProfile(): No configuration loaded.");
 		return false;
 	}
 
-	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, profile);
+	return g_adsBridge->setConfiguration(g_lastLoadedConfiguration, profile);
 }
 
 void AdsShutdown()
 {
 	g_log.writeMessage("AdsShutdown()");
-	g_adsBridge.clearAppDataServices();
-	g_adsBridge.close();
 
-	if (g_appThread.joinable() == true)
-	{
-		assert(g_app != nullptr);
+	g_adsBridge->clearAppDataServices();
+	g_adsBridge->close();
+	g_adsBridge.reset();
 
-		if (g_app != nullptr)
-		{
-			// Application will not exit until we call QCoreApplication::quit
-			// So we can check g_app for nullptr and then call QCoreApplication::quit
-			//
-			QTimer::singleShot(0, g_app, &QCoreApplication::quit);
-		}
-
-		g_appThread.join();
-	}
+	// Shutdown gRPC AFTER all channels/stubs have been destroyed (main window scope ended)
+	//
+	grpc_shutdown();
 
 	return;
 }
 
 void AdsAddService(const char* adsEquipmentId, const char* address, int port)
 {
-	g_log.writeMessage(QString("AdsAddService: %1, %2:%3").arg(adsEquipmentId).arg(address).arg(port));
-	g_adsBridge.addAppDataService(adsEquipmentId, address, port);
+	g_log.writeMessage(std::format("AdsAddService: {}, {}:{}", adsEquipmentId, address, port));
+	g_adsBridge->addAppDataService(adsEquipmentId, address, port);
 }
 
 void AdsConnect()
 {
 	g_log.writeMessage("AdsConnect()");
-	g_adsBridge.connect();
+	g_adsBridge->connect();
 }
 
 void AdsCloseConnection()
 {
 	g_log.writeMessage("AdsCloseConnection()");
-	g_adsBridge.close();
+	g_adsBridge->close();
 }
 
 size_t AdsGetTcpConnectionCount()
 {
-	return g_adsBridge.connectionCount();
+	return g_adsBridge->connectionCount();
 }
 
 bool AdsGetTcpConnectionStatusesPrivate1(size_t structSize, struct AdsConnectionStatus* out, size_t count)
 {
-	return g_adsBridge.connectionStatus(structSize, out, count);
+	return g_adsBridge->connectionStatus(structSize, out, count);
 }
 
 bool AdsSignalParamsLoaded()
 {
-	return g_adsBridge.signalParamsLoaded();
+	return g_adsBridge->signalParamsLoaded();
 }
 
 bool AdsSignalStatesLoaded()
 {
-	return g_adsBridge.signalStatesLoaded();
+	return g_adsBridge->signalStatesLoaded();
 }
 
 size_t AdsGetSignalCount()
 {
-	return g_adsBridge.signalCount();
+	return g_adsBridge->signalCount();
 }
 
 bool AdsGetSignalList(MatsSignalHash* out, size_t count)
 {
-	return g_adsBridge.signalList(out, count);
+	return g_adsBridge->signalList(out, count);
 }
 
 size_t AdsGetSignalParamsPrivate1(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count)
 {
-	return g_adsBridge.signalParams(structSize, signalHashes, out, count);
+	return g_adsBridge->signalParams(structSize, signalHashes, out, count);
 }
 
 size_t AdsGetSignalStatesPrivate1(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count)
 {
-	return g_adsBridge.signalStates(structSize, signalHashes, out, count);
+	return g_adsBridge->signalStates(structSize, signalHashes, out, count);
 }
 
 MatsSignalHash AdsCalcHash(const char* string)
 {
-	return ::calcHash(QString{string});
+	return ::calcHash(std::string_view{string});
 }
 
 bool AdsTestAdsConnectionStatus(size_t structSize, const struct AdsConnectionStatus* testValue)

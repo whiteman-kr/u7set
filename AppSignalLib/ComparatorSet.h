@@ -1,9 +1,15 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <QHash>
 #include <QMutex>
 #include <QUuid>
+#include <QString>
+#include <QStringList>
 
+#include <CommonLib/Types.h>
 
 namespace Proto
 {
@@ -160,7 +166,7 @@ class LmComparatorSet
 {
 public:
 	LmComparatorSet() = default;
-	LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> omparator);
+	LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> comparator);
 
 	void clear();
 	void append(std::shared_ptr<Comparator> comparator);

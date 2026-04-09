@@ -11,6 +11,8 @@
 #include <QTreeWidget>
 #include <QVariant>
 
+#include <CommonLib/PropertyObject.h>
+
 class QComboBox;
 class QToolButton;
 class QDateTimeEdit;

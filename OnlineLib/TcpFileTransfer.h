@@ -44,6 +44,7 @@ namespace Tcp
 		WrongClientHostname,
 
 		InternalError,
+		FileTooBig,
 	};
 
 	class FileTransfer

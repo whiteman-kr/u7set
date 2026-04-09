@@ -1,8 +1,10 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgLoader.h"
+
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
+
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
@@ -10,6 +12,7 @@
 #include "AppDataSource.h"
 #include "ApertureFile.h"
 #include "DiscretesLog.h"
+#include "GrpcAppDataSrv.h"
 
 class TcpArchiveClient;
 class AppDataReceiver;
@@ -103,14 +106,6 @@ private:
 
 	//
 
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
-	void onConfigurationReady(const QByteArray configurationXmlData,
-							  const BuildFileInfoArray buildFileInfoArray,
-							  SessionParams sessionParams,
-							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
-
 	bool readAppDataSources(const QByteArray& fileData, const QString& profile);
 	bool readAppSignals(const QByteArray& fileData);
 
@@ -136,9 +131,12 @@ private:
 	void runRtTrendsServerThread();
 	void stopRtTrendsServerThread();
 
-	void onGetDataSourcesIDs(UdpRequest& request);
-	void onGetDataSourcesInfo(UdpRequest& request);
-	void onGetDataSourcesState(UdpRequest& request);
+	void runGrpcAppDataSrv();
+	void stopGrpcAppDataSrv();
+
+	// void onGetDataSourcesIDs(UdpRequest& request);
+	// void onGetDataSourcesInfo(UdpRequest& request);
+	// void onGetDataSourcesState(UdpRequest& request);
 
 	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
 						  int count, double* updateStatus) const;
@@ -148,9 +146,13 @@ private:
 
 	void copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const;
 
-private:
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+private slots:
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
+									  const BuildFileInfoArray buildFileInfoArray,
+									  SessionParams sessionParams,
+									  std::shared_ptr<const SoftwareSettings> currentSettingsProfile) override;
 
+private:
 	AppDataServiceSettings m_curSettingsProfile;
 
 	int m_appDataProcessingThreadCount = 0;
@@ -169,8 +171,8 @@ private:
 
 	int m_autoArchivingGroupsCount = 0;
 
+	std::vector<ClientInfo> m_clients;
 	AppSignals m_appSignals;
-
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
@@ -195,4 +197,6 @@ private:
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
+
+	std::vector<std::unique_ptr<GrpcAppDataSrv>> m_grpcAppDataSrvs;
 };

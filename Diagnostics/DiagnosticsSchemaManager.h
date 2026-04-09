@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <SchemaClientLib/ClientSchemaManager.h>
 #include "DiagConfigController.h"
 

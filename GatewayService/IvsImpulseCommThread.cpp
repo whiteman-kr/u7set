@@ -36,7 +36,7 @@ namespace Gateway
 		}
 	}
 
-	void IvsImpulseCommThreadWorker::onSendStateChanges()
+	void IvsImpulseCommThreadWorker::onSendGateayStateChanges()
 	{
 		if (isWorkableSocketExists() == true)
 		{
@@ -766,16 +766,16 @@ namespace Gateway
 		addWorker(new IvsImpulseCommThreadWorker(handler));
 	}
 
-	void IvsImpulseCommThread::connect(AppDataServiceClient* client)
+	void IvsImpulseCommThread::connect(IvsImpulseHandler* handler)
 	{
-		TEST_PTR_RETURN(client);
+		TEST_PTR_RETURN(handler);
 
 		for(auto worker : m_workers)
 		{
-			SimpleThread::connect(client,
-								  &AppDataServiceClient::sendStateChanges,
+			SimpleThread::connect(handler,
+								  &IvsImpulseHandler::sendGatewayStateChanges,
 								  dynamic_cast<IvsImpulseCommThreadWorker*>(worker),
-								  &IvsImpulseCommThreadWorker::onSendStateChanges);
+								  &IvsImpulseCommThreadWorker::onSendGateayStateChanges);
 		}
 	}
 }

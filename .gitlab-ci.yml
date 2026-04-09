@@ -11,7 +11,7 @@ variables:
   # Build and test data
   #
   QT_VERSION: "6.8.1"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v435"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v439"
   SIMULATOR_PROJECT_NAME: "test_simulator_v439"
   PGPASSWORD: "P2ssw0rd"
 
@@ -158,7 +158,7 @@ windows_build_job:
     - "#               Remove some files not requiered for releases"
     - "# ----------------------------------------------"
     - "del -Force $Env:BIN_OUT_DIR/DiagDataSrv.exe"
-    
+
 #Signing Files
     - "# ----------------------------------------------"
     - "#               Sign Files"
@@ -196,7 +196,6 @@ windows_build_job:
   artifacts:
     name: "u7set-win-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
-      - dev/**/*
       - bin/*.exe
       - bin/*.exe
       - bin/release/*.exe
@@ -261,7 +260,6 @@ windows_test_job:
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Tests/u7databasetestsArgs.xml\""
-    - "&$Env:CI_PROJECT_DIR/bin/release/UtilsTests.exe"
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -275,6 +273,12 @@ windows_test_job:
     - "#               Run Compiler tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Tests/CompilerTestsArgs.xml"
+    
+#Run Utils tests
+    - "# ----------------------------------------------"
+    - "#               Run Utils tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/UtilsTests.exe -build=c:/temp/build/$Env:COMPILER_TESTS_PROJECT_NAME/build -profile=Local"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
@@ -294,6 +298,39 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\$Env:SIMULATOR_PROJECT_NAME\\build"
 
+windows_adsbridge_build:
+  stage: build
+  needs: ["project_backup_job"]
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  tags:
+    - vs2017
+  before_script:
+    - $Env:VCPKG_ROOT="C:/data/vcpkg/vcpkg"
+    - $Env:VCPKG_DEFAULT_BINARY_CACHE="C:/data/vcpkg/cache_windows_build"
+    - $env:Path += ";C:/data/vcpkg/vcpkg"
+  script:
+    - "dir env:"
+    - "echo $Env:CI_COMMIT_SHA"
+    - "git status"
+    - "git log -1"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\bin\release"
+    - $Env:INSTALL_OUT_DIR="$Env:CI_PROJECT_DIR\\dev"
+    - "# ----------------------------------------------"
+    - "#            Build and Install Project"
+    - "# ----------------------------------------------"    
+    - "& './gitlab_ci_build_adsbridge.bat'"
+
+  artifacts:
+    name: "AdsBridge-win-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
+    paths:
+      - dev/**/*
 
 linux_test_job:
   stage: test
@@ -380,7 +417,7 @@ linux_test_job:
     - "sleep 6"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
-    - "./UtilsTests"
+    - "./UtilsTests -build=/tmp/build/${COMPILER_TESTS_PROJECT_NAME}/build -profile=Local"
     - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
     - "export QT_QPA_PLATFORM=offscreen"
     - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -nosecurity"

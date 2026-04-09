@@ -4,6 +4,15 @@
 
 #include <ClientLib/TuningUserManager.h>
 
+#include <QComboBox>
+#include <QCoreApplication>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+
 #ifdef Q_OS_WIN
 // clang-format off
 // The order of these includes is important!

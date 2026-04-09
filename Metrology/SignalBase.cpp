@@ -4,6 +4,8 @@
 #include "Database.h"
 #include "MeasureBase.h"
 
+#include <QApplication>
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1645,6 +1647,18 @@ void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::invalidateSignals()
+{
+	QMutexLocker l(&m_signalMutex);
+
+	for(Metrology::Signal& ms : m_signalList)
+	{
+		ms.invalidate();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal)
 {
 	const Metrology::SignalParam& param = signal.param();
@@ -1868,50 +1882,69 @@ Hash SignalBase::hashForRequestState(int index)
 	return m_requestStateList[static_cast<quint64>(index)];
 }
 
+std::vector<Hash> SignalBase::requestStateHashes() const
+{
+	QMutexLocker l(&m_stateMutex);
+	return m_requestStateList;
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::appendHashForRequestState(const Hash& hash)
+void SignalBase::appendHashForRequestState(const Hash hash)
 {
 	if (hash == UNDEFINED_HASH)
 	{
 		return;
 	}
 
-	QMutexLocker l(&m_stateMutex);
+	{
+		QMutexLocker l(&m_stateMutex);
+		m_requestStateList.push_back(hash);
+	}
 
-	m_requestStateList.push_back(hash);
+	emit requestStateHashesChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::appendHashForRequestState(const std::set<Hash>& list)
 {
-	for (const Hash& hash : list)
 	{
-		if (hash == UNDEFINED_HASH)
-		{
-			continue;
-		}
+		QMutexLocker l(&m_stateMutex);
 
-		appendHashForRequestState(hash);
+		for (const Hash& hash : list)
+		{
+			if (hash == UNDEFINED_HASH)
+			{
+				continue;
+			}
+
+			m_requestStateList.push_back(hash);
+		}
 	}
+
+	emit requestStateHashesChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::removeLastHashForRequestState(int count)
 {
-	QMutexLocker l(&m_stateMutex);
-
-	if (count >= TO_INT(m_requestStateList.size()))
 	{
-		return;
+		QMutexLocker l(&m_stateMutex);
+
+		if (count >= TO_INT(m_requestStateList.size()))
+		{
+			return;
+		}
+
+		for(int i = 0; i < count; i++)
+		{
+			m_requestStateList.pop_back();
+		}
 	}
 
-	for(int i = 0; i < count; i++)
-	{
-		m_requestStateList.pop_back();
-	}
+	emit requestStateHashesChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2536,138 +2569,145 @@ MeasureSignal SignalBase::activeSignal() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setActiveSignal(const MeasureSignal& signal)
+void SignalBase::setActiveSignal(const MeasureSignal& activeSignal)
 {
-	QMutexLocker la(&m_activeSignalMutex);
-
-	m_activeSignal = signal;
-
-	QMutexLocker ls(&m_stateMutex);
-
-	m_requestStateList.clear();
-
-	for(int channel = 0; channel < signal.channelCount(); channel++)
 	{
-		// append hash of input signal
-		//
-		Metrology::Signal* pSignal = m_activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(channel);
-		if (pSignal == nullptr || pSignal->param().isValid() == false)
-		{
-			continue;
-		}
+		QMutexLocker la(&m_activeSignalMutex);
+		m_activeSignal = activeSignal;
+	}
 
-		m_requestStateList.push_back(pSignal->param().hash());
+	{
+		QMutexLocker ls(&m_stateMutex);
 
-		// append hash of signal that contains ID of module for input signal - Serial Number
-		//
-		QString appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
-		if (appSignalID_of_SerialNo.isEmpty() == false)
-		{
-			pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
-			m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
-		}
+		m_requestStateList.clear();
 
-		// append hash of comparators input signal
-		//
-		int comparatorCount = pSignal->param().comparatorCount();
-		for (int c = 0; c < comparatorCount; c++)
+		for(int channel = 0; channel < activeSignal.channelCount(); channel++)
 		{
-			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
-			if (comparatorEx == nullptr)
+			// append hash of input signal
+			//
+			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(channel);
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				continue;
 			}
 
-			if (comparatorEx->signalsIsValid() == false)
+			m_requestStateList.push_back(pSignal->param().hash());
+
+			// append hash of signal that contains ID of module for input signal - Serial Number
+			//
+			QString appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
+			if (appSignalID_of_SerialNo.isEmpty() == false)
+			{
+				pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
+				m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
+			}
+
+			// append hash of comparators input signal
+			//
+			int comparatorCount = pSignal->param().comparatorCount();
+			for (int c = 0; c < comparatorCount; c++)
+			{
+				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
+				if (comparatorEx == nullptr)
+				{
+					continue;
+				}
+
+				if (comparatorEx->signalsIsValid() == false)
+				{
+					continue;
+				}
+
+				if (comparatorEx->compare().isConst() == false)
+				{
+					m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
+				}
+
+				if (comparatorEx->hysteresis().isConst() == false)
+				{
+					m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
+				}
+
+				m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
+			}
+
+			// if input has not output signals got to next channel
+			//
+			if (activeSignal.connectionType() == Metrology::ConnectionType::Unused)
 			{
 				continue;
 			}
 
-			if (comparatorEx->compare().isConst() == false)
-			{
-				m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
-			}
-
-			if (comparatorEx->hysteresis().isConst() == false)
-			{
-				m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
-			}
-
-			m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
-		}
-
-		// if input has not output signals got to next channel
-		//
-		if (m_activeSignal.connectionType() == Metrology::ConnectionType::Unused)
-		{
-			continue;
-		}
-
-		// append hash of output signal
-		//
-		pSignal = m_activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).metrologySignal(channel);
-		if (pSignal == nullptr || pSignal->param().isValid() == false)
-		{
-			continue;
-		}
-
-		m_requestStateList.push_back(pSignal->param().hash());
-
-		// append hash of signal that contains ID of module for output signal
-		//
-		appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
-		if (appSignalID_of_SerialNo.isEmpty() == false)
-		{
-			pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
-			m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
-		}
-
-		// append hash of comparators output signal
-		//
-		comparatorCount = pSignal->param().comparatorCount();
-		for (int c = 0; c < comparatorCount; c++)
-		{
-			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
-			if (comparatorEx == nullptr)
+			// append hash of output signal
+			//
+			pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).metrologySignal(channel);
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				continue;
 			}
 
-			if (comparatorEx->signalsIsValid() == false)
+			m_requestStateList.push_back(pSignal->param().hash());
+
+			// append hash of signal that contains ID of module for output signal
+			//
+			appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
+			if (appSignalID_of_SerialNo.isEmpty() == false)
 			{
-				continue;
+				pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
+				m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
 			}
 
-			if (comparatorEx->compare().isConst() == false)
+			// append hash of comparators output signal
+			//
+			comparatorCount = pSignal->param().comparatorCount();
+			for (int c = 0; c < comparatorCount; c++)
 			{
-				m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
-			}
+				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
+				if (comparatorEx == nullptr)
+				{
+					continue;
+				}
 
-			if (comparatorEx->hysteresis().isConst() == false)
-			{
-				m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
-			}
+				if (comparatorEx->signalsIsValid() == false)
+				{
+					continue;
+				}
 
-			m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
+				if (comparatorEx->compare().isConst() == false)
+				{
+					m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
+				}
+
+				if (comparatorEx->hysteresis().isConst() == false)
+				{
+					m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
+				}
+
+				m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
+			}
 		}
 	}
 
 	emit activeSignalChanged(m_activeSignal);
+	emit requestStateHashesChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::clearActiveSignal()
 {
-	QMutexLocker la(&m_activeSignalMutex);
+	{
+		QMutexLocker la(&m_activeSignalMutex);
+		m_activeSignal.clear();
+	}
 
-	m_activeSignal.clear();
-
-	QMutexLocker ls(&m_stateMutex);
-
-	m_requestStateList.clear();
+	{
+		QMutexLocker ls(&m_stateMutex);
+		m_requestStateList.clear();
+	}
 
 	emit activeSignalChanged(m_activeSignal);
+	emit requestStateHashesChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

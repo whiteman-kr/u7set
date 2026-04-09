@@ -1,14 +1,14 @@
 #pragma once
 
+#include "../AppSignalLib/ISignalManager.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include <HardwareLib/Software.h>
 #include <VFrame30/SchemaDetails.h>
 
-#include "../OnlineLib/SoftwareSettings.h"
-
 #include "BuildResultWriter.h"
+#include "Context.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
-#include "Context.h"
 
 namespace VFrame30
 {
@@ -25,8 +25,6 @@ namespace AppSignalLists
 {
 	class AppSignalList;
 }
-
-class ISignalManager;
 
 namespace Builder
 {

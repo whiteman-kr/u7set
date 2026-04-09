@@ -210,13 +210,13 @@ namespace Gateway
 		request.setDelay(200);
 	}
 
-	void ModbusSlaveHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	void ModbusSlaveHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
-		int statesCount = getStatesReply.appsignalstates_size();
+		int statesCount = reply.appsignalstates_size();
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
+			const Proto::AppSignalState& state = reply.appsignalstates(i);
 
 			Hash hash = state.hash();
 
@@ -238,15 +238,15 @@ namespace Gateway
 		updateAllRegisters();
 	}
 
-	void ModbusSlaveHandler::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+	void ModbusSlaveHandler::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 	{
-		int statesCount = getStateChangesReply.appsignalstates_size();
+		int statesCount = reply.appsignalstates_size();
 
 		m_hashesToUpdate.clear();
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const Proto::AppSignalState& state = getStateChangesReply.appsignalstates(i);
+			const Proto::AppSignalState& state = reply.appsignalstates(i);
 
 			Hash hash = state.hash();
 
@@ -268,6 +268,19 @@ namespace Gateway
 		}
 
 		updateRegisters(m_hashesToUpdate);
+	}
+
+	void ModbusSlaveHandler::invalidateSignals()
+	{
+		for(auto& [hash, list] : m_signalsStates)
+		{
+			for(SignalState& st : list)
+			{
+				st.setValue(0);
+			}
+		}
+
+		updateAllRegisters();
 	}
 
 	E::ModbusMode ModbusSlaveHandler::modbusMode() const
@@ -495,6 +508,37 @@ namespace Gateway
 		updateAllRegisters();		// to init registers values
 
 		return true;
+	}
+
+	void ModbusSlaveHandler::runAppDataSrvClient()
+	{
+		std::lock_guard lg(m_adsClientMutex);
+
+		std::vector<HostAddressPort> srvAddrs;
+
+		if (m_settings.appDataService1.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService1.address);
+		}
+
+		if (m_settings.appDataService2.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService2.address);
+		}
+
+		auto updater = std::make_shared<ModbusAppSignalStateUpdater>(*this);
+
+		m_adsClient = std::make_unique<GrpcAdsClient>(m_swInfo, srvAddrs,
+													  QString("GatewayService %1").arg(m_swInfo.equipmentID()), m_log,
+													  GrpcAdsClient::RequestType::GetAppSignalState, 300,
+													  GrpcAdsClient::RequestType::GetAppSignalStateChanges, 20,
+													  updater);
+
+		std::vector<Hash> hashes = m_appSignals.getHashes();
+
+		m_adsClient->setHashesToRequestStates(hashes);
+
+		m_adsClient->start();
 	}
 
 	void ModbusSlaveHandler::prepareRequests()
@@ -1593,5 +1637,40 @@ namespace Gateway
 		Q_ASSERT(false);
 
 		return '0';
+	}
+
+	// ------------------------------------------------------------------------------------
+	//
+	// ModbusAppSignalStateUpdater class implementation
+	//
+	// ------------------------------------------------------------------------------------
+
+	ModbusAppSignalStateUpdater::ModbusAppSignalStateUpdater(ModbusSlaveHandler& handler) :
+		m_handler(handler)
+	{
+	}
+
+	void ModbusAppSignalStateUpdater::adsConnected()
+	{
+	}
+
+	void ModbusAppSignalStateUpdater::adsDisconnected()
+	{
+		m_handler.invalidateSignals();
+	}
+
+	void ModbusAppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
+	{
+		m_handler.updateAppSignalStates(reply);
+	}
+
+	void ModbusAppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
+	{
+		m_handler.processAppSignalStateChanges(reply);
+	}
+
+	void ModbusAppSignalStateUpdater::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+	{
+		Q_UNUSED(reply);
 	}
 }

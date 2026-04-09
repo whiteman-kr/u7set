@@ -1,6 +1,9 @@
 #pragma once
 
 #include <CommonLib/DebugInstCounter.h>
+#include <CommonLib/PropertyObject.h>
+#include <CommonLib/Hash.h>
+#include "../ProtobufEx/ProtoSerialization.h"
 #include <array>
 #include <functional>
 #include <memory>

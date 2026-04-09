@@ -40,6 +40,12 @@ namespace Gateway
 		return m_state[m_writeStateIndex ^ 1];
 	}
 
+	void AppSignalState::invalidate()
+	{
+		m_state[m_writeStateIndex].invalidate();
+		m_writeStateIndex.fetch_xor(1);
+	}
+
 	Hash AppSignalState::hash() const
 	{
 		return m_hash;

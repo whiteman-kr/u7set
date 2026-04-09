@@ -1,6 +1,9 @@
 #include "DialogMeasurePoint.h"
 #include "Delegate.h"
 
+#include <QHeaderView>
+#include <QMessageBox>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 DialogMeasurePoint::DialogMeasurePoint(const LinearityOption& linearity, QWidget* parent) :

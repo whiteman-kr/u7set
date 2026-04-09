@@ -4,15 +4,14 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/TcpConnectionState.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../UtilsLib/ILogFile.h"
 
 #include <QSharedMemory>
 #include <memory>
 
 class QDomNode;
-class CfgLoaderThread;
 class HostAddressPort;
-
 
 namespace ClientLib
 {
@@ -94,7 +93,7 @@ namespace ClientLib
 		SoftwareInfo m_softwareInfo;
 
 	private:
-		std::unique_ptr<CfgLoaderThread> m_cfgLoaderThread;
+		std::unique_ptr<GrpcCfgLoaderThread> m_grpcCfgLoaderThread;
 
 		QSharedMemory m_appInstanceSharedMemory;
 		int m_appInstanceNo = -1;

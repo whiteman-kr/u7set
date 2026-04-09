@@ -1,25 +1,65 @@
 #pragma once
 
-#include <random>
-
 #include "../../OnlineLib/CircularLogger.h"
+#include "../../OnlineLib/BuildInfo.h"
+#include "../../OnlineLib/SoftwareSettings.h"
+#include "../../AppDataService/AppDataSource.h"
+#include "../../AppDataService/AppDataReceiver.h"
+#include "../../AppDataService/DiscretesLog.h"
+#include "../../AppSignalLib/AppSignal.h"
 
-extern std::shared_ptr<CircularLogger> logger;
+extern CircularLoggerShared logger;
 
-inline quint64 randomUint64()
+extern QString buildPath;
+extern QString profileName;
+
+extern OnlineLib::BuildInfo buildInfo;
+extern SoftwareSettingsSet settingsSet;
+extern AppDataServiceSettings appDataSrvSettings;
+
+extern AppDataSources appDataSources;
+extern AppSignals appSignals;
+
+extern DynamicAppSignalStates appSignalStates;
+
+extern SimpleAppSignalStatesArchiveFlagQueue signalStatesQueue;
+extern GatewayAppSignalStatesQueue gatewaySignalStatesQueue;
+
+extern std::shared_ptr<AppDataReceiver> appDataReceiver;
+extern std::shared_ptr<DiscretesLogWriter> discretesLogWriter;
+
+//
+
+class LoggerGuard
 {
-	static thread_local std::mt19937_64 gen{ std::random_device{}() };
+public:
+	LoggerGuard()
+	{
+		Q_ASSERT(logger == nullptr);
+		logger = std::make_shared<CircularLogger>();
+		LOGGER_INIT(logger, QString(), "");
+		logger->setLogCodeInfo(false);
+	}
 
-	std::uniform_int_distribution<quint64> dist(0, UINT64_MAX);
+	~LoggerGuard()
+	{
+		LOGGER_SHUTDOWN(logger);
+	}
+};
 
-	return dist(gen);
-}
+bool isGTestDeathChild(const QStringList& args);
 
-inline quint32 randomUint32()
-{
-	static thread_local std::mt19937 gen{ std::random_device{}() };
+bool loadConfiguration();
+bool loadAppDataSources();
+bool loadAppSignals();
+void createAndInitSignalStates();
+void prepareAppDataSources();
+void createAndStartAppDataReceiver();
+void stopAppDataReceiver();
 
-	std::uniform_int_distribution<quint32> dist(0, UINT32_MAX);
+void clearSourcesSignalStatesQueue();
 
-	return dist(gen);
-}
+std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& project, const QString& equipmentID);
+void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter);
+
+void logMsg(const QString& msg);

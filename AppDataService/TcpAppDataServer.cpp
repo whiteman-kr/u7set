@@ -84,7 +84,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalStateChangesRequest(requestData, requestDataSize);
 		break;
 
-	case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:
+	case ADS_GET_GATEWAY_APP_SIGNAL_STATE_CHANGES:
 		onGatewayGetAppSignalStateChangesRequest(requestData, requestDataSize);
 		break;
 
@@ -246,7 +246,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 	{
 		Hash hash = tl_getAppSignalParamRequest.signalhashes(i);
 
-		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -290,7 +290,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	{
 		Hash hash = tl_getAppSignalRequest.signalhashes(i);
 
-		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -462,8 +462,8 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize)
 {
-	thread_local Network::GatewayGetAppSignalStateChangesRequest tl_gwGetAppSignalStateChangesRequest;
-	thread_local Network::GatewayGetAppSignalStateChangesReply tl_gwGetAppSignalStateChangesReply;
+	thread_local Network::GetGatewayAppSignalStateChangesRequest tl_gwGetAppSignalStateChangesRequest;
+	thread_local Network::GetGatewayAppSignalStateChangesReply tl_gwGetAppSignalStateChangesReply;
 	thread_local int tl_sentGatewayGetAppSignalStateChangesReplyCount = 0;
 
 	auto& request = tl_gwGetAppSignalStateChangesRequest;
@@ -543,13 +543,6 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 	sendReply(reply);
 
 	tl_sentGatewayGetAppSignalStateChangesReplyCount++;
-
-/*	if ((tl_sentGatewayGetAppSignalStateChangesReplyCount % 100) == 0)
-	{
-		qDebug() << C_STR(QString("Send %1 gateway states changes replies to %2").
-						  arg(tl_sentGatewayGetAppSignalStateChangesReplyCount).
-						  arg(connectedSoftwareInfo().equipmentID()));
-	} */
 }
 
 void TcpAppDataServer::onGetAppDataSourcesInfoRequest()

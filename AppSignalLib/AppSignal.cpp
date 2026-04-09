@@ -55,6 +55,11 @@ AppSignal::AppSignal(const ID_AppSignalID& ids)
 	m_loaded = false;
 }
 
+AppSignal::AppSignal(const Proto::AppSignal& proto)
+{
+	loadFromProto(proto);
+}
+
 AppSignal::~AppSignal()
 {
 }
@@ -1651,6 +1656,100 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	}
 }
 
+bool AppSignal::equalWithAppSignal(const AppSignal& s) const
+{
+	bool res = true;
+
+	// Signal identificators
+
+	res &= m_appSignalID == s.m_appSignalID;
+	res &= m_customAppSignalID == s.m_customAppSignalID;
+	res &= m_caption == s.m_caption;
+	res &= m_equipmentID == s.m_equipmentID;
+	res &= m_lmEquipmentID == s.m_lmEquipmentID;
+	res &= m_busTypeID == s.m_busTypeID;
+	res &= m_channel == s.m_channel;
+	res &= m_excludeFromBuild == s.m_excludeFromBuild;
+
+	res &= m_invertSignal == s.m_invertSignal;
+	res &= m_reserved == s.m_reserved;
+
+	// Signal type
+
+	res &= m_signalType == s.m_signalType;
+	res &= m_inOutType == s.m_inOutType;
+	res &= m_swCalcFunction == s.m_swCalcFunction;
+
+	// Signal format
+
+	res &= m_dataSize == s.m_dataSize;
+	res &= m_byteOrder == s.m_byteOrder;
+
+	// Analog signal properties
+
+	res &= m_analogSignalFormat == s.m_analogSignalFormat;
+	res &= m_unit == s.m_unit;
+
+	// Signal specific properties
+
+	res &= m_specPropStruct == s.m_specPropStruct;
+	res &= m_protoSpecPropValues == s.m_protoSpecPropValues;
+
+	// Tuning signal properties
+
+	res &= m_enableTuning == s.m_enableTuning;
+	res &= m_tuningDefaultValue == s.m_tuningDefaultValue;
+	res &= m_tuningLowBound == s.m_tuningLowBound;
+	res &= m_tuningHighBound == s.m_tuningHighBound;
+
+	//	Signal properties for MATS
+
+	res &= m_acquire == s.m_acquire;
+	res &= m_archive == s.m_archive;
+	res &= m_decimalPlaces == s.m_decimalPlaces;
+	res &= m_coarseAperture == s.m_coarseAperture;
+	res &= m_fineAperture == s.m_fineAperture;
+	res &= m_apertureType == s.m_apertureType;
+	res &= m_log == s.m_log;
+
+	// Signal fields from database
+
+	res &= m_ID == s.m_ID;
+	res &= m_signalGroupID == s.m_signalGroupID;
+	res &= m_signalInstanceID == s.m_signalInstanceID;
+	res &= m_changesetID == s.m_changesetID;
+	res &= m_checkedOut == s.m_checkedOut;
+	res &= m_userID == s.m_userID;
+	res &= m_createdMcs == s.m_createdMcs;
+	res &= m_deleted == s.m_deleted;
+	res &= m_instanceCreatedMcs == s.m_instanceCreatedMcs;
+	res &= m_instanceAction == s.m_instanceAction;
+
+	// Signal properties calculated in compile-time
+
+	res &= m_hash == s.m_hash;
+
+	res &= m_ioBufAddr == s.m_ioBufAddr;
+	res &= m_tuningAddr == s.m_tuningAddr;
+	res &= m_ualAddr == s.m_ualAddr;
+	res &= m_regBufAddr == s.m_regBufAddr;
+	res &= m_regValueAddr == s.m_regValueAddr;
+	res &= m_regValidityAddr == s.m_regValidityAddr;
+
+	res &= m_lmRamAccess == s.m_lmRamAccess;
+
+	res &= m_isConst == s.m_isConst;
+	res &= m_constValue == s.m_constValue;
+
+	res &= m_isEndpoint == s.m_isEndpoint;
+
+	res &= m_stateFlagsSignals == s.m_stateFlagsSignals;
+
+	res &= m_tags == s.m_tags;
+
+	return res;
+}
+
 void AppSignal::initCalculatedProperties()
 {
 	m_hash = calcHash(m_appSignalID);
@@ -2703,6 +2802,10 @@ const AppSignal* AppSignalSet::privateAt(int index) const
 //
 // -------------------------------------------------------------------------------
 
+AppSignals::AppSignals()
+{
+}
+
 AppSignals::~AppSignals()
 {
 	clear();
@@ -2711,44 +2814,50 @@ AppSignals::~AppSignals()
 void AppSignals::clear()
 {
 	m_hashToSignal.clear();
+	m_signals.clear();
+}
 
-	for(AppSignal* s : m_signals)
+void AppSignals::reserve(int expectedSignalsCount)
+{
+	if (m_signals.size() > 0)
 	{
-		delete s;
+		Q_ASSERT(false);
+		return;
 	}
 
-	m_signals.clear();
+	m_signals.reserve(expectedSignalsCount);
+	m_hashToSignal.reserve(expectedSignalsCount);
 }
 
 void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
 {
 	QString appSignalID = QString::fromStdString(protoAppSignal.appsignalid());
 
-	if (containsID(appSignalID) == true)
-	{
-		qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
-		assert(false);
-		return;
-	}
-
 	Hash hash = calcHash(appSignalID);
 
-	if (containsHash(hash) == true)
+	const AppSignal* existsAppSignal = getByHash(hash);
+
+	if (existsAppSignal != nullptr)
 	{
-		qDebug() << C_STR(QString("AppSignalID hash %1 collision").arg(hash, 16));
-		assert(false);
+		if (existsAppSignal->appSignalID() == appSignalID)
+		{
+			qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
+			Q_ASSERT(false);
+			return;
+		}
+
+		qDebug() << C_STR(QString("AppSignalIDs %1 and %2 hash %3 collision").
+								arg(appSignalID).arg(existsAppSignal->appSignalID()).arg(hash, 16));
+		Q_ASSERT(false);
 		return;
 	}
 
-	AppSignal* s = new AppSignal;
-
-	s->loadFromProto(protoAppSignal);
-
-	m_signals.push_back(s);
-	m_hashToSignal.insert({hash, s});
+	int index = static_cast<int>(m_signals.size());
+	m_signals.emplace_back(protoAppSignal);
+	m_hashToSignal.insert({hash, index});
 }
 
-bool AppSignals::containsID(const QString& appSignalID) const
+bool AppSignals::containsAppSignalID(const QString& appSignalID) const
 {
 	return m_hashToSignal.contains(calcHash(appSignalID));
 }
@@ -2758,19 +2867,12 @@ bool AppSignals::containsHash(Hash hash) const
 	return m_hashToSignal.contains(hash);
 }
 
-const AppSignal* AppSignals::getSignalByID(const QString& appSignalID) const
+const AppSignal* AppSignals::getByAppSignalID(const QString& appSignalID) const
 {
-	auto it = m_hashToSignal.find(calcHash(appSignalID));
-
-	if (it == m_hashToSignal.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
+	return getByHash(calcHash(appSignalID));
 }
 
-const AppSignal* AppSignals::getSignalByHash(Hash hash) const
+const AppSignal* AppSignals::getByHash(Hash hash) const
 {
 	auto it = m_hashToSignal.find(hash);
 
@@ -2779,7 +2881,17 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 		return nullptr;
 	}
 
-	return it->second;
+	return &m_signals[it->second];
+}
+
+const AppSignal* AppSignals::getByIndex(int index) const
+{
+	if (index < 0 || index >= static_cast<int>(m_signals.size()))
+	{
+		return nullptr;
+	}
+
+	return &m_signals[index];
 }
 
 const AppSignal* AppSignals::getSignalByIndex(size_t index) const
@@ -2790,7 +2902,7 @@ const AppSignal* AppSignals::getSignalByIndex(size_t index) const
 		return nullptr;
 	}
 
-	return m_signals[index];
+	return &m_signals[index];
 }
 
 const AppSignal* AppSignals::getSignalByIndex(int index) const
@@ -2812,22 +2924,37 @@ size_t AppSignals::count() const
 	return m_signals.size();
 }
 
-std::vector<AppSignal*>::iterator AppSignals::begin()
+std::vector<AppSignal>::iterator AppSignals::begin()
 {
 	return m_signals.begin();
 }
 
-std::vector<AppSignal*>::const_iterator AppSignals::begin() const
+std::vector<AppSignal>::const_iterator AppSignals::begin() const
 {
 	return m_signals.cbegin();
 }
 
-std::vector<AppSignal*>::iterator AppSignals::end()
+std::vector<AppSignal>::iterator AppSignals::end()
 {
 	return m_signals.end();
 }
 
-std::vector<AppSignal*>::const_iterator AppSignals::end() const
+std::vector<AppSignal>::const_iterator AppSignals::end() const
 {
 	return m_signals.cend();
 }
+
+std::vector<Hash> AppSignals::getHashes() const
+{
+	std::vector<Hash> hashes;
+
+	hashes.reserve(count());
+
+	for(const AppSignal& s : m_signals)
+	{
+		hashes.push_back(s.hash());
+	}
+
+	return hashes;
+}
+

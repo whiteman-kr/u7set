@@ -3,6 +3,7 @@
 #endif
 
 #include <CommonLib/Times.h>
+#include <QRegularExpression>
 
 
 QString DateTimeFormat::fileName(const QLocale* locale)

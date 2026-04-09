@@ -573,7 +573,11 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (m_signalDataServer != nullptr)
 	{
-		m_dataServiceIds = m_signalDataServer->dataServiceIds(signal.appSignalId());
+		for (auto services = m_signalDataServer->dataServiceIds(signal.appSignalId().toStdString()); //
+			 const auto& serviceId : services)
+		{
+			m_dataServiceIds.push_back(QString::fromStdString(serviceId));
+		}
 	}
 
 	ui->setupUi(this);
@@ -1350,8 +1354,15 @@ void DialogSignalInfo::fillProperties()
 
 		if (m_signalDataServer != nullptr)
 		{
+			QStringList dataServiceIds;
+			for (const auto& dss = m_signalDataServer->dataServiceIds(m_signal.appSignalId().toStdString()); //
+				 const auto& serviceId : dss)
+			{
+				dataServiceIds.push_back(QString::fromStdString(serviceId));
+			}
+
 			QStringList shortenIds;
-			QStringList dataServiceIds = m_signalDataServer->dataServiceIds(m_signal.appSignalId());
+
 			for (const auto& ads : m_appDataServices)
 			{
 				if (std::find(dataServiceIds.begin(), dataServiceIds.end(), ads.equipmentId) != dataServiceIds.end())

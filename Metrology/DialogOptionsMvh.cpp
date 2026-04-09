@@ -2,6 +2,8 @@
 #include "Delegate.h"
 #include "MeasureViewHeader.h"
 
+#include <QHeaderView>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureViewOption& header, QWidget* parent) :

@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Static runtime, used for AdsBridge.
+#
+option(STATIC_RUNTIME "Static runtime" OFF)
+
+if (STATIC_RUNTIME AND WIN32)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+if (STATIC_RUNTIME AND UNIX)
+	set(VCPKG_TARGET_TRIPLET x64-linux-static)
+endif()
+
 # Creates variables:
 #	U7SET_MAJOR_VERSION, 
 #	U7SET_MINOR_VERSION, 
@@ -50,6 +62,7 @@ set(QT_VERSION "6.8.1")
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(asio CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS graph)
+find_package(gRPC CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(PostgreSQL REQUIRED)
@@ -70,6 +83,11 @@ set_warnings()
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+	# /OPT:REF - remove unreferenced functions/data, reduce binary size
+	#
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /OPT:REF")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /OPT:REF")
 endif()
 
 # Where to put binaries.
@@ -158,41 +176,46 @@ message("Allow FTDI: ${ALLOW_FTDI}")
 message("Build Licenser: ${BUILD_LICENSER}")
 message("Small Unit Tests: ${BUILD_SMALL_TESTS}")
 message("RV Model: ${RV_MODEL}")
+message("Static Runtime: ${STATIC_RUNTIME}")
 message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(AppSignalLib)
-add_subdirectory(GatewayLib)
-add_subdirectory(OnlineLib)
-add_subdirectory(UtilsLib)
-
 add_subdirectory(libs)
-add_subdirectory(Simulator)
 
-add_subdirectory(Builder)
-add_subdirectory(BuilderConsole)
+if (NOT STATIC_RUNTIME)
+	add_subdirectory(AppSignalLib)
+	add_subdirectory(GatewayLib)
+	add_subdirectory(OnlineLib)
+	add_subdirectory(UtilsLib)
 
-add_subdirectory(AppDataService)
-add_subdirectory(ArchivingService)
-add_subdirectory(ConfigurationService)
-add_subdirectory(DiagDataService)
-add_subdirectory(GatewayService)
-add_subdirectory(ServiceControlManager)
-add_subdirectory(TuningService)
-
-add_subdirectory(TestSuiteConsole)
-
-add_subdirectory(Tests)
+	add_subdirectory(Simulator)
+	
+	add_subdirectory(Builder)
+	add_subdirectory(BuilderConsole)
+	
+	add_subdirectory(AppDataService)
+	add_subdirectory(ArchivingService)
+	add_subdirectory(ConfigurationService)
+	add_subdirectory(DiagDataService)
+	add_subdirectory(ServiceControlManager)
+	add_subdirectory(TuningService)
+	
+	add_subdirectory(TestSuiteConsole)
+	
+	add_subdirectory(Tests)
+endif()
 
 # Do not compile these projects if code coverage is on.
 #
-if(NOT CODE_COVERAGE)
+if((NOT STATIC_RUNTIME) AND (NOT CODE_COVERAGE))
+	add_subdirectory(GatewayService)
 	add_subdirectory(Archivist)
 
-    add_subdirectory(u7)
+	add_subdirectory(u7)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
+	
 	add_subdirectory(./Tools/qtkeychain)
 	add_subdirectory(./Tools/BuildCompConsole)
 
@@ -213,19 +236,21 @@ endif()
 # Create install target.
 # Just run /u7setinstall/createinstall.bat file.
 #
-add_custom_target(create_install
-	COMMAND ${CMAKE_COMMAND} -E env "U7SET_FULL_VERSION=${U7SET_FULL_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall/createinstall.bat"
-	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall"
-	COMMENT "Running createinstall.bat with U7SET_FULL_VERSION=${U7SET_FULL_VERSION}"
-)
-
-# Generate dependency graphs into the build directory/LibraryDependencies
-#
-if(WIN32)
-	# Add a custom target to run the dependencies.bat script
-	add_custom_target(GenerateDependencySvgs
-		COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
-		COMMENT "Generating library dependency SVG files..."
-		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+if (NOT STATIC_RUNTIME) # Only for full build
+	add_custom_target(create_install
+		COMMAND ${CMAKE_COMMAND} -E env "U7SET_FULL_VERSION=${U7SET_FULL_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall/createinstall.bat"
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall"
+		COMMENT "Running createinstall.bat with U7SET_FULL_VERSION=${U7SET_FULL_VERSION}"
 	)
+	
+	# Generate dependency graphs into the build directory/LibraryDependencies
+	#
+	if(WIN32)
+		# Add a custom target to run the dependencies.bat script
+		add_custom_target(GenerateDependencySvgs
+			COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
+			COMMENT "Generating library dependency SVG files..."
+			WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		)
+	endif()
 endif()

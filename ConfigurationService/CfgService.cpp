@@ -46,10 +46,11 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 		serviceInfo.set_cfgcheckerstate(TO_INT(E::ConfigCheckerState::Unknown));
 	}
 
+	/* NEED UPDATE!!!
 	if (m_cfgServerThread != nullptr)
 	{
 		m_cfgServerThread->getClientsList(&serviceInfo);
-	}
+	} */
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
@@ -198,39 +199,35 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-
-	CfgServer* cfgServer = new CfgServer(softwareInfo(),
-										 sessionParams(),
-										 buildPath,
-										 m_cfgServiceSettings.clients,
-										 m_cfgServiceSettings.checkHostname,
-										 logger());
-
-	std::vector<Tcp::ListenAddress> listenAddrs;
+	m_grpcCfgServers.clear();
 
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
 	{
-		if (rcs.enable())
+		if (rcs.enable() == false)
 		{
-			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+			continue;
 		}
+
+		HostAddressPort clientRequestIP = rcs.clientRequestIP();
+
+		m_grpcCfgServers.push_back(
+			std::make_unique<GrpcCfgServer>(softwareInfo(), sessionParams(),
+											m_cfgServiceSettings.clients,
+											m_cfgServiceSettings.checkHostname,
+											clientRequestIP, buildPath, logger()));
+		m_grpcCfgServers.back()->start();
 	}
-
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
-
-	m_cfgServerThread->start();
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
-	if (m_cfgServerThread != nullptr)
+	for(auto& srv : m_grpcCfgServers)
 	{
-		m_cfgServerThread->quitAndWait();
-
-		delete m_cfgServerThread;
-
-		m_cfgServerThread = nullptr;
+		TEST_PTR_CONTINUE(srv);
+		srv->stop();
 	}
+
+	m_grpcCfgServers.clear();
 }
 
 void ConfigurationServiceWorker::startCfgCheckerThread()

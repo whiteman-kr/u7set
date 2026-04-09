@@ -1,6 +1,8 @@
 #include "MetrologySignal.h"
 #include "UnitsConverter.h"
+
 #include <AppSignal.pb.h>
+#include <QApplication>
 
 namespace Metrology
 {
@@ -539,9 +541,21 @@ namespace Metrology
 
 		switch (inOutType())
 		{
-			case E::SignalInOutType::Input:		typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");	break;
-			case E::SignalInOutType::Internal:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");	break;
-			case E::SignalInOutType::Output:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");	break;
+			case E::SignalInOutType::Input:
+				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");
+				break;
+
+			case E::SignalInOutType::Internal:
+				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");
+				break;
+
+			case E::SignalInOutType::Output:
+				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");
+				break;
+
+			case E::SignalInOutType::SoftwareCalculated:
+				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "SwCalculated");
+				break;
 
 			default:
 				Q_ASSERT(0);

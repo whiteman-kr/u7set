@@ -1,12 +1,30 @@
 #include <ServiceLib/ServiceStarter.h>
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 #include "AppDataService.h"
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
+#include "../UtilsLib/HighResolutionTimerGuard.h"
+#include <grpc/support/log.h>
 
 int main(int argc, char *argv[])
 {
 	Vld::setVldReportFilterHook();
+
+#ifdef VLD_IS_INCLUDED
+	VLDDisable();
+#endif
+
+	// qInfo() << "GRPC_TRACE=" << qgetenv("GRPC_TRACE");
+	// qInfo() << "GRPC_VERBOSITY=" << qgetenv("GRPC_VERBOSITY");
+	// qInfo() << "ABSL_MIN_LOG_LEVEL=" << qgetenv("ABSL_MIN_LOG_LEVEL");
+
+#ifdef VLD_IS_INCLUDED
+	VLDEnable();
+#endif
+
+	HighResolutionTimerGuard highResTimerGuard;
+
+	Q_UNUSED(highResTimerGuard);
 
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::APPLICATION_DATA_SERVICE);
 
@@ -38,7 +56,7 @@ int main(int argc, char *argv[])
 	SoftwareInfo si(E::SoftwareType::AppDataService, "");
 
 	AppDataServiceWorker appDataServiceWorker(si,
-											  Service::getServiceInstanceName(Manufacturer::APPLICATION_DATA_SERVICE, argc, argv),
+											  ::Service::getServiceInstanceName(Manufacturer::APPLICATION_DATA_SERVICE, argc, argv),
 											  argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);

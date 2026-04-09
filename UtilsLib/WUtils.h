@@ -6,7 +6,10 @@
 #include <cmath>
 #include <set>
 #include <map>
+#include <limits>
+#include <random>
 #include <QTimeZone>
+#include <QThread>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
@@ -237,7 +240,7 @@ private:
 
 inline quint16 __checkAndCastToQuint16(int value)
 {
-	Q_ASSERT(value >= std::numeric_limits<quint16>::lowest() && value <= std::numeric_limits<quint16>::max());
+	Q_ASSERT(value >= (std::numeric_limits<quint16>::lowest)() && value <= (std::numeric_limits<quint16>::max)());
 
 	return static_cast<quint16>(value);
 }
@@ -251,16 +254,16 @@ template <class T>
 	std::enable_if_t<std::is_same<T, float>::value, bool>	// check that T is type of float
 isFloatEquals(T v1, T v2)
 {
-	return std::nextafter(v1, std::numeric_limits<float>::lowest()) <= v2 &&
-							std::nextafter(v1, std::numeric_limits<float>::max()) >= v2;
+	return std::nextafter(v1, (std::numeric_limits<float>::lowest)()) <= v2 &&
+							std::nextafter(v1, (std::numeric_limits<float>::max)()) >= v2;
 }
 
 template <class T>
 	std::enable_if_t<std::is_same<T, double>::value, bool>	// check that T is type of double
 isDoubleEquals(T v1, T v2)
 {
-	return std::nextafter(v1, std::numeric_limits<double>::lowest()) <= v2 &&
-							std::nextafter(v1, std::numeric_limits<double_t>::max()) >= v2;
+	return std::nextafter(v1, (std::numeric_limits<double>::lowest)()) <= v2 &&
+							std::nextafter(v1, (std::numeric_limits<double_t>::max)()) >= v2;
 }
 
 using OptionalBool = std::optional<bool>;
@@ -341,18 +344,31 @@ inline QString boolToString(bool value)
 
 inline bool checkInt32Range(qint64 value)
 {
-	return	value <= std::numeric_limits<qint32>::max() &&
-			value >= std::numeric_limits<qint32>::lowest();
+	return	value <= (std::numeric_limits<qint32>::max)() &&
+			value >= (std::numeric_limits<qint32>::lowest)();
 }
 
 inline bool checkFloat32Range(double value)
 {
-	return	value <= std::numeric_limits<float>::max() &&
-			value >= std::numeric_limits<float>::lowest();
+	return	value <= (std::numeric_limits<float>::max)() &&
+			value >= (std::numeric_limits<float>::lowest)();
 }
 
 template <typename KEY, typename VALUE>
 VALUE getValueOrDefault(const std::map<KEY, VALUE>& map, const KEY& key, const VALUE& def)
+{
+	auto it = map.find(key);
+
+	if (it == map.end())
+	{
+		return def;
+	}
+
+	return it->second;
+}
+
+template <typename KEY, typename VALUE>
+VALUE getValueOrDefault(const std::unordered_map<KEY, VALUE>& map, const KEY& key, const VALUE& def)
 {
 	auto it = map.find(key);
 
@@ -409,6 +425,30 @@ inline QString fineSize(qint64 size)
 	return QString("%1 Bytes").arg(size);
 }
 
+inline quintptr currentThreadId()
+{
+	return reinterpret_cast<quintptr>(QThread::currentThreadId());
+}
+
+inline quint64 randomUint64()
+{
+	static thread_local std::mt19937_64 gen{ std::random_device{}() };
+
+	std::uniform_int_distribution<quint64> dist(0, UINT64_MAX);
+
+	return dist(gen);
+}
+
+inline quint32 randomUint32()
+{
+	static thread_local std::mt19937 gen{ std::random_device{}() };
+
+	std::uniform_int_distribution<quint32> dist(0, UINT32_MAX);
+
+	return dist(gen);
+}
+
+
 #define ROUND_TO(value, roundTo)	(((value + roundTo - 1) / roundTo) * roundTo)
 
 const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
@@ -424,4 +464,3 @@ const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
 
 #define VOID_PTR_CAST(v) (reinterpret_cast<void*>(v))
 #define CONST_VOID_PTR_CAST(v) (reinterpret_cast<const void*>(v))
-

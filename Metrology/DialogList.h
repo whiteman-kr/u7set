@@ -13,6 +13,7 @@
 #include <QKeyEvent>
 #include <QClipboard>
 #include <QComboBox>
+#include <QMutex>
 
 // ==============================================================================================
 

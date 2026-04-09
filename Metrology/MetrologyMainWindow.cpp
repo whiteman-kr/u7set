@@ -4,6 +4,9 @@
 #include <CommonLib/ConstStrings.h>
 #include <UiLib/UiTools.h>
 
+#include <QApplication>
+#include <QSettings>
+
 #include "CalibratorBase.h"
 #include "Database.h"
 #include "SignalBase.h"
@@ -18,11 +21,51 @@
 #include "Options.h"
 #include "DialogOptions.h"
 
+AppSignalStateUpdater::AppSignalStateUpdater(SignalBase& signalBase) :
+	m_signalBase(signalBase)
+{
+}
+
+void AppSignalStateUpdater::adsConnected()
+{
+}
+
+void AppSignalStateUpdater::adsDisconnected()
+{
+	m_signalBase.invalidateSignals();
+}
+
+void AppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
+{
+	Metrology::SignalState mst;
+	AppSignalStateFlags f;
+
+	for(const Proto::AppSignalState& st : reply.appsignalstates())
+	{
+		mst.setValue(st.value());
+		f.all = st.flags();
+		mst.setFlags(f);
+		Hash h = st.hash();
+		m_signalBase.setSignalState(h, mst);
+	}
+}
+
+void AppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
+{
+	Q_UNUSED(reply)
+}
+
+void AppSignalStateUpdater::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+{
+	Q_UNUSED(reply)
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
-	: QMainWindow(parent)
-	, m_softwareInfo(softwareInfo)
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared log, QWidget* parent) :
+	QMainWindow(parent),
+	m_softwareInfo(softwareInfo),
+	m_log(log)
 {
 	// open database
 	//
@@ -41,6 +84,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::requestStateHashesChanged, this, &MainWindow::updateSignalHashesForRequestStates, Qt::QueuedConnection);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &theSignalBase.tuning().signalBase(), &TuningSignalBase::signalParamChanged, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
@@ -1159,17 +1203,27 @@ void MainWindow::setMeasureType(int measureType)
 
 bool MainWindow::signalSocketIsConnected()
 {
-	if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
+	// if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
+	// {
+	// 	return false;
+	// }
+
+	// if (m_pSignalSocket->isConnected() == false)
+	// {
+	// 	return false;
+	// }
+
 	{
-		return false;
+		std::lock_guard lg(m_grpcAdsClientMutex);
+
+		if (m_grpcAdsClient != nullptr)
+		{
+			return m_grpcAdsClient->isConnected();
+		}
 	}
 
-	if (m_pSignalSocket->isConnected() == false)
-	{
-		return false;
-	}
+	return false;
 
-	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1474,6 +1528,16 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 	}
 
 	return maxComparatorCount;
+}
+
+void MainWindow::updateSignalHashesForRequestStates()
+{
+	std::lock_guard lg(m_grpcAdsClientMutex);
+
+	if (m_grpcAdsClient)
+	{
+		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2720,7 +2784,7 @@ void MainWindow::configSocketWrongClientHostname(QString errMsg)
 
 void MainWindow::configSocketConfigurationLoaded()
 {
-	runSignalSocket();
+	restartSignalSocket();
 	runTuningSocket();
 
 	//
@@ -2795,17 +2859,31 @@ void MainWindow::configSocketSignalBaseLoaded()
 
 void MainWindow::signalSocketConnected()
 {
-	if (m_pSignalSocket == nullptr)
-	{
-		return;
-	}
+	// if (m_pSignalSocket == nullptr)
+	// {
+	// 	return;
+	// }
 
 	if (m_statusConnectToAppDataServer == nullptr)
 	{
 		return;
 	}
 
-	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(m_pSignalSocket->selectedServerIndex());
+	int serverIndex = 0;
+
+	{
+		std::lock_guard lg(m_grpcAdsClientMutex);
+
+		if (m_grpcAdsClient == nullptr)
+		{
+			return;
+		}
+
+		serverIndex = m_grpcAdsClient->selectedServerIndex();
+	}
+
+
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(serverIndex);
 	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
@@ -3280,34 +3358,75 @@ void MainWindow::runSignalSocket()
 {
 	// init signal socket thread
 	//
-	HostAddressPort signalSocketAddress1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
-	HostAddressPort signalSocketAddress2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
-	m_softwareInfo.setEquipmentID(theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary));
+	// HostAddressPort signalSocketAddress1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+	// HostAddressPort signalSocketAddress2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+	// m_softwareInfo.setEquipmentID(theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary));
 
-	m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
-	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+	// m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
+	// m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
 
-	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+	// connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
 
-	m_pSignalSocketThread->start();
+	// m_pSignalSocketThread->start();
+
+	std::lock_guard lg(m_grpcAdsClientMutex);
+
+	std::vector<HostAddressPort> serverAddress;
+
+	HostAddressPort addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+
+	if (addr.isSet())
+	{
+		serverAddress.push_back(addr);
+	}
+
+	addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+
+	if (addr.isSet())
+	{
+		serverAddress.push_back(addr);
+	}
+
+	auto updater = std::make_shared<AppSignalStateUpdater>(theSignalBase);
+
+	m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo,
+								serverAddress,
+								"Metrology GrpcAdsClient",
+								m_log,
+								GrpcAdsClient::RequestType::GetAppSignalState, 50,
+								GrpcAdsClient::RequestType::NoRequest, 1, updater);
+
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+
+	m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
+
+	m_grpcAdsClient->start();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopSignalSocket()
 {
-	if (m_pSignalSocketThread == nullptr)
-	{
-		return;
-	}
+	std::lock_guard lg(m_grpcAdsClientMutex);
 
-	m_pSignalSocketThread->quitAndWait(10000);
-	delete m_pSignalSocketThread;
-	m_pSignalSocketThread = nullptr;
+	if (m_grpcAdsClient != nullptr)
+	{
+		m_grpcAdsClient->stop();
+		m_grpcAdsClient.reset();
+	}
+}
+
+void MainWindow::restartSignalSocket()
+{
+	stopSignalSocket();
+	runSignalSocket();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -3464,4 +3583,17 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	QMainWindow::closeEvent(e);
 }
 
+
+MainWindow* getMainWindow()
+{
+	for (QWidget* w : qApp->topLevelWidgets())
+	{
+		if (auto* mw = qobject_cast<MainWindow*>(w))
+		{
+			return mw;
+		}
+	}
+
+	return nullptr;
+}
 // -------------------------------------------------------------------------------------------------------------------

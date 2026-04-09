@@ -483,7 +483,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
 	TestAdsGwConnection adsConn{signalManager, logger};
 	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_EQ(adsConn.m_connected, false);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
 	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
 
@@ -529,7 +529,7 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
 	TestAdsGwConnection adsConn{signalManager, logger};
 	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_EQ(adsConn.m_connected, false);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
 	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
 

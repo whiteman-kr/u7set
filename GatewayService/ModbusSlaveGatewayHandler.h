@@ -7,6 +7,7 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "ModbusProtocol.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 using namespace Modbus;
 using namespace asio;
@@ -53,8 +54,9 @@ namespace Gateway
 		virtual void onAppDataSrvDisconnected() override;
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
-		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
+		void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
+		void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply);
+		void invalidateSignals();
 
 		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
@@ -88,6 +90,8 @@ namespace Gateway
 
 	private:
 		bool init();
+
+		virtual void runAppDataSrvClient() override;
 
 		virtual void prepareRequests() override;
 
@@ -165,4 +169,21 @@ namespace Gateway
 	};
 
 	using ModbusSlaveHandlerShared = std::shared_ptr<ModbusSlaveHandler>;
+
+	class ModbusAppSignalStateUpdater : public IAppSignalStateUpdater
+	{
+	public:
+		ModbusAppSignalStateUpdater(ModbusSlaveHandler& handler);
+
+		virtual void adsConnected() override;
+		virtual void adsDisconnected() override;
+
+		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+
+	private:
+		ModbusSlaveHandler& m_handler;
+	};
+
 }

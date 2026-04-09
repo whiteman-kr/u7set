@@ -1,6 +1,5 @@
 #include <string>
 
-
 #include "AdsGatewayHandler.h"
 
 namespace Gateway
@@ -121,28 +120,38 @@ namespace Gateway
 		m_gateway->getEventSignalsHashes(hashes);
 	}
 
-	void AdsGatewayHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	void AdsGatewayHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
 		if (m_adsGatewayServer)
 		{
-			m_adsGatewayServer->updateSignalStates(getStatesReply);
+			m_adsGatewayServer->updateSignalStates(reply);
 		}
 	}
 
-	void AdsGatewayHandler::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+	void AdsGatewayHandler::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 	{
 		{
 			std::lock_guard lg(m_adsGatewayServerMutex);
 
 			if (m_adsGatewayServer)
 			{
-				m_adsGatewayServer->processStateChanges(getStateChangesReply);
+				m_adsGatewayServer->processStateChanges(reply);
 			}
 		}
 
-		m_hasPendingChanges = getStateChangesReply.pendingstatescount() > 0;
+		m_hasPendingChanges = reply.pendingstatescount() > 0;
+	}
+
+	void AdsGatewayHandler::invalidateSignals()
+	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
+		if (m_adsGatewayServer)
+		{
+			m_adsGatewayServer->invalidateSignals();
+		}
 	}
 
 	void AdsGatewayHandler::prepareRequests()
@@ -222,6 +231,37 @@ namespace Gateway
 		}
 	}
 
+	void AdsGatewayHandler::runAppDataSrvClient()
+	{
+		std::lock_guard lg(m_adsClientMutex);
+
+		std::vector<HostAddressPort> srvAddrs;
+
+		if (m_settings.appDataService1.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService1.address);
+		}
+
+		if (m_settings.appDataService2.address.isNull() == false)
+		{
+			srvAddrs.push_back(m_settings.appDataService2.address);
+		}
+
+		auto updater = std::make_shared<AdsGatewayAppSignalStateUpdater>(*this);
+
+		m_adsClient = std::make_unique<GrpcAdsClient>(m_swInfo, srvAddrs,
+													  QString("GatewayService %1").arg(m_swInfo.equipmentID()), m_log,
+													  GrpcAdsClient::RequestType::GetAppSignalState, 100,
+													  GrpcAdsClient::RequestType::GetAppSignalStateChanges, 20,
+													  updater);
+
+		std::vector<Hash> hashes = m_appSignals.getHashes();
+
+		m_adsClient->setHashesToRequestStates(hashes);
+
+		m_adsClient->start();
+	}
+
 	void AdsGatewayHandler::runAdsGatewayServer()
 	{
 		Q_ASSERT(m_adsGatewayServer == nullptr);
@@ -241,5 +281,39 @@ namespace Gateway
 			m_adsGatewayServer->stop();
 			m_adsGatewayServer.reset();
 		}
+	}
+
+	// ------------------------------------------------------------------------------------
+	//
+	// AdsGatewayAppSignalStateUpdater class implementation
+	//
+	// ------------------------------------------------------------------------------------
+
+	AdsGatewayAppSignalStateUpdater::AdsGatewayAppSignalStateUpdater(AdsGatewayHandler& handler) :
+		m_handler(handler)
+	{
+	}
+
+	void AdsGatewayAppSignalStateUpdater::adsConnected()
+	{
+	}
+
+	void AdsGatewayAppSignalStateUpdater::adsDisconnected()
+	{
+	}
+
+	void AdsGatewayAppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
+	{
+		m_handler.updateAppSignalStates(reply);
+	}
+
+	void AdsGatewayAppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
+	{
+		m_handler.processAppSignalStateChanges(reply);
+	}
+
+	void AdsGatewayAppSignalStateUpdater::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+	{
+		Q_UNUSED(reply);
 	}
 }

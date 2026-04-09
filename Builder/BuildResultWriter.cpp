@@ -486,7 +486,7 @@ namespace Builder
 
 	bool BuildResult::createBuildXml(const OnlineLib::BuildInfo& buildInfo)
 	{
-		m_buildXmlFile.setFileName(m_fullPath + "/build.xml");
+		m_buildXmlFile.setFileName(m_fullPath + File::SLASH_BUILD_XML);
 
 		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODeviceBase::Truncate) == false)
 		{

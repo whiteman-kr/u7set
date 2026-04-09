@@ -1,3 +1,4 @@
 MPS-29
 			Version: 0	MPS-29_v0.u7devp		Initial version
 	08.05.2023	Version: 1      MPS-29_v1.u7devp                RPCT-3530: Improve MPS-29 preset to calibrate thermopairs measurement
+	22.10.2025	Version: 3	MPS-29_v3.u7devp		Added: ElectricalUnits V, SensorType V_0_5

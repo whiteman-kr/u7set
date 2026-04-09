@@ -8,6 +8,7 @@
 #include <atomic>
 
 #include <Network.pb.h>
+#include <GrpcAppDataSrv.pb.h>
 
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
@@ -17,10 +18,10 @@
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
 
-class DiscretesLog
+class DiscretesLog : public LogWrapper
 {
 public:
-	DiscretesLog(bool isWriter);
+	DiscretesLog(bool isWriter, CircularLoggerShared log);
 	virtual ~DiscretesLog();
 
 	static bool readDiscretesLogRecord(const QSqlQuery& q, DiscretesLogRecord& r);
@@ -42,7 +43,6 @@ protected:
 
 protected:
 	bool m_isWriter = false;
-	CircularLoggerShared m_log;
 
 	QSqlDatabase m_db;
 	bool m_dbIsWorkable = false;
@@ -56,11 +56,18 @@ public:
 	virtual ~DiscretesLogReader();
 
 	virtual bool openDatabase() override;
-	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
 
 	void setLogChanged(bool logTruncated);
 
+	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
+	void getDiscretesLog(Grpc::GetDiscretesLogReply* reply);
+
 private:
+	void getDiscretesLogInternal(bool& logIsWorkable,
+								 int& pendingRecordsCount,
+								 qint64& logFirstRecordID,
+								::google::protobuf::RepeatedPtrField<::Network::DiscretesLogRecord>* dsLogRecord);
+
 	static bool selectLastNRecords(QSqlQuery& q, int N);
 	static bool selectNextAfterNRecords(QSqlQuery& q, qint64 lastRecordId, int N);
 
@@ -91,6 +98,7 @@ public:
 	void unregisterLogReader(const std::shared_ptr<DiscretesLogReader>& reader);
 
 	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest);
+	void ackDiscretesLog(const Grpc::AckDiscretesLogRequest& ackRequest);
 
 	static QString databaseName();
 
@@ -100,7 +108,9 @@ public:
 	bool deleteDbFiles();
 	void waitWhileLogQueueIsEmpty();
 
+	// for testing purposes only
 	//
+	void deleteDatabaseFiles(const QString& project, const QString& equipmentID);
 
 private:
 	void run();

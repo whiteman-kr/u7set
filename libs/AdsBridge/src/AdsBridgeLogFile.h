@@ -1,20 +1,19 @@
 #pragma once
-#include "../../UtilsLib/ILogFile.h"
 #include <AdsBridge/Common.h>
+#include <AdsConnectionLib/ILoggerStd.h>
 
 namespace AdsBridge
 {
-	class LogFile : public ILogFile
+	class LogFile : public ILoggerStd
 	{
 	public:
-		virtual bool writeAlert(const QString& text, const QString& tag = {}) override;
-		virtual bool writeError(const QString& text, const QString& tag = {}) override;
-		virtual bool writeWarning(const QString& text, const QString& tag = {}) override;
-		virtual bool writeMessage(const QString& text, const QString& tag = {}) override;
-		virtual bool writeText(const QString& text, const QString& tag = {}) override;
+		virtual void writeAlert(std::string_view message) override;
+		virtual void writeError(std::string_view message) override;
+		virtual void writeWarning(std::string_view message) override;
+		virtual void writeMessage(std::string_view message) override;
 
 	private:
-		bool privateLog(MatsLogLevel level, const char* message);
+		void privateLog(MatsLogLevel level, const char* message);
 
 	public:
 		static MatsLogHandler g_logHandler;

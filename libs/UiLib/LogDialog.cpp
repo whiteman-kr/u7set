@@ -1,15 +1,17 @@
-#include <QComboBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QDateTimeEdit>
-#include <QProcess>
-#include <QShortcut>
-#include <QScrollBar>
-#include <QDesktopServices>
 
 #include <UiLib/LogDialog.h>
-#include <UiLib/UiTools.h>
 #include <UiLib/StandardColors.h>
+#include <UiLib/UiTools.h>
+
+#include <QComboBox>
+#include <QDateTimeEdit>
+#include <QDesktopServices>
+#include <QLabel>
+#include <QProcess>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QShortcut>
+#include <QStyledItemDelegate>
 
 namespace Log
 {

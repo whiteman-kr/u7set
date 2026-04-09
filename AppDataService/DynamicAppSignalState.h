@@ -1,5 +1,6 @@
 #pragma once
 #include "../AppSignalLib/TuningValue.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../UtilsLib/Address16.h"
 
@@ -47,7 +48,7 @@ private:
 public:
 	DynamicAppSignalState();
 
-	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
+	void setSignalParams(const AppSignal& signal, const AppSignals& appSignals);
 
 	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
 				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue,
@@ -81,6 +82,8 @@ public:
 
 	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 
+	void setCurrent(Times time, double value, AppSignalStateFlags flags);
+
 	int autoArchivingGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
 
@@ -105,7 +108,7 @@ public:
 
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
-	const AppSignal* signal() const { return m_signal; }
+//	const AppSignal* signal() const { return m_signal; }
 
 	E::ApertureType apertureType() const { return m_apertureType; }
 	E::SignalType signalType() const { return m_signalType; }
@@ -124,6 +127,8 @@ public:
 
 	int onArchSignalsTimer();
 	inline void clearStatesSavedCounter() { m_statesSaved = 0; }
+
+	void testsSetNewCurState(const SimpleAppSignalState& st);		// for testing only!
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
@@ -168,7 +173,7 @@ private:
 	};
 
 private:
-	const AppSignal* m_signal = nullptr;
+	QString m_appSignalID;
 	Hash m_signalHash;
 
 	// parsing parameters
@@ -264,6 +269,7 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
+	SimpleAppSignalState getCurrentState(Hash hash) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 
@@ -272,6 +278,12 @@ public:
 
 	void overrideAperture(const ApertureRecord& ar, QString& logMsg);
 	void clearStatesSavedCounters();
+
+	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+					GatewayAppSignalStatesQueue* gatewaySignalStatesQueue,
+					std::vector<SimpleAppSignalState>* logQueue);
+
+	void testsSetNewCurState(const Hash h, const SimpleAppSignalState& st);		// for testing only!
 
 private:
 	std::vector<DynamicAppSignalState*> m_appSignalState;

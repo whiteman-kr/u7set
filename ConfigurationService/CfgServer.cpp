@@ -11,7 +11,7 @@
 CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
 	const SessionParams& sessionParams,
 	const QString& buildFolder,
-	const std::list<CfgServiceSettings::ClientInfo>& clients,
+	const std::vector<ClientInfo> &clients,
 	bool checkClientHostname,
 	CircularLoggerShared logger) :
 	Tcp::FileServer(buildFolder, softwareInfo, logger, "CfgServer"),
@@ -54,7 +54,7 @@ void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestDa
 
 void CfgServer::onServerThreadStarted()
 {
-	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
+	m_buildXmlPathFileName = m_rootFolder + File::SLASH_BUILD_XML;
 
 	readBuildXml();
 }

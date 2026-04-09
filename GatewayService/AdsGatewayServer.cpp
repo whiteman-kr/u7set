@@ -59,19 +59,7 @@ void AdsGatewayServer::stop()
 		return;
 	}
 
-	// cancel acceptor
-	//
-	{
-		std::lock_guard<std::mutex> lock(m_acceptorMutex);
-
-		if (m_acceptor)
-		{
-			asio::error_code ec;
-			m_acceptor->cancel(ec);
-			m_acceptor->close(ec);
-			m_acceptor.reset();
-		}
-	}
+	resetAcceptor();
 
 	closeSessions();
 
@@ -85,7 +73,7 @@ void AdsGatewayServer::stop()
 	joinAllSessions();
 }
 
-void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+void AdsGatewayServer::updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -98,15 +86,9 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 		indexes.resize(statesCount);
 	}
 
-	int notFoundCount = 0;
-
 	for(int i = 0; i < statesCount; i++)
 	{
 		const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
-
-		SimpleAppSignalState sass;
-
-		sass.load(state);
 
 		Hash hash = state.hash();
 
@@ -114,7 +96,6 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 
 		if (it == m_hashToIndex.end())
 		{
-			notFoundCount++;
 			indexes[i] = BAD_INDEX;
 			continue;
 		}
@@ -145,7 +126,7 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 	}
 }
 
-void AdsGatewayServer::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+void AdsGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -186,12 +167,12 @@ void AdsGatewayServer::processStateChanges(const Network::GetAppSignalStateChang
 
 			Hash hash = s.hash();
 
-			// auto it = m_hashToIndex.find(hash);
+			auto it = m_hashToIndex.find(hash);
 
-			// if (it == m_hashToIndex.end())
-			// {
-			// 	continue;
-			// }
+			if (it == m_hashToIndex.end())
+			{
+				continue;
+			}
 
 			state.hash = hash;
 			state.systemTime = s.systemtime();
@@ -206,6 +187,16 @@ void AdsGatewayServer::processStateChanges(const Network::GetAppSignalStateChang
 	}
 
 	updateSignalStatesByChanges(getStateChangesReply);
+}
+
+void AdsGatewayServer::invalidateSignals()
+{
+	std::lock_guard lg(m_signalStatesMutex);
+
+	for(SimpleAppSignalState& st : m_signalStates)
+	{
+		st.invalidate();
+	}
 }
 
 void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
@@ -234,69 +225,75 @@ void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
 
 void AdsGatewayServer::runAcceptLoop()
 {
-	try
+	static constexpr int BIND_RETRY_DELAY_MS = 1000;
+
+	while (m_running.load(std::memory_order_relaxed))
 	{
-		m_io.restart();
-
-		tcp::endpoint ep(asio::ip::address_v4::from_string(m_listenIP.addressStr().toStdString()), m_listenIP.port());
-
+		try
 		{
-			std::lock_guard<std::mutex> lock(m_acceptorMutex);
+			m_io.restart();
 
-			m_acceptor = std::make_shared<tcp::acceptor>(m_io);
-
-			m_acceptor->open(ep.protocol());
-			m_acceptor->set_option(tcp::acceptor::reuse_address(true));
-			m_acceptor->bind(ep);
-			m_acceptor->listen();
-		}
-
-		logMsg(QString("starts listening %1").arg(m_listenIP.addressPortStr()));
-
-		while (m_running.load())
-		{
-			reapFinishedSessions();
-
-			tcp::socket socket(m_io);
-			asio::error_code ec;
-
-			std::shared_ptr<tcp::acceptor> acceptor = nullptr;
+			tcp::endpoint ep(asio::ip::address_v4::from_string(m_listenIP.addressStr().toStdString()), m_listenIP.port());
 
 			{
 				std::lock_guard<std::mutex> lock(m_acceptorMutex);
-				acceptor = m_acceptor;
+
+				m_acceptor = std::make_shared<tcp::acceptor>(m_io);
+
+				m_acceptor->open(ep.protocol());
+				m_acceptor->set_option(tcp::acceptor::reuse_address(true));
+				m_acceptor->bind(ep);
+				m_acceptor->listen();
 			}
 
-			if (!acceptor)
-			{
-				break;
-			}
+			logMsg(QString("starts listening %1").arg(m_listenIP.addressPortStr()));
 
-			acceptor->accept(socket, ec);
-
-			if (!m_running.load())
+			while (m_running.load(std::memory_order_relaxed))
 			{
-				break;
-			}
+				reapFinishedSessions();
 
-			if (ec)
-			{
-				if (ec == asio::error::operation_aborted ||
-					ec == asio::error::bad_descriptor ||
-					ec == asio::error::invalid_argument ||
-					ec == asio::error::not_socket ||
-					ec == asio::error::no_descriptors)
+				tcp::socket socket(m_io);
+				asio::error_code ec;
+
+				std::shared_ptr<tcp::acceptor> acceptor;
+
+				{
+					std::lock_guard<std::mutex> lock(m_acceptorMutex);
+					acceptor = m_acceptor;
+				}
+
+				if (!acceptor)
 				{
 					break;
 				}
 
-				logErr(QString("accept error: %1").arg(QString::fromStdString(ec.message())));
-				continue;
-			}
+				acceptor->accept(socket, ec);
 
-			logMsg(QString("accept new connectio from %1").arg(getIpPortStr(socket)));
+				if (!m_running.load(std::memory_order_relaxed))
+				{
+					break;
+				}
 
-			{
+				if (ec)
+				{
+					if (ec == asio::error::operation_aborted ||
+						ec == asio::error::bad_descriptor ||
+						ec == asio::error::invalid_argument ||
+						ec == asio::error::not_socket)
+					{
+						logErr(QString("acceptor closed or invalid: %1").
+											arg(QString::fromStdString(ec.message())));
+						break;
+					}
+
+					logErr(QString("accept error: %1").arg(QString::fromStdString(ec.message())));
+					continue;
+				}
+
+				logMsg(QString("accept new connection from %1").arg(getIpPortStr(socket)));
+
+				// run session thread
+				//
 				SessionShared stc = std::make_shared<Session>();
 
 				stc->socket = std::make_shared<tcp::socket>(std::move(socket));
@@ -323,20 +320,24 @@ void AdsGatewayServer::runAcceptLoop()
 					});
 			}
 		}
-
+		catch (const std::exception& ex)
 		{
-			std::lock_guard<std::mutex> lock(m_acceptorMutex);
-			m_acceptor.reset();
-		}
-	}
-	catch (const std::exception& ex)
-	{
-		{
-			std::lock_guard<std::mutex> lock(m_acceptorMutex);
-			m_acceptor.reset();
+			logErr(QString("accept loop error on %1: %2").
+				   arg(m_listenIP.addressPortStr(), ex.what()));
 		}
 
-		logErr(QString("accept loop error: %1").arg(ex.what()));
+		resetAcceptor();
+
+		reapFinishedSessions();
+
+		if (!m_running.load(std::memory_order_relaxed))
+		{
+			break;
+		}
+
+		logWrn(QString("accept loop will retry bind/listen after delay"));
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(BIND_RETRY_DELAY_MS));
 	}
 
 	logMsg(QString("stops"));
@@ -356,7 +357,8 @@ void AdsGatewayServer::sessionThread(SessionShared stc)
 
 		stc->socket->set_option(tcp::no_delay(true), ec);
 
-		while (m_running.load()  && !stc->closing.load())
+		while (m_running.load(std::memory_order_relaxed)  &&
+					!stc->closing.load(std::memory_order_relaxed))
 		{
 			if (recvBufSize >= AGL::GW_MAX_PAYLOAD_SIZE)
 			{
@@ -423,6 +425,11 @@ void AdsGatewayServer::reapFinishedSessions()
 
 void AdsGatewayServer::closeSocket(SessionShared stc)
 {
+	requestCloseSession(stc);
+}
+
+void AdsGatewayServer::requestCloseSession(SessionShared stc)
+{
 	if (!stc)
 	{
 		return;
@@ -438,24 +445,9 @@ void AdsGatewayServer::closeSocket(SessionShared stc)
 	if (stc->socket)
 	{
 		asio::error_code ec;
+		stc->socket->cancel(ec);
 		stc->socket->shutdown(tcp::socket::shutdown_both, ec);
 		stc->socket->close(ec);
-	}
-}
-
-void AdsGatewayServer::requestCloseSession(SessionShared stc)
-{
-	if (!stc)
-	{
-		return;
-	}
-
-	stc->closing.store(true, std::memory_order_relaxed);
-
-	if (stc->socket)
-	{
-		asio::error_code ec;
-		stc->socket->cancel(ec);
 	}
 }
 
@@ -493,6 +485,19 @@ void AdsGatewayServer::joinAllSessions()
 		{
 			session->thread.join();
 		}
+	}
+}
+
+void AdsGatewayServer::resetAcceptor()
+{
+	std::lock_guard<std::mutex> lock(m_acceptorMutex);
+
+	if (m_acceptor)
+	{
+		asio::error_code ec;
+		m_acceptor->cancel(ec);
+		m_acceptor->close(ec);
+		m_acceptor.reset();
 	}
 }
 
@@ -925,8 +930,8 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 	AGL::AdsGwSignalStateRequest request;
 	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
 
-	logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
-		   arg(stc->clientName).arg(request.signalCount));
+	// logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
+	// 	   arg(stc->clientName).arg(request.signalCount));
 
 	if (request.signalCount > AGL::ADS_GW_MAX_SIGNAL_STATES)
 	{
@@ -1010,7 +1015,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
-	logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
+	// logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
 
 	return true;
 }
@@ -1022,7 +1027,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	Q_UNUSED(recvBuf);
 	Q_UNUSED(requestSize);
 
-	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
+//	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
 
 	AGL::AdsGwSignalStateChangesRequest request;
 	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
@@ -1074,8 +1079,8 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
-	logMsg(QString("Sent %1 signal state changes, pending states %2").
-						arg(reply.stateCount).arg(reply.pendingStatesCount));
+	// logMsg(QString("Sent %1 signal state changes, pending states %2").
+	// 					arg(reply.stateCount).arg(reply.pendingStatesCount));
 	return true;
 }
 
@@ -1254,7 +1259,13 @@ bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size) const
 
 QString AdsGatewayServer::getIpPortStr(const tcp::socket& socket) const
 {
-	tcp::endpoint remote = socket.remote_endpoint();
+	asio::error_code ec;
+	tcp::endpoint remote = socket.remote_endpoint(ec);
+
+	if (ec)
+	{
+		return "unknown";
+	}
 
 	return QString("%1:%2").arg(QString::fromStdString(remote.address().to_string())).arg(remote.port());
 }
@@ -1278,7 +1289,21 @@ void AdsGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& from
 	}
 }
 
-void AdsGatewayServer::updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
+{
+	switch(ch)
+	{
+	case E::Channel::A: return TO_UINT8('A');
+	case E::Channel::B: return TO_UINT8('B');
+	case E::Channel::C: return TO_UINT8('C');
+	case E::Channel::D: return TO_UINT8('D');
+	default: ;
+	}
+
+	return 0;
+}
+
+void AdsGatewayServer::updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	const size_t statesCount = getStateChangesReply.appsignalstates_size();
 

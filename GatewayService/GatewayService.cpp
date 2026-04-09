@@ -1,7 +1,5 @@
 #include "GatewayService.h"
 
-#include "../OnlineLib/CfgLoader.h"
-
 // -------------------------------------------------------------------------------
 //
 // GatewayServiceWorker class implementation
@@ -43,17 +41,17 @@ void GatewayServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 
 bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
 {
-	if (m_cfgLoaderThread == nullptr)
+	if (m_grpcCfgLoaderThread == nullptr)
 	{
 		return false;
 	}
 
-	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+	HostAddressPort serverIP = m_grpcCfgLoaderThread->getServerAddr();
 
-	if (state.isConnected)
+	if (serverIP.isNull() == false)
 	{
-		ip = state.peerAddr.address32();
-		port = state.peerAddr.port();
+		ip = serverIP.address32();
+		port = serverIP.port();
 
 		return true;
 	}
@@ -67,11 +65,6 @@ void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::LOG_GW, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 1 hour packet logging for specified gateways.", "GatewayID1[, GatewayID2 ...]");
-
-//	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
-
-//	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
-	//						SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
 }
 
 void GatewayServiceWorker::loadServiceSpecificSettings()
@@ -121,7 +114,8 @@ void GatewayServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker is started");
 
-	runCfgLoaderThread();
+	//runCfgLoaderThread();
+	runGrpcCfgLoaderThread();
 	runTimer();
 }
 
@@ -131,111 +125,10 @@ void GatewayServiceWorker::shutdown()
 
 	stopTimer();
 
-	stopCfgLoaderThread();
+	//stopCfgLoaderThread();
+	stopGrpcCfgLoaderThread();
 
 	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker finished");
-}
-
-void GatewayServiceWorker::runCfgLoaderThread()
-{
-	assert(m_cfgLoaderThread == nullptr);			// once should be runned
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &GatewayServiceWorker::onConfigurationReady);
-
-	m_cfgLoaderThread->start();
-
-	m_cfgLoaderThread->enableDownloadConfiguration();
-}
-
-void GatewayServiceWorker::stopCfgLoaderThread()
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread->quitAndWait();
-
-	delete m_cfgLoaderThread;
-
-	m_cfgLoaderThread = nullptr;
-}
-
-void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
-												const BuildFileInfoArray buildFileInfoArray,
-												SessionParams sessionParams,
-												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
-{
-	Q_UNUSED(configurationXmlData);
-
-	setSessionParams(sessionParams);
-
-	const QString& profile = currentSettingsProfile->profile;
-
-	DEBUG_LOG_MSG(logger(), "Configuration is ready");
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	DEBUG_LOG_MSG(logger(), "Settings profile: " + profile);
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	// stop all threads and free all allocated resources
-	//
-	clearConfiguration();
-
-	const GatewayServiceSettings* typedSettingsPtr = dynamic_cast<const GatewayServiceSettings*>(currentSettingsProfile.get());
-
-	if (typedSettingsPtr == nullptr)
-	{
-		DEBUG_LOG_MSG(logger(), "Settings casting error!");
-		return;
-	}
-
-	// making modificable local copy of settings
-	//
-	m_curSettingsProfile = *typedSettingsPtr;
-
-	bool result = true;
-	QString errStr;
-
-	//
-
-	QByteArray gatewayDescriptionFileData;
-
-	m_cfgLoaderThread->getFileBlockedByID(CfgFileId::GATEWAY_DESCRIPTION,
-										  &gatewayDescriptionFileData,
-										  &errStr);
-	result &= errStr.isEmpty();
-
-	// reads gateway description and fills m_acquiredSignals
-	//
-	result &= readGatewayDescription(gatewayDescriptionFileData);
-
-	if (result != false)
-	{
-		m_acquiredSignals.clear();
-		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals, profile);
-	}
-
-	//
-
-	QByteArray appSignalSetFileData;
-
-	m_cfgLoaderThread->getFileBlockedByID(CfgFileId::APP_SIGNAL_SET,
-										  &appSignalSetFileData,
-										  &errStr);
-	result &= errStr.isEmpty();
-	result &= readAppSignals(appSignalSetFileData);
-
-	//
-
-	if (result == true)
-	{
-		applyNewConfiguration();
-	}
 }
 
 bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
@@ -346,3 +239,75 @@ void GatewayServiceWorker::onTimer()
 {
 }
 
+void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+	const BuildFileInfoArray buildFileInfoArray,
+	SessionParams sessionParams,
+	std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
+{
+	Q_UNUSED(configurationXmlData);
+
+	setSessionParams(sessionParams);
+
+	DEBUG_LOG_MSG(logger(), "Configuration is ready");
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	// stop all threads and free all allocated resources
+	//
+	clearConfiguration();
+
+	const GatewayServiceSettings* typedSettingsPtr = dynamic_cast<const GatewayServiceSettings*>(currentSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
+		return;
+	}
+
+	// making modificable local copy of settings
+	//
+	m_curSettingsProfile = *typedSettingsPtr;
+
+	bool result = true;
+	QString errStr;
+
+	//
+
+	QByteArray gatewayDescriptionFileData;
+
+	m_grpcCfgLoaderThread->getFileBlockedByID(CfgFileId::GATEWAY_DESCRIPTION,
+										  &gatewayDescriptionFileData,
+										  &errStr);
+	result &= errStr.isEmpty();
+
+	// reads gateway description and fills m_acquiredSignals
+	//
+	result &= readGatewayDescription(gatewayDescriptionFileData);
+
+	if (result != false)
+	{
+		m_acquiredSignals.clear();
+		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals, currentSettingsProfile->profile);
+	}
+
+	//
+
+	QByteArray appSignalSetFileData;
+
+	m_grpcCfgLoaderThread->getFileBlockedByID(CfgFileId::APP_SIGNAL_SET,
+										  &appSignalSetFileData,
+										  &errStr);
+	result &= errStr.isEmpty();
+	result &= readAppSignals(appSignalSetFileData);
+
+	//
+
+	if (result == true)
+	{
+		applyNewConfiguration();
+	}
+}

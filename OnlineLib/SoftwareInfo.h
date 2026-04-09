@@ -1,5 +1,7 @@
 #pragma once
 
+#include <CommonLib/Types.h>
+
 namespace Network
 {
 	class SoftwareInfo;
@@ -34,6 +36,8 @@ public:
 	int pipelineID() const { return m_pipelineID; }
 
 	QString hostname() const { return m_hostname; }
+	void setHostname(const QString& hostName) { m_hostname = hostName; }
+
 	QString osUsername() const { return m_osUsername; }
 
 private:

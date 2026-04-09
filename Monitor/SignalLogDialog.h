@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../AppSignalLib/DiscretesLogRecord.h"
+#include "../../AppSignalLib/IAppSignalManager.h"
 
 
 namespace AppSignalLists
@@ -14,7 +15,6 @@ namespace ClientLib
 	class AppSignalManager;
 } // namespace ClientLib
 
-class IAppSignalManager;
 class SignalLogModel;
 class SignalLogTableView;
 

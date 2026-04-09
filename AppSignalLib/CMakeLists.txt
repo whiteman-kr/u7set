@@ -32,8 +32,6 @@ qt_add_library(${TARGET} STATIC
 	ITuningSignalManager.h
 	PropertyNames.cpp
 	PropertyNames.h
-	RecentUsed.cpp
-	RecentUsed.h
 	SimpleAppSignalState.cpp
 	SimpleAppSignalState.h
 	TuningDataStorage.cpp
@@ -91,7 +89,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLibStd)
 
 target_compile_definitions(${TARGET} PRIVATE APP_SIGNAL_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

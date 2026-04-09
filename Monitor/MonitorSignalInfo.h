@@ -1,7 +1,7 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalInfo.h>
 
 class MonitorCentralWidget;

@@ -23,6 +23,9 @@ public:
 	bool operator != (const HostAddressPort &other) const;
 	bool operator < (const HostAddressPort &other) const;
 
+	operator QString() const;
+	operator std::string() const;
+
 	void clear();
 
 	void setAny();
@@ -149,6 +152,16 @@ inline bool HostAddressPort::operator != (const HostAddressPort& other) const
 inline bool HostAddressPort::operator < (const HostAddressPort& other) const
 {
 	return addressPortValue() < other.addressPortValue();
+}
+
+inline HostAddressPort::operator QString() const
+{
+	return toString();
+}
+
+inline HostAddressPort::operator std::string() const
+{
+	return toStdString();
 }
 
 inline void HostAddressPort::clear()

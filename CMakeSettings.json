@@ -60,6 +60,28 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ]
+    },
+    {
+      "name": "Debug-Static",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": []
+    },
+    {
+      "name": "Release-Static",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     }
   ]
 }

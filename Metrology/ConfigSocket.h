@@ -2,7 +2,7 @@
 
 // This class is designed to receive signals from CfgSrv
 
-#include "../OnlineLib/CfgLoader.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 
 #include "Options.h"
 
@@ -29,7 +29,7 @@ public:
 
 public:
 
-	bool				isConnceted() { return m_connected; }
+	bool				isConnected() { return m_connected; }
 	HostAddressPort		address() { return m_address; }
 
 	void				start();
@@ -46,10 +46,10 @@ private:
 	SoftwareInfo		m_softwareInfo;
 	HostAddressPort		m_serverAddressPort1;
 	HostAddressPort		m_serverAddressPort2;
-	ServerOption	m_option;
+	ServerOption		m_option;
 
 
-	CfgLoaderThread*	m_cfgLoaderThread = nullptr;
+	std::unique_ptr<GrpcCfgLoaderThread> m_grpcCfgLoaderThread;
 
 	::Proto::MetrologySignalSet m_protoMetrologySignalSet;
 	ComparatorSet		m_comparatorSet;

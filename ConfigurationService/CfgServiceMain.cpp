@@ -1,5 +1,5 @@
 #include "CfgService.h"
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 #include <ServiceLib/ServiceStarter.h>
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
@@ -9,6 +9,10 @@
 int main(int argc, char** argv)
 {
 	Vld::setVldReportFilterHook();
+
+	// qInfo() << "GRPC_TRACE=" << qgetenv("GRPC_TRACE");
+	// qInfo() << "GRPC_VERBOSITY=" << qgetenv("GRPC_VERBOSITY");
+	// qInfo() << "ABSL_MIN_LOG_LEVEL=" << qgetenv("ABSL_MIN_LOG_LEVEL");
 
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::CONFIGURATION_SERVICE);
 

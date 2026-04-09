@@ -15,11 +15,13 @@ set(TARGET CfgSrv)
 add_executable(${TARGET}
 	CfgChecker.cpp
 	CfgChecker.h
-	CfgServer.cpp
-	CfgServer.h
+#	CfgServer.cpp
+#	CfgServer.h
 	CfgService.cpp
 	CfgService.h
 	CfgServiceMain.cpp
+	GrpcCfgServer.cpp
+	GrpcCfgServer.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

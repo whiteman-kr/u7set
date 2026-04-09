@@ -83,7 +83,7 @@ File **[Common.h](@ref Common.h)** contains common definitions and structures us
 
 <b>Initialization:</b>
 
-The AdsBridge library is initialized using `AdsInit()`. This function also starts a message loop if the application is not Qt-based. Here, the user should provide the EquipmentID of the AdsBridge instance configured in RPCT.
+The AdsBridge library is initialized using `AdsInit()`. User should provide the EquipmentID of the AdsBridge instance configured in RPCT.
 EquipmentID can be later changed by calling AdsSetConfiguration() or AdsLoadConfiguration().
 
 <b>Connection Management:</b>

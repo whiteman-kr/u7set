@@ -190,4 +190,15 @@ namespace OnlineLib
 	{
 		return ID == CfgFileId::CONFIGURATION_XML;
 	}
+
+	void BuildFileInfo::clear()
+	{
+		pathFileName.clear();
+		tag.clear();
+		ID.clear();
+		size = 0;
+		compressed = false;
+		md5.clear();
+		metadata.clear();
+	}
 }

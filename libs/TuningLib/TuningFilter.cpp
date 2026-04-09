@@ -773,7 +773,7 @@ namespace TuningFilters
 					QDataStream stream(data);
 					m_signalsHashes.clear();
 
-					Hash hash;
+					quint64 hash;
 					while (stream.atEnd() == false)
 					{
 						stream >> hash;
@@ -790,7 +790,7 @@ namespace TuningFilters
 					QDataStream stream(data);
 					m_equipmentHashes.clear();
 
-					Hash hash;
+					quint64 hash;
 					while (stream.atEnd() == false)
 					{
 						stream >> hash;
@@ -984,7 +984,7 @@ namespace TuningFilters
 			QDataStream stream(&data, QIODeviceBase::WriteOnly);
 			for (Hash hash : m_signalsHashes)
 			{
-				stream << hash;
+				stream << static_cast<quint64>(hash);
 			}
 
 			writer.writeCharacters(data.toBase64());
@@ -1004,7 +1004,7 @@ namespace TuningFilters
 			QDataStream stream(&data, QIODeviceBase::WriteOnly);
 			for (Hash hash : m_equipmentHashes)
 			{
-				stream << hash;
+				stream << static_cast<quint64>(hash);
 			}
 
 			writer.writeCharacters(data.toBase64());

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgLoader.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../GatewayLib/GatewayDescription.h"
 #include "GatewayHandler.h"
@@ -42,14 +42,6 @@ private:
 
 	//
 
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
-	void onConfigurationReady(const QByteArray configurationXmlData,
-							  const BuildFileInfoArray buildFileInfoArray,
-							  SessionParams sessionParams,
-							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
-
 	bool readAppSignals(const QByteArray& fileData);
 	bool readGatewayDescription(const QByteArray& fileData);
 
@@ -63,9 +55,13 @@ private:
 
 	const AppSignal* getSignalFunc(const QString& signalID);
 
-private:
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+private slots:
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
+							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile) override;
 
+private:
 	GatewayServiceSettings m_curSettingsProfile;
 
 	std::set<Hash> m_acquiredSignals;		// set of Hash(appSignalID) of acquired signals

@@ -1,20 +1,16 @@
 #pragma once
 
+
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../AppSignalLib/RecentUsed.h"
+#include "../AppSignalLib/ISignalManager.h"
 #include "../UtilsLib/ILogFile.h"
 
-#include "IAppSignalUpdater.h"
-#include "IRecentAppSignals.h"
-#include "ISignalDataServer.h"
-
-#include <QReadWriteLock>
-#include <memory>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-
+#include <AppSignalLibStd/AppSignalManagerCore.h>
+#include <AppSignalLibStd/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
+#include <AppSignalLibStd/RecentUsed.h>
 
 namespace ClientLib
 {
@@ -39,14 +35,12 @@ namespace ClientLib
 		///
 		virtual void notifySignalParamsUpdated() override;
 
-		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) override;
+		virtual void addSignals(std::span<const ::Proto::AppSignal> appSignals, const std::string& appDataServiceId) override;
 
 		virtual void invalidateSignalStates(SourceIdType sourceThreadId) override;
 
-		virtual void setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
+		virtual void setStates(std::span<const ::Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
 
-	private:
-		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
 		//
 		// End of IAppSignalUpdater implementation
 
@@ -56,7 +50,7 @@ namespace ClientLib
 		virtual void addRecentAppSignal(Hash hash) override;
 		virtual void addRecentAppSignals(std::span<const Hash> hashes) override;
 
-		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override;
+		virtual std::vector<Hash> recentlyUsedAppSignals(const std::string& appDataServivceId) override;
 		virtual bool hasRecentlyUsedAppSignals() override;
 
 		//
@@ -107,8 +101,8 @@ namespace ClientLib
 
 		// IAppSignalManager implementation - Setpoints
 		//
-		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const override;
-		[[nodiscard]] std::shared_ptr<Comparator> setpointByOutput(const QString& appSignalId) const override;
+		[[nodiscard]] std::vector<ComparatorShared> setpointsByInput(const QString& appSignalId) const override;
+		[[nodiscard]] ComparatorShared setpointByOutput(const QString& appSignalId) const override;
 
 		//
 		// ISignalDataServer implementation
@@ -116,12 +110,12 @@ namespace ClientLib
 
 		/// Get AppDataService EquipmentIDs list by AppSignalID.
 		///
-		QStringList dataServiceIds(const QString& appSignalId) const override;
+		std::vector<std::string> dataServiceIds(const std::string& appSignalId) const override;
 
 		/// Return true if AppDataService contains signal.
 		///
-		bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
-		bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
+		bool dataServiceHasSignal(const std::string& serviceEquipmentId, const std::string& appSignalId) const override;
+		bool dataServiceHasSignal(const std::string& serviceEquipmentId, Hash signalHash) const override;
 
 		/// Extension, not part of ISignalDataServer, at least yet.
 		///
@@ -129,7 +123,7 @@ namespace ClientLib
 
 		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
 		///
-		std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
+		std::vector<Hash> dataServiceSignals(const std::string& serviceEquipmentId) const override;
 
 		// Tags
 		//
@@ -140,48 +134,20 @@ namespace ClientLib
 	public:
 		std::optional<AppSignalParam> signalParamByEquipmentId(const QString& equipmentId) const;
 
-	public:
-		struct SourceState
-		{
-			AppSignalState state{};
-			Hash dataServerHash{UNDEFINED_HASH};
-			SourceIdType sourceThreadId{};
-			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{}; // State last time received or updated
-		};
+	private:
+		using CoreType = AppSignalStdLib::AppSignalManagerCore<AppSignalParam, AppSignalState, QString, QStringList>;
 
+	public:
+		using SourceState = CoreType::SourceState;
 		std::vector<SourceState> signalStateAllSources(const QString& appSignalId) const;
 
 	signals:
 		void signalParamsUpdated();
 
 	private:
-		struct Sources
-		{
-			size_t size = 0;
-			std::array<SourceState, 4> sources{}; // 4 maximum possible channels of getting signal (2 regular, 2 recent)
-
-			void set(const AppSignalState& state, Hash dataServerHash, SourceIdType sourceThreadId);
-			void invalidateSource(SourceIdType sourceThreadId);
-
-			[[nodiscard]] const AppSignalState& get() const;
-			[[nodiscard]] const AppSignalState& getForDataServer(Hash dataServerHash) const;
-		};
-
-
 		HasLogFile m_logFile;
 
-		mutable QReadWriteLock m_paramsLocker;
-		std::unordered_map<Hash, const AppSignalParam, VoidHasher<Hash>> m_signalParams; // Key is hash from AppSignalID
-		std::unordered_map<QString, QString> m_signalParamByEquipmentId;                 // Key is EquipmentId - value is AppSignalID
-		std::unordered_map<QString, QStringList> m_tagToAppSignals; // Key is tag - value is list of AppSignalIDs with this tag
-		std::set<QString> m_tags;                                   // All tags for received AppSignals
-		std::map<QString, std::unordered_set<Hash>>
-			m_appDataServiceToSignalHashList; // Key is AppDataServiceID, value is AppSignals received via this AppDataService
-
-		mutable QReadWriteLock m_statesLocker;
-		std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
-
-		static constexpr qint64 MaxDiff = 1_sec;
+		CoreType m_core;
 
 		// ComparatorSet is threadsafe itself
 		//

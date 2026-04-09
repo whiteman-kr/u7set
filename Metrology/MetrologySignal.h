@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../AppSignalLib/ComparatorSet.h"
+#include "../AppSignalLib/AppSignal.h"
+#include "../AppSignalLib/AppSignalState.h"
 #include "../UtilsLib/XmlHelper.h"
 #include <HardwareLib/DeviceObject.h>
 
@@ -364,6 +366,7 @@ namespace Metrology
 		SignalState& state() { return m_state; }
 		const SignalState& state() const { return m_state; }
 		void setState(const Metrology::SignalState& state) { m_state = state; }
+		void invalidate() { m_state.setValid(false); }
 
 	private:
 

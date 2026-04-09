@@ -7,6 +7,8 @@
 #include <intrin.h>
 #endif
 
+#include "WUtils.h"
+
 class SpinLock
 {
 	Q_DISABLE_COPY_MOVE(SpinLock)
@@ -30,7 +32,7 @@ public:
 
 	void lock()
 	{
-		quintptr currentId = getCurrentId();
+		quintptr currentId = currentThreadId();
 
 		Q_ASSERT(currentId != 0);
 
@@ -84,7 +86,7 @@ public:
 
 	[[nodiscard]] bool tryLock()
 	{
-		quintptr currentId = getCurrentId();
+		quintptr currentId = currentThreadId();
 
 		quintptr expected = 0;
 
@@ -95,7 +97,7 @@ public:
 
 	void unlock()
 	{
-		quintptr expected = getCurrentId();
+		quintptr expected = currentThreadId();
 
 		if (m_ownerID.compare_exchange_strong(
 			expected, 0,
@@ -104,11 +106,6 @@ public:
 		{
 			qFatal("SpinLock::unlock() from non-owner thread");
 		}
-	}
-
-	static inline quintptr getCurrentId()
-	{
-		return reinterpret_cast<quintptr>(QThread::currentThreadId());
 	}
 
 private:

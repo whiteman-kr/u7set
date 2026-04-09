@@ -1,0 +1,181 @@
+syntax = "proto2";
+
+import "AppSignal.proto";
+import "Network.proto";
+import "GrpcCommon.proto";
+
+package Grpc;
+
+//
+// GetAppSignalList
+//
+message GetAppSignalListRequest
+{
+}
+
+message GetAppSignalListReply
+{
+	optional uint32 totalSize = 2;				// How many signal IDs totally will be transfered.
+	repeated string appSignalIds = 3;
+}
+
+//
+// GetAppSignalParam
+//
+message GetAppSignalParamRequest
+{
+	repeated fixed64 signalHashes = 1;			// If empty then get all signals.
+}
+
+message GetAppSignalParamReply
+{
+	optional uint32 totalSize = 1;				// How many signal params totally will be transfered.
+	optional uint32 replySignalIndex = 2;		// Start index for this reply
+	repeated Proto.AppSignal signalParams = 3;
+}
+
+//
+// Geetting application signal states
+//
+message GetAppSignalStateRequest
+{
+	repeated uint64 signalHashes = 1;						// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+message GetAppSignalStateReply
+{
+	repeated Proto.AppSignalState appSignalStates = 1;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+//
+// GetAppSignalStateChanges
+//
+message GetAppSignalStateChangesRequest
+{
+}
+
+message GetAppSignalStateChangesReply
+{
+	optional int32 pendingStatesCount = 1 [default = 0];
+	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+//
+// GetGatewayAppSignalStateChanges
+//
+message GetGatewayAppSignalStateChangesRequest
+{
+	repeated uint64 signalHashes = 1;
+}
+
+message GetGatewayAppSignalStateChangesReply
+{
+	optional int32 pendingStatesCount = 1 [default = 0];
+	repeated Network.GatewayAppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX
+}
+
+//
+// GetDiscretesLog
+//
+message GetDiscretesLogRequest
+{
+}
+
+message GetDiscretesLogReply
+{
+	optional bool logIsWorkable = 1 [default = false];
+	optional int32 pendingRecordsCount = 2 [default = 0];
+	optional int64 logFirstRecordID = 3 [default = 0];
+	repeated Network.DiscretesLogRecord discretesLogRecord = 4;
+}
+
+message AckDiscretesLogRequest
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3;	// Acknowledged up to this plant time (inclusive)
+}
+
+message AckDiscretesLogReply
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3;	// Acknowledged up to this plant time (inclusive)
+}
+
+//
+// RtTrends
+//
+
+message RtSignalSamplePeriod
+{
+	required uint64 hash = 1;
+	optional int32 samplePeriod = 2 [default = 4];			    // enum E::RtTrandsSamplePeriod
+}
+
+message GetRtTrendsDataRequest
+{
+	repeated RtSignalSamplePeriod rtSignalSamplePeriod = 1;
+}
+
+message GetRtTrendsDataReply
+{
+	repeated RtSignalSamplePeriod rtSignalSamplePeriod = 1;
+	repeated Proto.AppSignalState appSignalStates = 2;
+}
+
+//
+//	GetAppDataSourcesInfo
+//
+message GetAppDataSourcesInfoRequest
+{
+}
+
+message GetAppDataSourcesInfoReply
+{
+	repeated Network.DataSourceInfo appDataSourceInfo = 1;
+}
+
+//
+//	GetAppDataSourcesState
+//
+message GetAppDataSourcesStateRequest
+{
+}
+
+message GetAppDataSourcesStateReply
+{
+	repeated Network.AppDataSourceState appDataSourceState = 1;
+}
+
+//
+//	GetServerTime
+//
+message GetServerTimeRequest
+{
+}
+
+message GetServerTimeReply
+{
+	optional int64 serverTimeUtc = 2 [default = 0];
+	optional int64 serverTimeLocal = 3 [default = 0];
+}
+
+service AppDataSrv
+{
+	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+	rpc Ping(PingRequest) returns (PingReply) {}
+	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
+	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
+	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
+	rpc GetAppSignalStateConstSize(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
+	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
+	rpc GetAppSignalStateChangesNoStream(GetAppSignalStateChangesRequest) returns (GetAppSignalStateChangesReply) {}
+	rpc GetGatewayAppSignalStateChanges(GetGatewayAppSignalStateChangesRequest) returns (GetGatewayAppSignalStateChangesReply) {}
+	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
+	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}
+	rpc GetRtTrendsData(stream GetRtTrendsDataRequest) returns (stream GetRtTrendsDataReply) {}
+	rpc GetAppDataSourcesInfo(GetAppDataSourcesInfoRequest) returns (GetAppDataSourcesInfoReply) {}
+	rpc GetAppDataSourcesState(GetAppDataSourcesStateRequest) returns (GetAppDataSourcesStateReply) {}
+	rpc GetServerTime(GetServerTimeRequest) returns (GetServerTimeReply) {}
+}

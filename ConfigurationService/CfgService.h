@@ -4,6 +4,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "CfgChecker.h"
+#include "GrpcCfgServer.h"
 
 // ------------------------------------------------------------------------------------
 //
@@ -55,7 +56,11 @@ private:
 
 private:
 	UdpSocketThread* m_infoSocketThread = nullptr;
-	Tcp::ListenerThread* m_cfgServerThread = nullptr;
+//	Tcp::ListenerThread* m_cfgServerThread = nullptr;
+
+	using GrpcCfgServerUPtr = std::unique_ptr<GrpcCfgServer>;
+
+	std::vector<GrpcCfgServerUPtr> m_grpcCfgServers;
 
 	CfgCheckerWorker* m_cfgCheckerWorker = nullptr;
 	SimpleThread* m_cfgCheckerThread = nullptr;

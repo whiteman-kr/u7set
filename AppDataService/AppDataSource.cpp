@@ -2,7 +2,6 @@
 
 #include "AppDataSource.h"
 
-
 // -------------------------------------------------------------------------------
 //
 // AppDataSource class implementation
@@ -23,6 +22,8 @@ AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource, CircularLo
 	initParsingBuffers(appDataFramesQuantity());
 
 	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
+
+	m_lastPlantTime.clear();
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -33,6 +34,8 @@ AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
 	m_gatewaySignalStatesQueue(3)
 {
 	loadFromProto(proto);
+
+	m_lastPlantTime.clear();
 }
 
 AppDataSource::~AppDataSource()
@@ -63,13 +66,13 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
-		if (appSignals.containsID(signalID) == false)
+		if (appSignals.containsAppSignalID(signalID) == false)
 		{
 			assert(false);
 			continue;
 		}
 
-		const AppSignal* signal = appSignals.getSignalByID(signalID);
+		const AppSignal* signal = appSignals.getByAppSignalID(signalID);
 
 		TEST_PTR_CONTINUE(signal);
 
@@ -111,13 +114,15 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_acquiredSignalsCount = TO_INT(m_signalStates.size());
 
-	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
+	int queueSize = std::max(m_acquiredSignalsCount * 3, SIGNAL_STATES_QUEUE_MIN_SIZE);
 
 	m_signalStatesQueue.resize(queueSize);
 
-	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+	queueSize = std::max(m_acquiredSignalsCount / 2, SIGNAL_STATES_QUEUE_MIN_SIZE);
 
 	m_gatewaySignalStatesQueue.resize(queueSize);
+
+	m_lastPlantTime.clear();
 }
 
 void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
@@ -236,6 +241,11 @@ bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwStat
 	return result;
 }
 
+void AppDataSource::clearSignalStatesQueue()
+{
+	m_signalStatesQueue.clear();
+}
+
 void AppDataSource::invalidateSignals()
 {
 	int pushedStatesCount = 0;
@@ -277,6 +287,53 @@ void AppDataSource::invalidateSignals()
 bool AppDataSource::statesQueueIsEmpty() const
 {
 	return m_signalStatesQueue.isEmpty();
+}
+
+// for testing purposes only!
+//
+void AppDataSource::pushState(const SimpleAppSignalState& state)
+{
+	m_signalStatesQueue.push(state, false);
+	wakeupStatesProcessingThread();
+}
+
+void AppDataSource::resizeSignalStatesQueue(int size)
+{
+	m_signalStatesQueue.resize(std::max(size, SIGNAL_STATES_QUEUE_MIN_SIZE));
+}
+
+void AppDataSource::checkInputPlantTime(Rup::TimeStamp plantTime)
+{
+	// here plantTime is in BigEndian byte order
+	//
+	plantTime.reverseBytes();
+
+	if (m_lastPlantTime.hour == plantTime.hour &&
+		m_lastPlantTime.minute == plantTime.minute &&
+		m_lastPlantTime.second == plantTime.second &&
+		m_lastPlantTime.millisecond == plantTime.millisecond &&
+		m_lastPlantTime.day == plantTime.day &&
+		m_lastPlantTime.month == plantTime.month &&
+		m_lastPlantTime.year == plantTime.year)
+	{
+		qDebug() << C_STR(QString("%1 duplicate plant time: %2").
+						  arg(moduleEquipmentID()).arg(m_lastPlantTime.rawToString(false)));
+	}
+
+	m_lastPlantTime = plantTime;
+}
+
+void AppDataSource::wakeupStatesProcessingThread()
+{
+	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
+	Q_ASSERT(m_statesProcessingRequired != nullptr);
+	Q_ASSERT(m_statesProcessingRequiredCondition != nullptr);
+
+	std::lock_guard lg(*m_statesProcessigRequiredMutex);
+	m_statesProcessingRequired->push(this);
+	m_statesProcessingRequiredCondition->notify_all();
+
+	Q_UNUSED(lg);
 }
 
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
@@ -426,19 +483,6 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
 	return true;
 }
 
-void AppDataSource::wakeupStatesProcessingThread()
-{
-	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
-	Q_ASSERT(m_statesProcessingRequired != nullptr);
-	Q_ASSERT(m_statesProcessingRequiredCondition != nullptr);
-
-	std::lock_guard lg(*m_statesProcessigRequiredMutex);
-	m_statesProcessingRequired->push(this);
-	m_statesProcessingRequiredCondition->notify_all();
-
-	Q_UNUSED(lg);
-}
-
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
 	if (m_autoArchivingGroupsCount <= 0)
@@ -585,6 +629,19 @@ AppDataSource* AppDataSources::getSourceByIP(quint32 ip)
 	return it->second;
 }
 
+AppDataSource* AppDataSources::getSourceByEquipmentID(const QString& equipmentId)
+{
+	auto it = m_moduleToSource.find(equipmentId);
+
+	if (it == m_moduleToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+
+}
+
 AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
 {
 	return getSignalSource(calcHash(signalID));
@@ -592,14 +649,12 @@ AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
 
 AppDataSource* AppDataSources::getSignalSource(Hash signalHash)
 {
-	auto it = m_signalToSource.find(signalHash);
+	return const_cast<AppDataSource*>(privateGetSignalSource(signalHash));
+}
 
-	if (it == m_signalToSource.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
+const AppDataSource* AppDataSources::getSignalSource(Hash signalHash) const
+{
+	return privateGetSignalSource(signalHash);
 }
 
 std::vector<AppDataSource*>::iterator AppDataSources::begin()
@@ -620,4 +675,21 @@ std::vector<AppDataSource*>::iterator AppDataSources::end()
 std::vector<AppDataSource*>::const_iterator AppDataSources::end() const
 {
 	return m_sources.end();
+}
+
+int AppDataSources::size() const
+{
+	return TO_INT(m_sources.size());
+}
+
+const AppDataSource* AppDataSources::privateGetSignalSource(Hash signalHash) const
+{
+	auto it = m_signalToSource.find(signalHash);
+
+	if (it == m_signalToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
 }

@@ -2,7 +2,7 @@
 #include "SimPropertyStorage.h"
 
 #include <CommonLib/ConstStrings.h>
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <LicenseLib/AppLicenser.h>
 #include <SimulatorLib/SimConsoleLogFile.h>
@@ -15,7 +15,6 @@
 #include <QSettings>
 
 #include <google/protobuf/message_lite.h>
-
 
 
 QString getProjectPath(QWidget* parent)

@@ -30,17 +30,21 @@ private:
 	DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;
 
-	SpinLock m_queuesMutex;
+	struct QueueInfo
+	{
+		SimpleAppSignalStatesQueueShared queue;
+		bool isArchivingQueue = false;
+		QString description;
+	};
 
-	// queuePtr => pair<isArchiveQueue, queueDescription>
+	std::mutex m_queuesMutex;
+	std::vector<QueueInfo> m_queues;
+
 	//
-	std::map<SimpleAppSignalStatesQueueShared, std::pair<bool, QString>> m_queues;
 
-	//
+	static constexpr int GATEWAY_QUEUES_COUNT = sizeof(quint32) * 8;
 
-	const int GATEWAY_QUEUES_COUNT = sizeof(quint32);
-
-	SpinLock m_gatewayQueuesMutex;
+	std::mutex m_gatewayQueuesMutex;
 
 	struct GatewayQueueHashes
 	{

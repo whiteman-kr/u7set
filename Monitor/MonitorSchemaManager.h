@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ClientLib/ISignalDataServer.h>
-#include <SchemaClientLib/ClientSchemaManager.h>
 #include "./Trend/RtSchemaTrend.h"
+#include <AppSignalLibStd/ISignalDataServer.h>
+#include <SchemaClientLib/ClientSchemaManager.h>
 
 
 class MonitorConfigController;

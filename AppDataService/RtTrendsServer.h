@@ -2,9 +2,8 @@
 
 #include "../OnlineLib/Tcp.h"
 
-#include "AppDataService.h"
+#include "AppDataSource.h"
 #include "DynamicAppSignalState.h"
-
 
 namespace RtTrends
 {
@@ -27,7 +26,7 @@ namespace RtTrends
 	class Session
 	{
 	public:
-		Session(AppDataServiceWorker& service);
+		Session(const DynamicAppSignalStates& signalStates);
 		~Session();
 
 		int id() const { return m_id; }
@@ -53,7 +52,6 @@ namespace RtTrends
 		int m_id = 0;
 
 		const DynamicAppSignalStates& m_signalStates;
-//		const SignalsToSources& m_signalToSources;
 
 		//
 
@@ -68,7 +66,10 @@ namespace RtTrends
 	class Server : public Tcp::Server
 	{
 	public:
-		Server(AppDataServiceWorker& appDataService);
+		Server(const SoftwareInfo& softwareInfo,
+			   const AppDataSources& appDataSources,
+			   DynamicAppSignalStates& signalStates,
+			   CircularLoggerShared log);
 
 		Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
@@ -95,7 +96,7 @@ namespace RtTrends
 		int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
 	private:
-		AppDataServiceWorker& m_appDataService;
+		const AppDataSources& m_appDataSources;
 		DynamicAppSignalStates& m_signalStates;
 		std::shared_ptr<CircularLogger> m_log;
 
@@ -118,6 +119,9 @@ namespace RtTrends
 	{
 	public:
 		ServerThread(const std::vector<Tcp::ListenAddress>& listenAddresses,
-					 AppDataServiceWorker& appDataService);
+					 const SoftwareInfo& softwareInfo,
+					 const AppDataSources& appDataSources,
+					 DynamicAppSignalStates& signalStates,
+					 CircularLoggerShared log);
 	};
 }

@@ -628,9 +628,9 @@ namespace SchemaClientLib
 				connectionStrings << QString::number(info.lmnumber());
 
 				controllerItem = new QTreeWidgetItem(connectionStrings);
-				controllerItem->setData(columnIndex_SourceHash, Qt::UserRole, ::calcHash(ts.equipmentId()));
+				controllerItem->setData(columnIndex_SourceHash, Qt::UserRole, QVariant::fromValue<Hash>(::calcHash(ts.equipmentId())));
 				controllerItem->setData(columnIndex_SourceEquipmentId, Qt::UserRole, ts.equipmentId());
-				controllerItem->setData(columnIndex_ControllerHash, Qt::UserRole, ::calcHash(lanEquipmentId));
+				controllerItem->setData(columnIndex_ControllerHash, Qt::UserRole, QVariant::fromValue<Hash>(::calcHash(lanEquipmentId)));
 				m_treeWidget->addTopLevelItem(controllerItem);
 
 				newItemsCreated = true;

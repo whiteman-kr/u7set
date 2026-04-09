@@ -1,3 +1,5 @@
+#include <QSettings>
+
 #include "DialogOptions.h"
 #include "DialogMeasurePoint.h"
 #include "DialogOptionsMvh.h"

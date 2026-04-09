@@ -5,9 +5,6 @@ project(ProtosAndGrpc LANGUAGES CXX)
 find_package(gRPC CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
 
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 #
 #
 # TARGET: Protos - regular protobuf messages
@@ -70,6 +67,8 @@ target_link_libraries(${TARGET} PUBLIC gRPC::grpc++ Protos)
 #target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_BINARY_DIR})
+
+target_include_directories(${TARGET} INTERFACE ${Protobuf_INCLUDE_DIRS})
 
 protobuf_generate(
     TARGET ${TARGET}

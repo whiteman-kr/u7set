@@ -11,10 +11,11 @@
 #include <QComboBox>
 
 #include "../UtilsLib/SimpleThread.h"
+#include "../OnlineLib/CircularLogger.h"
+#include "../OnlineLib/GrpcAdsClient.h"
 
 #include "CalibratorBase.h"
 #include "ConfigSocket.h"
-#include "SignalSocket.h"
 #include "TuningSocket.h"
 #include "SelectSignalWidget.h"
 #include "MeasureView.h"
@@ -25,6 +26,22 @@
 #include "PanelComparatorInfo.h"
 #include "DialogCalculator.h"
 
+class AppSignalStateUpdater : public IAppSignalStateUpdater
+{
+public:
+	AppSignalStateUpdater(SignalBase& signalBase);
+
+	virtual void adsConnected() override;
+	virtual void adsDisconnected() override;
+
+	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+	virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
+
+private:
+	SignalBase& m_signalBase;
+};
+
 // ==============================================================================================
 
 class MainWindow : public QMainWindow
@@ -32,7 +49,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared log, QWidget* parent = nullptr);
 	virtual ~MainWindow() override;
 
 public:
@@ -48,7 +65,7 @@ public:
 	// Sockets
 	//
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
-	SignalSocket*			signalSocket() { return m_pSignalSocket; }
+//	SignalSocket*			signalSocket() { return m_pSignalSocket; }
 	bool					signalSocketIsConnected();
 	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
 	bool					tuningSocketIsConnected();
@@ -62,6 +79,8 @@ public:
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
 	int						getMaxComparatorCount(const MeasureSignal& activeSignal);
+
+	void updateSignalHashesForRequestStates();
 
 private:
 
@@ -176,6 +195,7 @@ private:
 private:
 
 	SoftwareInfo			m_softwareInfo;
+	CircularLoggerShared	m_log;
 
 	CalibratorBase			m_calibratorBase;
 	Measure::Base			m_measureBase;
@@ -185,10 +205,14 @@ private:
 	void					stopConfigSocket();
 	QString					configSocketConnectedStateStr();
 
-	SignalSocket*			m_pSignalSocket = nullptr;
-	SimpleThread*			m_pSignalSocketThread = nullptr;
+//	SignalSocket*			m_pSignalSocket = nullptr;
+//	SimpleThread*			m_pSignalSocketThread = nullptr;
+
+	std::mutex m_grpcAdsClientMutex;
+	std::unique_ptr<GrpcAdsClient> m_grpcAdsClient;
 	void					runSignalSocket();
 	void					stopSignalSocket();
+	void					restartSignalSocket();
 
 	TuningSocket*			m_pTuningSocket = nullptr;
 	SimpleThread*			m_pTuningSocketThread = nullptr;
@@ -359,6 +383,9 @@ private slots:
 	//
 	void					showFindMeasurePanel(const QString& signalID);
 };
+
+
+MainWindow* getMainWindow();
 
 // ==============================================================================================
 

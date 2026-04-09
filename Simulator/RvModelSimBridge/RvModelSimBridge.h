@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include <ServiceLib/Service.h>
 

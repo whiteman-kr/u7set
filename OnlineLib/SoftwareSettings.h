@@ -3,6 +3,7 @@
 #include "SoftwareEndpoint.h"
 #include <CommonLib/HostAddressPort.h>
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/Types.h>
 #include "../OnlineLib/MatsUsers.h"
 
 class XmlWriteHelper;
@@ -18,8 +19,10 @@ struct SessionParams
 	QString currentSettingsProfile;
 	E::SoftwareRunMode softwareRunMode = E::SoftwareRunMode::Normal;
 
-	void saveTo(Network::SessionParams* sp);
+	void saveTo(Network::SessionParams* sp) const;
 	void loadFrom(const Network::SessionParams& sp);
+
+	void clear();
 };
 
 class RqCtrlSettings
@@ -154,6 +157,8 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getSettingsDefaultProfile() const;
 
+	void clear();
+
 	bool settingsProfileIsExists(const QString& profile);
 
 	bool writeToXml(XmlWriteHelper& xml);
@@ -218,23 +223,21 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
+struct ClientInfo
+{
+	QString equipmentID;
+	E::SoftwareType softwareType = E::SoftwareType::Unknown;
+	QString hostname;
+};
+
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
-	struct ClientInfo
-	{
-		QString equipmentID;
-		E::SoftwareType softwareType = E::SoftwareType::Unknown;
-		QString hostname;
-	};
-
-public:
-
 	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
 	bool checkHostname = false;
 
-	std::list<ClientInfo> clients;
+	std::vector<ClientInfo> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

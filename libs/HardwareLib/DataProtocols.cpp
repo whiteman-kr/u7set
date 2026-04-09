@@ -22,6 +22,18 @@ namespace Rup
 		year = reverseUint16(year);
 	}
 
+	void TimeStamp::clear()
+	{
+		hour = 0;
+		minute = 0;
+		second = 0;
+		millisecond = 0;
+
+		day = 0;
+		month = 0;
+		year = 0;
+	}
+
 	void TimeStamp::setDateTime(const QDateTime& dateTime)
 	{
 		QDate date = dateTime.date();

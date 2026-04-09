@@ -171,7 +171,7 @@ void ViewTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, cons
 		return;
 	}
 
-	item->setData(static_cast<int>(Columns::AppSignalID), Qt::UserRole, value.appSignalHash());
+	item->setData(static_cast<int>(Columns::AppSignalID), Qt::UserRole, QVariant::fromValue<Hash>(value.appSignalHash()));
 
 	if (m_signalManager.signalExists(value.appSignalHash()) == false)
 	{

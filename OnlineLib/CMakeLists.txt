@@ -17,12 +17,23 @@ qt_add_library(${TARGET} STATIC
 	ApertureRecord.h
 	BuildInfo.cpp
 	BuildInfo.h
-	CfgLoader.cpp
-	CfgLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
 	DataSource.cpp
 	DataSource.h
+	GrpcAdsClient.cpp
+	GrpcAdsClient.h
+	GrpcCfgLoader.cpp
+	GrpcCfgLoader.h
+	GrpcFileClient.cpp
+	GrpcFileClient.h
+	GrpcFileSrv.cpp
+	GrpcFileSrv.h
+	GrpcClient.h
+	GrpcServer.cpp
+	GrpcServer.h
+	GrpcSessionGuard.cpp
+	GrpcSessionGuard.h
 	MatsUsers.cpp
 	MatsUsers.h
 	OnlineDataSource.cpp
@@ -35,9 +46,9 @@ qt_add_library(${TARGET} STATIC
 	SignalStatesDistributor.h
 	SignalStatesProcessor.cpp
 	SignalStatesProcessor.h
-	SoftwareEndpoint.h
 	SocketIO.cpp
 	SocketIO.h
+	SoftwareEndpoint.h
 	SoftwareInfo.cpp
 	SoftwareInfo.h
 	SoftwareSettings.cpp
@@ -74,6 +85,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<optional>
 	<queue>
 	<set>
+	<string>
 	<thread>
 	<type_traits>
 	<unordered_map>
@@ -139,7 +151,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Network Qt6::Qml asio::asio)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib HardwareLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib HardwareLib GrpcLib)
 
 target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

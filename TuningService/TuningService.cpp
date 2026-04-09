@@ -377,40 +377,20 @@ namespace Tuning
 
 	void TuningServiceWorker::initialize()
 	{
-		runCfgLoaderThread();
+		runGrpcCfgLoaderThread();
+		// runCfgLoaderThread();
 	}
 
 	void TuningServiceWorker::shutdown()
 	{
 		clearConfiguration();
-		stopCfgLoaderThread();
+		//stopCfgLoaderThread();
+		stopGrpcCfgLoaderThread();
 
 		if (m_tuningPacketLog != nullptr)
 		{
 			LOGGER_SHUTDOWN(m_tuningPacketLog);
 		}
-	}
-
-	void TuningServiceWorker::runCfgLoaderThread()
-	{
-		m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
-
-		m_cfgLoaderThread->start();
-		m_cfgLoaderThread->enableDownloadConfiguration();
-	}
-
-	void TuningServiceWorker::stopCfgLoaderThread()
-	{
-		if (m_cfgLoaderThread == nullptr)
-		{
-			return;
-		}
-
-		m_cfgLoaderThread->quitAndWait();
-
-		delete m_cfgLoaderThread;
 	}
 
 	void TuningServiceWorker::clearConfiguration()
@@ -803,11 +783,6 @@ namespace Tuning
 
 		Q_UNUSED(configurationXmlData);
 
-		if (m_cfgLoaderThread == nullptr)
-		{
-			return;
-		}
-
 		const TuningServiceSettings* typedSettingsPtr = dynamic_cast<const TuningServiceSettings*>(curSettingsProfile.get());
 
 		if (typedSettingsPtr == nullptr)
@@ -827,7 +802,7 @@ namespace Tuning
 			QByteArray fileData;
 			QString errStr;
 
-			m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+			m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
 			if (errStr.isEmpty() == false)
 			{
@@ -860,7 +835,7 @@ namespace Tuning
 
 			clearConfiguration();
 
-			m_buildInfo = m_cfgLoaderThread->buildInfo();;
+			m_buildInfo = m_grpcCfgLoaderThread->buildInfo();
 
 			applyNewConfiguration(newSources);
 		}

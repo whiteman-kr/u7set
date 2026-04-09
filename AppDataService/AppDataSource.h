@@ -32,6 +32,8 @@ public:
 	bool getSignalState(SimpleAppSignalStateArchiveFlag* state);
 	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState);
 
+	void clearSignalStatesQueue();
+
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
 	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
@@ -47,10 +49,17 @@ public:
 	void incSimFlagsCount() { m_simFlagsCount++; }
 	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
 
-private:
-	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
+	// for testing purposes only!
+	//
+	void pushState(const SimpleAppSignalState& state);
+	void resizeSignalStatesQueue(int size);
+
+	void checkInputPlantTime(Rup::TimeStamp plantTime);
 
 	void wakeupStatesProcessingThread();
+
+private:
+	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
 
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
@@ -63,6 +72,8 @@ private:
 	virtual quint32 getExpectedDataUID() const override { return m_cachedAppDataUID; }
 
 private:
+	static constexpr int SIGNAL_STATES_QUEUE_MIN_SIZE = 1000;
+
 	CircularLoggerShared m_log;
 
 	std::mutex* m_statesProcessigRequiredMutex = nullptr;
@@ -108,6 +119,10 @@ private:
 	int m_lastAutoArchivingGroup = DynamicAppSignalState::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	quint32 m_cachedAppDataUID = 0;
+
+	//
+
+	Rup::TimeStamp m_lastPlantTime;
 };
 
 class AppDataSources
@@ -122,8 +137,11 @@ public:
 	void clear();
 
 	AppDataSource* getSourceByIP(quint32 ip);
+	AppDataSource* getSourceByEquipmentID(const QString& equipmentId);
+
 	AppDataSource* getSignalSource(const QString& signalID);
 	AppDataSource* getSignalSource(Hash signalHash);
+	const AppDataSource* getSignalSource(Hash signalHash) const;
 
 	std::vector<AppDataSource*>::iterator begin();
 	std::vector<AppDataSource*>::const_iterator begin() const;
@@ -131,7 +149,10 @@ public:
 	std::vector<AppDataSource*>::iterator end();
 	std::vector<AppDataSource*>::const_iterator end() const;
 
-//	const std::map<QString, AppDataSource*>& sources() const;
+	int size() const;
+
+private:
+	const AppDataSource* privateGetSignalSource(Hash signalHash) const;
 
 private:
 	// dynamic AppDataSource objects owner!

@@ -17,6 +17,8 @@ namespace Tcp
 
 	struct ConnectionState
 	{
+		QString name;
+
 		bool isSocketConnected = false;					// True - if TCP connection is etablished
 
 		bool isConnected = false;						// True - if TCP connection is etablished and

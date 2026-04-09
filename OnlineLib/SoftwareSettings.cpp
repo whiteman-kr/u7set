@@ -12,7 +12,8 @@
 // SessionParams struct implementation
 //
 // -------------------------------------------------------------------------------------
-void SessionParams::saveTo(Network::SessionParams* sp)
+
+void SessionParams::saveTo(Network::SessionParams* sp) const
 {
 	TEST_PTR_RETURN(sp);
 
@@ -24,6 +25,12 @@ void SessionParams::loadFrom(const Network::SessionParams& sp)
 {
 	currentSettingsProfile = QString::fromStdString(sp.currentsettingsprofile());
 	softwareRunMode = static_cast<E::SoftwareRunMode>(sp.softwarerunmode());
+}
+
+void SessionParams::clear()
+{
+	currentSettingsProfile.clear();
+	softwareRunMode = E::SoftwareRunMode::Normal;
 }
 
 // -------------------------------------------------------------------------------------
@@ -209,6 +216,12 @@ SoftwareSettingsSet::SoftwareSettingsSet(E::SoftwareType softwareType) :
 SoftwareSettingsSet::SoftwareSettingsSet() :
 	m_softwareType(E::SoftwareType::Unknown)
 {
+}
+
+void SoftwareSettingsSet::clear()
+{
+	m_softwareType = E::SoftwareType::Unknown;
+	m_settingsMap.clear();
 }
 
 bool SoftwareSettingsSet::settingsProfileIsExists(const QString& profile)
@@ -736,6 +749,8 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 	int clientsCount = 0;
 
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
+
+	clients.reserve(clientsCount);
 
 	for(int i = 0; i < clientsCount; i++)
 	{

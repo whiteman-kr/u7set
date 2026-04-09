@@ -17,6 +17,7 @@
 #include <CommonLib/HostAddressPort.h>
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
+#include <GrpcAppDataSrv.pb.h>
 
 using asio::ip::tcp;
 namespace AGL = GatewayClientLib;
@@ -53,8 +54,9 @@ public:
 	void run();
 	void stop();
 
-	void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
-	void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
+	void updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply);
+	void processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply);
+	void invalidateSignals();
 
 	void setConnectedToAppDataSrv(bool connected);
 
@@ -66,6 +68,7 @@ private:
 	void requestCloseSession(SessionShared stc);
 	void closeSessions();
 	void joinAllSessions();
+	void resetAcceptor();
 
 	void processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize);
 
@@ -98,7 +101,9 @@ private:
 
 	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
 
-	void updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
+	uint8_t channelChar(E::Channel ch) const;
+
+	void updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply);
 
 private:
 	HostAddressPort m_listenIP;

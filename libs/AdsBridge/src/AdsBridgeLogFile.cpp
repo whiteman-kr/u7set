@@ -5,38 +5,33 @@ namespace AdsBridge
 	MatsLogHandler LogFile::g_logHandler = nullptr;
 	MatsLogLevel LogFile::g_logLevel = MATS_LOG_LEVEL_WARNING;
 
-	bool LogFile::writeAlert(const QString& text, [[maybe_unused]] const QString& tag)
+	void LogFile::writeAlert(std::string_view message)
 	{
-		return privateLog(MATS_LOG_LEVEL_ERROR, text.toStdString().c_str());
+		return privateLog(MATS_LOG_LEVEL_ERROR, message.data());
 	}
 
-	bool LogFile::writeError(const QString& text, [[maybe_unused]] const QString& tag)
+	void LogFile::writeError(std::string_view message)
 	{
-		return privateLog(MATS_LOG_LEVEL_ERROR, text.toStdString().c_str());
+		return privateLog(MATS_LOG_LEVEL_ERROR, message.data());
 	}
 
-	bool LogFile::writeWarning(const QString& text, [[maybe_unused]] const QString& tag)
+	void LogFile::writeWarning(std::string_view message)
 	{
-		return privateLog(MATS_LOG_LEVEL_WARNING, text.toStdString().c_str());
+		return privateLog(MATS_LOG_LEVEL_WARNING, message.data());
 	}
 
-	bool LogFile::writeMessage(const QString& text, [[maybe_unused]] const QString& tag)
+	void LogFile::writeMessage(std::string_view message)
 	{
-		return privateLog(MATS_LOG_LEVEL_DEBUG, text.toStdString().c_str());
+		return privateLog(MATS_LOG_LEVEL_DEBUG, message.data());
 	}
 
-	bool LogFile::writeText(const QString& text, [[maybe_unused]] const QString& tag)
-	{
-		return privateLog(MATS_LOG_LEVEL_DEBUG, text.toStdString().c_str());
-	}
-
-	bool LogFile::privateLog(MatsLogLevel level, const char* message)
+	void LogFile::privateLog(MatsLogLevel level, const char* message)
 	{
 		if (g_logHandler != nullptr && level >= g_logLevel)
 		{
 			g_logHandler(level, message);
 		}
 
-		return true;
+		return;
 	}
 } // namespace AdsBridge

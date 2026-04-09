@@ -23,6 +23,7 @@ qt_add_library(${TARGET} STATIC
 	CUtils.h
 	DomXmlHelper.cpp
 	DomXmlHelper.h
+	HighResolutionTimerGuard.h
 	ILogFile.h
 	InstanceResolver.cpp
 	InstanceResolver.h
@@ -98,5 +99,9 @@ target_link_libraries(${TARGET} PUBLIC CommonLib)
 
 target_compile_definitions(${TARGET} PRIVATE UTILS_LIB_DOMAIN)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+if (WIN32)
+	target_link_libraries(${TARGET} PRIVATE winmm)
+endif ()
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

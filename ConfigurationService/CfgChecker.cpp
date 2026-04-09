@@ -110,7 +110,7 @@ bool CfgCheckerWorker::copyPath(const QString& src, const QString& dst)
 
 bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 {
-	QString buildXmlPath = buildDirectoryPath + "/build.xml";
+	QString buildXmlPath = buildDirectoryPath + File::SLASH_BUILD_XML;
 	QFile buildXmlFile(buildXmlPath);
 
 	if (!buildXmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -246,7 +246,7 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	// Has build.xml been changed?
 	//
-	QString buildXmlPath = m_autoloadBuildFolder + "/build.xml";
+	QString buildXmlPath = m_autoloadBuildFolder + File::SLASH_BUILD_XML;
 
 	QString newBuildXmlHash;
 
@@ -450,7 +450,7 @@ void CfgCheckerWorker::onThreadStarted()
 				continue;
 			}
 
-			QString workBuildXmlFileName = workBuildPath + "/build.xml";
+			QString workBuildXmlFileName = workBuildPath + File::SLASH_BUILD_XML;
 
 			if (getFileHash(workBuildXmlFileName, m_lastBuildXmlHash) == false)
 			{

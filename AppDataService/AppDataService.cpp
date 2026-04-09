@@ -1,11 +1,10 @@
-#include "../OnlineLib/CfgLoader.h"
-
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
 #include "AppDataReceiver.h"
 #include "ApertureFile.h"
+#include "AppDataSrvTools.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -110,17 +109,17 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
 {
-	if (m_cfgLoaderThread == nullptr)
+	if (m_grpcCfgLoaderThread == nullptr)
 	{
 		return false;
 	}
 
-	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+	HostAddressPort serverIP = m_grpcCfgLoaderThread->getServerAddr();
 
-	if (state.isConnected)
+	if (serverIP.isNull() == false)
 	{
-		ip = state.peerAddr.address32();
-		port = state.peerAddr.port();
+		ip = serverIP.address32();
+		port = serverIP.port();
 
 		return true;
 	}
@@ -234,7 +233,8 @@ void AppDataServiceWorker::initialize()
 
 	m_discretesLogWriter = std::make_shared<DiscretesLogWriter>();
 
-	runCfgLoaderThread();
+//	runCfgLoaderThread();
+	runGrpcCfgLoaderThread();
 
 	connect(this, &AppDataServiceWorker::restartArchSignalsTimer, this, &AppDataServiceWorker::onRestartArchSignalsTimer);
 }
@@ -243,182 +243,22 @@ void AppDataServiceWorker::shutdown()
 {
 	clearConfiguration();
 
-	stopCfgLoaderThread();
+	stopGrpcCfgLoaderThread();
+//	stopCfgLoaderThread();
 
 	m_discretesLogWriter.reset();
 
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker finished");
 }
 
-void AppDataServiceWorker::runCfgLoaderThread()
-{
-	assert(m_cfgLoaderThread == nullptr);			// once should be runned
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
-
-	m_cfgLoaderThread->start();
-
-	m_cfgLoaderThread->enableDownloadConfiguration();
-}
-
-void AppDataServiceWorker::stopCfgLoaderThread()
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread->quitAndWait();
-
-	delete m_cfgLoaderThread;
-
-	m_cfgLoaderThread = nullptr;
-}
-
-void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
-												const BuildFileInfoArray buildFileInfoArray,
-												SessionParams sessionParams,
-												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
-{
-	setSessionParams(sessionParams);
-
-	DEBUG_LOG_MSG(logger(), "Configuration is ready");
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	// stop all threads and free all allocated resources
-	//
-	clearConfiguration();
-
-	bool res = readBuildInfo(configurationXmlData);
-
-	if (res == false)
-	{
-		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from configurationXmlData"));
-		return;
-	}
-
-	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
-
-	if (typedSettingsPtr == nullptr)
-	{
-		DEBUG_LOG_MSG(logger(), "Settings casting error!");
-		return;
-	}
-
-	setCfgServiceID1(typedSettingsPtr->cfgServiceID1);
-	setCfgServiceID2(typedSettingsPtr->cfgServiceID2);
-
-	// making modificable local copy of settings
-	//
-	m_curSettingsProfile = *typedSettingsPtr;
-
-	// replace some cfg settings by command line arguments
-	//
-	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
-	{
-		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
-	}
-
-	bool result = true;
-
-	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
-	{
-		QByteArray fileData;
-		QString errStr;
-
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
-
-		if (errStr.isEmpty() == false)
-		{
-			qDebug() << errStr;
-			result = false;
-			continue;
-		}
-
-		result = true;
-
-		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
-		{
-			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
-		}
-
-		if (bfi.ID == CfgFileId::ACQUIRED_APP_SIGNALS)
-		{
-			result &= readAppSignals(fileData);				// fills m_appSignals
-		}
-
-		if (result == true)
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " OK";
-		}
-		else
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
-			break;
-		}
-	}
-
-	if (result == true)
-	{
-		applyNewConfiguration();
-	}
-}
-
 bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
 {
-	QVector<OnlineLib::DataSource> dataSources;
-	OnlineLib::BuildInfo buildInfo;
-
-	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources, &buildInfo);
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(logger(), QString("Error reading AppDataSources from XML-file"));
-		return false;
-	}
-
-	result = m_appDataSources.init(profile, dataSources, logger());
-
-	if (result == true)
-	{
-		DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
-	}
-	else
-	{
-		DEBUG_LOG_ERR(logger(), QString("AppDataSources loading error!"));
-	}
-
-	return result;
+	return AppDataSrvTools::readAppDataSources(fileData, profile, m_appDataSources, logger());
 }
 
 bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
-	::Proto::AppSignalSet signalSet;
-
-	bool result = signalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	int signalCount = signalSet.appsignal_size();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
-
-		m_appSignals.insert(appSignal);
-	}
-
-	return true;
+	return AppDataSrvTools::readAppSignals(fileData, m_appSignals);
 }
 
 void AppDataServiceWorker::createTimeErrLog()
@@ -446,50 +286,7 @@ void AppDataServiceWorker::shutdownTimeErrLog()
 
 void AppDataServiceWorker::createAndInitSignalStates()
 {
-	m_appSignalStates.clear();
-
-	if (m_appSignals.isEmpty())
-	{
-		return;
-	}
-
-	int signalCount = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		signalCount++;
-	}
-
-	m_appSignalStates.setSize(signalCount);
-
-	int index = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		DynamicAppSignalState* signalState = m_appSignalStates[index];
-
-		signalState->setSignalParams(signal, m_appSignals);
-
-		index++;
-	}
-
-	m_appSignalStates.buidlHash2State();
-
-	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+	AppDataSrvTools::createAndInitSignalStates(m_appSignals, m_appSignalStates, m_autoArchivingGroupsCount);
 
 	//
 
@@ -523,13 +320,11 @@ void AppDataServiceWorker::buildAcuiredAppSignalIDs()
 	m_acquiredAppSignalIDs.clear();
 	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
 
-	for(const AppSignal* signal : m_appSignals)
+	for(const AppSignal& signal : m_appSignals)
 	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isAcquired() == true)
+		if (signal.isAcquired() == true)
 		{
-			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
+			m_acquiredAppSignalIDs.push_back(signal.appSignalID());
 		}
 	}
 }
@@ -561,8 +356,9 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 	runAppDataReceiverThread();
 	runTcpArchiveClientThread();
-	runTcpAppDataServer();
+//	runTcpAppDataServer();
 	runRtTrendsServerThread();
+	runGrpcAppDataSrv();
 
 	onRestartArchSignalsTimer();
 
@@ -584,9 +380,10 @@ void AppDataServiceWorker::clearConfiguration()
 	//
 	m_discretesLogWriter->stop();
 
+	stopGrpcAppDataSrv();
 	stopRtTrendsServerThread();
+//	stopTcpAppDataServer();
 	stopTcpArchiveClientThread();
-	stopTcpAppDataServer();
 	stopAppDataReceiverThread();
 
 	shutdownTimeErrLog();
@@ -700,7 +497,10 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 				  });
 
 	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,
-														*this);
+														softwareInfo(),
+														m_appDataSources,
+														m_appSignalStates,
+														logger());
 
 	m_rtTrendsServerThread->start();
 }
@@ -716,8 +516,42 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
+void AppDataServiceWorker::runGrpcAppDataSrv()
+{
+	m_grpcAppDataSrvs.clear();
+	m_grpcAppDataSrvs.reserve(m_curSettingsProfile.rcSettings.size());
+
+	for(const RqCtrlSettings& rcs : m_curSettingsProfile.rcSettings)
+	{
+		if (rcs.enable() == false)
+		{
+			continue;
+		}
+
+		HostAddressPort listenIP = rcs.clientRequestIP();
+
+		m_grpcAppDataSrvs.emplace_back(std::make_unique<GrpcAppDataSrv>(softwareInfo(),
+															true, m_clients, false,
+															listenIP, m_appDataSources,
+															m_appDataReceiver, m_appSignals,
+															m_appSignalStates, m_discretesLogWriter,
+															logger()));
+		m_grpcAppDataSrvs.back()->start();
+	}
+}
+
+void AppDataServiceWorker::stopGrpcAppDataSrv()
+{
+	for(auto& srv : m_grpcAppDataSrvs)
+	{
+		srv->stop();
+	}
+
+	m_grpcAppDataSrvs.clear();
+}
+
 void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
-											int count, double* updateStatus) const
+	int count, double* updateStatus) const
 {
 	TEST_PTR_RETURN(recordsPerMin);
 	TEST_PTR_RETURN(updateStatus);
@@ -887,5 +721,105 @@ void AppDataServiceWorker::copyArchSignalsInfo(Network::ServiceInfo& serviceInfo
 			asi->set_highengineeringunits(state->highEngineeringUnits());
 			asi->set_signaltype(TO_INT(state->signalType()));
 		}
+	}
+}
+
+void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+	const BuildFileInfoArray buildFileInfoArray,
+	SessionParams sessionParams,
+	std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
+{
+	setSessionParams(sessionParams);
+
+	DEBUG_LOG_MSG(logger(), "Configuration is ready");
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	// stop all threads and free all allocated resources
+	//
+	clearConfiguration();
+
+	bool res = readBuildInfo(configurationXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from configurationXmlData"));
+		return;
+	}
+
+	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
+		return;
+	}
+
+	setCfgServiceID1(typedSettingsPtr->cfgServiceID1);
+	setCfgServiceID2(typedSettingsPtr->cfgServiceID2);
+
+	// making modificable local copy of settings
+	//
+	m_curSettingsProfile = *typedSettingsPtr;
+
+	// replace some cfg settings by command line arguments
+	//
+	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
+	{
+		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
+	}
+
+	if (m_grpcCfgLoaderThread == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	bool result = true;
+
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
+
+		m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+		if (errStr.isEmpty() == false)
+		{
+			qDebug() << errStr;
+			result = false;
+			continue;
+		}
+
+		result = true;
+
+		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
+		{
+			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
+		}
+
+		if (bfi.ID == CfgFileId::ACQUIRED_APP_SIGNALS)
+		{
+			result &= readAppSignals(fileData);				// fills m_appSignals
+		}
+
+		if (result == true)
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " OK";
+		}
+		else
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+			break;
+		}
+	}
+
+	if (result == true)
+	{
+		applyNewConfiguration();
 	}
 }

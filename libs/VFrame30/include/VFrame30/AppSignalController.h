@@ -36,7 +36,7 @@ namespace VFrame30
 
 		void signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const;
 
-		template<QStringRange Range>
+		template<StringRange Range>
 		void signalState(const Range& appSignalIds, std::vector<std::optional<AppSignalState>>* result) const
 		{
 			std::vector<Hash> hashes;

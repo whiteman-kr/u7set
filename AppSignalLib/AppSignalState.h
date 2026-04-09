@@ -1,7 +1,10 @@
 #pragma once
 
 #include "AppSignalStateFlags.h"
+
+#include <AppSignalLibStd/AppSignalAccessor.h>
 #include <CommonLib/Times.h>
+
 #include <QObject>
 
 namespace Proto
@@ -139,6 +142,9 @@ public:
 	[[nodiscard]] bool isOutOfLimits() const; //  isAboveHighLimit() || isBelowLowLimit()
 	[[nodiscard]] bool isTuningDefault() const;
 
+	void clear();
+
+	Proto::AppSignalState save() const;
 	void save(Proto::AppSignalState* protoState) const;
 	Hash load(const Proto::AppSignalState& protoState);
 
@@ -161,3 +167,17 @@ public:
 };
 
 Q_DECLARE_METATYPE(::AppSignalState)
+
+
+template<>
+struct AppSignalStateAccessor<::AppSignalState>
+{
+	static Hash hash(const ::AppSignalState& state) { return state.hash(); }
+	static void setHash(::AppSignalState& state, Hash hash) { state.m_hash = hash; }
+
+	static bool isStateAvailable(const ::AppSignalState& state) { return state.isStateAvailable(); }
+
+	static TimeStamp plantTime(const ::AppSignalState& state) { return state.time().plant; }
+
+	static AppSignalState fromProto(const Proto::AppSignalState& protoState) { return AppSignalState{protoState}; }
+};

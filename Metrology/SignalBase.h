@@ -228,6 +228,7 @@ public:
 	void setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
 	void setSignalState(const Hash& hash, const Metrology::SignalState& state);
 	void setSignalState(int index, const Metrology::SignalState& state);
+	void invalidateSignals();
 
 	bool enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal);
 
@@ -235,8 +236,9 @@ public:
 	//
 	int hashForRequestStateCount() const;
 	Hash hashForRequestState(int index);
+	std::vector<Hash> requestStateHashes() const;
 
-	void appendHashForRequestState(const Hash& hash);
+	void appendHashForRequestState(const Hash hash);
 	void appendHashForRequestState(const std::set<Hash>& list);
 	void removeLastHashForRequestState(int count);
 
@@ -270,7 +272,7 @@ public:
 	// main signal for measure
 	//
 	MeasureSignal activeSignal() const;
-	void setActiveSignal(const MeasureSignal& signal);
+	void setActiveSignal(const MeasureSignal& activeSignal);
 	void clearActiveSignal();
 
 	// other bases
@@ -323,6 +325,7 @@ private:
 signals:
 
 	void activeSignalChanged(const MeasureSignal& signal);
+	void requestStateHashesChanged();
 	void signalParamChanged(const QString& appSignalID);
 };
 

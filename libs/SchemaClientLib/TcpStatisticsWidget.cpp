@@ -119,7 +119,7 @@ namespace SchemaClientLib
 			size_t id = item->data(static_cast<int>(ColumnUserData::StatId), Qt::UserRole).value<uintptr_t>();
 			Q_ASSERT(id);
 
-			TcpClientStatistics::reconnect(id);
+			TcpClientStatistics::reconnectClient(id);
 			return;
 		};
 
@@ -149,7 +149,7 @@ namespace SchemaClientLib
 
 		for (const auto& stat : stats)
 		{
-			TcpClientStatistics::reconnect(stat.id);
+			TcpClientStatistics::reconnectClient(stat.id);
 		}
 
 		return;

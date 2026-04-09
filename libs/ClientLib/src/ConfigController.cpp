@@ -2,10 +2,12 @@
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "../OnlineLib/CfgLoader.h"
 #include <ClientLib/ConfigController.h>
 #include <CommonLib/HostAddressPort.h>
+
+#include <QCoreApplication>
 #include <QDomNode>
+
 
 namespace ClientLib
 {
@@ -30,25 +32,24 @@ namespace ClientLib
 
 		// Create communication thread
 		//
-		m_cfgLoaderThread = std::make_unique<CfgLoaderThread>(m_softwareInfo,
+		m_grpcCfgLoaderThread = std::make_unique<GrpcCfgLoaderThread>(m_softwareInfo,
 															  m_appInstanceNo,
 															  address1,
 															  address2,
-															  false,
-															  std::make_shared<CircularLogger>(logFile, "CfgLoaderThread"));
+															  std::make_shared<CircularLogger>(logFile, "GrpcCfgLoaderThread"));
 
-		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_configurationReady, this, &ConfigController::slot_configurationReady);
+		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_configurationReady, this, &ConfigController::slot_configurationReady);
 
 		auto logFunc = [this](QString errMsg)
 		{
 			m_logFile.writeError(errMsg);
 		};
 
-		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_unknownClientID, this, &ConfigController::error);
-		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_unknownClientID, logFunc);
+		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_unknownClientID, this, &ConfigController::error);
+		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_unknownClientID, logFunc);
 
-		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_wrongClientHostname, this, &ConfigController::error);
-		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_wrongClientHostname, logFunc);
+		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_wrongClientHostname, this, &ConfigController::error);
+		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_wrongClientHostname, logFunc);
 
 		return;
 	}
@@ -67,7 +68,7 @@ namespace ClientLib
 	{
 		m_softwareInfo.setEquipmentID(equipmentId);
 
-		m_cfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2, true);
+		m_grpcCfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2);
 
 		return;
 	}
@@ -75,7 +76,7 @@ namespace ClientLib
 	bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 	{
 		QString error;
-		bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, &error);
+		bool result = m_grpcCfgLoaderThread->getFileBlocked(pathFileName, fileData, &error);
 
 		if (result == false)
 		{
@@ -97,7 +98,7 @@ namespace ClientLib
 	bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr)
 	{
 		QString error;
-		bool result = m_cfgLoaderThread->getFileBlockedByID(id, fileData, &error);
+		bool result = m_grpcCfgLoaderThread->getFileBlockedByID(id, fileData, &error);
 
 		if (result == false)
 		{
@@ -118,12 +119,12 @@ namespace ClientLib
 
 	bool ConfigController::hasFileId(QString fileId) const
 	{
-		return m_cfgLoaderThread->hasFileID(std::move(fileId));
+		return m_grpcCfgLoaderThread->hasFileID(std::move(fileId));
 	}
 
 	Tcp::ConnectionState ConfigController::getConnectionState() const
 	{
-		return m_cfgLoaderThread->getConnectionState();
+		return m_grpcCfgLoaderThread->getConnectionState();
 	}
 
 	const SoftwareInfo& ConfigController::softwareInfo() const
@@ -359,10 +360,7 @@ namespace ClientLib
 	void ConfigController::start()
 	{
 		m_logFile.writeMessage(tr("MonitorConfigController::start()"));
-
-		m_cfgLoaderThread->start();
-		m_cfgLoaderThread->enableDownloadConfiguration();
-
+		m_grpcCfgLoaderThread->start();
 		return;
 	}
 

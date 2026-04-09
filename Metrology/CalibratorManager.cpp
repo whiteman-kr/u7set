@@ -1,3 +1,9 @@
+#include <QApplication>
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QScreen>
+#include <QMessageBox>
+
 #include "CalibratorManager.h"
 #include "MetrologySignal.h"
 #include "Options.h"

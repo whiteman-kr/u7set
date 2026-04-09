@@ -1,7 +1,7 @@
 #include "SignalSnapshotModel.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include <AppSignalLists/SignalList.h>
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 
 //
 // SignalSnapshotSorter
@@ -347,7 +347,7 @@ namespace SchemaClientLib
 		std::vector<Hash> appDataServiceHashes;
 		if (filterByDataServiceId == true)
 		{
-			appDataServiceHashes = m_signalDataServer->dataServiceSignals(m_dataServiceId);
+			appDataServiceHashes = m_signalDataServer->dataServiceSignals(m_dataServiceId.toStdString());
 			std::sort(appDataServiceHashes.begin(), appDataServiceHashes.end());
 		}
 
