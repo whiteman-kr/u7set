@@ -41,6 +41,8 @@ add_executable(${TARGET}
 	ModbusTcpSlaveThread.h
 	ModbusUdpSlaveThread.cpp
 	ModbusUdpSlaveThread.h
+	TuningGatewayServer.cpp
+	TuningGatewayServer.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

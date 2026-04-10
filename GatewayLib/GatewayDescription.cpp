@@ -10,6 +10,7 @@
 #include "IvsImpulseGateway.h"
 #include "ModbusSlaveGateway.h"
 #include "AdsGateway.h"
+#include "TuningGateway.h"
 
 namespace Gateway
 {
@@ -461,6 +462,9 @@ namespace Gateway
 
 		case E::GatewayType::AdsGateway:
 			return std::make_shared<AdsGateway>();
+
+		case E::GatewayType::TuningGateway:
+			return std::make_shared<TuningGateway>();
 
 		default:
 			Q_ASSERT(false);

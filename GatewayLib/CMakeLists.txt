@@ -21,6 +21,8 @@ qt_add_library(${TARGET} STATIC
 	IvsImpulseGateway.h
 	ModbusSlaveGateway.cpp
 	ModbusSlaveGateway.h
+	TuningGateway.cpp
+	TuningGateway.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -1,9 +1,9 @@
-#include "AdsGatewayServer.h"
+#include "TuningGatewayServer.h"
 
-AdsGatewayServer::AdsGatewayServer(const HostAddressPort& listenIP,
+TuningGatewayServer::TuningGatewayServer(const HostAddressPort& listenIP,
 									const AppSignals& appSignals,
 									CircularLoggerShared log) :
-	LogWrapper(log, "AdsGatewayServer"),
+	LogWrapper(log, "TuningGatewayServer"),
 	m_listenIP(listenIP),
 	m_appSignals(appSignals)
 {
@@ -30,11 +30,11 @@ AdsGatewayServer::AdsGatewayServer(const HostAddressPort& listenIP,
 	}
 }
 
-AdsGatewayServer::~AdsGatewayServer()
+TuningGatewayServer::~TuningGatewayServer()
 {
 }
 
-void AdsGatewayServer::start()
+void TuningGatewayServer::run()
 {
 	bool expected = false;
 
@@ -51,7 +51,7 @@ void AdsGatewayServer::start()
 		});
 }
 
-void AdsGatewayServer::stop()
+void TuningGatewayServer::stop()
 {
 	if (!m_running.exchange(false))
 	{
@@ -72,7 +72,7 @@ void AdsGatewayServer::stop()
 	joinAllSessions();
 }
 
-void AdsGatewayServer::updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply)
+void TuningGatewayServer::updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -125,7 +125,7 @@ void AdsGatewayServer::updateSignalStates(const Grpc::GetAppSignalStateReply& ge
 	}
 }
 
-void AdsGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
+void TuningGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -188,7 +188,7 @@ void AdsGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesR
 	updateSignalStatesByChanges(getStateChangesReply);
 }
 
-void AdsGatewayServer::invalidateSignals()
+void TuningGatewayServer::invalidateSignals()
 {
 	std::lock_guard lg(m_signalStatesMutex);
 
@@ -198,16 +198,16 @@ void AdsGatewayServer::invalidateSignals()
 	}
 }
 
-void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
+void TuningGatewayServer::setConnectedToTuningSrv(bool connected)
 {
-	m_connectedToAppDataSrv.store(connected, std::memory_order_relaxed);
+	connectedToTuningSrv.store(connected, std::memory_order_relaxed);
 
 	{
 		std::lock_guard lg(m_sessionsMutex);
 
 		for(SessionShared session : m_sessions)
 		{
-			session->connectedToAppDataSrv.store(connected, std::memory_order_relaxed);
+			session->connectedToTuningSrv.store(connected, std::memory_order_relaxed);
 		}
 	}
 
@@ -222,7 +222,7 @@ void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
 	}
 }
 
-void AdsGatewayServer::runAcceptLoop()
+void TuningGatewayServer::runAcceptLoop()
 {
 	static constexpr int BIND_RETRY_DELAY_MS = 1000;
 
@@ -296,7 +296,7 @@ void AdsGatewayServer::runAcceptLoop()
 				SessionShared stc = std::make_shared<Session>();
 
 				stc->socket = std::make_shared<tcp::socket>(std::move(socket));
-				stc->connectedToAppDataSrv.store(m_connectedToAppDataSrv.load(std::memory_order_relaxed),
+				stc->connectedToTuningSrv.store(connectedToTuningSrv.load(std::memory_order_relaxed),
 												std::memory_order_relaxed);
 
 				{
@@ -342,7 +342,7 @@ void AdsGatewayServer::runAcceptLoop()
 	logMsg(QString("stops"));
 }
 
-void AdsGatewayServer::sessionThread(SessionShared stc)
+void TuningGatewayServer::sessionThread(SessionShared stc)
 {
 	stc->payloadData.resize(AGL::GW_MAX_MSG_PAYLOAD_SIZE);
 
@@ -390,7 +390,7 @@ void AdsGatewayServer::sessionThread(SessionShared stc)
 	closeSocket(stc);
 }
 
-void AdsGatewayServer::reapFinishedSessions()
+void TuningGatewayServer::reapFinishedSessions()
 {
 	std::vector<SessionShared> finishedSessions;
 
@@ -422,12 +422,12 @@ void AdsGatewayServer::reapFinishedSessions()
 	}
 }
 
-void AdsGatewayServer::closeSocket(SessionShared stc)
+void TuningGatewayServer::closeSocket(SessionShared stc)
 {
 	requestCloseSession(stc);
 }
 
-void AdsGatewayServer::requestCloseSession(SessionShared stc)
+void TuningGatewayServer::requestCloseSession(SessionShared stc)
 {
 	if (!stc)
 	{
@@ -450,7 +450,7 @@ void AdsGatewayServer::requestCloseSession(SessionShared stc)
 	}
 }
 
-void AdsGatewayServer::closeSessions()
+void TuningGatewayServer::closeSessions()
 {
 	std::vector<SessionShared> sessions;
 
@@ -469,7 +469,7 @@ void AdsGatewayServer::closeSessions()
 	}
 }
 
-void AdsGatewayServer::joinAllSessions()
+void TuningGatewayServer::joinAllSessions()
 {
 	std::set<SessionShared> sessions;
 
@@ -487,7 +487,7 @@ void AdsGatewayServer::joinAllSessions()
 	}
 }
 
-void AdsGatewayServer::resetAcceptor()
+void TuningGatewayServer::resetAcceptor()
 {
 	std::lock_guard<std::mutex> lock(m_acceptorMutex);
 
@@ -500,7 +500,7 @@ void AdsGatewayServer::resetAcceptor()
 	}
 }
 
-void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize)
+void TuningGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize)
 {
 	while(recvBufSize >= AGL::GW_MSG_HEADER_SIZE)
 	{
@@ -632,7 +632,7 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 	}
 }
 
-bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
+bool TuningGatewayServer::processHandshakeRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -686,7 +686,7 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalListStartRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalListStartRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -715,7 +715,7 @@ bool AdsGatewayServer::processSignalListStartRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalListNextRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -756,7 +756,7 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 		if (payloadSize + AGL::GW_APP_SIGNAL_ID_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
 			Q_ASSERT(false);
-			logErr("AdsGatewayServer::processSignalListNextRequest payload size exceed!");
+			logErr("TuningGatewayServer::processSignalListNextRequest payload size exceed!");
 			sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 			return false;
 		}
@@ -779,7 +779,7 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalParamStartRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalParamStartRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -806,7 +806,7 @@ bool AdsGatewayServer::processSignalParamStartRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalParamNextRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -848,7 +848,7 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 		if (payloadSize + AGL::GW_APP_SIGNAL_PARAM_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
 			Q_ASSERT(false);
-			logErr("AdsGatewayServer::processSignalParamNextRequest payload size exceed!");
+			logErr("TuningGatewayServer::processSignalParamNextRequest payload size exceed!");
 			sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 			return false;
 		}
@@ -919,7 +919,7 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalStateRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -938,7 +938,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 		return false;
 	}
 
-	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
+	if (stc->connectedToTuningSrv.load(std::memory_order_relaxed) == false)
 	{
 		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
@@ -963,7 +963,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 			if (payloadSize + AGL::GW_APP_SIGNAL_STATE_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
 			{
 				Q_ASSERT(false);
-				logErr("AdsGatewayServer::processSignalStateRequest payload size exceed!");
+				logErr("TuningGatewayServer::processSignalStateRequest payload size exceed!");
 				sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 				return false;
 			}
@@ -1019,7 +1019,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
+bool TuningGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	const AGL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
@@ -1031,7 +1031,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	AGL::AdsGwSignalStateChangesRequest request;
 	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
 
-	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
+	if (stc->connectedToTuningSrv.load(std::memory_order_relaxed) == false)
 	{
 		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
@@ -1083,7 +1083,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
+bool TuningGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
 	const char *recvBuf, const size_t recvBufSize, GatewayClientLib::GwErrorCode& errCode)
 {
 	errCode = AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR;
@@ -1153,7 +1153,7 @@ bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader&
 	return true;
 }
 
-size_t AdsGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize)
+size_t TuningGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize)
 {
 	if (recvBufSize < requestSize)
 	{
@@ -1171,21 +1171,21 @@ size_t AdsGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t r
 	return restSize;
 }
 
-void AdsGatewayServer::sendErrReply(SessionShared stc,
+void TuningGatewayServer::sendErrReply(SessionShared stc,
 	const GatewayClientLib::GwMessageHeader& requestHeader,
 	AGL::GwErrorCode errCode)
 {
 	sendReply(stc, requestHeader.requestID, errCode, nullptr, 0);
 }
 
-void AdsGatewayServer::sendOkReply(SessionShared stc,
+void TuningGatewayServer::sendOkReply(SessionShared stc,
 	const GatewayClientLib::GwMessageHeader& requestHeader,
 	const char* payloadData, size_t payloadSize)
 {
 	sendReply(stc, requestHeader.requestID, AGL::GwErrorCode::GWC_SUCCESS, payloadData, payloadSize);
 }
 
-void AdsGatewayServer::sendReply(SessionShared stc,
+void TuningGatewayServer::sendReply(SessionShared stc,
 	uint32_t requestID, AGL::GwErrorCode errCode,
 	const char* payloadData, size_t payloadSize)
 {
@@ -1241,7 +1241,7 @@ void AdsGatewayServer::sendReply(SessionShared stc,
 	}
 }
 
-bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size) const
+bool TuningGatewayServer::checkNullTerminated(const char* str, size_t size) const
 {
 	TEST_PTR_RETURN_FALSE(str);
 
@@ -1256,7 +1256,7 @@ bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size) const
 	return false;
 }
 
-QString AdsGatewayServer::getIpPortStr(const tcp::socket& socket) const
+QString TuningGatewayServer::getIpPortStr(const tcp::socket& socket) const
 {
 	asio::error_code ec;
 	tcp::endpoint remote = socket.remote_endpoint(ec);
@@ -1269,7 +1269,7 @@ QString AdsGatewayServer::getIpPortStr(const tcp::socket& socket) const
 	return QString("%1:%2").arg(QString::fromStdString(remote.address().to_string())).arg(remote.port());
 }
 
-void AdsGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const
+void TuningGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const
 {
 	TEST_PTR_RETURN(toStr);
 
@@ -1288,7 +1288,7 @@ void AdsGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& from
 	}
 }
 
-uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
+uint8_t TuningGatewayServer::channelChar(E::Channel ch) const
 {
 	switch(ch)
 	{
@@ -1302,7 +1302,7 @@ uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
 	return 0;
 }
 
-void AdsGatewayServer::updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
+void TuningGatewayServer::updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	const size_t statesCount = getStateChangesReply.appsignalstates_size();
 

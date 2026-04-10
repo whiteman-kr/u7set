@@ -24,7 +24,7 @@ namespace AGL = GatewayClientLib;
 
 using TcpSocketShared = std::shared_ptr<tcp::socket>;
 
-class AdsGatewayServer : public LogWrapper
+class TuningGatewayServer : public LogWrapper
 {
 public:
 	struct Session
@@ -38,7 +38,7 @@ public:
 
 		bool handshakeCompleted = false;
 		QString clientName;
-		std::atomic_bool connectedToAppDataSrv {false};
+		std::atomic_bool connectedToTuningSrv {false};
 		std::vector<char> payloadData;
 		size_t errCount = 0;
 	};
@@ -48,10 +48,10 @@ public:
 	static constexpr size_t MAX_SESSION_ERRORS = 100;
 
 public:
-	AdsGatewayServer(const HostAddressPort& listenIP, const AppSignals& appSignals, CircularLoggerShared log);
-	virtual ~AdsGatewayServer();
+	TuningGatewayServer(const HostAddressPort& listenIP, const AppSignals& appSignals, CircularLoggerShared log);
+	virtual ~TuningGatewayServer();
 
-	void start();
+	void run();
 	void stop();
 
 	void updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply);
@@ -127,7 +127,7 @@ private:
 	std::mutex m_signalStateChangesMutex;
 	std::deque<AGL::GwAppSignalState> m_signalStateChanges;
 
-	std::atomic_bool m_connectedToAppDataSrv {false};
+	std::atomic_bool connectedToTuningSrv {false};
 
 	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
 	static constexpr int BAD_INDEX = -1;

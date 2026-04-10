@@ -22,7 +22,12 @@ namespace Builder
 								E::OS os);
 
 		bool doGatewaySpecificProcessing(const Gateway::GatewayShared& gw);
+		bool ivsImpulseGatewayProcessing(const Gateway::GatewayShared& gw);
+		bool modbusSlaveGatewayProcessing(const Gateway::GatewayShared& gw);
 		bool adsGatewayProcessing(const Gateway::GatewayShared& gw);
+		bool tuningGatewayProcessing(const Gateway::GatewayShared& gw);
+
+		bool checkConnection(const Gateway::GatewayShared& gw, E::SoftwareType swType);
 
 		bool checkStrLen(const QString& appSignalID, const QString& str, size_t len, const QString& propName);
 

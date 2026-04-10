@@ -40,7 +40,7 @@ namespace ClientLib
 									 ITuningAuthorization& tuningAuthorization,
 									 ILogFile* log,
 									 ITuningLog* tuningLog) :
-		Tcp::Client(softwareInfo, tunsInfo.clientRequestAddress, "TuningTcpClient", tunsInfo.equipmentId),
+		Tcp::Client(softwareInfo, tunsInfo.address, "TuningTcpClient", tunsInfo.equipmentId),
 		TcpClientStatistics(this),
 		m_logFile(log, "TuningTcpClient"),
 		m_tuningLog(tuningLog),

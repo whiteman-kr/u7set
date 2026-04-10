@@ -269,7 +269,7 @@ namespace Gateway
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
 		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_appSignals, m_log);
-		m_adsGatewayServer->run();
+		m_adsGatewayServer->start();
 	}
 
 	void AdsGatewayHandler::stopAdsGatewayServer()

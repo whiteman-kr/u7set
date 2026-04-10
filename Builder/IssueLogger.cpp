@@ -1852,6 +1852,30 @@ namespace Builder
 						arg(appSignalID, E::valueToString(inOutType), devSignalID, E::valueToString(devSignalFunction)));
 	}
 
+	/// IssueCode: CFG3056
+	///
+	/// IssueType: Error
+	///
+	/// Title: Gateway service %1 must be connected to %2 for Gateway %3 (type %4) profile %5
+	///
+	/// Parameters:
+	///			%1 Gateway service EquipmentID
+	///         %2 software type
+	///         %3 gateway ID
+	///         %4 gatewayType
+	///         %5 profile
+	///
+	/// Description:
+	///			Gateway service must be connected to specified software. Check Gateway service properties.
+	///
+	void IssueLogger::errCFG3056(QString gwSrvEquipmentID, QString swType, QString gwID, QString gwType, QString profile)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3056,
+				  tr("Gateway service %1 must be connected to %2 for Gateway %3 (type %4) profile %5.").
+						arg(gwSrvEquipmentID).arg(swType).arg(gwID).arg(gwType).arg(profile));
+	}
+
 	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error

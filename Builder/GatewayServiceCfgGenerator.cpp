@@ -206,15 +206,41 @@ namespace Builder
 		switch(gw->gatewayType())
 		{
 		case Gateway::E::GatewayType::IVS_Impulse:
+			result &= ivsImpulseGatewayProcessing(gw);
+			break;
+
 		case Gateway::E::GatewayType::ModbusSlave:
+			result &= modbusSlaveGatewayProcessing(gw);
 			break;
 
 		case Gateway::E::GatewayType::AdsGateway:
 			result &= adsGatewayProcessing(gw);
 			break;
 
+		case Gateway::E::GatewayType::TuningGateway:
+			result &= tuningGatewayProcessing(gw);
+			break;
+
 		default: ;
 		}
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::ivsImpulseGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::modbusSlaveGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
 
 		return result;
 	}
@@ -232,6 +258,10 @@ namespace Builder
 		}
 
 		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
+
+		RETURN_IF_FALSE(result);
 
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -338,6 +368,178 @@ namespace Builder
 			}
 
 			adsGw->appendSignalList(profile, appSignalIDs);
+		}
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::tuningGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::TuningService);
+
+/*		Gateway::AdsGatewayShared adsGw = std::dynamic_pointer_cast<Gateway::AdsGateway>(gw);
+
+		if (adsGw == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+		for(const QString& profile : profiles)
+		{
+			std::shared_ptr<const GatewayServiceSettings> settings  =
+				m_settingsSet.getSettingsProfile<GatewayServiceSettings>(profile);
+
+			TEST_PTR_CONTINUE(settings);
+
+			QStringList controllerIDs;
+
+			if (settings->appDataService1.equipmentId.isEmpty() == false)
+			{
+				controllerIDs.append(settings->appDataService1.equipmentId);
+			}
+
+			if (settings->appDataService2.equipmentId.isEmpty() == false)
+			{
+				controllerIDs.append(settings->appDataService2.equipmentId);
+			}
+
+			std::set<Hash> acquiredSignals;
+
+			for(const QString& controllerID : controllerIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(controllerID);
+
+				if (device == nullptr ||
+					device->deviceType() != Hardware::DeviceType::Controller)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				device = device->parent();
+
+				if (device == nullptr ||
+					device->deviceType() != Hardware::DeviceType::Software ||
+					device->toSoftware() == nullptr ||
+					device->toSoftware()->softwareType() != E::SoftwareType::AppDataService)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				QString appDataSrvID = device->equipmentIdTemplate();
+
+				auto it = m_context->m_swCfgGens.find(appDataSrvID);
+
+				if (it == m_context->m_swCfgGens.end())
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				std::shared_ptr<AppDataServiceCfgGenerator> adsCfgGen =
+					std::dynamic_pointer_cast<AppDataServiceCfgGenerator>(it->second);
+
+				if (adsCfgGen == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				const std::set<Hash> appDataSrvAcquiredSignals = adsCfgGen->acquiredAppSignals();
+
+				acquiredSignals.insert(appDataSrvAcquiredSignals.begin(),
+									   appDataSrvAcquiredSignals.end());
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+
+			QStringList appSignalIDs;
+
+			for(Hash hash : acquiredSignals)
+			{
+				const AppSignal* appSignal = m_signalSet->getSignalByHash(hash);
+
+				TEST_PTR_CONTINUE(appSignal);
+
+				//
+
+				const QString& appSignalID = appSignal->appSignalID();
+
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+
+				//
+
+				appSignalIDs.append(appSignal->appSignalID());
+			}
+
+			adsGw->appendSignalList(profile, appSignalIDs);
+		}*/
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::checkConnection(const Gateway::GatewayShared& gw, E::SoftwareType swType)
+	{
+		TEST_PTR_RETURN_FALSE(gw);
+
+		bool result = true;
+
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+		for(const QString& profile : profiles)
+		{
+			std::shared_ptr<const GatewayServiceSettings> settings  =
+				m_settingsSet.getSettingsProfile<GatewayServiceSettings>(profile);
+
+			TEST_PTR_CONTINUE(settings);
+
+			bool res = true;
+
+			switch(swType)
+			{
+			case E::SoftwareType::AppDataService:
+				res = !(settings->appDataService1.equipmentId.isEmpty() &&
+						settings->appDataService2.equipmentId.isEmpty());
+				break;
+
+			case E::SoftwareType::TuningService:
+				res = !(settings->tuningService1.equipmentId.isEmpty() &&
+						settings->tuningService2.equipmentId.isEmpty());
+				break;
+
+			default:
+				Q_ASSERT(false);
+				res = false;
+			}
+
+			if (res == false)
+			{
+				// Gateway service %1 must be connected to %2 for Gateway %3 (type %4) profile %5
+				//
+				m_log->errCFG3056(m_software->equipmentIdTemplate(), E::valueToString(swType),
+								  gw->gatewayID(), E::valueToString(gw->gatewayType()), profile);
+			}
+
+			result &= res;
 		}
 
 		return result;
