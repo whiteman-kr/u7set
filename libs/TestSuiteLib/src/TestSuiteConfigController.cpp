@@ -202,8 +202,8 @@ namespace TestSuite
 			for (const auto& ts : config.tuningServices)
 			{
 				m_logFile.writeMessage(
-					tr("TuningService: id, address: %1, %2.").arg(ts.equipmentId).arg(ts.clientRequestAddress.addressPortStr()));
-				qDebug() << "TuningService: id, address: " << ts.equipmentId << ", " << ts.clientRequestAddress.addressPortStr();
+					tr("TuningService: id, address: %1, %2.").arg(ts.equipmentId).arg(ts.address.addressPortStr()));
+				qDebug() << "TuningService: id, address: " << ts.equipmentId << ", " << ts.address.addressPortStr();
 
 				m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
 				qDebug() << "TuningSources: " << ts.drivenSources.join(", ");

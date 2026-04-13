@@ -106,6 +106,8 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwTuningSignalState) == 72);
 
+	constexpr size_t TUNING_GW_TUNING_SIGNAL_STATE_SIZE = sizeof(GwTuningSignalState);
+
 	enum GwTuningSignalStateFlags : uint32_t
 	{
 		TGWF_VALID = 0x00000001,              // Signal value is valid and reliable
@@ -205,6 +207,8 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwGetTuningSourcesStartRequest) == 4);
 
+	constexpr size_t TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE = sizeof(GwGetTuningSourcesStartRequest);
+
 	struct GwGetTuningSourcesStartResponse
 	{
 		uint32_t totalSize;   // Total file size in bytes
@@ -224,6 +228,8 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwGetTuningSourcesNextRequest) == 4);
 
+	constexpr size_t TUNING_GW_GET_TUNING_SOURCES_NEXT_REQUEST_SIZE = sizeof(GwGetTuningSourcesNextRequest);
+
 	struct GwGetTuningSourcesNextResponse
 	{
 		uint32_t part;     // Current part number (matches request)
@@ -242,6 +248,8 @@ namespace GatewayClientLib
 	};
 
 	static_assert(sizeof(GwGetTuningSourceStatesRequest) == 4);
+
+	constexpr size_t TUNING_GW_GET_TUNING_SOURCE_STATES_REQUEST_SIZE = sizeof(GwGetTuningSourceStatesRequest);
 
 	struct GwGetTuningSourceStatesResponse
 	{
@@ -265,6 +273,8 @@ namespace GatewayClientLib
 #endif
 	};
 
+	constexpr size_t TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE = sizeof(GwTuningSignalsReadRequest);
+
 	struct GwTuningSignalsReadResponse
 	{
 		uint32_t count;    // Number of states in response
@@ -273,6 +283,9 @@ namespace GatewayClientLib
 		GwTuningSignalState states[count]; // Array of states
 #endif
 	};
+
+	constexpr size_t TUNING_GW_TUNING_SIGNALS_READ_RESPONSE_SIZE = sizeof(GwTuningSignalsReadResponse);
+	constexpr size_t TUNING_GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - TUNING_GW_TUNING_SIGNALS_READ_RESPONSE_SIZE) / TUNING_GW_TUNING_SIGNAL_STATE_SIZE;
 
 	//
 	// Request TGW_TUNING_SIGNALS_APPLY
@@ -283,6 +296,8 @@ namespace GatewayClientLib
 	};
 
 	static_assert(sizeof(GwTuningSignalsApplyRequest) == 4);
+
+	constexpr size_t TUNING_GW_TUNING_SIGNALS_APPLY_REQUEST_SIZE = sizeof(GwTuningSignalsApplyRequest);
 
 	struct GwTuningSignalsApplyResponse
 	{
@@ -302,6 +317,8 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwTuningWriteValue) == 16);
 
+	constexpr size_t TUNING_GW_TUNING_WRITE_VALUE_SIZE = sizeof(GwTuningWriteValue);
+
 	struct GwTuningSignalsWriteRequest
 	{
 		char user[128];      // User name (ASCII, null-terminated)
@@ -313,6 +330,9 @@ namespace GatewayClientLib
 		GwTuningWriteValue values[count]; // Array of write commands
 #endif
 	};
+
+	constexpr size_t TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE = sizeof(GwTuningSignalsWriteRequest);
+	constexpr size_t TUNING_GW_MAX_WRITE_VALUES = (GW_MAX_MSG_PAYLOAD_SIZE - TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE) / TUNING_GW_TUNING_WRITE_VALUE_SIZE;
 
 	static_assert(sizeof(GwTuningSignalsWriteRequest) == 136);
 
@@ -350,6 +370,8 @@ namespace GatewayClientLib
 	};
 
 	static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
+
+	constexpr size_t TUNING_GW_CHANGE_CONTROLLED_TUNING_SOURCE_REQUEST_SIZE = sizeof(GwChangeControlledTuningSourceRequest);
 
 	struct GwChangeControlledTuningSourceResponse
 	{

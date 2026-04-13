@@ -2829,37 +2829,43 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	//
 
-	bool okApp1 = true;
+	bool res = true;
 
-	okApp1 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
-	okApp1 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
-									  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
-									  &appDataService1.address);
+	bool okApp1 = xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
 
-	bool okApp2 = true;
+	res = xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
+								  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
+								  &appDataService1.address);
 
-	okApp2 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
-	okApp2 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
-									  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
-									  &appDataService2.address);
+	okApp1 = okApp1 && (appDataService1.equipmentId.isEmpty() || res);
+
+	bool okApp2 = xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
+
+	res = xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
+								  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
+								  &appDataService2.address);
+
+	okApp2 = okApp2 && (appDataService2.equipmentId.isEmpty() || res);
 
 	result &= okApp1 || okApp2;
 
 	//
 
-	bool okTun1 = true;
+	bool okTun1 = xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID1, &tuningService1.equipmentId, true);
 
-	okTun1 &= xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID1, &tuningService1.equipmentId, true);
-	okTun1 &= xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP1,
-									  EquipmentPropNames::TUNING_SERVICE_PORT1,
-									  &tuningService1.address);
+	res = xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP1,
+								  EquipmentPropNames::TUNING_SERVICE_PORT1,
+								  &tuningService1.address);
 
-	bool okTun2 = true;
+	okTun1 = okTun1 && (tuningService1.equipmentId.isEmpty() || res);
 
-	okTun2 &= xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID2, &tuningService2.equipmentId, true);
-	okTun2 &= xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP2,
-									  EquipmentPropNames::TUNING_SERVICE_PORT2,
-									  &tuningService2.address);
+	bool okTun2 = xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID2, &tuningService2.equipmentId, true);
+
+	res = xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP2,
+										  EquipmentPropNames::TUNING_SERVICE_PORT2,
+										  &tuningService2.address);
+
+	okTun2 = okTun2 && (tuningService2.equipmentId.isEmpty() || res);
 
 	result &= okTun1 || okTun2;
 

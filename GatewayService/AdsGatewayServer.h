@@ -20,7 +20,7 @@
 #include <GrpcAppDataSrv.pb.h>
 
 using asio::ip::tcp;
-namespace AGL = GatewayClientLib;
+namespace GCL = GatewayClientLib;
 
 using TcpSocketShared = std::shared_ptr<tcp::socket>;
 
@@ -72,28 +72,28 @@ private:
 
 	void processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize);
 
-	bool processHandshakeRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processHandshakeRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-	bool processSignalListStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalListStartRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-	bool processSignalListNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalListNextRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalParamStartRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalParamNextRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-	bool processSignalStateRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalStateRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										 const char* recvBuf, const size_t requestSize);
-	bool processSignalStateChangesRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+	bool processSignalStateChangesRequest(SessionShared stc, const GCL::GwMessageHeader& header,
 										 const char* recvBuf, const size_t requestSize);
 
-	bool checkPayloadSize(const AGL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, AGL::GwErrorCode& errCode);
+	bool checkPayloadSize(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, GCL::GwErrorCode& errCode);
 	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
 
-	void sendErrReply(SessionShared stc, const GatewayClientLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
-	void sendOkReply(SessionShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
+	void sendErrReply(SessionShared stc, const GatewayClientLib::GwMessageHeader& requestHeader, GCL::GwErrorCode errCode);
+	void sendOkReply(SessionShared stc, const GCL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
 	void sendReply(SessionShared stc,
-				   uint32_t requestID, AGL::GwErrorCode errCode,
+				   uint32_t requestID, GCL::GwErrorCode errCode,
 				   const char* payloadData, size_t payloadSize);
 
 	bool checkNullTerminated(const char* str, size_t size) const;
@@ -125,7 +125,7 @@ private:
 	std::unordered_map<Hash, int> m_hashToIndex;
 
 	std::mutex m_signalStateChangesMutex;
-	std::deque<AGL::GwAppSignalState> m_signalStateChanges;
+	std::deque<GCL::GwAppSignalState> m_signalStateChanges;
 
 	std::atomic_bool m_connectedToAppDataSrv {false};
 

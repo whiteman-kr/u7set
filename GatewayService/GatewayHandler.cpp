@@ -3,6 +3,7 @@
 #include "IvsImpulseGatewayHandler.h"
 #include "ModbusSlaveGatewayHandler.h"
 #include "AdsGatewayHandler.h"
+#include "TuningGatewayHandler.h"
 
 namespace Gateway
 {
@@ -332,23 +333,40 @@ namespace Gateway
 				break;
 
 			case E::GatewayType::AdsGateway:
-			{
-				AdsGatewayShared adsGateway = std::dynamic_pointer_cast<AdsGateway>(gw);
-
-				if (adsGateway == nullptr)
 				{
-					result = false;
-					break;
+					AdsGatewayShared adsGateway = std::dynamic_pointer_cast<AdsGateway>(gw);
+
+					if (adsGateway == nullptr)
+					{
+						result = false;
+						break;
+					}
+
+					AdsGatewayHandlerShared adsGatewayHandler =
+						std::make_shared<AdsGatewayHandler>(swInfo, settings, adsGateway, appSignals,
+															 log, enableLogging);
+
+					m_handlers.push_back(adsGatewayHandler);
 				}
+				break;
 
-				AdsGatewayHandlerShared adsGatewayHandler =
-					std::make_shared<AdsGatewayHandler>(swInfo, settings, adsGateway, appSignals,
-														 log, enableLogging);
+			case E::GatewayType::TuningGateway:
+				{
+					TuningGatewayShared tunGateway = std::dynamic_pointer_cast<TuningGateway>(gw);
 
-				m_handlers.push_back(adsGatewayHandler);
-			}
-			break;
+					if (tunGateway == nullptr)
+					{
+						result = false;
+						break;
+					}
 
+					TuningGatewayHandlerShared tunGatewayHandler =
+						std::make_shared<TuningGatewayHandler>(swInfo, settings, tunGateway, appSignals,
+															log, enableLogging);
+
+					m_handlers.push_back(tunGatewayHandler);
+				}
+				break;
 
 			default:
 				Q_ASSERT(false);

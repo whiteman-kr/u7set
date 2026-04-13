@@ -136,7 +136,7 @@ void AdsGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesR
 		return;
 	}
 
-	AGL::GwAppSignalState state;
+	GCL::GwAppSignalState state;
 
 	constexpr size_t MAX_QUEUE_SIZE = 200000;
 
@@ -344,9 +344,9 @@ void AdsGatewayServer::runAcceptLoop()
 
 void AdsGatewayServer::sessionThread(SessionShared stc)
 {
-	stc->payloadData.resize(AGL::GW_MAX_MSG_PAYLOAD_SIZE);
+	stc->payloadData.resize(GCL::GW_MAX_MSG_PAYLOAD_SIZE);
 
-	std::vector<char> receiveBuffer(AGL::GW_MAX_PAYLOAD_SIZE);
+	std::vector<char> receiveBuffer(GCL::GW_MAX_PAYLOAD_SIZE);
 	char* recvBuf = receiveBuffer.data();
 	size_t recvBufSize = 0;
 
@@ -359,13 +359,13 @@ void AdsGatewayServer::sessionThread(SessionShared stc)
 		while (m_running.load(std::memory_order_relaxed)  &&
 					!stc->closing.load(std::memory_order_relaxed))
 		{
-			if (recvBufSize >= AGL::GW_MAX_PAYLOAD_SIZE)
+			if (recvBufSize >= GCL::GW_MAX_PAYLOAD_SIZE)
 			{
 				logErr("receive buffer overflow / invalid request size, receive buffer clearin");
 				recvBufSize = 0;
 			}
 
-			size_t bytesRead = stc->socket->read_some(asio::buffer(recvBuf + recvBufSize, AGL::GW_MAX_PAYLOAD_SIZE - recvBufSize), ec);
+			size_t bytesRead = stc->socket->read_some(asio::buffer(recvBuf + recvBufSize, GCL::GW_MAX_PAYLOAD_SIZE - recvBufSize), ec);
 
 			if (ec)
 			{
@@ -502,57 +502,57 @@ void AdsGatewayServer::resetAcceptor()
 
 void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize)
 {
-	while(recvBufSize >= AGL::GW_MSG_HEADER_SIZE)
+	while(recvBufSize >= GCL::GW_MSG_HEADER_SIZE)
 	{
-		AGL::GwMessageHeader header;
+		GCL::GwMessageHeader header;
 
-		std::memcpy(&header, recvBuf, AGL::GW_MSG_HEADER_SIZE);
+		std::memcpy(&header, recvBuf, GCL::GW_MSG_HEADER_SIZE);
 
-		if (header.payloadSize > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+		if (header.payloadSize > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 			stc->errCount++;
 			recvBufSize = 0;
 			return;
 		}
 
-		const size_t requestSize = AGL::GW_MSG_HEADER_SIZE +
+		const size_t requestSize = GCL::GW_MSG_HEADER_SIZE +
 								   header.payloadSize +
-								   AGL::GW_MSG_CRC_SIZE;
+								   GCL::GW_MSG_CRC_SIZE;
 
 		if (recvBufSize < requestSize)
 		{
 			return;
 		}
 
-		if (requestSize > AGL::GW_MAX_PAYLOAD_SIZE)
+		if (requestSize > GCL::GW_MAX_PAYLOAD_SIZE)
 		{
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 			stc->errCount++;
 			recvBufSize = 0;
 			return;
 		}
 
-		AGL::AdsGwRequestId requestID = static_cast<AGL::AdsGwRequestId>(header.requestID);
+		GCL::AdsGwRequestId requestID = static_cast<GCL::AdsGwRequestId>(header.requestID);
 
 		switch(requestID)
 		{
-		case AGL::AdsGwRequestId::ADSGW_HANDSHAKE:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
+		case GCL::AdsGwRequestId::ADSGW_HANDSHAKE:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
 			break;
 		default:
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_INVALID_REQUEST);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_INVALID_REQUEST);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
 		}
 
-		AGL::GwErrorCode errCode = AGL::GwErrorCode::GWC_SUCCESS;
+		GCL::GwErrorCode errCode = GCL::GwErrorCode::GWC_SUCCESS;
 
 		if (checkPayloadSize(header, recvBuf, recvBufSize, errCode) == false)
 		{
@@ -562,26 +562,26 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 			continue;
 		}
 
-		uint32_t calcCrc = Radiy::CRC32(recvBuf, AGL::GW_MSG_HEADER_SIZE + header.payloadSize);
+		uint32_t calcCrc = Radiy::CRC32(recvBuf, GCL::GW_MSG_HEADER_SIZE + header.payloadSize);
 
 		uint32_t receivedCrc;
-		std::memcpy(&receivedCrc, recvBuf + AGL::GW_MSG_HEADER_SIZE + header.payloadSize, sizeof(receivedCrc));
+		std::memcpy(&receivedCrc, recvBuf + GCL::GW_MSG_HEADER_SIZE + header.payloadSize, sizeof(receivedCrc));
 
 		if (calcCrc != receivedCrc)
 		{
 			logErr(QString("request %1 error CRC 0x%2 (expected 0x%3)").
 				   arg(header.requestID).arg(receivedCrc, 8, 16, QChar('0')).arg(calcCrc, 8, 16, QChar('0')));
 
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_CRC_ERROR);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_CRC_ERROR);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
 		}
 
-		if (requestID != AGL::AdsGwRequestId::ADSGW_HANDSHAKE &&
+		if (requestID != GCL::AdsGwRequestId::ADSGW_HANDSHAKE &&
 			stc->handshakeCompleted == false)
 		{
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 			stc->errCount++;
 			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
 			continue;
@@ -591,31 +591,31 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 
 		switch(requestID)
 		{
-		case AGL::AdsGwRequestId::ADSGW_HANDSHAKE:
+		case GCL::AdsGwRequestId::ADSGW_HANDSHAKE:
 			result = processHandshakeRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
 			result = processSignalListStartRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
 			result = processSignalListNextRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
 			result = processSignalParamStartRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
 			result = processSignalParamNextRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
 			result = processSignalStateRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
+		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
 			result = processSignalStateChangesRequest(stc, header, recvBuf, requestSize);
 			break;
 
@@ -633,14 +633,14 @@ void AdsGatewayServer::processRequest(SessionShared stc, char* recvBuf, size_t& 
 }
 
 bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(requestSize);
 
-	AGL::AdsGwHandshakeRequest request;
+	GCL::AdsGwHandshakeRequest request;
 
-	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_HANDSHAKE_REQUEST_SIZE);
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_HANDSHAKE_REQUEST_SIZE);
 
 	//
 
@@ -650,20 +650,20 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 	{
 		logErr("HANDSHAKE request error, clientName is NOT null-terminated");
 
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
 	stc->clientName = QString::fromUtf8(request.clientName);
 
-	if (request.protocolVersion != AGL::ADS_GW_PROTOCOL_VERSION)
+	if (request.protocolVersion != GCL::ADS_GW_PROTOCOL_VERSION)
 	{
 		logErr(QString("HANDSHAKE request from %1, WRONG protocol version 0x%2 (required %3)").
 					arg(stc->clientName).
 					arg(request.protocolVersion, 4, 16, QChar('0')).
-					arg(AGL::ADS_GW_PROTOCOL_VERSION, 4, 16, QChar('0')));
+					arg(GCL::ADS_GW_PROTOCOL_VERSION, 4, 16, QChar('0')));
 
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_UNSUPPORTED_VERSION);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_UNSUPPORTED_VERSION);
 		return false;
 	}
 
@@ -671,13 +671,13 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 					arg(stc->clientName).
 					arg(request.protocolVersion, 4, 16, QChar('0')));
 
-	AGL::AdsGwHandshakeResponse reply;
+	GCL::AdsGwHandshakeResponse reply;
 
-	reply.protocolVersion = AGL::ADS_GW_PROTOCOL_VERSION;
+	reply.protocolVersion = GCL::ADS_GW_PROTOCOL_VERSION;
 	reply.reserved = 0;
-	reply.maxStateRequest = AGL::ADS_GW_MAX_SIGNAL_STATES;
-	reply.sizeof_GwAppSignalParam = AGL::GW_APP_SIGNAL_PARAM_SIZE;
-	reply.sizeof_GwAppSignalState = AGL::GW_APP_SIGNAL_STATE_SIZE;
+	reply.maxStateRequest = GCL::ADS_GW_MAX_SIGNAL_STATES;
+	reply.sizeof_GwAppSignalParam = GCL::GW_APP_SIGNAL_PARAM_SIZE;
+	reply.sizeof_GwAppSignalState = GCL::GW_APP_SIGNAL_STATE_SIZE;
 
 	sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
 
@@ -687,7 +687,7 @@ bool AdsGatewayServer::processHandshakeRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalListStartRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(recvBuf);
@@ -697,12 +697,12 @@ bool AdsGatewayServer::processSignalListStartRequest(SessionShared stc,
 
 	logMsg(QString("SIGNAL_LIST_START request from %1").arg(stc->clientName));
 
-	AGL::AdsGwSignalListStartResponse reply;
+	GCL::AdsGwSignalListStartResponse reply;
 
 	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
 
 	reply.totalItemCount = signalCount;
-	reply.itemsPerPart = AGL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
+	reply.itemsPerPart = GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
 	reply.partCount = signalCount / reply.itemsPerPart + (signalCount % reply.itemsPerPart ? 1 : 0);
 
 	char* payloadData = stc->payloadData.data();
@@ -716,13 +716,13 @@ bool AdsGatewayServer::processSignalListStartRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(requestSize);
 
-	AGL::AdsGwSignalListNextRequest request;
-	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE);
+	GCL::AdsGwSignalListNextRequest request;
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE);
 
 	//
 
@@ -732,32 +732,32 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 	char* payloadData = stc->payloadData.data();
 
 	const int signalsCount = TO_INT(m_appSignals.count());
-	const int itemsPerPart = AGL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
+	const int itemsPerPart = GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
 	const int partCount = signalsCount / itemsPerPart + (signalsCount % itemsPerPart ? 1 : 0);
 
 	if (request.part >= static_cast<uint32_t>(partCount))
 	{
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
-	AGL::AdsGwSignalListNextResponse reply;
+	GCL::AdsGwSignalListNextResponse reply;
 
 	reply.part = request.part;
 	reply.appSignalIdCount = 0;
 
-	int signalStartIndex = request.part * AGL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
-	const int signalEndIndex = std::min(TO_INT(signalStartIndex + AGL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT), signalsCount);
+	int signalStartIndex = request.part * GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
+	const int signalEndIndex = std::min(TO_INT(signalStartIndex + GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT), signalsCount);
 
-	size_t payloadSize = AGL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE;
+	size_t payloadSize = GCL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE;
 
 	for(int i = signalStartIndex; i < signalEndIndex; i++)
 	{
-		if (payloadSize + AGL::GW_APP_SIGNAL_ID_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+		if (payloadSize + GCL::GW_APP_SIGNAL_ID_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
 			Q_ASSERT(false);
 			logErr("AdsGatewayServer::processSignalListNextRequest payload size exceed!");
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 			return false;
 		}
 
@@ -765,14 +765,14 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 
 		TEST_PTR_CONTINUE(appSignal);
 
-		copyStr(payloadData + payloadSize, AGL::GW_APP_SIGNAL_ID_SIZE, appSignal->appSignalID());
+		copyStr(payloadData + payloadSize, GCL::GW_APP_SIGNAL_ID_SIZE, appSignal->appSignalID());
 
-		payloadSize +=  AGL::GW_APP_SIGNAL_ID_SIZE;
+		payloadSize +=  GCL::GW_APP_SIGNAL_ID_SIZE;
 
 		reply.appSignalIdCount++;
 	}
 
-	std::memcpy(payloadData, &reply, AGL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE);
+	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE);
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
@@ -780,7 +780,7 @@ bool AdsGatewayServer::processSignalListNextRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalParamStartRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(recvBuf);
@@ -788,12 +788,12 @@ bool AdsGatewayServer::processSignalParamStartRequest(SessionShared stc,
 
 	logMsg(QString("SIGNAL_PARAM_START request from %1").arg(stc->clientName));
 
-	AGL::AdsGwSignalListStartResponse reply;
+	GCL::AdsGwSignalListStartResponse reply;
 
 	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
 
 	reply.totalItemCount = signalCount;
-	reply.itemsPerPart = AGL::ADS_GW_MAX_SIGNAL_PARAMS;
+	reply.itemsPerPart = GCL::ADS_GW_MAX_SIGNAL_PARAMS;
 	reply.partCount = signalCount / reply.itemsPerPart + (signalCount % reply.itemsPerPart ? 1 : 0);
 
 	char* payloadData = stc->payloadData.data();
@@ -807,14 +807,14 @@ bool AdsGatewayServer::processSignalParamStartRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(recvBuf);
 	Q_UNUSED(requestSize);
 
-	AGL::AdsGwSignalParamNextRequest request;
-	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE);
+	GCL::AdsGwSignalParamNextRequest request;
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE);
 
 	//
 
@@ -824,32 +824,32 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 	char* payloadData = stc->payloadData.data();
 
 	const int signalsCount = TO_INT(m_appSignals.count());
-	const int itemsPerPart = AGL::ADS_GW_MAX_SIGNAL_PARAMS;
+	const int itemsPerPart = GCL::ADS_GW_MAX_SIGNAL_PARAMS;
 	const int partCount = signalsCount / itemsPerPart + (signalsCount % itemsPerPart ? 1 : 0);
 
 	if (request.part >= static_cast<uint32_t>(partCount))
 	{
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 		return false;
 	}
 
-	AGL::AdsGwSignalParamNextResponse reply;
+	GCL::AdsGwSignalParamNextResponse reply;
 
 	reply.part = request.part;
 	reply.paramCount = 0;
 
-	int signalStartIndex = request.part * AGL::ADS_GW_MAX_SIGNAL_PARAMS;
-	const int signalEndIndex = std::min(TO_INT(signalStartIndex + AGL::ADS_GW_MAX_SIGNAL_PARAMS), signalsCount);
+	int signalStartIndex = request.part * GCL::ADS_GW_MAX_SIGNAL_PARAMS;
+	const int signalEndIndex = std::min(TO_INT(signalStartIndex + GCL::ADS_GW_MAX_SIGNAL_PARAMS), signalsCount);
 
-	size_t payloadSize = AGL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE;
+	size_t payloadSize = GCL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE;
 
 	for(int i = signalStartIndex; i < signalEndIndex; i++)
 	{
-		if (payloadSize + AGL::GW_APP_SIGNAL_PARAM_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+		if (payloadSize + GCL::GW_APP_SIGNAL_PARAM_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
 		{
 			Q_ASSERT(false);
 			logErr("AdsGatewayServer::processSignalParamNextRequest payload size exceed!");
-			sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
+			sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 			return false;
 		}
 
@@ -857,41 +857,41 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 
 		TEST_PTR_CONTINUE(appSignal);
 
-		AGL::GwAppSignalParam p{};
+		GCL::GwAppSignalParam p{};
 
 		p.hash = TO_UINT64(appSignal->hash());
-		copyStr(p.appSignalId, AGL::STRING_LENGTH_128, appSignal->appSignalID());
-		copyStr(p.customSignalId, AGL::STRING_LENGTH_128, appSignal->customAppSignalID());
-		copyStr(p.caption, AGL::STRING_LENGTH_256, appSignal->caption());
-		copyStr(p.equipmentId, AGL::STRING_LENGTH_128, appSignal->equipmentID());
-		copyStr(p.lmEquipmentId, AGL::STRING_LENGTH_128, appSignal->lmEquipmentID());
-		copyStr(p.units, AGL::STRING_LENGTH_128, appSignal->unit());
-		copyStr(p.tags, AGL::STRING_LENGTH_256, appSignal->tagsStr());
-		p.channel = static_cast<AGL::Channel>(appSignal->channel());
-		p.inOutType = static_cast<AGL::InOutType>(appSignal->inOutType());
+		copyStr(p.appSignalId, GCL::STRING_LENGTH_128, appSignal->appSignalID());
+		copyStr(p.customSignalId, GCL::STRING_LENGTH_128, appSignal->customAppSignalID());
+		copyStr(p.caption, GCL::STRING_LENGTH_256, appSignal->caption());
+		copyStr(p.equipmentId, GCL::STRING_LENGTH_128, appSignal->equipmentID());
+		copyStr(p.lmEquipmentId, GCL::STRING_LENGTH_128, appSignal->lmEquipmentID());
+		copyStr(p.units, GCL::STRING_LENGTH_128, appSignal->unit());
+		copyStr(p.tags, GCL::STRING_LENGTH_256, appSignal->tagsStr());
+		p.channel = static_cast<GCL::Channel>(appSignal->channel());
+		p.inOutType = static_cast<GCL::InOutType>(appSignal->inOutType());
 		
 		switch (appSignal->signalType())
 		{
 		case E::SignalType::Discrete:
-			p.type = AGL::SignalType::Discrete; 
+			p.type = GCL::SignalType::Discrete;
 			break;
 		case E::SignalType::Analog:
 			switch (appSignal->analogSignalFormat())
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
-				p.type = AGL::SignalType::SignedInt32;
+				p.type = GCL::SignalType::SignedInt32;
 				break;
 			case E::AnalogAppSignalFormat::Float32:
-				p.type = AGL::SignalType::Float32;
+				p.type = GCL::SignalType::Float32;
 				break;
 			default:
 				Q_ASSERT(false);
-				p.type = AGL::SignalType::Discrete; 
+				p.type = GCL::SignalType::Discrete;
 			}
 			break; 
 		default:
 			Q_ASSERT(false);
-			p.type = AGL::SignalType::Discrete; 
+			p.type = GCL::SignalType::Discrete;
 		}
 
 		p.decimalPlaces = TO_UINT8(appSignal->decimalPlaces());
@@ -905,14 +905,14 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 		p.tuningLowBound = appSignal->tuningLowBound().toDouble();
 		p.tuningHighBound = appSignal->tuningHighBound().toDouble();
 
-		std::memcpy(payloadData + payloadSize, &p, AGL::GW_APP_SIGNAL_PARAM_SIZE);
+		std::memcpy(payloadData + payloadSize, &p, GCL::GW_APP_SIGNAL_PARAM_SIZE);
 
-		payloadSize +=  AGL::GW_APP_SIGNAL_PARAM_SIZE;
+		payloadSize +=  GCL::GW_APP_SIGNAL_PARAM_SIZE;
 
 		reply.paramCount++;
 	}
 
-	std::memcpy(payloadData, &reply, AGL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE);
+	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE);
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
@@ -920,58 +920,58 @@ bool AdsGatewayServer::processSignalParamNextRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(recvBuf);
 	Q_UNUSED(requestSize);
 
-	AGL::AdsGwSignalStateRequest request;
-	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
+	GCL::AdsGwSignalStateRequest request;
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
 
 	// logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
 	// 	   arg(stc->clientName).arg(request.signalCount));
 
-	if (request.signalCount > AGL::ADS_GW_MAX_SIGNAL_STATES)
+	if (request.signalCount > GCL::ADS_GW_MAX_SIGNAL_STATES)
 	{
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
 		return false;
 	}
 
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
 	}
 
 	char* payloadData = stc->payloadData.data();
 
-	AGL::AdsGwSignalStateResponse reply;
+	GCL::AdsGwSignalStateResponse reply;
 
 	reply.stateCount = 0;
 
 	const uint32_t hashesCount = request.signalCount;
-	size_t hashesOffset = AGL::GW_MSG_HEADER_SIZE + AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE;
+	size_t hashesOffset = GCL::GW_MSG_HEADER_SIZE + GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE;
 
-	size_t payloadSize = AGL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE;
+	size_t payloadSize = GCL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE;
 
 	{
 		std::lock_guard lg(m_signalStatesMutex);
 
 		for(uint32_t i = 0; i < hashesCount; i++)
 		{
-			if (payloadSize + AGL::GW_APP_SIGNAL_STATE_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+			if (payloadSize + GCL::GW_APP_SIGNAL_STATE_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
 			{
 				Q_ASSERT(false);
 				logErr("AdsGatewayServer::processSignalStateRequest payload size exceed!");
-				sendErrReply(stc, header, AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
+				sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
 				return false;
 			}
 
 			Hash hash;
 
 			std::memcpy(&hash, recvBuf + hashesOffset, sizeof(hash));
-			hashesOffset += AGL::GW_APP_SIGNAL_HASH_SIZE;
+			hashesOffset += GCL::GW_APP_SIGNAL_HASH_SIZE;
 
 			auto it = m_hashToIndex.find(hash);
 
@@ -992,7 +992,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 
 			Q_ASSERT(st.hash == hash);
 
-			AGL::GwAppSignalState state;
+			GCL::GwAppSignalState state;
 
 			state.hash = st.hash;
 			state.systemTime = st.systemTime();
@@ -1002,15 +1002,15 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 			state.flags = st.flags.all;
 			state.reserved = 0;
 
-			std::memcpy(payloadData + payloadSize, &state, AGL::GW_APP_SIGNAL_STATE_SIZE);
+			std::memcpy(payloadData + payloadSize, &state, GCL::GW_APP_SIGNAL_STATE_SIZE);
 
-			payloadSize +=  AGL::GW_APP_SIGNAL_STATE_SIZE;
+			payloadSize +=  GCL::GW_APP_SIGNAL_STATE_SIZE;
 
 			reply.stateCount++;
 		}
 	}
 
-	std::memcpy(payloadData, &reply, AGL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE);
+	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE);
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
@@ -1020,7 +1020,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 }
 
 bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
-	const AGL::GwMessageHeader& header,
+	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
 	Q_UNUSED(recvBuf);
@@ -1028,12 +1028,12 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 
 //	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
 
-	AGL::AdsGwSignalStateChangesRequest request;
-	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
+	GCL::AdsGwSignalStateChangesRequest request;
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
 
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
-		sendErrReply(stc, header, AGL::GwErrorCode::GWC_NO_ADS_CONNECTION);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_ADS_CONNECTION);
 		return true;		// this is not request format error!
 	}
 
@@ -1041,22 +1041,22 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 
 	char* payloadData = stc->payloadData.data();
 
-	AGL::AdsGwSignalStateChangesResponse reply;
+	GCL::AdsGwSignalStateChangesResponse reply;
 
 	reply.stateCount = 0;
 	reply.pendingStatesCount = 0;
 
-	size_t payloadSize = AGL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE;
+	size_t payloadSize = GCL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE;
 
 	{
 		std::lock_guard lg(m_signalStateChangesMutex);
 
-		AGL::GwAppSignalState state;
+		GCL::GwAppSignalState state;
 
 		while(m_signalStateChanges.empty() == false &&
-			   reply.stateCount < AGL::ADS_GW_MAX_SIGNAL_STATE_CHANGES)
+			   reply.stateCount < GCL::ADS_GW_MAX_SIGNAL_STATE_CHANGES)
 		{
-			if (payloadSize + AGL::GW_APP_SIGNAL_STATE_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+			if (payloadSize + GCL::GW_APP_SIGNAL_STATE_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
 			{
 				break;
 			}
@@ -1064,9 +1064,9 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 			state = m_signalStateChanges.front();
 			m_signalStateChanges.pop_front();
 
-			std::memcpy(payloadData + payloadSize, &state, AGL::GW_APP_SIGNAL_STATE_SIZE);
+			std::memcpy(payloadData + payloadSize, &state, GCL::GW_APP_SIGNAL_STATE_SIZE);
 
-			payloadSize +=  AGL::GW_APP_SIGNAL_STATE_SIZE;
+			payloadSize +=  GCL::GW_APP_SIGNAL_STATE_SIZE;
 
 			reply.stateCount++;
 		}
@@ -1074,7 +1074,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 		reply.pendingStatesCount = TO_UINT32(m_signalStateChanges.size());
 	}
 
-	std::memcpy(payloadData, &reply, AGL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE);
+	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE);
 
 	sendOkReply(stc, header, payloadData, payloadSize);
 
@@ -1086,57 +1086,57 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
 	const char *recvBuf, const size_t recvBufSize, GatewayClientLib::GwErrorCode& errCode)
 {
-	errCode = AGL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR;
+	errCode = GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR;
 
 	TEST_PTR_RETURN_FALSE(recvBuf);
 
 	size_t payloadSize = 0;
 
-	switch(static_cast<AGL::AdsGwRequestId>(header.requestID))
+	switch(static_cast<GCL::AdsGwRequestId>(header.requestID))
 	{
-	case AGL::AdsGwRequestId::ADSGW_HANDSHAKE:
-		payloadSize = AGL::ADS_GW_HANDSHAKE_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_HANDSHAKE:
+		payloadSize = GCL::ADS_GW_HANDSHAKE_REQUEST_SIZE;
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
-		payloadSize = AGL::ADS_GW_SIGNAL_LIST_START_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
+		payloadSize = GCL::ADS_GW_SIGNAL_LIST_START_REQUEST_SIZE;
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
-		payloadSize = AGL::ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
+		payloadSize = GCL::ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE;
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
-		payloadSize = AGL::ADS_GW_SIGNAL_PARAM_START_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
+		payloadSize = GCL::ADS_GW_SIGNAL_PARAM_START_REQUEST_SIZE;
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
-		payloadSize = AGL::ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
+		payloadSize = GCL::ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE;
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
 		{
-			if (recvBufSize < AGL::GW_MSG_HEADER_SIZE + AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE)
+			if (recvBufSize < GCL::GW_MSG_HEADER_SIZE + GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE)
 			{
 				return false;
 			}
-			AGL::AdsGwSignalStateRequest request;
+			GCL::AdsGwSignalStateRequest request;
 
-			std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
+			std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
 
-			if (request.signalCount > AGL::ADS_GW_MAX_SIGNAL_STATES)
+			if (request.signalCount > GCL::ADS_GW_MAX_SIGNAL_STATES)
 			{
-				errCode = AGL::GwErrorCode::GWC_TOO_MANY_SIGNALS;
+				errCode = GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS;
 				return false;
 			}
 
-			payloadSize = AGL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE +
-						  static_cast<size_t>(request.signalCount) * AGL::GW_APP_SIGNAL_HASH_SIZE;
+			payloadSize = GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE +
+						  static_cast<size_t>(request.signalCount) * GCL::GW_APP_SIGNAL_HASH_SIZE;
 		}
 		break;
 
-	case AGL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
-		payloadSize = AGL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE;
+	case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
+		payloadSize = GCL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE;
 		break;
 
 	default:
@@ -1149,7 +1149,7 @@ bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader&
 		return false;
 	}
 
-	errCode = AGL::GwErrorCode::GWC_SUCCESS;
+	errCode = GCL::GwErrorCode::GWC_SUCCESS;
 	return true;
 }
 
@@ -1173,7 +1173,7 @@ size_t AdsGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t r
 
 void AdsGatewayServer::sendErrReply(SessionShared stc,
 	const GatewayClientLib::GwMessageHeader& requestHeader,
-	AGL::GwErrorCode errCode)
+	GCL::GwErrorCode errCode)
 {
 	sendReply(stc, requestHeader.requestID, errCode, nullptr, 0);
 }
@@ -1182,48 +1182,48 @@ void AdsGatewayServer::sendOkReply(SessionShared stc,
 	const GatewayClientLib::GwMessageHeader& requestHeader,
 	const char* payloadData, size_t payloadSize)
 {
-	sendReply(stc, requestHeader.requestID, AGL::GwErrorCode::GWC_SUCCESS, payloadData, payloadSize);
+	sendReply(stc, requestHeader.requestID, GCL::GwErrorCode::GWC_SUCCESS, payloadData, payloadSize);
 }
 
 void AdsGatewayServer::sendReply(SessionShared stc,
-	uint32_t requestID, AGL::GwErrorCode errCode,
+	uint32_t requestID, GCL::GwErrorCode errCode,
 	const char* payloadData, size_t payloadSize)
 {
 	TEST_PTR_RETURN(stc);
 
-	thread_local std::vector<char> sendBuf(AGL::GW_MAX_PAYLOAD_SIZE);
+	thread_local std::vector<char> sendBuf(GCL::GW_MAX_PAYLOAD_SIZE);
 
-	if (AGL::GW_MSG_HEADER_SIZE + payloadSize + AGL::GW_MSG_CRC_SIZE > AGL::GW_MAX_PAYLOAD_SIZE)
+	if (GCL::GW_MSG_HEADER_SIZE + payloadSize + GCL::GW_MSG_CRC_SIZE > GCL::GW_MAX_PAYLOAD_SIZE)
 	{
 		Q_ASSERT(false);
 		payloadData = nullptr;
 		payloadSize = 0;
-		errCode = AGL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR;
+		errCode = GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR;
 	}
 
-	if (errCode != AGL::GwErrorCode::GWC_SUCCESS)
+	if (errCode != GCL::GwErrorCode::GWC_SUCCESS)
 	{
 		Q_ASSERT(payloadData == nullptr);
 		Q_ASSERT(payloadSize == 0);
 		payloadSize = 0;
 	}
 
-	AGL::GwMessageHeader header;
+	GCL::GwMessageHeader header;
 
 	header.requestID = requestID;
 	header.payloadSize = static_cast<uint32_t>(payloadSize);
 	header.statusCode = static_cast<uint32_t>(errCode);
 
-	std::memcpy(sendBuf.data(), &header, AGL::GW_MSG_HEADER_SIZE);
+	std::memcpy(sendBuf.data(), &header, GCL::GW_MSG_HEADER_SIZE);
 
 	if (payloadSize > 0)
 	{
-		std::memcpy(sendBuf.data() + AGL::GW_MSG_HEADER_SIZE, payloadData, payloadSize);
+		std::memcpy(sendBuf.data() + GCL::GW_MSG_HEADER_SIZE, payloadData, payloadSize);
 	}
 
-	uint32_t crc = Radiy::CRC32(sendBuf.data(), AGL::GW_MSG_HEADER_SIZE + payloadSize);
+	uint32_t crc = Radiy::CRC32(sendBuf.data(), GCL::GW_MSG_HEADER_SIZE + payloadSize);
 
-	std::memcpy(sendBuf.data() + AGL::GW_MSG_HEADER_SIZE + payloadSize, &crc, AGL::GW_MSG_CRC_SIZE);
+	std::memcpy(sendBuf.data() + GCL::GW_MSG_HEADER_SIZE + payloadSize, &crc, GCL::GW_MSG_CRC_SIZE);
 
 	if (stc->closing.load(std::memory_order_relaxed))
 	{
@@ -1232,7 +1232,7 @@ void AdsGatewayServer::sendReply(SessionShared stc,
 
 	asio::error_code ec;
 
-	asio::write(*stc->socket, asio::buffer(sendBuf.data(), AGL::GW_MSG_HEADER_SIZE + payloadSize + AGL::GW_MSG_CRC_SIZE), ec);
+	asio::write(*stc->socket, asio::buffer(sendBuf.data(), GCL::GW_MSG_HEADER_SIZE + payloadSize + GCL::GW_MSG_CRC_SIZE), ec);
 
 	if (ec)
 	{
