@@ -953,3 +953,21 @@ message AcquiredDiagSignalsAndObjects
 	repeated LmDiagSignals lmDiagSignals = 1;
 	repeated AcquiredDiagObject diagObjects = 2;
 }
+
+message GetTuningSourcesFileRequest
+{
+	required uint64 partNo = 1 [default = 0];
+};
+
+message GetTuningSourcesFileReply
+{
+	required int32 errCode = 1 [default = 0];			// enum FileTransferResult values
+	required uint64 fileSize = 2 [default = 0];
+	required uint64 partsCount = 3 [default = 0];
+	required uint64 fileCrc64 = 4 [default = 0];
+
+	required uint64 partNo = 5 [default = 0];
+	required uint64 partSize = 6 [default = 0];
+
+	required bytes filePartData = 7;
+};

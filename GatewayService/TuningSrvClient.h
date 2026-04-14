@@ -19,8 +19,18 @@ public:
 
 private:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
-};
 
+	void onGetNextFilePart(const char* replyData, quint32 replyDataSize);
+
+	void restartReceiveFile();
+	void requestNextFilePart();
+
+private:
+	quint64 m_filePartNo = 0;
+	quint64 m_filePartsCount = 0;
+	std::atomic<bool> m_fileReady {false};
+	std::vector<char> m_tuningSourcesFileData;
+};
 
 class TuningSrvClientThread : public SimpleThread
 {

@@ -361,6 +361,7 @@ void TuningGatewayServer::startTuningSrvClient(TgsSessionShared stc)
 
 	stc->tunSrvClientThread = std::make_unique<TuningSrvClientThread>(stc, m_swInfo, m_tunSrvIP1, m_tunSrvIP2,
 							QString("TuningGateway %1").arg(m_swInfo.equipmentID()), Separator::EMPTY_STR);
+	stc->tunSrvClientThread->start();
 }
 
 void TuningGatewayServer::stopTuningSrvClient(TgsSessionShared stc)
@@ -423,6 +424,7 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
 		case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
 			break;
+
 		default:
 			sendErrReply(stc, header, GCL::GwErrorCode::GWC_INVALID_REQUEST);
 			stc->errCount++;
@@ -458,7 +460,7 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 
 		bool result = true;
 
-/*		if (requestID != GCL::AdsGwRequestId::ADSGW_HANDSHAKE &&
+		if (requestID != GCL::TuningGwRequestId::TGW_HANDSHAKE &&
 			stc->handshakeCompleted == false)
 		{
 			sendErrReply(stc, header, GCL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
@@ -467,40 +469,27 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 			continue;
 		}
 
-
 		switch(requestID)
 		{
-		case GCL::AdsGwRequestId::ADSGW_HANDSHAKE:
+		case GCL::TuningGwRequestId::TGW_HANDSHAKE:
 			result = processHandshakeRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_START:
-			result = processSignalListStartRequest(stc, header, recvBuf, requestSize);
+		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START:
+			result = processGetTuningSourcesStartRequest(stc, header, recvBuf, requestSize);
 			break;
 
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_LIST_NEXT:
-			result = processSignalListNextRequest(stc, header, recvBuf, requestSize);
-			break;
-
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_START:
-			result = processSignalParamStartRequest(stc, header, recvBuf, requestSize);
-			break;
-
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
-			result = processSignalParamNextRequest(stc, header, recvBuf, requestSize);
-			break;
-
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE:
-			result = processSignalStateRequest(stc, header, recvBuf, requestSize);
-			break;
-
-		case GCL::AdsGwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
-			result = processSignalStateChangesRequest(stc, header, recvBuf, requestSize);
+		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_NEXT:
+		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCE_STATES:
+		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_READ:
+		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE:
+		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
+		case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
 			break;
 
 		default:
 			Q_ASSERT(false);
-		}*/
+		}
 
 		if (result == false)
 		{
@@ -515,11 +504,20 @@ bool TuningGatewayServer::processHandshakeRequest(TgsSessionShared stc,
 	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
-/*	Q_UNUSED(requestSize);
+	const size_t expectedRequestSize = GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_HANDSHAKE_REQUEST_SIZE;
 
-	GCL::AdsGwHandshakeRequest request;
+	if (requestSize != expectedRequestSize)
+	{
+		logErr(QString("HANDSHAKE request error, wrong request size %1 (expected %2)").
+			   arg(requestSize).arg(expectedRequestSize));
 
-	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_HANDSHAKE_REQUEST_SIZE);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		return false;
+	}
+
+	GCL::TuningGwHandshakeRequest request;
+
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_HANDSHAKE_REQUEST_SIZE);
 
 	//
 
@@ -535,12 +533,12 @@ bool TuningGatewayServer::processHandshakeRequest(TgsSessionShared stc,
 
 	stc->clientName = QString::fromUtf8(request.clientName);
 
-	if (request.protocolVersion != GCL::ADS_GW_PROTOCOL_VERSION)
+	if (request.protocolVersion != GCL::TUNING_GW_PROTOCOL_VERSION)
 	{
 		logErr(QString("HANDSHAKE request from %1, WRONG protocol version 0x%2 (required %3)").
 					arg(stc->clientName).
 					arg(request.protocolVersion, 4, 16, QChar('0')).
-					arg(GCL::ADS_GW_PROTOCOL_VERSION, 4, 16, QChar('0')));
+					arg(GCL::TUNING_GW_PROTOCOL_VERSION, 4, 16, QChar('0')));
 
 		sendErrReply(stc, header, GCL::GwErrorCode::GWC_UNSUPPORTED_VERSION);
 		return false;
@@ -550,20 +548,52 @@ bool TuningGatewayServer::processHandshakeRequest(TgsSessionShared stc,
 					arg(stc->clientName).
 					arg(request.protocolVersion, 4, 16, QChar('0')));
 
-	GCL::AdsGwHandshakeResponse reply;
+	GCL::TuningGwHandshakeResponse reply;
 
-	reply.protocolVersion = GCL::ADS_GW_PROTOCOL_VERSION;
+	reply.protocolVersion = GCL::TUNING_GW_PROTOCOL_VERSION;
 	reply.reserved = 0;
-	reply.maxStateRequest = GCL::ADS_GW_MAX_SIGNAL_STATES;
-	reply.sizeof_GwAppSignalParam = GCL::GW_APP_SIGNAL_PARAM_SIZE;
-	reply.sizeof_GwAppSignalState = GCL::GW_APP_SIGNAL_STATE_SIZE;
+
+	reply.maxStateRequest = GCL::TUNING_GW_MAX_SIGNAL_STATES;
+	reply.maxStateWrite = GCL::TUNING_GW_MAX_WRITE_VALUES;
+
+	reply.sizeof_GwTuningSourceState = GCL::TUNING_GW_TUNING_SOURCE_STATE_SIZE;
+	reply.sizeof_GwTuningSignalState = GCL::TUNING_GW_TUNING_SIGNAL_STATE_SIZE;
 
 	sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
 
 	stc->handshakeCompleted = true;
-*/
+
 	return true;
 }
+
+bool TuningGatewayServer::processGetTuningSourcesStartRequest(TgsSessionShared stc,
+															  const GCL::GwMessageHeader& header,
+															  const char* recvBuf,
+															  const size_t requestSize)
+{
+	const size_t expectedRequestSize = GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE;
+
+	if (requestSize != expectedRequestSize)
+	{
+		logErr(QString("GET_TUNING_SOURCES_START_REQUEST request error, wrong request size %1 (expected %2)").
+			   arg(requestSize).arg(expectedRequestSize));
+
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		return false;
+	}
+
+	GCL::GwGetTuningSourcesStartRequest request;
+
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE);
+
+	GCL::GwGetTuningSourcesStartResponse reply;
+
+	replyu.totalSize;   // Total file size in bytes
+	uint32_t maxPartSize; // Maximum size of each part in bytes
+	uint32_t partCount;   // Total number of parts to retrieve via TGW_GET_TUNING_SOURCES_NEXT
+
+}
+
 /*
 bool TuningGatewayServer::processSignalListStartRequest(TgsSessionShared stc,
 	const GCL::GwMessageHeader& header,

@@ -19,6 +19,7 @@ namespace Tuning
 	public:
 		TcpTuningServer(TuningServiceWorker& service,
 						const TuningSources& tuningSources,
+						std::shared_ptr<std::vector<char>> tuningSourcesFileData,
 						std::shared_ptr<CircularLogger> logger);
 	private:
 		virtual void onServerThreadStarted() override;
@@ -45,6 +46,8 @@ namespace Tuning
 		void onGetTuningSourceFilling(const char* requestData, quint32 requestDataSize);
 		void onGetTuningSignalParam(const char* requestData, quint32 requestDataSize);
 
+		void onGetTuningSourcesFile(const char* requestData, quint32 requestDataSize);
+
 		void prepareSignalGetter();
 
 		void initClientSourcesList(const QString& clientEquipmentID);
@@ -53,6 +56,8 @@ namespace Tuning
 		TuningServiceWorker& m_service;
 
 		const TuningSources& m_tuningSources;
+		std::shared_ptr<std::vector<char>> m_tuningSourcesFileData;
+		quint64 m_tuningSourcesFileCrc64 = 0;
 
 		//
 

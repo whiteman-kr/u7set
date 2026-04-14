@@ -81,7 +81,8 @@ namespace Tuning
 		virtual void shutdown() override;
 
 		void clearConfiguration();
-		void applyNewConfiguration(const TuningSources& newSources);
+		void applyNewConfiguration(const TuningSources& newSources,
+								   std::shared_ptr<std::vector<char>> tuningSourcesFileData);
 
 		void buildServiceMaps(const TuningSources& newSources);
 		void clearServiceMaps();
@@ -92,7 +93,7 @@ namespace Tuning
 		bool loadConfigurationFromFile(const QString& fileName);
 		bool readTuningSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources);
 
-		void runTcpTuningServerThread();
+		void runTcpTuningServerThread(std::shared_ptr<std::vector<char>> tuningSourcesFileData);
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceThreads();

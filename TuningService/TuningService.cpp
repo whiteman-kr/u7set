@@ -407,7 +407,8 @@ namespace Tuning
 		m_startStopMutex.unlock();
 	}
 
-	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
+	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources,
+													std::shared_ptr<std::vector<char>> tuningSourcesFileData)
 	{
 		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
@@ -416,7 +417,7 @@ namespace Tuning
 		buildServiceMaps(newSources);
 		runTuningSourceThreads();
 		runSourcesListenerThreads();
-		runTcpTuningServerThread();
+		runTcpTuningServerThread(tuningSourcesFileData);
 
 		m_startStopMutex.unlock();
 	}
@@ -549,11 +550,11 @@ namespace Tuning
 		return result;
 	}
 
-	void TuningServiceWorker::runTcpTuningServerThread()
+	void TuningServiceWorker::runTcpTuningServerThread(std::shared_ptr<std::vector<char>> tuningSourcesFileData)
 	{
 		Q_ASSERT(m_tcpTuningServerThread == nullptr);
 
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, logger());
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, tuningSourcesFileData, logger());
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
 															m_serviceSettings.securityLevel,
@@ -796,6 +797,7 @@ namespace Tuning
 		bool result = true;
 
 		TuningSources newSources;
+		std::shared_ptr<std::vector<char>> tuningSourcesFileData;
 
 		for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 		{
@@ -816,6 +818,7 @@ namespace Tuning
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
 				result &= readTuningSources(fileData, sessionParams.currentSettingsProfile, &newSources);
+				tuningSourcesFileData = std::make_shared<std::vector<char>>(fileData.begin(), fileData.end());
 			}
 
 			if (result == true)
@@ -837,7 +840,7 @@ namespace Tuning
 
 			m_buildInfo = m_grpcCfgLoaderThread->buildInfo();
 
-			applyNewConfiguration(newSources);
+			applyNewConfiguration(newSources, tuningSourcesFileData);
 		}
 	}
 }

@@ -84,6 +84,8 @@ namespace GatewayClientLib
 
 	static_assert(sizeof(GwTuningSourceState) == 280);
 
+	constexpr size_t TUNING_GW_TUNING_SOURCE_STATE_SIZE = sizeof(GwTuningSourceState);
+
 	// GwTuningSignalState - contains the current tuning state of a tunable signal.
 	//
 	struct GwTuningSignalState

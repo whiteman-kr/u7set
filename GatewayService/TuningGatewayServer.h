@@ -81,18 +81,9 @@ private:
 
 	bool processHandshakeRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
 										const char* recvBuf, const size_t requestSize);
-/*	bool processSignalListStartRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalListNextRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamStartRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamNextRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalStateRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										 const char* recvBuf, const size_t requestSize);
-	bool processSignalStateChangesRequest(SessionShared stc, const GCL::GwMessageHeader& header,
-										 const char* recvBuf, const size_t requestSize); */
+
+	bool processGetTuningSourcesStartRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+											 const char* recvBuf, const size_t requestSize);
 
 	bool checkPayloadSize(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, GCL::GwErrorCode& errCode);
 	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);

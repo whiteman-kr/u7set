@@ -1,5 +1,6 @@
 #include "TcpTuningServer.h"
 #include "TuningService.h"
+#include "../OnlineLib/TcpFileTransfer.h"
 
 namespace Tuning
 {
@@ -14,14 +15,24 @@ namespace Tuning
 	quint64 TcpTuningServer::m_staticTcpConnectionID = 0;
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
-									 const TuningSources& tuningSources,
-									 std::shared_ptr<CircularLogger> logger) :
+		const TuningSources& tuningSources,
+		std::shared_ptr<std::vector<char>> tuningSourcesFileData,
+		std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo(), "TcpTuningServer"),
 		m_service(service),
 		m_tuningSources(tuningSources),
+		m_tuningSourcesFileData(tuningSourcesFileData),
 		m_logger(logger)
 	{
 		m_tcpConnectionID = ++m_staticTcpConnectionID;
+
+		Q_ASSERT(m_tuningSourcesFileData);
+
+		if (m_tuningSourcesFileData != nullptr && m_tuningSourcesFileData->empty() == false)
+		{
+			m_tuningSourcesFileCrc64 = Crc::crc64(m_tuningSourcesFileData->data(),
+											 TO_QINT64(m_tuningSourcesFileData->size()));
+		}
 
 		prepareSignalGetter();
 	}
@@ -53,7 +64,8 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources,
+														 m_tuningSourcesFileData, m_logger);
 		newServer->setListenAddress(listenAddr);
 		return newServer;
 	}
@@ -104,6 +116,10 @@ namespace Tuning
 
 		case RQID_GET_CLIENT_LIST:
 			sendClientList();
+			break;
+
+		case TDS_GET_TUNING_SOURCES_FILE:
+			onGetTuningSourcesFile(requestData, requestDataSize);
 			break;
 
 		default:
@@ -760,6 +776,57 @@ namespace Tuning
 		sendReply(m_getAppSignalParamReply);
 	}
 
+	void TcpTuningServer::onGetTuningSourcesFile(const char* requestData, quint32 requestDataSize)
+	{
+		Network::GetTuningSourcesFileRequest request;
+		Network::GetTuningSourcesFileReply reply;
+
+		bool result = request.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::RequestFormatError));
+			sendReply(reply);
+			return;
+		}
+
+		if (m_tuningSourcesFileData == nullptr ||
+			m_tuningSourcesFileData->empty())
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::FileIsNotAccessible));
+			sendReply(reply);
+			return;
+		}
+
+		quint64 partNo = request.partno();
+		quint64 fileSize = TO_QUINT64(m_tuningSourcesFileData->size());
+
+		if (partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE >= fileSize)
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::RequestFormatError));
+			sendReply(reply);
+			return;
+		}
+
+		//
+
+		quint64 partsCount = fileSize / TDS_TUNING_SOURCES_FILE_PART_SIZE +
+							 ((fileSize % TDS_TUNING_SOURCES_FILE_PART_SIZE) == 0 ? 0 : 1);
+
+		quint64 partStart = partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE;
+		quint64 partSize = std::min(fileSize - partStart, TDS_TUNING_SOURCES_FILE_PART_SIZE);
+
+		reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::Ok));
+		reply.set_filesize(m_tuningSourcesFileData->size());
+		reply.set_partscount(partsCount);
+		reply.set_filecrc64(m_tuningSourcesFileCrc64);
+		reply.set_partno(partNo);
+		reply.set_partsize(partSize);
+		reply.set_filepartdata(m_tuningSourcesFileData->data() + partStart, partSize);
+
+		sendReply(reply);
+	}
+
 	void TcpTuningServer::prepareSignalGetter()
 	{
 		for (const TuningSource& tuningSource : m_tuningSources)
@@ -827,9 +894,9 @@ namespace Tuning
 	// -------------------------------------------------------------------------------
 
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort &listenAddress,
-												 E::SecurityLevel securityLevel,
-												 TcpTuningServer* server,
-												 std::shared_ptr<CircularLogger> logger) :
+		E::SecurityLevel securityLevel,
+		TcpTuningServer* server,
+		std::shared_ptr<CircularLogger> logger) :
 		Tcp::ListenerThread(listenAddress, securityLevel, server, logger, "TcpTuningServerThread")
 	{
 	}
