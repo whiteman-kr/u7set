@@ -810,8 +810,8 @@ namespace Tuning
 
 		//
 
-		quint64 partsCount = fileSize / TDS_TUNING_SOURCES_FILE_PART_SIZE +
-							 ((fileSize % TDS_TUNING_SOURCES_FILE_PART_SIZE) == 0 ? 0 : 1);
+		quint64 partsCount =
+			(fileSize + TDS_TUNING_SOURCES_FILE_PART_SIZE - 1) / TDS_TUNING_SOURCES_FILE_PART_SIZE;
 
 		quint64 partStart = partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE;
 		quint64 partSize = std::min(fileSize - partStart, TDS_TUNING_SOURCES_FILE_PART_SIZE);

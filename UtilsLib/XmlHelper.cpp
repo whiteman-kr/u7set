@@ -88,21 +88,21 @@ void XmlWriteHelper::writeStringListAttribute(const QString& name, const QString
 	writeStringAttribute(name, list.join(Separator::SEMICOLON));
 }
 
-void XmlWriteHelper::writeIntAttribute(const QString& name, int value, bool hex)
+void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
+{
+	writeStringAttribute(name, value ? "true" : "false");
+}
+
+void XmlWriteHelper::writeInt32Attribute(const QString& name, qint32 value, bool hex)
 {
 	if (hex == true)
 	{
-		m_xmlWriter->writeAttribute(name, "0x" + QString::number(value, 16).toUpper());
+		m_xmlWriter->writeAttribute(name, hexInt32(value));
 	}
 	else
 	{
 		m_xmlWriter->writeAttribute(name, QString::number(value));
 	}
-}
-
-void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
-{
-	writeStringAttribute(name, value ? "true" : "false");
 }
 
 void XmlWriteHelper::writeInt64Attribute(const QString& name, qint64 value, bool hex)
@@ -111,27 +111,11 @@ void XmlWriteHelper::writeInt64Attribute(const QString& name, qint64 value, bool
 
 	if (hex == true)
 	{
-		valueStr = "0x" + QString::number(static_cast<qulonglong>(value), 16).toUpper();
+		valueStr = hexInt64(value);
 	}
 	else
 	{
 		valueStr = QString::number(static_cast<qlonglong>(value));
-	}
-
-	m_xmlWriter->writeAttribute(name, valueStr);
-}
-
-void XmlWriteHelper::writeUInt64Attribute(const QString& name, quint64 value, bool hex)
-{
-	QString valueStr;
-
-	if (hex == true)
-	{
-		valueStr = "0x" + QString::number(static_cast<qulonglong>(value), 16).toUpper();
-	}
-	else
-	{
-		valueStr = QString::number(static_cast<qulonglong>(value));
 	}
 
 	m_xmlWriter->writeAttribute(name, valueStr);
@@ -143,11 +127,27 @@ void XmlWriteHelper::writeUInt32Attribute(const QString& name, quint32 value, bo
 
 	if (hex == true)
 	{
-		valueStr = "0x" + QString::number(static_cast<ulong>(value), 16).toUpper();
+		valueStr = hexUInt32(value);
 	}
 	else
 	{
 		valueStr = QString::number(static_cast<ulong>(value));
+	}
+
+	m_xmlWriter->writeAttribute(name, valueStr);
+}
+
+void XmlWriteHelper::writeUInt64Attribute(const QString& name, quint64 value, bool hex)
+{
+	QString valueStr;
+
+	if (hex == true)
+	{
+		valueStr = hexUInt64(value);
+	}
+	else
+	{
+		valueStr = QString::number(static_cast<qulonglong>(value));
 	}
 
 	m_xmlWriter->writeAttribute(name, valueStr);
@@ -256,7 +256,25 @@ void XmlWriteHelper::writeQVariantAttribute(const QString& name, const QVariant&
 	}
 }
 
+QString XmlWriteHelper::hexUInt32(quint32 v)
+{
+	return (Separator::HEX + QString::number(v, 16).rightJustified(8, '0').toUpper());
+}
 
+QString XmlWriteHelper::hexInt32(qint32 v)
+{
+	return hexUInt32(std::bit_cast<quint32>(v));
+}
+
+QString XmlWriteHelper::hexUInt64(quint64 v)
+{
+return (Separator::HEX + QString::number(v, 16).rightJustified(16, '0').toUpper());
+}
+
+QString XmlWriteHelper::hexInt64(qint64 v)
+{
+	return hexUInt64(std::bit_cast<quint64>(v));
+}
 
 // -------------------------------------------------------------------------------------
 //

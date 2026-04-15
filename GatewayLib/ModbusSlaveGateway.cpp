@@ -581,7 +581,7 @@ namespace Gateway
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
 		xml.writeEnumKeyAttribute(XmlAttribute::MODBUS_MODE, m_modbusMode);
-		xml.writeIntAttribute(XmlAttribute::MODBUS_DEVICE_ID, m_modbusDeviceID);
+		xml.writeInt32Attribute(XmlAttribute::MODBUS_DEVICE_ID, m_modbusDeviceID);
 
 		xml.writeEndElement();		//	</Settings>
 	}
@@ -624,14 +624,14 @@ namespace Gateway
 		//
 
 		xml.writeStartElement(XmlElement::MODBUS_SIGNALS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_modbusSignals.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(m_modbusSignals.size()));
 
 		for(const auto& [addr16, mbSignal] : m_modbusSignals)
 		{
 			xml.writeStartElement(XmlElement::SIGNAL_ELEM);
 
-			xml.writeIntAttribute(XmlAttribute::REG_NO, mbSignal.addr.offset());
-			xml.writeIntAttribute(XmlAttribute::REG_BIT, mbSignal.addr.bit());
+			xml.writeInt32Attribute(XmlAttribute::REG_NO, mbSignal.addr.offset());
+			xml.writeInt32Attribute(XmlAttribute::REG_BIT, mbSignal.addr.bit());
 			xml.writeEnumKeyAttribute(XmlAttribute::FORMAT, mbSignal.format.signalFormat);
 			xml.writeEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, mbSignal.format.byteOrder);
 			xml.writeStringAttribute(XmlAttribute::APP_SIGNAL_ID, mbSignal.signalID);

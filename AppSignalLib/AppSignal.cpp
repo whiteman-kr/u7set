@@ -922,23 +922,23 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement("Signal");	// <Signal>
 
-	xml.writeIntAttribute("ID", ID());
-	xml.writeIntAttribute("GroupID", signalGroupID());
-	xml.writeIntAttribute("InstanceID", signalInstanceID());
-	xml.writeIntAttribute("Channel", TO_INT(channel()));
-	xml.writeIntAttribute("Type", TO_INT(signalType()));
+	xml.writeInt32Attribute("ID", ID());
+	xml.writeInt32Attribute("GroupID", signalGroupID());
+	xml.writeInt32Attribute("InstanceID", signalInstanceID());
+	xml.writeInt32Attribute("Channel", TO_INT(channel()));
+	xml.writeInt32Attribute("Type", TO_INT(signalType()));
 	xml.writeStringAttribute("AppSignalID", appSignalID());
 	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
 	xml.writeStringAttribute("Caption", caption());
 	xml.writeStringAttribute("EquipmentID", equipmentID());
-	xml.writeIntAttribute("DataFormat", TO_INT(analogSignalFormat()));
-	xml.writeIntAttribute("DataSize", dataSize());
+	xml.writeInt32Attribute("DataFormat", TO_INT(analogSignalFormat()));
+	xml.writeInt32Attribute("DataSize", dataSize());
 
 	writeIntSpecPropAttribute(xml, AppSignalPropNames::LOW_ADC);
 	writeIntSpecPropAttribute(xml, AppSignalPropNames::HIGH_ADC);
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_ENGINEERING_UNITS);
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_ENGINEERING_UNITS);
-	xml.writeIntAttribute("UnitID", 0);
+	xml.writeInt32Attribute("UnitID", 0);
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_VALID_RANGE);
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_VALID_RANGE);
 	xml.writeDoubleAttribute("UnbalanceLimit", 1);
@@ -955,13 +955,13 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 	writeIntSpecPropAttribute(xml, AppSignalPropNames::SENSOR_TYPE, "OutputSensorID");
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", false);
-	xml.writeIntAttribute("NormalState", 0);
-	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
+	xml.writeInt32Attribute("NormalState", 0);
+	xml.writeInt32Attribute("DecimalPlaces", decimalPlaces());
 	xml.writeDoubleAttribute("Aperture", coarseAperture());
-	xml.writeIntAttribute("InOutType", TO_INT(inOutType()));
+	xml.writeInt32Attribute("InOutType", TO_INT(inOutType()));
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::FILTERING_TIME);
 	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::SPREAD_TOLERANCE);
-	xml.writeIntAttribute("ByteOrder", TO_INT(byteOrder()));
+	xml.writeInt32Attribute("ByteOrder", TO_INT(byteOrder()));
 
 	xml.writeBoolAttribute("EnableTuning", enableTuning());
 	xml.writeStringAttribute("TuningValueType", tuningDefaultValue().typeStr());
@@ -972,15 +972,15 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute("BusTypeID", busTypeID());
 	xml.writeBoolAttribute("AdaptiveAperture", (apertureType() == E::ApertureType::ValuePercent));
 
-	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
-	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
-	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
-	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
-	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
-	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
+	xml.writeInt32Attribute("RamAddrOffset", ualAddr().offset());
+	xml.writeInt32Attribute("RamAddrBit", ualAddr().bit());
+	xml.writeInt32Attribute("ValueOffset", regValueAddr().offset());
+	xml.writeInt32Attribute("ValueBit", regValueAddr().bit());
+	xml.writeInt32Attribute("ValidityOffset", regValidityAddr().offset());
+	xml.writeInt32Attribute("ValidityBit", regValidityAddr().bit());
 
-	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
-	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
+	xml.writeInt32Attribute("TuningOffset", tuningAddr().offset());
+	xml.writeInt32Attribute("TuningBit", tuningAddr().bit());
 
 	// write spec properties
 
@@ -1014,7 +1014,7 @@ void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& pr
 
 	if (res == true)
 	{
-		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
+		xml.writeInt32Attribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
 	}
 	else
 	{
@@ -1028,7 +1028,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 
 	// Identification
 	//
-	xml.writeIntAttribute(AppSignalPropNames::ID, m_ID);
+	xml.writeInt32Attribute(AppSignalPropNames::ID, m_ID);
 
 	xml.writeStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, m_appSignalID);
 	xml.writeStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, m_customAppSignalID);
@@ -1036,8 +1036,8 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(AppSignalPropNames::EQUIPMENT_ID, m_equipmentID);
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
 
-	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
-	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
+	xml.writeInt32Attribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
+	xml.writeInt32Attribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
 
 	// Type
 	//
@@ -1047,7 +1047,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 	// Data format
 	//
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
-	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
+	xml.writeInt32Attribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
 
@@ -1064,7 +1064,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 	xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
 
 	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
-	xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
+	xml.writeInt32Attribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
 	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
 
 	// Addresses
@@ -1079,7 +1079,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 
 	if (m_enableTuning == true)
 	{
-		xml.writeIntAttribute(AppSignalPropNames::TUNING_VALUE_TYPE, TO_INT(m_tuningDefaultValue.type()));
+		xml.writeInt32Attribute(AppSignalPropNames::TUNING_VALUE_TYPE, TO_INT(m_tuningDefaultValue.type()));
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_VALUE_TYPE_STR, m_tuningDefaultValue.typeStr());
 
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, tuningDefaultValue().toString());

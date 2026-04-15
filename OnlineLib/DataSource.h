@@ -361,7 +361,7 @@ namespace OnlineLib
 			buildInfo.writeToXml(xmlWriter);
 
 			xml.writeStartElement(XmlElement::DATA_SOURCES);
-			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
+			xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
 
 			for (const TYPE& ds : dataSources)
 			{

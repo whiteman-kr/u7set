@@ -24,7 +24,7 @@ namespace Hardware
 		case E::DiagSignalType::Discrete:
 			xml.writeBoolAttribute(XmlAttribute::INVERSE_VALUE, inverseValue);
 
-			xml.writeIntAttribute(XmlAttribute::NORMAL_STATE, normalState);
+			xml.writeInt32Attribute(XmlAttribute::NORMAL_STATE, normalState);
 
 			xml.writeStringAttribute(XmlAttribute::NORMAL_STATE_STR0, normalStateString0);
 			xml.writeStringAttribute(XmlAttribute::NORMAL_STATE_STR1, normalStateString1);
@@ -180,7 +180,7 @@ namespace Hardware
 		xml.writeStartDocument();
 
 		xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
-		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_types.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(m_types.size()));
 
 		for(const auto& dst : m_types)
 		{

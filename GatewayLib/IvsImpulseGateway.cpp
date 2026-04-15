@@ -127,7 +127,7 @@ namespace Gateway
 	{
 		xml.writeStartElement(XmlElement::SIGNAL_LIST);
 
-		xml.writeIntAttribute(XmlAttribute::LIST_NO, m_listNo);
+		xml.writeInt32Attribute(XmlAttribute::LIST_NO, m_listNo);
 		xml.writeEnumKeyAttribute<E::SignalListDataType>(XmlAttribute::DATA_TYPE, m_dataType);
 		xml.writeBoolAttribute(XmlAttribute::SEND_EVENTS, m_sendEvents);
 		xml.writeBoolAttribute(XmlAttribute::INCLUDE_APP_SIGNAL_ID, m_includeAppSignalID);
@@ -283,14 +283,14 @@ namespace Gateway
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
 
-		xml.writeIntAttribute(XmlAttribute::SYSTEM_ID, m_systemID);
+		xml.writeInt32Attribute(XmlAttribute::SYSTEM_ID, m_systemID);
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
 		xml.writeIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, m_remoteGatewayIP1);
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
 		xml.writeIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, m_remoteGatewayIP2);
-		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
+		xml.writeInt32Attribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
 		xml.writeEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
-		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
+		xml.writeInt32Attribute(XmlAttribute::PERIOD, m_period);
 		xml.writeEndElement();		//	</Settings>
 	}
 

@@ -480,6 +480,9 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 			break;
 
 		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_NEXT:
+			result = processGetTuningSourcesNextRequest(stc, header, recvBuf, requestSize);
+			break;
+
 		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCE_STATES:
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_READ:
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE:
@@ -504,16 +507,7 @@ bool TuningGatewayServer::processHandshakeRequest(TgsSessionShared stc,
 	const GCL::GwMessageHeader& header,
 	const char* recvBuf, const size_t requestSize)
 {
-	const size_t expectedRequestSize = GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_HANDSHAKE_REQUEST_SIZE;
-
-	if (requestSize != expectedRequestSize)
-	{
-		logErr(QString("HANDSHAKE request error, wrong request size %1 (expected %2)").
-			   arg(requestSize).arg(expectedRequestSize));
-
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
-		return false;
-	}
+	Q_UNUSED(requestSize);
 
 	GCL::TuningGwHandshakeRequest request;
 
@@ -571,27 +565,83 @@ bool TuningGatewayServer::processGetTuningSourcesStartRequest(TgsSessionShared s
 															  const char* recvBuf,
 															  const size_t requestSize)
 {
-	const size_t expectedRequestSize = GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE;
-
-	if (requestSize != expectedRequestSize)
-	{
-		logErr(QString("GET_TUNING_SOURCES_START_REQUEST request error, wrong request size %1 (expected %2)").
-			   arg(requestSize).arg(expectedRequestSize));
-
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
-		return false;
-	}
+	Q_UNUSED(requestSize);
 
 	GCL::GwGetTuningSourcesStartRequest request;
 
 	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE);
 
+	quint64 fileSize = 0;
+	quint64 maxPartSize = 0;
+	quint64 partCount = 0;
+
+	if (stc->tunSrvClientThread == nullptr ||
+		stc->tunSrvClientThread->getTuningSourcesFileMetrics(fileSize, maxPartSize, partCount) == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
+		return false;
+	}
+
 	GCL::GwGetTuningSourcesStartResponse reply;
 
-	replyu.totalSize;   // Total file size in bytes
-	uint32_t maxPartSize; // Maximum size of each part in bytes
-	uint32_t partCount;   // Total number of parts to retrieve via TGW_GET_TUNING_SOURCES_NEXT
+	reply.totalSize = TO_UINT32(fileSize);
+	reply.maxPartSize = TO_UINT32(maxPartSize);
+	reply.partCount = TO_UINT32(partCount);
 
+	sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
+
+	return true;
+}
+
+bool TuningGatewayServer::processGetTuningSourcesNextRequest(TgsSessionShared stc,
+	const GCL::GwMessageHeader& header,
+	const char* recvBuf,
+	const size_t requestSize)
+{
+	Q_UNUSED(requestSize);
+
+	GCL::GwGetTuningSourcesNextRequest request;
+
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_REQUEST_SIZE);
+
+	if (stc->tunSrvClientThread == nullptr)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
+		return false;
+	}
+
+	thread_local std::vector<char> payload;
+
+	if (payload.capacity() < GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_RESPONSE_SIZE +
+							TDS_TUNING_SOURCES_FILE_PART_SIZE)
+	{
+		payload.reserve(GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_RESPONSE_SIZE +
+						TDS_TUNING_SOURCES_FILE_PART_SIZE);
+	}
+
+	// reserve size for GCL::GwGetTuningSourcesNextResponse struct
+	//
+	payload.resize(GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_RESPONSE_SIZE);
+
+	quint64 partNo = request.part;
+	quint64 partSize = 0;
+
+	if (stc->tunSrvClientThread->getTuningSourcesFilePart(partNo, payload, partSize) == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
+		return false;
+	}
+
+	GCL::GwGetTuningSourcesNextResponse reply;
+
+	reply.part = TO_UINT32(partNo);
+	reply.partSize = TO_UINT32(partSize);
+
+	std::memcpy(payload.data(), &reply, GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_RESPONSE_SIZE);
+
+	sendOkReply(stc, header, payload.data(), payload.size());
+
+	return true;
 }
 
 /*

@@ -356,8 +356,22 @@ namespace GatewayClientLib
 			GwGetTuningSourcesStartRequest startRequest{};
 			GwGetTuningSourcesStartResponse startResponse{};
 
-			GwErrorCode requestResult =
-				sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
+			GwErrorCode requestResult = GwErrorCode::GWC_SUCCESS;
+
+			int count = 0;
+
+			while(count < 10)
+			{
+				requestResult =	sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
+
+				if (requestResult == GwErrorCode::GWC_SUCCESS)
+				{
+					break;
+				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				count++;
+			}
 
 			if (requestResult != GwErrorCode::GWC_SUCCESS)
 			{

@@ -756,6 +756,7 @@ namespace Separator
 	inline const QString YES("Yes");
 	inline const QString NO("No");
 	inline const QString QUESTIONS("???");
+	inline const QString HEX("0x");
 }
 
 namespace FormatStr

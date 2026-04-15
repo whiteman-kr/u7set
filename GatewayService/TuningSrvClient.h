@@ -17,6 +17,9 @@ public:
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
 
+	bool getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount);
+	bool getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize);
+
 private:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
@@ -24,6 +27,7 @@ private:
 
 	void restartReceiveFile();
 	void requestNextFilePart();
+	void clearReceiveFileVars();
 
 private:
 	quint64 m_filePartNo = 0;
@@ -41,4 +45,10 @@ public:
 					const HostAddressPort& serverAddressPort2,
 					const QString& clientDescription,
 					const QString& serverEquipmentID);
+
+	bool getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount);
+	bool getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize);
+
+private:
+	TuningSrvClient* m_client = nullptr;
 };

@@ -241,6 +241,9 @@ namespace GatewayClientLib
 #endif
 	};
 
+	constexpr size_t TUNING_GW_GET_TUNING_SOURCES_NEXT_RESPONSE_SIZE = sizeof(GwGetTuningSourcesNextResponse);
+
+
 	//
 	// Request TGW_GET_TUNING_SOURCE_STATES
 	//

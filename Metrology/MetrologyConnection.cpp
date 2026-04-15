@@ -354,7 +354,7 @@ namespace Metrology
 	{
 		xml.writeStartElement("Connection");
 		{
-			xml.writeIntAttribute("Type", type());
+			xml.writeInt32Attribute("Type", type());
 			xml.writeStringAttribute(QString("SourceAppSignalID"), appSignalID(ConnectionIoType::Source));
 			xml.writeStringAttribute(QString("DestinationAppSignalID"), appSignalID(ConnectionIoType::Destination));
 		}

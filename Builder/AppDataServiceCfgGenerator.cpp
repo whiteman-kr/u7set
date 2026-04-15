@@ -84,7 +84,7 @@ namespace Builder
 		extXml.setAutoFormatting(true);
 		extXml.writeStartDocument();
 		extXml.writeStartElement(XmlElement::APP_SIGNALS);
-		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, resultWriter->buildInfo().buildNo);
+		extXml.writeInt32Attribute(XmlAttribute::BUILD_ID, resultWriter->buildInfo().buildNo);
 		extXml.writeStartElement(XmlElement::SIGNALS);
 
 		int signalCount = 0;
@@ -98,7 +98,7 @@ namespace Builder
 			signalCount = static_cast<int>(signalSet->size());
 		}
 
-		extXml.writeIntAttribute(XmlAttribute::COUNT, signalCount);
+		extXml.writeInt32Attribute(XmlAttribute::COUNT, signalCount);
 
 		int writtenSignalsCount = 0;
 
@@ -125,7 +125,7 @@ namespace Builder
 		extXml.writeEndElement();	// </Signals>
 
 		extXml.writeStartElement(XmlElement::ACTUATORS);
-		extXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(context->m_actuators.size()));
+		extXml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(context->m_actuators.size()));
 
 		for(const auto& [actuatorID, devModule] : context->m_actuators)
 		{
@@ -291,9 +291,9 @@ namespace Builder
 		azpzXml.setAutoFormatting(true);
 		azpzXml.writeStartDocument();
 		azpzXml.writeStartElement(XmlElement::APP_SIGNALS);
-		azpzXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().buildNo);
+		azpzXml.writeInt32Attribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().buildNo);
 		azpzXml.writeStartElement(XmlElement::SIGNALS);
-		azpzXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_acquiredAppSignals.size()));
+		azpzXml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(m_acquiredAppSignals.size()));
 
 		int writtenSignalsCount = 0;
 

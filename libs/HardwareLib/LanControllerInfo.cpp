@@ -118,7 +118,7 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStartElement(XmlElement::LAN_CONTROLLER);
 
 	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
-	xml.writeIntAttribute(EquipmentPropNames::CONTROLLER_NO, controllerNo);
+	xml.writeInt32Attribute(EquipmentPropNames::CONTROLLER_NO, controllerNo);
 	xml.writeEnumKeyAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, lanControllerType);
 
 	//
@@ -129,17 +129,17 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, appDataEnable);
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_IP, appDataIP);
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_PORT, appDataPort);
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_PORT, appDataPort);
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, appDataServiceID);
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_IP, appDataServiceIP);
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SERVICE_PORT, appDataServicePort);
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_SERVICE_PORT, appDataServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, appDataServiceNetmask);
 
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes);
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes);
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, rupAppDataUID, false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_APP_DATA_UID, rupAppDataUID, true);
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity);
-		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount);
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity);
+		xml.writeInt32Attribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::APP_DATA_PARAMS
@@ -152,10 +152,10 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnable);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_IP, tuningIP);
-		xml.writeIntAttribute(EquipmentPropNames::TUNING_PORT, tuningPort);
+		xml.writeInt32Attribute(EquipmentPropNames::TUNING_PORT, tuningPort);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_ID, tuningServiceID);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_IP, tuningServiceIP);
-		xml.writeIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, tuningServicePort);
+		xml.writeInt32Attribute(EquipmentPropNames::TUNING_SERVICE_PORT, tuningServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, tuningServiceNetmask);
 
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_TUNING_DATA_UID, rupTuningDataUID, false);
@@ -175,17 +175,17 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeBoolAttribute(EquipmentPropNames::DIAG_DATA_ENABLE, diagDataEnable);
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_IP, diagDataIP);
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_PORT, diagDataPort);
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_PORT, diagDataPort);
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_ID, diagDataServiceID);
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_IP, diagDataServiceIP);
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_PORT, diagDataServicePort);
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_SERVICE_PORT, diagDataServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, diagDataServiceNetmask);
 
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes);
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes);
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, rupDiagDataUID, false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_DIAG_DATA_UID, rupDiagDataUID, true);
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity);
-		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount);
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity);
+		xml.writeInt32Attribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::DIAG_DATA_PARAMS
@@ -522,10 +522,10 @@ const LanControllerInfo& LanControllersInfo::getInfo(const QString& controllerEq
 void LanControllersInfo::writeToXml(XmlWriteHelper& xml)const
 {
 	xml.writeStartElement(XmlElement::LAN_CONTROLLERS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_lans.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(m_lans.size()));
 
-	xml.writeIntAttribute(XmlAttribute::RUP_VERSION, m_rupVersion);
-	xml.writeIntAttribute(XmlAttribute::FOTIP_VERSION, m_fotipVersion);
+	xml.writeInt32Attribute(XmlAttribute::RUP_VERSION, m_rupVersion);
+	xml.writeInt32Attribute(XmlAttribute::FOTIP_VERSION, m_fotipVersion);
 
 	for(const LanControllerInfo& lci : m_lans)
 	{

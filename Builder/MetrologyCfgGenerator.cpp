@@ -72,8 +72,8 @@ namespace Builder
 		{
 			xml.writeStartElement("MetrologyItems");
 			{
-				xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().buildNo);
-				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_ITEMS_XML);			// version of MetrologyItems file
+				xml.writeInt32Attribute("buildID", m_buildResultWriter->buildInfo().buildNo);
+				xml.writeInt32Attribute("Version", CFG_FILE_VER_METROLOGY_ITEMS_XML);			// version of MetrologyItems file
 
 
 				// Creating rack list from equipment tree
@@ -112,7 +112,7 @@ namespace Builder
 				//
 				xml.writeStartElement("Racks");
 				{
-					xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(racks.count()));
+					xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(racks.count()));
 
 					for(Metrology::RackParam rack : racks)
 					{
@@ -149,7 +149,7 @@ namespace Builder
 				//
 				xml.writeStartElement("TuningSources");
 				{
-					xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(tuningSourceEquipmentID.count()));
+					xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(tuningSourceEquipmentID.count()));
 
 					for(const QString& equipmentID : tuningSourceEquipmentID)
 					{
@@ -181,7 +181,7 @@ namespace Builder
 				xml.writeStartElement("Connections");
 				{
 					int connectionCount = connectionBase.count();
-					xml.writeIntAttribute(XmlAttribute::COUNT, connectionCount);
+					xml.writeInt32Attribute(XmlAttribute::COUNT, connectionCount);
 
 					for(int i = 0; i < connectionCount; i++)
 					{

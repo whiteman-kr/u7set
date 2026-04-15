@@ -1,6 +1,12 @@
 #include "TuningSrvClient.h"
 #include "TuningGatewayServer.h"
 
+// -------------------------------------------------------------------------------------
+//
+// TuningSrvClient class implementation
+//
+// -------------------------------------------------------------------------------------
+
 TuningSrvClient::TuningSrvClient(std::shared_ptr<TgsSession> session,
 	const SoftwareInfo& softwareInfo,
 	const HostAddressPort& serverAddressPort1,
@@ -19,6 +25,47 @@ void TuningSrvClient::onConnection()
 
 void TuningSrvClient::onDisconnection()
 {
+	clearReceiveFileVars();
+}
+
+bool TuningSrvClient::getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount)
+{
+	if (m_fileReady == false)
+	{
+		fileSize = 0;
+		maxPartSize = 0;
+		partCount = 0;
+		return false;
+	}
+
+	fileSize = TO_QUINT64(m_tuningSourcesFileData.size());
+	maxPartSize = TDS_TUNING_SOURCES_FILE_PART_SIZE;
+	partCount = (fileSize + TDS_TUNING_SOURCES_FILE_PART_SIZE - 1) / TDS_TUNING_SOURCES_FILE_PART_SIZE;
+
+	return true;
+}
+
+bool TuningSrvClient::getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize)
+{
+	if (m_fileReady == false)
+	{
+		return false;
+	}
+
+	quint64 fileSize = TO_UINT64(m_tuningSourcesFileData.size());
+
+	quint64 partStart = partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE;
+
+	if (partStart >= fileSize)
+	{
+		return false;
+	}
+
+	partSize = std::min(fileSize - partStart, TDS_TUNING_SOURCES_FILE_PART_SIZE);
+
+	fileData.insert(fileData.end(), m_tuningSourcesFileData.begin() + partStart,
+					m_tuningSourcesFileData.begin() + partStart + partSize);
+	return true;
 }
 
 void TuningSrvClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -80,10 +127,7 @@ void TuningSrvClient::onGetNextFilePart(const char* replyData, quint32 replyData
 
 void TuningSrvClient::restartReceiveFile()
 {
-	m_filePartNo = 0;
-	m_filePartsCount = 0;
-	m_fileReady = false;
-	m_tuningSourcesFileData.clear();
+	clearReceiveFileVars();
 	requestNextFilePart();
 }
 
@@ -96,6 +140,20 @@ void TuningSrvClient::requestNextFilePart()
 	sendRequest(TDS_GET_TUNING_SOURCES_FILE, request);
 }
 
+void TuningSrvClient::clearReceiveFileVars()
+{
+	m_filePartNo = 0;
+	m_filePartsCount = 0;
+	m_fileReady = false;
+	m_tuningSourcesFileData.clear();
+}
+
+// -------------------------------------------------------------------------------------
+//
+// TuningSrvClientThread class implementation
+//
+// -------------------------------------------------------------------------------------
+
 TuningSrvClientThread::TuningSrvClientThread(std::shared_ptr<TgsSession> session,
 											const SoftwareInfo& softwareInfo,
 											const HostAddressPort& serverAddressPort1,
@@ -103,8 +161,29 @@ TuningSrvClientThread::TuningSrvClientThread(std::shared_ptr<TgsSession> session
 											const QString& clientDescription,
 											const QString& serverEquipmentID)
 {
-	TuningSrvClient* client = new TuningSrvClient(session, softwareInfo,
-												  serverAddressPort1, serverAddressPort2,
-												  clientDescription, serverEquipmentID);
-	addWorker(client);
+	m_client = new TuningSrvClient(session, softwareInfo,
+								  serverAddressPort1, serverAddressPort2,
+								  clientDescription, serverEquipmentID);
+	addWorker(m_client);
 }
+
+bool TuningSrvClientThread::getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount)
+{
+	if (m_client == nullptr)
+	{
+		return false;
+	}
+
+	return m_client->getTuningSourcesFileMetrics(fileSize, maxPartSize, partCount);
+}
+
+bool TuningSrvClientThread::getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize)
+{
+	if (m_client == nullptr)
+	{
+		return false;
+	}
+
+	return m_client->getTuningSourcesFilePart(partNo, fileData, partSize);
+}
+

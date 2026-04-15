@@ -58,7 +58,8 @@ namespace GatewayClientLib
 		GWC_REQUEST_FORMAT_ERROR = 0x0206,
 		GWC_GATEWAY_INTERNAL_ERROR = 0x0207,
 		GWC_NO_TS_CONNECTION = 0x0208,
-		GWC_CRC_ERROR = 0x020A
+		GWC_CRC_ERROR = 0x020A,
+		GWC_TUNING_SOURCES_FILE_NOT_READY = 0x020B,
 	};
 
 	constexpr std::string_view to_string(GwErrorCode ec) noexcept
@@ -96,6 +97,7 @@ namespace GatewayClientLib
 		case GWC_GATEWAY_INTERNAL_ERROR:			return "GWC_GATEWAY_INTERNAL_ERROR(0x0207)";
 		case GWC_NO_TS_CONNECTION:					return "GWC_NO_TS_CONNECTION(0x0208)";
 		case GWC_CRC_ERROR:							return "GWC_CRC_ERROR(0x020A)";
+		case GWC_TUNING_SOURCES_FILE_NOT_READY:		return "GWC_TUNING_SOURCES_FILE_NOT_READY(0x020B)";
 		}
 		// clang-format on
 

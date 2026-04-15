@@ -91,7 +91,7 @@ namespace Metrology
 	{
 		xml.writeStartElement("Rack");
 		{
-			xml.writeIntAttribute("Index", index());
+			xml.writeInt32Attribute("Index", index());
 			xml.writeStringAttribute("EquipmentID", equipmentID());
 			xml.writeStringAttribute("Caption", caption());
 		}

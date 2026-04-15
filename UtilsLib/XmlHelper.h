@@ -28,11 +28,11 @@ public:
 
 	void writeStringAttribute(const QString& name, const QString& value);
 	void writeStringListAttribute(const QString& name, const QStringList& list);
-	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
+	void writeInt32Attribute(const QString& name, qint32 value, bool hex = false);
 	void writeInt64Attribute(const QString& name, qint64 value, bool hex = false);
-	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
+	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeDoubleAttribute(const QString& name, double value);
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
@@ -65,6 +65,13 @@ public:
 	void writeEnumKeyValueAttribute(const QString& name, ENUM_TYPE value);	// writes Str name and Int value of enum item
 
 private:
+	static QString hexUInt32(quint32 v);
+	static QString hexInt32(qint32 v);
+
+	static QString hexUInt64(quint64 v);
+	static QString hexInt64(qint64 v);
+
+private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 };
@@ -90,7 +97,7 @@ void XmlWriteHelper::writeEnumValueAttribute(const QString& name, ENUM_TYPE valu
 {
 	static_assert(std::is_enum<ENUM_TYPE>::value == true);
 
-	writeIntAttribute(name + QString(XmlAttribute::ENUM_VALUE_SUFFIX), static_cast<int>(value));
+	writeInt32Attribute(name + QString(XmlAttribute::ENUM_VALUE_SUFFIX), static_cast<int>(value));
 }
 
 template<typename ENUM_TYPE>

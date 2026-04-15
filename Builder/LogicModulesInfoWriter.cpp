@@ -47,7 +47,7 @@ void LogicModulesInfoWriter::save(QByteArray* xmlFileData) const
 	{
 		xml.writeStartElement(XmlElement::LOGIC_MODULES);
 
-		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(logicModulesInfo.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(logicModulesInfo.size()));
 
 		for(const LogicModuleInfo& lmInfo : logicModulesInfo)
 		{
@@ -178,23 +178,23 @@ bool LogicModulesInfoWriter::save(const LogicModuleInfo& lmInfo, XmlWriteHelper&
 	xml.writeStringAttribute(EquipmentPropNames::CAPTION, lmInfo.caption);
 
 	xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_ID, lmInfo.subsystemID);
-	xml.writeIntAttribute(EquipmentPropNames::SUBSYSTEM_KEY, lmInfo.subsystemKey);
-	xml.writeIntAttribute(EquipmentPropNames::LM_NUMBER, lmInfo.lmNumber);
+	xml.writeInt32Attribute(EquipmentPropNames::SUBSYSTEM_KEY, lmInfo.subsystemKey);
+	xml.writeInt32Attribute(EquipmentPropNames::LM_NUMBER, lmInfo.lmNumber);
 	xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_CHANNEL, lmInfo.subsystemChannel);
 
 	xml.writeUInt64Attribute(EquipmentPropNames::LM_UNIQUE_ID, lmInfo.lmUniqueID, true);
 
 	xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, lmInfo.appDataEnable);
-	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);
+	xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);
 	xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, lmInfo.rupAppDataUID, true);
 
 	xml.writeBoolAttribute(EquipmentPropNames::DIAG_DATA_ENABLE, lmInfo.diagDataEnable);
-	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lmInfo.diagDataSizeBytes);
+	xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lmInfo.diagDataSizeBytes);
 	xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, lmInfo.rupDiagDataUID, true);
 
 	xml.writeStringAttribute(EquipmentPropNames::MODULE_FAMILY, lmInfo.moduleFamily);
-	xml.writeIntAttribute(EquipmentPropNames::MODULE_FAMILY_ID, lmInfo.moduleFamilyID, true);
-	xml.writeIntAttribute(EquipmentPropNames::MODULE_VERSION, lmInfo.moduleVersion);
+	xml.writeInt32Attribute(EquipmentPropNames::MODULE_FAMILY_ID, lmInfo.moduleFamilyID, true);
+	xml.writeInt32Attribute(EquipmentPropNames::MODULE_VERSION, lmInfo.moduleVersion);
 
 	xml.writeStringAttribute(EquipmentPropNames::PRESET_NAME, lmInfo.presetName);
 	xml.writeStringAttribute(EquipmentPropNames::LM_DESCRIPTION_FILE, lmInfo.lmDescriptionFile);
