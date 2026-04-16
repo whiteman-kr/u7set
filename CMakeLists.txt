@@ -198,6 +198,7 @@ if (NOT STATIC_RUNTIME)
 	add_subdirectory(ArchivingService)
 	add_subdirectory(ConfigurationService)
 	add_subdirectory(DiagDataService)
+	add_subdirectory(GatewayService)	
 	add_subdirectory(ServiceControlManager)
 	add_subdirectory(TuningService)
 	
@@ -209,7 +210,6 @@ endif()
 # Do not compile these projects if code coverage is on.
 #
 if((NOT STATIC_RUNTIME) AND (NOT CODE_COVERAGE))
-	add_subdirectory(GatewayService)
 	add_subdirectory(Archivist)
 
 	add_subdirectory(u7)
