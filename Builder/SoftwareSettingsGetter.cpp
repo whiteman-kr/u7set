@@ -1323,7 +1323,8 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 		E::SoftwareType::Metrology,
 		E::SoftwareType::Monitor,
 		E::SoftwareType::TestClient,
-		E::SoftwareType::TestSuite
+		E::SoftwareType::TestSuite,
+		E::SoftwareType::GatewayService
 	};
 
 	for(const auto& p : context->m_software)
@@ -1420,6 +1421,7 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 		case E::SoftwareType::Metrology:
 		case E::SoftwareType::TestClient:
+		case E::SoftwareType::GatewayService:
 			break;
 
 		default:
@@ -2842,7 +2844,7 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::TuningService>(
 		equipment, software,
-		EquipmentPropNames::TUNING_SERVICE_IDS, 2, true,
+		EquipmentPropNames::TUNING_SERVICE_ID, 2, true,
 		E::SoftwareType::TuningService,
 		EquipmentPropNames::CLIENT_REQUEST_IP,
 		EquipmentPropNames::CLIENT_REQUEST_PORT,
