@@ -41,6 +41,12 @@ struct TgsSession
 	size_t errCount = 0;
 
 	std::unique_ptr<TuningSrvClientThread> tunSrvClientThread;
+
+	//
+
+	std::mutex condVarMutex;
+	std::condition_variable condVar;
+	std::vector<char> replyData;
 };
 
 using TgsSessionShared = std::shared_ptr<TgsSession>;
@@ -49,6 +55,14 @@ class TuningGatewayServer : public LogWrapper
 {
 public:
 	static constexpr size_t MAX_SESSION_ERRORS = 100;
+
+private:
+	enum class WaitResult
+	{
+		QuitRequested,
+		Timeout,
+		DataReady
+	};
 
 public:
 	TuningGatewayServer(const SoftwareInfo& swInfo,
@@ -88,6 +102,12 @@ private:
 	bool processGetTuningSourcesNextRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
 											 const char* recvBuf, const size_t requestSize);
 
+	bool processGetTuningSourceStatesRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+											const char* recvBuf, const size_t requestSize);
+
+	bool processTuningSignalsReadRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+											 const char* recvBuf, const size_t requestSize);
+
 	bool checkPayloadSize(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, GCL::GwErrorCode& errCode);
 	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
 
@@ -101,8 +121,13 @@ private:
 	QString getIpPortStr(const tcp::socket& socket) const;
 
 	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
+	void copyStr(char* toStr, size_t toStrLen, const std::string& fromStr) const;
 
 	uint8_t channelChar(E::Channel ch) const;
+
+	WaitResult waitForOrQuit(TgsSessionShared stc, const int64_t timeoutMs);
+
+	bool isQuitRequested(TgsSessionShared stc) const;
 
 private:
 	SoftwareInfo m_swInfo;

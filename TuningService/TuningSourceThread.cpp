@@ -22,6 +22,7 @@ namespace Tuning
 		TEST_PTR_RETURN(tss);
 
 		tss->set_sourceid(sourceID);
+		tss->set_moduleequipmentid(moduleEquipmentID);
 		tss->set_lanequipmentid(lanEquipmentID);
 
 		//
@@ -292,6 +293,7 @@ namespace Tuning
 
 		m_state.sourceID = srcThread.source().ID();
 		m_state.channel = m_channel;
+		m_state.moduleEquipmentID = m_moduleEquipmentID.toStdString();
 		m_state.lanEquipmentID = channelInfo.portEquipmentID.toStdString();
 
 		//

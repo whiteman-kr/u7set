@@ -29,6 +29,7 @@ namespace Tuning
 		// only once initialized fields that not require std::atomic<>
 		//
 		quint64	sourceID{};					// generate by DataSource::generateID()
+		std::string moduleEquipmentID;
 		std::string lanEquipmentID;
 		int channel = CHANNEL_1;
 

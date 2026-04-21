@@ -258,6 +258,7 @@ namespace Tuning
 					Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
 
 					newTss->set_sourceid(src->ID());
+					newTss->set_moduleequipmentid(src->moduleEquipmentID().toStdString());
 					newTss->set_lanequipmentid(lanID.toStdString());
 					newTss->set_isreply(false);
 				}
@@ -298,6 +299,7 @@ namespace Tuning
 		{
 			int signalQuantity = m_tuningSignalsReadRequest.signalhash_size();
 
+			m_tuningSignalsReadReply.set_readrequestid(m_tuningSignalsReadRequest.readrequestid());
 			m_tuningSignalsReadReply.clear_tuningsignalstate();
 
 			for(int i = 0; i < signalQuantity; i++)

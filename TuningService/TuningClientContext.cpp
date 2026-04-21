@@ -149,9 +149,9 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(reply);
 
-		int signalCount = request.signalhash_size();
+		reply->set_readrequestid(request.readrequestid());
 
-		//reply.mutable_tuningsignalstate()->Reserve(signalCount);
+		int signalCount = request.signalhash_size();
 
 		reply->clear_tuningsignalstate();
 

@@ -634,6 +634,9 @@ message TuningSourceState
 	optional int64 errTuningFrameUpdate = 75 [default = 0];
 
 	optional int64 lmTime = 76 [ default = 0];
+
+	optional string moduleEquipmentID = 77;
+	optional bool buildMismatch = 78 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -676,6 +679,7 @@ message ChangeConrolledTuningSourceReply
 //
 message TuningSignalsRead
 {
+	optional uint64 readRequestID = 1 [default = 0];
     repeated uint64 signalHash = 2;
 }
 
@@ -712,6 +716,7 @@ message TuningSignalsReadReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalState tuningSignalState = 2;
 	optional int32 pendingSignalsStateChanges = 3 [default = 0];
+	optional uint64 readRequestID = 4 [default = 0];			// ID from TuningSignalsRead
 }
 
 // Get tuning signals state changes request - TDS_GET_SIGNALS_STATE_CHANGES

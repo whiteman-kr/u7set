@@ -207,8 +207,7 @@ void TuningGatewayServer::sessionThread(TgsSessionShared stc)
 
 		stc->socket->set_option(tcp::no_delay(true), ec);
 
-		while (m_running.load(std::memory_order_relaxed)  &&
-					!stc->closing.load(std::memory_order_relaxed))
+		while (m_running.load(std::memory_order_relaxed)  &&  !isQuitRequested(stc))
 		{
 			if (recvBufSize >= GCL::GW_MAX_PAYLOAD_SIZE)
 			{
@@ -484,7 +483,13 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 			break;
 
 		case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCE_STATES:
+			result = processGetTuningSourceStatesRequest(stc, header, recvBuf, requestSize);
+			break;
+
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_READ:
+			result = processTuningSignalsReadRequest(stc, header, recvBuf, requestSize);
+			break;
+
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE:
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
 		case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
@@ -575,8 +580,13 @@ bool TuningGatewayServer::processGetTuningSourcesStartRequest(TgsSessionShared s
 	quint64 maxPartSize = 0;
 	quint64 partCount = 0;
 
-	if (stc->tunSrvClientThread == nullptr ||
-		stc->tunSrvClientThread->getTuningSourcesFileMetrics(fileSize, maxPartSize, partCount) == false)
+	if (stc->tunSrvClientThread == nullptr)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
+		return false;
+	}
+
+	if	(stc->tunSrvClientThread->getTuningSourcesFileMetrics(fileSize, maxPartSize, partCount) == false)
 	{
 		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
 		return false;
@@ -606,7 +616,7 @@ bool TuningGatewayServer::processGetTuningSourcesNextRequest(TgsSessionShared st
 
 	if (stc->tunSrvClientThread == nullptr)
 	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
 		return false;
 	}
 
@@ -644,404 +654,223 @@ bool TuningGatewayServer::processGetTuningSourcesNextRequest(TgsSessionShared st
 	return true;
 }
 
-/*
-bool TuningGatewayServer::processSignalListStartRequest(TgsSessionShared stc,
+bool TuningGatewayServer::processGetTuningSourceStatesRequest(TgsSessionShared stc,
 	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
-{
-	Q_UNUSED(recvBuf);
-	Q_UNUSED(requestSize);
-
-	//
-
-	logMsg(QString("SIGNAL_LIST_START request from %1").arg(stc->clientName));
-
-	GCL::AdsGwSignalListStartResponse reply;
-
-	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
-
-	reply.totalItemCount = signalCount;
-	reply.itemsPerPart = GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
-	reply.partCount = signalCount / reply.itemsPerPart + (signalCount % reply.itemsPerPart ? 1 : 0);
-
-	char* payloadData = stc->payloadData.data();
-	const size_t payloadSize = sizeof(reply);
-
-	std::memcpy(payloadData, &reply, payloadSize);
-
-	sendOkReply(stc, header, payloadData, payloadSize);
-
-	return true;
-}
-
-bool TuningGatewayServer::processSignalListNextRequest(TgsSessionShared stc,
-	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
+	const char* recvBuf,
+	const size_t requestSize)
 {
 	Q_UNUSED(requestSize);
 
-	GCL::AdsGwSignalListNextRequest request;
-	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_LIST_NEXT_REQUEST_SIZE);
+	GCL::GwGetTuningSourceStatesRequest request;
 
-	//
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_REQUEST_SIZE);
 
-	logMsg(QString("SIGNAL_LIST_NEXT request from %1, requested part %2").
-						arg(stc->clientName).arg(request.part));
-
-	char* payloadData = stc->payloadData.data();
-
-	const int signalsCount = TO_INT(m_appSignals.count());
-	const int itemsPerPart = GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
-	const int partCount = signalsCount / itemsPerPart + (signalsCount % itemsPerPart ? 1 : 0);
-
-	if (request.part >= static_cast<uint32_t>(partCount))
+	if (stc->tunSrvClientThread == nullptr)
 	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
 		return false;
 	}
 
-	GCL::AdsGwSignalListNextResponse reply;
+	thread_local std::vector<char> replyData;
 
-	reply.part = request.part;
-	reply.appSignalIdCount = 0;
+	replyData.clear();
 
-	int signalStartIndex = request.part * GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT;
-	const int signalEndIndex = std::min(TO_INT(signalStartIndex + GCL::ADS_GW_MAX_APP_SIGNAL_ID_COUNT), signalsCount);
+	stc->tunSrvClientThread->getTuningSourceStatesReply(replyData);
 
-	size_t payloadSize = GCL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE;
+	thread_local Network::GetTuningSourcesStatesReply tsStates;
 
-	for(int i = signalStartIndex; i < signalEndIndex; i++)
+	tsStates.Clear();
+
+	bool result = false;
+
+	if (replyData.size() > 0)
 	{
-		if (payloadSize + GCL::GW_APP_SIGNAL_ID_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
-		{
-			Q_ASSERT(false);
-			logErr("TuningGatewayServer::processSignalListNextRequest payload size exceed!");
-			sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
-			return false;
-		}
-
-		const AppSignal* appSignal = m_appSignals.getSignalByIndex(i);
-
-		TEST_PTR_CONTINUE(appSignal);
-
-		copyStr(payloadData + payloadSize, GCL::GW_APP_SIGNAL_ID_SIZE, appSignal->appSignalID());
-
-		payloadSize +=  GCL::GW_APP_SIGNAL_ID_SIZE;
-
-		reply.appSignalIdCount++;
+		result = tsStates.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
 	}
 
-	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE);
+	GCL::GwGetTuningSourceStatesResponse reply;
 
-	sendOkReply(stc, header, payloadData, payloadSize);
+	reply.count = 0;
+	reply.clientIsActive = 0;
 
-	return true;
-}
-
-bool TuningGatewayServer::processSignalParamStartRequest(TgsSessionShared stc,
-	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
-{
-	Q_UNUSED(recvBuf);
-	Q_UNUSED(requestSize);
-
-	logMsg(QString("SIGNAL_PARAM_START request from %1").arg(stc->clientName));
-
-	GCL::AdsGwSignalListStartResponse reply;
-
-	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
-
-	reply.totalItemCount = signalCount;
-	reply.itemsPerPart = GCL::ADS_GW_MAX_SIGNAL_PARAMS;
-	reply.partCount = signalCount / reply.itemsPerPart + (signalCount % reply.itemsPerPart ? 1 : 0);
-
-	char* payloadData = stc->payloadData.data();
-	const size_t payloadSize = sizeof(reply);
-
-	std::memcpy(payloadData, &reply, payloadSize);
-
-	sendOkReply(stc, header, payloadData, payloadSize);
-
-	return true;
-}
-
-bool TuningGatewayServer::processSignalParamNextRequest(TgsSessionShared stc,
-	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
-{
-	Q_UNUSED(recvBuf);
-	Q_UNUSED(requestSize);
-
-	GCL::AdsGwSignalParamNextRequest request;
-	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE);
-
-	//
-
-	logMsg(QString("SIGNAL_PARAM_NEXT request from %1, requested part %2").
-		   arg(stc->clientName).arg(request.part));
-
-	char* payloadData = stc->payloadData.data();
-
-	const int signalsCount = TO_INT(m_appSignals.count());
-	const int itemsPerPart = GCL::ADS_GW_MAX_SIGNAL_PARAMS;
-	const int partCount = signalsCount / itemsPerPart + (signalsCount % itemsPerPart ? 1 : 0);
-
-	if (request.part >= static_cast<uint32_t>(partCount))
+	if (result == false)
 	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		sendOkReply(stc, header, reinterpret_cast<const char*>(&reply),
+							GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_RESPONSE_SIZE);
+		return true;
+	}
+
+	reply.clientIsActive = QString::fromStdString(tsStates.activeclientid()) == m_swInfo.equipmentID() ? 1 : 0;
+
+	if (tsStates.tuningsourcesstate_size() == 0)
+	{
+		sendOkReply(stc, header, reinterpret_cast<const char*>(&reply),
+					GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_RESPONSE_SIZE);
+		return true;
+	}
+
+	reply.count = TO_UINT32(tsStates.tuningsourcesstate_size());
+
+	thread_local std::vector<char> payload;
+
+	payload.clear();
+
+	payload.resize(GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_RESPONSE_SIZE);
+
+	std::memcpy(payload.data(), &reply, GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_RESPONSE_SIZE);
+
+	for(const Network::TuningSourceState& tss : tsStates.tuningsourcesstate())
+	{
+		GCL::GwTuningSourceState st;
+
+		st.sourceId = tss.sourceid();
+		copyStr(st.moduleEquipmentId, GCL::STRING_LENGTH_128, tss.moduleequipmentid());
+		copyStr(st.lanEquipmentId, GCL::STRING_LENGTH_128, tss.lanequipmentid());
+
+		st.isReplying = (tss.isreply() ? 1 : 0);
+		st.controlIsActive = (tss.controlisactive() ? 1 : 0);
+		st.setSOR = (tss.setsor() ? 1 : 0);
+		st.writingDisabled = (tss.writingdisabled() ? 1 : 0);
+		st.buildMismatch = (tss.buildmismatch() ? 1 : 0);
+		st.hasUnappliedParams = (tss.hasunappliedparams() ? 1 : 0);
+		st.reservedFlags[0] = 0;
+		st.reservedFlags[1] = 0;
+		st.lmTime = tss.lmtime();
+
+		const char* stPtr = reinterpret_cast<const char*>(&st);
+		payload.insert(payload.end(), stPtr, stPtr+ sizeof(st));
+	}
+
+	sendOkReply(stc, header, payload.data(), payload.size());
+
+	return true;
+}
+
+bool TuningGatewayServer::processTuningSignalsReadRequest(TgsSessionShared stc,
+	const GCL::GwMessageHeader& header,
+	const char* recvBuf,
+	const size_t requestSize)
+{
+	Q_UNUSED(requestSize);
+
+	GCL::GwTuningSignalsReadRequest request;
+
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE);
+
+	if (stc->tunSrvClientThread == nullptr)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
 		return false;
 	}
 
-	GCL::AdsGwSignalParamNextResponse reply;
+	quint32 hashesCount = request.count;
 
-	reply.part = request.part;
-	reply.paramCount = 0;
+	const char* hashPtr = recvBuf + GCL::GW_MSG_HEADER_SIZE +
+						  GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE;
 
-	int signalStartIndex = request.part * GCL::ADS_GW_MAX_SIGNAL_PARAMS;
-	const int signalEndIndex = std::min(TO_INT(signalStartIndex + GCL::ADS_GW_MAX_SIGNAL_PARAMS), signalsCount);
+	thread_local std::vector<Hash> hashes;
+	thread_local quint64 readRequestID = 0;
 
-	size_t payloadSize = GCL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE;
+	readRequestID++;
 
-	for(int i = signalStartIndex; i < signalEndIndex; i++)
+	hashes.clear();
+
+	for(quint32 i = 0; i < hashesCount; i++)
 	{
-		if (payloadSize + GCL::GW_APP_SIGNAL_PARAM_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
-		{
-			Q_ASSERT(false);
-			logErr("TuningGatewayServer::processSignalParamNextRequest payload size exceed!");
-			sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
-			return false;
-		}
+		Hash h;
 
-		const AppSignal* appSignal = m_appSignals.getSignalByIndex(i);
+		std::memcpy(&h, hashPtr, sizeof(Hash));
+		hashPtr += sizeof(Hash);
 
-		TEST_PTR_CONTINUE(appSignal);
-
-		GCL::GwAppSignalParam p{};
-
-		p.hash = TO_UINT64(appSignal->hash());
-		copyStr(p.appSignalId, GCL::STRING_LENGTH_128, appSignal->appSignalID());
-		copyStr(p.customSignalId, GCL::STRING_LENGTH_128, appSignal->customAppSignalID());
-		copyStr(p.caption, GCL::STRING_LENGTH_256, appSignal->caption());
-		copyStr(p.equipmentId, GCL::STRING_LENGTH_128, appSignal->equipmentID());
-		copyStr(p.lmEquipmentId, GCL::STRING_LENGTH_128, appSignal->lmEquipmentID());
-		copyStr(p.units, GCL::STRING_LENGTH_128, appSignal->unit());
-		copyStr(p.tags, GCL::STRING_LENGTH_256, appSignal->tagsStr());
-		p.channel = static_cast<GCL::Channel>(appSignal->channel());
-		p.inOutType = static_cast<GCL::InOutType>(appSignal->inOutType());
-		
-		switch (appSignal->signalType())
-		{
-		case E::SignalType::Discrete:
-			p.type = GCL::SignalType::Discrete;
-			break;
-		case E::SignalType::Analog:
-			switch (appSignal->analogSignalFormat())
-			{
-			case E::AnalogAppSignalFormat::SignedInt32:
-				p.type = GCL::SignalType::SignedInt32;
-				break;
-			case E::AnalogAppSignalFormat::Float32:
-				p.type = GCL::SignalType::Float32;
-				break;
-			default:
-				Q_ASSERT(false);
-				p.type = GCL::SignalType::Discrete;
-			}
-			break; 
-		default:
-			Q_ASSERT(false);
-			p.type = GCL::SignalType::Discrete;
-		}
-
-		p.decimalPlaces = TO_UINT8(appSignal->decimalPlaces());
-		p.tuning = TO_UINT8(appSignal->enableTuning());
-		p.reserved1 = 0;
-		p.reserved2 = 0;
-		p.reserved3 = 0;
-		p.lowValidRange = appSignal->lowValidRange();
-		p.highValidRange = appSignal->highValidRange();
-		p.tuningDefaultValue = appSignal->tuningDefaultValue().toDouble();
-		p.tuningLowBound = appSignal->tuningLowBound().toDouble();
-		p.tuningHighBound = appSignal->tuningHighBound().toDouble();
-
-		std::memcpy(payloadData + payloadSize, &p, GCL::GW_APP_SIGNAL_PARAM_SIZE);
-
-		payloadSize +=  GCL::GW_APP_SIGNAL_PARAM_SIZE;
-
-		reply.paramCount++;
+		hashes.push_back(h);
 	}
 
-	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE);
+	stc->replyData.clear();
 
-	sendOkReply(stc, header, payloadData, payloadSize);
+	stc->tunSrvClientThread->tuningSignalsRead(readRequestID, hashes,
+											   &stc->condVarMutex, &stc->condVar, &stc->replyData);
+
+	QElapsedTimer et;
+	et.start();
+
+	WaitResult wr = waitForOrQuit(stc, 500);
+
+	qint64 time = et.elapsed();
+
+	if (wr == WaitResult::QuitRequested)
+	{
+		return true;
+	}
+
+	GCL::GwTuningSignalsReadResponse reply;
+
+	reply.count = 0;
+	reply.reserved = 0;
+
+	thread_local std::vector<char> payload;
+
+	payload.resize(sizeof(reply));
+
+	std::memcpy(payload.data(), &reply, sizeof(reply));
+
+	if (wr == WaitResult::Timeout || stc->replyData.size() == 0)
+	{
+		sendOkReply(stc, header, payload.data(), payload.size());
+		return true;
+	}
+
+	thread_local Network::TuningSignalsReadReply prp;
+
+	bool res = prp.ParseFromArray(stc->replyData.data(), TO_INT(stc->replyData.size()));
+
+	if (res == false || prp.error() != 0)
+	{
+		sendOkReply(stc, header, payload.data(), payload.size());
+		return true;
+	}
+
+	reply.count = prp.tuningsignalstate_size();
+
+	std::memcpy(payload.data(), &reply, sizeof(reply));
+
+	GCL::GwTuningSignalState st;
+	TuningValue tv;
+
+	for(const Network::TuningSignalState& tst : prp.tuningsignalstate())
+	{
+		std::memset(&st, 0, sizeof(st));
+
+		st.hash = tst.signalhash();
+		st.errorCode = tst.error();
+
+		uint32_t flags = 0;
+
+		flags |= tst.valid() ? GCL::TGWF_VALID : 0;
+		flags |= tst.writeinprogress() ? GCL::TGWF_WRITE_IN_PROGRESS : 0;
+		flags |= tst.writingdisabled() ? 0 : GCL::TGWF_WRITING_IS_ENABLED;
+		flags |= tst.tuningdefault() ? GCL::TGWF_TUNING_DEFAULT : 0;
+
+		st.flags = flags;
+
+		tv.load(tst.value());
+
+		st.value = tv.toDouble();
+		st.successfulReadTime = tst.successfulreadtime();
+		st.writeRequestTime = tst.writerequesttime();
+		st.successfulWriteTime = tst.successfulwritetime();
+		st.unsuccessfulWriteTime = tst.unsuccessfulwritetime();
+		st.lmTime = tst.lmtime();
+		st.fotipProcessingNumerator = tst.fotipprocessingnumerator();
+
+		const char* stPtr = reinterpret_cast<const char*>(&st);
+		payload.insert(payload.end(), stPtr, stPtr + sizeof(st));
+	}
+
+	sendOkReply(stc, header, payload.data(), payload.size());
 
 	return true;
 }
 
-bool TuningGatewayServer::processSignalStateRequest(TgsSessionShared stc,
-	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
-{
-	Q_UNUSED(recvBuf);
-	Q_UNUSED(requestSize);
-
-	GCL::AdsGwSignalStateRequest request;
-	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE);
-
-	// logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
-	// 	   arg(stc->clientName).arg(request.signalCount));
-
-	if (request.signalCount > GCL::ADS_GW_MAX_SIGNAL_STATES)
-	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
-		return false;
-	}
-
-	if (stc->connectedToTuningSrv.load(std::memory_order_relaxed) == false)
-	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_ADS_CONNECTION);
-		return true;		// this is not request format error!
-	}
-
-	char* payloadData = stc->payloadData.data();
-
-	GCL::AdsGwSignalStateResponse reply;
-
-	reply.stateCount = 0;
-
-	const uint32_t hashesCount = request.signalCount;
-	size_t hashesOffset = GCL::GW_MSG_HEADER_SIZE + GCL::ADS_GW_SIGNAL_STATE_REQUEST_SIZE;
-
-	size_t payloadSize = GCL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE;
-
-	{
-		std::lock_guard lg(m_signalStatesMutex);
-
-		for(uint32_t i = 0; i < hashesCount; i++)
-		{
-			if (payloadSize + GCL::GW_APP_SIGNAL_STATE_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
-			{
-				Q_ASSERT(false);
-				logErr("TuningGatewayServer::processSignalStateRequest payload size exceed!");
-				sendErrReply(stc, header, GCL::GwErrorCode::GWC_GATEWAY_INTERNAL_ERROR);
-				return false;
-			}
-
-			Hash hash;
-
-			std::memcpy(&hash, recvBuf + hashesOffset, sizeof(hash));
-			hashesOffset += GCL::GW_APP_SIGNAL_HASH_SIZE;
-
-			auto it = m_hashToIndex.find(hash);
-
-			if (it == m_hashToIndex.end())
-			{
-				continue;
-			}
-
-			int stateIndex = it->second;
-
-			if (stateIndex < 0 || stateIndex >= TO_INT(m_signalStates.size()))
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			const SimpleAppSignalState& st = m_signalStates[stateIndex];
-
-			Q_ASSERT(st.hash == hash);
-
-			GCL::GwAppSignalState state;
-
-			state.hash = st.hash;
-			state.systemTime = st.systemTime();
-			state.localTime = st.localTime();
-			state.plantTime = st.plantTime();
-			state.value = st.value;
-			state.flags = st.flags.all;
-			state.reserved = 0;
-
-			std::memcpy(payloadData + payloadSize, &state, GCL::GW_APP_SIGNAL_STATE_SIZE);
-
-			payloadSize +=  GCL::GW_APP_SIGNAL_STATE_SIZE;
-
-			reply.stateCount++;
-		}
-	}
-
-	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_STATE_RESPONSE_SIZE);
-
-	sendOkReply(stc, header, payloadData, payloadSize);
-
-	// logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
-
-	return true;
-}
-
-bool TuningGatewayServer::processSignalStateChangesRequest(TgsSessionShared stc,
-	const GCL::GwMessageHeader& header,
-	const char* recvBuf, const size_t requestSize)
-{
-	Q_UNUSED(recvBuf);
-	Q_UNUSED(requestSize);
-
-//	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
-
-	GCL::AdsGwSignalStateChangesRequest request;
-	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::ADS_GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
-
-	if (stc->connectedToTuningSrv.load(std::memory_order_relaxed) == false)
-	{
-		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_ADS_CONNECTION);
-		return true;		// this is not request format error!
-	}
-
-	//
-
-	char* payloadData = stc->payloadData.data();
-
-	GCL::AdsGwSignalStateChangesResponse reply;
-
-	reply.stateCount = 0;
-	reply.pendingStatesCount = 0;
-
-	size_t payloadSize = GCL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE;
-
-	{
-		std::lock_guard lg(m_signalStateChangesMutex);
-
-		GCL::GwAppSignalState state;
-
-		while(m_signalStateChanges.empty() == false &&
-			   reply.stateCount < GCL::ADS_GW_MAX_SIGNAL_STATE_CHANGES)
-		{
-			if (payloadSize + GCL::GW_APP_SIGNAL_STATE_SIZE > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
-			{
-				break;
-			}
-
-			state = m_signalStateChanges.front();
-			m_signalStateChanges.pop_front();
-
-			std::memcpy(payloadData + payloadSize, &state, GCL::GW_APP_SIGNAL_STATE_SIZE);
-
-			payloadSize +=  GCL::GW_APP_SIGNAL_STATE_SIZE;
-
-			reply.stateCount++;
-		}
-
-		reply.pendingStatesCount = TO_UINT32(m_signalStateChanges.size());
-	}
-
-	std::memcpy(payloadData, &reply, GCL::ADS_GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE);
-
-	sendOkReply(stc, header, payloadData, payloadSize);
-
-	// logMsg(QString("Sent %1 signal state changes, pending states %2").
-	// 					arg(reply.stateCount).arg(reply.pendingStatesCount));
-	return true;
-}
-*/
 bool TuningGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
 	const char* recvBuf, const size_t recvBufSize, GatewayClientLib::GwErrorCode& errCode)
 {
@@ -1207,7 +1036,7 @@ void TuningGatewayServer::sendReply(TgsSessionShared stc,
 
 	std::memcpy(sendBuf.data() + GCL::GW_MSG_HEADER_SIZE + payloadSize, &crc, GCL::GW_MSG_CRC_SIZE);
 
-	if (stc->closing.load(std::memory_order_relaxed))
+	if (isQuitRequested(stc))
 	{
 		return;
 	}
@@ -1270,6 +1099,23 @@ void TuningGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& f
 	}
 }
 
+void TuningGatewayServer::copyStr(char* toStr, size_t toStrLen, const std::string& fromStr) const
+{
+	TEST_PTR_RETURN(toStr);
+
+	size_t fromLen = fromStr.size();
+
+	if (fromLen > toStrLen - 1)
+	{
+		std::memset(toStr, 0, toStrLen);
+	}
+	else
+	{
+		std::memcpy(toStr, fromStr.data(), fromLen);
+		std::memset(toStr + fromLen, 0, toStrLen - fromLen);
+	}
+}
+
 uint8_t TuningGatewayServer::channelChar(E::Channel ch) const
 {
 	switch(ch)
@@ -1283,3 +1129,36 @@ uint8_t TuningGatewayServer::channelChar(E::Channel ch) const
 
 	return 0;
 }
+
+TuningGatewayServer::WaitResult TuningGatewayServer::waitForOrQuit(TgsSessionShared stc,
+																const int64_t timeoutMs)
+{
+	TEST_PTR_RETURN_VALUE(stc, WaitResult::QuitRequested);
+
+	std::chrono::milliseconds timeout(timeoutMs);
+
+	std::unique_lock<std::mutex> ul(stc->condVarMutex);
+
+	bool conditionMet = stc->condVar.wait_for(ul, timeout, [this, stc]()
+								  {
+									  return isQuitRequested(stc) || !stc->replyData.empty();
+								  });
+
+	if (!conditionMet)
+	{
+		return WaitResult::Timeout;
+	}
+
+	if (isQuitRequested(stc))
+	{
+		return WaitResult::QuitRequested;
+	}
+
+	return WaitResult::DataReady;
+}
+
+bool TuningGatewayServer::isQuitRequested(TgsSessionShared stc) const
+{
+	return stc->closing.load(std::memory_order_relaxed);
+}
+

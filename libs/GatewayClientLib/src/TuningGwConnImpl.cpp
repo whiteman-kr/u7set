@@ -364,7 +364,7 @@ namespace GatewayClientLib
 			{
 				requestResult =	sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
 
-				if (requestResult == GwErrorCode::GWC_SUCCESS)
+				if (requestResult != GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
 				{
 					break;
 				}
