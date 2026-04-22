@@ -106,6 +106,10 @@ sleep 5
 ./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
 sleep 5
 
+# Check that only Gateway and Config services are running.
+#
+ps -A | grep Srv
+
 # First run tests that require no ADS connection.
 #
 $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection

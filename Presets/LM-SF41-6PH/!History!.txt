@@ -1,5 +1,7 @@
 LM-SF41-6PH
 	09.10.2025	Version: 1	LM1-SF41-6PH_v1.u7devp 	RPCT-4070: Added preset for module LM-SF41-6PH
 	26.12.2025	Version: 2	LM1-SF41-6PH_v2.u7devp 	RPCT-4103: Add four Ethernet controllers: 2 TUN/2 APP&Diag
+	07.04.2025	Version: 3	LM1-SF41-6PH_v3.u7devp 	RPCT-4103: Add new Platform Interface Controller signals
+	20.04.2025	Version: 4	LM1-SF41-6PH_v4.u7devp 	RPCT-4103: Change Platform Interface Controller signals addresses
 
 
