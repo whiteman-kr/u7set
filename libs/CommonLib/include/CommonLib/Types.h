@@ -1063,6 +1063,11 @@ namespace Cast
 
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
+inline const char* toConstCharPtr(const void* ptr)
+{
+	return reinterpret_cast<const char*>(ptr);
+}
+
 template<typename EnumType>
 EnumType IntToEnum(int value)
 {

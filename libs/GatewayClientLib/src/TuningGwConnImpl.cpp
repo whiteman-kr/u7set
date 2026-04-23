@@ -364,12 +364,13 @@ namespace GatewayClientLib
 			{
 				requestResult =	sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
 
-				if (requestResult != GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
+				if (requestResult != GwErrorCode::GWC_NO_TS_CONNECTION &&
+					requestResult != GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
 				{
 					break;
 				}
 
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				count++;
 			}
 

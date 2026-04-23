@@ -745,6 +745,7 @@ message TuningSignalsWrite
 	optional string matsUser = 1;
     optional bool autoApply = 2 [default = false];
     repeated TuningWriteCommand commands = 3;
+	optional uint64 writeRequestID = 4 [default = 0];
 }
 
 message TuningSignalWriteResult
@@ -757,6 +758,7 @@ message TuningSignalsWriteReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
+	optional uint64 writeRequestID = 3 [default = 0];
 }
 
 // Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY

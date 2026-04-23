@@ -7,15 +7,19 @@
 //
 // -------------------------------------------------------------------------------------
 
-TuningSrvClient::TuningSrvClient(std::shared_ptr<TgsSession> session,
+TuningSrvClient::TuningSrvClient(std::shared_ptr<TgsSession>& session,
 	const SoftwareInfo& softwareInfo,
 	const HostAddressPort& serverAddressPort1,
 	const HostAddressPort& serverAddressPort2,
 	const QString& clientDescription,
-	const QString& serverEquipmentID) :
+	const QString& serverEquipmentID,
+	const AppSignals& appSignals) :
 	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2,
-				clientDescription, serverEquipmentID)
+				clientDescription, serverEquipmentID),
+	m_session(session),
+	m_appSignals(appSignals)
 {
+	Q_ASSERT(m_session != nullptr);
 }
 
 void TuningSrvClient::onClientThreadStarted()
@@ -37,11 +41,13 @@ void TuningSrvClient::onClientThreadFinished()
 
 void TuningSrvClient::onConnection()
 {
+	m_session->connectedToTuningSrv = true;
 	restartReceiveFile();
 }
 
 void TuningSrvClient::onDisconnection()
 {
+	m_session->connectedToTuningSrv = false;
 	clearReceiveFileVars();
 }
 
@@ -92,15 +98,9 @@ bool TuningSrvClient::getTuningSourceStatesReply(std::vector<char>& reply)
 	return true;
 }
 
-void TuningSrvClient::tuningSignalsRead(quint64 requestID,
-	std::vector<Hash>& hashes,
-	std::mutex* condVarMutex,
-	std::condition_variable* condVar,
-	std::vector<char>* replyData)
+void TuningSrvClient::tuningSignalsRead(quint64 requestID, std::vector<Hash>& hashes)
 {
-	TEST_PTR_RETURN(condVarMutex);
-	TEST_PTR_RETURN(condVar);
-	TEST_PTR_RETURN(replyData);
+	Q_ASSERT(requestID != 0);
 
 	{
 		std::lock_guard lg(m_rwQueueMutex);
@@ -117,11 +117,43 @@ void TuningSrvClient::tuningSignalsRead(quint64 requestID,
 
 		req.readRequest = true;
 		req.rwRequestID = requestID;
+		req.user.clear();
+		req.apply = false;
 		req.hashes.swap(hashes);
 		req.values.clear();
-		req.condVarMutex = condVarMutex;
-		req.condVar = condVar;
-		req.replyData = replyData;
+	}
+
+	emit signal_sendNextRequest();
+}
+
+void TuningSrvClient::tuningSignalsWrite(quint64 requestID,
+										 const std::string& user,
+										 bool apply,
+										 std::vector<Hash>& hashes,
+										 std::vector<double>& values)
+{
+	Q_ASSERT(requestID != 0);
+	Q_ASSERT(hashes.size() == values.size());
+
+	{
+		std::lock_guard lg(m_rwQueueMutex);
+
+		if (m_rwRequestQueue.size() >= 3)
+		{
+			Q_ASSERT(false);
+			m_rwRequestQueue.pop_front();
+		}
+
+		m_rwRequestQueue.push_back(ReadWriteSignalsRequest{});
+
+		ReadWriteSignalsRequest& req = m_rwRequestQueue.back();
+
+		req.readRequest = false;
+		req.rwRequestID = requestID;
+		req.user = user;
+		req.apply = apply;
+		req.hashes.swap(hashes);
+		req.values.swap(values);
 	}
 
 	emit signal_sendNextRequest();
@@ -147,6 +179,10 @@ void TuningSrvClient::processReply(quint32 requestID, const char* replyData, qui
 
 	case TDS_TUNING_SIGNALS_READ:
 		onTuningSignalsRead(replyData, replyDataSize);
+		break;
+
+	case TDS_TUNING_SIGNALS_WRITE:
+		onTuningSignalsWrite(replyData, replyDataSize);
 		break;
 
 	default:
@@ -198,6 +234,8 @@ void TuningSrvClient::onGetNextFilePart(const char* replyData, quint32 replyData
 	}
 
 	m_fileReady = true;
+
+	sendGetSourceStatesRequest();
 }
 
 void TuningSrvClient::onGetTuningSourcesStates(const char* replyData, quint32 replyDataSize)
@@ -259,11 +297,47 @@ void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDa
 	}
 
 	{
-		std::lock_guard lg(*m_activeRwRequest.condVarMutex);
-		m_activeRwRequest.replyData->assign(replyData, replyData + replyDataSize);
+		std::lock_guard lg(m_session->condVarMutex);
+		m_session->replyData.assign(replyData, replyData + replyDataSize);
 	}
 
-	m_activeRwRequest.condVar->notify_one();
+	m_session->condVar.notify_one();
+
+	m_activeRwRequest.clear();
+}
+
+void TuningSrvClient::onTuningSignalsWrite(const char* replyData, quint32 replyDataSize)
+{
+	if (m_activeRwRequest.isNull())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	thread_local Network::TuningSignalsWriteReply reply;
+
+	reply.Clear();
+
+	bool result = reply.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		m_activeRwRequest.clear();
+		return;
+	}
+
+	if (m_activeRwRequest.rwRequestID != reply.writerequestid())
+	{
+		m_activeRwRequest.clear();
+		return;
+	}
+
+	{
+		std::lock_guard lg(m_session->condVarMutex);
+		m_session->replyData.assign(replyData, replyData + replyDataSize);
+	}
+
+	m_session->condVar.notify_one();
 
 	m_activeRwRequest.clear();
 }
@@ -305,9 +379,14 @@ void TuningSrvClient::sendNextRequest()
 	if (m_timerCtr >= REQUEST_SOURCE_STATES_PERIOD)
 	{
 		m_timerCtr = 0;
-		Network::GetTuningSourcesStates request;
-		sendRequest(TDS_GET_TUNING_SOURCES_STATES, request);
+		sendGetSourceStatesRequest();
 	}
+}
+
+void TuningSrvClient::sendGetSourceStatesRequest()
+{
+	Network::GetTuningSourcesStates request;
+	sendRequest(TDS_GET_TUNING_SOURCES_STATES, request);
 }
 
 bool TuningSrvClient::sendReadSignalsRequest(const ReadWriteSignalsRequest& req)
@@ -337,17 +416,53 @@ bool TuningSrvClient::sendReadSignalsRequest(const ReadWriteSignalsRequest& req)
 
 bool TuningSrvClient::sendWriteSignalsRequest(const ReadWriteSignalsRequest& req)
 {
-	Q_ASSERT(false);
-	return false;
+	Q_ASSERT(req.readRequest == false);
+
+	if (isClearToSendRequest() == false)
+	{
+		return false;
+	}
+
+	thread_local Network::TuningSignalsWrite writeRequest;
+
+	writeRequest.Clear();
+
+	writeRequest.set_writerequestid(req.rwRequestID);
+	writeRequest.set_matsuser(req.user);
+	writeRequest.set_autoapply(req.apply);
+
+	size_t count = req.hashes.size();
+
+	for(size_t i = 0; i < count; i++)
+	{
+		Hash h = req.hashes[i];
+
+		const AppSignal* s = m_appSignals.getByHash(h);
+
+		if (s == nullptr ||
+			s->enableTuning() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		TuningValue tunValue = TuningValue::createFromDouble(s->signalType(), s->analogSignalFormat(), req.values[i]);
+
+		Network::TuningWriteCommand* wc = writeRequest.add_commands();
+
+		wc->set_signalhash(h);
+		tunValue.save(wc->mutable_value());
+	}
+
+	setActiveRwRequest(req);
+
+	return sendRequest(TDS_TUNING_SIGNALS_WRITE, writeRequest);
 }
 
 void TuningSrvClient::setActiveRwRequest(const ReadWriteSignalsRequest& req)
 {
 	m_activeRwRequest.readRequest = req.readRequest;
 	m_activeRwRequest.rwRequestID = req.rwRequestID;
-	m_activeRwRequest.condVarMutex = req.condVarMutex;
-	m_activeRwRequest.condVar = req.condVar;
-	m_activeRwRequest.replyData = req.replyData;
 }
 
 void TuningSrvClient::restartReceiveFile()
@@ -384,11 +499,12 @@ TuningSrvClientThread::TuningSrvClientThread(std::shared_ptr<TgsSession> session
 											const HostAddressPort& serverAddressPort1,
 											const HostAddressPort& serverAddressPort2,
 											const QString& clientDescription,
-											const QString& serverEquipmentID)
+											const QString& serverEquipmentID,
+											const AppSignals& appSignals)
 {
 	m_client = new TuningSrvClient(session, softwareInfo,
 								  serverAddressPort1, serverAddressPort2,
-								  clientDescription, serverEquipmentID);
+								  clientDescription, serverEquipmentID, appSignals);
 	addWorker(m_client);
 }
 
@@ -407,13 +523,16 @@ bool TuningSrvClientThread::getTuningSourceStatesReply(std::vector<char>& reply)
 	return m_client->getTuningSourceStatesReply(reply);
 }
 
-void TuningSrvClientThread::tuningSignalsRead(quint64 requestID,
-	std::vector<Hash>& hashes,
-	std::mutex* condVarMutex,
-	std::condition_variable* condVar,
-	std::vector<char>* replyData)
+void TuningSrvClientThread::tuningSignalsRead(quint64 requestID, std::vector<Hash>& hashes)
 {
-	m_client->tuningSignalsRead(requestID, hashes, condVarMutex, condVar, replyData);
+	m_client->tuningSignalsRead(requestID, hashes);
 }
 
-
+void TuningSrvClientThread::tuningSignalsWrite(quint64 requestID,
+	const std::string& user,
+	bool apply,
+	std::vector<Hash>& hashes,
+	std::vector<double>& values)
+{
+	m_client->tuningSignalsWrite(requestID, user, apply, hashes, values);
+}
