@@ -1,22 +1,24 @@
 #include "TestSettings.hpp"
 
-#include <GatewayClientLib/../../src/AdsGwConnImpl.hpp>
-#include <GatewayClientLib/AdsSignalManager.hpp>
+#include <GatewayClientLib/../../src/TuningGwConnImpl.hpp>
 #include <GatewayClientLib/Logger.hpp>
+#include <GatewayClientLib/TuningGwProtocol.hpp>
+#include <GatewayClientLib/TuningSignalManager.hpp>
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <numeric>
 
 
-class AdsGatewayTests : public testing::Test
+class TuningGatewayTests : public testing::Test
 {
 public:
-	GatewayClientLib::AdsSignalManager signalManager{};
+	GatewayClientLib::TuningSignalManager signalManager{};
 	GatewayClientLib::ConsoleLogger logger{};
 
 	std::string clientEquipmentId = "TEST_CLIENT_EQUIPMENT_ID";
@@ -24,12 +26,12 @@ public:
 
 // Test that connection fails when no server is available
 //
-TEST_F(AdsGatewayTests, NoConnection)
+TEST_F(TuningGatewayTests, NoConnection)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestTuningGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -47,22 +49,22 @@ TEST_F(AdsGatewayTests, NoConnection)
 		bool m_connected = false;
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, "127.0.0.1", 3551, "EQUIPMENTID");
+	TestTuningGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, "127.0.0.1", 3551, "EQUIPMENTID");
 
-	ASSERT_EQ(adsConn.m_connected, false);
+	ASSERT_EQ(tuningConn.m_connected, false);
 
 	return;
 }
 
 // Expecting successful connection and handshake
 //
-TEST_F(AdsGatewayTests, ConnectAndHandshake)
+TEST_F(TuningGatewayTests, ConnectAndHandshake)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestTuningGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -80,19 +82,18 @@ TEST_F(AdsGatewayTests, ConnectAndHandshake)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestTuningGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
+	ASSERT_TRUE(tuningConn.m_connected);
 
-	ASSERT_EQ(adsConn.m_connected, true);
-
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
-	EXPECT_EQ(adsConn.handshakeResponse().protocolVersion, GatewayClientLib::ADS_GW_PROTOCOL_VERSION);
-	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalParam, sizeof(GatewayClientLib::GwAppSignalParam));
-	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalState, sizeof(GatewayClientLib::GwAppSignalState));
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(tuningConn.handshakeResponse().protocolVersion, GatewayClientLib::TUNING_GW_PROTOCOL_VERSION);
+	EXPECT_EQ(tuningConn.handshakeResponse().sizeof_GwTuningSourceState, sizeof(GatewayClientLib::GwTuningSourceState));
+	EXPECT_EQ(tuningConn.handshakeResponse().sizeof_GwTuningSignalState, sizeof(GatewayClientLib::GwTuningSignalState));
 
 	return;
 }
@@ -100,12 +101,12 @@ TEST_F(AdsGatewayTests, ConnectAndHandshake)
 // Send unsupported protocol version in handshake request
 // Expecting GWC_UNSUPPORTED_VERSION error code in response
 // 3.1
-TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
+TEST_F(TuningGatewayTests, SendUnsupportedProtocolVersion)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestTuningGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -123,16 +124,15 @@ TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestTuningGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
+	ASSERT_TRUE(tuningConn.m_connected);
 
-	ASSERT_EQ(adsConn.m_connected, true);
-
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_UNSUPPORTED_VERSION);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_UNSUPPORTED_VERSION);
 
 	return;
 }
@@ -140,12 +140,12 @@ TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 // Send unknown RequestID
 // Expected: GWC_INVALID_REQUEST
 //
-TEST_F(AdsGatewayTests, SendInvalidRequest)
+TEST_F(TuningGatewayTests, SendInvalidRequest)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -153,10 +153,10 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				GatewayClientLib::AdsGwHandshakeRequest request{};
-				GatewayClientLib::AdsGwHandshakeResponse response{};
+				GatewayClientLib::TuningGwHandshakeRequest request{};
+				GatewayClientLib::TuningGwHandshakeResponse response{};
 
-				sendRequest(static_cast<GatewayClientLib::AdsGwRequestId>(199999), request, response, {});
+				sendRequest(static_cast<GatewayClientLib::TuningGwRequestId>(199999), request, response, {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -167,16 +167,16 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.m_connected);
 
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_INVALID_REQUEST);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_INVALID_REQUEST);
 
 	return;
 }
@@ -184,12 +184,12 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 // Send invalid CRC in request
 // Expected: GWC_CRC_ERROR
 //
-TEST_F(AdsGatewayTests, SendInvalidCrc32)
+TEST_F(TuningGatewayTests, SendInvalidCrc32)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -199,10 +199,10 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 
 				// Compose handshake request with invalid CRC32
 				//
-				GatewayClientLib::AdsGwHandshakeRequest request{};
-				GatewayClientLib::AdsGwHandshakeResponse response{};
+				GatewayClientLib::TuningGwHandshakeRequest request{};
+				GatewayClientLib::TuningGwHandshakeResponse response{};
 
-				request.protocolVersion = GatewayClientLib::ADS_GW_PROTOCOL_VERSION;
+				request.protocolVersion = GatewayClientLib::TUNING_GW_PROTOCOL_VERSION;
 				std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
 
 
@@ -219,7 +219,7 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 					offset += sizeof(value);
 				};
 
-				writeUint32(static_cast<uint32_t>(GatewayClientLib::AdsGwRequestId::ADSGW_HANDSHAKE));
+				writeUint32(static_cast<uint32_t>(GatewayClientLib::TuningGwRequestId::TGW_HANDSHAKE));
 				writeUint32(static_cast<uint32_t>(sizeof(request)));                            // Payload size
 				writeUint32(static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS)); // Status code for request is always 0
 
@@ -242,10 +242,10 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 				// Receive response
 				//
 				m_lastStatusCode =
-					receiveResponsePacket<GatewayClientLib::AdsGwHandshakeResponse>(GatewayClientLib::AdsGwRequestId::ADSGW_HANDSHAKE,
-																					response,
-																					{},
-																					{});
+					receiveResponsePacket<GatewayClientLib::TuningGwHandshakeResponse>(GatewayClientLib::TuningGwRequestId::TGW_HANDSHAKE,
+																					   response,
+																					   {},
+																					   {});
 
 				return;
 			}
@@ -258,37 +258,36 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_EQ(tuningConn.m_connected, true);
 
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_CRC_ERROR);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_CRC_ERROR);
 
 	return;
 }
-
 
 // Expecting GWC_HANDSHAKE_REQUIRED error code when requesting signal list without handshake
-// ADSGW_SIGNAL_LIST_START/ADSGW_SIGNAL_LIST_NEXT
+// TGW_GET_TUNING_SOURCES_START/TGW_GET_TUNING_SOURCES_NEXT
 //
-TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
+TEST_F(TuningGatewayTests, RequestTuningSourceWithoutHandshake)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
 			try
 			{
 				m_connected = m_conn.connect(address, port);
-				requestSignalList();
+				requestTuningSources();
 			}
 			catch (const std::runtime_error&)
 			{
@@ -300,69 +299,29 @@ TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.m_connected);
 
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
 
-// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting signal params without handshake
-// ADSGW_SIGNAL_PARAM_START/ADSGW_SIGNAL_PARAM_NEXT
+// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting source states without handshake
+// TGW_GET_TUNING_SOURCE_STATES
 //
-TEST_F(AdsGatewayTests, RequestSignalParamWithoutHandshake)
+TEST_F(TuningGatewayTests, RequestSignalStatesWithoutHandshake)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestSignalParams();
-			}
-			catch (const std::runtime_error&)
-			{
-				// Exceptions are expected
-			}
-		}
-
-	public:
-		bool m_connected = false;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	ASSERT_EQ(adsConn.m_connected, true);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
-
-	return;
-}
-
-// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting signal states without handshake
-// ADSGW_SIGNAL_STATE
-//
-TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -370,14 +329,14 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
+				m_workset.handshakeResponse.maxStateRequest =
+					100; // It is used in getting states, but we did not do handshake, so set it manually.
 
-				requestSignalStates();
+				auto hashes = {Radiy::Hash{123}, Radiy::Hash{456}};
+				std::ignore = requestSignalStates(hashes);
 			}
 			catch (const std::runtime_error&)
 			{
-				// Exceptions are expected
 			}
 		}
 
@@ -385,30 +344,109 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
+	TestAdsGwConnection tuningConn{signalManager, logger};
 
 
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	ASSERT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
 
-// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting signal state changes without handshake
-// ADSGW_SIGNAL_STATE_CHANGES
+// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting TGW_GET_TUNING_SOURCE_STATES without handshake
 //
-TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
+TEST_F(TuningGatewayTests, RequestSignalStateChangesWithoutHandshake)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
+
+		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
+		{
+			try
+			{
+				m_connected = m_conn.connect(address, port);
+				requestTuningSourceStates();
+			}
+			catch (const std::runtime_error&)
+			{
+			}
+		}
+
+	public:
+		bool m_connected = false;
+
+		auto& lastStatusCode() const { return m_lastStatusCode; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
+	};
+
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
+
+	ASSERT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+
+	return;
+}
+
+// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting TGW_CHANGE_CONTROLLED_TUNING_SOURCE without handshake
+//
+TEST_F(TuningGatewayTests, RequestActivateSourceWithoutHandshake)
+{
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
+	{
+	public:
+		using TuningGwConnImpl::TuningGwConnImpl;
+
+		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
+		{
+			try
+			{
+				m_connected = m_conn.connect(address, port);
+				auto err = requestActivateTuningSource("ABC", true);
+				m_lastStatusCode = err;
+			}
+			catch (const std::runtime_error&)
+			{
+				// Exception is not expected to command requests.
+				//
+				ASSERT_TRUE(false);
+			}
+		}
+
+	public:
+		bool m_connected = false;
+
+		auto& lastStatusCode() const { return m_lastStatusCode; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
+	};
+
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
+
+	ASSERT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+
+	return;
+}
+
+// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting TGW_TUNING_SIGNALS_WRITE without handshake
+//
+TEST_F(TuningGatewayTests, RequestWriteWithoutHandshake)
+{
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
+	{
+	public:
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -416,14 +454,17 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
+				std::array<GatewayClientLib::GwTuningWriteValue, 2> states = {GatewayClientLib::GwTuningWriteValue{},
+																			  GatewayClientLib::GwTuningWriteValue{}};
 
-				requestStateChanges();
+				auto err = requestWriteSignalValues(states, "Vasiliy", true);
+				m_lastStatusCode = err;
 			}
 			catch (const std::runtime_error&)
 			{
-				// Exceptions are expected
+				// Exception is not expected to command requests.
+				//
+				ASSERT_TRUE(false);
 			}
 		}
 
@@ -431,29 +472,70 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	ASSERT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
 
-// Expecting GWC_NO_ADS_CONNECTION error code when requesting signal states with no ADS connection
-// for request ADSGW_SIGNAL_STATE
-// Precondition: ADS Gateway server is running but no ADS connection is established
+// Expecting GWC_HANDSHAKE_REQUIRED error code when requesting TGW_TUNING_SIGNALS_APPLY without handshake
 //
-TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
+TEST_F(TuningGatewayTests, RequestApplyWithoutHandshake)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
+
+		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
+		{
+			try
+			{
+				m_connected = m_conn.connect(address, port);
+
+				auto err = requestApplyWrittenSignals();
+				m_lastStatusCode = err;
+			}
+			catch (const std::runtime_error&)
+			{
+				// Exception is not expected to command requests.
+				//
+				ASSERT_TRUE(false);
+			}
+		}
+
+	public:
+		bool m_connected = false;
+
+		auto& lastStatusCode() const { return m_lastStatusCode; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
+	};
+
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
+
+	ASSERT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+
+	return;
+}
+
+// Request TuningSources.xml (TGW_GET_TUNING_SOURCES_START/TGW_GET_TUNING_SOURCES_NEXT)
+//
+TEST_F(TuningGatewayTests, RequestTuningSources)
+{
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
+	{
+	public:
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -462,101 +544,11 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
-
-				requestSignalStates();
+				requestTuningSources();
 			}
 			catch (const std::runtime_error&)
 			{
-				// Exceptions are expected
-			}
-		}
-
-	public:
-		bool m_connected = false;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	ASSERT_EQ(adsConn.m_connected, false);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
-
-	return;
-}
-
-// Expecting GWC_NO_ADS_CONNECTION error code when requesting signal states with no ADS connection
-// for request ADSGW_SIGNAL_STATE_CHANGES
-// Precondition: ADS Gateway server is running but no ADS connection is established
-//
-TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestHandshake(equipmentId);
-
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
-
-				requestStateChanges();
-			}
-			catch (const std::runtime_error&)
-			{
-				// Exceptions are expected
-			}
-		}
-
-	public:
-		bool m_connected = false;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	ASSERT_EQ(adsConn.m_connected, false);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
-
-	return;
-}
-
-// Request signal list after successful handshake
-// Expected to receive non-empty signal list
-//
-TEST_F(AdsGatewayTests, RequestSignalList)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestHandshake(equipmentId);
-
-				m_receivedSignalList = requestSignalList();
-			}
-			catch (const std::runtime_error&)
-			{
+				ASSERT_TRUE(false);
 			}
 		}
 
@@ -565,77 +557,43 @@ TEST_F(AdsGatewayTests, RequestSignalList)
 		std::vector<std::string> m_receivedSignalList;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
+
+		const auto& workset() { return m_workset; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	EXPECT_EQ(adsConn.m_connected, true);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(tuningConn.m_connected, true);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
-	EXPECT_FALSE(adsConn.m_receivedSignalList.empty());
-	EXPECT_GT(adsConn.m_receivedSignalList.size(), 5);
+	// --
+	ASSERT_FALSE(tuningConn.workset().project.name.empty());
+	ASSERT_FALSE(tuningConn.workset().project.buildDate.empty());
+	ASSERT_GT(tuningConn.workset().project.buildNo, 10);
+	ASSERT_FALSE(tuningConn.workset().project.name.empty());
+
+	ASSERT_EQ(tuningConn.workset().tuningSources.size(), 1);
+
+	const auto& source = tuningConn.workset().tuningSources[0];
+	ASSERT_FALSE(source.signalIds.empty());
+	ASSERT_FALSE(source.signals.empty());
+	ASSERT_EQ(source.signals.size(), source.signalIds.size());
 
 	return;
 }
-
-// Request signal params after successful handshake
-// Expected to receive non-empty signal param list
-//
-TEST_F(AdsGatewayTests, RequestSignalParams)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestHandshake(equipmentId);
-
-				m_receivedSignalParams = requestSignalParams();
-			}
-			catch (const std::runtime_error&)
-			{
-			}
-		}
-
-	public:
-		bool m_connected = false;
-		std::vector<GatewayClientLib::GwAppSignalParam> m_receivedSignalParams;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	EXPECT_EQ(adsConn.m_connected, true);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
-
-	EXPECT_FALSE(adsConn.m_receivedSignalParams.empty());
-	EXPECT_GT(adsConn.m_receivedSignalParams.size(), 5);
-
-	return;
-}
-
 
 // Test Format Error for Handshake: Send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
+TEST_F(TuningGatewayTests, HandshakeSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -643,19 +601,20 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				GatewayClientLib::AdsGwHandshakeRequest request{};
-				GatewayClientLib::AdsGwHandshakeResponse response{};
+				GatewayClientLib::TuningGwHandshakeRequest request{};
+				GatewayClientLib::TuningGwHandshakeResponse response{};
 
 				std::array<std::byte, 32> payload{};
 
-				m_lastStatusCode =
-					sendRequest<GatewayClientLib::AdsGwHandshakeRequest, std::byte, GatewayClientLib::AdsGwHandshakeResponse, std::byte>(
-						GatewayClientLib::AdsGwRequestId::ADSGW_HANDSHAKE,
-						request,
-						std::span<const std::byte>(payload),
-						response,
-						{},
-						{});
+				m_lastStatusCode = sendRequest<GatewayClientLib::TuningGwHandshakeRequest,
+											   std::byte,
+											   GatewayClientLib::TuningGwHandshakeResponse,
+											   std::byte>(GatewayClientLib::TuningGwRequestId::TGW_HANDSHAKE,
+														  request,
+														  std::span<const std::byte>(payload),
+														  response,
+														  {},
+														  {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -666,16 +625,16 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_EQ(tuningConn.m_connected, true);
 
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 
 	return;
 }
@@ -683,12 +642,12 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 // Test Format Error for Handshake: Send not less payload then required
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
+TEST_F(TuningGatewayTests, HandshakeSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view /*equipmentId*/) override
 		{
@@ -706,7 +665,7 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 				FakeHandshakeRequest request{};
 				GatewayClientLib::AdsGwHandshakeResponse response{};
 
-				m_lastStatusCode = sendRequest(GatewayClientLib::AdsGwRequestId::ADSGW_HANDSHAKE, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::TuningGwRequestId::TGW_HANDSHAKE, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -717,29 +676,30 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 		bool m_connected = false;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_EQ(adsConn.m_connected, true);
+	ASSERT_EQ(tuningConn.m_connected, true);
 
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 
 	return;
 }
 
+#if 0
 // Test Format Error for ADSGW_SIGNAL_LIST_START: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalListStartSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -773,23 +733,23 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_START: send less payload than required.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
+TEST_F(TuningGatewayTests, SignalListStartSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -819,23 +779,23 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_NEXT: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalListNextSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -880,23 +840,23 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_NEXT: send less payload than required.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
+TEST_F(TuningGatewayTests, SignalListNextSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -935,23 +895,23 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_START: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalParamStartSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -984,23 +944,23 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_START: send less payload than required.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
+TEST_F(TuningGatewayTests, SignalParamStartSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1029,23 +989,23 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_NEXT: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalParamNextSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1090,23 +1050,23 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_NEXT: send less payload than required.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
+TEST_F(TuningGatewayTests, SignalParamNextSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1145,23 +1105,23 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalStateSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1197,23 +1157,23 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE: send less payload than required.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
+TEST_F(TuningGatewayTests, SignalStateSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1249,23 +1209,23 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE_CHANGES: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
+TEST_F(TuningGatewayTests, SignalStateChangesSendExcessivePayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1294,23 +1254,23 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE_CHANGES: send excessive payload.
 // Expected error code: GWC_REQUEST_FORMAT_ERROR
 //
-TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
+TEST_F(TuningGatewayTests, SignalStateChangesSendLessPayload)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1336,23 +1296,23 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request too big part for ADSGW_SIGNAL_LIST_NEXT:
 // Expected error code: GWC_REQUEST_FORMAT_ERROR -- it is not stated directly in the protocol doc but makes sense to have it.
 //
-TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
+TEST_F(TuningGatewayTests, SignalListGetInvalidPart)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1400,23 +1360,23 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request too big part for ADSGW_SIGNAL_LIST_NEXT:
 // Expected error code: GWC_REQUEST_FORMAT_ERROR -- it is not stated directly in the protocol doc but makes sense to have it.
 //
-TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
+TEST_F(TuningGatewayTests, SignalParamGetInvalidPart)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1461,23 +1421,23 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request several signal state which are not existing
 // Expecting: These signals are not returned.
 //
-TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
+TEST_F(TuningGatewayTests, RequestNonexistingSignalStates)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1516,24 +1476,24 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
-	EXPECT_EQ(adsConn.returnedSignalStates, 0);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(tuningConn.returnedSignalStates, 0);
 }
 
 // Request too many signal states
 // Expecting: GWC_TOO_MANY_SIGNALS
 //
-TEST_F(AdsGatewayTests, RequestTooManySignalStates)
+TEST_F(TuningGatewayTests, RequestTooManySignalStates)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1571,23 +1531,23 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
 }
 
 // Request several signal states.
 // Expecting: Normal behavior.
 //
-TEST_F(AdsGatewayTests, RequestSignalStates)
+TEST_F(TuningGatewayTests, RequestSignalStates)
 {
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::TuningGwConnImpl
 	{
 	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
+		using TuningGwConnImpl::TuningGwConnImpl;
 
 		void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
 		{
@@ -1653,25 +1613,25 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 		std::vector<GatewayClientLib::GwAppSignalState> states;
 	};
 
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	TestAdsGwConnection tuningConn{signalManager, logger};
+	tuningConn.run({}, TuningTestSettings::Address, TuningTestSettings::Port, clientEquipmentId);
 
-	ASSERT_TRUE(adsConn.m_connected);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_TRUE(tuningConn.m_connected);
+	ASSERT_TRUE(tuningConn.lastStatusCode().has_value());
+	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
-	EXPECT_EQ(adsConn.returnedSignalStates, adsConn.projectSignals.size());
+	EXPECT_EQ(tuningConn.returnedSignalStates, tuningConn.projectSignals.size());
 
-	for (const auto& s : adsConn.projectSignals)
+	for (const auto& s : tuningConn.projectSignals)
 	{
-		auto it = std::find_if(adsConn.states.begin(),
-							   adsConn.states.end(),
+		auto it = std::find_if(tuningConn.states.begin(),
+							   tuningConn.states.end(),
 							   [&s](const GatewayClientLib::GwAppSignalState& state)
 							   {
 								   return state.hash == s.hash;
 							   });
 
-		EXPECT_NE(it, adsConn.states.end());
+		EXPECT_NE(it, tuningConn.states.end());
 
 		if (std::isnan(s.expectedValue) == false) // nan - means do not check expected value
 		{
@@ -1679,3 +1639,5 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 		}
 	}
 }
+
+#endif
