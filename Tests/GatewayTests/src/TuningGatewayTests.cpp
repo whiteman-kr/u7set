@@ -24,6 +24,54 @@ public:
 	std::string clientEquipmentId = "TEST_CLIENT_EQUIPMENT_ID";
 };
 
+namespace
+{
+	class TestTuningGwConnectionAccessor : public GatewayClientLib::TuningGwConnImpl
+	{
+	public:
+		using TuningGwConnImpl::TuningGwConnImpl;
+		using TuningGwConnImpl::requestHandshake;
+		using TuningGwConnImpl::requestSignalStates;
+		using TuningGwConnImpl::requestTuningSourceStates;
+		using TuningGwConnImpl::requestTuningSources;
+
+		bool connect(std::string_view address, uint16_t port)
+		{
+			m_connected = m_conn.connect(address, port);
+			return m_connected;
+		}
+
+		template<typename RequestT, typename ResponseT>
+		GatewayClientLib::GwErrorCode sendRawRequest(GatewayClientLib::TuningGwRequestId requestId,
+															const RequestT& request,
+															ResponseT& response)
+		{
+			return this->sendRequest(requestId, request, response, {});
+		}
+
+		template<typename RequestT, typename RequestVariablePartT, typename ResponseT, typename ResponseVariablePartT>
+		GatewayClientLib::GwErrorCode sendRawRequest(GatewayClientLib::TuningGwRequestId requestId,
+															const RequestT& request,
+															std::span<const RequestVariablePartT> requestVariablePart,
+															ResponseT& response,
+															std::span<ResponseVariablePartT> responseVariablePart)
+		{
+			return this->sendRequest(requestId, request, requestVariablePart, response, responseVariablePart, {});
+		}
+
+		auto& lastStatusCode() const { return m_lastStatusCode; }
+		auto& handshakeResponse() const { return m_workset.handshakeResponse; }
+		const auto& workset() const { return m_workset; }
+
+		bool m_connected = false;
+	};
+
+	std::vector<Radiy::Hash> gptKnownTuningSignalHashes()
+	{
+		return {Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), Radiy::calcHash("#TGW_D1")};
+	}
+} // namespace
+
 // Test that connection fails when no server is available
 //
 TEST_F(TuningGatewayTests, NoConnection)
@@ -688,6 +736,201 @@ TEST_F(TuningGatewayTests, HandshakeSendLessPayload)
 	EXPECT_EQ(tuningConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 
 	return;
+}
+
+//
+// GPT Tests
+//
+TEST_F(TuningGatewayTests, GptTuningSourcesStartReturnsConsistentMetadata)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	GatewayClientLib::GwGetTuningSourcesStartRequest request{};
+	GatewayClientLib::GwGetTuningSourcesStartResponse response{};
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, request, response);
+
+	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_GT(response.totalSize, 0u);
+	EXPECT_GT(response.maxPartSize, 0u);
+	EXPECT_GT(response.partCount, 0u);
+	EXPECT_EQ(response.partCount, (response.totalSize + response.maxPartSize - 1) / response.maxPartSize);
+	EXPECT_LE(response.totalSize, response.partCount * response.maxPartSize);
+}
+
+TEST_F(TuningGatewayTests, GptTuningSourceStatesResponseCountMatchesParsedSourceCount)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+
+	const auto sourceStates = tuningConn.tuningSources();
+	EXPECT_EQ(sourceStates.size(), tuningConn.workset().tuningSources.size());
+}
+
+TEST_F(TuningGatewayTests, GptTuningSourceStatesModuleEquipmentIdMatchesTuningSourcesXml)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+
+	const auto sourceStates = tuningConn.tuningSources();
+	ASSERT_EQ(sourceStates.size(), tuningConn.workset().tuningSources.size());
+
+	for (size_t i = 0; i < sourceStates.size(); ++i)
+	{
+		EXPECT_EQ(std::string{sourceStates[i].moduleEquipmentId}, tuningConn.workset().tuningSources[i].moduleEquipmentId);
+	}
+
+}
+
+
+TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1"), Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1")};
+	const auto states = tuningConn.requestSignalStates(hashes);
+
+	ASSERT_EQ(states.size(), hashes.size());
+	for (size_t i = 0; i < hashes.size(); ++i)
+	{
+		EXPECT_EQ(states[i].hash, hashes[i]);
+	}
+
+}
+
+
+TEST_F(TuningGatewayTests, GptReadSignalStatesDuplicateHashesPreserveDuplicates)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	const Radiy::Hash duplicateHash = Radiy::calcHash("#TGW_D1");
+	const std::vector<Radiy::Hash> hashes{duplicateHash, duplicateHash, duplicateHash};
+	const auto states = tuningConn.requestSignalStates(hashes);
+
+	ASSERT_EQ(states.size(), hashes.size());
+	for (const auto& state : states)
+	{
+		EXPECT_EQ(state.hash, duplicateHash);
+	}
+
+}
+
+
+TEST_F(TuningGatewayTests, GptReadSignalStatesSupportsExactlyMaxStateRequest)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	const auto knownHashes = gptKnownTuningSignalHashes();
+	std::vector<Radiy::Hash> hashes;
+	hashes.reserve(tuningConn.handshakeResponse().maxStateRequest);
+
+	for (uint32_t i = 0; i < tuningConn.handshakeResponse().maxStateRequest; ++i)
+	{
+		hashes.push_back(knownHashes[i % knownHashes.size()]);
+	}
+
+	const auto states = tuningConn.requestSignalStates(hashes);
+
+	ASSERT_EQ(states.size(), hashes.size());
+	for (size_t i = 0; i < hashes.size(); ++i)
+	{
+		EXPECT_EQ(states[i].hash, hashes[i]);
+	}
+
+}
+
+
+TEST_F(TuningGatewayTests, GptReadSignalStatesOneKnownSignal)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1")};
+	const auto states = tuningConn.requestSignalStates(hashes);
+
+	ASSERT_EQ(states.size(), 1u);
+	EXPECT_EQ(states[0].hash, hashes[0]);
+	// Commented as out error can be GWC_LM_CONTROL_IS_NOT_ACTIVE
+	// EXPECT_EQ(states[0].errorCode, static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
+	EXPECT_TRUE(std::isfinite(states[0].value));
+
+}
+
+
+TEST_F(TuningGatewayTests, DISABLED_GptReadSignalStatesSkipsUnknownHashes)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	auto hashes = gptKnownTuningSignalHashes();
+	hashes.insert(hashes.begin() + 1, Radiy::calcHash("#GPT_UNKNOWN_SIGNAL"));
+
+	auto states = tuningConn.requestSignalStates(hashes);
+
+	// TODO: DECIDE WHAT TO DO IF UNKNOWN HASHES ARE REQUESTED. CURRENTLY THEY ARE JUST SKIPPED, BUT MAYBE IT SHOULD BE AN ERROR INSTEAD?
+
+	ASSERT_EQ(states.size(), 2u);
+	EXPECT_EQ(states[0].hash, Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"));
+	EXPECT_EQ(states[1].hash, Radiy::calcHash("#TGW_D1"));
+}
+
+TEST_F(TuningGatewayTests, GptReadSignalStatesRejectsTooManySignals)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
+
+	GatewayClientLib::GwTuningSignalsReadRequest request{};
+	request.count = tuningConn.handshakeResponse().maxStateRequest + 1;
+
+	auto knownHashes = gptKnownTuningSignalHashes();
+	std::vector<Radiy::Hash> hashes(request.count, knownHashes.front());
+	std::vector<GatewayClientLib::GwTuningSignalState> states(request.count);
+	GatewayClientLib::GwTuningSignalsReadResponse response{};
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_TUNING_SIGNALS_READ,
+													   request,
+													   std::span<const Radiy::Hash>{hashes},
+													   response,
+													   std::span<GatewayClientLib::GwTuningSignalState>{states});
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
 }
 
 #if 0
