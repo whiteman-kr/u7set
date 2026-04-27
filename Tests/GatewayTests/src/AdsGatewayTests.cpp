@@ -84,7 +84,7 @@ TEST_F(AdsGatewayTests, ConnectAndHandshake)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -127,7 +127,7 @@ TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -171,7 +171,7 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -262,7 +262,7 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -304,7 +304,7 @@ TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -345,7 +345,7 @@ TEST_F(AdsGatewayTests, RequestSignalParamWithoutHandshake)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -391,7 +391,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 	TestAdsGwConnection adsConn{signalManager, logger};
 
 
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -435,103 +435,11 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
 	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
-
-	return;
-}
-
-// Expecting GWC_NO_ADS_CONNECTION error code when requesting signal states with no ADS connection
-// for request ADSGW_SIGNAL_STATE
-// Precondition: ADS Gateway server is running but no ADS connection is established
-//
-TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestHandshake(equipmentId);
-
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
-
-				requestSignalStates();
-			}
-			catch (const std::runtime_error&)
-			{
-				// Exceptions are expected
-			}
-		}
-
-	public:
-		bool m_connected = false;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	ASSERT_EQ(adsConn.m_connected, false);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
-
-	return;
-}
-
-// Expecting GWC_NO_ADS_CONNECTION error code when requesting signal states with no ADS connection
-// for request ADSGW_SIGNAL_STATE_CHANGES
-// Precondition: ADS Gateway server is running but no ADS connection is established
-//
-TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
-{
-	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
-	{
-	public:
-		using AdsGwConnImpl::AdsGwConnImpl;
-
-		virtual void run(std::stop_token, std::string_view address, uint16_t port, std::string_view equipmentId) override
-		{
-			try
-			{
-				m_connected = m_conn.connect(address, port);
-				requestHandshake(equipmentId);
-
-				m_appSignalHashes.push_back(1234567890); // Dummy signal hash to avoid early exit
-				m_appSignalHashes.push_back(3456);       // Dummy signal hash to avoid early exit
-
-				requestStateChanges();
-			}
-			catch (const std::runtime_error&)
-			{
-				// Exceptions are expected
-			}
-		}
-
-	public:
-		bool m_connected = false;
-
-		auto& lastStatusCode() const { return m_lastStatusCode; }
-		auto& handshakeResponse() const { return m_handshakeResponse; }
-	};
-
-	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
-
-	ASSERT_EQ(adsConn.m_connected, false);
-	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
 
 	return;
 }
@@ -569,7 +477,7 @@ TEST_F(AdsGatewayTests, RequestSignalList)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	EXPECT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -614,7 +522,7 @@ TEST_F(AdsGatewayTests, RequestSignalParams)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	EXPECT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -670,7 +578,7 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -721,7 +629,7 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_EQ(adsConn.m_connected, true);
 
@@ -774,7 +682,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -820,7 +728,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -881,7 +789,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -936,7 +844,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -985,7 +893,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1030,7 +938,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1091,7 +999,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1146,7 +1054,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1198,7 +1106,7 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1250,7 +1158,7 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1295,7 +1203,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1337,7 +1245,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1401,7 +1309,7 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1462,7 +1370,7 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1517,7 +1425,7 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1572,7 +1480,7 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
@@ -1599,9 +1507,9 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 				GatewayClientLib::AdsGwSignalStateRequest request{};
 				GatewayClientLib::AdsGwSignalStateResponse response{};
 
-				if (TestSettings::projectSignals.empty() == false)
+				if (AdsTestSettings::projectSignals.empty() == false)
 				{
-					projectSignals = TestSettings::projectSignals;
+					projectSignals = AdsTestSettings::projectSignals;
 				}
 				else
 				{
@@ -1648,13 +1556,13 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 		bool m_connected = false;
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 
-		std::vector<TestSettings::ProjectSignal> projectSignals;
+		std::vector<AdsTestSettings::ProjectSignal> projectSignals;
 		uint32_t returnedSignalStates = 0;
 		std::vector<GatewayClientLib::GwAppSignalState> states;
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
-	adsConn.run({}, TestSettings::Address, TestSettings::Port, clientEquipmentId);
+	adsConn.run({}, AdsTestSettings::Address, AdsTestSettings::Port, clientEquipmentId);
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());

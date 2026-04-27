@@ -1,8 +1,8 @@
 ﻿# Radiy TuningService Gateway Protocol Specification
 
-**Document Version:** 0.2  
+**Document Version:** 0.3  
 **Protocol Version:** 1.0  
-**Date:** 06 Apr 2026  
+**Date:** 15 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
@@ -164,6 +164,8 @@ Typical location in build output is a per-service directory named by the TuningS
 **Obtaining the file:**
 - Via protocol: Use the `TGW_GET_TUNING_SOURCES_START` / `TGW_GET_TUNING_SOURCES_NEXT` requests ([Section 5.2](#52-tgw_get_tuning_sources_start--tgw_get_tuning_sources_next)) to retrieve the file contents from the Gateway in parts
 - From build output: Load the file directly from the RPCT build output directory
+
+When the Gateway has already established a connection to TuningService but has not received `TuningSources.xml` from it yet, `TGW_GET_TUNING_SOURCES_START` and `TGW_GET_TUNING_SOURCES_NEXT` may temporarily respond with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` ([Section 7.2](#72-error-codes)). This is not a critical error: the client may wait and repeat `TGW_GET_TUNING_SOURCES_START` later.
 
 Before starting work, an external client should read and parse this file to obtain the configuration and identifiers required for correct protocol usage.
 
@@ -537,6 +539,7 @@ Total size: 12 bytes
 - No file data is included in the `TGW_GET_TUNING_SOURCES_START` response — all data is retrieved via `TGW_GET_TUNING_SOURCES_NEXT` requests
 - For the XML format description, see [Appendix C: TuningSources.xml File Format](#appendix-c-tuningsourcesxml-file-format)
 - If no tuning sources are configured, the server returns a valid XML with an empty `DataSources` element (`Count="0"`)
+- If the Gateway is already connected to TuningService but has not received `TuningSources.xml` from it yet, the server responds with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` and no payload. This condition is temporary and not critical; the client may wait and repeat `TGW_GET_TUNING_SOURCES_START`.
 
 ---
 
@@ -585,6 +588,7 @@ Total size: `8 + partSize` bytes
 - `partSize` is the number of bytes in the `data` field of this part
 - Client must concatenate all parts in order (0, 1, ..., `partCount` - 1) to reconstruct the complete UTF-8 XML file content
 - The sum of all `partSize` values across all parts equals `totalSize`
+- If the Gateway is already connected to TuningService but has not received `TuningSources.xml` from it yet, the server responds with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` and no payload. The client should treat this as a temporary condition, wait, and restart retrieval with `TGW_GET_TUNING_SOURCES_START`.
 
 **Example Flow:**
 ```
@@ -1189,6 +1193,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 519 (0x0207) | GWC_GATEWAY_INTERNAL_ERROR | Internal gateway-level error (distinct from TuningService-level `GWC_INTERNAL_ERROR`) |
 | 520 (0x0208) | GWC_NO_TS_CONNECTION | TuningGateway not connected to TuningService |
 | 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
+| 523 (0x020B) | GWC_TUNING_SOURCES_FILE_NOT_READY | Gateway is connected to TuningService but has not received `TuningSources.xml` yet |
 
 ---
 
@@ -1533,3 +1538,4 @@ Within each `DataSource` element:
 |------------------|------|------------------|--------|---------|
 | 0.1 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
 | 0.2 | 06 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated TGW_CHANGE_CONTROLLED_TUNING_SOURCE |
+| 0.3 | 15 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added error GWC_TUNING_SOURCES_FILE_NOT_READY |

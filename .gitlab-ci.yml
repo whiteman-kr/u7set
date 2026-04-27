@@ -435,10 +435,10 @@ linux_test_job:
     - "sleep 5"
     - "./linux_test_job_systemid_clienttest_ws01_gwslinux.sh &"
     - "sleep 5"
-    - "$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5566 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection"
+    - "$CI_PROJECT_DIR/bin/release/GatewayTests --port=5566 --gtest_filter=AdsGatewayTestsNoAds.*"
     - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
     - "sleep 5"
-    - "$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5566 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection"
+    - "$CI_PROJECT_DIR/bin/release/GatewayTests --port=5566 --gtest_filter=AdsGatewayTests.*"
     - "StopServices || true"
     - "popd"
 

@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
-project (AdsGatewayTests LANGUAGES CXX)
+project (GatewayTests LANGUAGES CXX)
 
 set(GOOGLETEST_DIR $ENV{GOOGLETEST_DIR})
 
 find_package(Threads REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
-set(TARGET AdsGatewayTests)
+set(TARGET GatewayTests)
 
 add_executable(${TARGET} 
 	./src/AdsGatewayTests.cpp
@@ -15,6 +15,7 @@ add_executable(${TARGET}
 	./src/HashTests.cpp
 	./src/main.cpp
 	./src/TestSettings.hpp
+	./src/TuningGatewayTests.cpp
 	./src/TuningSourcesTests.cpp
 )
 
