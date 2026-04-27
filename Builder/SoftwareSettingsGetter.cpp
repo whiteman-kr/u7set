@@ -2853,6 +2853,9 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 	tuningService1 = tuningSrvConns[0];
 	tuningService2 = tuningSrvConns[1];
 
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+									 &tuningSourceEquipmentIDs, log);
+
 	// Get GatewayDescription
 	//
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::GATEWAY_DESCRIPTION,

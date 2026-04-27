@@ -1,9 +1,11 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
+#include "TuningServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../GatewayLib/AdsGateway.h"
+#include "../GatewayLib/TuningGateway.h"
 #include <GatewayClientLib/AdsGwProtocol.hpp>
 
 namespace Builder
@@ -245,7 +247,7 @@ namespace Builder
 		return result;
 	}
 
-	namespace AGL = GatewayClientLib;
+	namespace GCL = GatewayClientLib;
 
 	bool GatewayServiceCfgGenerator::adsGatewayProcessing(const Gateway::GatewayShared& gw)
 	{
@@ -354,13 +356,13 @@ namespace Builder
 
 				const QString& appSignalID = appSignal->appSignalID();
 
-				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
-				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
-				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), GCL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), GCL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), GCL::STRING_LENGTH_256, QStringLiteral("tags"));
 
 				//
 
@@ -379,9 +381,9 @@ namespace Builder
 
 		result = checkConnection(gw, E::TuningService);
 
-/*		Gateway::AdsGatewayShared adsGw = std::dynamic_pointer_cast<Gateway::AdsGateway>(gw);
+		Gateway::TuningGatewayShared tunGw = std::dynamic_pointer_cast<Gateway::TuningGateway>(gw);
 
-		if (adsGw == nullptr)
+		if (tunGw == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
@@ -396,69 +398,24 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(settings);
 
-			QStringList controllerIDs;
+			QVector<AppSignal*> tunSignals;
 
-			if (settings->appDataService1.equipmentId.isEmpty() == false)
+			for(const QString& tunSrcID : settings->tuningSourceEquipmentIDs)
 			{
-				controllerIDs.append(settings->appDataService1.equipmentId);
-			}
+				Tuning::TuningDataShared td = m_context->m_tuningDataStorage->getTuningData(tunSrcID);
 
-			if (settings->appDataService2.equipmentId.isEmpty() == false)
-			{
-				controllerIDs.append(settings->appDataService2.equipmentId);
-			}
-
-			std::set<Hash> acquiredSignals;
-
-			for(const QString& controllerID : controllerIDs)
-			{
-				std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(controllerID);
-
-				if (device == nullptr ||
-					device->deviceType() != Hardware::DeviceType::Controller)
+				if (td == nullptr)
 				{
-					LOG_INTERNAL_ERROR(m_log);
+					// Tuning data is not found for module %1
+					//
+					m_log->errALC5197(tunSrcID);
 					result = false;
 					break;
 				}
 
-				device = device->parent();
-
-				if (device == nullptr ||
-					device->deviceType() != Hardware::DeviceType::Software ||
-					device->toSoftware() == nullptr ||
-					device->toSoftware()->softwareType() != E::SoftwareType::AppDataService)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					break;
-				}
-
-				QString appDataSrvID = device->equipmentIdTemplate();
-
-				auto it = m_context->m_swCfgGens.find(appDataSrvID);
-
-				if (it == m_context->m_swCfgGens.end())
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					break;
-				}
-
-				std::shared_ptr<AppDataServiceCfgGenerator> adsCfgGen =
-					std::dynamic_pointer_cast<AppDataServiceCfgGenerator>(it->second);
-
-				if (adsCfgGen == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					break;
-				}
-
-				const std::set<Hash> appDataSrvAcquiredSignals = adsCfgGen->acquiredAppSignals();
-
-				acquiredSignals.insert(appDataSrvAcquiredSignals.begin(),
-									   appDataSrvAcquiredSignals.end());
+				tunSignals.append(td->getAnalogFloatSignals());
+				tunSignals.append(td->getAnalogIntSignals());
+				tunSignals.append(td->getDiscreteSignals());
 			}
 
 			if (result == false)
@@ -468,31 +425,29 @@ namespace Builder
 
 			QStringList appSignalIDs;
 
-			for(Hash hash : acquiredSignals)
+			for(const AppSignal* appSignal : tunSignals)
 			{
-				const AppSignal* appSignal = m_signalSet->getSignalByHash(hash);
-
 				TEST_PTR_CONTINUE(appSignal);
 
 				//
 
 				const QString& appSignalID = appSignal->appSignalID();
 
-				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
-				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
-				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), GCL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), GCL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), GCL::STRING_LENGTH_256, QStringLiteral("tags"));
 
 				//
 
-				appSignalIDs.append(appSignal->appSignalID());
+				appSignalIDs.append(appSignalID);
 			}
 
-			adsGw->appendSignalList(profile, appSignalIDs);
-		}*/
+			tunGw->appendSignalList(profile, appSignalIDs);
+		}
 
 		return result;
 	}

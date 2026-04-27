@@ -933,17 +933,17 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 	{
 		return true;
 	}
-/*
-	GCL::GwTuningSignalsReadResponse reply;
+
+	GCL::GwTuningSignalsWriteResponse reply;
 
 	reply.count = 0;
 	reply.reserved = 0;
 
 	thread_local std::vector<char> payload;
 
-	payload.resize(sizeof(reply));
+	const char* replyPtr = reinterpret_cast<const char*>(&reply);
 
-	std::memcpy(payload.data(), &reply, sizeof(reply));
+	payload.assign(replyPtr, replyPtr + sizeof(reply));
 
 	if (wr == WaitResult::Timeout || stc->replyData.size() == 0)
 	{
@@ -951,7 +951,7 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 		return true;
 	}
 
-	thread_local Network::TuningSignalsReadReply prp;
+	thread_local Network::TuningSignalsWriteReply prp;
 
 	bool res = prp.ParseFromArray(stc->replyData.data(), TO_INT(stc->replyData.size()));
 
@@ -961,44 +961,24 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 		return true;
 	}
 
-	reply.count = prp.tuningsignalstate_size();
+	reply.count = prp.writeresult_size();
 
 	std::memcpy(payload.data(), &reply, sizeof(reply));
 
-	GCL::GwTuningSignalState st;
-	TuningValue tv;
+	GCL::GwTuningSignalWriteResult writeResult;
 
-	for(const Network::TuningSignalState& tst : prp.tuningsignalstate())
+	writeResult.reserved = 0;
+
+	const char* writeResultPtr = reinterpret_cast<const char*>(&writeResult);
+
+	for(const Network::TuningSignalWriteResult& twr : prp.writeresult())
 	{
-		std::memset(&st, 0, sizeof(st));
-
-		st.hash = tst.signalhash();
-		st.errorCode = tst.error();
-
-		uint32_t flags = 0;
-
-		flags |= tst.valid() ? GCL::TGWF_VALID : 0;
-		flags |= tst.writeinprogress() ? GCL::TGWF_WRITE_IN_PROGRESS : 0;
-		flags |= tst.writingdisabled() ? 0 : GCL::TGWF_WRITING_IS_ENABLED;
-		flags |= tst.tuningdefault() ? GCL::TGWF_TUNING_DEFAULT : 0;
-
-		st.flags = flags;
-
-		tv.load(tst.value());
-
-		st.value = tv.toDouble();
-		st.successfulReadTime = tst.successfulreadtime();
-		st.writeRequestTime = tst.writerequesttime();
-		st.successfulWriteTime = tst.successfulwritetime();
-		st.unsuccessfulWriteTime = tst.unsuccessfulwritetime();
-		st.lmTime = tst.lmtime();
-		st.fotipProcessingNumerator = tst.fotipprocessingnumerator();
-
-		const char* stPtr = reinterpret_cast<const char*>(&st);
-		payload.insert(payload.end(), stPtr, stPtr + sizeof(st));
+		writeResult.hash = twr.signalhash();
+		writeResult.status = twr.error();
+		payload.insert(payload.end(), writeResultPtr, writeResultPtr + sizeof(writeResult));
 	}
 
-	sendOkReply(stc, header, payload.data(), payload.size());*/
+	sendOkReply(stc, header, payload.data(), payload.size());
 
 	return true;
 }

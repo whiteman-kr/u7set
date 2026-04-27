@@ -704,6 +704,8 @@ public:
 	SoftwareEndpoint::TuningService tuningService1;
 	SoftwareEndpoint::TuningService tuningService2;
 
+	QStringList tuningSourceEquipmentIDs;
+
 	QString gatewayDescription;
 
 private:

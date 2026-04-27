@@ -263,10 +263,12 @@ namespace Tuning
 
 			if (err != E::NetworkError::Success)
 			{
+				writeResult->set_error(TO_INT(err));
 				hasErrors = true;
 			}
 			else
 			{
+				writeResult->set_error(TO_INT(E::NetworkError::Success));
 				if (autoApply == true)
 				{
 					usedSrcThreads.insert(sourceThread);

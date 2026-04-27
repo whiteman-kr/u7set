@@ -1791,7 +1791,7 @@ namespace Tuning
 		if (newValue < ts->lowBound() || newValue > ts->highBound())
 		{
 			DEBUG_LOG_ERR(m_logger, QString("New tuning value (%1) of tuning signal %2 is out of range (%3..%4)").
-											arg(newValue.doubleValue()).
+											arg(newValue.toDouble()).
 											arg(ts->appSignalID()).
 											arg(ts->lowBound().toString()).
 											arg(ts->highBound().toString()));

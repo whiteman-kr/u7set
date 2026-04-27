@@ -2794,6 +2794,9 @@ bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 EquipmentPropNames::TUNING_SERVICE_PORT2,
 							 tuningService2.address);
 
+	xml.writeStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+					tuningSourceEquipmentIDs.join(QChar(';')));
+
 	//
 
 	writeEndSettings(xml);
@@ -2868,6 +2871,12 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 	okTun2 = okTun2 && (tuningService2.equipmentId.isEmpty() || res);
 
 	result &= okTun1 || okTun2;
+
+	QString ids;
+
+	result &= xml.readStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &ids, true);
+
+	tuningSourceEquipmentIDs = ids.split(QChar(';'), Qt::SkipEmptyParts);
 
 	return result;
 }
