@@ -103,19 +103,19 @@ void TuningSrvClient::tuningSignalsRead(quint64 requestID, std::vector<Hash>& ha
 	Q_ASSERT(requestID != 0);
 
 	{
-		std::lock_guard lg(m_rwQueueMutex);
+		std::lock_guard lg(m_requestQueueMutex);
 
-		if (m_rwRequestQueue.size() >= 3)
+		if (m_requestQueue.size() >= 3)
 		{
 			Q_ASSERT(false);
-			m_rwRequestQueue.pop_front();
+			m_requestQueue.pop_front();
 		}
 
-		m_rwRequestQueue.push_back(ReadWriteSignalsRequest{});
+		m_requestQueue.push_back(Request{});
 
-		ReadWriteSignalsRequest& req = m_rwRequestQueue.back();
+		Request& req = m_requestQueue.back();
 
-		req.readRequest = true;
+		req.requestType = RequestType::Read;
 		req.rwRequestID = requestID;
 		req.user.clear();
 		req.apply = false;
@@ -136,24 +136,69 @@ void TuningSrvClient::tuningSignalsWrite(quint64 requestID,
 	Q_ASSERT(hashes.size() == values.size());
 
 	{
-		std::lock_guard lg(m_rwQueueMutex);
+		std::lock_guard lg(m_requestQueueMutex);
 
-		if (m_rwRequestQueue.size() >= 3)
+		if (m_requestQueue.size() >= 3)
 		{
 			Q_ASSERT(false);
-			m_rwRequestQueue.pop_front();
+			m_requestQueue.pop_front();
 		}
 
-		m_rwRequestQueue.push_back(ReadWriteSignalsRequest{});
+		m_requestQueue.push_back(Request{});
 
-		ReadWriteSignalsRequest& req = m_rwRequestQueue.back();
+		Request& req = m_requestQueue.back();
 
-		req.readRequest = false;
+		req.requestType = RequestType::Write;
 		req.rwRequestID = requestID;
 		req.user = user;
 		req.apply = apply;
 		req.hashes.swap(hashes);
 		req.values.swap(values);
+	}
+
+	emit signal_sendNextRequest();
+}
+
+void TuningSrvClient::tuningSignalsApply()
+{
+	{
+		std::lock_guard lg(m_requestQueueMutex);
+
+		if (m_requestQueue.size() >= 3)
+		{
+			Q_ASSERT(false);
+			m_requestQueue.pop_front();
+		}
+
+		m_requestQueue.push_back(Request{});
+
+		Request& req = m_requestQueue.back();
+
+		req.requestType = RequestType::Apply;
+	}
+
+	emit signal_sendNextRequest();
+}
+
+void TuningSrvClient::tuningChangeControlledSource(const std::string& moduleEquipmentID,
+													bool activateControl)
+{
+	{
+		std::lock_guard lg(m_requestQueueMutex);
+
+		if (m_requestQueue.size() >= 3)
+		{
+			Q_ASSERT(false);
+			m_requestQueue.pop_front();
+		}
+
+		m_requestQueue.push_back(Request{});
+
+		Request& req = m_requestQueue.back();
+
+		req.requestType = RequestType::ChangeConttrolledSource;
+		req.moduleEquipmentID = moduleEquipmentID;
+		req.activateControl = activateControl;
 	}
 
 	emit signal_sendNextRequest();
@@ -183,6 +228,14 @@ void TuningSrvClient::processReply(quint32 requestID, const char* replyData, qui
 
 	case TDS_TUNING_SIGNALS_WRITE:
 		onTuningSignalsWrite(replyData, replyDataSize);
+		break;
+
+	case TDS_TUNING_SIGNALS_APPLY:
+		onTuningSignalsApply(replyData, replyDataSize);
+		break;
+
+	case TDS_CHANGE_CONTROLLED_TUNING_SOURCE:
+		onChangeControlledSource(replyData, replyDataSize);
 		break;
 
 	default:
@@ -272,7 +325,7 @@ void TuningSrvClient::onGetTuningSourcesStates(const char* replyData, quint32 re
 
 void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDataSize)
 {
-	if (m_activeRwRequest.isNull())
+	if (m_activeRequest.isNull())
 	{
 		Q_ASSERT(false);
 		return;
@@ -286,13 +339,13 @@ void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDa
 
 	if (result == false)
 	{
-		m_activeRwRequest.clear();
+		m_activeRequest.clear();
 		return;
 	}
 
-	if (m_activeRwRequest.rwRequestID != reply.readrequestid())
+	if (m_activeRequest.rwRequestID != reply.readrequestid())
 	{
-		m_activeRwRequest.clear();
+		m_activeRequest.clear();
 		return;
 	}
 
@@ -303,12 +356,12 @@ void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDa
 
 	m_session->condVar.notify_one();
 
-	m_activeRwRequest.clear();
+	m_activeRequest.clear();
 }
 
 void TuningSrvClient::onTuningSignalsWrite(const char* replyData, quint32 replyDataSize)
 {
-	if (m_activeRwRequest.isNull())
+	if (m_activeRequest.isNull())
 	{
 		Q_ASSERT(false);
 		return;
@@ -322,13 +375,13 @@ void TuningSrvClient::onTuningSignalsWrite(const char* replyData, quint32 replyD
 
 	if (result == false)
 	{
-		m_activeRwRequest.clear();
+		m_activeRequest.clear();
 		return;
 	}
 
-	if (m_activeRwRequest.rwRequestID != reply.writerequestid())
+	if (m_activeRequest.rwRequestID != reply.writerequestid())
 	{
-		m_activeRwRequest.clear();
+		m_activeRequest.clear();
 		return;
 	}
 
@@ -339,7 +392,67 @@ void TuningSrvClient::onTuningSignalsWrite(const char* replyData, quint32 replyD
 
 	m_session->condVar.notify_one();
 
-	m_activeRwRequest.clear();
+	m_activeRequest.clear();
+}
+
+void TuningSrvClient::onTuningSignalsApply(const char* replyData, quint32 replyDataSize)
+{
+	if (m_activeRequest.isNull())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	thread_local Network::TuningSignalsApplyReply reply;
+
+	reply.Clear();
+
+	bool result = reply.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		m_activeRequest.clear();
+		return;
+	}
+
+	{
+		std::lock_guard lg(m_session->condVarMutex);
+		m_session->replyData.assign(replyData, replyData + replyDataSize);
+	}
+
+	m_session->condVar.notify_one();
+
+	m_activeRequest.clear();
+}
+
+void TuningSrvClient::onChangeControlledSource(const char* replyData, quint32 replyDataSize)
+{
+	if (m_activeRequest.isNull())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	thread_local Network::ChangeConrolledTuningSourceReply reply;
+
+	reply.Clear();
+
+	bool result = reply.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		m_activeRequest.clear();
+		return;
+	}
+
+	{
+		std::lock_guard lg(m_session->condVarMutex);
+		m_session->replyData.assign(replyData, replyData + replyDataSize);
+	}
+
+	m_session->condVar.notify_one();
+
+	m_activeRequest.clear();
 }
 
 void TuningSrvClient::sendNextRequest()
@@ -350,26 +463,40 @@ void TuningSrvClient::sendNextRequest()
 	}
 
 	{
-		std::lock_guard lg(m_rwQueueMutex);
+		std::lock_guard lg(m_requestQueueMutex);
 
-		if (m_rwRequestQueue.empty() == false)
+		if (m_requestQueue.empty() == false)
 		{
-			const ReadWriteSignalsRequest& req = m_rwRequestQueue.front();
+			const Request& req = m_requestQueue.front();
 
 			bool res = false;
 
-			if (req.readRequest == true)
+			switch(req.requestType)
 			{
+			case RequestType::Read:
 				res = sendReadSignalsRequest(req);
-			}
-			else
-			{
+				break;
+
+			case RequestType::Write:
 				res = sendWriteSignalsRequest(req);
+				break;
+
+			case RequestType::Apply:
+				res = sendApplySignalsRequest(req);
+				break;
+
+			case RequestType::ChangeConttrolledSource:
+				res = sendChangeControlledSourceRequest(req);
+				break;
+
+			default:
+				Q_ASSERT(false);
+				res = true;
 			}
 
 			if (res == true)
 			{
-				m_rwRequestQueue.pop_front();
+				m_requestQueue.pop_front();
 			}
 
 			return;
@@ -389,9 +516,9 @@ void TuningSrvClient::sendGetSourceStatesRequest()
 	sendRequest(TDS_GET_TUNING_SOURCES_STATES, request);
 }
 
-bool TuningSrvClient::sendReadSignalsRequest(const ReadWriteSignalsRequest& req)
+bool TuningSrvClient::sendReadSignalsRequest(const Request& req)
 {
-	Q_ASSERT(req.readRequest == true);
+	Q_ASSERT(req.requestType == RequestType::Read);
 
 	if (isClearToSendRequest() == false)
 	{
@@ -409,14 +536,14 @@ bool TuningSrvClient::sendReadSignalsRequest(const ReadWriteSignalsRequest& req)
 		readRequest.add_signalhash(h);
 	}
 
-	setActiveRwRequest(req);
+	setActiveRequest(req);
 
 	return sendRequest(TDS_TUNING_SIGNALS_READ, readRequest);
 }
 
-bool TuningSrvClient::sendWriteSignalsRequest(const ReadWriteSignalsRequest& req)
+bool TuningSrvClient::sendWriteSignalsRequest(const Request& req)
 {
-	Q_ASSERT(req.readRequest == false);
+	Q_ASSERT(req.requestType == RequestType::Write);
 
 	if (isClearToSendRequest() == false)
 	{
@@ -454,15 +581,53 @@ bool TuningSrvClient::sendWriteSignalsRequest(const ReadWriteSignalsRequest& req
 		tunValue.save(wc->mutable_value());
 	}
 
-	setActiveRwRequest(req);
+	setActiveRequest(req);
 
 	return sendRequest(TDS_TUNING_SIGNALS_WRITE, writeRequest);
 }
 
-void TuningSrvClient::setActiveRwRequest(const ReadWriteSignalsRequest& req)
+bool TuningSrvClient::sendApplySignalsRequest(const Request& req)
 {
-	m_activeRwRequest.readRequest = req.readRequest;
-	m_activeRwRequest.rwRequestID = req.rwRequestID;
+	Q_ASSERT(req.requestType == RequestType::Apply);
+
+	if (isClearToSendRequest() == false)
+	{
+		return false;
+	}
+
+	thread_local Network::TuningSignalsApply applyRequest;
+
+	setActiveRequest(req);
+
+	return sendRequest(TDS_TUNING_SIGNALS_APPLY, applyRequest);
+}
+
+bool TuningSrvClient::sendChangeControlledSourceRequest(const Request& req)
+{
+	Q_ASSERT(req.requestType == RequestType::ChangeConttrolledSource);
+
+	if (isClearToSendRequest() == false)
+	{
+		return false;
+	}
+
+	thread_local Network::ChangeConrolledTuningSourceRequest request;
+
+	request.Clear();
+
+	request.set_takecontrol(true);
+	request.set_tuningsourceequipmentid(req.moduleEquipmentID);
+	request.set_activatecontrol(req.activateControl);
+
+	setActiveRequest(req);
+
+	return sendRequest(TDS_CHANGE_CONTROLLED_TUNING_SOURCE, request);
+}
+
+void TuningSrvClient::setActiveRequest(const Request& req)
+{
+	m_activeRequest.requestType = req.requestType;
+	m_activeRequest.rwRequestID = req.rwRequestID;
 }
 
 void TuningSrvClient::restartReceiveFile()
@@ -536,3 +701,14 @@ void TuningSrvClientThread::tuningSignalsWrite(quint64 requestID,
 {
 	m_client->tuningSignalsWrite(requestID, user, apply, hashes, values);
 }
+
+void TuningSrvClientThread::tuningSignalsApply()
+{
+	m_client->tuningSignalsApply();
+}
+
+void TuningSrvClientThread::tuningChangeControlledSource(const std::string& moduleEquipmentID, bool activateControl)
+{
+	m_client->tuningChangeControlledSource(moduleEquipmentID, activateControl);
+}
+

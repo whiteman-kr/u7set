@@ -13,29 +13,41 @@ class TuningSrvClient : public Tcp::Client
 	Q_OBJECT
 
 private:
-	struct ReadWriteSignalsRequest
+	enum class RequestType
 	{
-		bool readRequest = true;			// true - read request
-											// false - write request
+		Nothing,
+		Read,
+		Write,
+		Apply,
+		ChangeConttrolledSource
+	};
+
+	struct Request
+	{
+		RequestType requestType = RequestType::Nothing;
 		quint64 rwRequestID = 0;
 		std::string user;
 		bool apply = false;
 		std::vector<Hash> hashes;
 		std::vector<double> values;
+		std::string moduleEquipmentID;
+		bool activateControl = false;
 
 		void clear()
 		{
-			readRequest = true;
+			requestType = RequestType::Nothing;
 			rwRequestID = 0;
 			user.clear();
 			apply = false;
 			hashes.clear();
 			values.clear();
+			moduleEquipmentID.clear();
+			activateControl = false;
 		}
 
 		bool isNull()
 		{
-			return (rwRequestID == 0);
+			return (requestType == RequestType::Nothing);
 		}
 	};
 
@@ -66,6 +78,10 @@ public:
 						   bool apply,
 						   std::vector<Hash>& hashes,
 						   std::vector<double>& values);
+
+	void tuningSignalsApply();
+	void tuningChangeControlledSource(const std::string& moduleEquipmentID, bool activateControl);
+
 private:
 	void onTimer();
 
@@ -75,14 +91,17 @@ private:
 	void onGetTuningSourcesStates(const char* replyData, quint32 replyDataSize);
 	void onTuningSignalsRead(const char* replyData, quint32 replyDataSize);
 	void onTuningSignalsWrite(const char* replyData, quint32 replyDataSize);
+	void onTuningSignalsApply(const char* replyData, quint32 replyDataSize);
+	void onChangeControlledSource(const char* replyData, quint32 replyDataSize);
 
 	void sendNextRequest();
 	void sendGetSourceStatesRequest();
-	bool sendReadSignalsRequest(const ReadWriteSignalsRequest& req);
-	bool sendWriteSignalsRequest(const ReadWriteSignalsRequest& req);
+	bool sendReadSignalsRequest(const Request& req);
+	bool sendWriteSignalsRequest(const Request& req);
+	bool sendApplySignalsRequest(const Request& req);
+	bool sendChangeControlledSourceRequest(const Request& req);
 
-	void setActiveRwRequest(const ReadWriteSignalsRequest& req);
-	void clearActiveRwRequest();
+	void setActiveRequest(const Request& req);
 
 	void restartReceiveFile();
 	void requestNextFilePart();
@@ -113,9 +132,9 @@ private:
 
 	//
 
-	std::mutex m_rwQueueMutex;
-	std::deque<ReadWriteSignalsRequest> m_rwRequestQueue;
-	ReadWriteSignalsRequest m_activeRwRequest;
+	std::mutex m_requestQueueMutex;
+	std::deque<Request> m_requestQueue;
+	Request m_activeRequest;
 };
 
 class TuningSrvClientThread : public SimpleThread
@@ -141,6 +160,9 @@ public:
 							bool apply,
 							std::vector<Hash>& hashes,
 							std::vector<double>& values);
+
+	void tuningSignalsApply();
+	void tuningChangeControlledSource(const std::string& moduleEquipmentID, bool activateControl);
 
 private:
 	TuningSrvClient* m_client = nullptr;

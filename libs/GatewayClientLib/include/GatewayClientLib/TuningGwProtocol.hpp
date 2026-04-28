@@ -390,4 +390,7 @@ namespace GatewayClientLib
 	};
 
 	static_assert(sizeof(GwChangeControlledTuningSourceResponse) == 132);
+
+	constexpr size_t TUNING_GW_CHANGE_CONTROLLED_TUNING_SOURCE_RESPONSE_SIZE = sizeof(GwChangeControlledTuningSourceResponse);
+
 }; // namespace GatewayClientLib

@@ -111,6 +111,12 @@ private:
 	bool processTuningSignalsWriteRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
 										 const char* recvBuf, const size_t requestSize);
 
+	bool processTuningSignalsApplyRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+										  const char* recvBuf, const size_t requestSize);
+
+	bool processChangeControlledSourceRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+										  const char* recvBuf, const size_t requestSize);
+
 	bool checkPayloadSize(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, GCL::GwErrorCode& errCode);
 	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
 

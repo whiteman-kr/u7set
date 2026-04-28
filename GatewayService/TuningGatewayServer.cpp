@@ -500,7 +500,11 @@ void TuningGatewayServer::processRequest(TgsSessionShared stc, char* recvBuf, si
 			break;
 
 		case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
+			result = processTuningSignalsApplyRequest(stc, header, recvBuf, requestSize);
+			break;
+
 		case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
+			result = processChangeControlledSourceRequest(stc, header, recvBuf, requestSize);
 			break;
 
 		default:
@@ -798,7 +802,10 @@ bool TuningGatewayServer::processTuningSignalsReadRequest(TgsSessionShared stc,
 		hashes.push_back(h);
 	}
 
-	stc->replyData.clear();
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		stc->replyData.clear();
+	}
 
 	stc->tunSrvClientThread->tuningSignalsRead(readRequestID, hashes);
 
@@ -826,13 +833,26 @@ bool TuningGatewayServer::processTuningSignalsReadRequest(TgsSessionShared stc,
 		return true;
 	}
 
+	thread_local std::vector<char> replyData;
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		replyData.swap(stc->replyData);
+	}
+
 	thread_local Network::TuningSignalsReadReply prp;
 
-	bool res = prp.ParseFromArray(stc->replyData.data(), TO_INT(stc->replyData.size()));
+	bool res = prp.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
 
-	if (res == false || prp.error() != 0)
+	if (res == false)
 	{
-		sendOkReply(stc, header, payload.data(), payload.size());
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_PARSE_REQUEST_ERROR);
+		return true;
+	}
+
+	if (prp.error() != 0)
+	{
+		sendErrReply(stc, header, static_cast<GCL::GwErrorCode>(prp.error()));
 		return true;
 	}
 
@@ -897,7 +917,8 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE);
 
 	quint32 valuesCount = request.count;
-	std::string user(request.user, GCL::STRING_LENGTH_128);
+	QString user = QString::fromUtf8(request.user);
+
 	bool apply = request.apply;
 
 	const char* valuePtr = recvBuf + GCL::GW_MSG_HEADER_SIZE +
@@ -923,9 +944,12 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 		values.push_back(valPtr->value);
 	}
 
-	stc->replyData.clear();
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		stc->replyData.clear();
+	}
 
-	stc->tunSrvClientThread->tuningSignalsWrite(writeRequestID, user, apply, hashes, values);
+	stc->tunSrvClientThread->tuningSignalsWrite(writeRequestID, user.toStdString(), apply, hashes, values);
 
 	WaitResult wr = waitForOrQuit(stc, 500);
 
@@ -951,13 +975,26 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 		return true;
 	}
 
+	thread_local std::vector<char> replyData;
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		replyData.swap(stc->replyData);
+	}
+
 	thread_local Network::TuningSignalsWriteReply prp;
 
-	bool res = prp.ParseFromArray(stc->replyData.data(), TO_INT(stc->replyData.size()));
+	bool res = prp.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
 
-	if (res == false || prp.error() != 0)
+	if (res == false)
 	{
-		sendOkReply(stc, header, payload.data(), payload.size());
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_PARSE_REQUEST_ERROR);
+		return true;
+	}
+
+	if (prp.error() != 0)
+	{
+		sendErrReply(stc, header, static_cast<GCL::GwErrorCode>(prp.error()));
 		return true;
 	}
 
@@ -979,6 +1016,150 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 	}
 
 	sendOkReply(stc, header, payload.data(), payload.size());
+
+	return true;
+}
+
+bool TuningGatewayServer::processTuningSignalsApplyRequest(TgsSessionShared stc, const GCL::GwMessageHeader& header,
+									  const char* recvBuf, const size_t requestSize)
+{
+	Q_UNUSED(recvBuf);
+	Q_UNUSED(requestSize);
+
+	if (stc->tunSrvClientThread == nullptr ||
+		stc->connectedToTuningSrv == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
+		return false;
+	}
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		stc->replyData.clear();
+	}
+
+	stc->tunSrvClientThread->tuningSignalsApply();
+
+	WaitResult wr = waitForOrQuit(stc, 500);
+
+	if (wr == WaitResult::QuitRequested)
+	{
+		return true;
+	}
+
+	GCL::GwTuningSignalsApplyResponse reply;
+
+	reply.reserved = 0;
+
+	thread_local std::vector<char> payload;
+
+	const char* replyPtr = reinterpret_cast<const char*>(&reply);
+
+	payload.assign(replyPtr, replyPtr + sizeof(reply));
+
+	if (wr == WaitResult::Timeout || stc->replyData.size() == 0)
+	{
+		sendOkReply(stc, header, payload.data(), payload.size());
+		return true;
+	}
+
+	thread_local std::vector<char> replyData;
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		replyData.swap(stc->replyData);
+	}
+
+	thread_local Network::TuningSignalsApplyReply arp;
+
+	bool res = arp.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
+
+	if (res == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_PARSE_REQUEST_ERROR);
+		return true;
+	}
+
+	if (arp.error() != 0)
+	{
+		sendErrReply(stc, header, static_cast<GCL::GwErrorCode>(arp.error()));
+		return true;
+	}
+
+	sendOkReply(stc, header, payload.data(), payload.size());
+
+	return true;
+}
+
+bool TuningGatewayServer::processChangeControlledSourceRequest(TgsSessionShared stc,
+															const GCL::GwMessageHeader& header,
+															const char* recvBuf,
+															const size_t requestSize)
+{
+	Q_UNUSED(requestSize);
+
+	if (stc->tunSrvClientThread == nullptr ||
+		stc->connectedToTuningSrv == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
+		return false;
+	}
+
+	GCL::GwChangeControlledTuningSourceRequest request;
+
+	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_CHANGE_CONTROLLED_TUNING_SOURCE_REQUEST_SIZE);
+
+	QString moduleEquipmentID = QString::fromUtf8(request.moduleEquipmentId);
+
+	bool activateControl = request.activateControl;
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		stc->replyData.clear();
+	}
+
+	stc->tunSrvClientThread->tuningChangeControlledSource(moduleEquipmentID.toStdString(), activateControl);
+
+	WaitResult wr = waitForOrQuit(stc, 500);
+
+	if (wr == WaitResult::QuitRequested)
+	{
+		return true;
+	}
+
+	thread_local std::vector<char> replyData;
+
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		replyData.swap(stc->replyData);
+	}
+
+	thread_local Network::ChangeConrolledTuningSourceReply crp;
+
+	bool res = crp.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
+
+	if (res == false)
+	{
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_PARSE_REQUEST_ERROR);
+		return true;
+	}
+
+	if (crp.error() != 0)
+	{
+		sendErrReply(stc, header, static_cast<GCL::GwErrorCode>(crp.error()));
+		return true;
+	}
+
+	GCL::GwChangeControlledTuningSourceResponse reply;
+
+	copyStr(reply.controlledModuleEquipmentId, GCL::STRING_LENGTH_128, crp.controlledtuningsourceequipmentid());
+	reply.controlIsActive = crp.controlisactive();
+
+	reply.reserved[0] = 0;
+	reply.reserved[1] = 0;
+	reply.reserved[2] = 0;
+
+	sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
 
 	return true;
 }
