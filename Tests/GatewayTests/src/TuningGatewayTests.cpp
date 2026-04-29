@@ -30,6 +30,7 @@ namespace
 	{
 	public:
 		using TuningGwConnImpl::TuningGwConnImpl;
+		using TuningGwConnImpl::requestActivateTuningSource;
 		using TuningGwConnImpl::requestHandshake;
 		using TuningGwConnImpl::requestSignalStates;
 		using TuningGwConnImpl::requestTuningSourceStates;
@@ -43,18 +44,18 @@ namespace
 
 		template<typename RequestT, typename ResponseT>
 		GatewayClientLib::GwErrorCode sendRawRequest(GatewayClientLib::TuningGwRequestId requestId,
-															const RequestT& request,
-															ResponseT& response)
+													 const RequestT& request,
+													 ResponseT& response)
 		{
 			return this->sendRequest(requestId, request, response, {});
 		}
 
 		template<typename RequestT, typename RequestVariablePartT, typename ResponseT, typename ResponseVariablePartT>
 		GatewayClientLib::GwErrorCode sendRawRequest(GatewayClientLib::TuningGwRequestId requestId,
-															const RequestT& request,
-															std::span<const RequestVariablePartT> requestVariablePart,
-															ResponseT& response,
-															std::span<ResponseVariablePartT> responseVariablePart)
+													 const RequestT& request,
+													 std::span<const RequestVariablePartT> requestVariablePart,
+													 ResponseT& response,
+													 std::span<ResponseVariablePartT> responseVariablePart)
 		{
 			return this->sendRequest(requestId, request, requestVariablePart, response, responseVariablePart, {});
 		}
@@ -69,6 +70,11 @@ namespace
 	std::vector<Radiy::Hash> gptKnownTuningSignalHashes()
 	{
 		return {Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), Radiy::calcHash("#TGW_D1")};
+	}
+
+	std::array<std::string_view, 3> gptKnownTuningSourceModuleIds()
+	{
+		return {"SYSTEMID_CLIENTTEST_CH12_MD00", "SYSTEMID_CLIENTTEST_CH13_MD00", "SYSTEMID_CLIENTTEST_CH14_MD00"};
 	}
 } // namespace
 
@@ -624,7 +630,7 @@ TEST_F(TuningGatewayTests, RequestTuningSources)
 	ASSERT_GT(tuningConn.workset().project.buildNo, 10);
 	ASSERT_FALSE(tuningConn.workset().project.name.empty());
 
-	ASSERT_EQ(tuningConn.workset().tuningSources.size(), 1);
+	ASSERT_EQ(tuningConn.workset().tuningSources.size(), 3);
 
 	const auto& source = tuningConn.workset().tuningSources[0];
 	ASSERT_FALSE(source.signalIds.empty());
@@ -646,7 +652,7 @@ TEST_F(TuningGatewayTests, RequestTuningSources)
 		// RegValidityAddr="-1:-1" EnableTuning="true" TuningValueType="1" TuningValueTypeStr="SignedInt32" TuningDefaultValue="99999"
 		// TuningLowBound="-2147483648" TuningHighBound="2147483647" TuningDefaultValueHex="0x0001869F" TuningLowBoundHex="0x80000000"
 		// TuningHighBoundHex="0x7FFFFFFF" TuningAddr="0:0" TuningAbsAddr="0:0" HighEngineeringUnits="100" LowEngineeringUnits="0"/>
-		// 
+		//
 		// SignedInt32
 		//
 		ASSERT_TRUE(source.signals.contains(Radiy::calcHash("#TEST_TUNING_LIMITS_INT32")));
@@ -840,7 +846,7 @@ TEST_F(TuningGatewayTests, GptTuningSourceStatesResponseCountMatchesParsedSource
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
- 	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
 
 	const auto sourceStates = tuningConn.tuningSources();
 	EXPECT_EQ(sourceStates.size(), tuningConn.workset().tuningSources.size());
@@ -863,7 +869,6 @@ TEST_F(TuningGatewayTests, GptTuningSourceStatesModuleEquipmentIdMatchesTuningSo
 	{
 		EXPECT_EQ(std::string{sourceStates[i].moduleEquipmentId}, tuningConn.workset().tuningSources[i].moduleEquipmentId);
 	}
-
 }
 
 
@@ -882,7 +887,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
 	{
 		EXPECT_EQ(states[i].hash, hashes[i]);
 	}
-
 }
 
 
@@ -902,7 +906,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesDuplicateHashesPreserveDuplicates)
 	{
 		EXPECT_EQ(state.hash, duplicateHash);
 	}
-
 }
 
 
@@ -929,7 +932,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesSupportsExactlyMaxStateRequest)
 	{
 		EXPECT_EQ(states[i].hash, hashes[i]);
 	}
-
 }
 
 
@@ -948,7 +950,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesOneKnownSignal)
 	// Commented as out error can be GWC_LM_CONTROL_IS_NOT_ACTIVE
 	// EXPECT_EQ(states[0].errorCode, static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
 	EXPECT_TRUE(std::isfinite(states[0].value));
-
 }
 
 
@@ -994,12 +995,264 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesRejectsTooManySignals)
 	GatewayClientLib::GwTuningSignalsReadResponse response{};
 
 	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_TUNING_SIGNALS_READ,
-													   request,
-													   std::span<const Radiy::Hash>{hashes},
-													   response,
-													   std::span<GatewayClientLib::GwTuningSignalState>{states});
+											request,
+											std::span<const Radiy::Hash>{hashes},
+											response,
+											std::span<GatewayClientLib::GwTuningSignalState>{states});
 
 	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+}
+
+TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceAcceptsKnownModuleIdAndEchoesActivatedState)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	GatewayClientLib::GwChangeControlledTuningSourceRequest request{};
+	GatewayClientLib::GwChangeControlledTuningSourceResponse response{};
+
+	constexpr std::string_view moduleEquipmentId = "SYSTEMID_CLIENTTEST_CH12_MD00";
+	std::snprintf(request.moduleEquipmentId, sizeof(request.moduleEquipmentId), "%s", moduleEquipmentId.data());
+	request.activateControl = 1;
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response);
+
+	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_STREQ(response.controlledModuleEquipmentId, moduleEquipmentId.data());
+	EXPECT_EQ(response.controlIsActive, 1u);
+	EXPECT_EQ(response.reserved[0], 0u);
+	EXPECT_EQ(response.reserved[1], 0u);
+	EXPECT_EQ(response.reserved[2], 0u);
+
+	// It takes time to activate source, so wait a bit
+	bool passed = false;
+	for (int i = 0; i < 20; i++)
+	{
+		ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+
+		const auto sourceStates = tuningConn.tuningSources();
+		ASSERT_EQ(sourceStates.size(), gptKnownTuningSourceModuleIds().size());
+
+		for (const auto& sourceState : sourceStates)
+		{
+			if (std::string_view{sourceState.moduleEquipmentId} == moduleEquipmentId)
+			{
+				if (sourceState.controlIsActive == 1u)
+				{
+					passed = true;
+				}
+			}
+			else
+			{
+				EXPECT_EQ(sourceState.controlIsActive, 0u);
+			}
+		}
+
+		if (passed == true)
+		{
+			break;
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds{200});
+	}
+
+	EXPECT_TRUE(passed);
+
+	return;
+}
+
+
+TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceDeactivatesKnownModuleIdAndEchoesInactiveState)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	GatewayClientLib::GwChangeControlledTuningSourceRequest request{};
+	GatewayClientLib::GwChangeControlledTuningSourceResponse response{};
+
+	constexpr std::string_view moduleEquipmentId = "SYSTEMID_CLIENTTEST_CH12_MD00";
+	std::snprintf(request.moduleEquipmentId, sizeof(request.moduleEquipmentId), "%s", moduleEquipmentId.data());
+	request.activateControl = 1;
+
+	ASSERT_EQ(tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response),
+			  GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	request.activateControl = 0;
+	response = {};
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response);
+
+	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_STREQ(response.controlledModuleEquipmentId, moduleEquipmentId.data());
+	EXPECT_EQ(response.controlIsActive, 0u);
+	EXPECT_EQ(response.reserved[0], 0u);
+	EXPECT_EQ(response.reserved[1], 0u);
+	EXPECT_EQ(response.reserved[2], 0u);
+}
+
+TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceRejectsUnknownModuleId)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	GatewayClientLib::GwChangeControlledTuningSourceRequest request{};
+	GatewayClientLib::GwChangeControlledTuningSourceResponse response{};
+
+	std::snprintf(request.moduleEquipmentId, sizeof(request.moduleEquipmentId), "%s", "SYSTEMID_CLIENTTEST_CH99_MD00");
+	request.activateControl = 1;
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response);
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_UNKNOWN_TUNING_SOURCE_ID);
+}
+
+TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceRejectsExcessivePayload)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	GatewayClientLib::GwChangeControlledTuningSourceRequest request{};
+	GatewayClientLib::GwChangeControlledTuningSourceResponse response{};
+	std::array<std::byte, 8> payload{};
+
+	constexpr std::string_view moduleEquipmentId = "SYSTEMID_CLIENTTEST_CH12_MD00";
+	std::snprintf(request.moduleEquipmentId, sizeof(request.moduleEquipmentId), "%s", moduleEquipmentId.data());
+	request.activateControl = 1;
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE,
+											request,
+											std::span<const std::byte>(payload),
+											response,
+											std::span<std::byte>{});
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+}
+
+TEST_F(TuningGatewayTests, GptRequestActivateTuningSourceActivatesKnownModuleId)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	constexpr std::string_view moduleEquipmentId = "SYSTEMID_CLIENTTEST_CH12_MD00";
+
+	const auto status = tuningConn.requestActivateTuningSource(moduleEquipmentId, true);
+	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	bool passed = false;
+	for (int i = 0; i < 20; ++i)
+	{
+		ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+
+		const auto sourceStates = tuningConn.tuningSources();
+		ASSERT_EQ(sourceStates.size(), gptKnownTuningSourceModuleIds().size());
+
+		for (const auto& sourceState : sourceStates)
+		{
+			if (std::string_view{sourceState.moduleEquipmentId} == moduleEquipmentId)
+			{
+				if (sourceState.controlIsActive == 1u)
+				{
+					passed = true;
+				}
+			}
+			else
+			{
+				EXPECT_EQ(sourceState.controlIsActive, 0u);
+			}
+		}
+
+		if (passed)
+		{
+			break;
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds{200});
+	}
+
+	EXPECT_TRUE(passed);
+}
+
+TEST_F(TuningGatewayTests, GptRequestActivateTuningSourceDeactivatesKnownModuleId)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	constexpr std::string_view moduleEquipmentId = "SYSTEMID_CLIENTTEST_CH12_MD00";
+
+	ASSERT_EQ(tuningConn.requestActivateTuningSource(moduleEquipmentId, true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+
+	ASSERT_EQ(tuningConn.requestActivateTuningSource(moduleEquipmentId, false), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	bool passed = false;
+	for (int i = 0; i < 20; ++i)
+	{
+		ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+
+		const auto sourceStates = tuningConn.tuningSources();
+		ASSERT_EQ(sourceStates.size(), gptKnownTuningSourceModuleIds().size());
+
+		bool allDeactivated = std::all_of(sourceStates.begin(),
+										  sourceStates.end(),
+										  [](const auto& sourceState)
+										  {
+											  return sourceState.controlIsActive == 0u;
+										  });
+		if (allDeactivated == true)
+		{
+			passed = true;
+			break;
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds{200});
+	}
+
+	EXPECT_TRUE(passed);
+}
+
+TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceRejectsLessPayload)
+{
+	class FakeChangeControlledTuningSourceRequest
+	{
+	public:
+		char moduleEquipmentId[127];
+		uint8_t activateControl;
+		uint8_t reserved[3];
+	};
+
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+
+	FakeChangeControlledTuningSourceRequest request{};
+	GatewayClientLib::GwChangeControlledTuningSourceResponse response{};
+
+	std::snprintf(request.moduleEquipmentId, sizeof(request.moduleEquipmentId), "%s", "SYSTEMID_CLIENTTEST_CH12_MD00");
+	request.activateControl = 1;
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE, request, response);
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 #if 0
