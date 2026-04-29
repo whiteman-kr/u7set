@@ -360,12 +360,17 @@ namespace GatewayClientLib
 
 			int count = 0;
 
-			while(count < 10)
+			while (count < 30)
 			{
-				requestResult =	sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
+				requestResult =
+					sendRequest(TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, startRequest, startResponse, m_isCancelledFunc);
 
-				if (requestResult != GwErrorCode::GWC_NO_TS_CONNECTION &&
-					requestResult != GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
+				if (requestResult != GwErrorCode::GWC_NO_TS_CONNECTION && requestResult != GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
+				{
+					break;
+				}
+
+				if (m_isCancelledFunc && m_isCancelledFunc() == false)
 				{
 					break;
 				}
