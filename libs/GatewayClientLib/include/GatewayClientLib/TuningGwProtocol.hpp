@@ -339,7 +339,7 @@ namespace GatewayClientLib
 	};
 
 	constexpr size_t TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE = sizeof(GwTuningSignalsWriteRequest);
-	constexpr size_t TUNING_GW_MAX_WRITE_VALUES = (GW_MAX_MSG_PAYLOAD_SIZE - TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE) / TUNING_GW_TUNING_WRITE_VALUE_SIZE;
+	constexpr size_t TUNING_GW_MAX_WRITE_VALUES = 65536;
 
 	static_assert(sizeof(GwTuningSignalsWriteRequest) == 136);
 

@@ -16,6 +16,7 @@ private:
 	enum class RequestType
 	{
 		Nothing,
+		SourceStates,
 		Read,
 		Write,
 		Apply,
@@ -68,7 +69,8 @@ public:
 
 	bool getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount);
 	bool getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize);
-	bool getTuningSourceStatesReply(std::vector<char>& reply);
+
+	void getTuningSourcesState();
 
 	void tuningSignalsRead(quint64 requestID,
 						   std::vector<Hash>& hashes);
@@ -95,7 +97,7 @@ private:
 	void onChangeControlledSource(const char* replyData, quint32 replyDataSize);
 
 	void sendNextRequest();
-	void sendGetSourceStatesRequest();
+	bool sendGetSourceStatesRequest(const Request& req);
 	bool sendReadSignalsRequest(const Request& req);
 	bool sendWriteSignalsRequest(const Request& req);
 	bool sendApplySignalsRequest(const Request& req);
@@ -127,11 +129,6 @@ private:
 
 	//
 
-	std::mutex m_sourceStatesMutex;
-	std::vector<char> m_sourceStatesReply;
-
-	//
-
 	std::mutex m_requestQueueMutex;
 	std::deque<Request> m_requestQueue;
 	Request m_activeRequest;
@@ -151,6 +148,8 @@ public:
 	bool getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount);
 	bool getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize);
 	bool getTuningSourceStatesReply(std::vector<char>& reply);
+
+	void getTuningSourcesState();
 
 	void tuningSignalsRead(quint64 requestID,
 						   std::vector<Hash>& hashes);

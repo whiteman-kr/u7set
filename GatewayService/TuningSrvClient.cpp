@@ -91,11 +91,25 @@ bool TuningSrvClient::getTuningSourcesFilePart(quint64 partNo, std::vector<char>
 	return true;
 }
 
-bool TuningSrvClient::getTuningSourceStatesReply(std::vector<char>& reply)
+void TuningSrvClient::getTuningSourcesState()
 {
-	std::lock_guard lg(m_sourceStatesMutex);
-	reply = m_sourceStatesReply;
-	return true;
+	{
+		std::lock_guard lg(m_requestQueueMutex);
+
+		if (m_requestQueue.size() >= 3)
+		{
+			Q_ASSERT(false);
+			m_requestQueue.pop_front();
+		}
+
+		m_requestQueue.push_back(Request{});
+
+		Request& req = m_requestQueue.back();
+
+		req.requestType = RequestType::SourceStates;
+	}
+
+	emit signal_sendNextRequest();
 }
 
 void TuningSrvClient::tuningSignalsRead(quint64 requestID, std::vector<Hash>& hashes)
@@ -287,14 +301,17 @@ void TuningSrvClient::onGetNextFilePart(const char* replyData, quint32 replyData
 	}
 
 	m_fileReady = true;
-
-	sendGetSourceStatesRequest();
 }
 
 void TuningSrvClient::onGetTuningSourcesStates(const char* replyData, quint32 replyDataSize)
 {
+	if (m_activeRequest.isNull())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	thread_local Network::GetTuningSourcesStatesReply reply;
-	thread_local int errCtr = 0;
 
 	reply.Clear();
 
@@ -302,25 +319,20 @@ void TuningSrvClient::onGetTuningSourcesStates(const char* replyData, quint32 re
 	//
 	bool result = reply.ParseFromArray(replyData, replyDataSize);
 
+	if (result == false)
 	{
-		std::lock_guard lg(m_sourceStatesMutex);
-
-		if (result == true)
-		{
-			m_sourceStatesReply.assign(replyData, replyData + replyDataSize);
-			errCtr = 0;
-		}
-		else
-		{
-			errCtr++;
-
-			if (errCtr >= 3)
-			{
-				m_sourceStatesReply.clear();
-				errCtr = 0;
-			}
-		}
+		m_activeRequest.clear();
+		return;
 	}
+
+	{
+		std::lock_guard lg(m_session->condVarMutex);
+		m_session->replyData.assign(replyData, replyData + replyDataSize);
+	}
+
+	m_session->condVar.notify_one();
+
+	m_activeRequest.clear();
 }
 
 void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDataSize)
@@ -473,6 +485,10 @@ void TuningSrvClient::sendNextRequest()
 
 			switch(req.requestType)
 			{
+			case RequestType::SourceStates:
+				res = sendGetSourceStatesRequest(req);
+				break;
+
 			case RequestType::Read:
 				res = sendReadSignalsRequest(req);
 				break;
@@ -502,18 +518,18 @@ void TuningSrvClient::sendNextRequest()
 			return;
 		}
 	}
-
-	if (m_timerCtr >= REQUEST_SOURCE_STATES_PERIOD)
-	{
-		m_timerCtr = 0;
-		sendGetSourceStatesRequest();
-	}
 }
 
-void TuningSrvClient::sendGetSourceStatesRequest()
+bool TuningSrvClient::sendGetSourceStatesRequest(const Request& req)
 {
+	Q_ASSERT(req.requestType == RequestType::SourceStates);
+
+	setActiveRequest(req);
+
 	Network::GetTuningSourcesStates request;
 	sendRequest(TDS_GET_TUNING_SOURCES_STATES, request);
+
+	return true;
 }
 
 bool TuningSrvClient::sendReadSignalsRequest(const Request& req)
@@ -683,9 +699,9 @@ bool TuningSrvClientThread::getTuningSourcesFilePart(quint64 partNo, std::vector
 	return m_client->getTuningSourcesFilePart(partNo, fileData, partSize);
 }
 
-bool TuningSrvClientThread::getTuningSourceStatesReply(std::vector<char>& reply)
+void TuningSrvClientThread::getTuningSourcesState()
 {
-	return m_client->getTuningSourceStatesReply(reply);
+	m_client->getTuningSourcesState();
 }
 
 void TuningSrvClientThread::tuningSignalsRead(quint64 requestID, std::vector<Hash>& hashes)

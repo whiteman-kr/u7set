@@ -400,7 +400,14 @@ namespace Builder
 
 			QVector<AppSignal*> tunSignals;
 
-			for(const QString& tunSrcID : settings->tuningSourceEquipmentIDs)
+			QStringList tuningSourcesIDs = settings->tuningSourceEquipmentIDs;
+
+			if (tuningSourcesIDs.empty())
+			{
+				tuningSourcesIDs = m_context->m_tuningDataStorage->getAllTuningSourceIDs();
+			}
+
+			for(const QString& tunSrcID : tuningSourcesIDs)
 			{
 				Tuning::TuningDataShared td = m_context->m_tuningDataStorage->getTuningData(tunSrcID);
 

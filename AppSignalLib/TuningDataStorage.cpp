@@ -872,4 +872,15 @@ namespace  Tuning
 		return it->second;
 	}
 
+	QStringList TuningDataStorage::getAllTuningSourceIDs() const
+	{
+		QStringList ids;
+
+		for(const auto& [id, data] : m_tuningDataMap)
+		{
+			ids.append(id);
+		}
+
+		return ids;
+	}
 }

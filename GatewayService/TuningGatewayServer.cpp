@@ -686,35 +686,42 @@ bool TuningGatewayServer::processGetTuningSourceStatesRequest(TgsSessionShared s
 
 	std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_REQUEST_SIZE);
 
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		stc->replyData.clear();
+	}
+
+	stc->tunSrvClientThread->getTuningSourcesState();
+
+	WaitResult wr = waitForOrQuit(stc, 500);
+
+	if (wr == WaitResult::QuitRequested)
+	{
+		return true;
+	}
+
 	thread_local std::vector<char> replyData;
 
-	replyData.clear();
-
-	stc->tunSrvClientThread->getTuningSourceStatesReply(replyData);
+	{
+		std::lock_guard lg(stc->condVarMutex);
+		replyData.swap(stc->replyData);
+	}
 
 	thread_local Network::GetTuningSourcesStatesReply tsStates;
 
 	tsStates.Clear();
 
-	bool result = false;
+	bool res = tsStates.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
 
-	if (replyData.size() > 0)
+	if (res == false)
 	{
-		result = tsStates.ParseFromArray(replyData.data(), TO_INT(replyData.size()));
+		sendErrReply(stc, header, GCL::GwErrorCode::GWC_PARSE_REQUEST_ERROR);
+		return true;
 	}
 
 	GCL::GwGetTuningSourceStatesResponse reply;
 
 	reply.count = 0;
-	reply.clientIsActive = 0;
-
-	if (result == false)
-	{
-		sendOkReply(stc, header, reinterpret_cast<const char*>(&reply),
-							GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_RESPONSE_SIZE);
-		return true;
-	}
-
 	reply.clientIsActive = QString::fromStdString(tsStates.activeclientid()) == m_swInfo.equipmentID() ? 1 : 0;
 
 	if (tsStates.tuningsourcesstate_size() == 0)
