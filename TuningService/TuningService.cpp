@@ -159,6 +159,13 @@ namespace Tuning
 
 		AUTO_LOCK(m_startStopMutex);							// !!!!
 
+		if (m_tuningSources.getSourceByID(tuningSourceEquipmentID) == nullptr)
+		{
+			*controlledTuningSource = tuningSourceEquipmentID;
+			*controlIsActive = false;
+			return E::NetworkError::UnknownTuningSourceID;
+		}
+
 		stopSourcesListenerThreads();
 
 		stopTuningSourceThreads();

@@ -1756,7 +1756,6 @@ namespace Tuning
 
 		if (ts == nullptr)
 		{
-			Q_ASSERT(false);			// how all previous checks we pass ???
 			tss->set_valid(false);
 			tss->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
 			return;
@@ -2269,7 +2268,6 @@ namespace Tuning
 
 		if (it == m_hash2SignalIndexMap.end())
 		{
-			Q_ASSERT(false);
 			return nullptr;
 		}
 

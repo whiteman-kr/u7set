@@ -468,6 +468,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0438.sql", "Upgrade to version 438, LM-SF41, AFB func changed to version 6"},
 	{":/DatabaseUpgrade/Upgrade0439.sql", "Upgrade to version 439, LM-SF41, Add 4 Ethernet controllers (2TUN/2APP&DIAG), Add ConfigVersion to LAN Controller description"},
 	{":/DatabaseUpgrade/Upgrade0440.sql", "Upgrade to version 440, LM-SF41, change Platform Interface Controller signals addresses"},
+	{":/DatabaseUpgrade/Upgrade0441.sql", "Upgrade to version 441, GatewayService preset updating"},
 };
 
 int DbWorker::counter = 0;
