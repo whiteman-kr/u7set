@@ -1083,13 +1083,64 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_VALUE_TYPE_STR, m_tuningDefaultValue.typeStr());
 
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, tuningDefaultValue().toString());
-		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, tuningDefaultValue().bitCastUint64Value(), true);
-
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, tuningLowBound().toString());
-		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, tuningLowBound().bitCastUint64Value(), true);
-
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, tuningHighBound().toString());
-		xml.writeUInt64Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, tuningHighBound().bitCastUint64Value(), true);
+
+		switch (signalType())
+		{
+		case E::SignalType::Analog:
+			switch (analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				Q_ASSERT(tuningDefaultValue().type() == TuningValueType::Float);
+				Q_ASSERT(tuningLowBound().type() == TuningValueType::Float);
+				Q_ASSERT(tuningHighBound().type() == TuningValueType::Float);
+
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX,
+										 std::bit_cast<quint32>(tuningDefaultValue().floatValue()),
+										 true);
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX,
+										 std::bit_cast<quint32>(tuningLowBound().floatValue()),
+										 true);
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX,
+										 std::bit_cast<quint32>(tuningHighBound().floatValue()),
+										 true);
+				break;
+			case E::AnalogAppSignalFormat::SignedInt32:
+				Q_ASSERT(tuningDefaultValue().type() == TuningValueType::SignedInt32);
+				Q_ASSERT(tuningLowBound().type() == TuningValueType::SignedInt32);
+				Q_ASSERT(tuningHighBound().type() == TuningValueType::SignedInt32);
+
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX,
+										 std::bit_cast<quint32>(tuningDefaultValue().int32Value()),
+										 true);
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX,
+										 std::bit_cast<quint32>(tuningLowBound().int32Value()),
+										 true);
+				xml.writeUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX,
+										 std::bit_cast<quint32>(tuningHighBound().int32Value()),
+										 true);
+				break;
+			default:
+				Q_ASSERT(false);
+				break;
+			}
+			break;
+
+		case E::SignalType::Discrete:
+			Q_ASSERT(tuningDefaultValue().type() == TuningValueType::Discrete);
+			Q_ASSERT(tuningLowBound().type() == TuningValueType::Discrete);
+			Q_ASSERT(tuningHighBound().type() == TuningValueType::Discrete);
+
+			xml.writeUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, tuningDefaultValue().discreteValue(), true);
+			xml.writeUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, tuningLowBound().discreteValue(), true);
+			xml.writeUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, tuningHighBound().discreteValue(), true);
+			break;
+
+		default:
+			Q_ASSERT(false);
+			break;
+		}
 
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ADDR, m_tuningAddr);
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, m_tuningAddr);
@@ -1222,17 +1273,80 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		updateTuningValuesType();
 
 		Q_ASSERT(m_tuningDefaultValue.type() == tvt);
+		Q_ASSERT(m_tuningLowBound.type() == tvt);
+		Q_ASSERT(m_tuningHighBound.type() == tvt);
 
-		quint64 v64;
+		switch (signalType())
+		{
+		case E::SignalType::Analog:
+			switch (analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				{
+					quint32 v32;
+					float f;
 
-		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v64);
-		m_tuningDefaultValue.setBitCastUint64Value(v64);
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v32);
+					f = std::bit_cast<float>(v32);
+					m_tuningDefaultValue.setFloatValue(f);
 
-		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v64);
-		m_tuningLowBound.setBitCastUint64Value(v64);
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v32);
+					f = std::bit_cast<float>(v32);
+					m_tuningLowBound.setFloatValue(f);
 
-		result &= xml.readUInt64Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v64);
-		m_tuningHighBound.setBitCastUint64Value(v64);
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v32);
+					f = std::bit_cast<float>(v32);
+					m_tuningHighBound.setFloatValue(f);
+				}
+				break;
+			case E::AnalogAppSignalFormat::SignedInt32:
+				{
+					quint32 v32;
+					qint32 i32;
+
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v32);
+					i32 = std::bit_cast<qint32>(v32);
+					m_tuningDefaultValue.setInt32Value(i32);
+
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v32);
+					i32 = std::bit_cast<qint32>(v32);
+					m_tuningLowBound.setInt32Value(i32);
+
+					result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v32);
+					i32 = std::bit_cast<qint32>(v32);
+					m_tuningHighBound.setInt32Value(i32);
+				}
+				break;
+			default:
+				result = false;
+				Q_ASSERT(false);
+				break;
+			}
+			break;
+
+		case E::SignalType::Discrete:
+			{
+				quint32 v32;
+				qint32 i32;
+
+				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v32);
+				i32 = std::bit_cast<qint32>(v32);
+				tuningDefaultValue().setDiscreteValue(i32);
+
+				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v32);
+				i32 = std::bit_cast<qint32>(v32);
+				tuningLowBound().setDiscreteValue(i32);
+
+				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v32);
+				i32 = std::bit_cast<qint32>(v32);
+				tuningHighBound().setDiscreteValue(i32);
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			break;
+		}
 
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ADDR, &m_tuningAddr);
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, &m_tuningAbsAddr);

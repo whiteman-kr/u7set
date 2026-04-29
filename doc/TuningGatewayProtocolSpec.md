@@ -1,8 +1,8 @@
 ﻿# Radiy TuningService Gateway Protocol Specification
 
-**Document Version:** 0.3  
+**Document Version:** 0.4  
 **Protocol Version:** 1.0  
-**Date:** 15 Apr 2026  
+**Date:** 27 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
@@ -769,16 +769,16 @@ Total size: `8 + (count * sizeof(GwTuningSignalState))` bytes
 **Response Behavior:**
 - `count` equals the number of returned states.
 - States are returned in the same order as requested hashes.
-- Missing signals: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
+- Missing signals: If a requested signal hash is not found in the system, the corresponding returned `GwTuningSignalState` has `hash` set to the requested hash and `errorCode = GWC_UNKNOWN_SIGNAL_HASH` ([Section 7.2](#72-error-codes)).
 
 **Example Flow:**
 ```
 Client -> Server: TGW_TUNING_SIGNALS_READ (count=3, hashes=[0x123, 0x456, 0x999])
 Server -> Client: TGW_TUNING_SIGNALS_READ (Status=0, count=3,
     states=[
-        { hash=0x123, ... },
-        { hash=0x456, ... },
-        { hash=0x999, ... }
+        { hash=0x123, errorCode=0, ... },
+        { hash=0x456, errorCode=0, ... },
+        { hash=0x999, errorCode=GWC_UNKNOWN_SIGNAL_HASH, ... }
     ])
 ```
 
@@ -1539,3 +1539,4 @@ Within each `DataSource` element:
 | 0.1 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
 | 0.2 | 06 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated TGW_CHANGE_CONTROLLED_TUNING_SOURCE |
 | 0.3 | 15 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added error GWC_TUNING_SOURCES_FILE_NOT_READY |
+| 0.4 | 27 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed TGW_TUNING_SIGNALS_READ missing-signal behavior |

@@ -3,12 +3,29 @@
 #include <pugixml/pugixml.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <charconv>
+#include <cstdint>
 #include <ranges>
 
 
 namespace
 {
+	bool tryParseHexUint32(std::string_view text, uint32_t& value)
+	{
+		if (text.empty())
+		{
+			return false;
+		}
+
+		if (text.starts_with("0x") || text.starts_with("0X"))
+		{
+			text.remove_prefix(2);
+		}
+
+		auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), value, 16);
+		return ec == std::errc{} && ptr == text.data() + text.size();
+	}
 
 
 	GatewayClientLib::TuningSource parseDataSource(const pugi::xml_node& dataSource, std::vector<std::string>& errors)
@@ -55,6 +72,30 @@ namespace
 			std::string appSignalId = signalNode.attribute("AppSignalID").as_string();
 			auto hash = Radiy::calcHash(appSignalId);
 
+			auto readDiscreteTuningValue = [&signalNode](const char* hexAttributeName)
+			{
+				uint32_t rawValue = 0;
+				const bool ok = tryParseHexUint32(signalNode.attribute(hexAttributeName).as_string(), rawValue);
+				assert(ok);
+				return static_cast<double>(rawValue == 0 ? 0 : 1);
+			};
+
+			auto readSignedTuningValue = [&signalNode](const char* hexAttributeName)
+			{
+				uint32_t rawValue = 0;
+				const bool ok = tryParseHexUint32(signalNode.attribute(hexAttributeName).as_string(), rawValue);
+				assert(ok);
+				return static_cast<double>(std::bit_cast<int32_t>(rawValue));
+			};
+
+			auto readFloatingTuningValue = [&signalNode](const char* hexAttributeName)
+			{
+				uint32_t rawValue = 0;
+				const bool ok = tryParseHexUint32(signalNode.attribute(hexAttributeName).as_string(), rawValue);
+				assert(ok);
+				return static_cast<double>(std::bit_cast<float>(rawValue));
+			};
+
 
 			GatewayClientLib::GwAppSignalParam sp{};
 
@@ -83,58 +124,32 @@ namespace
 			switch (signalType)
 			{
 			case GatewayClientLib::SignalType::Discrete:
-				[[fallthrough]];
+				{
+					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_int();
+					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_int();
+					sp.tuningDefaultValue = readDiscreteTuningValue("TuningDefaultValueHex");
+                 sp.tuningLowBound = readDiscreteTuningValue("TuningLowBoundHex");
+					sp.tuningHighBound = readDiscreteTuningValue("TuningHighBoundHex");
+				}
+				break;
+
 			case GatewayClientLib::SignalType::SignedInt32:
 				{
-#if 0
-					auto hexStrToInt = [](const char* hexStr) -> int
-					{
-						int value = 0;
-						std::from_chars(hexStr, hexStr + std::strlen(hexStr), value, 16);
-						return value;
-					};
-
 					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_int();
 					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_int();
-					sp.tuningDefaultValue = hexStrToInt(signalNode.attribute("TuningDefaultValueHex").as_string());
-					sp.tuningLowBound = hexStrToInt(signalNode.attribute("TuningLowBoundHex").as_string());
-					sp.tuningHighBound = hexStrToInt(signalNode.attribute("TuningHighBoundHex").as_string());
-#else
-					int to_do_getting_data_as_hex = 0;
-					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_int();
-					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_int();
-					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValue").as_int();
-					sp.tuningLowBound = signalNode.attribute("TuningLowBound").as_int();
-					sp.tuningHighBound = signalNode.attribute("TuningHighBound").as_int();
-#endif
+					sp.tuningDefaultValue = readSignedTuningValue("TuningDefaultValueHex");
+					sp.tuningLowBound = readSignedTuningValue("TuningLowBoundHex");
+					sp.tuningHighBound = readSignedTuningValue("TuningHighBoundHex");
 				}
 				break;
 
 			case GatewayClientLib::SignalType::Float32:
 				{
-#if 0
-					auto hexStrToDouble = [](const char* hexStr) -> double
-					{
-						uint32_t intValue = 0;
-						std::from_chars(hexStr, hexStr + std::strlen(hexStr), intValue, 16);
-						float value;
-						std::memcpy(&value, &intValue, sizeof(float));
-						return value;
-					};
-
 					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_double();
 					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_double();
-					sp.tuningDefaultValue = hexStrToDouble(signalNode.attribute("TuningDefaultValueHex").as_string());
-					sp.tuningLowBound = hexStrToDouble(signalNode.attribute("TuningLowBoundHex").as_string());
-					sp.tuningHighBound = hexStrToDouble(signalNode.attribute("TuningHighBoundHex").as_string());
-#else
-					int to_do_getting_data_as_hex = 0;
-					sp.lowValidRange = signalNode.attribute("LowEngineeringUnits").as_double();
-					sp.highValidRange = signalNode.attribute("HighEngineeringUnits").as_double();
-					sp.tuningDefaultValue = signalNode.attribute("TuningDefaultValue").as_double();
-					sp.tuningLowBound = signalNode.attribute("TuningLowBound").as_double();
-					sp.tuningHighBound = signalNode.attribute("TuningHighBound").as_double();
-#endif
+					sp.tuningDefaultValue = readFloatingTuningValue("TuningDefaultValueHex");
+					sp.tuningLowBound = readFloatingTuningValue("TuningLowBoundHex");
+					sp.tuningHighBound = readFloatingTuningValue("TuningHighBoundHex");
 				}
 				break;
 			};

@@ -594,8 +594,9 @@ TEST_F(TuningGatewayTests, RequestTuningSources)
 
 				requestTuningSources();
 			}
-			catch (const std::runtime_error&)
+			catch (const std::runtime_error& e)
 			{
+				std::cout << "Exception: " << e.what() << std::endl;
 				ASSERT_TRUE(false);
 			}
 		}
@@ -629,6 +630,66 @@ TEST_F(TuningGatewayTests, RequestTuningSources)
 	ASSERT_FALSE(source.signalIds.empty());
 	ASSERT_FALSE(source.signals.empty());
 	ASSERT_EQ(source.signals.size(), source.signalIds.size());
+
+	// Verify that known signal hashes are present in the received signals
+	//
+
+	// Check signal:
+	//
+	{
+		// <Signal ID="2875" AppSignalID="#TEST_TUNING_LIMITS_INT32" CustomAppSignalID="TEST_TUNING_LIMITS_INT32" Caption="App signal
+		// #TEST_TUNING_LIMITS_INT32 in schema SYSTEMID_CLIENTTEST_CH12_MD00" EquipmentID="SYSTEMID_CLIENTTEST_CH12_MD00" Channel="A"
+		// ChannelVal="0" SignalGroupID="0" SignalInstanceID="3045" Type="Analog" TypeVal="0" InOutType="Internal" InOutTypeVal="2"
+		// ByteOrder="BigEndian" ByteOrderVal="1" DataSize="32" AnalogSignalFormat="SignedInt32" AnalogSignalFormatVal="1" BusTypeID=""
+		// InvertSignal="false" Acquire="true" Archive="true" Log="false" Reserved="false" ApertureType="RangePercent" ApertureTypeVal="0"
+		// FineAperture="0.5" CoarseAperture="1" Unit="mm" DecimalPlaces="3" Tags="" UalAddr="46336:0" RegValueAddr="0:0"
+		// RegValidityAddr="-1:-1" EnableTuning="true" TuningValueType="1" TuningValueTypeStr="SignedInt32" TuningDefaultValue="99999"
+		// TuningLowBound="-2147483648" TuningHighBound="2147483647" TuningDefaultValueHex="0x0001869F" TuningLowBoundHex="0x80000000"
+		// TuningHighBoundHex="0x7FFFFFFF" TuningAddr="0:0" TuningAbsAddr="0:0" HighEngineeringUnits="100" LowEngineeringUnits="0"/>
+		// 
+		// SignedInt32
+		//
+		ASSERT_TRUE(source.signals.contains(Radiy::calcHash("#TEST_TUNING_LIMITS_INT32")));
+
+		const auto& sp = source.signals.at(Radiy::calcHash("#TEST_TUNING_LIMITS_INT32"));
+
+		EXPECT_EQ(sp.hash, Radiy::calcHash("#TEST_TUNING_LIMITS_INT32"));
+		EXPECT_STREQ(sp.appSignalId, "#TEST_TUNING_LIMITS_INT32");
+		EXPECT_STREQ(sp.customSignalId, "TEST_TUNING_LIMITS_INT32");
+
+		EXPECT_EQ(static_cast<int32_t>(sp.tuningDefaultValue), 99999);
+		EXPECT_EQ(static_cast<int32_t>(sp.tuningLowBound), -2147483648);
+		EXPECT_EQ(static_cast<int32_t>(sp.tuningHighBound), 2147483647);
+	}
+
+	// Check signal:
+	//
+	{
+		// <Signal ID="2947" AppSignalID="#TEST_TUNING_LIMITS_FP32" CustomAppSignalID="TEST_TUNING_LIMITS_FP32" Caption="App signal
+		// #TEST_TUNING_LIMITS_FP32 in schema SYSTEMID_CLIENTTEST_CH12_MD00" EquipmentID="SYSTEMID_CLIENTTEST_CH12_MD00" Channel="A"
+		// ChannelVal="0" SignalGroupID="0" SignalInstanceID="3117" Type="Analog" TypeVal="0" InOutType="Internal" InOutTypeVal="2"
+		// ByteOrder="BigEndian" ByteOrderVal="1" DataSize="32" AnalogSignalFormat="Float32" AnalogSignalFormatVal="2" BusTypeID=""
+		// InvertSignal="false" Acquire="true" Archive="true" Log="false" Reserved="false" ApertureType="RangePercent" ApertureTypeVal="0"
+		// FineAperture="0.5" CoarseAperture="1" Unit="mm" DecimalPlaces="3" Tags="" UalAddr="46336:0" RegValueAddr="0:0"
+		// RegValidityAddr="-1:-1" EnableTuning="true" TuningValueType="3" TuningValueTypeStr="Float" TuningDefaultValue="999"
+		// TuningLowBound="-10345.5" TuningHighBound="18345.5" TuningDefaultValueHex="0x4479C000" TuningLowBoundHex="0xC621A600"
+		// TuningHighBoundHex="0x468F5300" TuningAddr="0:0" TuningAbsAddr="0:0" HighEngineeringUnits="100" LowEngineeringUnits="0"/>
+		//
+		// Float32
+		//
+		ASSERT_TRUE(source.signals.contains(Radiy::calcHash("#TEST_TUNING_LIMITS_FP32")));
+
+		const auto& sp = source.signals.at(Radiy::calcHash("#TEST_TUNING_LIMITS_FP32"));
+
+		EXPECT_EQ(sp.hash, Radiy::calcHash("#TEST_TUNING_LIMITS_FP32"));
+		EXPECT_STREQ(sp.appSignalId, "#TEST_TUNING_LIMITS_FP32");
+		EXPECT_STREQ(sp.customSignalId, "TEST_TUNING_LIMITS_FP32");
+
+		EXPECT_EQ(sp.tuningDefaultValue, 999.0);
+		EXPECT_EQ(sp.tuningLowBound, -10345.5);
+		EXPECT_EQ(sp.tuningHighBound, 18345.5);
+	}
+
 
 	return;
 }
@@ -747,12 +808,22 @@ TEST_F(TuningGatewayTests, GptTuningSourcesStartReturnsConsistentMetadata)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	GatewayClientLib::GwGetTuningSourcesStartRequest request{};
 	GatewayClientLib::GwGetTuningSourcesStartResponse response{};
+	GatewayClientLib::GwErrorCode status{};
 
-	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, request, response);
+	for (int i = 0; i < 10; i++)
+	{
+		status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, request, response);
+		if (status == GatewayClientLib::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+
+		break;
+	}
 
 	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 	EXPECT_GT(response.totalSize, 0u);
@@ -767,11 +838,9 @@ TEST_F(TuningGatewayTests, GptTuningSourceStatesResponseCountMatchesParsedSource
 	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
-
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
-	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
+ 	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
 
 	const auto sourceStates = tuningConn.tuningSources();
 	EXPECT_EQ(sourceStates.size(), tuningConn.workset().tuningSources.size());
@@ -783,7 +852,6 @@ TEST_F(TuningGatewayTests, GptTuningSourceStatesModuleEquipmentIdMatchesTuningSo
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_NO_THROW(tuningConn.requestTuningSourceStates());
@@ -805,7 +873,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1"), Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1")};
 	const auto states = tuningConn.requestSignalStates(hashes);
@@ -825,7 +892,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesDuplicateHashesPreserveDuplicates)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	const Radiy::Hash duplicateHash = Radiy::calcHash("#TGW_D1");
 	const std::vector<Radiy::Hash> hashes{duplicateHash, duplicateHash, duplicateHash};
@@ -846,7 +912,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesSupportsExactlyMaxStateRequest)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	const auto knownHashes = gptKnownTuningSignalHashes();
 	std::vector<Radiy::Hash> hashes;
@@ -874,7 +939,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesOneKnownSignal)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1")};
 	const auto states = tuningConn.requestSignalStates(hashes);
@@ -888,24 +952,30 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesOneKnownSignal)
 }
 
 
-TEST_F(TuningGatewayTests, DISABLED_GptReadSignalStatesSkipsUnknownHashes)
+TEST_F(TuningGatewayTests, GptReadSignalStatesSkipsUnknownHashes)
 {
 	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	auto hashes = gptKnownTuningSignalHashes();
 	hashes.insert(hashes.begin() + 1, Radiy::calcHash("#GPT_UNKNOWN_SIGNAL"));
 
 	auto states = tuningConn.requestSignalStates(hashes);
 
-	// TODO: DECIDE WHAT TO DO IF UNKNOWN HASHES ARE REQUESTED. CURRENTLY THEY ARE JUST SKIPPED, BUT MAYBE IT SHOULD BE AN ERROR INSTEAD?
+	ASSERT_EQ(states.size(), 3u);
 
-	ASSERT_EQ(states.size(), 2u);
 	EXPECT_EQ(states[0].hash, Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"));
-	EXPECT_EQ(states[1].hash, Radiy::calcHash("#TGW_D1"));
+	EXPECT_TRUE(states[0].errorCode == static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS) ||
+				states[0].errorCode == static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_LM_CONTROL_IS_NOT_ACTIVE));
+
+	EXPECT_EQ(states[1].hash, Radiy::calcHash("#GPT_UNKNOWN_SIGNAL"));
+	EXPECT_EQ(states[1].errorCode, static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_UNKNOWN_SIGNAL_HASH));
+
+	EXPECT_EQ(states[2].hash, Radiy::calcHash("#TGW_D1"));
+	EXPECT_TRUE(states[2].errorCode == static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS) ||
+				states[2].errorCode == static_cast<uint32_t>(GatewayClientLib::GwErrorCode::GWC_LM_CONTROL_IS_NOT_ACTIVE));
 }
 
 TEST_F(TuningGatewayTests, GptReadSignalStatesRejectsTooManySignals)
@@ -914,7 +984,6 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesRejectsTooManySignals)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait to avoid GWC_TUNING_SOURCES_FILE_NOT_READY
 
 	GatewayClientLib::GwTuningSignalsReadRequest request{};
 	request.count = tuningConn.handshakeResponse().maxStateRequest + 1;

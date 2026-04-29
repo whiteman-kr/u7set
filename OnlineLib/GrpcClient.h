@@ -382,7 +382,7 @@ protected:
 
 		setConnectionState(state);
 
-		logErr(QString("%1::createStubAndHandshake - Handshake Failed").arg(clientDescription()));
+		logErr(QString("%1::createStubAndHandshake - Handshake Failed: %2").arg(clientDescription()).arg(QString::fromStdString(st.error_message())));
 
 		m_stub.reset();
 	}
