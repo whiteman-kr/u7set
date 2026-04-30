@@ -61,7 +61,7 @@ namespace GatewayClientLib
 		return m_conn->commandActivateTuningSource(tuningSourceId, true);
 	}
 
-	std::future<GwErrorCode> TuningGwConnection::commandDeactivateTuningSource()
+	std::future<GwErrorCode> TuningGwConnection::commandDeactivateTuningSource(std::string_view tuningSourceId)
 	{
 		if (m_conn == nullptr)
 		{
@@ -70,7 +70,7 @@ namespace GatewayClientLib
 			return promise.get_future();
 		}
 
-		return m_conn->commandActivateTuningSource("", false);
+		return m_conn->commandActivateTuningSource(tuningSourceId, false);
 	}
 
 	std::future<WriteValueResult> TuningGwConnection::commandWriteSignalValues(std::span<const GwTuningWriteValue> states,

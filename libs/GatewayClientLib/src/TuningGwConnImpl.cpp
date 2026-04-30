@@ -445,7 +445,7 @@ namespace GatewayClientLib
 
 		// Parse received TuningSources.xml content
 		//
-		auto result = parseTuningSourcesXml(tuningSourcesXmlContent);
+		ParseTuningSourceXmlResult result = parseTuningSourcesXml(tuningSourcesXmlContent);
 		if (result.errors.empty() == false)
 		{
 			std::string allErrors;
@@ -455,6 +455,16 @@ namespace GatewayClientLib
 			}
 
 			throw std::runtime_error{std::format("Parsing TuningSources.xml {} error(s): {}", result.errors.size(), allErrors)};
+		}
+
+		// Add signals from sources.
+		//
+		for (const auto& src : result.tuningSources) 
+		{
+			for (const auto[_, signalParam] : src.signals) 
+			{
+				m_signalUpdater.addSignals({&signalParam, 1});
+			}
 		}
 
 		// Save the result for further use

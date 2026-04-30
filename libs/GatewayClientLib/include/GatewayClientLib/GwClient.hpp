@@ -41,11 +41,11 @@ namespace GatewayClientLib
 		GWC_UNKNOWN_TUNING_SOURCE_ID = 0x0017,
 		GWC_TUNING_SOURCE_HAS_NO_SIGNALS = 0x0018,
 
-		GWC_COMMUNICATION_ERROR = 0x0030,   // Not a server error code. Used internally by gateway client to indicate communication errors
+		GWC_COMMUNICATION_ERROR = 0x0080,   // Not a server error code. Used internally by gateway client to indicate communication errors
 											// (e.g. connection lost, send/receive failure, etc.)
-		GWC_COMMAND_CANCELED = 0x0031,      // Not a server error code. Used internally by gateway client to indicate that a command was
+		GWC_COMMAND_CANCELED = 0x0081,      // Not a server error code. Used internally by gateway client to indicate that a command was
 											// canceled (e.g. by client shutdown)
-		GWC_CLIENT_INTERNAL_ERROR = 0x0032, // Not a server error code. Used internally by gateway client to indicate internal errors.
+		GWC_CLIENT_INTERNAL_ERROR = 0x0082, // Not a server error code. Used internally by gateway client to indicate internal errors.
 
 		// Gateway service error codes - reported by gateway service when it fails to process a request (e.g. due to invalid request,
 		// unsupported protocol version, etc.)

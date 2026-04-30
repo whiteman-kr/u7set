@@ -55,7 +55,7 @@ namespace GatewayClientLib
 		// Enqueues a command to activate or deactivate control of a tuning source.
 		//
 		std::future<GatewayClientLib::GwErrorCode> commandActivateTuningSource(std::string_view tuningSourceId);
-		std::future<GatewayClientLib::GwErrorCode> commandDeactivateTuningSource();
+		std::future<GatewayClientLib::GwErrorCode> commandDeactivateTuningSource(std::string_view tuningSourceId);
 
 		// Enqueues commands to write tuning signal values. The contents of `states` are copied, so the
 		// caller does not need to keep them alive after this function returns.

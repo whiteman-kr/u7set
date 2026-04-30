@@ -33,6 +33,7 @@ namespace
 		using TuningGwConnImpl::requestActivateTuningSource;
 		using TuningGwConnImpl::requestHandshake;
 		using TuningGwConnImpl::requestSignalStates;
+		using TuningGwConnImpl::requestWriteSignalValues;
 		using TuningGwConnImpl::requestTuningSourceStates;
 		using TuningGwConnImpl::requestTuningSources;
 
@@ -70,6 +71,14 @@ namespace
 	std::vector<Radiy::Hash> gptKnownTuningSignalHashes()
 	{
 		return {Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), Radiy::calcHash("#TGW_D1")};
+	}
+
+	std::vector<GatewayClientLib::GwTuningWriteValue> gptKnownWritableSignalValues()
+	{
+		return {
+			{Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), 1.0},
+			{Radiy::calcHash("#TGW_D1"), 0.0},
+		};
 	}
 
 	std::array<std::string_view, 3> gptKnownTuningSourceModuleIds()
@@ -1001,6 +1010,175 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesRejectsTooManySignals)
 											std::span<GatewayClientLib::GwTuningSignalState>{states});
 
 	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+}
+
+TEST_F(TuningGatewayTests, GptTuningSignalsWriteRawRequestRejectsTooManySignals)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+
+	GatewayClientLib::GwTuningSignalsWriteRequest request{};
+	std::snprintf(request.user, sizeof(request.user), "%s", "TuningUser1");
+	request.apply = 0;
+	request.count = tuningConn.handshakeResponse().maxStateWrite + 1;
+
+	std::vector<GatewayClientLib::GwTuningWriteValue> values(request.count,
+															 GatewayClientLib::GwTuningWriteValue{Radiy::calcHash("#TGW_D1"), 0.0});
+	std::vector<GatewayClientLib::GwTuningSignalWriteResult> results(request.count);
+	GatewayClientLib::GwTuningSignalsWriteResponse response{};
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE,
+											request,
+											std::span<const GatewayClientLib::GwTuningWriteValue>{values},
+											response,
+											std::span<GatewayClientLib::GwTuningSignalWriteResult>{results});
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+}
+
+TEST_F(TuningGatewayTests, GptTuningSignalsWriteRawRequestRejectsExcessivePayload)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+
+	GatewayClientLib::GwTuningSignalsWriteRequest request{};
+	GatewayClientLib::GwTuningSignalsWriteResponse response{};
+	std::array<GatewayClientLib::GwTuningWriteValue, 1> values{{{Radiy::calcHash("#TGW_D1"), 0.0}}};
+	std::array<GatewayClientLib::GwTuningSignalWriteResult, 1> results{};
+	std::array<std::byte, 32> extraPayload{};
+
+	std::snprintf(request.user, sizeof(request.user), "%s", "TuningUser1");
+	request.apply = 0;
+	request.count = 1;
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE,
+											request,
+											std::span<const std::byte>{extraPayload},
+											response,
+											std::span<GatewayClientLib::GwTuningSignalWriteResult>{results});
+
+	EXPECT_EQ(status, GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+}
+
+// DISABLED - On writeing discrete signal to 1, internal error is reported, waing fro the fix.
+//
+TEST_F(TuningGatewayTests, DISABLED_GptTuningSignalsWriteRawRequestReturnsResultsForKnownSignals)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+
+	GatewayClientLib::GwTuningSignalsWriteRequest request{};
+	GatewayClientLib::GwTuningSignalsWriteResponse response{};
+	auto values = gptKnownWritableSignalValues();
+	std::vector<GatewayClientLib::GwTuningSignalWriteResult> results(values.size());
+
+	std::snprintf(request.user, sizeof(request.user), "%s", "TuningUser1");
+	request.apply = 0;
+	request.count = static_cast<uint32_t>(values.size());
+
+	auto status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE,
+											request,
+											std::span<const GatewayClientLib::GwTuningWriteValue>{values},
+											response,
+											std::span<GatewayClientLib::GwTuningSignalWriteResult>{results});
+
+	ASSERT_EQ(status, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_EQ(response.count, values.size());
+	EXPECT_EQ(response.reserved, 0u);
+
+	for (size_t i = 0; i < values.size(); ++i)
+	{
+		EXPECT_EQ(results[i].hash, values[i].hash);
+		EXPECT_EQ(results[i].status, static_cast<int32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
+		EXPECT_EQ(results[i].reserved, 0u);
+	}
+}
+
+// DISABLED - On writeing discrete signal to 1, internal error is reported, waing fro the fix.
+//
+TEST_F(TuningGatewayTests, DISABLED_GptRequestWriteSignalValuesReturnsSuccessForKnownSignals)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	auto values = gptKnownWritableSignalValues();
+	auto result = tuningConn.requestWriteSignalValues(values, "TuningUser1", false);
+
+	ASSERT_EQ(result.errorCode, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_EQ(result.signalResults.size(), values.size());
+
+	for (size_t i = 0; i < values.size(); ++i)
+	{
+		EXPECT_EQ(result.signalResults[i].hash, values[i].hash);
+		EXPECT_EQ(result.signalResults[i].status, static_cast<int32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
+		EXPECT_EQ(result.signalResults[i].reserved, 0u);
+	}
+}
+
+TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesReturnsPerSignalUnknownHash)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	std::vector<GatewayClientLib::GwTuningWriteValue> values{
+		{Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), 1.0},
+		{Radiy::calcHash("#GPT_UNKNOWN_SIGNAL"), 1.0},
+		{Radiy::calcHash("#TGW_D1"), 0.0},
+	};
+
+	auto result = tuningConn.requestWriteSignalValues(values, "TuningUser1", false);
+
+	ASSERT_EQ(result.errorCode, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_EQ(result.signalResults.size(), values.size());
+
+	EXPECT_EQ(result.signalResults[0].hash, values[0].hash);
+	EXPECT_EQ(result.signalResults[0].status, static_cast<int32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
+
+	EXPECT_EQ(result.signalResults[1].hash, values[1].hash);
+	EXPECT_EQ(result.signalResults[1].status, static_cast<int32_t>(GatewayClientLib::GwErrorCode::GWC_UNKNOWN_SIGNAL_HASH));
+
+	EXPECT_EQ(result.signalResults[2].hash, values[2].hash);
+	EXPECT_EQ(result.signalResults[2].status, static_cast<int32_t>(GatewayClientLib::GwErrorCode::GWC_SUCCESS));
+}
+
+TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesRejectsTooManySignals)
+{
+	TestTuningGwConnectionAccessor tuningConn{signalManager, logger};
+
+	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
+	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+	ASSERT_NO_THROW(tuningConn.requestTuningSources());
+	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
+	std::vector<GatewayClientLib::GwTuningWriteValue> values;
+	values.reserve(tuningConn.handshakeResponse().maxStateWrite + 1u);
+	for (uint32_t i = 0; i < tuningConn.handshakeResponse().maxStateWrite + 1u; ++i)
+	{
+		values.push_back({Radiy::calcHash("#TGW_D1"), static_cast<double>(i % 2)});
+	}
+
+	auto result = tuningConn.requestWriteSignalValues(values, "TuningUser1", false);
+
+	EXPECT_EQ(result.errorCode, GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(result.signalResults.size(), values.size());
 }
 
 TEST_F(TuningGatewayTests, GptChangeControlledTuningSourceAcceptsKnownModuleIdAndEchoesActivatedState)
