@@ -1,8 +1,8 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.4  
+**Document Version:** 1.5  
 **Protocol Version:** 1.0  
-**Date:** 26 Mar 2026  
+**Date:** 30 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Released
 
@@ -206,13 +206,13 @@ For reference implementation, see [Appendix B](#appendix-b-crc32-reference-imple
 
 | Request ID | Value (hex) | Description |
 |------------|-------------|-------------|
-| ADSGW_HANDSHAKE | 0x0001 | Initial handshake |
-| ADSGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs |
-| ADSGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs |
-| ADSGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters |
-| ADSGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters |
-| ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
-| ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
+| [ADSGW_HANDSHAKE](#61-adsgw_handshake) | 0x0001 | Initial handshake |
+| [ADSGW_SIGNAL_LIST_START](#62-adsgw_signal_list_start--adsgw_signal_list_next) | 0x0100 | Start retrieving list of AppSignalIDs |
+| [ADSGW_SIGNAL_LIST_NEXT](#62-adsgw_signal_list_start--adsgw_signal_list_next) | 0x0101 | Continue retrieving list of AppSignalIDs |
+| [ADSGW_SIGNAL_PARAM_START](#63-adsgw_signal_param_start--adsgw_signal_param_next) | 0x0200 | Start retrieving signal parameters |
+| [ADSGW_SIGNAL_PARAM_NEXT](#63-adsgw_signal_param_start--adsgw_signal_param_next) | 0x0201 | Continue retrieving signal parameters |
+| [ADSGW_SIGNAL_STATE](#64-adsgw_signal_state) | 0x0300 | Request signal states |
+| [ADSGW_SIGNAL_STATE_CHANGES](#65-adsgw_signal_state_changes) | 0x0301 | Request signal state changes |
 
 <a id="42-response-convention" name="42-response-convention"></a>
 ### 4.2 Response Convention
@@ -1158,3 +1158,4 @@ uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialC
 | 1.2 | 02 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed error code values |
 | 1.3 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added TOC and internal navigation links |
 | 1.4 | 26 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added AnalogFormat to signal type |
+| 1.5 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added navigation to Section 4.1 |

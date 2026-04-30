@@ -51,7 +51,7 @@ void printHelp()
 								<< "    ts list, ts l - Get the list of tuning sources\n"
 								<< "    ts status LM_EQUIPMENT_ID, ts s ID - Get tuning source information\n"
 								<< "    ts activate LM_EQUIPMENT_ID, ts a ID - Activate tuning source\n"
-								<< "    ts deactivate, ts d - Deactivate current tuning source\n"
+								<< "    ts deactivate LM_EQUIPMENT_ID, ts d ID - Deactivate tuning source\n"
 								<< "\nWriting Values:\n"
 								<< "    write, w #SIGNALID=value [#SIGNALID=value ...] - Write tuning signal values\n"
 								<< "    apply - Apply (commit) the written tuning signal values\n"
@@ -322,7 +322,7 @@ void handleWriteCommand(GatewayClientLib::TuningGwConnection& conn,
 		{
 			auto signalParam = signalManager.getSignalParam(sigResult.hash);
 
-			std::cout << "  " << (signalParam.has_value() ? signalParam->customSignalId : "<unknown signal>") << " (hash: 0x" << std::hex
+			std::cout << "  " << (signalParam.has_value() ? signalParam->appSignalId : "<unknown signal>") << " (hash: 0x" << std::hex
 					  << sigResult.hash << std::dec << "): " << to_string(static_cast<GatewayClientLib::GwErrorCode>(sigResult.status))
 					  << std::endl;
 		}
@@ -477,7 +477,6 @@ int main()
 				{
 					std::string equipmentId = argument.starts_with("activate ") ? trim(std::string_view{argument}.substr(9)) :
 																				  trim(std::string_view{argument}.substr(2));
-
 					if (equipmentId.empty() == true)
 					{
 						std::cout << "Invalid command format. Usage: ts activate LM_EQUIPMENT_ID" << std::endl;
@@ -489,9 +488,17 @@ int main()
 					continue;
 				}
 
-				if (argument == "deactivate" || argument == "d")
+				if (argument.starts_with("deactivate ") == true || argument.starts_with("d ") == true)
 				{
-					auto future = conn.commandDeactivateTuningSource();
+					std::string equipmentId = argument.starts_with("deactivate ") ? trim(std::string_view{argument}.substr(11)) :
+																					trim(std::string_view{argument}.substr(2));
+					if (equipmentId.empty() == true)
+					{
+						std::cout << "Invalid command format. Usage: ts deactivate LM_EQUIPMENT_ID" << std::endl;
+						continue;
+					}
+
+					auto future = conn.commandDeactivateTuningSource(equipmentId);
 					printCommandResult(std::move(future));
 					continue;
 				}
