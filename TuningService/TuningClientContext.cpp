@@ -222,8 +222,6 @@ namespace Tuning
 
 		std::set<TuningSourceThreadShared> usedSrcThreads;
 
-		bool hasErrors = false;
-
 		for(int i = 0; i < writeRequestCount; i++)
 		{
 			Network::TuningSignalWriteResult* writeResult = reply->add_writeresult();
@@ -261,39 +259,25 @@ namespace Tuning
 
 			E::NetworkError err = sourceThread->writeSignalState(clientEquipmentID, matsUser, signalHash, TuningValue(writeCmd.value()));
 
-			if (err != E::NetworkError::Success)
+			writeResult->set_error(TO_INT(err));
+
+			if (err == E::NetworkError::Success && autoApply == true)
 			{
-				writeResult->set_error(TO_INT(err));
-				hasErrors = true;
-			}
-			else
-			{
-				writeResult->set_error(TO_INT(E::NetworkError::Success));
-				if (autoApply == true)
-				{
-					usedSrcThreads.insert(sourceThread);
-				}
+				usedSrcThreads.insert(sourceThread);
 			}
 		}
 
-		if (autoApply == true && hasErrors == false)
+		if (autoApply == true)
 		{
 			for(const TuningSourceThreadShared& srcThread : usedSrcThreads)
 			{
 				TEST_PTR_CONTINUE(srcThread);
 
-				E::NetworkError err = srcThread->applySignalStates(clientEquipmentID, matsUser);
-
-				if (err != E::NetworkError::Success)
-				{
-					hasErrors = true;
-				}
+				srcThread->applySignalStates(clientEquipmentID, matsUser);
 			}
 		}
 
-		E::NetworkError result = (hasErrors == true ? E::NetworkError::InternalError : E::NetworkError::Success);
-
-		reply->set_error(TO_INT(result));
+		reply->set_error(TO_INT(E::NetworkError::Success));
 	}
 
 	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& matsUser) const

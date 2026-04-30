@@ -945,7 +945,8 @@ bool TuningGatewayServer::processTuningSignalsWriteRequest(TgsSessionShared stc,
 
 	for(quint32 i = 0; i < valuesCount; i++)
 	{
-		const GCL::GwTuningWriteValue* valPtr = reinterpret_cast<const GCL::GwTuningWriteValue*>(valuePtr);
+		const GCL::GwTuningWriteValue* valPtr =
+			reinterpret_cast<const GCL::GwTuningWriteValue*>(valuePtr + i * sizeof(GCL::GwTuningWriteValue));
 
 		hashes.push_back(valPtr->hash);
 		values.push_back(valPtr->value);

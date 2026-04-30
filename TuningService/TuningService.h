@@ -97,7 +97,7 @@ namespace Tuning
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceThreads();
-		bool runTuningSourceThread(bool runSingleSource,
+		E::NetworkError runTuningSourceThread(bool runSingleSource,
 								   const QString& tuningSourceEquipmentID);
 
 		TuningSourceThreadShared createTuningSourceThread(const TuningSource& source);

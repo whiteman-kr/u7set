@@ -1206,6 +1206,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(AppSignalPropNames::ID, &m_ID);
 
 	result &= xml.readStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, &m_appSignalID);
+
 	result &= xml.readStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, &m_customAppSignalID);
 	result &= xml.readStringAttribute(AppSignalPropNames::CAPTION, &m_caption);
 	result &= xml.readStringAttribute(AppSignalPropNames::EQUIPMENT_ID, &m_equipmentID);
@@ -1331,15 +1332,15 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_DEFAULT_VALUE_HEX, &v32);
 				i32 = std::bit_cast<qint32>(v32);
-				tuningDefaultValue().setDiscreteValue(i32);
+				m_tuningDefaultValue.setDiscreteValue(i32);
 
 				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_LOW_BOUND_HEX, &v32);
 				i32 = std::bit_cast<qint32>(v32);
-				tuningLowBound().setDiscreteValue(i32);
+				m_tuningLowBound.setDiscreteValue(i32);
 
 				result &= xml.readUInt32Attribute(AppSignalPropNames::TUNING_HIGH_BOUND_HEX, &v32);
 				i32 = std::bit_cast<qint32>(v32);
-				tuningHighBound().setDiscreteValue(i32);
+				m_tuningHighBound.setDiscreteValue(i32);
 			}
 			break;
 

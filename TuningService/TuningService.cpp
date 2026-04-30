@@ -177,13 +177,13 @@ namespace Tuning
 			return E::NetworkError::Success;
 		}
 
-		bool result = runTuningSourceThread(true, tuningSourceEquipmentID);
+		E::NetworkError result = runTuningSourceThread(true, tuningSourceEquipmentID);
 
-		if (result == false)
+		if (result != E::NetworkError::Success)
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return E::NetworkError::InternalError;
+			return result;
 		}
 
 		runSourcesListenerThreads();
@@ -592,7 +592,7 @@ namespace Tuning
 		}
 	}
 
-	bool TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
+	E::NetworkError TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
 													const QString& singleSourceEquipmentID)
 	{
 		// if tuningSourceEquipmentID empty - run all sources workers
@@ -600,7 +600,7 @@ namespace Tuning
 		//
 		assert(m_sourceThreads.size() == 0);
 
-		bool result = false;
+		E::NetworkError result = E::NetworkError::InternalError;
 
 		for(const TuningSource& tuningSource : m_tuningSources)
 		{
@@ -611,7 +611,7 @@ namespace Tuning
 
 			if (m_serviceSettings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
 			{
-				continue;
+				return E::NetworkError::UnknownTuningSourceID;
 			}
 
 			if (tuningSource.hasTuningSignals() == false)
@@ -619,7 +619,7 @@ namespace Tuning
 				DEBUG_LOG_MSG(logger(),
 							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
 							  arg(tuningSource.moduleEquipmentID()));
-				continue;
+				return E::NetworkError::TuningSourceHasNoSignals;
 			}
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
@@ -630,7 +630,7 @@ namespace Tuning
 
 			setSourceThreadInTuningClientContexts(sourceThread);
 
-			result = true;
+			result = E::NetworkError::Success;
 		}
 
 		for(auto& p : m_sourceThreads)

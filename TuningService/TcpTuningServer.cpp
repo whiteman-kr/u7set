@@ -291,6 +291,7 @@ namespace Tuning
 			return;
 		}
 
+		m_tuningSignalsReadReply.set_readrequestid(m_tuningSignalsReadRequest.readrequestid());
 		m_tuningSignalsReadReply.set_pendingsignalsstatechanges(0);
 
 		E::NetworkError errCode = E::NetworkError::Success;
@@ -299,7 +300,6 @@ namespace Tuning
 		{
 			int signalQuantity = m_tuningSignalsReadRequest.signalhash_size();
 
-			m_tuningSignalsReadReply.set_readrequestid(m_tuningSignalsReadRequest.readrequestid());
 			m_tuningSignalsReadReply.clear_tuningsignalstate();
 
 			for(int i = 0; i < signalQuantity; i++)
@@ -437,6 +437,8 @@ namespace Tuning
 
 		bool result = m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
 
+		m_tuningSignalsWriteReply.set_writerequestid(m_tuningSignalsWriteRequest.writerequestid());
+
 		if (result == false)
 		{
 			m_tuningSignalsWriteReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
@@ -497,8 +499,6 @@ namespace Tuning
 		}
 
 		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
-
-		m_tuningSignalsWriteReply.set_writerequestid(m_tuningSignalsWriteRequest.writerequestid());
 
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
