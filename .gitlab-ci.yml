@@ -427,7 +427,7 @@ linux_test_job:
 
 #Run AdsGateway tests
     - "# ----------------------------------------------"
-    - "#               Run AdsGateway tests"
+    - "#               Run Gateway tests"
     - "# ----------------------------------------------"
     - "pushd $CI_PROJECT_DIR/bin/release"
     - "StopServices || true"

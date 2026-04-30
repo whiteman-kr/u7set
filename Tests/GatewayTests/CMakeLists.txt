@@ -16,16 +16,10 @@ add_executable(${TARGET}
 	./src/main.cpp
 	./src/TestSettings.hpp
 	./src/TuningGatewayTests.cpp
-	./src/TuningSourcesTests.cpp
+	./src/TuningGatewayTestsNoTuningService.cpp
 )
 
 target_link_libraries(${TARGET} PRIVATE Threads::Threads GTest::gtest GTest::gmock)
 target_link_libraries(${TARGET} PRIVATE GatewayClientLib)
-
-add_custom_command(TARGET ${TARGET} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/data/TestTuningSource.xml
-		$<TARGET_FILE_DIR:${TARGET}>/TestTuningSource.xml
-)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
