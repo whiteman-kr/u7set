@@ -576,20 +576,23 @@ bool TuningSrvClient::sendWriteSignalsRequest(const Request& req)
 
 	size_t count = req.hashes.size();
 
+	TuningValue tunValue;
+
 	for(size_t i = 0; i < count; i++)
 	{
 		Hash h = req.hashes[i];
 
 		const AppSignal* s = m_appSignals.getByHash(h);
 
-		if (s == nullptr ||
-			s->enableTuning() == false)
+		if (s == nullptr || s->enableTuning() == false)
 		{
-			Q_ASSERT(false);
-			continue;
+			tunValue.setType(TuningValueType::Discrete);
+			tunValue.setDiscreteValue(0);
 		}
-
-		TuningValue tunValue = TuningValue::createFromDouble(s->signalType(), s->analogSignalFormat(), req.values[i]);
+		else
+		{
+			tunValue = TuningValue::createFromDouble(s->signalType(), s->analogSignalFormat(), req.values[i]);
+		}
 
 		Network::TuningWriteCommand* wc = writeRequest.add_commands();
 
