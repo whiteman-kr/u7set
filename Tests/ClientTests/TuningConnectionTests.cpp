@@ -257,7 +257,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 		}
 	}
 
-	// Check that one connection is established.
+	// Check three connections are established.
 	//
 	std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
 
@@ -286,7 +286,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 			allSourcesInfo = tc.tuningSourcesInfo();
 		}
 	}
-	EXPECT_EQ(allSourcesInfo.size(), 1);
+	EXPECT_EQ(allSourcesInfo.size(), 3);
 
 	// Check that tuning source info for LM is arrived
 	//

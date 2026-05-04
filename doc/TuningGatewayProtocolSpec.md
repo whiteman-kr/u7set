@@ -1573,7 +1573,7 @@ The `*Hex` fields store the value in the signal's native representation:
 <?xml version="1.0" encoding="UTF-8"?>
 <Content>
     <BuildInfo
-         Project="test_simulator_v441"
+         Project="test_simulator"
         ID="2658"
         Date="30-Apr-2026 10:30"
         Changeset="0"
