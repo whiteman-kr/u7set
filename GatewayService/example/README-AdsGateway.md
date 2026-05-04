@@ -81,9 +81,8 @@ To build this project, you need:
 ## Building
 
 ```bash
-mkdir build && cd build
-cmake ..
-cmake --build .
+cmake . -B ./build
+cmake --build ./build
 ```
 
 ## Running
@@ -97,7 +96,7 @@ Before running the example, ensure that the following services are configured, r
 ./AdsGatewayExample
 ```
 
-By default, the client attempts to connect to `127.0.0.1:5566`. These settings can be modified in [src/main.cpp](src/main.cpp).
+By default, the client attempts to connect to `127.0.0.1:5566`. These settings can be modified in [src/AdsGatewayExample.cpp](src/AdsGatewayExample.cpp).
 
 ## Usage
 
@@ -112,28 +111,35 @@ Once connected, the client provides a simple interactive command line:
 
 ## Project Structure
 
-- [src/main.cpp](src/main.cpp): The main entry point and CLI logic.
-- [src/lib/GatewayClientLib/](src/lib/GatewayClientLib/): Core library providing protocol implementation and connection management.
-- [CMakeLists.txt](CMakeLists.txt): CMake build configuration.
+- [src/AdsGatewayExample.cpp](src/AdsGatewayExample.cpp): The main entry point and CLI logic for the AdsGateway example.
+- [CMakeLists.txt](CMakeLists.txt): CMake build configuration for the example executables.
+- [./lib/GatewayClientLib/](./lib/GatewayClientLib/): Core library providing protocol implementation and connection management.
 
 ### [GatewayClientLib](./lib/GatewayClientLib/)
 
 This library provides the core logic for communicating with the `GatewayService`.
 
 **Public Headers (`include/GatewayClientLib/`):**
-- [AdsGwConnection.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwConnection.hpp): High-level class to establish and manage the gateway connection.
-- [AdsGwProtocol.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwProtocol.hpp): Definitions of binary protocol structures, request IDs, and status codes.
-- [SignalManager.hpp](./lib/GatewayClientLib/include/GatewayClientLib/SignalManager.hpp): Central storage for signal parameters and actual states.
+- [AdsGwConnection.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwConnection.hpp): High-level class that starts and stops the ADS gateway connection thread.
+- [AdsGwProtocol.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwProtocol.hpp): Definitions of ADS gateway protocol messages, request IDs, and payload structures.
+- [AdsSignalManager.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsSignalManager.hpp): ADS-specific alias of the generic `SignalManager` for signal parameters and states.
+- [GwClient.hpp](./lib/GatewayClientLib/include/GatewayClientLib/GwClient.hpp): Shared client-side constants, enums, error codes, and message header definitions.
 - [GwCrc32.hpp](./lib/GatewayClientLib/include/GatewayClientLib/GwCrc32.hpp): CRC32 checksum calculation.
 - [GwHash.hpp](./lib/GatewayClientLib/include/GatewayClientLib/GwHash.hpp): Helper for calculating 64-bit hashes of AppSignalIDs.
 - [Logger.hpp](./lib/GatewayClientLib/include/GatewayClientLib/Logger.hpp): Simple integration for logging output.
-- [ISignalUpdater.hpp](./lib/GatewayClientLib/include/GatewayClientLib/ISignalUpdater.hpp): Interface used to update `SignalManager` data.
+- [SignalManager.hpp](./lib/GatewayClientLib/include/GatewayClientLib/SignalManager.hpp): Generic signal storage used by protocol-specific managers.
+- [IAdsSignalUpdater.hpp](./lib/GatewayClientLib/include/GatewayClientLib/IAdsSignalUpdater.hpp): ADS-specific updater interface used by `AdsGwConnection` to publish signal updates.
+- [ISignalUpdater.hpp](./lib/GatewayClientLib/include/GatewayClientLib/ISignalUpdater.hpp): Generic updater interface template for signal parameters and states.
 
 **Implementation Details (`src/`):**
-- [AdsGwConnImpl.hpp](./lib/GatewayClientLib/src/AdsGwConnImpl.hpp): Internal connection implementation handling the message loop and state machine.
-- [TcpConnection.hpp](./lib/GatewayClientLib/src/TcpConnection.hpp): Cross-platform abstraction for non-blocking TCP sockets.
+- [AdsGwConnection.cpp](./lib/GatewayClientLib/src/AdsGwConnection.cpp): Starts the worker thread and owns connection lifecycle for the ADS client.
+- [AdsGwConnImpl.hpp](./lib/GatewayClientLib/src/AdsGwConnImpl.hpp): ADS-specific request loop and synchronization logic.
+- [AdsGwConnImpl.cpp](./lib/GatewayClientLib/src/AdsGwConnImpl.cpp): Implementation of handshake, signal list synchronization, and state polling.
+- [GwConnImpl.hpp](./lib/GatewayClientLib/src/GwConnImpl.hpp): Generic request-response transport layer for gateway messages.
+- [TcpConnection.hpp](./lib/GatewayClientLib/src/TcpConnection.hpp): Cross-platform abstraction for TCP sockets.
+- [TcpConnection.cpp](./lib/GatewayClientLib/src/TcpConnection.cpp): Common `TcpConnection` lifecycle implementation.
 - [TcpConnWindows.cpp](./lib/GatewayClientLib/src/TcpConnWindows.cpp) / [TcpConnLinux.cpp](./lib/GatewayClientLib/src/TcpConnLinux.cpp): Platform-specific socket implementations.
-- [SignalManager.cpp](./lib/GatewayClientLib/src/SignalManager.cpp): Implementation of signal lookup and storage.
+- [GwCrc32.cpp](./lib/GatewayClientLib/src/GwCrc32.cpp): CRC32 implementation used for message integrity checks.
 
 ## Contact
 
