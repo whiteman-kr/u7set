@@ -1,0 +1,33 @@
+windows_adsbridge_build:
+  stage: build
+  needs: ["project_backup_job"]
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  tags:
+    - vs2017
+  before_script:
+    - $Env:VCPKG_ROOT="C:/data/vcpkg/vcpkg"
+    - $Env:VCPKG_DEFAULT_BINARY_CACHE="C:/data/vcpkg/cache_windows_build"
+    - $env:Path += ";C:/data/vcpkg/vcpkg"
+  script:
+    - "dir env:"
+    - "echo $Env:CI_COMMIT_SHA"
+    - "git status"
+    - "git log -1"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\bin\release"
+    - $Env:INSTALL_OUT_DIR="$Env:CI_PROJECT_DIR\\dev"
+    - "# ----------------------------------------------"
+    - "#            Build and Install Project"
+    - "# ----------------------------------------------"    
+    - "& './gitlab_ci_build_adsbridge.bat'"
+
+  artifacts:
+    name: "AdsBridge-win-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
+    paths:
+      - dev/**/*

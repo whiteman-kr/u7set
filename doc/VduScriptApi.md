@@ -113,7 +113,7 @@ bool writeValueInt(string signalId, int32 value);
 bool writeValueByIndexInt(int signalIndex, int32 value);
 
 bool writeValueFloat(string signalId, float value);
-bool writeValueByIndexFloat(string signalId, float value);
+bool writeValueByIndexFloat(int signalIndex, float value);
 ```
 
 ```c
@@ -211,7 +211,7 @@ void itemRectSetLineColor(SchemaItem* item, uint32 color)
 
 ```c
 uint32 itemRectFillColor(SchemaItem* item)
-void itemRectSetFillColor(Item* item, uint32 color)
+void itemRectSetFillColor(SchemaItem* item, uint32 color)
 ```
 
 ```c

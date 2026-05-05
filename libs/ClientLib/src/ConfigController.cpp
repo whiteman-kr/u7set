@@ -6,7 +6,9 @@
 #include <CommonLib/HostAddressPort.h>
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QDomNode>
+#include <QStandardPaths>
 
 
 namespace ClientLib
@@ -33,12 +35,15 @@ namespace ClientLib
 		// Create communication thread
 		//
 		m_grpcCfgLoaderThread = std::make_unique<GrpcCfgLoaderThread>(m_softwareInfo,
-															  m_appInstanceNo,
-															  address1,
-															  address2,
-															  std::make_shared<CircularLogger>(logFile, "GrpcCfgLoaderThread"));
+																	  m_appInstanceNo,
+																	  address1,
+																	  address2,
+																	  std::make_shared<CircularLogger>(logFile, "GrpcCfgLoaderThread"));
 
-		connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_configurationReady, this, &ConfigController::slot_configurationReady);
+		connect(m_grpcCfgLoaderThread.get(),
+				&GrpcCfgLoaderThread::signal_configurationReady,
+				this,
+				&ConfigController::slot_configurationReady);
 
 		auto logFunc = [this](QString errMsg)
 		{
@@ -61,7 +66,7 @@ namespace ClientLib
 		releaseAppInstanceNo();
 
 		qDebug() << "ConfigController::~ConfigController";
-		//m_cfgLoaderThread->quitAndWait();
+		// m_cfgLoaderThread->quitAndWait();
 	}
 
 	void ConfigController::setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2)
@@ -194,113 +199,134 @@ namespace ClientLib
 
 	int ConfigController::acquireAppInstanceNo(const QString& programName)
 	{
-		// Communication instance no
-		//
-		m_appInstanceSharedMemory.setKey(programName + "InstanceNo");
-
-		int result = 0;
-
-		if (bool ok = m_appInstanceSharedMemory.create(MaxInstanceCount * sizeof(qint64)); ok == true)
+		auto acquireFallbackInstanceNo = [&](const QString& reason)
 		{
-			qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory created, thread: " << QThread::currentThread();
+			m_appInstanceNoIsFallback = true;
 
-			// Shared memory just created, initialize it
-			//
-			std::lock_guard locker(m_appInstanceSharedMemory);
+			const int fallbackInstanceNo = MaxInstanceCount + static_cast<int>(QDateTime::currentMSecsSinceEpoch() & 0xFF);
 
-			qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-			Q_ASSERT(sharedData);
+			m_logFile.writeAlert(
+				tr("Using fallback instance no %1 for %2. Reason: %3").arg(fallbackInstanceNo).arg(programName).arg(reason));
 
-			std::fill(sharedData, sharedData + MaxInstanceCount, 0);
+			qDebug() << "ConfigController::acquireAppInstanceNo(): Fallback instance no:" << fallbackInstanceNo << ", reason:" << reason;
 
-			sharedData[0] = QCoreApplication::instance()->applicationPid();
+			return fallbackInstanceNo;
+		};
 
-			result = 0;
-		}
-		else
+		auto lockErrorToString = [](QLockFile& lockFile)
 		{
-			if (m_appInstanceSharedMemory.error() == QSharedMemory::SharedMemoryError::AlreadyExists)
+			switch (lockFile.error())
 			{
-				qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory already exists, try to attach, thread: "
-						 << QThread::currentThread();
+			case QLockFile::NoError:
+				return QStringLiteral("NoError");
 
-				ok = m_appInstanceSharedMemory.attach();
-			}
-
-			if (ok == false)
-			{
-				qDebug() << "ConfigController::acquireAppInstanceNo(): Cannot create or attach to shared memory, thread: "
-						 << QThread::currentThread() << ", error: " << m_appInstanceSharedMemory.errorString();
-
-				m_logFile.writeAlert(tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
-										 .arg(m_appInstanceSharedMemory.errorString()));
-
-				// Set some Application Instance No, take random 127 high slots.
-				//
-				result = static_cast<int>(MaxInstanceCount - 1 - (QDateTime::currentMSecsSinceEpoch() & 0x7F));
-			}
-			else
-			{
-				qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory is attached, thread: " << QThread::currentThread();
-
-				// Get empty slot from the shared memory
-				//
-				Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
-
-				std::lock_guard locker(m_appInstanceSharedMemory);
-
-				qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-				Q_ASSERT(sharedData);
-
-				result = -1;
-
-				for (int i = 0; i < MaxInstanceCount; i++)
+			case QLockFile::LockFailedError:
 				{
-					if (sharedData[i] == 0)
+					qint64 pid = 0;
+					QString hostName;
+					QString appName;
+
+					if (lockFile.getLockInfo(&pid, &hostName, &appName))
 					{
-						// This is an empty slot, use it
-						//
-						sharedData[i] = qApp->applicationPid();
-						result = i;
-						break;
+						return QStringLiteral("LockFailedError; owner pid=%1 host=%2 app=%3").arg(pid).arg(hostName).arg(appName);
 					}
+
+					return QStringLiteral("LockFailedError");
 				}
 
-				if (result == -1)
-				{
-					m_logFile.writeAlert(
-						tr("Cannot create or attach to shared memory to determine software instance no, there is no free slots."));
+			case QLockFile::PermissionError:
+				return QStringLiteral("PermissionError");
 
-					// Set random Application Instance No, take random 127 high slots.
-					//
-					result = static_cast<int>(MaxInstanceCount - 1 - (QDateTime::currentMSecsSinceEpoch() & 0x7F));
-				}
+			case QLockFile::UnknownError:
+				return QStringLiteral("UnknownError");
 			}
+
+			return QStringLiteral("UnexpectedLockError");
+		};
+
+		const QString tempLocation = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+		if (tempLocation.isEmpty())
+		{
+			return acquireFallbackInstanceNo(tr("TempLocation is empty"));
 		}
 
-		return result;
+		const QString lockDirPath = QDir(tempLocation).filePath(QStringLiteral("ClientLibInstanceNoLocks"));
+		if (QDir().mkpath(lockDirPath) == false && QDir(lockDirPath).exists() == false)
+		{
+			return acquireFallbackInstanceNo(tr("Cannot create lock directory %1").arg(lockDirPath));
+		}
+
+		auto getInstanceLockFilePath = [&lockDirPath, &programName](int instanceNo)
+		{
+			return QDir(lockDirPath).filePath(QStringLiteral("%1-InstanceNo-%2.lock").arg(programName).arg(instanceNo));
+		};
+
+		int occupiedSlots = 0;
+		QString firstLockFailureDetails;
+
+		for (int i = 0; i < MaxInstanceCount; i++)
+		{
+			auto lockFile = std::make_unique<QLockFile>(getInstanceLockFilePath(i));
+			lockFile->setStaleLockTime(0);
+
+			if (lockFile->tryLock())
+			{
+				m_appInstanceNoIsFallback = false;
+				m_appInstanceLockFile = std::move(lockFile);
+
+				qDebug() << "ConfigController::acquireAppInstanceNo(): Instance lock acquired:" << i
+						 << ", thread: " << QThread::currentThread();
+
+				return i;
+			}
+
+			const QString lockFailureDetails = lockErrorToString(*lockFile);
+
+			if (lockFile->error() == QLockFile::LockFailedError)
+			{
+				occupiedSlots++;
+
+				if (firstLockFailureDetails.isEmpty())
+				{
+					firstLockFailureDetails = tr("slot %1 file %2: %3").arg(i).arg(lockFile->fileName()).arg(lockFailureDetails);
+				}
+
+				continue;
+			}
+
+			return acquireFallbackInstanceNo(
+				tr("Cannot lock slot %1 file %2: %3").arg(i).arg(lockFile->fileName()).arg(lockFailureDetails));
+		}
+
+		return acquireFallbackInstanceNo(
+			tr("All %1 slots are occupied in %2. First lock detail: %3").arg(occupiedSlots).arg(lockDirPath).arg(firstLockFailureDetails));
 	}
 
 	void ConfigController::releaseAppInstanceNo()
 	{
 		qDebug() << "ConfigController::releaseAppInstanceNo(): " << m_appInstanceNo << ", thread: " << QThread::currentThread()
-				 << ", isAttached: " << m_appInstanceSharedMemory.isAttached();
+				 << ", hasLockFile: " << (m_appInstanceLockFile != nullptr);
 
 		// Release application instance slot
 		//
-		if (m_appInstanceNo < 0 || m_appInstanceNo >= MaxInstanceCount)
+		if (m_appInstanceNo < 0 || m_appInstanceLockFile == nullptr)
 		{
 			return;
 		}
 
-		Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
+		if (m_appInstanceNoIsFallback == true)
+		{
+			return;
+		}
 
-		std::lock_guard locker(m_appInstanceSharedMemory);
+		if (m_appInstanceLockFile == nullptr)
+		{
+			m_logFile.writeAlert(tr("Cannot release application instance no %1 because the lock file is missing.").arg(m_appInstanceNo));
+			return;
+		}
 
-		qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-		Q_ASSERT(sharedData);
-
-		sharedData[m_appInstanceNo] = 0;
+		m_appInstanceLockFile->unlock();
+		m_appInstanceLockFile.reset();
 
 		return;
 	}

@@ -309,3 +309,27 @@ TEST(ConfigControllerTests, twoClientsOnSameComputer)
 
 	return;
 }
+
+TEST(ConfigControllerTests, InstanceNo_ReusesReleasedSlot)
+{
+	ILogFileStub log;
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
+
+	auto configController1 = std::make_unique<MonitorConfigControllerStub>(softwareInfo, host, &log);
+	auto configController2 = std::make_unique<MonitorConfigControllerStub>(softwareInfo, host, &log);
+
+	const int releasedInstanceNo = configController1->appInstanceNo();
+	const int liveInstanceNo = configController2->appInstanceNo();
+
+	EXPECT_NE(releasedInstanceNo, liveInstanceNo);
+
+	configController1.reset();
+
+	MonitorConfigControllerStub configController3{softwareInfo, host, &log};
+
+	EXPECT_EQ(configController3.appInstanceNo(), releasedInstanceNo);
+	EXPECT_NE(configController3.appInstanceNo(), liveInstanceNo);
+
+	return;
+}

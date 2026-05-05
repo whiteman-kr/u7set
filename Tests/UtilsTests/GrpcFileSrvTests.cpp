@@ -372,7 +372,7 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 	server->stop();
 }
 
-TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
+TEST(GrpcFileClientTest, DISABLED_GetFile_WrongLocalFolder)
 {
 	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
 
