@@ -1,4 +1,4 @@
-<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.10">
+<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.11">
   <FlashMemory>
     <AppLogicFrameCount>512</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -17,7 +17,7 @@
     <TuningWriteBitstream>true</TuningWriteBitstream>
     <MaxConfigurationCount>12</MaxConfigurationCount>
     <SingleConfigFirstFrame>2</SingleConfigFirstFrame>
-    <SingleConfigFrameCount>19</SingleConfigFrameCount>
+    <SingleConfigFrameCount>20</SingleConfigFrameCount>
     <SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
   </FlashMemory>
   <Memory>

@@ -419,7 +419,11 @@ void GrpcCfgLoader::downloadNextFile()
 
 	{
 		std::lock_guard lg(m_grpcFileClientMutex);
-		m_grpcFileClient->downloadFile(fileName);
+
+		if (m_grpcFileClient != nullptr)
+		{
+			m_grpcFileClient->downloadFile(fileName);
+		}
 	}
 }
 

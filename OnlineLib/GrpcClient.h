@@ -355,19 +355,31 @@ protected:
 			return;
 		}
 
+		thread_local bool emitUnknownClientID = true;
+		thread_local bool emitWrongClientHostname = true;
+
 		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
 		{
 			if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
 			{
 				state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
-				emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
+
+				if (emitUnknownClientID)
+				{
+					emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
+					emitUnknownClientID = false;
+				}
 			}
 			else
 			{
 				if (st.error_message() == Grpc::WRONG_HOST_NAME)
 				{
 					state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
-					emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
+					if (emitWrongClientHostname)
+					{
+						emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
+						emitWrongClientHostname = false;
+					}
 				}
 				else
 				{
@@ -382,7 +394,8 @@ protected:
 
 		setConnectionState(state);
 
-		logErr(QString("%1::createStubAndHandshake - Handshake Failed: %2").arg(clientDescription()).arg(QString::fromStdString(st.error_message())));
+		logErr(QString("%1::createStubAndHandshake - Handshake Failed (%2)").
+			   arg(clientDescription()).arg(QString::fromStdString(st.error_message())));
 
 		m_stub.reset();
 	}
