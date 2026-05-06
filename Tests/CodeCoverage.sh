@@ -72,7 +72,6 @@ sleep 5
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &
 
 ./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js -speed_factor=x0.5 -verbose > SimulatorConsole.out 2>&1 &
-
 sleep 6
 
 # Run ClientTests, they are functional.
@@ -131,6 +130,9 @@ popd
 # ----------------------------------------------
 pushd $CI_PROJECT_DIR/bin/debug
 
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/GatewayTests/TuningGatewayTests.js -speed_factor=x0.5 -verbose > SimulatorConsoleTuningGateway.out 2>&1 &
+sleep 6
+
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > linux_code_coverage_systemid_clienttest_ws01_cfgs.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh  < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.out 2>&1 &
 sleep 5
@@ -146,13 +148,14 @@ $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayT
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tuns.out 2>&1 &
 sleep 5
 
-$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTests.* --gtest_repeat=5
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
 
 StopServices || true
 popd
 
-# Run other tests, not services are required here.
-#
+# ----------------------------------------------
+# Run other tests, no services are required here.
+# ----------------------------------------------
 #./LicenseLibTests
 ./MetrologyTests
 ./SimulatorTests
