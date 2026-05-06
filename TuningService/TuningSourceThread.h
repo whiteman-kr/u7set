@@ -424,7 +424,7 @@ namespace Tuning
 
 		void checkSetSOR();
 
-		void pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID);
+		[[nodiscard]] E::NetworkError pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID);
 
 		const TuningChannelHandler* privateGetChannelHandler(int channel) const;
 		TuningSignalShared privateGetTuningSignal(Hash hash) const;

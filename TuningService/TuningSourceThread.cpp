@@ -1809,9 +1809,7 @@ namespace Tuning
 		cmd.write.signalHash = signalHash;
 		cmd.write.newTuningValue = newValue;
 
-		pushCommandToHandlers(cmd, ts->appSignalID());
-
-		return E::NetworkError::Success;
+		return pushCommandToHandlers(cmd, ts->appSignalID());
 	}
 
 	E::NetworkError TuningSourceThreadWorker::applySignalStates(const QString& clientEquipmentID,
@@ -1825,9 +1823,7 @@ namespace Tuning
 		cmd.opCode = Fotip::OpCode::Apply;
 		cmd.autoCommand = false;
 
-		pushCommandToHandlers(cmd, QString());
-
-		return E::NetworkError::Success;
+		return pushCommandToHandlers(cmd, QString());
 	}
 
 	QString TuningSourceThreadWorker::sourceEquipmentID() const
@@ -2207,14 +2203,21 @@ namespace Tuning
 		m_writingDisabled = writingDisabled;
 	}
 
-	void TuningSourceThreadWorker::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
+	E::NetworkError TuningSourceThreadWorker::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
 	{
 		AUTO_LOCK(m_handlersMutex);
 
 		Q_UNUSED(appSignalID);
 
+		bool returnSuccess = false;
+
 		for(TuningChannelHandler* handler : m_handlers)
 		{
+			if (handler->isReply() == true)
+			{
+				returnSuccess = true;
+			}
+
 			handler->pushTuningCommand(cmd);
 
 			switch(cmd.opCode)
@@ -2242,6 +2245,8 @@ namespace Tuning
 				Q_ASSERT(false);
 			}
 		}
+
+		return (returnSuccess == true ? E::NetworkError::Success : E::NetworkError::TuningNoReply);
 	}
 
 	const TuningChannelHandler* TuningSourceThreadWorker::privateGetChannelHandler(int channel) const
