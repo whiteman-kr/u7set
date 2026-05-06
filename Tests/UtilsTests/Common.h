@@ -60,6 +60,5 @@ void stopAppDataReceiver();
 void clearSourcesSignalStatesQueue();
 
 std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& project, const QString& equipmentID);
-void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter);
 
 void logMsg(const QString& msg);

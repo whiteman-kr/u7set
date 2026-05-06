@@ -372,7 +372,7 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 	server->stop();
 }
 
-TEST(GrpcFileClientTest, DISABLED_GetFile_WrongLocalFolder)
+TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 {
 	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
 
@@ -384,7 +384,11 @@ TEST(GrpcFileClientTest, DISABLED_GetFile_WrongLocalFolder)
 
 	server->start();
 
-	const QString tempDir = "P:/temp";
+#ifdef Q_OS_WIN
+	const QString tempDir = "Z:/not_exist_dir/temp";
+#else
+	const QString tempDir = "/dev/null/temp";
+#endif
 
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
 

@@ -856,7 +856,8 @@ TEST(GrpcAppDataSrvTest, GetDiscretesLog)
 
 	server->stop();
 
-	stopDiscretesLogWriter(dsLogWriter);
+	dsLogWriter->stop();
+	dsLogWriter.reset();
 }
 
 TEST(GrpcAppDataSrvTest, GetAppDataSourcesInfo)

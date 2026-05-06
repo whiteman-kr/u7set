@@ -115,7 +115,14 @@ int main(int argc, char *argv[])
 	auto result = RUN_ALL_TESTS();
 
 	stopAppDataReceiver();
-	stopDiscretesLogWriter(discretesLogWriter);
+
+	appDataSources.clear();
+
+	if (discretesLogWriter)
+	{
+		discretesLogWriter->stop();
+		discretesLogWriter.reset();
+	}
 
 	return result;
 }
