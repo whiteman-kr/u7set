@@ -101,8 +101,6 @@ StopServices || true
 sleep 5
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
-sleep 5
-
 ./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
 sleep 5
 
@@ -126,6 +124,31 @@ sleep 5
 
 StopServices || true
 sleep 5
+popd
+
+# ----------------------------------------------
+#               Run TuningGateway tests
+# ----------------------------------------------
+pushd $CI_PROJECT_DIR/bin/debug
+
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > linux_code_coverage_systemid_clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh  < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.out 2>&1 &
+sleep 5
+
+ps -A | grep Srv
+
+# First run tests that require no TuningService connection.
+#
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTestsNoTuningService.*
+
+# Then start TuningService for other tests.
+#
+./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tuns.out 2>&1 &
+sleep 5
+
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTests.* --gtest_repeat=5
+
+StopServices || true
 popd
 
 # Run other tests, not services are required here.
