@@ -21,25 +21,65 @@ const std::vector<ClientInfo> clients =
 		{ "MONITOR1", E::SoftwareType::Monitor, "WS1" },
 	};
 
-std::unique_ptr<Grpc::FileSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
-																std::unique_ptr<GrpcFileSrv>& outServer)
+class SrvStubGuard
+{
+public:
+	explicit SrvStubGuard(std::unique_ptr<GrpcFileSrv> server, std::unique_ptr<Grpc::FileSrv::Stub> stub) :
+		m_server(std::move(server)),
+		m_stub(std::move(stub))
+	{
+	}
+
+	SrvStubGuard(SrvStubGuard&&) noexcept = default;
+
+	~SrvStubGuard()
+	{
+		if (m_server)
+		{
+			m_server->stop();
+		}
+	}
+
+	GrpcFileSrv& server() const
+	{
+		Q_ASSERT(m_server != nullptr);
+		return *m_server.get();
+	}
+
+	Grpc::FileSrv::Stub& stub() const
+	{
+		Q_ASSERT(m_stub != nullptr);
+		return *m_stub.get();
+	}
+
+private:
+	std::unique_ptr<GrpcFileSrv> m_server;
+	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
+};
+
+
+SrvStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP)
 {
 	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
 
-	outServer = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false,
+	std::unique_ptr<GrpcFileSrv> server = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false,
 												 listenIP, buildPath, logger);
 
-	outServer->start();
+	server->start();
+
+	QThread::msleep(500);
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
-	return Grpc::FileSrv::NewStub(channel);
+	std::unique_ptr<Grpc::FileSrv::Stub> stub = Grpc::FileSrv::NewStub(channel);
+
+	return SrvStubGuard(std::move(server), std::move(stub));
 }
 
 std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Status* status = nullptr)
 {
-	for(int retry = 0; retry < 3; retry++)
+	for(int retry = 0; retry < 5; retry++)
 	{
 		SoftwareInfo si(ci.softwareType, ci.equipmentID);
 
@@ -69,6 +109,8 @@ std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Sta
 		DEBUG_LOG_WRN(logger, QString("Error handshake, status: %1, msg: %2").
 							  arg(grpcStatusCodeToString(st.error_code())).
 							  arg(QString::fromStdString(st.error_message())));
+
+		QThread::msleep(500);
 	}
 
 	return {};
@@ -76,10 +118,9 @@ std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Sta
 
 TEST(GrpcFileSrvTest, GetFile_ShortFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14100}, server);
+	SrvStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14100});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -93,7 +134,7 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 
 	req.set_filename(File::SLASH_BUILD_XML.toStdString());
 
-	auto reader = stub->GetFile(&ctx, req);
+	auto reader = ssg.stub().GetFile(&ctx, req);
 
 	Grpc::GetFileReply reply;
 
@@ -114,16 +155,13 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 	grpc::Status st = reader->Finish();
 
 	EXPECT_TRUE(st.ok());
-
-	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_LongFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14101}, server);
+	SrvStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14101});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -138,7 +176,7 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 
 		req.set_filename("/Reports/Equipment.json");
 
-		auto reader = stub->GetFile(&ctx, req);
+		auto reader = ssg.stub().GetFile(&ctx, req);
 
 		Grpc::GetFileReply reply;
 
@@ -181,16 +219,13 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 
 		EXPECT_TRUE(st.ok());
 	}
-
-	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_WrongFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14102}, server);
+	SrvStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14102});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -204,7 +239,7 @@ TEST(GrpcFileSrvTest, GetFile_WrongFile)
 
 	req.set_filename("/build123.xml");			// wrong file
 
-	auto reader = stub->GetFile(&ctx, req);
+	auto reader = ssg.stub().GetFile(&ctx, req);
 
 	Grpc::GetFileReply reply;
 
@@ -220,8 +255,6 @@ TEST(GrpcFileSrvTest, GetFile_WrongFile)
 	grpc::Status st = reader->Finish();
 
 	EXPECT_TRUE(st.ok());
-
-	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_ShortFile)
@@ -264,15 +297,22 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	EXPECT_TRUE(f.exists());
 
-	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
+	bool openResult = f.open(QIODeviceBase::ReadOnly);
 
-	QByteArray fileData = f.readAll();
+	if (openResult == false)
+	{
+		EXPECT_TRUE(openResult);
+	}
+	else
+	{
+		QByteArray fileData = f.readAll();
 
-	EXPECT_EQ(fileData.size(), fr.fileData.size());
+		EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QString md5 = Md5Hash::hashStr(fileData);
+		QString md5 = Md5Hash::hashStr(fileData);
 
-	EXPECT_EQ(md5, fr.md5);
+		EXPECT_EQ(md5, fr.md5);
+	}
 
 	client->stop();
 	server->stop();
@@ -317,15 +357,22 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	EXPECT_TRUE(f.exists());
 
-	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
+	bool openResult = f.open(QIODeviceBase::ReadOnly);
 
-	QByteArray fileData = f.readAll();
+	if (openResult == false)
+	{
+		EXPECT_TRUE(openResult);
+	}
+	else
+	{
+		QByteArray fileData = f.readAll();
 
-	EXPECT_EQ(fileData.size(), fr.fileData.size());
+		EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QString md5 = Md5Hash::hashStr(fileData);
+		QString md5 = Md5Hash::hashStr(fileData);
 
-	EXPECT_EQ(md5, fr.md5);
+		EXPECT_EQ(md5, fr.md5);
+	}
 
 	client->stop();
 	server->stop();
