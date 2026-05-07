@@ -106,6 +106,7 @@ sleep 5
 # Check that only Gateway and Config services are running.
 #
 ps -A | grep Srv
+ps -A | grep Simulator
 
 # First run tests that require no ADS connection.
 #
@@ -123,32 +124,42 @@ sleep 5
 
 StopServices || true
 sleep 5
+ps -A | grep Srv
+ps -A | grep Simulator
 popd
 
 # ----------------------------------------------
 #               Run TuningGateway tests
 # ----------------------------------------------
 pushd $CI_PROJECT_DIR/bin/debug
+date
 
-./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/GatewayTests/TuningGatewayTests.js -speed_factor=x0.5 -verbose > SimulatorConsoleTuningGateway.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/GatewayTests/TuningGatewayTests.js -speed_factor=x0.5 -verbose > tgw_SimulatorConsole.out 2>&1 &
 sleep 6
 
-./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > linux_code_coverage_systemid_clienttest_ws01_cfgs.out 2>&1 &
-./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh  < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh  < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
 sleep 5
 
 ps -A | grep Srv
+ps -A | grep Simulator
 
 # First run tests that require no TuningService connection.
 #
+date
 $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTestsNoTuningService.*
+date
 
 # Then start TuningService for other tests.
 #
-./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > linux_code_coverage_systemid_clienttest_ws04_tuns.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > tgw_clienttest_ws04_tuns.out 2>&1 &
 sleep 5
+ps -A | grep Srv
+ps -A | grep Simulator
 
+date
 $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
+date
 
 StopServices || true
 popd
