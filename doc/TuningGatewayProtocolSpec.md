@@ -1,10 +1,9 @@
 ﻿# Radiy TuningService Gateway Protocol Specification
 
-**Document Version:** 0.6  
+**Document Version:** 1.0  
 **Protocol Version:** 1.0  
-**Date:** 30 Apr 2026  
+**Date:** 08 May 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
-**Status:** Draft
 
 ## Table of Contents
 
@@ -1648,3 +1647,4 @@ The `*Hex` fields store the value in the signal's native representation:
 | 0.4 | 27 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed TGW_TUNING_SIGNALS_READ missing-signal behavior |
 | 0.5 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Clarified tuning source activation behavior |
 | 0.6 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated Appendix C to document the client-relevant `TuningSources.xml` subset and `*Hex` signal parsing |
+| 1.0 | 08 May 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |

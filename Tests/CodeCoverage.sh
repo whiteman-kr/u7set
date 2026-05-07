@@ -8,9 +8,12 @@
 #   sudo apt install lcov
 #   sudo pip install python3
 #   sudo pip install lcov-cobertura
-#
-set -x  # Echo on.
-set -e  # Terminate script if any command returns error.
+
+# Echo on.
+set -x
+
+# Terminate script if any command returns error.
+set -e
 
 # Run StopServices when exit (any error or success).
 #
@@ -24,7 +27,8 @@ function StopServices() {
     pkill -SIGINT CfgSrv || true
     pkill -SIGINT AppDataSrv || true
     pkill -SIGINT TuningSrv || true
-    pkill -SIGINT SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
+    # without last e, I assume there is a limitation to 15 symbols.
+    pkill -SIGINT SimulatorConsol || true
     pkill -SIGINT GatewaySrv || true
     sleep 6
 }
@@ -100,7 +104,7 @@ StopServices || true
 sleep 5
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
-./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
+./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh < /dev/null > tgw_clienttest_ws01_gwslinuxcc.out 2>&1 &
 sleep 5
 
 # Check that only Gateway and Config services are running.
@@ -138,7 +142,7 @@ date
 sleep 6
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
-./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh  < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
 sleep 5
 
 ps -A | grep Srv
