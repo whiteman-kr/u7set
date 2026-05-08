@@ -21,6 +21,7 @@ GrpcCfgLoader::GrpcCfgLoader(const SoftwareInfo& softwareInfo,
 						int appInstance,
 						const std::vector<HostAddressPort>& serverAddrs,
 						CircularLoggerShared logger) :
+	SimpleThreadWorker("GrpcCfgLoader"),
 	LogWrapper(logger),
 	m_swInfo(softwareInfo),
 	m_appInstance(appInstance),

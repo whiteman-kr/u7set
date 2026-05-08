@@ -55,7 +55,7 @@ function testStartTuning(sim)
 {
 	// Get ScriptLogicModule object for LM
 	//
-	lm = sim.logicModule("SYSTEMID_CLIENTTEST_CH12_MD00");
+	let lm = sim.logicModule("SYSTEMID_CLIENTTEST_CH12_MD00");
 	assert(lm != undefined);
 
 	lm.armingKey = true;

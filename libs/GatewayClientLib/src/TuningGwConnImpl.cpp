@@ -459,9 +459,9 @@ namespace GatewayClientLib
 
 		// Add signals from sources.
 		//
-		for (const auto& src : result.tuningSources) 
+		for (const auto& src : result.tuningSources)
 		{
-			for (const auto[_, signalParam] : src.signals) 
+			for (const auto [_, signalParam] : src.signals)
 			{
 				m_signalUpdater.addSignals({&signalParam, 1});
 			}

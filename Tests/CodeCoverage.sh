@@ -20,17 +20,17 @@ set -e
 trap StopServices EXIT  
 
 function StopServices() {
-    echo "StopServices()"
+    echo "---Enter StopServices()---"
 
     # Stop services for functional tests.
     #
     pkill -SIGINT CfgSrv || true
     pkill -SIGINT AppDataSrv || true
     pkill -SIGINT TuningSrv || true
-    # without last e, I assume there is a limitation to 15 symbols.
     pkill -SIGINT SimulatorConsol || true
     pkill -SIGINT GatewaySrv || true
     sleep 6
+    echo "---Leave StopServices()---"
 }
 
 # Stop if any service is running.
@@ -96,21 +96,15 @@ export QT_QPA_PLATFORM=offscreen
 #
 StopServices || true
 
-# ----------------------------------------------
-#               Run AdsGateway tests
-# ----------------------------------------------
+echo "----------------------------------------------"
+echo "-           Run AdsGateway tests             -"
+echo "----------------------------------------------"
 pushd $CI_PROJECT_DIR/bin/debug
 StopServices || true
-sleep 5
 
-./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
-./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh < /dev/null > tgw_clienttest_ws01_gwslinuxcc.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > agw_clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh < /dev/null > agw_clienttest_ws01_gwslinuxcc.out 2>&1 &
 sleep 5
-
-# Check that only Gateway and Config services are running.
-#
-ps -A | grep Srv
-ps -A | grep Simulator
 
 # First run tests that require no ADS connection.
 #
@@ -118,7 +112,7 @@ $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTest
 
 # Then start ADS for other tests.
 #
-./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > agw_clienttest_ws01_ads.out 2>&1 &
 sleep 5
 
 # Run other Adsgateway tests.
@@ -127,14 +121,12 @@ $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTest
 sleep 5
 
 StopServices || true
-sleep 5
-ps -A | grep Srv
-ps -A | grep Simulator
 popd
 
-# ----------------------------------------------
-#               Run TuningGateway tests
-# ----------------------------------------------
+echo "----------------------------------------------"
+echo "-          Run TuningGateway tests           -"
+echo "----------------------------------------------"
+
 pushd $CI_PROJECT_DIR/bin/debug
 date
 
@@ -144,9 +136,6 @@ sleep 6
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
 sleep 5
-
-ps -A | grep Srv
-ps -A | grep Simulator
 
 # First run tests that require no TuningService connection.
 #
@@ -158,8 +147,6 @@ date
 #
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > tgw_clienttest_ws04_tuns.out 2>&1 &
 sleep 5
-ps -A | grep Srv
-ps -A | grep Simulator
 
 date
 $CI_PROJECT_DIR/bin/debug/GatewayTests --port=5577 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
@@ -168,9 +155,10 @@ date
 StopServices || true
 popd
 
-# ----------------------------------------------
-# Run other tests, no services are required here.
-# ----------------------------------------------
+echo "----------------------------------------------------"
+echo "-  Run other tests, no services are required here  -"
+echo "----------------------------------------------------"
+
 #./LicenseLibTests
 ./MetrologyTests
 ./SimulatorTests
