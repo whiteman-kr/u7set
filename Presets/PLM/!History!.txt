@@ -2,4 +2,5 @@ PLM
 	18.10.2024	Version: 0	PLM_v0.u7devp 			CMCASETASK-592:  Start developing of PLM
 	05.11.2024	Version: 1	PLM_v1.u7devp 			CMCASETASK-592:  Added PLM working version
 	20.02.2026	Version: 2	PLM_v2.u7devp 			CMCASETASK-592:  PLM Input signals and Configuration review
+	08.05.2026	Version: 3	PLM_v3.u7devp 			RADIX-3919:  	 PLM available modes have been changed
 
