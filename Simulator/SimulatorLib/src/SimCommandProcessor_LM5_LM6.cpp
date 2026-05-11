@@ -4977,8 +4977,8 @@ namespace Sim
 
 				result.setFloatValue(floatData.floatValue());
 
-				zero = result.mathZero();
-				nan = result.mathNan();
+				zero = floatData.mathZero();
+				nan = floatData.mathNan();
 			}
 			break;
 		case 6:		// FP Exp
@@ -4988,10 +4988,10 @@ namespace Sim
 
 				result.setFloatValue(floatData.floatValue());
 
-				nan = result.mathNan();
-				overflow_inf = result.mathOverflow();
-				underflow = result.mathUnderflow();
-				zero = result.mathZero();
+				nan = floatData.mathNan();
+				overflow_inf = floatData.mathOverflow();
+				underflow = floatData.mathUnderflow();
+				zero = floatData.mathZero();
 			}
 			break;
 		case 7:		// FP INV is  = 1.0/data;

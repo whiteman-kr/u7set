@@ -700,7 +700,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == false)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
