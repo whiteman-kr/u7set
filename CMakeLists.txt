@@ -105,13 +105,22 @@ endif()
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
 include(./cmake/codecoverage.cmake)
 
-# UndfineBehaviorSanitizer
+# UndefineBehaviorSanitizer
 #
 option(UB_SANITIZER "UB Sanitizer" OFF)
 
 if(UB_SANITIZER)
 	add_compile_options(-fsanitize=undefined)
 	add_link_options(-fsanitize=undefined)
+endif()
+
+# AddressSanitizer
+#
+option(ADDRESS_SANITIZER "Address Sanitizer" OFF)
+
+if(ADDRESS_SANITIZER)
+	add_compile_options(-fsanitize=address)
+	add_link_options(-fsanitize=address)
 endif()
 
 # Update Translations
@@ -163,6 +172,7 @@ endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("UBSanitizer: " ${UB_SANITIZER})
+message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
 message("CMake version:  ${CMAKE_VERSION}")
