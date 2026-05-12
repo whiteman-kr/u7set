@@ -4,7 +4,7 @@
       "name": "Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64" ],
+      "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
       "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
@@ -15,7 +15,7 @@
       "name": "Debug-ASan",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64" ],
+      "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
       "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DCMAKE_CXX_FLAGS=\"/fsanitize=address /EHsc\" -DCMAKE_C_FLAGS=\"/fsanitize=address /EHsc\"",
@@ -26,7 +26,7 @@
       "name": "Debug-UpdateTranslations",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64" ],
+      "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
       "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
@@ -48,7 +48,7 @@
       "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64" ]
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     },
     {
       "name": "ReleaseDebugInfo",
@@ -59,7 +59,7 @@
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64" ]
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     },
     {
       "name": "Debug-Static",
@@ -70,7 +70,7 @@
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64" ],
+      "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": []
     },
     {
@@ -81,7 +81,7 @@
       "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
       "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64" ]
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     }
   ]
 }
