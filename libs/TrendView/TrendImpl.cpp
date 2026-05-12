@@ -2,6 +2,8 @@
 #include "TrendScale.h"
 #include <CUtils.h>
 
+#include <QPainter>
+
 namespace TrendLib
 {
 	const double TrendImpl::discreteSignalHeight = 5.0 / 10.0; // 5/10*25.4 = 12.7 mm

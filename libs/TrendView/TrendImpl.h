@@ -5,6 +5,8 @@
 
 #include "TrendRuler.h"
 
+class QPainter;
+
 
 namespace TrendLib
 {
