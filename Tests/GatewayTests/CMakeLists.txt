@@ -11,6 +11,7 @@ set(TARGET GatewayTests)
 
 add_executable(${TARGET} 
 	./src/AdsGatewayTests.cpp
+	./src/AdsGatewayTestsNoAds.cpp
 	./src/GwCrc32Tests.cpp
 	./src/HashTests.cpp
 	./src/main.cpp

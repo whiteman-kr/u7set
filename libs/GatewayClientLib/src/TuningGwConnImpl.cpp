@@ -375,7 +375,7 @@ namespace GatewayClientLib
 					break;
 				}
 
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
 				count++;
 			}
 
@@ -459,9 +459,9 @@ namespace GatewayClientLib
 
 		// Add signals from sources.
 		//
-		for (const auto& src : result.tuningSources) 
+		for (const auto& src : result.tuningSources)
 		{
-			for (const auto[_, signalParam] : src.signals) 
+			for (const auto [_, signalParam] : src.signals)
 			{
 				m_signalUpdater.addSignals({&signalParam, 1});
 			}

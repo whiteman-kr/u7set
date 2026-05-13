@@ -4,7 +4,6 @@
 **Protocol Version:** 1.0  
 **Date:** 30 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
-**Status:** Released
 
 ## Table of Contents
 

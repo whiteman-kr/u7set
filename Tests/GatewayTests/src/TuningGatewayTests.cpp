@@ -140,6 +140,30 @@ namespace
 		return false;
 	}
 
+	bool gptWaitUntilSourceIsReplying(TestTuningGwConnectionAccessor& tuningConn, std::string_view moduleEquipmentId)
+	{
+		for (int i = 0; i < 15; ++i)
+		{
+			tuningConn.requestTuningSourceStates();
+
+			const auto sourceStates = tuningConn.tuningSources();
+			for (const auto& sourceState : sourceStates)
+			{
+				if (std::string_view{sourceState.moduleEquipmentId} == moduleEquipmentId)
+				{
+					if (sourceState.isReplying == 1u)
+					{
+						return true;
+					}
+				}
+			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds{200});
+		}
+
+		return false;
+	}
+
 	bool gptWaitUntilReadMatchesWrittenValues(TestTuningGwConnectionAccessor& tuningConn,
 											  std::span<const GatewayClientLib::GwTuningWriteValue> expectedValues)
 	{
@@ -1203,6 +1227,7 @@ TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesReturnsSuccessForKnownSign
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_TRUE(gptWaitUntilSourceIsReplying(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
 
 	auto values = gptKnownWritableSignalValues();
 	auto result = tuningConn.requestWriteSignalValues(values, "TuningUser1", false);
@@ -1226,6 +1251,7 @@ TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesReturnsPerSignalUnknownHas
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	ASSERT_TRUE(gptWaitUntilSourceIsReplying(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
 
 	std::vector<GatewayClientLib::GwTuningWriteValue> values{
 		{Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1"), 1.0},
@@ -1258,6 +1284,7 @@ TEST_F(TuningGatewayTests, GptTuningSignalsWriteRawRequestReturnsTuningNoReplyFo
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH13_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
 	ASSERT_TRUE(gptWaitUntilControlledSourceIsActive(tuningConn, "SYSTEMID_CLIENTTEST_CH13_MD00"));
 
 	GatewayClientLib::GwTuningSignalsWriteRequest request{};
@@ -1315,7 +1342,9 @@ TEST_F(TuningGatewayTests, GptTuningSignalsWriteRawRequestEventuallyUpdatesReadb
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
 	ASSERT_TRUE(gptWaitUntilControlledSourceIsActive(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
+	ASSERT_TRUE(gptWaitUntilSourceIsReplying(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
 
 	const auto currentStates = tuningConn.requestSignalStates(gptKnownTuningSignalHashes());
 	ASSERT_EQ(currentStates.size(), gptKnownTuningSignalHashes().size());
@@ -1363,7 +1392,9 @@ TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesEventuallyUpdatesReadback)
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+
 	ASSERT_TRUE(gptWaitUntilControlledSourceIsActive(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
+	ASSERT_TRUE(gptWaitUntilSourceIsReplying(tuningConn, "SYSTEMID_CLIENTTEST_CH12_MD00"));
 
 	const auto currentStates = tuningConn.requestSignalStates(gptKnownTuningSignalHashes());
 	ASSERT_EQ(currentStates.size(), gptKnownTuningSignalHashes().size());
