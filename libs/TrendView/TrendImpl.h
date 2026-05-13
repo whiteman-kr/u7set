@@ -69,6 +69,11 @@ namespace TrendLib
 									 const TrendParam& drawParam,
 									 std::list<std::shared_ptr<OneHourData>>& signalData,
 									 std::stop_token stoken) const;
+		void drawSignalTrendDiscreteBars(QPainter* painter,
+										 const TrendSignalParam& signal,
+										 const TrendParam& drawParam,
+										 std::list<std::shared_ptr<OneHourData>>& signalData,
+										 std::stop_token stoken) const;
 		void drawSignalTrendAnalog(QPainter* painter,
 								   const TrendSignalParam& signal,
 								   const TrendParam& drawParam,

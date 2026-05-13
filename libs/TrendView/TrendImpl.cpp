@@ -4,6 +4,9 @@
 
 #include <QPainter>
 
+#define EXPERIMENTAL_TREND_DRAW_WITH_BARS
+// #define DEBUG_TIME
+
 namespace TrendLib
 {
 	const double TrendImpl::discreteSignalHeight = 5.0 / 10.0; // 5/10*25.4 = 12.7 mm
@@ -47,8 +50,6 @@ namespace TrendLib
 			return;
 		}
 
-		// #define DEBUG_TIME
-
 #ifdef DEBUG_TIME
 		QElapsedTimer timeMeasures;
 		timeMeasures.start();
@@ -63,7 +64,20 @@ namespace TrendLib
 		draw(&painter, drawParam, true, stoken);
 
 #ifdef DEBUG_TIME
-		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+		{
+			thread_local std::deque<qint64> elapsedMedium;
+			elapsedMedium.push_back(timeMeasures.elapsed());
+
+			while (elapsedMedium.size() > 16)
+			{
+				elapsedMedium.pop_front();
+			}
+
+			auto average = std::accumulate(elapsedMedium.begin(), elapsedMedium.end(), 0LL);
+			average /= elapsedMedium.size();
+
+			qDebug() << "Trend draw time: " << average << " ms";
+		}
 #endif
 		return;
 	}
@@ -1098,7 +1112,18 @@ namespace TrendLib
 		{
 			// signalData will release some data inside, after drawing
 			//
-			drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
+			// #ifdef EXPERIMENTAL_TREND_DRAW_WITH_BARS
+			//			if (QApplication::keyboardModifiers() & Qt::CTRL)
+			//			{
+			//				drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
+			//			}
+			//			else
+			//			{
+			drawSignalTrendDiscreteBars(painter, signal, drawParam, signalData, stoken);
+			//}
+			// #else
+			//			drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
+			// #endif
 		}
 
 		if (signal.isAnalog() == true)
@@ -1128,16 +1153,16 @@ namespace TrendLib
 		//
 		painter->setClipRect(signalRect);
 
-		// Draw trend
+		// Set pen to get font metrics
 		//
-		const auto textBoundSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
-
-		E::TimeType timeType = drawParam.timeType();
-
 		QPen linePen({signal.color()},
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY(),
 					 Qt::SolidLine);
 		painter->setPen(linePen);
+
+		const auto textBoundSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
+
+		E::TimeType timeType = drawParam.timeType();
 
 		const int recommendedSize = 8192 * 2;
 		std::vector<QPointF> lines;
@@ -1281,6 +1306,290 @@ namespace TrendLib
 			drawPolyline(painter, lines, signalRect);
 			lines.clear();
 		}
+
+		// Reset clipping
+		//
+		painter->setClipping(false);
+
+		return;
+	}
+
+	void TrendImpl::drawSignalTrendDiscreteBars(QPainter* painter,
+												const TrendSignalParam& signal,
+												const TrendParam& drawParam,
+												std::list<std::shared_ptr<OneHourData>>& signalData,
+												std::stop_token stoken) const
+	{
+		Q_ASSERT(painter);
+		Q_ASSERT(signal.isDiscrete() == true);
+
+		QRectF signalRect = signal.tempDrawRect();
+		double barWidth = 1.0 / drawParam.realDpiX(); // 1 pixel width
+		size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+
+		struct Bar
+		{
+			bool hasValue;
+			bool has0;
+			bool has1;
+
+			void update(bool value)
+			{
+				if (hasValue == false)
+				{
+					hasValue = true;
+					has0 = !value;
+					has1 = value;
+				}
+				else
+				{
+					has0 = has0 || !value;
+					has1 = has1 || value;
+				}
+			}
+		};
+
+		thread_local std::vector<Bar> bars;
+		bars.resize(totalBars);
+		std::fill(bars.begin(), bars.end(), Bar{});
+
+		// Set clip region
+		//
+		painter->setClipRect(signalRect);
+
+		// Set pen to get font metrics.
+		//
+		QPen linePen({signal.color()},
+					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY(),
+					 Qt::SolidLine);
+		painter->setPen(linePen);
+
+		const auto textBoundSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
+
+		const E::TimeType timeType = drawParam.timeType();
+
+		const TimeStamp startTimeStamp = drawParam.startTimeStamp();
+		const qint64 duration = drawParam.duration();
+
+		const double dpiY = drawParam.realDpiY();
+		const double dpiX = drawParam.realDpiX();
+
+		double yPos0 = signalRect.bottom() - textBoundSize.height() / 2.0;
+		double yPos1 = signalRect.top() + textBoundSize.height() * 1.1;
+		yPos0 =
+			static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY; // Make sure that Y is proper aligned for nice look of cosmetic pen
+		yPos1 =
+			static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY; // Make sure that Y is proper aligned for nice look of cosmetic pen
+
+		std::optional<TrendStateItem> prevState;
+
+		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
+		{
+			if (stoken.stop_requested() == true)
+			{
+				break;
+			}
+
+			for (const std::vector<TrendStateRecord>& data = hour->data; //
+				 const TrendStateRecord& record : data)
+			{
+				if (stoken.stop_requested() == true)
+				{
+					break;
+				}
+
+				for (const TrendStateItem& state : record.states)
+				{
+					if (state.isValid() == false)
+					{
+						prevState.reset();
+						continue;
+					}
+
+					if (prevState.has_value() == false)
+					{
+						prevState = state;
+						continue;
+					}
+
+					// We have a prev state and current state, draw bars between them on the level of [currentBarValue : prevState.value].
+					// Also add a bar at the [prevState.value : state.value]
+
+					TimeStamp currentTime = state.getTime(timeType);
+					TimeStamp prevTime = prevState->getTime(timeType);
+
+					double startX = TrendScale::timeToScaledPixel(prevTime, signalRect, startTimeStamp, duration);
+					double endX = TrendScale::timeToScaledPixel(currentTime, signalRect, startTimeStamp, duration);
+					double dx = endX - startX;
+					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) / barWidth));
+					
+					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) / barWidth));
+					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0) 
+					{
+						// This point is completely out of the left edge, skip it
+						//
+						prevState = state;
+						continue;
+					}
+
+					const bool prevStateValue = static_cast<bool>(prevState->value);
+					for (std::size_t cnt = 0; cnt < barCount; cnt++)
+					{
+						std::ptrdiff_t index = barOffset + static_cast<std::ptrdiff_t>(cnt);
+						if (index < 0)
+						{
+							continue;
+						}
+
+						if (static_cast<size_t>(index) >= totalBars)
+						{
+							// Early exit if we are out of the right edge, no need to process more bars
+							//
+							break;
+						}
+
+						bars[index].update(prevStateValue);
+					}
+
+					// Add a bar at the last point with the value of the current state
+					//
+					if (size_t lastBarIndex = barOffset + barCount - 1; //
+						lastBarIndex < bars.size())
+					{
+						bars[lastBarIndex].update(state.value);
+					}
+
+					// --
+					//
+					prevState = state;
+				} // for (const TrendStateItem& state : record.states)
+			}
+
+			hour.reset();  // Free memory, we don't need it anymore
+		}
+
+		// Draw bars
+		//
+#if 0
+		{
+			painter->setPen(Qt::NoPen);
+
+			const double lineWeightFactor = (signal.lineWeight() <= 1.0) ? 1.0 : signal.lineWeight();
+			const double minBarWidth = (1.0 / dpiX) * lineWeightFactor;
+			const double minBarHeight = (1.0 / dpiY) * lineWeightFactor;
+
+			QRectF barRect;
+
+			for (size_t i = 0; i < bars.size(); i++)
+			{
+				const Bar& bar = bars[i];
+				
+				if (bar.hasValue == true)
+				{
+					double x = signalRect.left() + i * barWidth; // - minBarWidth / 2.0;
+					double y = bar.min;
+					double height = bar.max - bar.min;
+
+					if (height == 0 || height < minBarHeight)
+					{
+						height = minBarHeight;
+					}
+
+					// If y and height are the same as the previous bar, just extend the width of the previous bar
+					//
+					if (barRect.isNull() == true)
+					{
+						barRect = QRectF(x, y, minBarWidth, height);
+					}
+					else 
+					{
+						if (std::fabs(barRect.top() - y) <= std::numeric_limits<double>::epsilon() &&
+							std::fabs(barRect.height() - height) <= std::numeric_limits<double>::epsilon())
+						{
+							barRect.setWidth((x + minBarWidth) - barRect.left());
+						}
+						else
+						{
+							painter->fillRect(barRect, signal.color());
+							barRect = QRectF(x, y, minBarWidth, height);
+						}
+					}
+				}
+				else
+				{
+					if (barRect.isNull() == false) 
+					{
+						painter->fillRect(barRect, signal.color());
+						barRect = QRectF{};
+					}
+				}
+			}
+
+			if (barRect.isNull() == false)
+			{
+				painter->fillRect(barRect, signal.color());
+				barRect = QRectF{};
+			}
+		}
+#else
+		{
+			painter->setPen(Qt::NoPen);
+			//painter->setRenderHint(QPainter::Antialiasing, false);
+
+			const double lineWeightFactor = (signal.lineWeight() <= 1.0) ? 1.0 : signal.lineWeight();
+			const double minBarWidth = (1.0 / dpiX) * lineWeightFactor;
+			const double minBarHeight = (1.0 / dpiY) * lineWeightFactor;
+			const double pixelWidth = 1.0 / dpiX;
+
+			const double fullHeight = yPos0 - yPos1 + minBarHeight;
+			double drawPos0 = yPos0 - minBarHeight / 2.0;
+			double drawPos1 = yPos1 - minBarHeight / 2.0;
+
+			auto color = signal.color();
+
+			for (size_t i = 0; i < bars.size(); i++)
+			{
+				Bar bar = bars[i];
+
+				if (bar.hasValue == true)
+				{
+					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
+
+					double y;
+					double h;
+
+					if (bar.has0 && !bar.has1) 
+					{
+						// Bottom
+						//
+						y = drawPos0; 
+						h = minBarHeight;
+					} else if (!bar.has0 && bar.has1)
+					{
+						// Top
+						//
+						y = drawPos1;
+						h = minBarHeight;
+					}else if (bar.has0 && bar.has1)
+					{
+						// Vertical full bar
+						//
+						y = drawPos1;
+						h = fullHeight;
+					}
+					else {
+						assert(false);
+						y = 0;
+						h = 0;
+					}
+
+					painter->fillRect(QRectF{x, y, minBarWidth, h}, color);
+				}
+			}
+
+			//painter->setRenderHint(QPainter::Antialiasing, true);
+		}
+#endif
 
 		// Reset clipping
 		//
