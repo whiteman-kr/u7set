@@ -1,4 +1,16 @@
 #include "TuningGatewayServer.h"
+#include "AsyncTcpServer.h"
+
+
+class TuninigGatewaySession : public AsyncTcpSession
+{
+public:
+	TuninigGatewaySession(asio::ip::tcp::socket socket, CircularLoggerShared log) :
+		AsyncTcpSession(std::move(socket), log)
+	{
+
+	}
+};
 
 TuningGatewayServer::TuningGatewayServer(const SoftwareInfo& swInfo, const HostAddressPort& listenIP,
 										const HostAddressPort& tunSrvIP1,
@@ -12,6 +24,10 @@ TuningGatewayServer::TuningGatewayServer(const SoftwareInfo& swInfo, const HostA
 	m_tunSrvIP2(tunSrvIP2),
 	m_appSignals(appSignals)
 {
+
+	std::vector<HostAddressPort> addresses = {listenIP};
+
+	AsyncTcpServer<TuninigGatewaySession> qq(addresses, 2, log);
 }
 
 TuningGatewayServer::~TuningGatewayServer()

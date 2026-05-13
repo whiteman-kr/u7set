@@ -21,6 +21,8 @@ add_executable(${TARGET}
 	AppDataServiceClient.h
 	AppSignalState.cpp
 	AppSignalState.h
+	AsyncTcpServer.cpp
+	AsyncTcpServer.h
 	Float16.cpp
 	Float16.h
 	GatewayHandler.cpp
@@ -47,7 +49,7 @@ add_executable(${TARGET}
 	TuningGatewayServer.h
 	TuningSrvClient.cpp
 	TuningSrvClient.h
-)
+ )
 
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes

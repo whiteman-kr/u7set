@@ -660,6 +660,11 @@ void LogWrapper::setLog(CircularLoggerShared log)
 	m_log = log;
 }
 
+void LogWrapper::setClassName(QString& className) 
+{
+	m_className = className;
+}
+
 void LogWrapper::logMsg(const QString& msg) const
 {
 	if (m_log)
