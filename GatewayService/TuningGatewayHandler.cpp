@@ -40,24 +40,42 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_tunGatewayServerMutex);
 
-		Q_ASSERT(m_tunGatewayServer == nullptr);
+		//Q_ASSERT(m_tunGatewayServer == nullptr);
 
-		m_tunGatewayServer = std::make_unique<TuningGatewayServer>(m_swInfo,
-																   m_gateway->clientRequestIP1(),
-																   m_settings.tuningService1.address,
-																   m_settings.tuningService2.address,
-																   m_appSignals, m_log);
-		m_tunGatewayServer->start();
+		//m_tunGatewayServer = std::make_unique<TuningGatewayServer>(m_swInfo,
+		//														   m_gateway->clientRequestIP1(),
+		//														   m_settings.tuningService1.address,
+		//														   m_settings.tuningService2.address,
+		//														   m_appSignals, m_log);
+		//m_tunGatewayServer->start();
+
+		Q_ASSERT(m_asyncTunGatewayServer == nullptr);
+
+		std::vector<HostAddressPort> listenAddresses;
+
+		m_asyncTunGatewayServer = std::make_unique<AsyncTuningGatewayServer>(
+											m_swInfo, m_appSignals,
+											std::vector<HostAddressPort>{m_gateway->clientRequestIP1()},
+											std::vector<HostAddressPort>{m_settings.tuningService1.address, m_settings.tuningService2.address},
+											2, m_log, "AsyncTuningGatewayServer");
+		m_asyncTunGatewayServer->start();
+
 	}
 
 	void TuningGatewayHandler::stopTuningGatewayServer()
 	{
 		std::lock_guard lg(m_tunGatewayServerMutex);
 
-		if (m_tunGatewayServer != nullptr)
+		//if (m_tunGatewayServer != nullptr)
+		//{
+		//	m_tunGatewayServer->stop();
+		//	m_tunGatewayServer.reset();
+		//}
+
+		if (m_asyncTunGatewayServer != nullptr)
 		{
-			m_tunGatewayServer->stop();
-			m_tunGatewayServer.reset();
+			m_asyncTunGatewayServer->stop();
+			m_asyncTunGatewayServer.reset();
 		}
 	}
 }

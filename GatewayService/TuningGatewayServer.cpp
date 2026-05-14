@@ -1,16 +1,175 @@
 #include "TuningGatewayServer.h"
-#include "AsyncTcpServer.h"
 
+// -----------------------------------------------------------------------------
+// 
+// TuningGatewaySession class implementation
+// 
+// -----------------------------------------------------------------------------
 
-class TuninigGatewaySession : public AsyncTcpSession
+TuningGatewaySession::TuningGatewaySession(const SoftwareInfo& swInfo,
+										   const AppSignals& appSignals,
+										   const std::vector<HostAddressPort>& serviceAddresses, 
+										   asio::ip::tcp::socket socket,
+										   CircularLoggerShared log) :
+	AsyncTcpSession(swInfo, appSignals, serviceAddresses, std::move(socket), log)
 {
-public:
-	TuninigGatewaySession(asio::ip::tcp::socket socket, CircularLoggerShared log) :
-		AsyncTcpSession(std::move(socket), log)
-	{
+}
 
+void TuningGatewaySession::onStarted()
+{
+
+}
+
+void TuningGatewaySession::onStopped()
+{
+
+}
+
+bool TuningGatewaySession::checkRequestID(uint32_t requestID)
+{
+	switch (static_cast<GCL::TuningGwRequestId>(requestID))
+	{
+	case GCL::TuningGwRequestId::TGW_HANDSHAKE:
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START:
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_NEXT:
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCE_STATES:
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_READ:
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE:
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
+	case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
+		return true;
+
+	default:
+		;
 	}
-};
+
+	return false;
+}
+
+bool TuningGatewaySession::isHandshakeRequest(uint32_t requestID)
+{
+	return static_cast<GCL::TuningGwRequestId>(requestID) == GCL::TuningGwRequestId::TGW_HANDSHAKE;
+}
+
+bool TuningGatewaySession::checkPayloadSize(const GCL::GwMessageHeader& header,
+											const char* recvBuf,
+											const size_t recvBufSize,
+											GCL::GwErrorCode& errCode)
+{
+	errCode = GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR;
+
+	TEST_PTR_RETURN_FALSE(recvBuf);
+
+	size_t payloadSize = 0;
+
+	switch (static_cast<GCL::TuningGwRequestId>(header.requestID))
+	{
+	case GCL::TuningGwRequestId::TGW_HANDSHAKE:
+		payloadSize = GCL::TUNING_GW_HANDSHAKE_REQUEST_SIZE;
+		break;
+
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START:
+		payloadSize = GCL::TUNING_GW_GET_TUNING_SOURCES_START_REQUEST_SIZE;
+		break;
+
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCES_NEXT:
+		payloadSize = GCL::TUNING_GW_GET_TUNING_SOURCES_NEXT_REQUEST_SIZE;
+		break;
+
+	case GCL::TuningGwRequestId::TGW_GET_TUNING_SOURCE_STATES:
+		payloadSize = GCL::TUNING_GW_GET_TUNING_SOURCE_STATES_REQUEST_SIZE;
+		break;
+
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_READ:
+		{
+			if (recvBufSize < GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE)
+			{
+				return false;
+			}
+
+			GCL::GwTuningSignalsReadRequest request;
+
+			std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE);
+
+			if (request.count > GCL::TUNING_GW_MAX_SIGNAL_STATES)
+			{
+				errCode = GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS;
+				return false;
+			}
+
+			payloadSize =
+				GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE + static_cast<size_t>(request.count) * GCL::GW_APP_SIGNAL_HASH_SIZE;
+		}
+		break;
+
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_WRITE:
+		{
+			if (recvBufSize < GCL::GW_MSG_HEADER_SIZE + GCL::TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE)
+			{
+				return false;
+			}
+
+			GCL::GwTuningSignalsWriteRequest request;
+
+			std::memcpy(&request, recvBuf + GCL::GW_MSG_HEADER_SIZE, GCL::TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE);
+
+			if (request.count > GCL::TUNING_GW_MAX_WRITE_VALUES)
+			{
+				errCode = GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS;
+				return false;
+			}
+
+			payloadSize = GCL::TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE +
+						  static_cast<size_t>(request.count) * GCL::TUNING_GW_TUNING_WRITE_VALUE_SIZE;
+		}
+		break;
+
+	case GCL::TuningGwRequestId::TGW_TUNING_SIGNALS_APPLY:
+		payloadSize = GCL::TUNING_GW_TUNING_SIGNALS_APPLY_REQUEST_SIZE;
+		break;
+
+	case GCL::TuningGwRequestId::TGW_CHANGE_CONTROLLED_TUNING_SOURCE:
+		payloadSize = GCL::TUNING_GW_CHANGE_CONTROLLED_TUNING_SOURCE_REQUEST_SIZE;
+		break;
+
+	default:
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (header.payloadSize != payloadSize)
+	{
+		return false;
+	}
+
+	errCode = GCL::GwErrorCode::GWC_SUCCESS;
+	return true;
+}
+
+size_t TuningGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize)
+{
+	if (recvBufSize < requestSize)
+	{
+		Q_ASSERT(false);
+		return recvBufSize;
+	}
+
+	const size_t restSize = recvBufSize - requestSize;
+
+	if (restSize > 0)
+	{
+		std::memmove(recvBuf, recvBuf + requestSize, restSize);
+	}
+
+	return restSize;
+}
+
+bool TuningGatewaySession::processRequest(const GCL::GwMessageHeader& header, char* recvBuf, size_t recvBufSize)
+{
+
+}
+
+// -----------------------------------------------------------------------------
 
 TuningGatewayServer::TuningGatewayServer(const SoftwareInfo& swInfo, const HostAddressPort& listenIP,
 										const HostAddressPort& tunSrvIP1,
@@ -24,10 +183,6 @@ TuningGatewayServer::TuningGatewayServer(const SoftwareInfo& swInfo, const HostA
 	m_tunSrvIP2(tunSrvIP2),
 	m_appSignals(appSignals)
 {
-
-	std::vector<HostAddressPort> addresses = {listenIP};
-
-	AsyncTcpServer<TuninigGatewaySession> qq(addresses, 2, log);
 }
 
 TuningGatewayServer::~TuningGatewayServer()

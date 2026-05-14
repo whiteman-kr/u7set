@@ -18,10 +18,34 @@
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
 #include <GrpcAppDataSrv.pb.h>
+#include "AsyncTcpServer.h"
 #include "TuningSrvClient.h"
 
 using asio::ip::tcp;
 namespace GCL = GatewayClientLib;
+
+
+class TuningGatewaySession : public AsyncTcpSession
+{
+public:
+	TuningGatewaySession(const SoftwareInfo& swInfo, 
+						 const AppSignals& appSignals,
+						 const std::vector<HostAddressPort>& serviceAddresses, 
+						 asio::ip::tcp::socket socket, 
+						 CircularLoggerShared log);
+protected:	
+	virtual void onStarted();
+	virtual void onStopped();
+
+	virtual bool checkRequestID(uint32_t requestID) override;
+	virtual bool isHandshakeRequest(uint32_t requestID) override;
+	virtual bool checkPayloadSize(const GCL::GwMessageHeader& header,
+								const char* recvBuf,
+								const size_t recvBufSize,
+								GCL::GwErrorCode& errCode) override;
+
+	virtual bool processRequest(const GCL::GwMessageHeader& header, char* recvBuf, size_t recvBufSize) override;
+};
 
 using TcpSocketShared = std::shared_ptr<tcp::socket>;
 

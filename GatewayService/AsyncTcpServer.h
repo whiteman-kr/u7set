@@ -8,7 +8,13 @@
 #include <vector>
 
 #include <CommonLib/HostAddressPort.h>
+#include <GatewayClientLib/GwClient.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
+#include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "../AppSignalLib/AppSignal.h"
+
+namespace GCL = GatewayClientLib;
 
 template<class SessionT>
 class AsyncTcpServer;
@@ -22,7 +28,12 @@ public:
 	static constexpr size_t MAX_READ_BUFFER_SIZE = 4 * 1024 * 1024;
 
 public:
-	explicit AsyncTcpSession(asio::ip::tcp::socket socket, CircularLoggerShared log);
+	explicit AsyncTcpSession(const SoftwareInfo& swInfo,
+							 const AppSignals& appSignals,
+							 const std::vector<HostAddressPort>& serviceAddresses, 
+							 asio::ip::tcp::socket socket, 
+							 CircularLoggerShared log);
+
 	virtual ~AsyncTcpSession();
 
 	void setBufferSize(size_t size);
@@ -33,28 +44,52 @@ protected:
 	virtual void onStarted();
 	virtual void onStopped();
 
-	virtual void onDataReceived(const char* data, std::size_t size) = 0;
+	virtual bool checkRequestID(uint32_t requestID) = 0;
+	virtual bool isHandshakeRequest(uint32_t requestID) = 0;
+	virtual bool checkPayloadSize(const GCL::GwMessageHeader& header,
+								  const char* recvBuf,
+								  const size_t recvBufSize,
+								  GCL::GwErrorCode& errCode) = 0;
+
+	virtual bool processRequest(const GCL::GwMessageHeader& header, char* recvBuf, size_t recvBufSize) = 0;
+
 	virtual void onError(const std::error_code& ec);
 
-	void send(const std::vector<char>& data);
-	void send(const char* data, size_t dataSize);
+	void sendErrReply(const GCL::GwMessageHeader& requestHeader, GCL::GwErrorCode errCode);
+	void sendOkReply(const GCL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
+	void sendReply(uint32_t requestID, GCL::GwErrorCode errCode, const char* payloadData, size_t payloadSize);
+
+	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
+
+	bool isHandshakeCompleted() const;
+	void setHandshakeCompleted(bool completed);
 
 private:
 	void start();
 	void stop();
 
-	void startRead();
-	void startWrite();
+	void startReceive();
+	void startSend();
+
+	void onDataReceived(char* recvBuf, std::size_t recvBufSize);
 
 private:
+	SoftwareInfo m_swInfo;
+	const AppSignals& m_appSignals;
+	std::vector<HostAddressPort> m_serviceAdresses;
+
 	asio::ip::tcp::socket m_socket;
 	asio::strand<asio::any_io_executor> m_strand;
 
 	bool m_started = false;
 
-	Buffer m_readBuffer;
-	Buffer m_writeBuffer;
+	Buffer m_recvBuf;
+	size_t m_recvBufSize = 0;
+	Buffer m_sendBuf;
 	bool m_writeInProgress = false;
+	quint64 m_errCount = 0;
+
+	bool m_handshakeCompleted = false;
 
 	template<class SessionT>
 	friend class AsyncTcpServer;
@@ -64,12 +99,18 @@ template<class SessionT>
 class AsyncTcpServer : public LogWrapper
 {
 public:
-	explicit AsyncTcpServer(const std::vector<HostAddressPort>& addresses, 
+	explicit AsyncTcpServer(const SoftwareInfo& swInfo,
+							const AppSignals& appSignals,
+							const std::vector<HostAddressPort>& listenAddresses, 
+							const std::vector<HostAddressPort>& serviceAddresses, 
 							int threadsCount, 
 							CircularLoggerShared log,
 							const QString& description = "AsyncTcpServer") :
 		LogWrapper(log, description),
-		m_addresses(addresses),
+		m_swInfo(swInfo),
+		m_appSignals(appSignals),
+		m_listenAddresses(listenAddresses),
+		m_serviceAddresses(serviceAddresses),
 		m_threadsCount(threadsCount),
 		m_workGuard(asio::make_work_guard(m_ioContext))
 	{
@@ -91,9 +132,9 @@ public:
 			return true;
 		}
 
-		for (const HostAddressPort& addressPort : m_addresses)
+		for (const HostAddressPort& listenAddress : m_listenAddresses)
 		{
-			if (!startAcceptor(addressPort))
+			if (!startAcceptor(listenAddress))
 			{
 				stop();
 				return false;
@@ -142,21 +183,21 @@ public:
 	}
 
 private:
-	bool startAcceptor(const HostAddressPort& addressPort)
+	bool startAcceptor(const HostAddressPort& listenAddress)
 	{
 		using asio::ip::tcp;
 
 		std::error_code ec;
 
-		asio::ip::address address = asio::ip::make_address(addressPort.addressPortStr.toStdString(), ec);
+		asio::ip::address address = asio::ip::make_address(listenAddress.addressPortStr().toStdString(), ec);
 
 		if (ec)
 		{
-			logErr(QString("Bad IP %1: %2").arg(addressPort.addressPortStr()).arg(qstr(ec.message())));
+			logErr(QString("Bad IP %1: %2").arg(listenAddress.addressPortStr()).arg(qstr(ec.message())));
 			return false;
 		}
 
-		tcp::endpoint endpoint(address, addressPort.port);
+		tcp::endpoint endpoint(address, listenAddress.port());
 
 		auto acceptor = std::make_shared<tcp::acceptor>(m_ioContext);
 
@@ -180,7 +221,7 @@ private:
 
 		if (ec)
 		{
-			logErr(QString("Bind failed %1: %2").arg(addressPort.addressPortStr()).arg(qstr(ec.message())));
+			logErr(QString("Bind failed %1: %2").arg(listenAddress.addressPortStr()).arg(qstr(ec.message())));
 			return false;
 		}
 
@@ -196,7 +237,7 @@ private:
 
 		accept(acceptor);
 
-		logMsg(QString("Listening on %1").arg(addressPort.addressPortStr()));
+		logMsg(QString("Listening on %1").arg(listenAddress.addressPortStr()));
 
 		return true;
 	}
@@ -218,7 +259,7 @@ private:
 
 				if (!ec)
 				{
-					std::make_shared<SessionT>(std::move(socket), getLog())->start();
+					std::make_shared<SessionT>(m_swInfo, m_appSignals, m_serviceAddresses, std::move(socket), getLog())->start();
 				}
 				else
 				{
@@ -230,11 +271,14 @@ private:
 	}
 
 private:
-	asio::io_context m_ioContext;
-	asio::executor_work_guard<asio::io_context::executor_type> m_workGuard;
+	SoftwareInfo m_swInfo;
+	const AppSignals& m_appSignals;
+	std::vector<HostAddressPort> m_listenAddresses;
+	std::vector<HostAddressPort> m_serviceAddresses;
 
-	std::vector<HostAddressPort> m_addresses;
+	asio::io_context m_ioContext;
 	std::vector<std::shared_ptr<asio::ip::tcp::acceptor>> m_acceptors;
+	asio::executor_work_guard<asio::io_context::executor_type> m_workGuard;
 
 	int m_threadsCount = 1;
 	std::vector<std::thread> m_threads;
