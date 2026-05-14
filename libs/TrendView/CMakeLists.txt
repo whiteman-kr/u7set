@@ -79,6 +79,7 @@ target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::Print
 target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLib AppSignalLists)
 
 target_compile_definitions(${TARGET} PRIVATE TREND_VIEW_LIBRARY)
+target_compile_definitions(${TARGET} PUBLIC TREND_ZERO_COPY_TREND_DATA)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

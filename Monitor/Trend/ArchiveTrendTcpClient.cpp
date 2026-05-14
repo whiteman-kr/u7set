@@ -21,11 +21,12 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
 	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("shared_ptr<TrendLib::OneHourData>>");
 	qRegisterMetaType<std::shared_ptr<TrendLib::RealtimeData>>("shared_ptr<TrendLib::RealtimeData>>");
 
-	connect(this, &Tcp::Client::signal_wrongServerID,
-		[this](const QString& errorMessage)
-		{
-			m_logFile.writeError(errorMessage);
-		});
+	connect(this,
+			&Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
 
 	return;
 }
@@ -40,8 +41,8 @@ void ArchiveTrendTcpClient::timerEvent(QTimerEvent* event)
 	if (requestInProgress == true)
 	{
 		QString stat = QString("%1 - %2")
-						.arg(m_currentRequest.signalPlusServerId.appSignalId)
-						.arg(DateTimeToString::dateTimeSec(m_currentRequest.hourToRequest.toDateTime())); // Should add seconds???
+						   .arg(m_currentRequest.signalPlusServerId.appSignalId)
+						   .arg(DateTimeToString::dateTimeSec(m_currentRequest.hourToRequest.toDateTime())); // Should add seconds???
 		setStatText(stat);
 	}
 	else
@@ -51,9 +52,7 @@ void ArchiveTrendTcpClient::timerEvent(QTimerEvent* event)
 
 	setStatRequestQueueSize(static_cast<int>(m_queue.size()));
 
-	if (event->timerId() == m_periodicTimerId &&
-		requestInProgress == false &&
-		isClearToSendRequest() == true)
+	if (event->timerId() == m_periodicTimerId && requestInProgress == false && isClearToSendRequest() == true)
 	{
 		resetRequestCycle();
 		return;
@@ -67,7 +66,8 @@ void ArchiveTrendTcpClient::onClientThreadStarted()
 	qDebug() << "ArchiveTrendTcpClient::onClientThreadStarted()";
 	m_logFile.writeMessage("onClientThreadStarted()");
 
-	m_periodicTimerId = startTimer(MonitorAppSettings::instance().requestTimeInterval());	// Start it here, as this function is running in the right thread
+	m_periodicTimerId =
+		startTimer(MonitorAppSettings::instance().requestTimeInterval()); // Start it here, as this function is running in the right thread
 
 	return;
 }
@@ -146,15 +146,11 @@ void ArchiveTrendTcpClient::resetRequestCycle()
 {
 	QThread::msleep(0);
 
-	if (m_queue.empty() == false &&
-		requestInProgress == false &&
-		isClearToSendRequest() == true)
+	if (m_queue.empty() == false && requestInProgress == false && isClearToSendRequest() == true)
 	{
 		requestStart();
 	}
-	else
-	{
-	}
+	else {}
 
 	return;
 }
@@ -169,8 +165,8 @@ void ArchiveTrendTcpClient::requestStart()
 		return;
 	}
 
-	m_currentRequest = m_queue.back();	// THESE TWO LINES MUST BE IN CONSISTENCY!!!!
-	m_queue.pop_back();					// Take the last one, let's assume it is shown now and more important
+	m_currentRequest = m_queue.back(); // THESE TWO LINES MUST BE IN CONSISTENCY!!!!
+	m_queue.pop_back();                // Take the last one, let's assume it is shown now and more important
 
 	incStatRequestCount();
 	requestInProgress = true;
@@ -180,7 +176,8 @@ void ArchiveTrendTcpClient::requestStart()
 	m_startRequest.Clear();
 	m_startRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 
-	m_startRequest.set_timetype(static_cast<int>(m_currentRequest.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
+	m_startRequest.set_timetype(
+		static_cast<int>(m_currentRequest.timeType)); // enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
 	m_startRequest.set_starttime(m_currentRequest.hourToRequest.timeStamp);
 	m_startRequest.set_endtime(m_currentRequest.hourToRequest.timeStamp + 1_hour);
 	m_startRequest.add_signalhashes(m_currentSignalHash);
@@ -191,7 +188,8 @@ void ArchiveTrendTcpClient::requestStart()
 
 	m_receivedData = std::make_shared<TrendLib::OneHourData>();
 
-	m_logFile.writeMessage(QString("requestStart(), sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START...), %1").arg(m_currentRequest.toString()));
+	m_logFile.writeMessage(
+		QString("requestStart(), sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START...), %1").arg(m_currentRequest.toString()));
 	return;
 }
 
@@ -199,8 +197,8 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 {
 	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
 	m_logFile.writeMessage(QString("processStart(), ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: %1 ms, m_currentRequest %2")
-							.arg(m_startRequestTime.elapsed())
-							.arg(m_currentRequest.toString()));
+							   .arg(m_startRequestTime.elapsed())
+							   .arg(m_currentRequest.toString()));
 
 	Q_ASSERT(m_connectedSoftwareInfo.equipmentID() == m_currentRequest.signalPlusServerId.archiveServerId);
 
@@ -210,9 +208,7 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 
 	if (ok == false)
 	{
-		emit requestError(m_currentRequest.signalPlusServerId,
-						  m_currentRequest.hourToRequest,
-						  m_currentRequest.timeType);
+		emit requestError(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 		Q_ASSERT(ok);
@@ -226,19 +222,14 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 
 	if (error != 0)
 	{
-		emit requestError(m_currentRequest.signalPlusServerId,
-						  m_currentRequest.hourToRequest,
-						  m_currentRequest.timeType);
+		emit requestError(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 
-		qDebug() << "RECEIVED ERROR:   TrendTcpClient::processStart, error = " << error
-				 << ", archError = " << archError
+		qDebug() << "RECEIVED ERROR:   TrendTcpClient::processStart, error = " << error << ", archError = " << archError
 				 << ", RequestID = " << m_currentRequestId;
 
-		m_logFile.writeError(QString("processStart(), error: %1, m_currentRequest %2")
-								.arg(archError)
-								.arg(m_currentRequest.toString()));
+		m_logFile.writeError(QString("processStart(), error: %1, m_currentRequest %2").arg(archError).arg(m_currentRequest.toString()));
 
 		resetRequestCycle();
 		return;
@@ -270,9 +261,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	if (ok == false)
 	{
-		emit requestError(m_currentRequest.signalPlusServerId,
-						  m_currentRequest.hourToRequest,
-						  m_currentRequest.timeType);
+		emit requestError(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 
@@ -287,18 +276,15 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	{
 		Q_ASSERT(m_currentRequestId == m_nextReply.requestid());
 
-		emit requestError(m_currentRequest.signalPlusServerId,
-						  m_currentRequest.hourToRequest,
-						  m_currentRequest.timeType);
+		emit requestError(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 
-		qDebug() << "TrendTcpClient::processNext, wrong RequestID, expected " << m_currentRequestId
-				 << ", received " << m_nextReply.requestid();
+		qDebug() << "TrendTcpClient::processNext, wrong RequestID, expected " << m_currentRequestId << ", received "
+				 << m_nextReply.requestid();
 
-		m_logFile.writeError(QString("processNext(), wrong RequestId, expected %1, received %2")
-								.arg(m_currentRequestId)
-								.arg(m_nextReply.requestid()));
+		m_logFile.writeError(
+			QString("processNext(), wrong RequestId, expected %1, received %2").arg(m_currentRequestId).arg(m_nextReply.requestid()));
 
 		resetRequestCycle();
 		return;
@@ -306,22 +292,16 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	if (error != 0)
 	{
-		emit requestError(m_currentRequest.signalPlusServerId,
-						  m_currentRequest.hourToRequest,
-						  m_currentRequest.timeType);
+		emit requestError(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 
 		qDebug() << "ERROR: TrendTcpClient::processNext, AppSignalID = " << m_currentRequest.signalPlusServerId.appSignalId
-				 << ", error = " << error
-				 << ", archError = " << archError
-				 << ", RequestID = " << m_currentRequestId
+				 << ", error = " << error << ", archError = " << archError << ", RequestID = " << m_currentRequestId
 				 << ", requestedTime = " << m_currentRequest.hourToRequest.toDateTime();
 
-		m_logFile.writeError(QString("processNext(), error: %1, archError: %2, request: %3")
-								.arg(error)
-								.arg(archError)
-								.arg(m_currentRequest.toString()));
+		m_logFile.writeError(
+			QString("processNext(), error: %1, archError: %2, request: %3").arg(error).arg(archError).arg(m_currentRequest.toString()));
 
 		resetRequestCycle();
 		return;
@@ -342,7 +322,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	int stateCount = m_nextReply.appsignalstates_size();
 
-	//qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
+	// qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
 
 	// --
 	//
@@ -350,13 +330,13 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	if (stateCount != 0)
 	{
-		if (m_receivedData->data.empty() == true)
+		if (m_receivedData->data_.empty() == true)
 		{
-			m_receivedData->data.emplace_back();
-			m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
+			m_receivedData->data_.emplace_back();
+			m_receivedData->data_.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 		}
 
-		record = &m_receivedData->data.back();
+		record = &m_receivedData->data_.back();
 
 		// --
 		//
@@ -377,10 +357,10 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 				if (record->states.size() >= record->states.max_size())
 				{
-					m_receivedData->data.emplace_back();
-					m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
+					m_receivedData->data_.emplace_back();
+					m_receivedData->data_.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 
-					record = &m_receivedData->data.back();
+					record = &m_receivedData->data_.back();
 					Q_ASSERT(record);
 				}
 
@@ -395,22 +375,19 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	{
 		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Request->Reply time: " << m_startRequestTime.elapsed();
 		m_logFile.writeMessage(QString("processNext(), Requested completed, time: %1 ms, request: %2")
-									.arg(m_startRequestTime.elapsed())
-									.arg(m_currentRequest.toString()));
+								   .arg(m_startRequestTime.elapsed())
+								   .arg(m_currentRequest.toString()));
 
 		Q_ASSERT(m_receivedData);
 
-		m_receivedData->state = TrendLib::OneHourData::State::Received;
+		m_receivedData->state_ = TrendLib::OneHourData::State::Received;
 
-		emit dataReady(m_currentRequest.signalPlusServerId,
-					   m_currentRequest.hourToRequest,
-					   m_currentRequest.timeType,
-					   m_receivedData);
+		emit dataReady(m_currentRequest.signalPlusServerId, m_currentRequest.hourToRequest, m_currentRequest.timeType, m_receivedData);
 
-		requestInProgress = false;			// END OF REQUEST COMMUNICATION!
+		requestInProgress = false; // END OF REQUEST COMMUNICATION!
 		m_receivedData.reset();
 
-		resetRequestCycle();				// start new cycle
+		resetRequestCycle();       // start new cycle
 	}
 	else
 	{
@@ -492,7 +469,7 @@ void ArchiveTrendTcpClient::setStatRequestQueueSize(int value)
 void ArchiveTrendTcpClient::incStatRequestCount()
 {
 	m_statMutex.lock();
-	m_stat.requestCount ++;
+	m_stat.requestCount++;
 	m_statMutex.unlock();
 
 	return;
@@ -501,7 +478,7 @@ void ArchiveTrendTcpClient::incStatRequestCount()
 void ArchiveTrendTcpClient::incStatReplyCount()
 {
 	m_statMutex.lock();
-	m_stat.replyCount ++;
+	m_stat.replyCount++;
 	m_statMutex.unlock();
 
 	return;

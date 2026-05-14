@@ -67,17 +67,17 @@ namespace TrendLib
 		void drawSignalTrendDiscrete(QPainter* painter,
 									 const TrendSignalParam& signal,
 									 const TrendParam& drawParam,
-									 std::list<std::shared_ptr<OneHourData>>& signalData,
+									 std::list<std::shared_ptr<const OneHourData>>& signalData,
 									 std::stop_token stoken) const;
 		void drawSignalTrendDiscreteBars(QPainter* painter,
 										 const TrendSignalParam& signal,
 										 const TrendParam& drawParam,
-										 std::list<std::shared_ptr<OneHourData>>& signalData,
+										 std::list<std::shared_ptr<const OneHourData>>& signalData,
 										 std::stop_token stoken) const;
 		void drawSignalTrendAnalog(QPainter* painter,
 								   const TrendSignalParam& signal,
 								   const TrendParam& drawParam,
-								   std::list<std::shared_ptr<OneHourData>>& signalData,
+								   std::list<std::shared_ptr<const OneHourData>>& signalData,
 								   std::stop_token stoken) const;
 
 		void drawRulers(QPainter* painter, TrendParam drawParam) const;

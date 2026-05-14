@@ -17,7 +17,7 @@ bool MonitorSchemaManager::trendData(QUuid trendUuid,
 									 QDateTime /*to*/,
 									 E::TimeType /*timeType*/,
 									 E::TrendMode /*mode*/,
-									 std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const
+									 std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const
 {
 	return m_rtTrendSchemas.trendData(trendUuid, trendSignal.appSignalId(), outData);
 }

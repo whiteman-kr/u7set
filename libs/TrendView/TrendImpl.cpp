@@ -68,7 +68,7 @@ namespace TrendLib
 			thread_local std::deque<qint64> elapsedMedium;
 			elapsedMedium.push_back(timeMeasures.elapsed());
 
-			while (elapsedMedium.size() > 16)
+			while (elapsedMedium.size() > 8)
 			{
 				elapsedMedium.pop_front();
 			}
@@ -1091,7 +1091,7 @@ namespace TrendLib
 		QDateTime startTime = requestStartTime.toDateTime();
 		QDateTime finishTime = requestFinishTime.toDateTime();
 
-		std::list<std::shared_ptr<OneHourData>> signalData;
+		std::list<std::shared_ptr<const OneHourData>> signalData;
 		bool requestResult = false;
 
 		if (drawParam.trendDataProvider() != nullptr)
@@ -1112,18 +1112,18 @@ namespace TrendLib
 		{
 			// signalData will release some data inside, after drawing
 			//
-			// #ifdef EXPERIMENTAL_TREND_DRAW_WITH_BARS
-			//			if (QApplication::keyboardModifiers() & Qt::CTRL)
-			//			{
-			//				drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
-			//			}
-			//			else
-			//			{
-			drawSignalTrendDiscreteBars(painter, signal, drawParam, signalData, stoken);
-			//}
-			// #else
-			//			drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
-			// #endif
+#ifdef EXPERIMENTAL_TREND_DRAW_WITH_BARS
+			if ((QApplication::keyboardModifiers() & Qt::CTRL) && (QApplication::keyboardModifiers() & Qt::SHIFT))
+			{
+				drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
+			}
+			else
+			{
+				drawSignalTrendDiscreteBars(painter, signal, drawParam, signalData, stoken);
+			}
+#else
+			drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
+#endif
 		}
 
 		if (signal.isAnalog() == true)
@@ -1141,7 +1141,7 @@ namespace TrendLib
 	void TrendImpl::drawSignalTrendDiscrete(QPainter* painter,
 											const TrendSignalParam& signal,
 											const TrendParam& drawParam,
-											std::list<std::shared_ptr<OneHourData>>& signalData,
+											std::list<std::shared_ptr<const OneHourData>>& signalData,
 											std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
@@ -1189,14 +1189,18 @@ namespace TrendLib
 
 		// int pointIndex = 0;
 
-		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
+		for (std::shared_ptr<const OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
 			if (stoken.stop_requested() == true)
 			{
 				break;
 			}
 
-			const std::vector<TrendStateRecord>& data = hour->data;
+#ifdef TREND_ZERO_COPY_TREND_DATA
+			std::shared_lock lock{hour->mutex};
+#endif
+
+			const std::vector<TrendStateRecord>& data = hour->data_;
 
 			for (const TrendStateRecord& record : data)
 			{
@@ -1317,7 +1321,7 @@ namespace TrendLib
 	void TrendImpl::drawSignalTrendDiscreteBars(QPainter* painter,
 												const TrendSignalParam& signal,
 												const TrendParam& drawParam,
-												std::list<std::shared_ptr<OneHourData>>& signalData,
+												std::list<std::shared_ptr<const OneHourData>>& signalData,
 												std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
@@ -1350,8 +1354,8 @@ namespace TrendLib
 		};
 
 		thread_local std::vector<Bar> bars;
-		bars.resize(totalBars);
-		std::fill(bars.begin(), bars.end(), Bar{});
+		bars.clear();
+		bars.resize(totalBars, Bar{});
 
 		// Set clip region
 		//
@@ -1383,14 +1387,18 @@ namespace TrendLib
 
 		std::optional<TrendStateItem> prevState;
 
-		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
+		for (std::shared_ptr<const OneHourData>& hour : signalData)     // REFERENCE! To actually free memory after use
 		{
 			if (stoken.stop_requested() == true)
 			{
 				break;
 			}
 
-			for (const std::vector<TrendStateRecord>& data = hour->data; //
+#ifdef TREND_ZERO_COPY_TREND_DATA
+			std::shared_lock lock{hour->mutex};
+#endif
+
+			for (const std::vector<TrendStateRecord>& data = hour->data_; //
 				 const TrendStateRecord& record : data)
 			{
 				if (stoken.stop_requested() == true)
@@ -1422,9 +1430,9 @@ namespace TrendLib
 					double endX = TrendScale::timeToScaledPixel(currentTime, signalRect, startTimeStamp, duration);
 					double dx = endX - startX;
 					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) / barWidth));
-					
+
 					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) / barWidth));
-					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0) 
+					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0)
 					{
 						// This point is completely out of the left edge, skip it
 						//
@@ -1465,10 +1473,13 @@ namespace TrendLib
 				} // for (const TrendStateItem& state : record.states)
 			}
 
-			hour.reset();  // Free memory, we don't need it anymore
+#ifdef TREND_ZERO_COPY_TREND_DATA
+#else
+			hour.reset(); // Free memory, we don't need it anymore
+#endif
 		}
 
-		// Draw bars
+						  // Draw bars
 		//
 #if 0
 		{
@@ -1534,7 +1545,7 @@ namespace TrendLib
 #else
 		{
 			painter->setPen(Qt::NoPen);
-			//painter->setRenderHint(QPainter::Antialiasing, false);
+			// painter->setRenderHint(QPainter::Antialiasing, false);
 
 			const double lineWeightFactor = (signal.lineWeight() <= 1.0) ? 1.0 : signal.lineWeight();
 			const double minBarWidth = (1.0 / dpiX) * lineWeightFactor;
@@ -1558,26 +1569,29 @@ namespace TrendLib
 					double y;
 					double h;
 
-					if (bar.has0 && !bar.has1) 
+					if (bar.has0 && !bar.has1)
 					{
 						// Bottom
 						//
-						y = drawPos0; 
+						y = drawPos0;
 						h = minBarHeight;
-					} else if (!bar.has0 && bar.has1)
+					}
+					else if (!bar.has0 && bar.has1)
 					{
 						// Top
 						//
 						y = drawPos1;
 						h = minBarHeight;
-					}else if (bar.has0 && bar.has1)
+					}
+					else if (bar.has0 && bar.has1)
 					{
 						// Vertical full bar
 						//
 						y = drawPos1;
 						h = fullHeight;
 					}
-					else {
+					else
+					{
 						assert(false);
 						y = 0;
 						h = 0;
@@ -1587,7 +1601,7 @@ namespace TrendLib
 				}
 			}
 
-			//painter->setRenderHint(QPainter::Antialiasing, true);
+			// painter->setRenderHint(QPainter::Antialiasing, true);
 		}
 #endif
 
@@ -1601,7 +1615,7 @@ namespace TrendLib
 	void TrendImpl::drawSignalTrendAnalog(QPainter* painter,
 										  const TrendSignalParam& signal,
 										  const TrendParam& drawParam,
-										  std::list<std::shared_ptr<OneHourData>>& signalData,
+										  std::list<std::shared_ptr<const OneHourData>>& signalData,
 										  std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
@@ -1659,14 +1673,17 @@ namespace TrendLib
 
 		//		int pointIndex = 0;
 
-		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
+		for (std::shared_ptr<const OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
 			if (stoken.stop_requested() == true)
 			{
 				break;
 			}
 
-			const std::vector<TrendStateRecord>& data = hour->data;
+#ifdef TREND_ZERO_COPY_TREND_DATA
+			std::shared_lock lock{hour->mutex};
+#endif
+			const std::vector<TrendStateRecord>& data = hour->data_;
 
 			for (const TrendStateRecord& record : data)
 			{
@@ -2149,7 +2166,7 @@ namespace TrendLib
 
 		// Getting data without requesting if it is not present
 		//
-		std::list<std::shared_ptr<OneHourData>> signalData;
+		std::list<std::shared_ptr<const OneHourData>> signalData;
 
 		TimeStamp minus1hour(rulerTime.timeStamp - 1_hour);
 		TimeStamp plus1hour(rulerTime.timeStamp + 1_hour);
@@ -2161,9 +2178,12 @@ namespace TrendLib
 		TrendStateItem lastState;
 		lastState.clear();
 
-		for (const std::shared_ptr<OneHourData>& h : signalData)
+		for (const std::shared_ptr<const OneHourData>& h : signalData)
 		{
-			const std::vector<TrendStateRecord>& records = h->data;
+#ifdef TREND_ZERO_COPY_TREND_DATA
+			std::shared_lock lock{h->mutex};
+#endif
+			const std::vector<TrendStateRecord>& records = h->data_;
 
 			for (const TrendStateRecord& record : records)
 			{

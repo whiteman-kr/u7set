@@ -1005,16 +1005,19 @@ namespace TrendLib
 
 		for (TrendLib::TrendSignalParam& ts : analogs)
 		{
-			std::list<std::shared_ptr<OneHourData>> signalData;
+			std::list<std::shared_ptr<const OneHourData>> signalData;
 			signalSet().getExistingTrendData(ts, startTime, finishTime, timeType, &signalData);
 
 			double minValue = 0;
 			double maxValue = 0;
 			bool firstValue = true;
 
-			for (std::shared_ptr<OneHourData> hour : signalData)
+			for (std::shared_ptr<const OneHourData> hour : signalData)
 			{
-				const std::vector<TrendStateRecord>& data = hour->data;
+#ifdef TREND_ZERO_COPY_TREND_DATA
+				std::shared_lock lock{hour->mutex};
+#endif
+				const std::vector<TrendStateRecord>& data = hour->data_;
 				for (const TrendStateRecord& record : data)
 				{
 					for (const TrendStateItem& state : record.states)

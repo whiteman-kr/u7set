@@ -1,14 +1,16 @@
 #pragma once
 
-#include <vector>
 #include <list>
 #include <memory>
+#include <shared_mutex>
+#include <vector>
+
 
 namespace Proto
 {
 	class TrendArchiveHour;
 	class TrendStateRecord;
-}
+} // namespace Proto
 
 namespace TrendLib
 {
@@ -38,7 +40,7 @@ namespace TrendLib
 		[[nodiscard]] bool isValid() const
 		{
 			return (flags & 0x00000002); // AppSignalStateFlags::stateAvailable, it is a real non valid
-			// validity bit 0 is a combination of stateAvailable and coupled validity signal
+										 // validity bit 0 is a combination of stateAvailable and coupled validity signal
 		}
 
 		void setValid(bool valid)
@@ -86,10 +88,13 @@ namespace TrendLib
 
 	using TrendStateItem = TrendStateItem_v2;
 
+	static_assert(sizeof(TrendStateItem) == 40);
+	static_assert(std::is_trivially_copyable_v<TrendStateItem>);
+
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t RecomendedSize = 3200;			// TrendStateItem is about 40 bytes, 1600 is about 64KB, 3200 is about 128KB
+		static const size_t RecomendedSize = 3200; // TrendStateItem is about 40 bytes, 1600 is about 64KB, 3200 is about 128KB
 
 		// Serialization
 		//
@@ -97,17 +102,15 @@ namespace TrendLib
 		bool load(const ::Proto::TrendStateRecord& message);
 	};
 
-
 	struct RealtimeDataChunk
 	{
 		Hash appSignalHash = UNDEFINED_HASH;
 		std::vector<TrendStateItem> states;
 	};
 
-
 	struct RealtimeData
 	{
-		std::list<RealtimeDataChunk> signalData;	// Each item is a signal with the vector of states
+		std::list<RealtimeDataChunk> signalData; // Each item is a signal with the vector of states
 	};
 
 	struct OneHourData
@@ -119,15 +122,25 @@ namespace TrendLib
 			Received
 		};
 
-		State state = State::NoData;
-		std::vector<TrendStateRecord> data;
+#ifdef TREND_ZERO_COPY_TREND_DATA
+		mutable std::shared_mutex mutex;
+#endif
+
+		State state_ = State::NoData;
+		std::vector<TrendStateRecord> data_;
 
 		// Serialization
 		//
 		bool save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const;
 		bool load(const Proto::TrendArchiveHour& message);
+
+		void cloneToUnsafe(OneHourData& copy) const
+		{
+			copy.state_ = state_;
+			copy.data_ = data_;
+		}
 	};
-}
+} // namespace TrendLib
 
 Q_DECLARE_METATYPE(TrendLib::TrendStateItem)
 Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::RealtimeData>)

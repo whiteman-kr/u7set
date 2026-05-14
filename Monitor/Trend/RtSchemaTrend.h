@@ -53,7 +53,7 @@ public:
 	void updateConnections(const SoftwareInfo& softwareInfo,
 						   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
-	bool trendData(const QString& appSignalId, std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const;
+	bool trendData(const QString& appSignalId, std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const;
 	TimeStamp maxTimeStamp() const;
 
 	
@@ -102,7 +102,7 @@ public:
 
 	bool trendData(QUuid trendUuid,
 				   const QString& appSignalId,
-				   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const;
+				   std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const;
 
 	TimeStamp maxTimeStamp(QUuid trendUuid) const;
 

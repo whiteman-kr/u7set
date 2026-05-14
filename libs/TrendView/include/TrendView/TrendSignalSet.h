@@ -90,12 +90,12 @@ namespace TrendLib
 
 		bool getFullExistingTrendData(const TrendSignalParam& trendSignal,
 									  E::TimeType timeType,
-									  std::list<std::shared_ptr<OneHourData>>* outData) const;
+									  std::list<std::shared_ptr<const OneHourData>>* outData) const;
 		bool getExistingTrendData(const TrendSignalParam& trendSignal,
 								  QDateTime from,
 								  QDateTime to,
 								  E::TimeType timeType,
-								  std::list<std::shared_ptr<OneHourData>>* outData) const;
+								  std::list<std::shared_ptr<const OneHourData>>* outData) const;
 		std::optional<TrendStateItem> lastRealtimeState(Hash signalHash, E::TimeType timeType) const;
 
 		// ITrendDataProvider implementation
@@ -106,7 +106,7 @@ namespace TrendLib
 							   QDateTime to,
 							   E::TimeType timeType,
 							   E::TrendMode mode,
-							   std::list<std::shared_ptr<OneHourData>>* outData) const override;
+							   std::list<std::shared_ptr<const OneHourData>>* outData) const override;
 
 		virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const override;
 

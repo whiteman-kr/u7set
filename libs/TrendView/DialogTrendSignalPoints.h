@@ -1,12 +1,13 @@
 #ifndef DIALOGTRENDSIGNALPOINTS_H
 #define DIALOGTRENDSIGNALPOINTS_H
 
-#include <QDialog>
-#include <QAbstractTableModel>
-#include <TrendView/TrendSignalSet.h>
 #include "TrendScale.h"
+#include <QAbstractTableModel>
+#include <QDialog>
+#include <TrendView/TrendSignalSet.h>
 
-namespace Ui {
+namespace Ui
+{
 	class DialogTrendSignalPoints;
 }
 
@@ -33,7 +34,9 @@ public:
 public:
 	explicit TrendPointsModel(QObject* parent = nullptr);
 
-	void setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData> >& signalData, const TrendLib::TrendSignalParam& trendSignal, E::TimeType timeType);
+	void setSignalData(std::list<std::shared_ptr<const TrendLib::OneHourData>>& signalData,
+					   const TrendLib::TrendSignalParam& trendSignal,
+					   E::TimeType timeType);
 
 	int stateItemIndex(const TrendLib::TrendStateItem& stateItem) const;
 	TrendLib::TrendStateItem stateItemByIndex(int index, int* oneHourIndex, int* recordIndex, int* stateIndex, bool* ok) const;
@@ -48,7 +51,10 @@ private:
 
 
 private:
-	std::list<std::shared_ptr<TrendLib::OneHourData>> m_signalData;
+	// m_signalData is always a deep copy even if TREND_ZERO_COPY_TREND_DATA is defined, so it can be accessed without locks.
+	//
+	std::list<std::shared_ptr<const TrendLib::OneHourData>> m_signalData;
+
 	E::TimeType m_timeType = E::TimeType::Local;
 	E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 	TrendLib::TrendSignalParam m_trendSignal;
@@ -88,7 +94,7 @@ private:
 	void updatePoints();
 
 private:
-	Ui::DialogTrendSignalPoints *ui;
+	Ui::DialogTrendSignalPoints* ui;
 
 	TrendPointsModel m_pointsModel;
 
