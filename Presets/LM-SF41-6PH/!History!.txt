@@ -4,5 +4,6 @@ LM-SF41-6PH
 	07.04.2025	Version: 3	LM1-SF41-6PH_v3.u7devp 	RPCT-4103: Add new Platform Interface Controller signals
 	20.04.2025	Version: 4	LM1-SF41-6PH_v4.u7devp 	RPCT-4103: Change Platform Interface Controller signals addresses
 	14.05.2025	Version: 5	LM1-SF41-6PH_v5.u7devp 	RADIX-4023: Add TempDataValidity to the preset
+	15.05.2025	Version: 6	LM1-SF41-6PH_v6.u7devp 	RADIX-4025: Add ITSEnable property
 
 

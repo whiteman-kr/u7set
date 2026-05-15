@@ -21,6 +21,7 @@ function generate_lm(builder: ConfigStruct.Builder,
 
 	const MODULEID_LM1_SF00: number = 0x1100;
 	const MODULEID_LM1_SF01: number = 0x1101;
+	const MODULEID_LM1_SF41: number = 0x1102;	// LM1-SF41-6PH
 
 	const MODULEID_LM1_SR01: number = 0x11A0;
 	const MODULEID_LM1_SR02: number = 0x11A1;
@@ -38,13 +39,28 @@ function generate_lm(builder: ConfigStruct.Builder,
 	let LMNumber: number = module.propertyInt("LMNumber");
 	let moduleId: number = module.moduleFamily + module.moduleVersion;
 	let modulePlace: number = module.place;
+	
+	// LM1-SF41-6PH-specific properties
+	//
+	let itsEnable: boolean = false;
+	if (moduleId == MODULEID_LM1_SF41)
+	{
+		if (module.propertyValue("ITSEnable") == undefined)
+		{
+			log.errCFG3000("ITSEnable", module.equipmentId);
+			return false;
+		}
 
+		itsEnable = module.propertyBool("ITSEnable");
+	}
+
+	// Check place
+	//
 	if (modulePlace != 0)
 	{
 		log.errCFG3002("Place", modulePlace, 0, 0, module.equipmentId);
 		return false;
 	}
-
 
 	// Constants
 	//
@@ -179,6 +195,20 @@ function generate_lm(builder: ConfigStruct.Builder,
 
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] UniqueID = 0\r\n");
 	ptr += 8;
+
+	//CFG Values Quantity is not used for now
+
+	ptr += 2;
+
+	//ITS Enable
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ITSEnable", 
+		(itsEnable === true ? 1 : 0)) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] ITS Enable = " + (itsEnable === true ? 1 : 0) + "\r\n");
+	ptr += 2;
 
 	// I/O Modules configuration
 	//
