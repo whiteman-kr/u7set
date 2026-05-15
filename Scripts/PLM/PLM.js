@@ -99,8 +99,7 @@ function generate_plm(confFirmware, module, LMNumber, frame, log, signalSet, opt
     let configFramesQuantity = 1;
     let dataFramesQuantity = 0;
 
-    let txId = module.customModuleFamily + module.moduleVersion;
-//    let txId = module.moduleFamily + module.moduleVersion;
+    let txId = module.moduleFamily + module.moduleVersion;
     
     if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
