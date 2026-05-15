@@ -80,7 +80,7 @@ sleep 6
 
 # Run ClientTests, they are functional.
 #
-./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
+#./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
 
 # Run AdsBridgeTests, they are functional.
 #

@@ -4,7 +4,6 @@
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 
-
 int main(int argc, char *argv[])
 {
 	Vld::setVldReportFilterHook();
@@ -38,13 +37,16 @@ int main(int argc, char *argv[])
 
 	SoftwareInfo si(E::SoftwareType::GatewayService, "");
 
-	GatewayServiceWorker gatewayServiceWorker(si,
-											  Service::getServiceInstanceName(Manufacturer::GATEWAY_SERVICE, argc, argv),
-											  argc, argv, logger);
+	int result = 0;
 
-	ServiceStarter serviceStarter(app, gatewayServiceWorker, logger);
+	{
+		GatewayServiceWorker gatewayServiceWorker(si, Service::getServiceInstanceName(Manufacturer::GATEWAY_SERVICE, argc, argv),
+												  argc, argv, logger);
 
-	int result = serviceStarter.exec();
+		ServiceStarter serviceStarter(app, gatewayServiceWorker, logger);
+
+		result = serviceStarter.exec();
+	}
 
 	google::protobuf::ShutdownProtobufLibrary();
 
