@@ -42,16 +42,16 @@ function generate_lm(builder: ConfigStruct.Builder,
 	
 	// LM1-SF41-6PH-specific properties
 	//
-	let itsEnable: boolean = false;
+	let plantTimeEnable: boolean = false;
 	if (moduleId == MODULEID_LM1_SF41)
 	{
-		if (module.propertyValue("ITSEnable") == undefined)
+		if (module.propertyValue("PlantTimeEnable") == undefined)
 		{
-			log.errCFG3000("ITSEnable", module.equipmentId);
+			log.errCFG3000("PlantTimeEnable", module.equipmentId);
 			return false;
 		}
 
-		itsEnable = module.propertyBool("ITSEnable");
+		plantTimeEnable = module.propertyBool("PlantTimeEnable");
 	}
 
 	// Check place
@@ -200,14 +200,14 @@ function generate_lm(builder: ConfigStruct.Builder,
 
 	ptr += 2;
 
-	//ITS Enable
+	//PlantTimeEnable
 
-	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ITSEnable", 
-		(itsEnable === true ? 1 : 0)) == false)
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "PlantTimeEnable", 
+		(plantTimeEnable === true ? 1 : 0)) == false)
 	{
 		return false;
 	}
-	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] ITS Enable = " + (itsEnable === true ? 1 : 0) + "\r\n");
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] PlantTimeEnable = " + (plantTimeEnable === true ? 1 : 0) + "\r\n");
 	ptr += 2;
 
 	// I/O Modules configuration

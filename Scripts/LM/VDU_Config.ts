@@ -11,7 +11,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 		"TrackballEnable", "TrackballType", 
 		"TouchscreenEnable", "TouchscreenType", 
 		"KeyboardEnable", "KeyboardType",
-		"ITSEnable"];
+		"PlantTimeEnable"];
 	for (let cp: number = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -37,7 +37,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	let keyboardEnable: boolean = module.propertyBool("KeyboardEnable");
 	let keyboardType: number = module.propertyInt("KeyboardType");
 
-	let itsEnable: boolean = module.propertyBool("ITSEnable");
+	let plantTimeEnable: boolean = module.propertyBool("PlantTimeEnable");
 
 	// Constants
 	//
@@ -276,14 +276,14 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] KeyboardType = " + keyboardType + "\r\n");
 	ptr += 2;
 
-	//ITS Enable
+	//PlantTimeEnablee
 
-	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ITSEnable", 
-		(itsEnable === true ? 1 : 0)) == false)
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "PlantTimeEnable", 
+		(plantTimeEnable === true ? 1 : 0)) == false)
 	{
 		return false;
 	}
-	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] ITS Enable = " + (itsEnable === true ? 1 : 0) + "\r\n");
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] PlantTimeEnable = " + (plantTimeEnable === true ? 1 : 0) + "\r\n");
 	ptr += 2;
 	
 	// Create LANs configuration
