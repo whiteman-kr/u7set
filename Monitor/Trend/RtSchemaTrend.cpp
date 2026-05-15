@@ -31,7 +31,7 @@ void RtSchemaTrendDataProvider::updateConnections(const SoftwareInfo& softwareIn
 }
 
 
-bool RtSchemaTrendDataProvider::trendData(const QString& appSignalId, std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const
+bool RtSchemaTrendDataProvider::trendData(const QString& appSignalId, std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const
 {
 	Q_ASSERT(outData);
 
@@ -48,7 +48,11 @@ bool RtSchemaTrendDataProvider::trendData(const QString& appSignalId, std::list<
 		{
 			Q_UNUSED(hour);
 
-			auto copiedHourData = std::make_shared<TrendLib::OneHourData>(hourData.operator*());
+#ifdef TREND_ZERO_COPY_TREND_DATA
+			std::shared_ptr<const TrendLib::OneHourData> copiedHourData = hourData;
+#else
+			auto copiedHourData = std::make_shared<const TrendLib::OneHourData>(hourData.operator*());
+#endif
 			outData->push_back(copiedHourData);
 		}
 	}
@@ -80,8 +84,10 @@ TimeStamp RtSchemaTrendDataProvider::maxTimeStamp() const
 			continue;
 		}
 
-		const std::shared_ptr<TrendLib::OneHourData>& lastHourData = archive.m_hours.crbegin()->second;
-		const std::vector<TrendLib::TrendStateRecord>& lastHourRecords = lastHourData->data;
+		const std::shared_ptr<const TrendLib::OneHourData> lastHourData = archive.m_hours.crbegin()->second;
+
+		std::shared_lock lock{lastHourData->mutex};
+		const auto& lastHourRecords = lastHourData->data_;
 
 		if (lastHourRecords.empty() == true || lastHourRecords.back().states.empty() == true)
 		{
@@ -322,7 +328,7 @@ void RtSchemaTrendDataProvider::appendRealtimeData_unsafe(QString sourceEquipmen
 		{
 			hourData = archive->m_hours[ts];
 
-			if (hourData.get() == nullptr)	// Just created
+			if (hourData == nullptr) // Just created
 			{
 				hourData = std::make_shared<TrendLib::OneHourData>();
 				archive->m_hours[ts] = hourData;
@@ -331,27 +337,29 @@ void RtSchemaTrendDataProvider::appendRealtimeData_unsafe(QString sourceEquipmen
 			lastHourTime = ts;
 		}
 
-		hourData->state = TrendLib::OneHourData::State::Received;
+		std::unique_lock lock{hourData->mutex};
 
-		if (hourData->data.empty() == true)
+		hourData->state_ = TrendLib::OneHourData::State::Received;
+
+		if (hourData->data_.empty() == true)
 		{
-			TrendLib::TrendStateRecord& record = hourData->data.emplace_back();
+			TrendLib::TrendStateRecord& record = hourData->data_.emplace_back();
 			record.states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 		}
 		else
 		{
-			TrendLib::TrendStateRecord& lastRecord = hourData->data.back();
+			TrendLib::TrendStateRecord& lastRecord = hourData->data_.back();
 
 			if (lastRecord.states.size() >= TrendLib::TrendStateRecord::RecomendedSize)
 			{
-				TrendLib::TrendStateRecord& record = hourData->data.emplace_back();
+				TrendLib::TrendStateRecord& record = hourData->data_.emplace_back();
 				record.states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 			}
 		}
 
 		// Add state
 		//
-		TrendLib::TrendStateRecord& recordToAddState = hourData->data.back();
+		TrendLib::TrendStateRecord& recordToAddState = hourData->data_.back();
 		recordToAddState.states.push_back(state);
 	}
 
@@ -466,7 +474,7 @@ void RtSchemaTrend::updateRealtimeConnections()
 
 bool RtSchemaTrend::trendData(QUuid trendUuid,
 							  const QString& appSignalId,
-							  std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const
+							  std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const
 {
 	QMutexLocker locker(&m_mutex);
 	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());

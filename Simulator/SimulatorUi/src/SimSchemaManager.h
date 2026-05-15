@@ -32,7 +32,7 @@ namespace SimUi
 							   QDateTime to,
 							   E::TimeType timeType,
 							   E::TrendMode mode,
-							   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const override;
+							   std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const override;
 
 	public:
 		SimIdeSimulator* simulator();

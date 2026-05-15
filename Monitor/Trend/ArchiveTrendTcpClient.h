@@ -1,22 +1,20 @@
 #pragma once
 
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../OnlineLib/SoftwareSettings.h"
 #include <CommonLib/Times.h>
-
 #include <TrendView/TrendArchiveServer.h>
 #include <TrendView/TrendSignalState.h>
 
 
-class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
+class ArchiveTrendTcpClient : public Tcp::Client,
+							  public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
-						  const SoftwareEndpoint::ArchiveService& server,
-						  ILogFile* logFile);
+	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::ArchiveService& server, ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
 protected:
@@ -45,7 +43,10 @@ public slots:
 	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
 
 signals:
-	void dataReady(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void dataReady(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId,
+				   TimeStamp requestedHour,
+				   E::TimeType timeType,
+				   std::shared_ptr<TrendLib::OneHourData> data);
 	void requestError(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType);
 
 	// Staticstic
@@ -57,7 +58,7 @@ public:
 		int requestQueueSize = 0;
 		int requestCount = 0;
 		int replyCount = 0;
-		int isConnected = 0;		// do not make it bool please, it is convenient to propogate the summ of statistics later
+		int isConnected = 0; // do not make it bool please, it is convenient to propogate the summ of statistics later
 	};
 
 	Stat stat() const;
@@ -82,17 +83,17 @@ private:
 		TimeStamp hourToRequest;
 		E::TimeType timeType{E::TimeType::Plant};
 
-		bool operator== (const RequestQueue& r) const
+		bool operator==(const RequestQueue& r) const
 		{
-			return	this->signalPlusServerId == r.signalPlusServerId &&
-					this->hourToRequest == r.hourToRequest &&
-					this->timeType == r.timeType;
+			return this->signalPlusServerId == r.signalPlusServerId && this->hourToRequest == r.hourToRequest &&
+				   this->timeType == r.timeType;
 		}
 
 		QString toString()
 		{
-			return QString{"RequestQueue{'%1', TimeType %2, HourToRequest %3}"}
-						.arg(signalPlusServerId.appSignalId, E::valueToString(timeType), hourToRequest.toDateTime().toString());
+			return QString{"RequestQueue{'%1', TimeType %2, HourToRequest %3}"}.arg(signalPlusServerId.appSignalId,
+																					E::valueToString(timeType),
+																					hourToRequest.toDateTime().toString());
 		}
 	};
 

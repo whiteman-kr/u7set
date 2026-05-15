@@ -1,17 +1,19 @@
 #include "DialogTrendSignalPoints.h"
-#include "ui_DialogTrendSignalPoints.h"
 #include "DialogTrendSignalPoint.h"
-#include "TrendSettings.h"
 #include "TrendScale.h"
-#include <QKeyEvent>
+#include "TrendSettings.h"
+#include "ui_DialogTrendSignalPoints.h"
 #include <QClipboard>
+#include <QKeyEvent>
 
-TrendPointsModel::TrendPointsModel(QObject* parent)
-	: QAbstractTableModel(parent)
+TrendPointsModel::TrendPointsModel(QObject* parent) :
+	QAbstractTableModel(parent)
 {
 }
 
-void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData>>& signalData, const TrendLib::TrendSignalParam& trendSignal, E::TimeType timeType)
+void TrendPointsModel::setSignalData(std::list<std::shared_ptr<const TrendLib::OneHourData>>& signalData,
+									 const TrendLib::TrendSignalParam& trendSignal,
+									 E::TimeType timeType)
 {
 	m_trendSignal = trendSignal;
 
@@ -25,20 +27,43 @@ void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHour
 
 	// Set new data
 	//
-	m_signalData.swap(signalData);
 	m_timeType = timeType;
 
-	// Calculate new m_rowCount
-	//
+#ifdef TREND_ZERO_COPY_TREND_DATA
+
+	m_signalData.clear();
 	m_rowCount = 0;
 
-	for (const auto& oneHourDataPtr : m_signalData)
+	for (auto oneHourDataPtr : signalData)
 	{
-		for (const auto& stateRecord : oneHourDataPtr->data)
+		std::shared_lock lock{oneHourDataPtr->mutex};
+
+		for (const auto& stateRecord : oneHourDataPtr->data_)
+		{
+			m_rowCount += static_cast<int>(stateRecord.states.size());
+		}
+
+		// Make a deep copy.
+		//
+		auto copiedHour = std::make_shared<TrendLib::OneHourData>();
+		oneHourDataPtr->cloneToUnsafe(*copiedHour);
+
+		m_signalData.push_back(std::move(copiedHour));
+	}
+#else
+	// signalData is already a deep copy, so just swap it.
+	//
+	m_signalData.swap(signalData);
+	m_rowCount = 0;
+
+	for (auto oneHourDataPtr : m_signalData)
+	{
+		for (const auto& stateRecord : oneHourDataPtr->data_)
 		{
 			m_rowCount += static_cast<int>(stateRecord.states.size());
 		}
 	}
+#endif
 
 	// Insert new rows
 	//
@@ -55,17 +80,20 @@ int TrendPointsModel::stateItemIndex(const TrendLib::TrendStateItem& stateItem) 
 {
 	int currentIndex = 0;
 
-	for (const auto& oneHourDataPtr : m_signalData)
+	for (auto oneHourDataPtr : m_signalData)
 	{
-		for (const auto& stateRecord : oneHourDataPtr->data)
+#ifdef TREND_ZERO_COPY_TREND_DATA
+		// This lock is not strictly necessary, m_signalData is a deep copy of the original data, but we take it in case code changes in the
+		// future and we want to be safe.
+		//
+		std::shared_lock lock{oneHourDataPtr->mutex};
+#endif
+		for (const auto& stateRecord : oneHourDataPtr->data_)
 		{
 			for (const TrendLib::TrendStateItem& item : stateRecord.states)
 			{
-				if (item.local == stateItem.local &&
-					item.plant == stateItem.plant &&
-					item.system == stateItem.system &&
-					item.value == stateItem.value &&
-					item.flags == stateItem.flags)
+				if (item.local == stateItem.local && item.plant == stateItem.plant && item.system == stateItem.system &&
+					item.value == stateItem.value && item.flags == stateItem.flags)
 				{
 					return currentIndex;
 				}
@@ -94,11 +122,17 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 	*stateIndex = 0;
 	*ok = false;
 
-	for (const auto& oneHourDataPtr : m_signalData)
+	for (auto oneHourDataPtr : m_signalData)
 	{
 		*recordIndex = 0;
 
-		for (const auto& stateRecord : oneHourDataPtr->data)
+#ifdef TREND_ZERO_COPY_TREND_DATA
+		// This lock is not strictly necessary, m_signalData is a deep copy of the original data, but we take it in case code changes in the
+		// future and we want to be safe.
+		//
+		std::shared_lock lock{oneHourDataPtr->mutex};
+#endif
+		for (const auto& stateRecord : oneHourDataPtr->data_)
 		{
 			if (currentIndex <= index && index < currentIndex + stateRecord.states.size())
 			{
@@ -154,21 +188,21 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 
 		switch (index.column())
 		{
-			case static_cast<int>(Columns::Record):
-				return QString("%1/%2").arg(oneHourIndex).arg(recordIndex);
+		case static_cast<int>(Columns::Record):
+			return QString("%1/%2").arg(oneHourIndex).arg(recordIndex);
 
-			case static_cast<int>(Columns::Index):
-				return QString("%1").arg(stateIndex);
+		case static_cast<int>(Columns::Index):
+			return QString("%1").arg(stateIndex);
 
-			case static_cast<int>(Columns::Time):
-				return DateTimeToString::dateTimeMs(stateItem.getTime(m_timeType).toDateTime());
+		case static_cast<int>(Columns::Time):
+			return DateTimeToString::dateTimeMs(stateItem.getTime(m_timeType).toDateTime());
 
-			case static_cast<int>(Columns::Value):
-				if (stateItem.isValid() == false)
-				{
-					return QString("???");
-				}
-				return TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal);
+		case static_cast<int>(Columns::Value):
+			if (stateItem.isValid() == false)
+			{
+				return QString("???");
+			}
+			return TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal);
 
 		case static_cast<int>(Columns::Realtime):
 			if (stateItem.isRealtimePoint() == true)
@@ -180,7 +214,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 				return QString("no");
 			}
 		default:
-				Q_ASSERT(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -221,7 +255,8 @@ QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, 
 //
 DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalParam& trendSignal,
 												 TrendLib::TrendSignalSet* trendSignalSet,
-												 E::TimeType timeType, E::TrendMode trendMode,
+												 E::TimeType timeType,
+												 E::TrendMode trendMode,
 												 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTrendSignalPoints),
@@ -315,12 +350,12 @@ bool DialogTrendSignalPoints::eventFilter(QObject* obj, QEvent* event)
 	return QDialog::eventFilter(obj, event);
 }
 
-void DialogTrendSignalPoints::copySelection() 
+void DialogTrendSignalPoints::copySelection()
 {
 	auto selectedItems = ui->tableView->selectionModel()->selectedRows();
 
 	std::vector<int> selectedRows;
-	for (const auto& index : selectedItems) 
+	for (const auto& index : selectedItems)
 	{
 		selectedRows.push_back(index.row());
 	}
@@ -330,12 +365,12 @@ void DialogTrendSignalPoints::copySelection()
 	int endColumn = static_cast<int>(TrendPointsModel::Columns::Value);
 
 	QString text;
-	for (const auto& row : selectedRows) 
+	for (const auto& row : selectedRows)
 	{
-		for (auto c = startColumn; c <= endColumn; c++) 
+		for (auto c = startColumn; c <= endColumn; c++)
 		{
 			text.append(m_pointsModel.data(m_pointsModel.index(row, c), Qt::DisplayRole).toString());
-			if (c != endColumn) 
+			if (c != endColumn)
 			{
 				text.append("\t\t");
 			}
@@ -353,7 +388,7 @@ void DialogTrendSignalPoints::copySelection()
 
 void DialogTrendSignalPoints::updatePoints()
 {
-	std::list<std::shared_ptr<TrendLib::OneHourData>> signalData;
+	std::list<std::shared_ptr<const TrendLib::OneHourData>> signalData;
 
 	m_trendSignalSet->getFullExistingTrendData(m_trendSignal, m_timeType, &signalData);
 
@@ -547,7 +582,7 @@ void DialogTrendSignalPoints::on_comboTimeType_currentIndexChanged(int index)
 	return;
 }
 
-void DialogTrendSignalPoints::on_tableView_doubleClicked(const QModelIndex &index)
+void DialogTrendSignalPoints::on_tableView_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 	on_buttonEdit_clicked();
