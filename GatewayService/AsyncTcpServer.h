@@ -59,10 +59,22 @@ protected:
 	void sendOkReply(const GCL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
 	void sendReply(uint32_t requestID, GCL::GwErrorCode errCode, const char* payloadData, size_t payloadSize);
 
-	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
-
 	bool isHandshakeCompleted() const;
 	void setHandshakeCompleted(bool completed);
+
+	QString clientName() const;
+	void setClientName(const QString& clientName);
+
+	void incErrCount();
+	bool checkNullTerminated(const char* str, size_t size) const;
+	const SoftwareInfo& swInfo() const;
+	const AppSignals& appSignals() const;
+	const std::vector<HostAddressPort>& serviceAdresses() const;
+
+	bool isQuitRequested() const;
+
+	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
+	void copyStr(char* toStr, size_t toStrLen, const std::string& fromStr) const;
 
 private:
 	void start();
@@ -71,7 +83,8 @@ private:
 	void startReceive();
 	void startSend();
 
-	void onDataReceived(char* recvBuf, std::size_t recvBufSize);
+	void onDataReceived(char* recvBuf, std::size_t& recvBufSize);
+	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
 
 private:
 	SoftwareInfo m_swInfo;
@@ -82,6 +95,7 @@ private:
 	asio::strand<asio::any_io_executor> m_strand;
 
 	bool m_started = false;
+	std::atomic_bool m_quitRequested{false};
 
 	Buffer m_recvBuf;
 	size_t m_recvBufSize = 0;
@@ -90,6 +104,7 @@ private:
 	quint64 m_errCount = 0;
 
 	bool m_handshakeCompleted = false;
+	QString m_clientName;
 
 	template<class SessionT>
 	friend class AsyncTcpServer;

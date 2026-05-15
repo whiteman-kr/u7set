@@ -28,9 +28,10 @@ void AsyncTcpSession::start()
 	asio::dispatch(m_strand,
 				   [self = shared_from_this()]()
 				   {
-					   self->onStarted();
-					   self->m_started = true;
-					   self->startReceive();
+						self->m_quitRequested.store(false);
+						self->onStarted();
+						self->m_started = true;
+						self->startReceive();
 				   });
 }
 
@@ -39,13 +40,13 @@ void AsyncTcpSession::stop()
 	asio::dispatch(m_strand,
 				   [self = shared_from_this()]()
 				   {
-					   std::error_code ec;
+						self->m_quitRequested.store(true);
+						
+						std::error_code ec;
 
-					   self->m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
-
-					   self->m_socket.close(ec);
-
-					   self->onStopped();
+						self->m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+						self->m_socket.close(ec);
+						self->onStopped();
 				   });
 }
 
@@ -105,6 +106,12 @@ void AsyncTcpSession::sendOkReply(const GCL::GwMessageHeader& requestHeader, con
 
 void AsyncTcpSession::sendReply(uint32_t requestID, GCL::GwErrorCode errCode, const char* payloadData, size_t payloadSize)
 {
+	if (m_writeInProgress == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+	
 	m_sendBuf.clear();
 
 	if (GCL::GW_MSG_HEADER_SIZE + payloadSize + GCL::GW_MSG_CRC_SIZE > GCL::GW_MAX_PAYLOAD_SIZE)
@@ -146,42 +153,124 @@ void AsyncTcpSession::sendReply(uint32_t requestID, GCL::GwErrorCode errCode, co
 	startSend();
 }
 
-size_t AsyncTcpSession::skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize)
-{
-	if (recvBufSize < requestSize)
-	{
-		Q_ASSERT(false);
-		return recvBufSize;
-	}
-
-	const size_t restSize = recvBufSize - requestSize;
-
-	if (restSize > 0)
-	{
-		std::memmove(recvBuf, recvBuf + requestSize, restSize);
-	}
-
-	return restSize;
-}
-
 bool AsyncTcpSession::isHandshakeCompleted() const
 {
 	return m_handshakeCompleted;
 }
+
 void AsyncTcpSession::setHandshakeCompleted(bool completed)
 {
 	m_handshakeCompleted = completed;
 }
 
+QString AsyncTcpSession::clientName() const
+{
+	return m_clientName;
+}
+
+void AsyncTcpSession::setClientName(const QString& clientName)
+{
+	m_clientName = clientName;
+}
+
+void AsyncTcpSession::incErrCount()
+{
+	m_errCount++;
+}
+
+bool AsyncTcpSession::checkNullTerminated(const char* str, size_t size) const
+{
+	TEST_PTR_RETURN_FALSE(str);
+
+	for (size_t i = 0; i < size; i++)
+	{
+		if (str[i] == 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+const SoftwareInfo& AsyncTcpSession::swInfo() const
+{
+	return m_swInfo;
+}
+
+const AppSignals& AsyncTcpSession::appSignals() const
+{
+	return m_appSignals;
+}
+
+const std::vector<HostAddressPort>& AsyncTcpSession::serviceAdresses() const
+{
+	return m_serviceAdresses;
+}
+
+bool AsyncTcpSession::isQuitRequested() const
+{
+	return m_quitRequested.load();
+}
+
+void AsyncTcpSession::copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const
+{
+	TEST_PTR_RETURN(toStr);
+
+	const QByteArray fromData = fromStr.toUtf8();
+
+	size_t fromLen = fromData.size();
+
+	if (fromLen > toStrLen - 1)
+	{
+		std::memset(toStr, 0, toStrLen);
+	}
+	else
+	{
+		std::memcpy(toStr, fromData.constData(), fromLen);
+		std::memset(toStr + fromLen, 0, toStrLen - fromLen);
+	}
+}
+
+void AsyncTcpSession::copyStr(char* toStr, size_t toStrLen, const std::string& fromStr) const
+{
+	TEST_PTR_RETURN(toStr);
+
+	size_t fromLen = fromStr.size();
+
+	if (fromLen > toStrLen - 1)
+	{
+		std::memset(toStr, 0, toStrLen);
+	}
+	else
+	{
+		std::memcpy(toStr, fromStr.data(), fromLen);
+		std::memset(toStr + fromLen, 0, toStrLen - fromLen);
+	}
+}
+
+
 void AsyncTcpSession::startReceive()
 {
+	if (m_recvBufSize >= m_recvBuf.size())
+	{
+		logErr("Receive buffer overflow");
+		stop();
+		return;
+	}
+
 	m_socket.async_read_some(asio::buffer(m_recvBuf.data() + m_recvBufSize, m_recvBuf.size() - m_recvBufSize),
 							 asio::bind_executor(m_strand,
 								[self = shared_from_this()](const std::error_code& ec, std::size_t size)
 								{
 									if (ec)
 									{
-										self->onError(ec);
+										if (ec != asio::error::operation_aborted)
+										{
+											self->onError(ec);
+										}
+
+										self->stop();
 										return;
 									}
 
@@ -216,98 +305,132 @@ void AsyncTcpSession::startSend()
 
 									if (ec)
 									{
-										self->onError(ec);
+										if (ec != asio::error::operation_aborted)
+										{
+											self->onError(ec);
+										}
+
+										self->stop();
 										return;
 									}
 
 									self->m_sendBuf.clear();
 
-									self->startReceive();
+									if (self->m_recvBufSize > 0)
+									{
+										self->onDataReceived(self->m_recvBuf.data(), self->m_recvBufSize);
+									}
+									else
+									{
+										self->startReceive();
+									}
 								}));
 }
 
-void AsyncTcpSession::onDataReceived(char* recvBuf, std::size_t recvBufSize)
+void AsyncTcpSession::onDataReceived(char* recvBuf, std::size_t& recvBufSize)
 {
-	while (recvBufSize >= GCL::GW_MSG_HEADER_SIZE)
+	if (recvBufSize < GCL::GW_MSG_HEADER_SIZE)
 	{
-		GCL::GwMessageHeader header;
-
-		std::memcpy(&header, recvBuf, GCL::GW_MSG_HEADER_SIZE);
-
-		if (header.payloadSize > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
-		{
-			sendErrReply(header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
-			m_errCount++;
-			recvBufSize = 0;
-			return;
-		}
-
-		const size_t requestSize = GCL::GW_MSG_HEADER_SIZE + header.payloadSize + GCL::GW_MSG_CRC_SIZE;
-
-		if (recvBufSize < requestSize)
-		{
-			return;
-		}
-
-		if (requestSize > GCL::GW_MAX_PAYLOAD_SIZE)
-		{
-			sendErrReply(header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
-			m_errCount++;
-			recvBufSize = 0;
-			return;
-		}
-
-		if (checkRequestID(header.requestID) == false)
-		{
-			sendErrReply(header, GCL::GwErrorCode::GWC_INVALID_REQUEST);
-			m_errCount++;
-			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
-			return;
-		}
-
-		GCL::GwErrorCode errCode = GCL::GwErrorCode::GWC_SUCCESS;
-
-		if (checkPayloadSize(header, recvBuf, recvBufSize, errCode) == false)
-		{
-			sendErrReply(header, errCode);
-			m_errCount++;
-			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
-			continue;
-		}
-
-		uint32_t calcCrc = Radiy::CRC32(recvBuf, GCL::GW_MSG_HEADER_SIZE + header.payloadSize);
-
-		uint32_t receivedCrc;
-		std::memcpy(&receivedCrc, recvBuf + GCL::GW_MSG_HEADER_SIZE + header.payloadSize, sizeof(receivedCrc));
-
-		if (calcCrc != receivedCrc)
-		{
-			logErr(QString("request %1 error CRC 0x%2 (expected 0x%3)")
-					   .arg(header.requestID)
-					   .arg(receivedCrc, 8, 16, QChar('0'))
-					   .arg(calcCrc, 8, 16, QChar('0')));
-
-			sendErrReply(header, GCL::GwErrorCode::GWC_CRC_ERROR);
-			m_errCount++;
-			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
-			continue;
-		}
-
-		if (isHandshakeRequest(header.requestID) == false && m_handshakeCompleted == false)
-		{
-			sendErrReply(header, GCL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
-			m_errCount++;
-			recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
-			continue;
-		}
-
-		bool result = processRequest(header, recvBuf + GCL::GW_MSG_HEADER_SIZE, header.payloadSize);
-
-		if (result == false)
-		{
-			m_errCount++;
-		}
-
-		recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+		startReceive();
+		return;
 	}
+
+	GCL::GwMessageHeader header;
+
+	std::memcpy(&header, recvBuf, GCL::GW_MSG_HEADER_SIZE);
+
+	if (header.payloadSize > GCL::GW_MAX_MSG_PAYLOAD_SIZE)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		m_errCount++;
+		recvBufSize = 0;
+		return;
+	}
+
+	const size_t requestSize = GCL::GW_MSG_HEADER_SIZE + header.payloadSize + GCL::GW_MSG_CRC_SIZE;
+
+	if (recvBufSize < requestSize)
+	{
+		startReceive();
+		return;
+	}
+
+	if (requestSize > GCL::GW_MAX_PAYLOAD_SIZE)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+		m_errCount++;
+		recvBufSize = 0;
+		return;
+	}
+
+	if (checkRequestID(header.requestID) == false)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_INVALID_REQUEST);
+		m_errCount++;
+		recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+		return;
+	}
+
+	GCL::GwErrorCode errCode = GCL::GwErrorCode::GWC_SUCCESS;
+
+	if (checkPayloadSize(header, recvBuf, recvBufSize, errCode) == false)
+	{
+		sendErrReply(header, errCode);
+		m_errCount++;
+		recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+		return;
+	}
+
+	uint32_t calcCrc = Radiy::CRC32(recvBuf, GCL::GW_MSG_HEADER_SIZE + header.payloadSize);
+
+	uint32_t receivedCrc;
+	std::memcpy(&receivedCrc, recvBuf + GCL::GW_MSG_HEADER_SIZE + header.payloadSize, sizeof(receivedCrc));
+
+	if (calcCrc != receivedCrc)
+	{
+		logErr(QString("request %1 error CRC 0x%2 (expected 0x%3)").
+								arg(header.requestID).
+								arg(receivedCrc, 8, 16, QChar('0')).
+								arg(calcCrc, 8, 16, QChar('0')));
+
+		sendErrReply(header, GCL::GwErrorCode::GWC_CRC_ERROR);
+		m_errCount++;
+		recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+		return;
+	}
+
+	if (isHandshakeRequest(header.requestID) == false && m_handshakeCompleted == false)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+		m_errCount++;
+		recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+		return;
+	}
+
+	bool result = processRequest(header, recvBuf + GCL::GW_MSG_HEADER_SIZE, header.payloadSize);
+
+	if (result == false)
+	{
+		m_errCount++;
+	}
+
+	recvBufSize = skipRequest(requestSize, recvBuf, recvBufSize);
+}
+
+size_t AsyncTcpSession::skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize)
+{
+	if (recvBufSize < requestSize)
+	{
+		Q_ASSERT(false);
+		return recvBufSize;
+	}
+
+	const size_t restSize = recvBufSize - requestSize;
+
+	if (restSize > 0)
+	{
+		std::memmove(recvBuf, recvBuf + requestSize, restSize);
+	}
+
+	return restSize;
 }

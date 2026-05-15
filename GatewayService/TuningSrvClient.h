@@ -6,7 +6,7 @@
 
 #include "../OnlineLib/Tcp.h"
 
-struct TgsSession;
+class TuningGatewaySession;
 
 class TuningSrvClient : public Tcp::Client
 {
@@ -53,7 +53,7 @@ private:
 	};
 
 public:
-	TuningSrvClient(std::shared_ptr<TgsSession>& session,
+	TuningSrvClient(TuningGatewaySession& session,
 					const SoftwareInfo& softwareInfo,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
@@ -113,7 +113,7 @@ signals:
 	void signal_sendNextRequest();
 
 private:
-	std::shared_ptr<TgsSession> m_session;
+	TuningGatewaySession& m_session;
 	const AppSignals& m_appSignals;
 
 	static constexpr int TIMER_PERIOD = 10;
@@ -137,7 +137,7 @@ private:
 class TuningSrvClientThread : public SimpleThread
 {
 public:
-	TuningSrvClientThread(std::shared_ptr<TgsSession> session,
+	TuningSrvClientThread(TuningGatewaySession& session,
 					const SoftwareInfo& softwareInfo,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
@@ -147,7 +147,6 @@ public:
 
 	bool getTuningSourcesFileMetrics(quint64& fileSize, quint64& maxPartSize, quint64& partCount);
 	bool getTuningSourcesFilePart(quint64 partNo, std::vector<char>& fileData, quint64& partSize);
-	bool getTuningSourceStatesReply(std::vector<char>& reply);
 
 	void getTuningSourcesState();
 

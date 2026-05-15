@@ -7,7 +7,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-TuningSrvClient::TuningSrvClient(std::shared_ptr<TgsSession>& session,
+TuningSrvClient::TuningSrvClient(TuningGatewaySession& session,
 	const SoftwareInfo& softwareInfo,
 	const HostAddressPort& serverAddressPort1,
 	const HostAddressPort& serverAddressPort2,
@@ -19,7 +19,6 @@ TuningSrvClient::TuningSrvClient(std::shared_ptr<TgsSession>& session,
 	m_session(session),
 	m_appSignals(appSignals)
 {
-	Q_ASSERT(m_session != nullptr);
 }
 
 void TuningSrvClient::onClientThreadStarted()
@@ -41,13 +40,13 @@ void TuningSrvClient::onClientThreadFinished()
 
 void TuningSrvClient::onConnection()
 {
-	m_session->connectedToTuningSrv = true;
+	m_session.setConnectedToTuningSrv(true);
 	restartReceiveFile();
 }
 
 void TuningSrvClient::onDisconnection()
 {
-	m_session->connectedToTuningSrv = false;
+	m_session.setConnectedToTuningSrv(false);
 	clearReceiveFileVars();
 }
 
@@ -325,12 +324,7 @@ void TuningSrvClient::onGetTuningSourcesStates(const char* replyData, quint32 re
 		return;
 	}
 
-	{
-		std::lock_guard lg(m_session->condVarMutex);
-		m_session->replyData.assign(replyData, replyData + replyDataSize);
-	}
-
-	m_session->condVar.notify_one();
+	m_session.setReplyData(replyData, replyDataSize);
 
 	m_activeRequest.clear();
 }
@@ -361,12 +355,7 @@ void TuningSrvClient::onTuningSignalsRead(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	{
-		std::lock_guard lg(m_session->condVarMutex);
-		m_session->replyData.assign(replyData, replyData + replyDataSize);
-	}
-
-	m_session->condVar.notify_one();
+	m_session.setReplyData(replyData, replyDataSize);
 
 	m_activeRequest.clear();
 }
@@ -397,12 +386,7 @@ void TuningSrvClient::onTuningSignalsWrite(const char* replyData, quint32 replyD
 		return;
 	}
 
-	{
-		std::lock_guard lg(m_session->condVarMutex);
-		m_session->replyData.assign(replyData, replyData + replyDataSize);
-	}
-
-	m_session->condVar.notify_one();
+	m_session.setReplyData(replyData, replyDataSize);
 
 	m_activeRequest.clear();
 }
@@ -427,12 +411,7 @@ void TuningSrvClient::onTuningSignalsApply(const char* replyData, quint32 replyD
 		return;
 	}
 
-	{
-		std::lock_guard lg(m_session->condVarMutex);
-		m_session->replyData.assign(replyData, replyData + replyDataSize);
-	}
-
-	m_session->condVar.notify_one();
+	m_session.setReplyData(replyData, replyDataSize);
 
 	m_activeRequest.clear();
 }
@@ -457,12 +436,7 @@ void TuningSrvClient::onChangeControlledSource(const char* replyData, quint32 re
 		return;
 	}
 
-	{
-		std::lock_guard lg(m_session->condVarMutex);
-		m_session->replyData.assign(replyData, replyData + replyDataSize);
-	}
-
-	m_session->condVar.notify_one();
+	m_session.setReplyData(replyData, replyDataSize);
 
 	m_activeRequest.clear();
 }
@@ -678,7 +652,7 @@ void TuningSrvClient::clearReceiveFileVars()
 //
 // -------------------------------------------------------------------------------------
 
-TuningSrvClientThread::TuningSrvClientThread(std::shared_ptr<TgsSession> session,
+TuningSrvClientThread::TuningSrvClientThread(TuningGatewaySession& session,
 											const SoftwareInfo& softwareInfo,
 											const HostAddressPort& serverAddressPort1,
 											const HostAddressPort& serverAddressPort2,

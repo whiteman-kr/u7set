@@ -370,7 +370,7 @@ namespace GatewayClientLib
 					break;
 				}
 
-				if (m_isCancelledFunc && m_isCancelledFunc() == false)
+				if (m_isCancelledFunc && m_isCancelledFunc() == true)
 				{
 					break;
 				}
