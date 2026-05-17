@@ -345,6 +345,11 @@ namespace Tuning
 				return;
 			}
 
+			int signalCount = m_tuningSignalsReadRequest.signalhash_size();
+
+			QElapsedTimer timer;
+			timer.start();
+
 			// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
 			//
 			clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
@@ -360,6 +365,10 @@ namespace Tuning
 			{
 				Q_ASSERT(false);
 			}
+
+			qint64 tm = timer.elapsed();
+
+			qDebug() << C_STR(QString("READ %1 signals, time = %2").arg(signalCount).arg(tm));
 
 			sendReply(m_tuningSignalsReadReply);
 		}
@@ -500,6 +509,9 @@ namespace Tuning
 
 		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
 
+		//QElapsedTimer timer;
+		//timer.start();
+
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
 		clientContext->writeSignalStates(clientEquipmentID, matsUser, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
@@ -507,6 +519,8 @@ namespace Tuning
 		sendReply(m_tuningSignalsWriteReply);
 
 		errCode = static_cast<E::NetworkError>(m_tuningSignalsWriteReply.error());
+
+//		qDebug() << C_STR(QString("WRITE %1 signals, time = %2").arg(m_tuningSignalsWriteRequest.commands_size()).arg(timer.elapsed()));
 
 		QString msg = QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
 				arg(E::valueToString(errCode)).arg(peerAddr().addressStr());

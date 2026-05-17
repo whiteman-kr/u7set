@@ -292,7 +292,7 @@ namespace GatewayClientLib
 	};
 
 	constexpr size_t TUNING_GW_TUNING_SIGNALS_READ_RESPONSE_SIZE = sizeof(GwTuningSignalsReadResponse);
-	constexpr size_t TUNING_GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - TUNING_GW_TUNING_SIGNALS_READ_RESPONSE_SIZE) / TUNING_GW_TUNING_SIGNAL_STATE_SIZE;
+	constexpr size_t TUNING_GW_MAX_SIGNAL_STATES = 8192;
 
 	//
 	// Request TGW_TUNING_SIGNALS_APPLY
@@ -339,7 +339,7 @@ namespace GatewayClientLib
 	};
 
 	constexpr size_t TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE = sizeof(GwTuningSignalsWriteRequest);
-	constexpr size_t TUNING_GW_MAX_WRITE_VALUES = 65536;
+	constexpr size_t TUNING_GW_MAX_WRITE_VALUES = 4096;
 
 	static_assert(sizeof(GwTuningSignalsWriteRequest) == 136);
 

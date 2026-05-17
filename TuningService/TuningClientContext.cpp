@@ -219,6 +219,7 @@ namespace Tuning
 		bool autoApply = request.autoapply();
 
 		reply->clear_writeresult();
+		reply->mutable_writeresult()->Reserve(writeRequestCount);
 
 		std::set<TuningSourceThreadShared> usedSrcThreads;
 

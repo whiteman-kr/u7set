@@ -205,11 +205,9 @@ namespace Tuning
 
 	void TuningCommandQueue::push(const TuningCommand& cmd)
 	{
-		m_mutex.lock();
+		std::lock_guard lg(m_mutex);
 
-		m_queue.push(cmd);
-
-		m_mutex.unlock();
+		m_queue.push_back(cmd);
 	}
 
 	bool TuningCommandQueue::pop(TuningCommand* cmd)
@@ -218,16 +216,16 @@ namespace Tuning
 
 		bool result = false;
 
-		m_mutex.lock();
-
-		if (m_queue.empty() == false)
 		{
-			*cmd = m_queue.front();
-			m_queue.pop();
-			result = true;
-		}
+			std::lock_guard lg(m_mutex);
 
-		m_mutex.unlock();
+			if (m_queue.empty() == false)
+			{
+				*cmd = m_queue.front();
+				m_queue.pop_front();
+				result = true;
+			}
+		}
 
 		return result;
 	}
@@ -1773,7 +1771,6 @@ namespace Tuning
 
 		if (ts == nullptr)
 		{
-			Q_ASSERT(false);
 			return E::NetworkError::UnknownSignalHash;
 		}
 
@@ -1800,8 +1797,8 @@ namespace Tuning
 
 		TuningCommand cmd;
 
-		cmd.clientEquipmentID = clientEquipmentID;
-		cmd.matsUser = matsUser;
+		//cmd.clientEquipmentID = clientEquipmentID;
+		//cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Write;
 		cmd.autoCommand = false;

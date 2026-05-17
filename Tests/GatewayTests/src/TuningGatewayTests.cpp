@@ -1006,6 +1006,8 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 
+	std::this_thread::sleep_for(std::chrono::milliseconds{200});
+
 	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1"), Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1")};
 
 	std::vector<GatewayClientLib::GwTuningSignalState> states;
@@ -1037,6 +1039,8 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesDuplicateHashesPreserveDuplicates)
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 
+	std::this_thread::sleep_for(std::chrono::milliseconds{200});
+
 	const Radiy::Hash duplicateHash = Radiy::calcHash("#TGW_D1");
 	const std::vector<Radiy::Hash> hashes{duplicateHash, duplicateHash, duplicateHash};
 	const auto states = tuningConn.requestSignalStates(hashes);
@@ -1056,11 +1060,16 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesSupportsExactlyMaxStateRequest)
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 
+	std::this_thread::sleep_for(std::chrono::milliseconds{200});
+
 	const auto knownHashes = gptKnownTuningSignalHashes();
 	std::vector<Radiy::Hash> hashes;
-	hashes.reserve(tuningConn.handshakeResponse().maxStateRequest);
 
-	for (uint32_t i = 0; i < tuningConn.handshakeResponse().maxStateRequest; ++i)
+	uint32_t maxStateCount = tuningConn.handshakeResponse().maxStateRequest;
+
+	hashes.reserve(maxStateCount);
+
+	for (uint32_t i = 0; i < maxStateCount; ++i)
 	{
 		hashes.push_back(knownHashes[i % knownHashes.size()]);
 	}
@@ -1082,6 +1091,8 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesOneKnownSignal)
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 
+	std::this_thread::sleep_for(std::chrono::milliseconds{200});
+
 	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1")};
 	const auto states = tuningConn.requestSignalStates(hashes);
 
@@ -1099,6 +1110,8 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesSkipsUnknownHashes)
 
 	ASSERT_TRUE(tuningConn.connect(TuningTestSettings::Address, TuningTestSettings::Port));
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
+
+	std::this_thread::sleep_for(std::chrono::milliseconds{200});
 
 	auto hashes = gptKnownTuningSignalHashes();
 	hashes.insert(hashes.begin() + 1, Radiy::calcHash("#GPT_UNKNOWN_SIGNAL"));
@@ -1444,8 +1457,12 @@ TEST_F(TuningGatewayTests, GptRequestWriteSignalValuesRejectsTooManySignals)
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
 	std::vector<GatewayClientLib::GwTuningWriteValue> values;
-	values.reserve(tuningConn.handshakeResponse().maxStateWrite + 1u);
-	for (uint32_t i = 0; i < tuningConn.handshakeResponse().maxStateWrite + 1u; ++i)
+
+	uint32_t valuesCount = tuningConn.handshakeResponse().maxStateWrite + 1u;
+
+	values.reserve(valuesCount);
+
+	for (uint32_t i = 0; i < valuesCount; ++i)
 	{
 		values.push_back({Radiy::calcHash("#TGW_D1"), static_cast<double>(i % 2)});
 	}

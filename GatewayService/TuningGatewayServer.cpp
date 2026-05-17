@@ -276,7 +276,7 @@ bool TuningGatewaySession::processGetTuningSourcesStartRequest(const GCL::GwMess
 
 	if (m_tunSrvClientThread == nullptr || m_connectedToTuningSrv == false)
 	{
-		sendErrReply(header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
+		sendErrReply(header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
 		return false;
 	}
 
@@ -459,6 +459,12 @@ bool TuningGatewaySession::processTuningSignalsReadRequest(const GCL::GwMessageH
 
 	quint32 hashesCount = request.count;
 
+	if (hashesCount > GCL::TUNING_GW_MAX_SIGNAL_STATES)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+		return false;
+	}
+
 	const char* hashPtr = recvBuf + GCL::TUNING_GW_TUNING_SIGNALS_READ_REQUEST_SIZE;
 
 	m_readRequestID++;
@@ -481,7 +487,7 @@ bool TuningGatewaySession::processTuningSignalsReadRequest(const GCL::GwMessageH
 
 	m_tunSrvClientThread->tuningSignalsRead(m_readRequestID, hashes);
 
-	WaitResult wr = waitForOrQuit(500);
+	WaitResult wr = waitForOrQuit(2000);
 
 	if (wr == WaitResult::QuitRequested)
 	{
@@ -584,6 +590,13 @@ bool TuningGatewaySession::processTuningSignalsWriteRequest(const GCL::GwMessage
 	std::memcpy(&request, recvBuf, GCL::TUNING_GW_TUNING_SIGNALS_WRITE_REQUEST_SIZE);
 
 	quint32 valuesCount = request.count;
+
+	if (valuesCount > GCL::TUNING_GW_MAX_WRITE_VALUES)
+	{
+		sendErrReply(header, GCL::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+		return false;
+	}
+
 	QString user = QString::fromUtf8(request.user);
 
 	bool apply = request.apply;
@@ -611,12 +624,17 @@ bool TuningGatewaySession::processTuningSignalsWriteRequest(const GCL::GwMessage
 
 	m_tunSrvClientThread->tuningSignalsWrite(m_writeRequestID, user.toStdString(), apply, hashes, values);
 
-	WaitResult wr = waitForOrQuit(500);
+	QElapsedTimer timer;
+	timer.start();
+
+	WaitResult wr = waitForOrQuit(5000);
 
 	if (wr == WaitResult::QuitRequested)
 	{
 		return true;
 	}
+
+	quint64 tm = timer.elapsed();
 
 	GCL::GwTuningSignalsWriteResponse reply;
 
