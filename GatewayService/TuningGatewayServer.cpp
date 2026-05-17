@@ -487,7 +487,7 @@ bool TuningGatewaySession::processTuningSignalsReadRequest(const GCL::GwMessageH
 
 	m_tunSrvClientThread->tuningSignalsRead(m_readRequestID, hashes);
 
-	WaitResult wr = waitForOrQuit(1000);
+	WaitResult wr = waitForOrQuit(2000);
 
 	if (wr == WaitResult::QuitRequested)
 	{
@@ -624,12 +624,17 @@ bool TuningGatewaySession::processTuningSignalsWriteRequest(const GCL::GwMessage
 
 	m_tunSrvClientThread->tuningSignalsWrite(m_writeRequestID, user.toStdString(), apply, hashes, values);
 
-	WaitResult wr = waitForOrQuit(2500);
+	QElapsedTimer timer;
+	timer.start();
+
+	WaitResult wr = waitForOrQuit(5000);
 
 	if (wr == WaitResult::QuitRequested)
 	{
 		return true;
 	}
+
+	quint64 tm = timer.elapsed();
 
 	GCL::GwTuningSignalsWriteResponse reply;
 
