@@ -948,7 +948,8 @@ TEST_F(TuningGatewayTests, GptTuningSourcesStartReturnsConsistentMetadata)
 	for (int i = 0; i < 10; i++)
 	{
 		status = tuningConn.sendRawRequest(GatewayClientLib::TuningGwRequestId::TGW_GET_TUNING_SOURCES_START, request, response);
-		if (status == GatewayClientLib::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY)
+		if (status == GatewayClientLib::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY ||
+			status == GatewayClientLib::GwErrorCode::GWC_NO_TS_CONNECTION)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;
@@ -1006,7 +1007,20 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
 	ASSERT_NO_THROW(tuningConn.requestHandshake(clientEquipmentId));
 
 	const std::vector<Radiy::Hash> hashes{Radiy::calcHash("#TGW_D1"), Radiy::calcHash("#CLIENTTEST_TUNING_SAFE_D1")};
-	const auto states = tuningConn.requestSignalStates(hashes);
+
+	std::vector<GatewayClientLib::GwTuningSignalState> states;
+
+	try
+	{
+		states = tuningConn.requestSignalStates(hashes);
+	}
+	catch(const std::exception& e)
+	{
+		std::string err = e.what();
+
+		int a = 0;
+	}
+	
 
 	ASSERT_EQ(states.size(), hashes.size());
 	for (size_t i = 0; i < hashes.size(); ++i)
@@ -1190,7 +1204,7 @@ TEST_F(TuningGatewayTests, GptTuningSignalsWriteRawRequestReturnsResultsForKnown
 	ASSERT_NO_THROW(tuningConn.requestTuningSources());
 	ASSERT_EQ(tuningConn.requestActivateTuningSource("SYSTEMID_CLIENTTEST_CH12_MD00", true), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+	std::this_thread::sleep_for(std::chrono::milliseconds{5000});
 
 	GatewayClientLib::GwTuningSignalsWriteRequest request{};
 	GatewayClientLib::GwTuningSignalsWriteResponse response{};

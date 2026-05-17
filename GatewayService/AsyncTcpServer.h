@@ -204,7 +204,7 @@ private:
 
 		std::error_code ec;
 
-		asio::ip::address address = asio::ip::make_address(listenAddress.addressPortStr().toStdString(), ec);
+		asio::ip::address address = asio::ip::make_address(listenAddress.addressStr().toStdString(), ec);
 
 		if (ec)
 		{

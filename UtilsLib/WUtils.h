@@ -137,7 +137,7 @@
 
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
-#define C_STR(qstring) qstring.toStdString().c_str()
+#define C_STR(qstring) (qstring).toStdString().c_str()
 
 #define CONTAINS_NULLPTR(vector_of_set)	(std::find(vector_of_set.begin(), vector_of_set.end(), nullptr) != vector_of_set.end())
 
