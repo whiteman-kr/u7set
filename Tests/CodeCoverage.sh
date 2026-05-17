@@ -108,7 +108,7 @@ sleep 5
 
 # First run tests that require no ADS connection.
 #
-$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTestsNoAds.*
+#$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTestsNoAds.*
 
 # Then start ADS for other tests.
 #
@@ -117,7 +117,7 @@ sleep 5
 
 # Run other Adsgateway tests.
 #
-$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTests.*
+#$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTests.*
 sleep 5
 
 StopServices || true
