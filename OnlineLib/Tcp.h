@@ -367,6 +367,8 @@ namespace Tcp
 		char* m_protobufBuffer = nullptr;
 
 		mutable QMutex m_statesMutex;
+
+		std::vector<char> m_sendBuf;
 	};
 
 	// -------------------------------------------------------------------------------------

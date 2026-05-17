@@ -63,7 +63,7 @@ namespace Tuning
 
 		const TuningSources& m_tuningSources;
 
-		std::map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
+		std::unordered_map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
 		std::map<Hash, QString> m_signalToSourceIdMap;					// signal Hash => source EquipmentID
 
 		//

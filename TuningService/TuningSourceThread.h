@@ -176,8 +176,8 @@ namespace Tuning
 		bool pop(TuningCommand* cmd);
 
 	private:
-		QMutex m_mutex;
-		std::queue<TuningCommand> m_queue;
+		std::mutex m_mutex;
+		std::deque<TuningCommand> m_queue;
 	};
 
 	// ----------------------------------------------------------------------------------
