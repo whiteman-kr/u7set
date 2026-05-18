@@ -550,7 +550,7 @@ namespace TrendLib
 
 				// Draw horizontal grid and scale
 				//
-				drawAnalogSignalsGridSeparateMode(painter, lane.laneRect, drawParam, ts);
+				drawAnalogSignalsGridSeparateMode(painter, lane.laneRect, drawParam, ts, ts.color());
 
 				// Draw real-time mode last value.
 				//
@@ -765,7 +765,8 @@ namespace TrendLib
 	void TrendImpl::drawAnalogSignalsGridSeparateMode(QPainter* painter,
 													  const QRectF& laneRect,
 													  const TrendParam& drawParam,
-													  const TrendSignalParam& signal) const
+													  const TrendSignalParam& signal,
+													  TrendColor color) const
 	{
 		Q_ASSERT(painter);
 		painter->setClipping(false);
@@ -845,10 +846,10 @@ namespace TrendLib
 
 		// Draw grid values
 		//
+		painter->setPen(color);
+
 		const auto boundTextSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
 		const double textHeight = boundTextSize.height();
-
-		painter->setPen(signal.color());
 
 		painter->setClipRect(scaleAreaRect);
 
@@ -886,9 +887,16 @@ namespace TrendLib
 			return;
 		}
 
-		if (analogs.size() == 1)
+		auto sameSignalLimitsPred = [scaleType = drawParam.scaleType(), &firstSignal = analogs[0]](const TrendSignalParam& sp)
 		{
-			drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, analogs[0]);
+			return sp.viewLowLimit(scaleType) == firstSignal.viewLowLimit(scaleType) &&
+				   sp.viewHighLimit(scaleType) == firstSignal.viewHighLimit(scaleType);
+		};
+
+		if (analogs.size() == 1 || std::all_of(analogs.cbegin(), analogs.cend(), sameSignalLimitsPred))
+		{
+			auto color = analogs.size() == 1 ? analogs[0].color() : 0;
+			drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, analogs[0], color);
 			return;
 		}
 
@@ -900,16 +908,12 @@ namespace TrendLib
 			return;
 		}
 
-		bool ok = false;
+		bool ok1 = false;
+		bool ok2 = false;
 
-		double highLimit = TrendScale::scaleHighLimit(analogs[0], drawParam.scaleType(), &ok);
-		if (ok == false)
-		{
-			return;
-		}
-
-		double lowLimit = TrendScale::scaleLowLimit(analogs[0], drawParam.scaleType(), &ok);
-		if (ok == false)
+		const double highLimit = TrendScale::scaleHighLimit(analogs[0], drawParam.scaleType(), &ok1);
+		const double lowLimit = TrendScale::scaleLowLimit(analogs[0], drawParam.scaleType(), &ok2);
+		if (ok1 == false || ok2 == false)
 		{
 			return;
 		}
@@ -923,7 +927,23 @@ namespace TrendLib
 
 		// Get grid values
 		//
-		double minInchInterval = 3.0 / 8.0;                          // minimum inches interval
+		double minInchInterval = 3.0 / 8.0; // minimum inches interval
+		if (analogs.size() == 3)
+		{
+			// Three rows, need more vertical space for scale values, so increase minInchInterval
+			//
+			minInchInterval = 3.0 / 5.0;
+		}
+		else if (analogs.size() >= 5 && analogs.size() < 7)
+		{
+			minInchInterval = 3.0 / 5.0;
+		}
+		else if (analogs.size() >= 7)
+		{
+			// 7, 8, ...
+			//
+			minInchInterval = 4.0 / 5.0;
+		}
 
 		auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(),
 												   lowLimit,
@@ -937,7 +957,7 @@ namespace TrendLib
 
 		// Draw horz grids
 		//
-		double dpiY = drawParam.realDpiY();
+		const double dpiY = drawParam.realDpiY();
 
 		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
@@ -948,9 +968,7 @@ namespace TrendLib
 		for (const std::pair<double, double>& p : *scaleValues)
 		{
 			double value = p.first;
-
 			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
-
 			double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY; // Align to DPI
 
 			if (antiAliasedY < signalRect.top() || antiAliasedY > signalRect.bottom())
@@ -965,104 +983,132 @@ namespace TrendLib
 			grids.emplace_back(y, scaleValue);
 		}
 
-		// Draw grid values for the FIRST signal
-		//
-		painter->setPen(analogs[0].color());
-
 		const auto boundTextSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
 		const double textHeight = boundTextSize.height();
 
 		painter->setClipRect(scaleAreaRect);
 
-		for (const std::pair<double, double>& p : grids)
+		auto drawTextFunc = [&scaleAreaRect, textHeight, painter](double gridY,
+																  double value,
+																  const TrendParam& drawParam,
+																  const TrendSignalParam& signal,
+																  int column,
+																  int row,
+																  int columnCount,
+																  int rowCount)
 		{
-			double y = p.first;
-			double value = p.second;
+			assert(rowCount >= 2 && rowCount <= 4);
 
-			// This signal is draw in 0 pos
-			//  2 | 0
-			// ---+---
-			//  3 | 1
-			QRectF textRect(scaleAreaRect.left() + scaleAreaRect.width() / 2.0, y - textHeight, scaleAreaRect.width() / 2.0, textHeight);
+			double cellWidth = scaleAreaRect.width() / columnCount;
+			double cellHeight = textHeight;
+			double cellX = scaleAreaRect.left() + column * cellWidth;
+			double cellY = gridY + (-textHeight * rowCount / 2.0) + row * cellHeight;
 
+			QRectF textRect(cellX, cellY, cellWidth, cellHeight);
 			if (textRect.top() < scaleAreaRect.top() || textRect.bottom() > scaleAreaRect.bottom())
 			{
-				continue;
-			}
-
-			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), analogs[0]);
-
-			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
-		}
-
-		// Draw grid values for the rest of signals
-		//
-		for (size_t i = 1; i < analogs.size(); i++)
-		{
-			const TrendSignalParam& signal = analogs[i];
-			Q_ASSERT(signal.isAnalog() == true);
-
-			double signalHighLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
-			if (ok == false)
-			{
-				continue;
-			}
-
-			double signalLowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
-			if (ok == false)
-			{
-				continue;
-			}
-
-			double signalDelta = signalHighLimit - signalLowLimit;
-			if (std::fabs(signalDelta) <= std::numeric_limits<double>::min())
-			{
-				// Divide by 0 possible
-				//
-				continue;
+				return;
 			}
 
 			painter->setPen(signal.color());
 
-			for (const std::pair<double, double>& p : grids)
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), signal);
+			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter);
+			return;
+		};
+
+		auto getGridsForSignalFunc = [&grids, &signalRect](const TrendSignalParam& signal,
+														   const TrendParam& drawParam) -> std::vector<std::pair<double, double>>
+		{
+			std::vector<std::pair<double, double>> res;
+			bool ok1 = false;
+			bool ok2 = false;
+
+			double signalHighLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok1);
+			double signalLowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok2);
+			if (ok1 == false || ok2 == false || std::fabs(signalHighLimit - signalLowLimit) <= std::numeric_limits<double>::min())
 			{
-				double y = p.first;
+				return res;
+			}
 
-				double scaleValue = TrendScale::scaledPixelToValue(y, signalRect, signalLowLimit, signalHighLimit);
-
-				double value = TrendScale::valueFromScaleValue(scaleValue, drawParam.scaleType(), &ok);
-
-				// This signal is draw in 0 pos
-				//  2 | 0
-				// ---+---
-				//  3 | 1
-				QRectF textRect;
-
-				switch (signal.tempSignalIndex() % 4)
-				{
-				case 0:
-					textRect =
-						QRectF(scaleAreaRect.left() + scaleAreaRect.width() / 2.0, y - textHeight, scaleAreaRect.width() / 2.0, textHeight);
-					break;
-				case 1:
-					textRect = QRectF(scaleAreaRect.left() + scaleAreaRect.width() / 2.0, y, scaleAreaRect.width() / 2.0, textHeight);
-					break;
-				case 2:
-					textRect = QRectF(scaleAreaRect.left(), y - textHeight, scaleAreaRect.width() / 2.0, textHeight);
-					break;
-				case 3:
-					textRect = QRectF(scaleAreaRect.left(), y, scaleAreaRect.width() / 2.0, textHeight);
-					break;
-				}
-
-				if (textRect.top() < scaleAreaRect.top() || textRect.bottom() > scaleAreaRect.bottom())
+			for (const auto& [gridY, gridValue] : grids)
+			{
+				double scaleValue = TrendScale::scaledPixelToValue(gridY, signalRect, signalLowLimit, signalHighLimit);
+				double value = TrendScale::valueFromScaleValue(scaleValue, drawParam.scaleType(), &ok1);
+				if (ok1 == false)
 				{
 					continue;
 				}
 
-				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam.scaleType(), signal) : "?";
+				res.emplace_back(gridY, value);
+			}
 
-				drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
+			return res;
+		};
+
+		auto drawSignalScale = [&getGridsForSignalFunc,
+								&drawTextFunc,
+								&drawParam](const TrendSignalParam& signal, int column, int row, int columnCount, int rowCount)
+		{
+			auto gridsForSignal = getGridsForSignalFunc(signal, drawParam);
+			for (const auto [gridY, value] : gridsForSignal)
+			{
+				drawTextFunc(gridY, value, drawParam, signal, column, row, columnCount, rowCount);
+			}
+		};
+
+		if (analogs.size() == 2)
+		{
+			const int columnCount = 1;
+			const int rowCount = 2;
+			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
+			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
+		}
+		else if (analogs.size() == 3)
+		{
+			const int columnCount = 1;
+			const int rowCount = 3;
+			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
+			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
+			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
+		}
+		else if (analogs.size() == 4)
+		{
+			const int columnCount = 2;
+			const int rowCount = 2;
+			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
+			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
+			drawSignalScale(analogs[2], 1, 0, columnCount, rowCount);
+			drawSignalScale(analogs[3], 1, 1, columnCount, rowCount);
+		}
+		else if (analogs.size() == 5 || analogs.size() == 6)
+		{
+			const int columnCount = 2;
+			const int rowCount = 3;
+			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
+			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
+			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
+			drawSignalScale(analogs[3], 1, 0, columnCount, rowCount);
+			drawSignalScale(analogs[4], 1, 1, columnCount, rowCount);
+			if (analogs.size() == 6)
+			{
+				drawSignalScale(analogs[5], 1, 2, columnCount, rowCount);
+			}
+		}
+		else if (analogs.size() >= 7)
+		{
+			const int columnCount = 2;
+			const int rowCount = 4;
+			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
+			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
+			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
+			drawSignalScale(analogs[3], 0, 3, columnCount, rowCount);
+			drawSignalScale(analogs[4], 1, 0, columnCount, rowCount);
+			drawSignalScale(analogs[5], 1, 1, columnCount, rowCount);
+			drawSignalScale(analogs[6], 1, 2, columnCount, rowCount);
+			if (analogs.size() > 7)
+			{
+				drawSignalScale(analogs[7], 1, 3, columnCount, rowCount);
 			}
 		}
 
@@ -2036,7 +2082,7 @@ namespace TrendLib
 				{
 					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
 					double y = bar.min - minBarHeight / 2.0; // bar.min is the top of the bar, bar.max is the bottom of the bar,
-															// because in pixel coordinates, y increases downwards
+															 // because in pixel coordinates, y increases downwards
 					double w = minBarWidth;
 					double h = std::max(bar.max - bar.min, minBarHeight);
 					if (h > w)

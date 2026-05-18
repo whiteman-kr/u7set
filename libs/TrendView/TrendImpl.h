@@ -56,7 +56,8 @@ namespace TrendLib
 		void drawAnalogSignalsGridSeparateMode(QPainter* painter,
 											   const QRectF& laneRect,
 											   const TrendParam& drawParam,
-											   const TrendSignalParam& signal) const;
+											   const TrendSignalParam& signal,
+											   TrendColor color) const;
 
 		void drawAnalogSignalsGridOverlappedMode(QPainter* painter,
 												 const QRectF& laneRect,
