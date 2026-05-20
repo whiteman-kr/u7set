@@ -392,6 +392,60 @@ namespace VFrame30
 													   IndicatorTrend::setShowDateLabels);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// indentLeft
+		//
+		int precision = 0;
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			precision = 0;
+		}
+		else
+		{
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 2 : 4; // 2 for mm, 4 for inches
+		}
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentLeft,
+													   true,
+													   IndicatorTrend::indentLeft,
+													   IndicatorTrend::setIndentLeft);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentRight
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentRight,
+													   true,
+													   IndicatorTrend::indentRight,
+													   IndicatorTrend::setIndentRight);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentTop
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentTop,
+													   true,
+													   IndicatorTrend::indentTop,
+													   IndicatorTrend::setIndentTop);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentBottom
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentBottom,
+													   true,
+													   IndicatorTrend::indentBottom,
+													   IndicatorTrend::setIndentBottom);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
 		// samplePeriod
 		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::RtTrendsSamplePeriod,
@@ -521,6 +575,26 @@ namespace VFrame30
 			m_trendParam.setShowDateLabels(m.showdatelabels());
 		}
 
+		if (m.has_indentleft() == true)
+		{
+			m_trendParam.setIndentLeft(m.indentleft());
+		}
+
+		if (m.has_indentright() == true)
+		{
+			m_trendParam.setIndentRight(m.indentright());
+		}
+
+		if (m.has_indenttop() == true)
+		{
+			m_trendParam.setIndentTop(m.indenttop());
+		}
+
+		if (m.has_indentbottom() == true)
+		{
+			m_trendParam.setIndentBottom(m.indentbottom());
+		}
+
 		return true;
 	}
 
@@ -541,11 +615,17 @@ namespace VFrame30
 		m->set_lanecount(laneCount());
 		m->set_backcolor1st(backColor1st().rgba());
 		m->set_backcolor2nd(backColor2nd().rgba());
+
 		m->set_showsignalids(showSignalIds());
 		m->set_showsignalcaptions(showSignalCaptions());
 		m->set_showsignalscales(showSignalScales());
 		m->set_showtimelabels(showTimeLabels());
 		m->set_showdatelabels(showDateLabels());
+
+		m->set_indentleft(m_trendParam.indentLeft()); // Use m_trendParam, it keeps indent in native unit.
+		m->set_indentright(m_trendParam.indentRight());
+		m->set_indenttop(m_trendParam.indentTop());
+		m->set_indentbottom(m_trendParam.indentBottom());
 
 		m->set_sampleperiod(static_cast<int>(m_samplePeriod));
 		m->set_timetype(static_cast<int>(m_timeType));
@@ -931,6 +1011,161 @@ namespace VFrame30
 	void IndicatorTrend::setShowDateLabels(bool value)
 	{
 		m_trendParam.setShowDateLabels(value);
+	}
+
+	double IndicatorTrend::indentLeft() const
+	{
+		if (m_trendParam.indentLeft() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentLeft());
+		}
+		else
+		{
+			double pt = m_trendParam.indentLeft();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentLeft(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentLeft(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentLeft(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentLeft(pt);
+		}
+	}
+
+	double IndicatorTrend::indentRight() const
+	{
+		if (m_trendParam.indentRight() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentRight());
+		}
+		else
+		{
+			double pt = m_trendParam.indentRight();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentRight(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentRight(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentRight(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentRight(pt);
+		}
+	}
+
+	double IndicatorTrend::indentTop() const
+	{
+		if (m_trendParam.indentTop() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentTop());
+		}
+		else
+		{
+			double pt = m_trendParam.indentTop();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+	void IndicatorTrend::setIndentTop(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentTop(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentTop(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentTop(pt);
+		}
+	}
+
+	double IndicatorTrend::indentBottom() const
+	{
+		if (m_trendParam.indentBottom() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentBottom());
+		}
+		else
+		{
+			double pt = m_trendParam.indentBottom();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentBottom(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentBottom(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentBottom(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentBottom(pt);
+		}
 	}
 
 	E::RtTrendsSamplePeriod IndicatorTrend::samplePeriod() const

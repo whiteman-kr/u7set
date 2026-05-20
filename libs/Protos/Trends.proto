@@ -104,6 +104,11 @@ message TrendParam
 	optional bool show_time_labels = 83 [default = true];
 	optional bool show_date_labels = 84 [default = true];
 
+	optional double indent_left = 90 [default = -1.0];
+	optional double indent_right = 91 [default = -1.0];
+	optional double indent_top = 92 [default = -1.0];
+	optional double indent_bottom = 93 [default = -1.0];
+
     optional int32 scale_type = 5 [default = 0];		// enum TrendScaleType::Generic, TrendScaleType::Logarithmic, TrendScaleType::Exponential 
 
 	optional string projectName = 100;

@@ -33,6 +33,11 @@ namespace TrendLib
 		message->set_show_time_labels(m_showTimeLabels);
 		message->set_show_date_labels(m_showDateLabels);
 
+		message->set_indent_left(m_indentLeft);
+		message->set_indent_right(m_indentRight);
+		message->set_indent_top(m_indentTop);
+		message->set_indent_bottom(m_indentBottom);
+
 		message->set_projectname(m_project.toStdString());
 
 		return true;
@@ -62,6 +67,11 @@ namespace TrendLib
 		m_showSignalScales = message.show_signal_scales();
 		m_showTimeLabels = message.show_time_labels();
 		m_showDateLabels = message.show_date_labels();
+
+		m_indentLeft = message.indent_left();
+		m_indentRight = message.indent_right();
+		m_indentTop = message.indent_top();
+		m_indentBottom = message.indent_bottom();
 
 		m_project = QString::fromStdString(message.projectname());
 
@@ -262,6 +272,45 @@ namespace TrendLib
 	void TrendParam::setShowDateLabels(bool value)
 	{
 		m_showDateLabels = value;
+	}
+
+	double TrendParam::indentLeft() const
+	{
+		return m_indentLeft;
+	}
+
+	void TrendParam::setIndentLeft(double value)
+	{
+		m_indentLeft = value;
+	}
+
+	double TrendParam::indentRight() const
+	{
+		return m_indentRight;
+	}
+
+	void TrendParam::setIndentRight(double value)
+	{
+		m_indentRight = value;
+	}
+
+	double TrendParam::indentTop() const
+	{
+		return m_indentTop;
+	}
+	void TrendParam::setIndentTop(double value)
+	{
+		m_indentTop = value;
+	}
+
+	double TrendParam::indentBottom() const
+	{
+		return m_indentBottom;
+	}
+
+	void TrendParam::setIndentBottom(double value)
+	{
+		m_indentBottom = value;
 	}
 
 	QDateTime TrendParam::startTime() const

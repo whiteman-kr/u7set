@@ -59,6 +59,8 @@ namespace TrendLib
 		const TrendLib::ITrendDataProvider* trendDataProvider() const;
 		void setTrendDataProvider(TrendLib::ITrendDataProvider* dataProvider);
 
+		// Appearance properties
+		//
 		[[nodiscard]] QColor backColor1st() const;
 		void setBackColor1st(const QColor& value);
 
@@ -80,6 +82,22 @@ namespace TrendLib
 		[[nodiscard]] bool showDateLabels() const;
 		void setShowDateLabels(bool value);
 
+		// Indent properties
+		//
+		[[nodiscard]] double indentLeft() const;
+		void setIndentLeft(double value);
+
+		[[nodiscard]] double indentRight() const;
+		void setIndentRight(double value);
+
+		[[nodiscard]] double indentTop() const;
+		void setIndentTop(double value);
+
+		[[nodiscard]] double indentBottom() const;
+		void setIndentBottom(double value);
+
+		// Time properties
+		//
 		[[nodiscard]] QDateTime startTime() const;
 		void setStartTime(const QDateTime& value);
 
@@ -125,6 +143,11 @@ namespace TrendLib
 		bool m_showSignalScales = true;
 		bool m_showTimeLabels = true;
 		bool m_showDateLabels = true;
+
+		double m_indentLeft{-1.0};
+		double m_indentRight{-1.0};
+		double m_indentTop{-1.0};
+		double m_indentBottom{-1.0};
 
 		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
 		qint64 m_duration = 1_hour;

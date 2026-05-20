@@ -145,6 +145,22 @@ namespace VFrame30
 		Q_PROPERTY(bool showDateLabels READ showDateLabels WRITE setShowDateLabels)
 		Q_PROPERTY(bool ShowDateLabels READ showDateLabels WRITE setShowDateLabels)
 
+		/// \brief Gets or sets left indent (if -1, then default indent is used).
+		Q_PROPERTY(double indentLeft READ indentLeft WRITE setIndentLeft)
+		Q_PROPERTY(double IndentLeft READ indentLeft WRITE setIndentLeft)
+
+		/// \brief Gets or sets right indent (if -1, then default indent is used).
+		Q_PROPERTY(double indentRight READ indentRight WRITE setIndentRight)
+		Q_PROPERTY(double IndentRight READ indentRight WRITE setIndentRight)
+
+		/// \brief Gets or sets top indent (if -1, then default indent is used).
+		Q_PROPERTY(double indentTop READ indentTop WRITE setIndentTop)
+		Q_PROPERTY(double IndentTop READ indentTop WRITE setIndentTop)
+
+		/// \brief Gets or sets bottom indent (if -1, then default indent is used).
+		Q_PROPERTY(double indentBottom READ indentBottom WRITE setIndentBottom)
+		Q_PROPERTY(double IndentBottom READ indentBottom WRITE setIndentBottom)
+
 		/// \brief Gets or sets redraw interval in milliseconds.
 		Q_PROPERTY(int redrawInterval READ redrawInterval WRITE setRedrawInterval)
 		Q_PROPERTY(int RedrawInterval READ redrawInterval WRITE setRedrawInterval)
@@ -197,6 +213,8 @@ namespace VFrame30
 		int laneCount() const;
 		void setLaneCount(int value);
 
+		// Appearance properties
+		//
 		QColor backColor1st() const;
 		void setBackColor1st(const QColor& value);
 
@@ -218,6 +236,23 @@ namespace VFrame30
 		bool showDateLabels() const;
 		void setShowDateLabels(bool value);
 
+		// Indent properties
+		// Gets and sets indents in native units (mm/in/pixels).
+		//
+		[[nodiscard]] double indentLeft() const;
+		void setIndentLeft(double value);
+
+		[[nodiscard]] double indentRight() const;
+		void setIndentRight(double value);
+
+		[[nodiscard]] double indentTop() const;
+		void setIndentTop(double value);
+
+		[[nodiscard]] double indentBottom() const;
+		void setIndentBottom(double value);
+
+		// Time properties
+		//
 		E::RtTrendsSamplePeriod samplePeriod() const;
 		void setSamplePeriod(E::RtTrendsSamplePeriod value);
 

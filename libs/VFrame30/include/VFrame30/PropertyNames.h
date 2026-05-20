@@ -178,6 +178,11 @@ namespace VFrame30
 		inline static const QString indicatorTrendShowSignalScales{"ShowSignalScales"};
 		inline static const QString indicatorTrendShowTimeLabels{"ShowTimeLabels"};
 		inline static const QString indicatorTrendShowDateLabels{"ShowDateLabels"};
+		inline static const QString indicatorTrendIndentLeft{"IndentLeft"};
+		inline static const QString indicatorTrendIndentRight{"IndentRight"};
+		inline static const QString indicatorTrendIndentTop{"IndentTop"};
+		inline static const QString indicatorTrendIndentBottom{"IndentBottom"};
+		inline static const QString indicatorTrendIndentDescription{"Indent; if set to -1, the auto indent is used."};
 		inline static const QString indicatorTrendLaneCount{"LaneCount"};
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};

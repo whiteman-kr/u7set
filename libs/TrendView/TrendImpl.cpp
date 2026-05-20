@@ -2831,21 +2831,20 @@ namespace TrendLib
 		// |                                |
 		// +--------------------------------+
 		//
-		double topMargin = 1.0 / 4.0; // 1/4 inch
+		double topMargin = drawParam.indentTop() < 0 ? 1.0 / 4.0 : drawParam.indentTop(); // 1/4 inch
 
 		double bottomMargin = 0;
 		if (drawParam.showTimeLabels() == true && drawParam.showDateLabels() == true)
 		{
-			bottomMargin = 1.0 / 4.0 + 1.0 / 8.0;
+			bottomMargin = drawParam.indentBottom() < 0 ? (1.0 / 4.0 + 1.0 / 8.0) : drawParam.indentBottom();
 		}
 		else
 		{
-			bottomMargin = 1.0 / 4.0;
+			bottomMargin = drawParam.indentBottom() < 0 ? (1.0 / 4.0) : drawParam.indentBottom();
 		}
 
 
 		QRectF insideRect;
-
 		if (drawParam.showSignalScales() == true)
 		{
 			int columnCount = calcAnalogScaleColumnCount(analogSignalParams, drawParam);
@@ -2853,8 +2852,8 @@ namespace TrendLib
 			{
 				// 1 column of scale values
 				//
-				insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
-				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+				insideRect.setLeft(laneRect.left() + (drawParam.indentLeft() < 0 ? (3.0 / 4.0) : drawParam.indentLeft()));
+				insideRect.setRight(laneRect.right() - (drawParam.indentRight() < 0 ? (1.0 / 4.0) : drawParam.indentRight()));
 				insideRect.setTop(laneRect.top() + topMargin);
 				insideRect.setBottom(laneRect.bottom() - bottomMargin);
 			}
@@ -2862,16 +2861,16 @@ namespace TrendLib
 			{
 				// 2 columns of scale values
 				//
-				insideRect.setLeft(laneRect.left() + 3.0 / 4.0 * 1.5);
-				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+				insideRect.setLeft(laneRect.left() + (drawParam.indentLeft() < 0 ? (3.0 / 4.0 * 1.5) : drawParam.indentLeft()));
+				insideRect.setRight(laneRect.right() - (drawParam.indentRight() < 0 ? (1.0 / 4.0) : drawParam.indentRight()));
 				insideRect.setTop(laneRect.top() + topMargin);
 				insideRect.setBottom(laneRect.bottom() - bottomMargin);
 			}
 		}
 		else
 		{
-			insideRect.setLeft(laneRect.left() + 1.0 / 4.0);
-			insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+			insideRect.setLeft(laneRect.left() + (drawParam.indentLeft() < 0 ? (1.0 / 4.0) : drawParam.indentLeft()));
+			insideRect.setRight(laneRect.right() - (drawParam.indentRight() < 0 ? (1.0 / 4.0) : drawParam.indentRight()));
 			insideRect.setTop(laneRect.top() + topMargin);
 			insideRect.setBottom(laneRect.bottom() - bottomMargin);
 		}
