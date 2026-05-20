@@ -518,6 +518,7 @@ namespace AppSignalStdLib
 					{
 						sourceState.state = state;
 						sourceState.lastUpdateTime = now;
+						sourceState.dataServerHash = dataServerHash;
 						return;
 					}
 
@@ -529,13 +530,11 @@ namespace AppSignalStdLib
 
 				if (emptyState == nullptr)
 				{
-					// No empty space in sources
+					// Communication threads could be recreated, if we ended up in this situation, reset all states for this signal -
+					// this will free space for other sources, and set new state to the first item.
 					//
-					assert(emptyState);
-
-					// Try to mitigate it, and set value to the last item
-					//
-					emptyState = &sources.back();
+					std::fill(sources.begin(), sources.end(), SourceState{});
+					emptyState = &sources.front();
 				}
 
 				*emptyState = SourceState{state, dataServerHash, sourceThreadId, now};

@@ -4,6 +4,8 @@
 
 #include <QPainter>
 
+#include <ranges>
+
 #define EXPERIMENTAL_TREND_DRAW_WITH_BARS
 // #define DEBUG_TIME
 
@@ -123,7 +125,7 @@ namespace TrendLib
 
 		for (size_t laneIndex = 0, laneCount = drawParam.laneCount(); laneIndex < laneCount; laneIndex++)
 		{
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (stoken.stop_requested() == true)
 			{
 				break;
 			}
@@ -404,32 +406,46 @@ namespace TrendLib
 
 		// Draw text, time and date
 		//
-		QRectF textClipRect(laneRect.left(), insideRect.bottom(), laneRect.width(), laneRect.bottom() - insideRect.bottom());
-		painter->setClipRect(textClipRect);
-
-		painter->setPen(Qt::black);
-		QString lastDateText;
-		for (const PosTimePair& p : timeGridPos)
+		if (drawParam.showTimeLabels() == true || drawParam.showDateLabels() == true)
 		{
-			QDateTime dateTime = p.timeStamp.toDateTime();
+			QRectF textClipRect(laneRect.left(), insideRect.bottom(), laneRect.width(), laneRect.bottom() - insideRect.bottom());
+			painter->setClipRect(textClipRect);
 
-			QString timeText =
-				timeGridInterval < 1_sec ? DateTimeToString ::timeMs(dateTime.time()) : DateTimeToString::timeSec(dateTime.time());
-			QString dateText = DateTimeToString::date(dateTime.date());
-
-			QRectF timeTextRect(p.x - 2.0, insideRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
-			QRectF dateTextRect(p.x - 2.0, timeTextRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
-
-			drawText(painter, timeText, timeTextRect, drawParam, Qt::AlignCenter);
-
-			if (lastDateText != dateText)
+			painter->setPen(Qt::black);
+			QString lastDateText;
+			for (const PosTimePair& p : timeGridPos)
 			{
-				lastDateText = dateText;
-				drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
-			}
-		}
+				QDateTime dateTime = p.timeStamp.toDateTime();
 
-		painter->setClipping(false);
+				QString timeText =
+					timeGridInterval < 1_sec ? DateTimeToString ::timeMs(dateTime.time()) : DateTimeToString::timeSec(dateTime.time());
+				QRectF timeTextRect{p.x - 2.0,
+									insideRect.bottom(),
+									4.0,
+									drawParam.showDateLabels() ? (laneRect.bottom() - insideRect.bottom()) / 2.0 :
+																 (laneRect.bottom() - insideRect.bottom())};
+
+				if (drawParam.showTimeLabels() == true)
+				{
+					drawText(painter, timeText, timeTextRect, drawParam, Qt::AlignCenter);
+				}
+
+				QString dateText = DateTimeToString::date(dateTime.date());
+				QRectF dateTextRect{p.x - 2.0,
+									drawParam.showTimeLabels() == true ? timeTextRect.bottom() : insideRect.bottom(),
+									4.0,
+									drawParam.showTimeLabels() == true ? (laneRect.bottom() - insideRect.bottom()) / 2.0 :
+																		 (laneRect.bottom() - insideRect.bottom())};
+
+				if (drawParam.showDateLabels() == true && lastDateText != dateText)
+				{
+					lastDateText = dateText;
+					drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
+				}
+			}
+
+			painter->setClipping(false);
+		}
 
 		// --
 		//
@@ -456,29 +472,53 @@ namespace TrendLib
 				break;
 			}
 
-			QString signalText = ts.archiveServerShortId().isEmpty() == true ?
-									 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
-									 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+			QString signalText;
+			if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == true)
+			{
+				signalText = ts.archiveServerShortId().isEmpty() == true ?
+								 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+								 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+			}
 
-			painter->setPen(ts.color());
+			if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == false)
+			{
+				signalText = ts.archiveServerShortId().isEmpty() == true ?
+								 QString("  %1").arg(ts.signalId()) :
+								 QString("  %1 (%2)").arg(ts.signalId()).arg(ts.archiveServerShortId());
+			}
 
-			QRectF testDesctriptionBoundRect;
-			drawText(painter,
-					 signalText,
-					 signalRect,
-					 drawParam,
-					 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
-					 &testDesctriptionBoundRect);
+			if (drawParam.showSignalIds() == false && drawParam.showSignalCaptions() == true)
+			{
+				signalText = ts.archiveServerShortId().isEmpty() == true ?
+								 QString("  %1").arg(ts.caption()) :
+								 QString("  %1 (%2)").arg(ts.caption()).arg(ts.archiveServerShortId());
+			}
 
-			auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
-			drawParam.signalDescriptionRect().push_back(scr);
+			if (signalText.isEmpty() == false)
+			{
+				painter->setPen(ts.color());
+
+				QRectF testDescriptionBoundRect;
+				drawText(painter,
+						 signalText,
+						 signalRect,
+						 drawParam,
+						 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
+						 &testDescriptionBoundRect);
+
+				auto scr = std::make_pair(ts.appSignalId(), testDescriptionBoundRect);
+				drawParam.signalDescriptionRect().push_back(scr);
+			}
 
 			// Draw scale 0/1 for discretes.
 			//
-			QRectF scaleAreaRect = calcScaleAreaRect(lane.laneRect, signalRect);
+			if (drawParam.showSignalScales() == true)
+			{
+				QRectF scaleAreaRect = calcScaleAreaRect(lane.laneRect, signalRect);
 
-			drawText(painter, "0 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignBottom);
-			drawText(painter, "1 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignTop);
+				drawText(painter, "0 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignBottom);
+				drawText(painter, "1 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignTop);
+			}
 
 			// Draw real-time mode last (current) value.
 			//
@@ -500,21 +540,47 @@ namespace TrendLib
 				}
 
 				QString signalText;
-				if (ts.unit().isEmpty() == true)
+				if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == true)
 				{
-					signalText = ts.archiveServerShortId().isEmpty() == true ?
-									 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
-									 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+					if (ts.unit().isEmpty() == true)
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+										 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+					}
+					else
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
+										 QString("  %1 - %2, %3 (%4)")
+											 .arg(ts.signalId())
+											 .arg(ts.caption())
+											 .arg(ts.unit())
+											 .arg(ts.archiveServerShortId());
+					}
 				}
-				else
+
+				if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == false)
 				{
 					signalText = ts.archiveServerShortId().isEmpty() == true ?
-									 QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
-									 QString("  %1 - %2, %3 (%4)")
-										 .arg(ts.signalId())
-										 .arg(ts.caption())
-										 .arg(ts.unit())
-										 .arg(ts.archiveServerShortId());
+									 QString("  %1").arg(ts.signalId()) :
+									 QString("  %1 (%2)").arg(ts.signalId()).arg(ts.archiveServerShortId());
+				}
+
+				if (drawParam.showSignalIds() == false && drawParam.showSignalCaptions() == true)
+				{
+					if (ts.unit().isEmpty() == true)
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1").arg(ts.caption()) :
+										 QString("  %1 (%2)").arg(ts.caption()).arg(ts.archiveServerShortId());
+					}
+					else
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1, %2").arg(ts.caption()).arg(ts.unit()) :
+										 QString("  %1, %2 (%3)").arg(ts.caption()).arg(ts.unit()).arg(ts.archiveServerShortId());
+					}
 				}
 
 				// Check the scale view limits
@@ -533,20 +599,23 @@ namespace TrendLib
 					signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
 				}
 
-				painter->setPen(ts.color());
+				if (signalText.isEmpty() == false)
+				{
+					painter->setPen(ts.color());
 
-				// Draw description text
-				//
-				QRectF testDescriptionBoundRect;
-				drawText(painter,
-						 signalText,
-						 signalRect,
-						 drawParam,
-						 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
-						 &testDescriptionBoundRect);
+					// Draw description text
+					//
+					QRectF testDescriptionBoundRect;
+					drawText(painter,
+							 signalText,
+							 signalRect,
+							 drawParam,
+							 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
+							 &testDescriptionBoundRect);
 
-				auto scr = std::make_pair(ts.appSignalId(), testDescriptionBoundRect);
-				drawParam.signalDescriptionRect().push_back(scr);
+					auto scr = std::make_pair(ts.appSignalId(), testDescriptionBoundRect);
+					drawParam.signalDescriptionRect().push_back(scr);
+				}
 
 				// Draw horizontal grid and scale
 				//
@@ -567,21 +636,47 @@ namespace TrendLib
 			for (const TrendSignalParam& ts : analogs)
 			{
 				QString signalText;
-				if (ts.unit().isEmpty() == true)
+				if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == true)
 				{
-					signalText = ts.archiveServerShortId().isEmpty() == true ?
-									 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
-									 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+					if (ts.unit().isEmpty() == true)
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+										 QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
+					}
+					else
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
+										 QString("  %1 - %2, %3 (%4)")
+											 .arg(ts.signalId())
+											 .arg(ts.caption())
+											 .arg(ts.unit())
+											 .arg(ts.archiveServerShortId());
+					}
 				}
-				else
+
+				if (drawParam.showSignalIds() == true && drawParam.showSignalCaptions() == false)
 				{
 					signalText = ts.archiveServerShortId().isEmpty() == true ?
-									 QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
-									 QString("  %1 - %2, %3 (%4)")
-										 .arg(ts.signalId())
-										 .arg(ts.caption())
-										 .arg(ts.unit())
-										 .arg(ts.archiveServerShortId());
+									 QString("  %1").arg(ts.signalId()) :
+									 QString("  %1 (%2)").arg(ts.signalId()).arg(ts.archiveServerShortId());
+				}
+
+				if (drawParam.showSignalIds() == false && drawParam.showSignalCaptions() == true)
+				{
+					if (ts.unit().isEmpty() == true)
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1").arg(ts.caption()) :
+										 QString("  %1 (%2)").arg(ts.caption()).arg(ts.archiveServerShortId());
+					}
+					else
+					{
+						signalText = ts.archiveServerShortId().isEmpty() == true ?
+										 QString("  %1, %2").arg(ts.caption()).arg(ts.unit()) :
+										 QString("  %1, %2 (%3)").arg(ts.caption()).arg(ts.unit()).arg(ts.archiveServerShortId());
+					}
 				}
 
 				// Check the scale view limits
@@ -600,26 +695,29 @@ namespace TrendLib
 					signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
 				}
 
-				painter->setPen(ts.color());
+				if (signalText.isEmpty() == false)
+				{
+					painter->setPen(ts.color());
 
-				QRectF testDesctriptionBoundRect;
-				drawText(painter,
-						 signalText,
-						 signalRect,
-						 drawParam,
-						 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
-						 &testDesctriptionBoundRect);
+					QRectF testDesctriptionBoundRect;
+					drawText(painter,
+							 signalText,
+							 signalRect,
+							 drawParam,
+							 Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
+							 &testDesctriptionBoundRect);
 
-				auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
-				drawParam.signalDescriptionRect().push_back(scr);
+					auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
+					drawParam.signalDescriptionRect().push_back(scr);
+
+					// Shift rect
+					//
+					signalRect.setTop(testDesctriptionBoundRect.bottom() + testDesctriptionBoundRect.height() * 0.25);
+				}
 
 				// Draw realtime mode last value.
 				//
 				drawSignalsDecorRealtimeValue(painter, lane, signalRect, drawParam, ts);
-
-				// Shift rect
-				//
-				signalRect.setTop(testDesctriptionBoundRect.bottom() + testDesctriptionBoundRect.height() * 0.25);
 			}
 
 			// Draw horizontal grid and scale
@@ -829,7 +927,6 @@ namespace TrendLib
 			double value = p.first;
 
 			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
-
 			double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY; // Align to DPI
 
 			if (antiAliasedY < signalRect.top() || antiAliasedY > signalRect.bottom())
@@ -842,6 +939,11 @@ namespace TrendLib
 			double scaleValue = p.second;
 
 			grids.emplace_back(y, scaleValue);
+		}
+
+		if (drawParam.showSignalScales() == false)
+		{
+			return;
 		}
 
 		// Draw grid values
@@ -887,22 +989,30 @@ namespace TrendLib
 			return;
 		}
 
-		auto sameSignalLimitsPred = [scaleType = drawParam.scaleType(), &firstSignal = analogs[0]](const TrendSignalParam& sp)
-		{
-			return sp.viewLowLimit(scaleType) == firstSignal.viewLowLimit(scaleType) &&
-				   sp.viewHighLimit(scaleType) == firstSignal.viewHighLimit(scaleType);
-		};
+		int columnCount = calcAnalogScaleColumnCount(analogs, drawParam);
+		int rowCount = static_cast<int>(analogs.size() / columnCount + (analogs.size() % columnCount));
+		rowCount = std::clamp<int>(rowCount, 1, 4);
 
-		if (analogs.size() == 1 || std::all_of(analogs.cbegin(), analogs.cend(), sameSignalLimitsPred))
+		if (columnCount == 1)
 		{
-			auto color = analogs.size() == 1 ? analogs[0].color() : 0;
-			drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, analogs[0], color);
-			return;
+			auto sameSignalLimitsPred = [scaleType = drawParam.scaleType(), &firstSignal = analogs[0]](const TrendSignalParam& sp)
+			{
+				return sp.viewLowLimit(scaleType) == firstSignal.viewLowLimit(scaleType) &&   // Same low limit
+					   sp.viewHighLimit(scaleType) == firstSignal.viewHighLimit(scaleType) && // Same high limit
+					   sp.analogFormat() == firstSignal.analogFormat() &&                     // Same format
+					   sp.precision() == firstSignal.precision();                             // Same precision
+			};
+
+			if (analogs.size() == 1 || std::ranges::all_of(analogs, sameSignalLimitsPred) == true)
+			{
+				auto color = analogs.size() == 1 ? analogs[0].color() : 0;
+				drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, analogs[0], color);
+				return;
+			}
 		}
 
 		QRectF signalRect = analogs[0].tempDrawRect();
 		QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
-
 		if (signalRect.isEmpty() == true || scaleAreaRect.isEmpty() == true)
 		{
 			return;
@@ -927,23 +1037,11 @@ namespace TrendLib
 
 		// Get grid values
 		//
-		double minInchInterval = 3.0 / 8.0; // minimum inches interval
-		if (analogs.size() == 3)
-		{
-			// Three rows, need more vertical space for scale values, so increase minInchInterval
-			//
-			minInchInterval = 3.0 / 5.0;
-		}
-		else if (analogs.size() >= 5 && analogs.size() < 7)
-		{
-			minInchInterval = 3.0 / 5.0;
-		}
-		else if (analogs.size() >= 7)
-		{
-			// 7, 8, ...
-			//
-			minInchInterval = 4.0 / 5.0;
-		}
+		const std::array minVertIntervals = {4.0 / 8.0,
+											 3.0 / 8.0,
+											 3.0 / 5.0,
+											 4.0 / 5.0}; // minimum inches interval for 1-2, 3-6, 7+ signals
+		const double minInchInterval = minVertIntervals[std::clamp(rowCount - 1, 0, static_cast<int>(minVertIntervals.size() - 1))];
 
 		auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(),
 												   lowLimit,
@@ -981,6 +1079,11 @@ namespace TrendLib
 			double scaleValue = p.second;
 
 			grids.emplace_back(y, scaleValue);
+		}
+
+		if (drawParam.showSignalScales() == false)
+		{
+			return;
 		}
 
 		const auto boundTextSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
@@ -1057,58 +1160,14 @@ namespace TrendLib
 			}
 		};
 
-		if (analogs.size() == 2)
+		// Draw scales for signals in columns and rows
+		//
 		{
-			const int columnCount = 1;
-			const int rowCount = 2;
-			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
-			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
-		}
-		else if (analogs.size() == 3)
-		{
-			const int columnCount = 1;
-			const int rowCount = 3;
-			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
-			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
-			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
-		}
-		else if (analogs.size() == 4)
-		{
-			const int columnCount = 2;
-			const int rowCount = 2;
-			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
-			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
-			drawSignalScale(analogs[2], 1, 0, columnCount, rowCount);
-			drawSignalScale(analogs[3], 1, 1, columnCount, rowCount);
-		}
-		else if (analogs.size() == 5 || analogs.size() == 6)
-		{
-			const int columnCount = 2;
-			const int rowCount = 3;
-			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
-			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
-			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
-			drawSignalScale(analogs[3], 1, 0, columnCount, rowCount);
-			drawSignalScale(analogs[4], 1, 1, columnCount, rowCount);
-			if (analogs.size() == 6)
+			int signalIndex = 0;
+			for (const TrendSignalParam& ts : analogs | std::views::take(8))
 			{
-				drawSignalScale(analogs[5], 1, 2, columnCount, rowCount);
-			}
-		}
-		else if (analogs.size() >= 7)
-		{
-			const int columnCount = 2;
-			const int rowCount = 4;
-			drawSignalScale(analogs[0], 0, 0, columnCount, rowCount);
-			drawSignalScale(analogs[1], 0, 1, columnCount, rowCount);
-			drawSignalScale(analogs[2], 0, 2, columnCount, rowCount);
-			drawSignalScale(analogs[3], 0, 3, columnCount, rowCount);
-			drawSignalScale(analogs[4], 1, 0, columnCount, rowCount);
-			drawSignalScale(analogs[5], 1, 1, columnCount, rowCount);
-			drawSignalScale(analogs[6], 1, 2, columnCount, rowCount);
-			if (analogs.size() > 7)
-			{
-				drawSignalScale(analogs[7], 1, 3, columnCount, rowCount);
+				drawSignalScale(ts, signalIndex / rowCount, signalIndex % rowCount, columnCount, rowCount);
+				signalIndex++;
 			}
 		}
 
@@ -1599,14 +1658,16 @@ namespace TrendLib
 			painter->setPen(Qt::NoPen);
 			// painter->setRenderHint(QPainter::Antialiasing, false);
 
-			const double lineWeightFactor = (signal.lineWeight() <= 1.0) ? 1.0 : signal.lineWeight();
-			const double minBarWidth = (1.0 / dpiX) * lineWeightFactor;
-			const double minBarHeight = (1.0 / dpiY) * lineWeightFactor;
+			const double cosmeticPenWidth = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiX);
+			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
+			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
+			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
 			const double pixelWidth = 1.0 / dpiX;
 
 			const double fullHeight = yPos0 - yPos1 + minBarHeight;
-			double drawPos0 = yPos0 - minBarHeight / 2.0;
-			double drawPos1 = yPos1 - minBarHeight / 2.0;
+			const double drawPos0 = yPos0 - minBarHeight / 2.0;
+			const double drawPos1 = yPos1 - minBarHeight / 2.0;
 
 			auto color = signal.color();
 
@@ -1912,7 +1973,6 @@ namespace TrendLib
 		// Set clip region
 		//
 		painter->setClipRect(signalRect);
-
 		painter->setRenderHint(QPainter::Antialiasing, false);
 
 		// Set pen to get font metrics.
@@ -1923,17 +1983,15 @@ namespace TrendLib
 
 		// Draw trend
 		//
-		bool ok = false;
+		bool ok1 = false;
+		bool ok2 = false;
 
-		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
-		if (ok == false)
+		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok1);
+		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok2);
+		if (ok1 == false || ok2 == false)
 		{
-			return;
-		}
-
-		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
-		if (ok == false)
-		{
+			painter->setClipping(false);
+			painter->setRenderHint(QPainter::Antialiasing, true);
 			return;
 		}
 
@@ -1941,6 +1999,8 @@ namespace TrendLib
 		{
 			// Divide by 0 possible
 			//
+			painter->setClipping(false);
+			painter->setRenderHint(QPainter::Antialiasing, true);
 			return;
 		}
 
@@ -1967,6 +2027,7 @@ namespace TrendLib
 					break;
 				}
 
+				bool ok = false;
 				for (const TrendStateItem& state : record.states)
 				{
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
@@ -2062,16 +2123,12 @@ namespace TrendLib
 
 			const double dpiX = drawParam.realDpiX();
 			const double dpiY = drawParam.realDpiY();
-
-			const double lineWeightFactor = (signal.lineWeight() <= 1.0) ? 1.0 : signal.lineWeight();
-			const double minBarWidth = (1.0 / dpiX) * lineWeightFactor;
-			const double minBarHeight = (1.0 / dpiY) * lineWeightFactor;
+			const double cosmeticPenWidth = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiX);
+			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
+			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
+			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
 			const double pixelWidth = 1.0 / dpiX;
-
-			// const double fullHeight = yPos0 - yPos1 + minBarHeight;
-			// double drawPos0 = yPos0 - minBarHeight / 2.0;
-			// double drawPos1 = yPos1 - minBarHeight / 2.0;
-
 			auto color = signal.color();
 
 			for (size_t i = 0; i < bars.size(); i++)
@@ -2759,45 +2816,64 @@ namespace TrendLib
 
 	QRectF TrendImpl::calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const
 	{
-		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
-		return TrendImpl::calcTrendArea(laneRect, drawParam, analogsCount);
+		return TrendImpl::calcTrendArea(laneRect, drawParam, std::span<const TrendSignalParam>{signalSet().analogSignals()});
 	}
 
-	QRectF TrendImpl::calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount)
+	QRectF TrendImpl::calcTrendArea(const QRectF& laneRect,
+									const TrendParam& drawParam,
+									std::span<const TrendSignalParam> analogSignalParams)
 	{
 		// Calc InsideRect(trendArea)
 		// +--------------------------------+
 		// |   +---------------------------+|
 		// |   |   insideRect (trendArea)  ||
 		// |   +---------------------------+|
+		// |                                |
 		// +--------------------------------+
 		//
-		QRectF insideRect;
+		double topMargin = 1.0 / 4.0; // 1/4 inch
 
-		if (drawParam.viewMode() == E::TrendViewMode::Separated)
+		double bottomMargin = 0;
+		if (drawParam.showTimeLabels() == true && drawParam.showDateLabels() == true)
 		{
-			insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
-			insideRect.setRight(laneRect.right() - 1.0 / 4.0);
-			insideRect.setTop(laneRect.top() + 1.0 / 4.0);
-			insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
+			bottomMargin = 1.0 / 4.0 + 1.0 / 8.0;
+		}
+		else
+		{
+			bottomMargin = 1.0 / 4.0;
 		}
 
-		if (drawParam.viewMode() == E::TrendViewMode::Overlapped)
+
+		QRectF insideRect;
+
+		if (drawParam.showSignalScales() == true)
 		{
-			if (analogSignalCount < 2) // 0 or 1
+			int columnCount = calcAnalogScaleColumnCount(analogSignalParams, drawParam);
+			if (columnCount == 1)
 			{
+				// 1 column of scale values
+				//
 				insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
 				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
-				insideRect.setTop(laneRect.top() + 1.0 / 4.0);
-				insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
+				insideRect.setTop(laneRect.top() + topMargin);
+				insideRect.setBottom(laneRect.bottom() - bottomMargin);
 			}
 			else
 			{
+				// 2 columns of scale values
+				//
 				insideRect.setLeft(laneRect.left() + 3.0 / 4.0 * 1.5);
 				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
-				insideRect.setTop(laneRect.top() + 1.0 / 4.0);
-				insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
+				insideRect.setTop(laneRect.top() + topMargin);
+				insideRect.setBottom(laneRect.bottom() - bottomMargin);
 			}
+		}
+		else
+		{
+			insideRect.setLeft(laneRect.left() + 1.0 / 4.0);
+			insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+			insideRect.setTop(laneRect.top() + topMargin);
+			insideRect.setBottom(laneRect.bottom() - bottomMargin);
 		}
 
 		// Adjust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
@@ -2811,6 +2887,43 @@ namespace TrendLib
 		insideRect.setHeight(static_cast<double>(static_cast<int>(insideRect.height() * dpiY)) / dpiY);
 
 		return insideRect;
+	}
+
+	int TrendImpl::calcAnalogScaleColumnCount(std::span<const TrendSignalParam> analogSignalParams, const TrendParam& drawParam)
+	{
+		if (drawParam.viewMode() == E::TrendViewMode::Separated)
+		{
+			return 1;
+		}
+
+		if (drawParam.viewMode() == E::TrendViewMode::Overlapped)
+		{
+			const auto& analogs = analogSignalParams;
+			if (analogs.empty() == true)
+			{
+				return 1;
+			}
+
+			auto sameSignalLimitsPred = [scaleType = drawParam.scaleType(), &firstSignal = analogs[0]](const TrendSignalParam& sp)
+			{
+				return sp.viewLowLimit(scaleType) == firstSignal.viewLowLimit(scaleType) &&   // Same low limit
+					   sp.viewHighLimit(scaleType) == firstSignal.viewHighLimit(scaleType) && // Same high limit
+					   sp.analogFormat() == firstSignal.analogFormat() &&                     // Same format
+					   sp.precision() == firstSignal.precision();                             // Same precision
+			};
+
+			if (analogs.size() <= 3 || std::ranges::all_of(analogs, sameSignalLimitsPred) == true)
+			{
+				return 1;
+			}
+
+			return 2;
+		}
+
+		// New mode?
+		//
+		Q_ASSERT(false);
+		return 1;
 	}
 
 	QRectF TrendImpl::calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect)

@@ -1002,9 +1002,7 @@ namespace TrendLib
 		m_selectViewLaneIndex = laneIndex;
 
 		QRectF laneRect = TrendImpl::calcLaneRect(laneIndex, m_trendParam);
-
-		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
-		QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogsCount);
+		QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, std::span<const TrendSignalParam>{signalSet().analogSignals()});
 
 		m_startSelectViewPoint = TrendImpl::pixelPointToInchPoint(pos, m_trendParam);
 		m_finishSelectViewPoint = m_startSelectViewPoint;
@@ -1087,9 +1085,7 @@ namespace TrendLib
 				// Analogs does not have calculated trend rect
 				//
 				QRectF laneRect = TrendImpl::calcLaneRect(m_selectViewLaneIndex, m_trendParam);
-
-				int analogsCount = static_cast<int>(analogs.size());
-				QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogsCount);
+				QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogs);
 
 				TrendImpl::calcSignalRects(trendArea, m_trendParam, &discretes, &analogs); // calc rects
 			}

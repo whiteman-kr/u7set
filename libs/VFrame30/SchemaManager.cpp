@@ -101,7 +101,6 @@ namespace VFrame30
 
 	TimeStamp SchemaManager::maxTimeStamp(QUuid /*trendUuid*/, E::TimeType /*timeType*/) const
 	{
-		Q_ASSERT(false);
 		return {};
 	}
 

@@ -103,7 +103,11 @@ namespace TrendLib
 
 		static QRectF calcLaneRect(size_t laneIndex, const TrendParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const;
-		static QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount);
+		static QRectF calcTrendArea(const QRectF& laneRect,
+									const TrendParam& drawParam,
+									std::span<const TrendSignalParam> analogSignalParams);
+
+		static int calcAnalogScaleColumnCount(std::span<const TrendSignalParam> analogSignalParams, const TrendParam& drawParam);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
 
 		static QRect inchRectToPixelRect(const QRectF& rect, const TrendParam& drawParam);

@@ -2,9 +2,7 @@
 
 namespace TrendLib
 {
-	TrendParam::TrendParam()
-	{
-	}
+	TrendParam::TrendParam() {}
 
 	TrendParam::TrendParam(ITrendDataProvider* dataProvider) :
 		m_dataProvider(dataProvider)
@@ -28,6 +26,12 @@ namespace TrendLib
 
 		message->set_back_color_1st(m_backColor1st.rgb());
 		message->set_back_color_2nd(m_backColor2nd.rgb());
+
+		message->set_show_signal_ids(m_showSignalIds);
+		message->set_show_signal_captions(m_showSignalCaptions);
+		message->set_show_signal_scales(m_showSignalScales);
+		message->set_show_time_labels(m_showTimeLabels);
+		message->set_show_date_labels(m_showDateLabels);
 
 		message->set_projectname(m_project.toStdString());
 
@@ -53,6 +57,12 @@ namespace TrendLib
 		m_backColor1st = QColor::fromRgb(message.back_color_1st());
 		m_backColor2nd = QColor::fromRgb(message.back_color_2nd());
 
+		m_showSignalIds = message.show_signal_ids();
+		m_showSignalCaptions = message.show_signal_captions();
+		m_showSignalScales = message.show_signal_scales();
+		m_showTimeLabels = message.show_time_labels();
+		m_showDateLabels = message.show_date_labels();
+
 		m_project = QString::fromStdString(message.projectname());
 
 		return true;
@@ -73,7 +83,7 @@ namespace TrendLib
 		setDpi(dpiX, dpiY, devicePixelRatio);
 
 		m_rectPx = value;
-		
+
 		m_rectIn.setLeft(value.left() / realDpiX());
 		m_rectIn.setTop(value.top() / realDpiY());
 		m_rectIn.setWidth(value.width() / realDpiX());
@@ -204,6 +214,56 @@ namespace TrendLib
 		m_backColor2nd = value;
 	}
 
+	bool TrendParam::showSignalIds() const
+	{
+		return m_showSignalIds;
+	}
+
+	void TrendParam::setShowSignalIds(bool value)
+	{
+		m_showSignalIds = value;
+	}
+
+	bool TrendParam::showSignalCaptions() const
+	{
+		return m_showSignalCaptions;
+	}
+
+	void TrendParam::setShowSignalCaptions(bool value)
+	{
+		m_showSignalCaptions = value;
+	}
+
+	bool TrendParam::showSignalScales() const
+	{
+		return m_showSignalScales;
+	}
+
+	void TrendParam::setShowSignalScales(bool value)
+	{
+		m_showSignalScales = value;
+	}
+
+	bool TrendParam::showTimeLabels() const
+	{
+		return m_showTimeLabels;
+	}
+
+	void TrendParam::setShowTimeLabels(bool value)
+	{
+		m_showTimeLabels = value;
+	}
+
+	bool TrendParam::showDateLabels() const
+	{
+		return m_showDateLabels;
+	}
+
+	void TrendParam::setShowDateLabels(bool value)
+	{
+		m_showDateLabels = value;
+	}
+
 	QDateTime TrendParam::startTime() const
 	{
 		return m_startTimeStamp.toDateTime();
@@ -283,4 +343,4 @@ namespace TrendLib
 		return m_signalDescriptionRect;
 	}
 
-}
+} // namespace TrendLib
