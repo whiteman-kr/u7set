@@ -480,6 +480,11 @@ message IndicatorTrend
 	optional bool showTimeLabels = 123 [default = true];
 	optional bool showDateLabels = 124 [default = true];
 
+	optional double indentLeft = 130 [default = -1.0];
+	optional double indentRight = 131 [default = -1.0];
+	optional double indentTop = 132 [default = -1.0];
+	optional double indentBottom = 133 [default = -1.0];
+
 	repeated IndicatorTrendSignalParam trendSignalParams = 110;
 }
 

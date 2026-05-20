@@ -356,7 +356,8 @@ namespace TrendLib
 		bool ok = painter.begin(printer);
 		if (ok == false)
 		{
-			Q_ASSERT(ok);
+			// Print may be canceled.
+			//
 			return false;
 		}
 
