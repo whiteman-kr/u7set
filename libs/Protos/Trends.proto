@@ -98,6 +98,12 @@ message TrendParam
     optional uint32 back_color_1st = 70;
 	optional uint32 back_color_2nd = 71;
 
+	optional bool show_signal_ids = 80 [default = true];
+	optional bool show_signal_captions = 81 [default = true];
+	optional bool show_signal_scales = 82 [default = true];
+	optional bool show_time_labels = 83 [default = true];
+	optional bool show_date_labels = 84 [default = true];
+
     optional int32 scale_type = 5 [default = 0];		// enum TrendScaleType::Generic, TrendScaleType::Logarithmic, TrendScaleType::Exponential 
 
 	optional string projectName = 100;

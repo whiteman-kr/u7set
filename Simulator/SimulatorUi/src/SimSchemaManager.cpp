@@ -66,7 +66,6 @@ namespace SimUi
 		// If you want Monitor schemas in simulator ide and want SchemaItemIndicator in mode trend
 		// then you have to add here some code
 		//
-		Q_ASSERT(false);
 		return false;
 	}
 

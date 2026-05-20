@@ -15,13 +15,31 @@ class TuningSignalState;
 namespace VFrame30
 {
 	class Indicator;
+	class IndicatorTrend;
 
-	//
-	// SchemaItemIndicator
-	//
-	class SchemaItemIndicator : public PosRectImpl, public IMatsSchemaItemAssociations
+	/*! \class SchemaItemIndicator
+		\ingroup dynamicSchemaItems
+		\brief Schema item that hosts and exposes indicator objects.
+
+		This item owns indicator implementations and provides unified access to
+		histogram, arrow and trend indicator objects for scripting and rendering.
+	*/
+	class SchemaItemIndicator : public PosRectImpl,
+								public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
+
+		/// \brief Get HistogramVert indicator object.
+		Q_PROPERTY(QObject* histogramVert READ histogramVertIndicatorObject)
+		Q_PROPERTY(QObject* HistogramVert READ histogramVertIndicatorObject)
+
+		/// \brief Get ArrowIndicator indicator object.
+		Q_PROPERTY(QObject* arrowIndicator READ arrowIndicatorObject)
+		Q_PROPERTY(QObject* ArrowIndicator READ arrowIndicatorObject)
+
+		/// \brief Get Trend indicator object.
+		Q_PROPERTY(IndicatorTrend* trend READ trendIndicatorObject)
+		Q_PROPERTY(IndicatorTrend* Trend READ trendIndicatorObject)
 
 	public:
 		SchemaItemIndicator(void);
@@ -90,6 +108,12 @@ namespace VFrame30
 		template<typename IndicatorType = VFrame30::Indicator>
 		const IndicatorType* indicatorObject() const;
 
+		// This function is used for JS
+		//
+		QObject* histogramVertIndicatorObject();
+		QObject* arrowIndicatorObject();
+		IndicatorTrend* trendIndicatorObject();
+
 	private:
 		QStringList m_signalIds = {"#APPSIGNALID"};
 
@@ -130,5 +154,4 @@ namespace VFrame30
 
 		return dynamic_cast<const IndicatorType*>(m_indicatorObjects[index].get());
 	}
-
 } // namespace VFrame30

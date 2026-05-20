@@ -1,7 +1,7 @@
 #pragma once
 
-#include <CommonLib/Times.h>
 #include "ITrendDataProvider.h"
+#include <CommonLib/Times.h>
 
 #include <QColor>
 #include <QRectF>
@@ -65,6 +65,21 @@ namespace TrendLib
 		[[nodiscard]] QColor backColor2nd() const;
 		void setBackColor2nd(const QColor& value);
 
+		[[nodiscard]] bool showSignalIds() const;
+		void setShowSignalIds(bool value);
+
+		[[nodiscard]] bool showSignalCaptions() const;
+		void setShowSignalCaptions(bool value);
+
+		[[nodiscard]] bool showSignalScales() const;
+		void setShowSignalScales(bool value);
+
+		[[nodiscard]] bool showTimeLabels() const;
+		void setShowTimeLabels(bool value);
+
+		[[nodiscard]] bool showDateLabels() const;
+		void setShowDateLabels(bool value);
+
 		[[nodiscard]] QDateTime startTime() const;
 		void setStartTime(const QDateTime& value);
 
@@ -79,7 +94,7 @@ namespace TrendLib
 		void resetHightlightRulerIndex();
 
 		[[nodiscard]] double cosmeticPenWidth() const;
-		
+
 		[[nodiscard]] QString project() const;
 		void setProject(const QString& value);
 
@@ -105,6 +120,12 @@ namespace TrendLib
 		QColor m_backColor1st = {qRgb(0xEA, 0xEA, 0xEA)};
 		QColor m_backColor2nd = {qRgb(0xF8, 0xF8, 0xF8)};
 
+		bool m_showSignalIds = true;
+		bool m_showSignalCaptions = true;
+		bool m_showSignalScales = true;
+		bool m_showTimeLabels = true;
+		bool m_showDateLabels = true;
+
 		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
 		qint64 m_duration = 1_hour;
 
@@ -113,9 +134,9 @@ namespace TrendLib
 
 		QString m_project;
 
-		mutable std::vector<std::pair<QString, QRectF>> m_signalDescriptionRect;		// Keeps signal description Rect, which is filled while draw trend, in inches.
+		mutable std::vector<std::pair<QString, QRectF>>
+			m_signalDescriptionRect; // Keeps signal description Rect, which is filled while draw trend, in inches.
 	};
-}
+} // namespace TrendLib
 
 Q_DECLARE_METATYPE(TrendLib::TrendParam)
-

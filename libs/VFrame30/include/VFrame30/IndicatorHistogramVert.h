@@ -92,6 +92,10 @@ namespace VFrame30
 	//
 	// Vertical histogram, the base view
 	//
+	/*! \class IndicatorHistogramVert
+		\ingroup dynamicSchemaItems
+		\brief Vertical histogram indicator used for dynamic signal visualization.
+	*/
 	class IndicatorHistogramVert : public Indicator
 	{
 		Q_OBJECT
