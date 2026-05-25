@@ -24,8 +24,16 @@ include(cmake/compiler.cmake)
 
 # Emit error if VCPKG_ROOT is not set
 #
-if(NOT DEFINED ENV{VCPKG_ROOT})
-	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+#if(NOT DEFINED ENV{VCPKG_ROOT})
+#	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+#endif()
+
+if(NOT DEFINED VCPKG_ROOT)
+	if(DEFINED ENV{VCPKG_ROOT})
+		set(VCPKG_ROOT "$ENV{VCPKG_ROOT}")
+	else()
+		message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+	endif()
 endif()
 
 if (UNIX)

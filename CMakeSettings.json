@@ -1,87 +1,111 @@
 ﻿{
-  "configurations": [
-    {
-      "name": "Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": ""
-    },
-    {
-      "name": "Debug-ASan",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DCMAKE_CXX_FLAGS=\"/fsanitize=address /EHsc\" -DCMAKE_C_FLAGS=\"/fsanitize=address /EHsc\"",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": ""
-    },
-    {
-      "name": "Debug-UpdateTranslations",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "UPDATE_TRANSLATIONS",
-          "value": "True",
-          "type": "BOOL"
-        }
-      ]
-    },
-    {
-      "name": "Release",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
-    },
-    {
-      "name": "ReleaseDebugInfo",
-      "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
-    },
-    {
-      "name": "Debug-Static",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
-    },
-    {
-      "name": "Release-Static",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
-      "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
-    }
-  ]
+	"configurations": [
+		{
+			"name": "Debug",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"inheritEnvironments": [ "msvc_x64_x64" ],
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": ""
+		},
+		{
+			"name": "Debug-ASan",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"inheritEnvironments": [ "msvc_x64_x64" ],
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DCMAKE_CXX_FLAGS=\"/fsanitize=address /EHsc\" -DCMAKE_C_FLAGS=\"/fsanitize=address /EHsc\"",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": ""
+		},
+		{
+			"name": "Debug-UpdateTranslations",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"inheritEnvironments": [ "msvc_x64_x64" ],
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"variables": [
+				{
+					"name": "UPDATE_TRANSLATIONS",
+					"value": "True",
+					"type": "BOOL"
+				}
+			]
+		},
+		{
+			"name": "Release",
+			"generator": "Ninja",
+			"configurationType": "Release",
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "msvc_x64_x64" ]
+		},
+		{
+			"name": "ReleaseDebugInfo",
+			"generator": "Ninja",
+			"configurationType": "RelWithDebInfo",
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "msvc_x64_x64" ]
+		},
+		{
+			"name": "Debug-Static",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "msvc_x64_x64" ]
+		},
+		{
+			"name": "Release-Static",
+			"generator": "Ninja",
+			"configurationType": "Release",
+			"buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+			"installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DSTATIC_RUNTIME=ON",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "msvc_x64_x64" ]
+		},
+		{
+			"name": "WSL-GCC-Debug",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"buildRoot": "${projectDir}/../build-u7set-${name}",
+			"installRoot": "${projectDir}/../build-u7set-${name}/install",
+			"cmakeExecutable": "cmake",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=/home/wm/Qt/6.8.1/gcc_64 -DQt6_DIR=/home/wm/Qt/6.8.1/gcc_64/lib/cmake/Qt6 -DVCPKG_ROOT=/home/wm/vcpkg -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "linux_x64" ],
+			"wslPath": "${defaultWSLPath}",
+			"variables": [
+				{
+					"name": "CMAKE_C_COMPILER",
+					"value": "/usr/bin/gcc-14",
+					"type": "FILEPATH"
+				},
+				{
+					"name": "CMAKE_CXX_COMPILER",
+					"value": "/usr/bin/g++-14",
+					"type": "FILEPATH"
+				}
+			]
+		}
+	]
 }
