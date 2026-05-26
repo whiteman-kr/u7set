@@ -471,20 +471,14 @@ namespace Sim
 
 			// bind Ok
 
-			QVariant newRecvBufSize(static_cast<int>(2 * 1024 * 1024));
+			QVariant newRecvBufSize(static_cast<int>(16 * 1024));
 
 			m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, newRecvBufSize);
 
 			QVariant currentBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
 
-#ifdef QT_DEBUG
-			if (newRecvBufSize.toInt() != currentBufSize.toInt())
-			{
-				m_log.writeWarning(QString("Tuning simulation receive buffer size is not changed to required size."));
-			}
-#else
-			Q_UNUSED(currentBufSize);
-#endif
+			m_log.writeMessage(QString("Requested recv buf = %1, actual = %2").arg(newRecvBufSize.toInt()).arg(currentBufSize.toInt()));
+
 			break;
 		}
 

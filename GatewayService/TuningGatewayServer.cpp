@@ -276,7 +276,7 @@ bool TuningGatewaySession::processGetTuningSourcesStartRequest(const GCL::GwMess
 
 	if (m_tunSrvClientThread == nullptr || m_connectedToTuningSrv == false)
 	{
-		sendErrReply(header, GCL::GwErrorCode::GWC_TUNING_SOURCES_FILE_NOT_READY);
+		sendErrReply(header, GCL::GwErrorCode::GWC_NO_TS_CONNECTION);
 		return false;
 	}
 
