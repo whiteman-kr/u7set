@@ -13,6 +13,8 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <iostream>
+#include <cstring>
 
 namespace GatewayClientLib
 {
@@ -84,6 +86,8 @@ namespace GatewayClientLib
 				throw errno;
 			}
 
+			std::cout << "CONNECT TO " << address << ":" << port << std::endl;
+
 			int res = ::connect(m_fd, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
 			if (res == 0)
 			{
@@ -123,13 +127,34 @@ namespace GatewayClientLib
 					auto remaining = static_cast<int>((timeout - elapsedMs).count());
 					int waitMs = std::min(remaining, 200); // Timeout 200ms or less depending on remaining time
 
+					//int pollRes = ::poll(&fds, 1, waitMs);
+					//if (pollRes < 0 && errno != EINTR)
+					//{
+					//	throw errno;
+					//}
+
+					//connected = (pollRes > 0);
+
 					int pollRes = ::poll(&fds, 1, waitMs);
-					if (pollRes < 0 && errno != EINTR)
+
+					std::cout << "pollRes = " << pollRes << " errno = " << errno << " revents = " << fds.revents << std::endl;
+
+					if (pollRes < 0)
 					{
+						if (errno == EINTR)
+						{
+							continue;
+						}
+
 						throw errno;
 					}
 
-					connected = (pollRes > 0);
+					if (pollRes == 0)
+					{
+						continue;
+					}
+
+					connected = true;
 				}
 
 				// Socket is ready - check if connection succeeded
@@ -141,6 +166,8 @@ namespace GatewayClientLib
 					{
 						throw errno;
 					}
+
+					std::cout << "SO_ERROR = " << error << " " << strerror(error) << std::endl;
 
 					if (error != 0)
 					{
