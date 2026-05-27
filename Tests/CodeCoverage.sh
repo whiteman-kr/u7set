@@ -140,7 +140,7 @@ sleep 5
 # First run tests that require no TuningService connection.
 #
 date
-$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*
+strace -f -e trace=connect $CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*
 date
 
 # Then start TuningService for other tests.
@@ -149,7 +149,7 @@ date
 sleep 5
 
 date
-$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
+strace -f -e trace=connect $CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
 date
 
 StopServices || true
