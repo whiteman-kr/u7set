@@ -135,7 +135,7 @@ sleep 40
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
-sleep 5
+sleep 10
 
 # First run tests that require no TuningService connection.
 #
@@ -146,7 +146,7 @@ date
 # Then start TuningService for other tests.
 #
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > tgw_clienttest_ws04_tuns.out 2>&1 &
-sleep 5
+sleep 10
 
 date
 strace -f -e trace=connect $CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
