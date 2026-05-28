@@ -2828,7 +2828,7 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::AppDataService>(
 										equipment, software,
-										EquipmentPropNames::APP_DATA_SERVICE_IDS, 2, false,
+										EquipmentPropNames::APP_DATA_SERVICE_IDS, 2, true,
 										E::SoftwareType::AppDataService,
 										EquipmentPropNames::CLIENT_REQUEST_IP,
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
