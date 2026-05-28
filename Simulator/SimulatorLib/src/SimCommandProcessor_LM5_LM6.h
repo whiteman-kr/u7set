@@ -389,8 +389,8 @@ namespace Sim
 		void afb_func_v4(AfbComponentInstance* instance);
 		void afb_func_v5(AfbComponentInstance* instance);
 		void afb_func_v6(AfbComponentInstance* instance);
-		void afb_func_v5v6(AfbComponentInstance* instance);
-		void afb_func_private(AfbComponentInstance* instance, int conf, int version);
+		void afb_func_private_v11(AfbComponentInstance* instance, int conf, int version); // Quartus 11.1
+		void afb_func_private_v17(AfbComponentInstance* instance, int conf, int version); // Quartus 17.0
 
 		//	INTEGRATOR, OpCode 17
 		//

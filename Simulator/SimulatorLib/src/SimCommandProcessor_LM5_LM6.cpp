@@ -3,6 +3,20 @@
 #include "SimException.h"
 #include "SimAfb.h"
 
+namespace
+{
+	float subnormalToZero(float x)
+	{
+		// Quartus treats subnormal numbers as zero, so we need to do the same to be consistent with hardware behavior
+		//
+		return std::fpclassify(x) == FP_SUBNORMAL ? std::copysign(0, x) : x;
+	}
+
+	bool isZero(float x)
+	{
+		return std::fpclassify(x) == FP_ZERO;
+	}
+}
 
 namespace Sim
 {
@@ -4777,7 +4791,7 @@ namespace Sim
 
 		if (conf == 1 || conf == 2 || conf == 7 || conf == 8)
 		{
-			return afb_func_private(instance, conf, 3);
+			return afb_func_private_v11(instance, conf, 3);
 		}
 		else
 		{
@@ -4802,7 +4816,7 @@ namespace Sim
 		}
 		else
 		{
-			return afb_func_private(instance, conf, 4);
+			return afb_func_private_v11(instance, conf, 4);
 		}
 
 		return;
@@ -4810,38 +4824,41 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::afb_func_v5(AfbComponentInstance* instance)
 	{
-		return afb_func_v5v6(instance);
-	}
-	
-	void CommandProcessor_LM5_LM6::afb_func_v6(AfbComponentInstance* instance)
-	{
-		return afb_func_v5v6(instance);
-	}
-
-	void CommandProcessor_LM5_LM6::afb_func_v5v6(AfbComponentInstance* instance)
-	{
-		// Version 5 and 6 are identical, the difference is only in the implementation by different Quartus versions.
-		//
-
-		// Define input opIndexes
-		//
 		const int i_conf = 0;
 		quint16 conf = instance->param(i_conf)->wordValue();
 
 		if (conf < 1 || conf > 13)
 		{
-			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-			                    .arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.").arg(conf),
+								Q_FUNC_INFO);
 		}
 		else
 		{
-			return afb_func_private(instance, conf, 5);
+			return afb_func_private_v11(instance, conf, 5);
+		}
+
+		return;
+	}
+	
+	void CommandProcessor_LM5_LM6::afb_func_v6(AfbComponentInstance* instance)
+	{
+		const int i_conf = 0;
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 13)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.").arg(conf),
+								Q_FUNC_INFO);
+		}
+		else
+		{
+			return afb_func_private_v17(instance, conf, 6);
 		}
 
 		return;
 	}
 
-	void CommandProcessor_LM5_LM6::afb_func_private(AfbComponentInstance* instance, int conf, int version)
+	void CommandProcessor_LM5_LM6::afb_func_private_v11(AfbComponentInstance* instance, int conf, int version)
 	{
 		// Define input opIndexes
 		//
@@ -5126,6 +5143,293 @@ namespace Sim
 		default:
 			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
+								Q_FUNC_INFO);
+		}
+
+		// Save result
+		//
+		instance->addParam(result);
+
+		instance->addParamWord(o_overflow_inf, overflow_inf);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_div_by_zero, div_by_zero);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_func_private_v17(AfbComponentInstance* instance, int conf, int version)
+	{
+		// Define input opIndexes
+		//
+		const int i_data = 1;
+
+		const int o_result = 5;
+		const int o_result_sign = 6; // result for conf 13
+		const int o_overflow_inf = 7;
+		const int o_underflow = 8;
+		const int o_zero = 9;
+		const int o_nan = 10;
+		const int o_div_by_zero = 11;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		AfbComponentParam result{static_cast<quint16>(o_result)};
+
+		quint16 overflow_inf = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+		quint16 div_by_zero = 0;
+
+		switch (conf)
+		{
+		case 1: // FP SQRT
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				floatData = subnormalToZero(floatData); // It it is subnormal, set to zero, otherwise leave as is.
+
+				if (std::isnormal(floatData) == true || isZero(floatData) == true)
+				{
+					if (std::signbit(floatData) == true && isZero(floatData) == false)
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+					}
+					else
+					{
+						result.setFloatValue(std::sqrt(floatData));
+						zero = isZero(result.floatValue());
+					}
+
+					break;
+				}
+
+				if (std::isinf(floatData) == true)
+				{
+					if (std::signbit(floatData) == false)
+					{
+						result.setFloatValue(std::numeric_limits<float>::infinity());
+						overflow_inf = 1;
+					}
+					else
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+					}
+
+					break;
+				}
+
+				if (std::isnan(floatData) == true)
+				{
+					result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+					nan = 1;
+					break;
+				}
+
+				// what type of float is it ?
+				SimException::raise(
+					QStringLiteral("Specific type of float: %1, conf %2, afb_func_v%3").arg(floatData).arg(conf).arg(version),
+					Q_FUNC_INFO);
+			}
+			break;
+		case 2: // FP ABS, Just reset the sign bit, nomatter which input is.
+			{
+				uint32_t asUint = std::bit_cast<uint32_t>(instance->param(i_data)->floatValue()) & (~0x80000000);
+				float floatData = std::bit_cast<float>(asUint);
+				
+				result.setFloatValue(floatData);
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+				overflow_inf = std::isinf(floatData);
+			}
+			break;
+		case 3: // FP SIN, Altera's fp ip-core dows not generate any flags for sin, but LM generates o_zero for output
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				floatData = subnormalToZero(floatData); // It is subnormal, set to zero, otherwise leave as is.
+				floatData = std::sin(floatData);
+				
+				result.setFloatValue(floatData);
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+				overflow_inf = std::isinf(floatData);   // Should not happen for sin, but just in case.
+			}
+			break;
+		case 4: // FP COS, Altera's fp ip-core dows not generate any flags for sin, but LM generates o_zero for output
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				floatData = subnormalToZero(floatData); // It is subnormal, set to zero, otherwise leave as is.
+				floatData = std::cos(floatData);
+				
+				result.setFloatValue(floatData);
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+				overflow_inf = std::isinf(floatData);   // Should not happen for cos, but just in case.
+			}
+			break;
+		case 5: // FP Log(e)
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				floatData = subnormalToZero(floatData); // It is subnormal, set to zero, otherwise leave as is.
+				std::feclearexcept(FE_ALL_EXCEPT);
+				floatData = std::logf(floatData);
+				
+				result.setFloatValue(floatData);
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+			}
+			break;
+		case 6: // FP Exp
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				floatData = subnormalToZero(floatData); // It is subnormal, set to zero, otherwise leave as is.
+
+				std::feclearexcept(FE_ALL_EXCEPT);
+				floatData = std::expf(floatData);
+
+				underflow = std::fetestexcept(FE_UNDERFLOW);
+				overflow_inf = std::isinf(floatData) && std::signbit(floatData) == false; // Only for positive infinity
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+
+				result.setFloatValue(floatData);
+			}
+			break;
+		case 7: // FP INV is  = 1.0/data;
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				result.setFloatValue(1.0f);
+				result.divFloatingPoint(floatData);
+
+				underflow = result.mathUnderflow();
+				if (underflow) 
+				{
+					result.setFloatValue(std::copysign(0.0f, std::signbit(result.floatValue())));
+				}
+
+				zero = isZero(result.floatValue());
+				div_by_zero = result.mathDivByZero();
+				nan = result.mathNan();
+			}
+			break;
+		case 8:                                                         // SI ABS
+			{
+				qint32 inputData = instance->param(i_data)->signedIntValue();
+
+				qint32 resultValue = 0;
+				if (inputData == std::numeric_limits<qint32>::lowest()) // -2147483648 cannot became positive 2147483648
+				{
+					resultValue = std::numeric_limits<qint32>::max();
+					overflow_inf = 1;
+				}
+				else
+				{
+					resultValue = std::abs(inputData);
+					overflow_inf = 0;
+				}
+
+				result.setSignedIntValue(resultValue);
+
+				zero = (resultValue == 0);
+			}
+			break;
+		case 9: // FP sign inversion
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+#ifdef __cpp_lib_bit_cast
+				quint32 asBinary = std::bit_cast<quint32>(floatData);
+#else
+				quint32 asBinary;
+				std::memcpy(&asBinary, &floatData, sizeof(floatData));
+#endif
+				if (asBinary != 0)          // 0 must not become negative zero
+				{
+					asBinary ^= 0x80000000; // flip sign bin
+				}
+#ifdef __cpp_lib_bit_cast
+				floatData = std::bit_cast<float>(asBinary);
+#else
+				std::memcpy(&floatData, &asBinary, sizeof(asBinary));
+#endif
+				result.setFloatValue(floatData);
+
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+			}
+			break;
+		case 10:                                               // SI sign inversion
+			{
+				qint64 data = instance->param(i_data)->signedIntValue();
+				data *= -1;
+
+				if (data > std::numeric_limits<qint32>::max()) // data is 64bit wide, so it is possible that (data > max)
+				{
+					data = std::numeric_limits<qint32>::max();
+					overflow_inf = 1;
+				}
+
+				result.setSignedIntValue(static_cast<qint32>(data));
+				zero = (data == 0);
+			}
+			break;
+		case 11: // FP negate
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+#ifdef __cpp_lib_bit_cast
+				quint32 asBinary = std::bit_cast<quint32>(floatData);
+#else
+				quint32 asBinary;
+				std::memcpy(&asBinary, &floatData, sizeof(floatData));
+#endif
+				if (asBinary != 0)          // 0 must not become negative zero
+				{
+					asBinary |= 0x80000000; // flip sign bin
+				}
+#ifdef __cpp_lib_bit_cast
+				floatData = std::bit_cast<float>(asBinary);
+#else
+				std::memcpy(&floatData, &asBinary, sizeof(asBinary));
+#endif
+				result.setFloatValue(floatData);
+
+				zero = isZero(floatData);
+				nan = std::isnan(floatData);
+			}
+			break;
+		case 12: // SI negate
+			{
+				qint32 data = instance->param(i_data)->signedIntValue();
+				if (data > 0)
+				{
+					data *= -1;
+				}
+
+				result.setSignedIntValue(data);
+				zero = (data == 0);
+			}
+			break;
+		case 13: // SI/FP sign
+			{
+				float data = instance->param(i_data)->floatValue();
+
+				quint16 sign = std::signbit(data);
+
+				result.setOpIndex(o_result_sign);
+				result.setWordValue(sign);
+
+				overflow_inf = std::isinf(data); // for configuraion 13 ouput o_overflow is o_inf
+				nan = std::isnan(data);
+			}
+			break;
+
+		default:
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.").arg(conf),
 								Q_FUNC_INFO);
 		}
 

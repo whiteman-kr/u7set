@@ -1,4 +1,4 @@
-<AFB id="#math_exp_fp_v1" Caption="math_exp_fp" Version="1.6">
+<AFB id="#math_exp_fp_v1" Caption="math_exp_fp" Version="1.7">
 	<Properties>
 		<Description>Function Block outputs the exponential calculation result</Description>
 		<Category>Math</Category>
@@ -12,7 +12,6 @@
 	<Outputs>
 		<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
 		<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
-		<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 		<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 		<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 	</Outputs>
@@ -27,13 +26,6 @@
 			</Script>
 		</Param>
 		<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-			<Value>1</Value>
-			<Default>1</Default>
-			<Script>
-				<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
-			</Script>
-		</Param>
-		<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 			<Value>1</Value>
 			<Default>1</Default>
 			<Script>
@@ -81,7 +73,6 @@
 				}
 
 				createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-				createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 				createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 				createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
 

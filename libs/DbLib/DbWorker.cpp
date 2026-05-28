@@ -470,6 +470,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0440.sql", "Upgrade to version 440, LM-SF41, change Platform Interface Controller signals addresses"},
 	{":/DatabaseUpgrade/Upgrade0441.sql", "Upgrade to version 441, GatewayService preset updating"},
 	{":/DatabaseUpgrade/Upgrade0442.sql", "Upgrade to version 442, LM-SF41, PLM, FSCChassis, LM-SF41 xml, RVDU, ConfigScript.js preset updating"},
+	{":/DatabaseUpgrade/Upgrade0443.sql", "Upgrade to version 443, Update for LM-SF41 LmDescription, Review of AFB func_v6"},
 };
 
 int DbWorker::counter = 0;
