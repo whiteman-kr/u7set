@@ -202,7 +202,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -242,7 +242,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -276,7 +276,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -306,7 +306,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -598,7 +598,7 @@ namespace Builder
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 		//
-		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 		return false;
 	}
@@ -643,7 +643,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 			return false;
 		}
@@ -672,7 +672,7 @@ namespace Builder
 		{
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_count.unsignedIntValue(), i_count.caption(), caption(), guid());
+			m_log->errALC5051(i_count.unsignedIntValue(), i_count.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -713,7 +713,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -753,7 +753,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -811,7 +811,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -1013,7 +1013,7 @@ namespace Builder
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 		//
-		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 		return false;
 	}
@@ -1289,7 +1289,7 @@ namespace Builder
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 		//
-		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 		return false;
 	}
@@ -1365,7 +1365,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -1469,6 +1469,8 @@ namespace Builder
 
 		m_runTime = 0;
 
+		std::string lmName = lmDescriptionName().toStdString();
+
 		if (iConf == CMP_32SI_EQU ||
 			iConf == CMP_32SI_GREAT ||
 			iConf == CMP_32SI_LESS ||
@@ -1545,7 +1547,7 @@ namespace Builder
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 		//
-		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 		return false;
 	}
@@ -1582,7 +1584,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -1662,7 +1664,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 			return false;
 		}
@@ -1731,7 +1733,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 			return false;
 		}
@@ -1832,7 +1834,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 			return false;
 		}
@@ -1949,7 +1951,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid(), label(), schemaID());
 
 			return false;
 		}
@@ -2226,7 +2228,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf->unsignedIntValue(), i_conf->caption(), caption(), guid());
+			m_log->errALC5051(i_conf->unsignedIntValue(), i_conf->caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -2236,7 +2238,7 @@ namespace Builder
 		{
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf_n->unsignedIntValue(), i_conf_n->caption(), caption(), guid());
+			m_log->errALC5051(i_conf_n->unsignedIntValue(), i_conf_n->caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -2275,7 +2277,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -2300,7 +2302,7 @@ namespace Builder
 		{
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid());
+			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid(), label(), schemaID());
 			return false;
 		}
 
@@ -2333,7 +2335,7 @@ namespace Builder
 		{
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid());
+			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid(), label(), schemaID());
 			result = false;
 		}
 
