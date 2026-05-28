@@ -5219,7 +5219,7 @@ namespace Sim
 				floatData = subnormalToZero(floatData); // It is subnormal, set to zero, otherwise leave as is.
 
 				std::feclearexcept(FE_ALL_EXCEPT);
-				floatData = std::expf(floatData);
+				floatData = std::exp(floatData);
 
 				underflow = std::fetestexcept(FE_UNDERFLOW);
 				overflow_inf = std::isinf(floatData) && std::signbit(floatData) == false; // Only for positive infinity
