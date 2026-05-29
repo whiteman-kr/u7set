@@ -286,7 +286,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 			allSourcesInfo = tc.tuningSourcesInfo();
 		}
 	}
-	EXPECT_EQ(allSourcesInfo.size(), 1);
+	EXPECT_EQ(allSourcesInfo.size(), 3);
 
 	// Check that tuning source info for LM is arrived
 	//
