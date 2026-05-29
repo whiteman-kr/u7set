@@ -638,8 +638,15 @@ bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& na
 
 	RETURN_IF_FALSE(result);
 
-	result &= hostAddressPort->setAddress(addressStr);
-	hostAddressPort->setPort(port);
+	if (addressStr.isEmpty())
+	{
+		hostAddressPort->clear();
+	}
+	else
+	{
+		result &= hostAddressPort->setAddress(addressStr);
+		hostAddressPort->setPort(port);
+	}
 
 	return result;
 }
