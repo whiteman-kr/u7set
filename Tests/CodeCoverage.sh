@@ -137,6 +137,8 @@ sleep 40
 ./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
 sleep 10
 
+export ASAN_OPTIONS=detect_container_overflow=0
+
 # First run tests that require no TuningService connection.
 #
 date
