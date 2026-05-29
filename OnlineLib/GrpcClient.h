@@ -454,7 +454,7 @@ private:
 	std::atomic_bool m_threadStarted {false};
 	std::atomic_bool m_quitRequested {false};
 
-	mutable std::atomic<int> m_srvAddrIndex{-1};
+	mutable std::atomic<int> m_srvAddrIndex{0};
 
 	//
 
