@@ -131,7 +131,6 @@ if(ADDRESS_SANITIZER)
 
 	if (MSVC)
 		add_compile_options(/fsanitize=address /EHsc)
-		add_link_options(-fsanitize=address)
 		add_compile_definitions(_DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
 	else()
 		add_compile_options(-fsanitize=address)
