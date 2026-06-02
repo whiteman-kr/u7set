@@ -1,16 +1,19 @@
-#include <cstring>
+#include "TrendWidget.h"
+#include "TrendScale.h"
+
+#include <QFile>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPdfWriter>
 #include <QPrinter>
-#include <QMouseEvent>
-#include "TrendWidget.h"
-#include "TrendScale.h"
+
+#include <cstring>
 
 
 namespace TrendLib
 {
-	RenderThread::RenderThread(TrendImpl* trendImpl, ITrendDataProvider* dataProvider, QObject* parent)
-		: QThread(parent),
+	RenderThread::RenderThread(TrendImpl* trendImpl, ITrendDataProvider* dataProvider, QObject* parent) :
+		QThread(parent),
 		m_trendImpl(trendImpl),
 		m_drawParam(dataProvider)
 	{
@@ -62,7 +65,7 @@ namespace TrendLib
 		{
 			std::unique_lock<std::mutex> locker(m_mutex);
 
-			m_newJob.wait(locker, 
+			m_newJob.wait(locker,
 						  [this]()
 						  {
 							  return m_interruptRequested || m_drawParam.has_value();
@@ -87,7 +90,7 @@ namespace TrendLib
 			//
 			if (m_image.size() != drawParam->rectPx().size())
 			{
-				auto imageSize= drawParam->rectPx().size().toSize();
+				auto imageSize = drawParam->rectPx().size().toSize();
 				m_image = QImage{imageSize, QImage::Format_RGB32};
 
 				m_image.setDevicePixelRatio(drawParam->devicePixelRatio());
@@ -117,7 +120,7 @@ namespace TrendLib
 		m_thread(&m_trend.impl(), &m_trend.signalSet()),
 		m_pixmapDrawParam(&m_trend.signalSet())
 	{
-		setMouseTracking(true);		// To enable mouseMoveEvent without pressed button
+		setMouseTracking(true); // To enable mouseMoveEvent without pressed button
 
 		connect(&m_thread, &RenderThread::renderedImage, this, &TrendWidget::updatePixmap);
 	}
@@ -250,9 +253,7 @@ namespace TrendLib
 
 	bool TrendWidget::load(const ::Proto::TrendWidget& message)
 	{
-		if (message.IsInitialized() == false ||
-			message.has_trend() == false ||
-			message.has_trend_param() == false)
+		if (message.IsInitialized() == false || message.has_trend() == false || message.has_trend_param() == false)
 		{
 			Q_ASSERT(message.IsInitialized());
 			Q_ASSERT(message.has_trend());
@@ -294,9 +295,7 @@ namespace TrendLib
 			QPainter p(&image);
 
 			TrendParam drawParam = m_pixmapDrawParam;
-			drawParam.setDpi(p.device()->physicalDpiX(),
-							 p.device()->physicalDpiY(),
-							 1.0);
+			drawParam.setDpi(p.device()->physicalDpiX(), p.device()->physicalDpiY(), 1.0);
 			drawParam.setProject({}); // Do not show project name.
 
 			m_trend.impl().drawRulers(&p, drawParam);
@@ -346,8 +345,7 @@ namespace TrendLib
 
 	bool TrendWidget::print(QPrinter* printer) const
 	{
-		if (printer == nullptr ||
-			printer->isValid() == false)
+		if (printer == nullptr || printer->isValid() == false)
 		{
 			Q_ASSERT(printer);
 			return false;
@@ -358,7 +356,8 @@ namespace TrendLib
 		bool ok = painter.begin(printer);
 		if (ok == false)
 		{
-			Q_ASSERT(ok);
+			// Print may be canceled.
+			//
 			return false;
 		}
 
@@ -496,12 +495,10 @@ namespace TrendLib
 		TrendImpl::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rulerIndex, &outSignal);
 
 		if (m_mouseAction == MouseAction::SelectViewStart &&
-			(mouseOn == TrendImpl::MouseOn::InsideTrendArea ||
-			 mouseOn == TrendImpl::MouseOn::OnSignalDescription ||
+			(mouseOn == TrendImpl::MouseOn::InsideTrendArea || mouseOn == TrendImpl::MouseOn::OnSignalDescription ||
 			 mouseOn == TrendImpl::MouseOn::OnRuler))
 		{
-			if (event->buttons().testFlag(Qt::LeftButton) == false &&
-				event->buttons().testFlag(Qt::MiddleButton) == false)
+			if (event->buttons().testFlag(Qt::LeftButton) == false && event->buttons().testFlag(Qt::MiddleButton) == false)
 			{
 				// Cancel action
 				//
@@ -561,16 +558,15 @@ namespace TrendLib
 			}
 		}
 
-		if (event->buttons().testFlag(Qt::LeftButton) == true ||
-			event->buttons().testFlag(Qt::MiddleButton) == true)
+		if (event->buttons().testFlag(Qt::LeftButton) == true || event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			if (mouseOn == TrendImpl::MouseOn::InsideTrendArea)
 			{
 				m_mouseScrollInitialTime = m_trendParam.startTimeStamp();
 				m_mouseScrollInitialMousePos = event->pos();
-				m_mouseScrollSignal = outSignal;								// tempDrawRect already calculated
+				m_mouseScrollSignal = outSignal;                          // tempDrawRect already calculated
 
-				m_mouseScrollAnalogSignals = signalSet().analogSignals();		// tempDrawRect is not calculated
+				m_mouseScrollAnalogSignals = signalSet().analogSignals(); // tempDrawRect is not calculated
 
 				m_mouseAction = MouseAction::Scroll;
 				this->grabMouse();
@@ -603,9 +599,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (m_mouseAction == MouseAction::MoveRuler)
-		{
-		}
+		if (m_mouseAction == MouseAction::MoveRuler) {}
 
 		if (m_mouseAction == MouseAction::MoveRuler)
 		{
@@ -620,11 +614,10 @@ namespace TrendLib
 		m_mouseAction = MouseAction::None;
 		releaseMouse();
 
-		if (event->buttons().testFlag(Qt::LeftButton) == false &&
-			event->buttons().testFlag(Qt::MiddleButton) == false)
+		if (event->buttons().testFlag(Qt::LeftButton) == false && event->buttons().testFlag(Qt::MiddleButton) == false)
 		{
 			unsetCursor();
-			mouseMoveEvent(event);		// To set cursor
+			mouseMoveEvent(event); // To set cursor
 		}
 		else
 		{
@@ -652,11 +645,21 @@ namespace TrendLib
 
 			switch (mouseOn)
 			{
-			case TrendImpl::MouseOn::Outside:				newCursorShape = Qt::ArrowCursor;			break;
-			case TrendImpl::MouseOn::OutsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
-			case TrendImpl::MouseOn::InsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
-			case TrendImpl::MouseOn::OnSignalDescription:	newCursorShape = Qt::PointingHandCursor;	break;
-			case TrendImpl::MouseOn::OnRuler:				newCursorShape = Qt::SplitHCursor;			break;
+			case TrendImpl::MouseOn::Outside:
+				newCursorShape = Qt::ArrowCursor;
+				break;
+			case TrendImpl::MouseOn::OutsideTrendArea:
+				newCursorShape = Qt::ArrowCursor;
+				break;
+			case TrendImpl::MouseOn::InsideTrendArea:
+				newCursorShape = Qt::ArrowCursor;
+				break;
+			case TrendImpl::MouseOn::OnSignalDescription:
+				newCursorShape = Qt::PointingHandCursor;
+				break;
+			case TrendImpl::MouseOn::OnRuler:
+				newCursorShape = Qt::SplitHCursor;
+				break;
 			default:
 				Q_ASSERT(false);
 			}
@@ -693,7 +696,7 @@ namespace TrendLib
 					// Scroll time with a mouse mode
 					//
 					QRectF laneRect = m_trend.impl().calcLaneRect(0, m_trendParam);
-					QRectF trenAreaRect = m_trend.impl().calcTrendArea(laneRect, m_trendParam);	// TrendArea in inches
+					QRectF trenAreaRect = m_trend.impl().calcTrendArea(laneRect, m_trendParam); // TrendArea in inches
 					QRectF trendAreaRectPixels = TrendImpl::inchRectToPixelRect(trenAreaRect, m_trendParam);
 
 					double coefx = m_trendParam.duration() / trendAreaRectPixels.width();
@@ -711,11 +714,11 @@ namespace TrendLib
 
 						if (m_trendParam.viewMode() == E::TrendViewMode::Separated)
 						{
-							analogsToShift.push_back(m_mouseScrollSignal);		// signalRect is calculated
+							analogsToShift.push_back(m_mouseScrollSignal); // signalRect is calculated
 						}
 						else
 						{
-							analogsToShift = m_mouseScrollAnalogSignals;		// signalRect is not calculated yet
+							analogsToShift = m_mouseScrollAnalogSignals;   // signalRect is not calculated yet
 							auto discretes = signalSet().discreteSignals();
 
 							TrendImpl::calcSignalRects(trenAreaRect, m_trendParam, &discretes, &analogsToShift);
@@ -785,7 +788,7 @@ namespace TrendLib
 					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
 
 					QRectF laneRect = m_trend.impl().calcLaneRect(laneIndex, m_trendParam);
-					QRectF trenAreaRect = m_trend.impl().calcTrendArea(laneRect, m_trendParam);	// TrendArea in inches
+					QRectF trenAreaRect = m_trend.impl().calcTrendArea(laneRect, m_trendParam); // TrendArea in inches
 					QRectF trendAreaRectPixels = TrendImpl::inchRectToPixelRect(trenAreaRect, m_trendParam);
 
 					qint64 laneStartTime = m_trendParam.startTimeStamp().timeStamp + m_trendParam.duration() * laneIndex;
@@ -832,7 +835,7 @@ namespace TrendLib
 		int vertDegrees = event->angleDelta().y() / 8;
 		int vertSteps = vertDegrees / 15;
 
-		int horzDegrees = event->angleDelta().x() / 8;		// Horz degrees work with pressed Alt
+		int horzDegrees = event->angleDelta().x() / 8; // Horz degrees work with pressed Alt
 		int horzSteps = horzDegrees / 15;
 
 		// In some cases horz scroll is not supported, then just check Alt manually
@@ -867,7 +870,7 @@ namespace TrendLib
 
 			// Set new values to controls and draw param
 			//
-			m_trendParam.setLaneDuration(newLaneDuration);		// This func can limit value
+			m_trendParam.setLaneDuration(newLaneDuration); // This func can limit value
 
 			if (m_trendParam.duration() != oldDuration)
 			{
@@ -904,10 +907,8 @@ namespace TrendLib
 
 				TrendImpl::MouseOn mouseOn = mouseIsOver(event->position().toPoint(), &laneIndex, &timeStamp, &rulerIndex, &trendSignal);
 
-				if (mouseOn != TrendImpl::MouseOn::OutsideTrendArea &&
-					mouseOn != TrendImpl::MouseOn::Outside &&
-					trendSignal.appSignalId().isEmpty() == false &&
-					trendSignal.isAnalog() == true)
+				if (mouseOn != TrendImpl::MouseOn::OutsideTrendArea && mouseOn != TrendImpl::MouseOn::Outside &&
+					trendSignal.appSignalId().isEmpty() == false && trendSignal.isAnalog() == true)
 				{
 					signalsToScale.push_back(trendSignal);
 				}
@@ -979,7 +980,11 @@ namespace TrendLib
 		return;
 	}
 
-	TrendImpl::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* onSignal)
+	TrendImpl::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos,
+												int* outLaneIndex,
+												TimeStamp* timeStamp,
+												int* rulerIndex,
+												TrendSignalParam* onSignal)
 	{
 		TrendParam tp = m_pixmapDrawParam;
 
@@ -998,9 +1003,7 @@ namespace TrendLib
 		m_selectViewLaneIndex = laneIndex;
 
 		QRectF laneRect = TrendImpl::calcLaneRect(laneIndex, m_trendParam);
-
-		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
-		QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogsCount);
+		QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, std::span<const TrendSignalParam>{signalSet().analogSignals()});
 
 		m_startSelectViewPoint = TrendImpl::pixelPointToInchPoint(pos, m_trendParam);
 		m_finishSelectViewPoint = m_startSelectViewPoint;
@@ -1083,15 +1086,12 @@ namespace TrendLib
 				// Analogs does not have calculated trend rect
 				//
 				QRectF laneRect = TrendImpl::calcLaneRect(m_selectViewLaneIndex, m_trendParam);
+				QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogs);
 
-				int analogsCount = static_cast<int>(analogs.size());
-				QRectF trendArea = TrendImpl::calcTrendArea(laneRect, m_trendParam, analogsCount);
-
-				TrendImpl::calcSignalRects(trendArea, m_trendParam, &discretes, &analogs);  // calc rects
+				TrendImpl::calcSignalRects(trendArea, m_trendParam, &discretes, &analogs); // calc rects
 			}
 			else
 			{
-
 				analogs.push_back(m_selectViewAreaSignal);
 			}
 
@@ -1135,8 +1135,8 @@ namespace TrendLib
 
 				double coefHeight = (highLimit - lowLimit) / signalRectTsp.height();
 
-//				qint64 newHighLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - top) * coefHeight);
-//				qint64 newLowLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight);
+				//				qint64 newHighLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - top) * coefHeight);
+				//				qint64 newLowLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight);
 				double newHighLimit = lowLimit + (signalRectTsp.bottom() - top) * coefHeight;
 				double newLowLimit = lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight;
 
@@ -1306,4 +1306,4 @@ namespace TrendLib
 	{
 		m_trendParam.setProject(value);
 	}
-}
+} // namespace TrendLib

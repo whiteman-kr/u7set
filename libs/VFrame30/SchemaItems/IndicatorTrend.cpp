@@ -17,10 +17,7 @@ namespace
 
 	public:
 		TrendImageCache() = default;
-		~TrendImageCache() 
-		{
-			cache.clear();
-		}
+		~TrendImageCache() { cache.clear(); }
 
 		QImage* getCachedImage(const QUuid& trendUuid)
 		{
@@ -114,13 +111,26 @@ namespace VFrame30
 		if (prop.isEmpty() == true || prop == PropertyNames::color)
 		{
 			ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, IndicatorTrendSignalParam::color, IndicatorTrendSignalParam::setColor)
-				->setCategory(PropertyNames::indicatorSettings);
+				->setCategory(PropertyNames::appearanceCategory);
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
 		{
 			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::lineWeight, true, IndicatorTrendSignalParam::lineWeight, IndicatorTrendSignalParam::setLineWeight)
-				->setCategory(PropertyNames::indicatorSettings);
+				->setCategory(PropertyNames::appearanceCategory);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::analogFormat)
+		{
+			ADD_PROPERTY_GETTER_SETTER(E::AnalogFormat, PropertyNames::analogFormat, true, IndicatorTrendSignalParam::analogFormat, IndicatorTrendSignalParam::setAnalogFormat)
+				->setCategory(PropertyNames::appearanceCategory)
+				.setDescription(PropertyNames::analogFormatDescription);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::precision)
+		{
+			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, IndicatorTrendSignalParam::precision, IndicatorTrendSignalParam::setPrecision)
+				->setCategory(PropertyNames::appearanceCategory);
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::lowLimit)
@@ -150,6 +160,9 @@ namespace VFrame30
 		message->set_color(m_color.rgba());
 		message->set_linewieght(m_lineWeight);
 
+		message->set_analogformat(static_cast<int>(m_analogFormat));
+		message->set_precision(m_precision);
+
 		message->set_lowlimit(m_lowLimit);
 		message->set_highlimit(m_highLimit);
 
@@ -160,6 +173,9 @@ namespace VFrame30
 	{
 		m_color = message.color();
 		m_lineWeight = message.linewieght();
+
+		m_analogFormat = static_cast<E::AnalogFormat>(message.analogformat());
+		m_precision = message.precision();
 
 		m_lowLimit = message.lowlimit();
 		m_highLimit = message.highlimit();
@@ -177,6 +193,9 @@ namespace VFrame30
 
 		trendSignalParam->setColor(color().rgb());
 		trendSignalParam->setLineWeight(lineWeight());
+
+		trendSignalParam->setAnalogFormat(analogFormat());
+		trendSignalParam->setPrecision(precision());
 
 		trendSignalParam->setLowLimit(lowLimit());
 		trendSignalParam->setHighLimit(highLimit());
@@ -204,10 +223,31 @@ namespace VFrame30
 		m_lineWeight = value;
 	}
 
+	E::AnalogFormat IndicatorTrendSignalParam::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void IndicatorTrendSignalParam::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
+	}
+
+	int IndicatorTrendSignalParam::precision() const
+	{
+		return m_precision;
+	}
+
+	void IndicatorTrendSignalParam::setPrecision(int value)
+	{
+		m_precision = value;
+	}
+
 	double IndicatorTrendSignalParam::lowLimit() const
 	{
 		return m_lowLimit;
 	}
+
 	void IndicatorTrendSignalParam::setLowLimit(double value)
 	{
 		m_lowLimit = std::min(m_highLimit, value);
@@ -217,6 +257,7 @@ namespace VFrame30
 	{
 		return m_highLimit;
 	}
+
 	void IndicatorTrendSignalParam::setHighLimit(double value)
 	{
 		m_highLimit = std::max(m_lowLimit, value);
@@ -261,6 +302,8 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
+		// viewMode
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode,
 													   PropertyNames::indicatorTrendViewMode,
 													   true,
@@ -268,6 +311,8 @@ namespace VFrame30
 													   IndicatorTrend::setViewMode);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// scaleType
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendScaleType,
 													   PropertyNames::indicatorTrendScaleType,
 													   true,
@@ -275,6 +320,8 @@ namespace VFrame30
 													   IndicatorTrend::setScaleType);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// laneCount
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
 													   PropertyNames::indicatorTrendLaneCount,
 													   true,
@@ -282,6 +329,8 @@ namespace VFrame30
 													   IndicatorTrend::setLaneCount);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// laneSpacing
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
 													   PropertyNames::indicatorTrendBackColor1st,
 													   true,
@@ -289,6 +338,8 @@ namespace VFrame30
 													   IndicatorTrend::setBackColor1st);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// laneSpacing
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
 													   PropertyNames::indicatorTrendBackColor2nd,
 													   true,
@@ -296,6 +347,107 @@ namespace VFrame30
 													   IndicatorTrend::setBackColor2nd);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// showSignalIds
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(bool,
+													   PropertyNames::indicatorTrendShowSignalIds,
+													   true,
+													   IndicatorTrend::showSignalIds,
+													   IndicatorTrend::setShowSignalIds);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		// showSignalCaptions
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(bool,
+													   PropertyNames::indicatorTrendShowSignalCaptions,
+													   true,
+													   IndicatorTrend::showSignalCaptions,
+													   IndicatorTrend::setShowSignalCaptions);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		// showSignalScales
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(bool,
+													   PropertyNames::indicatorTrendShowSignalScales,
+													   true,
+													   IndicatorTrend::showSignalScales,
+													   IndicatorTrend::setShowSignalScales);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		// showTimeLabels
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(bool,
+													   PropertyNames::indicatorTrendShowTimeLabels,
+													   true,
+													   IndicatorTrend::showTimeLabels,
+													   IndicatorTrend::setShowTimeLabels);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		// showDateLabels
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(bool,
+													   PropertyNames::indicatorTrendShowDateLabels,
+													   true,
+													   IndicatorTrend::showDateLabels,
+													   IndicatorTrend::setShowDateLabels);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		// indentLeft
+		//
+		int precision = 0;
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			precision = 0;
+		}
+		else
+		{
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 2 : 4; // 2 for mm, 4 for inches
+		}
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentLeft,
+													   true,
+													   IndicatorTrend::indentLeft,
+													   IndicatorTrend::setIndentLeft);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentRight
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentRight,
+													   true,
+													   IndicatorTrend::indentRight,
+													   IndicatorTrend::setIndentRight);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentTop
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentTop,
+													   true,
+													   IndicatorTrend::indentTop,
+													   IndicatorTrend::setIndentTop);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// indentBottom
+		//
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(double,
+													   PropertyNames::indicatorTrendIndentBottom,
+													   true,
+													   IndicatorTrend::indentBottom,
+													   IndicatorTrend::setIndentBottom);
+		p->setCategory(PropertyNames::positionAndSizeCategory);
+		p->setDescription(PropertyNames::indicatorTrendIndentDescription);
+		p->setPrecision(precision);
+
+		// samplePeriod
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::RtTrendsSamplePeriod,
 													   PropertyNames::indicatorTrendSamplePeriod,
 													   true,
@@ -303,6 +455,8 @@ namespace VFrame30
 													   IndicatorTrend::setSamplePeriod);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// timeType
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TimeType,
 													   PropertyNames::timeType,
 													   true,
@@ -311,6 +465,8 @@ namespace VFrame30
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::timeTypeToolTip);
 
+		// redrawInterval
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
 													   PropertyNames::indicatorTrendRedrawInterval,
 													   true,
@@ -319,6 +475,8 @@ namespace VFrame30
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendRedrawIntervalToolTip);
 
+		// laneDuration
+		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
 													   PropertyNames::indicatorTrendLaneDuration,
 													   true,
@@ -327,6 +485,8 @@ namespace VFrame30
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
 
+		// trendSignalParams
+		//
 		propertyObject->ADD_PROPERTY_CAT_VAR(PropertyVector<IndicatorTrendSignalParam>,
 											 PropertyNames::trendSignalParams,
 											 PropertyNames::indicatorSettings,
@@ -390,6 +550,51 @@ namespace VFrame30
 			m_trendParam.setBackColor2nd(m.backcolor2nd());
 		}
 
+		if (m.has_showsignalids() == true)
+		{
+			m_trendParam.setShowSignalIds(m.showsignalids());
+		}
+
+		if (m.has_showsignalcaptions() == true)
+		{
+			m_trendParam.setShowSignalCaptions(m.showsignalcaptions());
+		}
+
+		if (m.has_showsignalscales() == true)
+		{
+			m_trendParam.setShowSignalScales(m.showsignalscales());
+		}
+
+		if (m.has_showtimelabels() == true)
+		{
+			m_trendParam.setShowTimeLabels(m.showtimelabels());
+		}
+
+		if (m.has_showdatelabels() == true)
+		{
+			m_trendParam.setShowDateLabels(m.showdatelabels());
+		}
+
+		if (m.has_indentleft() == true)
+		{
+			m_trendParam.setIndentLeft(m.indentleft());
+		}
+
+		if (m.has_indentright() == true)
+		{
+			m_trendParam.setIndentRight(m.indentright());
+		}
+
+		if (m.has_indenttop() == true)
+		{
+			m_trendParam.setIndentTop(m.indenttop());
+		}
+
+		if (m.has_indentbottom() == true)
+		{
+			m_trendParam.setIndentBottom(m.indentbottom());
+		}
+
 		return true;
 	}
 
@@ -410,6 +615,17 @@ namespace VFrame30
 		m->set_lanecount(laneCount());
 		m->set_backcolor1st(backColor1st().rgba());
 		m->set_backcolor2nd(backColor2nd().rgba());
+
+		m->set_showsignalids(showSignalIds());
+		m->set_showsignalcaptions(showSignalCaptions());
+		m->set_showsignalscales(showSignalScales());
+		m->set_showtimelabels(showTimeLabels());
+		m->set_showdatelabels(showDateLabels());
+
+		m->set_indentleft(m_trendParam.indentLeft()); // Use m_trendParam, it keeps indent in native unit.
+		m->set_indentright(m_trendParam.indentRight());
+		m->set_indenttop(m_trendParam.indentTop());
+		m->set_indentbottom(m_trendParam.indentBottom());
 
 		m->set_sampleperiod(static_cast<int>(m_samplePeriod));
 		m->set_timetype(static_cast<int>(m_timeType));
@@ -497,6 +713,14 @@ namespace VFrame30
 			}
 		}
 
+		bool forceRedraw = false;
+		if (m_forceRedraw.load(std::memory_order_acquire) == true)
+		{
+			forceRedraw = true;
+			m_forceRedraw.store(false, std::memory_order_release);
+			m_image = {};
+		}
+
 		if (m_image.isNull() == false)
 		{
 			painter->drawImage(boundingRect, m_image);
@@ -525,6 +749,7 @@ namespace VFrame30
 		// Detect if image update is required
 		//
 		bool needRedraw = m_redrawInterval < 250_ms ||                 //
+						  forceRedraw == true ||                       //
 						  m_drawTimer.hasExpired(m_redrawInterval) ||  //
 						  drawParam->drawMode() == DrawMode::Editor || //
 						  (expectedImageSize != m_image.size());
@@ -541,8 +766,8 @@ namespace VFrame30
 			QStringList itemSignalIds = schemaItem->signalIds();
 			QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
 
-			if (bool signalsAreTheSame = (itemSignalIds != trendSignalIds) || m_updateSignalsTimer.hasExpired(10'000); //
-				signalsAreTheSame == true)
+			if (bool signalsNotSame = (itemSignalIds != trendSignalIds) || m_updateSignalsTimer.hasExpired(10'000) || forceRedraw; //
+				signalsNotSame == true)
 			{
 				std::list<TrendLib::TrendSignalParam> signalParams;
 
@@ -626,7 +851,6 @@ namespace VFrame30
 						return QImage{};
 					}
 				},
-
 				std::ref(m_trend),
 				m_trendParam,
 				expectedImageSize,
@@ -684,6 +908,11 @@ namespace VFrame30
 		return m_trend;
 	}
 
+	void IndicatorTrend::forceRedraw()
+	{
+		m_forceRedraw.store(true, std::memory_order_release);
+	}
+
 	E::TrendViewMode IndicatorTrend::viewMode() const
 	{
 		return m_trendParam.viewMode();
@@ -734,6 +963,211 @@ namespace VFrame30
 		m_trendParam.setBackColor2nd(value);
 	}
 
+	bool IndicatorTrend::showSignalIds() const
+	{
+		return m_trendParam.showSignalIds();
+	}
+
+	void IndicatorTrend::setShowSignalIds(bool value)
+	{
+		m_trendParam.setShowSignalIds(value);
+	}
+
+	bool IndicatorTrend::showSignalCaptions() const
+	{
+		return m_trendParam.showSignalCaptions();
+	}
+
+	void IndicatorTrend::setShowSignalCaptions(bool value)
+	{
+		m_trendParam.setShowSignalCaptions(value);
+	}
+
+	bool IndicatorTrend::showSignalScales() const
+	{
+		return m_trendParam.showSignalScales();
+	}
+
+	void IndicatorTrend::setShowSignalScales(bool value)
+	{
+		m_trendParam.setShowSignalScales(value);
+	}
+
+	bool IndicatorTrend::showTimeLabels() const
+	{
+		return m_trendParam.showTimeLabels();
+	}
+
+	void IndicatorTrend::setShowTimeLabels(bool value)
+	{
+		m_trendParam.setShowTimeLabels(value);
+	}
+
+	bool IndicatorTrend::showDateLabels() const
+	{
+		return m_trendParam.showDateLabels();
+	}
+
+	void IndicatorTrend::setShowDateLabels(bool value)
+	{
+		m_trendParam.setShowDateLabels(value);
+	}
+
+	double IndicatorTrend::indentLeft() const
+	{
+		if (m_trendParam.indentLeft() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentLeft());
+		}
+		else
+		{
+			double pt = m_trendParam.indentLeft();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentLeft(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentLeft(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentLeft(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentLeft(pt);
+		}
+	}
+
+	double IndicatorTrend::indentRight() const
+	{
+		if (m_trendParam.indentRight() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentRight());
+		}
+		else
+		{
+			double pt = m_trendParam.indentRight();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentRight(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentRight(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentRight(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentRight(pt);
+		}
+	}
+
+	double IndicatorTrend::indentTop() const
+	{
+		if (m_trendParam.indentTop() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentTop());
+		}
+		else
+		{
+			double pt = m_trendParam.indentTop();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+	void IndicatorTrend::setIndentTop(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentTop(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentTop(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentTop(pt);
+		}
+	}
+
+	double IndicatorTrend::indentBottom() const
+	{
+		if (m_trendParam.indentBottom() < 0)
+		{
+			return -1;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_trendParam.indentBottom());
+		}
+		else
+		{
+			double pt = m_trendParam.indentBottom();
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void IndicatorTrend::setIndentBottom(double value)
+	{
+		if (value < 0)
+		{
+			m_trendParam.setIndentBottom(-1);
+			return;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			double pt = VFrame30::RoundDisplayPoint(value);
+			m_trendParam.setIndentBottom(pt);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_trendParam.setIndentBottom(pt);
+		}
+	}
+
 	E::RtTrendsSamplePeriod IndicatorTrend::samplePeriod() const
 	{
 		return m_samplePeriod;
@@ -777,5 +1211,19 @@ namespace VFrame30
 	void IndicatorTrend::setDurationSeconds(int value)
 	{
 		m_trendParam.setLaneDuration(value * 1000);
+	}
+
+	QList<VFrame30::IndicatorTrendSignalParam*> IndicatorTrend::jsTrendSignalParams() const
+	{
+		QList<VFrame30::IndicatorTrendSignalParam*> list;
+		list.reserve(m_trendSignalParams.size());
+
+		for (const auto& tsp : m_trendSignalParams)
+		{
+			QJSEngine::setObjectOwnership(tsp.get(), QJSEngine::CppOwnership);
+			list.append(tsp.get());
+		}
+
+		return list;
 	}
 } // namespace VFrame30

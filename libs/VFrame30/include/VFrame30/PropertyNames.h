@@ -50,6 +50,15 @@ namespace VFrame30
 		inline static const QString precision{"Precision"};
 		inline static const QString precisionPropText{"Number of decimals after period, -1: take value from the signal description"};
 		inline static const QString analogFormat{"AnalogFormat"};
+		inline static const QString analogFormatDescription{
+			"Analog format for the value.\n"
+			"Supported values:\n"
+			"e_9e (0x65/101) scientific notation with lowercase exponent, for example 1.2e+03.\n"
+			"E_9E (0x45/69) scientific notation with uppercase exponent, for example 1.2E+03.\n"
+			"f_9 (0x66/102) fixed-point decimal format, for example 1234.56.\n"
+			"g_9_or_9e (0x67/103) shortest representation using either fixed-point or scientific notation with lowercase exponent.\n"
+			"G_9_or_9E (0x47/71)  shortest representation using either fixed-point or scientific notation with uppercase exponent."
+		};
 		inline static const QString customText{"CustomText"};
 		inline static const QString columnCount{"ColumnCount"};
 		inline static const QString pinCount{"PinCount"};
@@ -164,6 +173,16 @@ namespace VFrame30
 
 		inline static const QString indicatorTrendBackColor1st{"BackColor1st"};
 		inline static const QString indicatorTrendBackColor2nd{"BackColor2nd"};
+		inline static const QString indicatorTrendShowSignalIds{"ShowSignalIDs"};
+		inline static const QString indicatorTrendShowSignalCaptions{"ShowSignalCaptions"};
+		inline static const QString indicatorTrendShowSignalScales{"ShowSignalScales"};
+		inline static const QString indicatorTrendShowTimeLabels{"ShowTimeLabels"};
+		inline static const QString indicatorTrendShowDateLabels{"ShowDateLabels"};
+		inline static const QString indicatorTrendIndentLeft{"IndentLeft"};
+		inline static const QString indicatorTrendIndentRight{"IndentRight"};
+		inline static const QString indicatorTrendIndentTop{"IndentTop"};
+		inline static const QString indicatorTrendIndentBottom{"IndentBottom"};
+		inline static const QString indicatorTrendIndentDescription{"Indent; if set to -1, the auto indent is used."};
 		inline static const QString indicatorTrendLaneCount{"LaneCount"};
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};

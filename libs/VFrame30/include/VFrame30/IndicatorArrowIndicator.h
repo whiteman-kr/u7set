@@ -6,6 +6,10 @@ namespace VFrame30
 	//
 	// ArrowIndicator
 	//
+	/*! \class IndicatorArrowIndicator
+		\ingroup dynamicSchemaItems
+		\brief Arrow indicator used for dynamic signal visualization.
+	*/
 	class IndicatorArrowIndicator : public Indicator
 	{
 		Q_OBJECT
@@ -39,8 +43,8 @@ namespace VFrame30
 		double m_startValue = 0;
 		double m_endValue = 100.0;
 
-		double m_startAngle = 330;			// Zero degrees is at the 9 o'clock position.
+		double m_startAngle = 330; // Zero degrees is at the 9 o'clock position.
 		double m_spanAngle = 240;
 	};
 
-}
+} // namespace VFrame30

@@ -1481,13 +1481,10 @@ protected:
 public:
 	// Add new property
 	//
-	template <typename TYPE,
-			  typename CLASS,
-			  TYPE(CLASS::*get)() const,
-			  void(CLASS::*set)(TYPE)>
-	auto addProperty(const QString& caption, const QString& category, bool visible)
+	template<typename TYPE, typename CLASS, auto get, auto set>
+	PropertyTypedValue<TYPE, CLASS, get, set>* addProperty(const QString& caption, const QString& category, bool visible)
 	{
-#if !defined(__GNUC__) || (__GNUC___ > 10)
+#if !defined(__GNUC__) || (__GNUC__ > 10)
 		static_assert(get != nullptr);
 #endif
 

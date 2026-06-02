@@ -915,6 +915,7 @@ namespace Builder
 			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM1_SR05);
 			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM8_SR10);
 			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM11_SR90);
+			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM_SF41);
 		}
 	}
 
@@ -1310,7 +1311,7 @@ namespace Builder
 
 		// Parameter '%1' of AFB '%2' must have type 32-bit Float.
 		//
-		m_log->errALC5050(paramValue.opName(), caption(), guid());
+		m_log->errALC5050(paramValue.opName(), caption(), guid(), label(), schemaID());
 
 		return false;
 	}

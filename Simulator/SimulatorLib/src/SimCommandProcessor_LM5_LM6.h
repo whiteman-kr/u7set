@@ -389,8 +389,8 @@ namespace Sim
 		void afb_func_v4(AfbComponentInstance* instance);
 		void afb_func_v5(AfbComponentInstance* instance);
 		void afb_func_v6(AfbComponentInstance* instance);
-		void afb_func_v5v6(AfbComponentInstance* instance);
-		void afb_func_private(AfbComponentInstance* instance, int conf, int version);
+		void afb_func_private_v11(AfbComponentInstance* instance, int conf, int version); // Quartus 11.1
+		void afb_func_private_v17(AfbComponentInstance* instance, int conf, int version); // Quartus 17.0
 
 		//	INTEGRATOR, OpCode 17
 		//
@@ -470,101 +470,99 @@ namespace Sim
 		using SimAfbFunc = void (CommandProcessor_LM5_LM6::*)(AfbComponentInstance*);
 		using SimAfbFuncCast = u_ptm_cast<CommandProcessor_LM5_LM6, void(AfbComponentInstance*)>;
 
-		const std::map<QString, SimCommandFunc> m_nameToFuncCommand
-		{
-			{QStringLiteral("command_nop"),				&CommandProcessor_LM5_LM6::command_nop},			// Code: 1 - ext: 0b000000
-			{QStringLiteral("command_reset"),			&CommandProcessor_LM5_LM6::command_reset},			// Code: 1 - ext: 0b100000
-			{QStringLiteral("command_set"),				&CommandProcessor_LM5_LM6::command_set},			// Code: 1 - ext: 0b010000
-			{QStringLiteral("command_or"),				&CommandProcessor_LM5_LM6::command_or},				// Code: 1 - ext: 0b110000
-			{QStringLiteral("command_and"),				&CommandProcessor_LM5_LM6::command_and},			// Code: 1 - ext: 0b001000
-			{QStringLiteral("command_not"),				&CommandProcessor_LM5_LM6::command_not},			// Code: 1 - ext: 0b101000
-			{QStringLiteral("command_lshift0"),			&CommandProcessor_LM5_LM6::command_lshift0},		// Code: 1 - ext: 0b011000
-			{QStringLiteral("command_lshift1"),			&CommandProcessor_LM5_LM6::command_lshift1},		// Code: 1 - ext: 0b111000
-			{QStringLiteral("command_startafb"),		&CommandProcessor_LM5_LM6::command_startafb},		// 2
-			{QStringLiteral("command_stop"),			&CommandProcessor_LM5_LM6::command_stop},			// 3
-			{QStringLiteral("command_mov"),				&CommandProcessor_LM5_LM6::command_mov},			// Code: 4 - ext: 0b000000
-			{QStringLiteral("command_mov_addr_acc"),	&CommandProcessor_LM5_LM6::command_mov_addr_acc},	// Code: 4 - ext: 0b100000
-			{QStringLiteral("command_mov_acc_addr"),	&CommandProcessor_LM5_LM6::command_mov_acc_addr},	// Code: 4 - ext: 0b010000
-			{QStringLiteral("command_movmem"),			&CommandProcessor_LM5_LM6::command_movmem},			// 5
-			{QStringLiteral("command_movc"),			&CommandProcessor_LM5_LM6::command_movc},			// Code: 6 - ext: 0xb000000
-			{QStringLiteral("command_movc_acc"),		&CommandProcessor_LM5_LM6::command_movc_acc},		// Code: 6 - ext: 0xb100000
-			{QStringLiteral("command_movbc"),			&CommandProcessor_LM5_LM6::command_movbc},			// 7
-			{QStringLiteral("command_wrfb"),			&CommandProcessor_LM5_LM6::command_wrfb},			// 8
-			{QStringLiteral("command_rdfb"),			&CommandProcessor_LM5_LM6::command_rdfb},			// 9
-			{QStringLiteral("command_wrfbc"),			&CommandProcessor_LM5_LM6::command_wrfbc},			// 10
-			{QStringLiteral("command_wrfbb"),			&CommandProcessor_LM5_LM6::command_wrfbb},			// 11
-			{QStringLiteral("command_rdfbb"),			&CommandProcessor_LM5_LM6::command_rdfbb},			// 12
-			{QStringLiteral("command_rdfbcmp"),			&CommandProcessor_LM5_LM6::command_rdfbcmp},		// 13
-			{QStringLiteral("command_setmem"),			&CommandProcessor_LM5_LM6::command_setmem},			// 14
-			{QStringLiteral("command_movb"),			&CommandProcessor_LM5_LM6::command_movb},			// Code: 15 - ext: 0xb000000
-			{QStringLiteral("command_movb_acc_addr"),	&CommandProcessor_LM5_LM6::command_movb_acc_addr},	// Code: 15 - 0b10xxxx
-			{QStringLiteral("command_movb_addr_acc"),	&CommandProcessor_LM5_LM6::command_movb_addr_acc},	// Code: 15 - 0b01xxxx
-			{QStringLiteral("command_nstartafb"),		&CommandProcessor_LM5_LM6::command_not_implemented},// 16 Not supported?
-			{QStringLiteral("command_appstart"),		&CommandProcessor_LM5_LM6::command_appstart},		// 17
-			{QStringLiteral("command_mov32"),			&CommandProcessor_LM5_LM6::command_mov32},			// 18
-			{QStringLiteral("command_movc32"),			&CommandProcessor_LM5_LM6::command_movc32},			// 19
-			{QStringLiteral("command_wrfb32"),			&CommandProcessor_LM5_LM6::command_wrfb32},			// 20
-			{QStringLiteral("command_rdfb32"),			&CommandProcessor_LM5_LM6::command_rdfb32},			// 21
-			{QStringLiteral("command_wrfbc32"),			&CommandProcessor_LM5_LM6::command_wrfbc32},		// 22
-			{QStringLiteral("command_rdfbcmp32"),		&CommandProcessor_LM5_LM6::command_rdfbcmp32},		// 23
-			{QStringLiteral("command_movcmpf"),			&CommandProcessor_LM5_LM6::command_movcmpf},		// 24
-			{QStringLiteral("command_pmov"),			&CommandProcessor_LM5_LM6::command_pmov},			// 25
-			{QStringLiteral("command_pmov32"),			&CommandProcessor_LM5_LM6::command_pmov32},			// 26
-			{QStringLiteral("command_fillb"),			&CommandProcessor_LM5_LM6::command_fillb},			// 27
+		const std::map<QString, SimCommandFunc> m_nameToFuncCommand{
+			{QStringLiteral("command_nop"), &CommandProcessor_LM5_LM6::command_nop},                     // Code: 1 - ext: 0b000000
+			{QStringLiteral("command_reset"), &CommandProcessor_LM5_LM6::command_reset},                 // Code: 1 - ext: 0b100000
+			{QStringLiteral("command_set"), &CommandProcessor_LM5_LM6::command_set},                     // Code: 1 - ext: 0b010000
+			{QStringLiteral("command_or"), &CommandProcessor_LM5_LM6::command_or},                       // Code: 1 - ext: 0b110000
+			{QStringLiteral("command_and"), &CommandProcessor_LM5_LM6::command_and},                     // Code: 1 - ext: 0b001000
+			{QStringLiteral("command_not"), &CommandProcessor_LM5_LM6::command_not},                     // Code: 1 - ext: 0b101000
+			{QStringLiteral("command_lshift0"), &CommandProcessor_LM5_LM6::command_lshift0},             // Code: 1 - ext: 0b011000
+			{QStringLiteral("command_lshift1"), &CommandProcessor_LM5_LM6::command_lshift1},             // Code: 1 - ext: 0b111000
+			{QStringLiteral("command_startafb"), &CommandProcessor_LM5_LM6::command_startafb},           // 2
+			{QStringLiteral("command_stop"), &CommandProcessor_LM5_LM6::command_stop},                   // 3
+			{QStringLiteral("command_mov"), &CommandProcessor_LM5_LM6::command_mov},                     // Code: 4 - ext: 0b000000
+			{QStringLiteral("command_mov_addr_acc"), &CommandProcessor_LM5_LM6::command_mov_addr_acc},   // Code: 4 - ext: 0b100000
+			{QStringLiteral("command_mov_acc_addr"), &CommandProcessor_LM5_LM6::command_mov_acc_addr},   // Code: 4 - ext: 0b010000
+			{QStringLiteral("command_movmem"), &CommandProcessor_LM5_LM6::command_movmem},               // 5
+			{QStringLiteral("command_movc"), &CommandProcessor_LM5_LM6::command_movc},                   // Code: 6 - ext: 0xb000000
+			{QStringLiteral("command_movc_acc"), &CommandProcessor_LM5_LM6::command_movc_acc},           // Code: 6 - ext: 0xb100000
+			{QStringLiteral("command_movbc"), &CommandProcessor_LM5_LM6::command_movbc},                 // 7
+			{QStringLiteral("command_wrfb"), &CommandProcessor_LM5_LM6::command_wrfb},                   // 8
+			{QStringLiteral("command_rdfb"), &CommandProcessor_LM5_LM6::command_rdfb},                   // 9
+			{QStringLiteral("command_wrfbc"), &CommandProcessor_LM5_LM6::command_wrfbc},                 // 10
+			{QStringLiteral("command_wrfbb"), &CommandProcessor_LM5_LM6::command_wrfbb},                 // 11
+			{QStringLiteral("command_rdfbb"), &CommandProcessor_LM5_LM6::command_rdfbb},                 // 12
+			{QStringLiteral("command_rdfbcmp"), &CommandProcessor_LM5_LM6::command_rdfbcmp},             // 13
+			{QStringLiteral("command_setmem"), &CommandProcessor_LM5_LM6::command_setmem},               // 14
+			{QStringLiteral("command_movb"), &CommandProcessor_LM5_LM6::command_movb},                   // Code: 15 - ext: 0xb000000
+			{QStringLiteral("command_movb_acc_addr"), &CommandProcessor_LM5_LM6::command_movb_acc_addr}, // Code: 15 - 0b10xxxx
+			{QStringLiteral("command_movb_addr_acc"), &CommandProcessor_LM5_LM6::command_movb_addr_acc}, // Code: 15 - 0b01xxxx
+			{QStringLiteral("command_nstartafb"), &CommandProcessor_LM5_LM6::command_not_implemented},   // 16 Not supported?
+			{QStringLiteral("command_appstart"), &CommandProcessor_LM5_LM6::command_appstart},           // 17
+			{QStringLiteral("command_mov32"), &CommandProcessor_LM5_LM6::command_mov32},                 // 18
+			{QStringLiteral("command_movc32"), &CommandProcessor_LM5_LM6::command_movc32},               // 19
+			{QStringLiteral("command_wrfb32"), &CommandProcessor_LM5_LM6::command_wrfb32},               // 20
+			{QStringLiteral("command_rdfb32"), &CommandProcessor_LM5_LM6::command_rdfb32},               // 21
+			{QStringLiteral("command_wrfbc32"), &CommandProcessor_LM5_LM6::command_wrfbc32},             // 22
+			{QStringLiteral("command_rdfbcmp32"), &CommandProcessor_LM5_LM6::command_rdfbcmp32},         // 23
+			{QStringLiteral("command_movcmpf"), &CommandProcessor_LM5_LM6::command_movcmpf},             // 24
+			{QStringLiteral("command_pmov"), &CommandProcessor_LM5_LM6::command_pmov},                   // 25
+			{QStringLiteral("command_pmov32"), &CommandProcessor_LM5_LM6::command_pmov32},               // 26
+			{QStringLiteral("command_fillb"), &CommandProcessor_LM5_LM6::command_fillb},                 // 27
 		};
 
 
-		const std::map<QString, SimAfbFunc> m_nameToFuncAfb
-		{
-			{QStringLiteral("afb_logic_v207"),		&CommandProcessor_LM5_LM6::afb_logic_v207},				// 1
-			{QStringLiteral("afb_not_v103"),		&CommandProcessor_LM5_LM6::afb_not_v103},				// 2
-			{QStringLiteral("afb_tct_v208"),		&CommandProcessor_LM5_LM6::afb_tct_v208},				// 3
-			{QStringLiteral("afb_tct_v209"),		&CommandProcessor_LM5_LM6::afb_tct_v209},				// 3
-			{QStringLiteral("afb_tct_v210"),		&CommandProcessor_LM5_LM6::afb_tct_v210},				// 3
-			{QStringLiteral("afb_flipflop_v106"),	&CommandProcessor_LM5_LM6::afb_flipflop_v106},			// 4
-			{QStringLiteral("afb_ctud_v106"),		&CommandProcessor_LM5_LM6::afb_ctud_v106},				// 5
-			{QStringLiteral("afb_maj_v107"),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6
-			{QStringLiteral("afb_srsst_v104"),		&CommandProcessor_LM5_LM6::afb_srsst_v104},				// 7
-			{QStringLiteral("afb_bcod_v103"),		&CommandProcessor_LM5_LM6::afb_bcod_v103},				// 8
-			{QStringLiteral("afb_bcod_v104"),		&CommandProcessor_LM5_LM6::afb_bcod_v104},				// 8
-			{QStringLiteral("afb_bdec_v103"),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
-			{QStringLiteral("afb_bcomp_v111"),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10
-			{QStringLiteral("afb_bcomp_v112"),		&CommandProcessor_LM5_LM6::afb_bcomp_v112},				// 10
-			{QStringLiteral("afb_damper_v112"),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11
-			{QStringLiteral("afb_mem_v7"),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
-			{QStringLiteral("afb_mem_v8"),			&CommandProcessor_LM5_LM6::afb_mem_v8},					// 12
-			{QStringLiteral("afb_mem_v9"),			&CommandProcessor_LM5_LM6::afb_mem_v9},					// 12
-			{QStringLiteral("afb_math_v104"),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
-			{QStringLiteral("afb_math_v105"),		&CommandProcessor_LM5_LM6::afb_math_v105},				// 13
-			{QStringLiteral("afb_scale_v108"),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
-			{QStringLiteral("afb_func_v3"),			&CommandProcessor_LM5_LM6::afb_func_v3},				// 16
-			{QStringLiteral("afb_func_v4"),			&CommandProcessor_LM5_LM6::afb_func_v4},				// 16
-			{QStringLiteral("afb_func_v5"),			&CommandProcessor_LM5_LM6::afb_func_v5},				// 16
-			{QStringLiteral("afb_func_v6"),			&CommandProcessor_LM5_LM6::afb_func_v6},				// 16
-			{QStringLiteral("afb_int_v6_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},			// 17	ti is unlimited
-			{QStringLiteral("afb_int_v6_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v6_ti350000},		// 17	ti is limited to 350000ms
-			{QStringLiteral("afb_int_v7_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v7_tiunlim},			// 17	ti is unlimited
-			{QStringLiteral("afb_int_v7_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v7_ti350000},		// 17	ti is limited to 350000ms
-			{QStringLiteral("afb_dpcomp_v3"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
-			{QStringLiteral("afb_dpcomp_v4"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
-			{QStringLiteral("afb_dpcomp_v5"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
-			{QStringLiteral("afb_dpcomp_v6"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v6},				// 20
-			{QStringLiteral("afb_mux_v1"),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
-			{QStringLiteral("afb_latch_v4"),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
-			{QStringLiteral("afb_latch_v5"),		&CommandProcessor_LM5_LM6::afb_latch_v5},				// 22
-			{QStringLiteral("afb_lim_v7"),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
-			{QStringLiteral("fb_deadzone_v5"),		&CommandProcessor_LM5_LM6::fb_deadzone_v5},				// 24
-			{QStringLiteral("fb_deadzone_v6"),		&CommandProcessor_LM5_LM6::fb_deadzone_v6},				// 24
-			{QStringLiteral("afb_pol_v3"),			&CommandProcessor_LM5_LM6::afb_pol_v3},					// 25
-			{QStringLiteral("afb_der_v5_tdunlim"),	&CommandProcessor_LM5_LM6::afb_der_v5_tdunlim},			// 26	td is unlimited
-			{QStringLiteral("afb_der_v5_td350000"),	&CommandProcessor_LM5_LM6::afb_der_v5_td350000},		// 26	td is limited to 350000ms
-			{QStringLiteral("afb_mismatch_v2"),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
-			{QStringLiteral("afb_mismatch_v3"),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
-			{QStringLiteral("afb_mismatch_v4"),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
-			{QStringLiteral("afb_tconv_v0"),		&CommandProcessor_LM5_LM6::afb_tconv_v0},				// 28
-			{QStringLiteral("afb_tconv_v1"),		&CommandProcessor_LM5_LM6::afb_tconv_v1},				// 28
-			{QStringLiteral("afb_indication_v1"),	&CommandProcessor_LM5_LM6::afb_indication_v1},			// 29
-			{QStringLiteral("afb_pulse_gen_v0"),	&CommandProcessor_LM5_LM6::afb_pulse_gen_v0},			// 30
+		const std::map<QString, SimAfbFunc> m_nameToFuncAfb{
+			{QStringLiteral("afb_logic_v207"), &CommandProcessor_LM5_LM6::afb_logic_v207},               // 1
+			{QStringLiteral("afb_not_v103"), &CommandProcessor_LM5_LM6::afb_not_v103},                   // 2
+			{QStringLiteral("afb_tct_v208"), &CommandProcessor_LM5_LM6::afb_tct_v208},                   // 3
+			{QStringLiteral("afb_tct_v209"), &CommandProcessor_LM5_LM6::afb_tct_v209},                   // 3
+			{QStringLiteral("afb_tct_v210"), &CommandProcessor_LM5_LM6::afb_tct_v210},                   // 3
+			{QStringLiteral("afb_flipflop_v106"), &CommandProcessor_LM5_LM6::afb_flipflop_v106},         // 4
+			{QStringLiteral("afb_ctud_v106"), &CommandProcessor_LM5_LM6::afb_ctud_v106},                 // 5
+			{QStringLiteral("afb_maj_v107"), &CommandProcessor_LM5_LM6::afb_maj_v107},                   // 6
+			{QStringLiteral("afb_srsst_v104"), &CommandProcessor_LM5_LM6::afb_srsst_v104},               // 7
+			{QStringLiteral("afb_bcod_v103"), &CommandProcessor_LM5_LM6::afb_bcod_v103},                 // 8
+			{QStringLiteral("afb_bcod_v104"), &CommandProcessor_LM5_LM6::afb_bcod_v104},                 // 8
+			{QStringLiteral("afb_bdec_v103"), &CommandProcessor_LM5_LM6::afb_bdec_v103},                 // 9
+			{QStringLiteral("afb_bcomp_v111"), &CommandProcessor_LM5_LM6::afb_bcomp_v111},               // 10
+			{QStringLiteral("afb_bcomp_v112"), &CommandProcessor_LM5_LM6::afb_bcomp_v112},               // 10
+			{QStringLiteral("afb_damper_v112"), &CommandProcessor_LM5_LM6::afb_damper_v112},             // 11
+			{QStringLiteral("afb_mem_v7"), &CommandProcessor_LM5_LM6::afb_mem_v7},                       // 12
+			{QStringLiteral("afb_mem_v8"), &CommandProcessor_LM5_LM6::afb_mem_v8},                       // 12
+			{QStringLiteral("afb_mem_v9"), &CommandProcessor_LM5_LM6::afb_mem_v9},                       // 12
+			{QStringLiteral("afb_math_v104"), &CommandProcessor_LM5_LM6::afb_math_v104},                 // 13
+			{QStringLiteral("afb_math_v105"), &CommandProcessor_LM5_LM6::afb_math_v105},                 // 13
+			{QStringLiteral("afb_scale_v108"), &CommandProcessor_LM5_LM6::afb_scale_v108},               // 14
+			{QStringLiteral("afb_func_v3"), &CommandProcessor_LM5_LM6::afb_func_v3},                     // 16
+			{QStringLiteral("afb_func_v4"), &CommandProcessor_LM5_LM6::afb_func_v4},                     // 16
+			{QStringLiteral("afb_func_v5"), &CommandProcessor_LM5_LM6::afb_func_v5},                     // 16
+			{QStringLiteral("afb_func_v6"), &CommandProcessor_LM5_LM6::afb_func_v6},                     // 16
+			{QStringLiteral("afb_int_v6_tiunlim"), &CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},       // 17	ti is unlimited
+			{QStringLiteral("afb_int_v6_ti350000"), &CommandProcessor_LM5_LM6::afb_int_v6_ti350000},     // 17	ti is limited to 350000ms
+			{QStringLiteral("afb_int_v7_tiunlim"), &CommandProcessor_LM5_LM6::afb_int_v7_tiunlim},       // 17	ti is unlimited
+			{QStringLiteral("afb_int_v7_ti350000"), &CommandProcessor_LM5_LM6::afb_int_v7_ti350000},     // 17	ti is limited to 350000ms
+			{QStringLiteral("afb_dpcomp_v3"), &CommandProcessor_LM5_LM6::afb_dpcomp_v3},                 // 20
+			{QStringLiteral("afb_dpcomp_v4"), &CommandProcessor_LM5_LM6::afb_dpcomp_v4},                 // 20
+			{QStringLiteral("afb_dpcomp_v5"), &CommandProcessor_LM5_LM6::afb_dpcomp_v5},                 // 20
+			{QStringLiteral("afb_dpcomp_v6"), &CommandProcessor_LM5_LM6::afb_dpcomp_v6},                 // 20
+			{QStringLiteral("afb_mux_v1"), &CommandProcessor_LM5_LM6::afb_mux_v1},                       // 21
+			{QStringLiteral("afb_latch_v4"), &CommandProcessor_LM5_LM6::afb_latch_v4},                   // 22
+			{QStringLiteral("afb_latch_v5"), &CommandProcessor_LM5_LM6::afb_latch_v5},                   // 22
+			{QStringLiteral("afb_lim_v7"), &CommandProcessor_LM5_LM6::afb_lim_v7},                       // 23
+			{QStringLiteral("fb_deadzone_v5"), &CommandProcessor_LM5_LM6::fb_deadzone_v5},               // 24
+			{QStringLiteral("fb_deadzone_v6"), &CommandProcessor_LM5_LM6::fb_deadzone_v6},               // 24
+			{QStringLiteral("afb_pol_v3"), &CommandProcessor_LM5_LM6::afb_pol_v3},                       // 25
+			{QStringLiteral("afb_der_v5_tdunlim"), &CommandProcessor_LM5_LM6::afb_der_v5_tdunlim},       // 26	td is unlimited
+			{QStringLiteral("afb_der_v5_td350000"), &CommandProcessor_LM5_LM6::afb_der_v5_td350000},     // 26	td is limited to 350000ms
+			{QStringLiteral("afb_mismatch_v2"), &CommandProcessor_LM5_LM6::afb_mismatch_v2},             // 27
+			{QStringLiteral("afb_mismatch_v3"), &CommandProcessor_LM5_LM6::afb_mismatch_v3},             // 27
+			{QStringLiteral("afb_mismatch_v4"), &CommandProcessor_LM5_LM6::afb_mismatch_v4},             // 27
+			{QStringLiteral("afb_tconv_v0"), &CommandProcessor_LM5_LM6::afb_tconv_v0},                   // 28
+			{QStringLiteral("afb_tconv_v1"), &CommandProcessor_LM5_LM6::afb_tconv_v1},                   // 28
+			{QStringLiteral("afb_indication_v1"), &CommandProcessor_LM5_LM6::afb_indication_v1},         // 29
+			{QStringLiteral("afb_pulse_gen_v0"), &CommandProcessor_LM5_LM6::afb_pulse_gen_v0},           // 30
 		};
 
 		static constexpr int m_cycleDurationMs = 5;
@@ -573,5 +571,4 @@ namespace Sim
 		friend SimCommandTest_LM5_LM6;
 	};
 
-}
-
+} // namespace Sim

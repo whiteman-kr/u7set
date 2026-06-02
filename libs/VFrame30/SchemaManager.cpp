@@ -93,7 +93,7 @@ namespace VFrame30
 								  QDateTime /*to*/,
 								  E::TimeType /*timeType*/,
 								  E::TrendMode /*mode*/,
-								  std::list<std::shared_ptr<TrendLib::OneHourData>>* /*outData*/) const
+								  std::list<std::shared_ptr<const TrendLib::OneHourData>>* /*outData*/) const
 	{
 		Q_ASSERT(false);
 		return false;
@@ -101,7 +101,6 @@ namespace VFrame30
 
 	TimeStamp SchemaManager::maxTimeStamp(QUuid /*trendUuid*/, E::TimeType /*timeType*/) const
 	{
-		Q_ASSERT(false);
 		return {};
 	}
 

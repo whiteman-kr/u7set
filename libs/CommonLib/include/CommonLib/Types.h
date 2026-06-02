@@ -4,8 +4,8 @@
 #include <QMetaObject>
 #include <QObject>
 #include <cassert>
-#include <type_traits>
 #include <cstdint>
+#include <type_traits>
 
 /*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
@@ -537,17 +537,31 @@ public:
 	};
 	Q_ENUM(TrendMode)
 
+	/// \brief Trend display mode.
+	///
+	/// Controls how multiple signal trends are drawn in the same chart area.
 	enum class TrendViewMode
 	{
+		/// \brief 0 - Draw each signal trend in its own lane.
 		Separated,
+
+		/// \brief 1 - Draw all analog signal trends on the same lane.
 		Overlapped
 	};
 	Q_ENUM(TrendViewMode)
 
+	/// \brief Trend axis scaling type.
+	///
+	/// Selects how the trend value axis is scaled when drawing indicator data.
 	enum class TrendScaleType
 	{
+		/// \brief 0 - Linear value scale.
 		Linear,
+
+		/// \brief 1 - Base-10 logarithmic value scale.
 		Log10,
+
+		/// \brief 2 - Period-based scale.
 		Period
 	};
 	Q_ENUM(TrendScaleType)

@@ -61,12 +61,11 @@ namespace SimUi
 									 QDateTime /*to*/,
 									 E::TimeType /*timeType*/,
 									 E::TrendMode /*mode*/,
-									 std::list<std::shared_ptr<TrendLib::OneHourData>>* /*outData*/) const
+									 std::list<std::shared_ptr<const TrendLib::OneHourData>>* /*outData*/) const
 	{
 		// If you want Monitor schemas in simulator ide and want SchemaItemIndicator in mode trend
 		// then you have to add here some code
 		//
-		Q_ASSERT(false);
 		return false;
 	}
 

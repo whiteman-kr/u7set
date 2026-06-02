@@ -5,7 +5,13 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	signalSet: ConfigStruct.SignalSet, subsystemStorage: ConfigStruct.SubsystemStorage, opticModuleStorage: ConfigStruct.OptoModuleStorage, logicModuleDescription: ConfigStruct.LogicModule)
 {
 
-	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID", "MasterPIN"];
+	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "DiagLANDataSize", 
+		"TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID", 
+		"MasterPIN", 
+		"TrackballEnable", "TrackballType", 
+		"TouchscreenEnable", "TouchscreenType", 
+		"KeyboardEnable", "KeyboardType",
+		"PlantTimeEnable"];
 	for (let cp: number = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -21,6 +27,17 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	let LMNumber: number = module.propertyInt("LMNumber");
 	let moduleId: number = module.moduleFamily + module.moduleVersion;
 	let masterPIN: string = module.propertyString("MasterPIN");
+	
+	let trackballEnable: boolean = module.propertyBool("TrackballEnable");
+	let trackballType: number = module.propertyInt("TrackballType");
+
+	let touchscreenEnable: boolean = module.propertyBool("TouchscreenEnable");
+	let touchscreenType: number = module.propertyInt("TouchscreenType");
+
+	let keyboardEnable: boolean = module.propertyBool("KeyboardEnable");
+	let keyboardType: number = module.propertyInt("KeyboardType");
+
+	let plantTimeEnable: boolean = module.propertyBool("PlantTimeEnable");
 
 	// Constants
 	//
@@ -198,7 +215,76 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] MasterPIN = " + masterPinHash + "\r\n");
 	ptr += 4;
-	
+
+	//TrackballEnable
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "TrackballEnable", 
+		(trackballEnable === true ? 1 : 0)) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] TrackballEnable = " + trackballEnable + "\r\n");
+	ptr += 2;
+
+	//TrackballType
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "TrackballType", 
+		trackballType) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] TrackballType = " + trackballType + "\r\n");
+	ptr += 2;
+
+	//TouchscreenEnable
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "TouchscreenEnable", 
+		(touchscreenEnable === true ? 1 : 0)) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] TouchscreenEnable = " + touchscreenEnable + "\r\n");
+	ptr += 2;
+
+	//TouchscreenType
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "TouchscreenType", 
+		touchscreenType) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] TouchscreenType = " + touchscreenType + "\r\n");
+	ptr += 2;
+
+	//KeyboardEnable
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "KeyboardEnable", 
+		(keyboardEnable === true ? 1 : 0)) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] KeyboardEnable = " + keyboardEnable + "\r\n");
+	ptr += 2;
+
+	//KeyboardType
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "KeyboardType", 
+		keyboardType) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] KeyboardType = " + keyboardType + "\r\n");
+	ptr += 2;
+
+	//PlantTimeEnablee
+
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "PlantTimeEnable", 
+		(plantTimeEnable === true ? 1 : 0)) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] PlantTimeEnable = " + (plantTimeEnable === true ? 1 : 0) + "\r\n");
+	ptr += 2;
 	
 	// Create LANs configuration
 	//

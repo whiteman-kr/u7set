@@ -13,6 +13,7 @@
 	let FamilyTIM = 0x1900;
 	let FamilyRIM = 0x1A00;
 	let FamilyFIM = 0x1B00;
+	let FamilyPLM = 0x1D00;
 	
 	let LMVersionPhase3 = 0;
 	let LMVersionPhase4 = 1;
@@ -134,6 +135,35 @@
 	{
 		// LM1-SF41-6PH
 		//
+
+		// The PLM shall not be installed together with another I/O modules, check this
+		//
+		if (family === FamilyPLM)
+		{
+			let childrenCount = chassis.childrenCount;
+			for (let i = 0; i < childrenCount; i++)
+			{
+				let childModule = chassis.child(i);
+				if (childModule == null)
+				{
+					return false;
+				}
+				if (childModule.isModule() === false)
+				{
+					continue;
+				}
+				
+				let childFamily = childModule.propertyValue("ModuleFamily");
+		
+				// Only LM or PLM allowed in the chassis
+				//
+				if (childFamily != FamilyLM && childFamily != FamilyPLM)
+				{
+					return false;
+				}
+			}
+		}
+				
 		if ((family === FamilyAIM && version === 1) ||	//AIM
 			(family === FamilyAOM && version === 1) ||	//AOM
 			(family === FamilyDIM && version === 0) ||	//DIM
@@ -143,7 +173,8 @@
 			(family === FamilyWAIM && version === 0) ||	//WAIM
 			(family === FamilyTIM && version === 0) ||	//TIM
 			(family === FamilyFIM && version === 0) ||	//FIM
-			(family === FamilyRIM && version === 0))	//RIM
+			(family === FamilyRIM && version === 0) ||	//RIM
+			(family === FamilyPLM && ((place & 1) != 0) /*shall be oll places*/))	//PLM
 		{
 			return true; 
 		} 

@@ -4695,18 +4695,20 @@ namespace Builder
 	///		%1 functional block parameter caption
 	///		%2 functional block caption
 	///		%3 application logic item Uuid
-	///
+	///		%4 item label
+	///		%5 schema ID
+	/// 
 	/// Description:
 	///		Specified parameter must have type 32-bit Float. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	void IssueLogger::errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid, QString itemLabel, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5050, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5050,
-				  QString(tr("Parameter %1 of AFB %2 must have type 32-bit Float.")).
-				  arg(paramCaption).arg(fbCaption));
+				  QString(tr("Parameter %1 of AFB %2 must have type 32-bit Float (Item %3, Schema %4).")).
+				  arg(paramCaption).arg(fbCaption).arg(itemLabel).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5051
@@ -4720,18 +4722,20 @@ namespace Builder
 	///		%2 functional block parameter caption
 	///		%3 functional block caption
 	///		%4 application logic item Uuid
-	///
+	///		%5 item label
+	///		%6 schema ID
+	///	
 	/// Description:
 	///		Specified parameter must have type 32-bit Float. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid)
+	void IssueLogger::errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid, QString itemLabel, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5051, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5051,
-				  QString(tr("Value %1 of parameter %2 of AFB %3 is incorrect.")).
-				  arg(paramValue).arg(paramCaption).arg(fbCaption));
+				  QString(tr("Value %1 of parameter %2 of AFB %3 is incorrect (Item %4, Schema %5).")).
+				  arg(paramValue).arg(paramCaption).arg(fbCaption).arg(itemLabel).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5052

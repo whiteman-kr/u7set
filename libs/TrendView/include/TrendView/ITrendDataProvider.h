@@ -1,5 +1,4 @@
-#ifndef ITRENDDATAPROVIDER_H
-#define ITRENDDATAPROVIDER_H
+#pragma once
 #include <CommonLib/Times.h>
 #include <list>
 #include <memory>
@@ -23,13 +22,11 @@ namespace TrendLib
 							   QDateTime to,
 							   E::TimeType timeType,
 							   E::TrendMode mode,
-							   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const = 0;
+							   std::list<std::shared_ptr<const TrendLib::OneHourData>>* outData) const = 0;
 
 		// Get maximum TimeStamp buy all signals
 		//
 		virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const = 0;
 	};
 
-}
-
-#endif // ITRENDDATAPROVIDER_H
+} // namespace TrendLib

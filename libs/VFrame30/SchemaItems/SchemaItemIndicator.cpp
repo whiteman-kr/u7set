@@ -1,14 +1,14 @@
-#include <VFrame30/SchemaItemIndicator.h>
 #include "../AppSignalLib/TuningSignalState.h"
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/DrawParam.h>
-#include <VFrame30/Schema.h>
-#include <VFrame30/FblItemRect.h>
-#include <VFrame30/MacrosExpander.h>
 #include <VFrame30/AppSignalController.h>
-#include <VFrame30/IndicatorHistogramVert.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/FblItemRect.h>
 #include <VFrame30/IndicatorArrowIndicator.h>
+#include <VFrame30/IndicatorHistogramVert.h>
 #include <VFrame30/IndicatorTrend.h>
+#include <VFrame30/MacrosExpander.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/Schema.h>
+#include <VFrame30/SchemaItemIndicator.h>
 
 namespace VFrame30
 {
@@ -24,16 +24,24 @@ namespace VFrame30
 	}
 
 	SchemaItemIndicator::SchemaItemIndicator(SchemaUnit unit) :
-		m_indicatorObjects
-			{
-				std::make_unique<IndicatorHistogramVert>(unit),		// E::IndicatorType::HistogramVert
-				std::make_unique<IndicatorArrowIndicator>(unit),	// E::IndicatorType::ArrowIndicator
-				std::make_unique<IndicatorTrend>(unit),				// E::IndicatorType::Trend
-			}
+		m_indicatorObjects{
+			std::make_unique<IndicatorHistogramVert>(unit),  // E::IndicatorType::HistogramVert
+			std::make_unique<IndicatorArrowIndicator>(unit), // E::IndicatorType::ArrowIndicator
+			std::make_unique<IndicatorTrend>(unit),          // E::IndicatorType::Trend
+		}
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemIndicator::signalIdsString, SchemaItemIndicator::setSignalIdsString);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::appSignalIDs,
+								 PropertyNames::functionalCategory,
+								 true,
+								 SchemaItemIndicator::signalIdsString,
+								 SchemaItemIndicator::setSignalIdsString);
 
-		ADD_PROPERTY_GETTER_SETTER(E::IndicatorType, PropertyNames::indicatorType, true, SchemaItemIndicator::indicatorType, SchemaItemIndicator::setIndicatorType);
+		ADD_PROPERTY_GETTER_SETTER(E::IndicatorType,
+								   PropertyNames::indicatorType,
+								   true,
+								   SchemaItemIndicator::indicatorType,
+								   SchemaItemIndicator::setIndicatorType);
 
 		m_static = false;
 		setItemUnit(unit);
@@ -113,7 +121,7 @@ namespace VFrame30
 
 		// --
 		//
-		setIndicatorType(static_cast<E::IndicatorType>(indicatorMessage.type()));	// call setter to create properties
+		setIndicatorType(static_cast<E::IndicatorType>(indicatorMessage.type())); // call setter to create properties
 
 		return true;
 	}
@@ -241,9 +249,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in MonitorMode
 		//
-		if (context != nullptr &&
-			context->appSignalController() != nullptr &&
-			context->viewVariables() != nullptr)
+		if (context != nullptr && context->appSignalController() != nullptr && context->viewVariables() != nullptr)
 		{
 			result = MacrosExpander::parse(result, context, nullptr, this);
 		}
@@ -268,9 +274,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in MonitorMode
 		//
-		if (context != nullptr &&
-			context->appSignalController() != nullptr &&
-			context->viewVariables() != nullptr)
+		if (context != nullptr && context->appSignalController() != nullptr && context->viewVariables() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 		}
@@ -303,7 +307,7 @@ namespace VFrame30
 			value = E::IndicatorType::HistogramVert;
 		}
 
-		m_indicatorType = value;		// Getter will other object with different properties
+		m_indicatorType = value; // Getter will other object with different properties
 
 		updateIndicatorProperties();
 
@@ -324,5 +328,46 @@ namespace VFrame30
 		return;
 	}
 
-}
+	QObject* SchemaItemIndicator::histogramVertIndicatorObject()
+	{
+		if (m_indicatorType != E::IndicatorType::HistogramVert)
+		{
+			return nullptr;
+		}
 
+		auto i = indicatorObject<IndicatorHistogramVert>();
+		Q_ASSERT(i);
+
+		QJSEngine::setObjectOwnership(i, QJSEngine::CppOwnership);
+		return i;
+	}
+
+	QObject* SchemaItemIndicator::arrowIndicatorObject()
+	{
+		if (m_indicatorType != E::IndicatorType::ArrowIndicator)
+		{
+			return nullptr;
+		}
+
+		auto i = indicatorObject<IndicatorArrowIndicator>();
+		Q_ASSERT(i);
+
+		QJSEngine::setObjectOwnership(i, QJSEngine::CppOwnership);
+		return i;
+	}
+
+	IndicatorTrend* SchemaItemIndicator::trendIndicatorObject()
+	{
+		if (isTrend() == false)
+		{
+			return nullptr;
+		}
+
+		auto i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
+
+		QJSEngine::setObjectOwnership(i, QJSEngine::CppOwnership);
+		return i;
+	}
+
+} // namespace VFrame30

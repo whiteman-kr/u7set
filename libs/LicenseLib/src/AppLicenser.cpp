@@ -105,7 +105,6 @@ namespace
 		QString output = process.readAllStandardOutput();
 		return output.trimmed();
 #endif
-		return QString();
 	}
 
 	// Functions to get hardware identifiers
@@ -484,9 +483,9 @@ namespace
 		{
 			return QString("%1|%2|%3").arg(manufacturer, product, serialNumber);
 		}
-#endif
-
+	
 		return QString();
+#endif
 	}
 
 	QStringList getMacAddresses()

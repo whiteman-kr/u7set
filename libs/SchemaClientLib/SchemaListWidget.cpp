@@ -16,6 +16,8 @@ namespace SchemaClientLib
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_widget);
 
+		setMinimumHeight(100);
+
 		connect(m_widget, &SchemaListWidgetPrivate::openSchemaRequest, this, &SchemaListWidget::openSchemaRequest);
 
 		return;

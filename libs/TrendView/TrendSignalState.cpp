@@ -154,11 +154,14 @@ namespace TrendLib
 
 		bool ok = true;
 
+#ifdef TREND_ZERO_COPY_TREND_DATA
+		std::shared_lock lock{mutex};
+#endif
 		message->set_time_stamp(timeStamp.timeStamp);
-		message->set_state(static_cast<int>(state));
+		message->set_state(static_cast<int>(state_));
 
-		message->mutable_records()->Reserve(static_cast<int>(data.size()));
-		for (const TrendStateRecord& record : data)
+		message->mutable_records()->Reserve(static_cast<int>(data_.size()));
+		for (const TrendStateRecord& record : data_)
 		{
 			ok &= record.save(message->add_records());
 		}
@@ -170,15 +173,19 @@ namespace TrendLib
 	{
 		bool ok = true;
 
-		// message.time_stamp() -- is not read jere, it is required on one level lower, in TrendArchive as a key to map
-		state = static_cast<OneHourData::State>(message.state());
+#ifdef TREND_ZERO_COPY_TREND_DATA
+		std::unique_lock lock{mutex};
+#endif
 
-		data.clear();
-		data.reserve(message.records_size());
+		// message.time_stamp() -- is not read here, it is required on one level lower, in TrendArchive as a key to map
+		state_ = static_cast<OneHourData::State>(message.state());
+
+		data_.clear();
+		data_.reserve(message.records_size());
 
 		for (int i = 0; i < message.records_size(); i++)
 		{
-			TrendStateRecord& record = data.emplace_back();
+			TrendStateRecord& record = data_.emplace_back();
 			ok &= record.load(message.records(i));
 		}
 

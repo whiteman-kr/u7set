@@ -1047,6 +1047,7 @@ namespace LmDescriptionName
 	inline const QString LM8_SR10("LM8_SR10");
 
 	inline const QString LM11_SR90("LM11_SR90");
+	inline const QString LM_SF41("LM_SF41");
 }
 
 namespace BOM

@@ -108,7 +108,31 @@ namespace EditEngine
 	{
 		assert(item);
 
-		item->setPropertyValue(propertyName, value);
+		if (value.userType() == qMetaTypeId<Afb::AfbParamValue>()) 
+		{
+			// For AFB values, we should keep the original QVariant type when setting the new value
+			//
+			Afb::AfbParamValue afbValue = item->propertyValue(propertyName).value<Afb::AfbParamValue>();
+			int typeId = afbValue.value().typeId();					// keep the type
+			
+			QVariant v = value.value<Afb::AfbParamValue>().value(); // new value that wants to be be set
+			if (v.convert(typeId) == true)							// convert it to the original type
+			{
+				afbValue.setValue(v);
+				item->setPropertyValue(propertyName, afbValue.toVariant());
+			}
+			else
+			{
+				QMessageBox::critical(schemaView,
+									  QObject::tr("Error"),
+									  QObject::tr("Invalid value format for property '%1'.").arg(propertyName));
+			}
+		}
+		else
+		{
+			item->setPropertyValue(propertyName, value);
+		}
+	
 
 		auto property = item->propertyByCaption(propertyName);
 		assert(property);
