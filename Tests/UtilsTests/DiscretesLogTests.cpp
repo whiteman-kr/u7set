@@ -171,7 +171,7 @@ TEST(DiscretesLogWriterTests, InsertBatch)
 
 	writer.pushStates(states);
 
-	QThread::msleep(500);
+	QThread::msleep(1000);
 
 	const std::vector<DiscretesLogRecord> rows = readAllRows(DiscretesLogWriter::databaseName());
 

@@ -773,7 +773,9 @@ bool DiscretesLogWriter::openDatabase()
 {
 	m_dbIsWorkable = false;
 
-	m_db = QSqlDatabase::addDatabase("QSQLITE", "DiscretesLogWriter");
+	QString dbName = QString("DiscretesLogWriter_%1").arg(QUuid::createUuid().toString());
+
+	m_db = QSqlDatabase::addDatabase("QSQLITE", dbName);
 
 	m_db.setDatabaseName(m_databaseName);
 
