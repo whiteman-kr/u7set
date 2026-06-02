@@ -34,6 +34,8 @@ public:
 
 	~ServerStubGuard()
 	{
+		m_stub.reset();
+
 		if (m_server)
 		{
 			m_server->stop();
@@ -74,16 +76,16 @@ ServerStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP,
 												 appSignals, appSignalStates,
 												 dsLogWriter, logger);
 
+	server->start();
+
+	std::this_thread::sleep_for(1s);
+
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
 	std::unique_ptr<Grpc::AppDataSrv::Stub> stub = Grpc::AppDataSrv::NewStub(channel);
 
 	ServerStubGuard ssg(std::move(server), std::move(stub));
-
-	ssg.server().start();
-
-	std::this_thread::sleep_for(1s);
 
 	return ssg;
 }
@@ -302,7 +304,7 @@ TEST(GrpcAppDataSrvTest, SessionTimeout)
 
 TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 {
-	ServerStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14000}, nullptr);
+	ServerStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 13994}, nullptr);
 
 	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 

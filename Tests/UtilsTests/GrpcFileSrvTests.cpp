@@ -16,25 +16,86 @@
 
 #include "Common.h"
 
+using namespace std::chrono_literals;
+
 const std::vector<ClientInfo> clients =
 	{
 		{ "MONITOR1", E::SoftwareType::Monitor, "WS1" },
 	};
 
-std::unique_ptr<Grpc::FileSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
-																std::unique_ptr<GrpcFileSrv>& outServer)
+class FileServerStubGuard
+{
+public:
+	explicit FileServerStubGuard(std::unique_ptr<GrpcFileSrv> server, std::unique_ptr<Grpc::FileSrv::Stub> stub) :
+		m_server(std::move(server)),
+		m_stub(std::move(stub))
+	{
+	}
+
+	FileServerStubGuard(FileServerStubGuard&&) noexcept = default;
+
+	~FileServerStubGuard()
+	{
+		m_stub.reset();
+
+		if (m_server)
+		{
+			m_server->stop();
+		}
+	}
+
+	GrpcFileSrv& server() const
+	{
+		Q_ASSERT(m_server != nullptr);
+		return *m_server.get();
+	}
+
+	Grpc::FileSrv::Stub& stub() const
+	{
+		Q_ASSERT(m_stub != nullptr);
+		return *m_stub.get();
+	}
+
+private:
+	std::unique_ptr<GrpcFileSrv> m_server;
+	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
+};
+
+
+//std::unique_ptr<Grpc::FileSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
+//																std::unique_ptr<GrpcFileSrv>& outServer)
+//{
+//	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
+//
+//	outServer = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false,
+//												 listenIP, buildPath, logger);
+//
+//	outServer->start();
+//
+//	const std::string endpoint = listenIP.addressPortStr().toStdString();
+//
+//	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
+//	return Grpc::FileSrv::NewStub(channel);
+//}
+
+FileServerStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP)
 {
 	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
+	
+	std::unique_ptr<GrpcFileSrv> server = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false, listenIP, buildPath, logger);
 
-	outServer = std::make_unique<GrpcFileSrv>(si, true, std::vector<ClientInfo>{}, false,
-												 listenIP, buildPath, logger);
+	server->start();
 
-	outServer->start();
+	std::this_thread::sleep_for(1s);
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
-	return Grpc::FileSrv::NewStub(channel);
+	std::unique_ptr<Grpc::FileSrv::Stub> stub  = Grpc::FileSrv::NewStub(channel);
+
+	FileServerStubGuard ssg(std::move(server), std::move(stub));
+
+	return ssg;
 }
 
 std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Status* status = nullptr)
@@ -76,10 +137,9 @@ std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Sta
 
 TEST(GrpcFileSrvTest, GetFile_ShortFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14100}, server);
+	FileServerStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14100});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -93,7 +153,7 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 
 	req.set_filename(File::SLASH_BUILD_XML.toStdString());
 
-	auto reader = stub->GetFile(&ctx, req);
+	auto reader = ssg.stub().GetFile(&ctx, req);
 
 	Grpc::GetFileReply reply;
 
@@ -114,16 +174,13 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 	grpc::Status st = reader->Finish();
 
 	EXPECT_TRUE(st.ok());
-
-	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_LongFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14101}, server);
+	FileServerStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14101});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -138,7 +195,7 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 
 		req.set_filename("/Reports/Equipment.json");
 
-		auto reader = stub->GetFile(&ctx, req);
+		auto reader = ssg.stub().GetFile(&ctx, req);
 
 		Grpc::GetFileReply reply;
 
@@ -181,16 +238,13 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 
 		EXPECT_TRUE(st.ok());
 	}
-
-	server->stop();
 }
 
 TEST(GrpcFileSrvTest, GetFile_WrongFile)
 {
-	std::unique_ptr<GrpcFileSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14102}, server);
+	FileServerStubGuard ssg = StartServerAndMakeClient({"127.0.0.1", 14102});
 
-	const std::string authToken = Handshake(*stub, clients[0]);
+	const std::string authToken = Handshake(ssg.stub(), clients[0]);
 
 	ASSERT_FALSE(authToken.empty());
 
@@ -204,7 +258,7 @@ TEST(GrpcFileSrvTest, GetFile_WrongFile)
 
 	req.set_filename("/build123.xml");			// wrong file
 
-	auto reader = stub->GetFile(&ctx, req);
+	auto reader = ssg.stub().GetFile(&ctx, req);
 
 	Grpc::GetFileReply reply;
 
@@ -220,8 +274,6 @@ TEST(GrpcFileSrvTest, GetFile_WrongFile)
 	grpc::Status st = reader->Finish();
 
 	EXPECT_TRUE(st.ok());
-
-	server->stop();
 }
 
 TEST(GrpcFileClientTest, GetFile_ShortFile)
@@ -235,6 +287,8 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 									serverAddr, buildPath, logger);
 
 	server->start();
+
+	QThread::sleep(1);
 
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
@@ -290,6 +344,8 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	server->start();
 
+	QThread::sleep(1);
+
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
 	QDir().mkpath(tempDir);
@@ -343,6 +399,8 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 
 	server->start();
 
+	QThread::sleep(1);
+
 	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
 
 	QDir().mkpath(tempDir);
@@ -384,6 +442,8 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 
 	server->start();
 
+	QThread::sleep(1);
+
 #ifdef Q_OS_WIN
 	const QString tempDir = "Z:/not_exist_dir/temp";
 #else
@@ -396,6 +456,8 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 																			  tempDir, "GrpcFileClientTest", logger, 3000);
 
 	client->start();
+
+	QThread::sleep(1);
 
 	QString fileName(File::SLASH_BUILD_XML);
 
