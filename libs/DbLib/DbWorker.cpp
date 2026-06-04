@@ -471,6 +471,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0441.sql", "Upgrade to version 441, GatewayService preset updating"},
 	{":/DatabaseUpgrade/Upgrade0442.sql", "Upgrade to version 442, LM-SF41, PLM, FSCChassis, LM-SF41 xml, RVDU, ConfigScript.js preset updating"},
 	{":/DatabaseUpgrade/Upgrade0443.sql", "Upgrade to version 443, Update for LM-SF41 LmDescription, Review of AFB func_v6"},
+	{":/DatabaseUpgrade/Upgrade0444.sql", "Upgrade to version 444, Update for LM-SF41 LmDescription, New AFB mem_v10"},
 };
 
 int DbWorker::counter = 0;

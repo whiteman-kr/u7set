@@ -4023,7 +4023,22 @@ namespace Sim
 		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
 		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
 
-		return afb_mem_private(instance, conf, count, 8);
+		return afb_mem_private(instance, conf, count, 9);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mem_v10(AfbComponentInstance* instance)
+	{
+		const int i_count = 0; // Input count
+		const int i_conf = 1;  // SI/FP
+		const int maxInputCount = 8;
+
+		quint16 count = instance->param(i_count)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		return afb_mem_private(instance, conf, count, 10);
 	}
 
 	void CommandProcessor_LM5_LM6::afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version)
@@ -4168,7 +4183,12 @@ namespace Sim
 			Operand maxOperand{AfbComponentParam{static_cast<quint16>(o_max_val)}, 0};
 			Operand minOperand{AfbComponentParam{static_cast<quint16>(o_min_val)}, 0};
 
-			size_t operandCount = 0;
+			size_t operandCount = 0;           // How many valid operands are there, excluding NaN if version is 10
+			size_t configuredOperandCount = 0; // How many operands are enabled, even if they are NaN
+			quint16 overflow = 0;
+			quint16 underflow = 0;
+			quint16 nan = 0;
+			quint16 mem_edi = 0;
 
 			for (quint16 i = 0; i < count; i++)
 			{
@@ -4178,30 +4198,37 @@ namespace Sim
 					continue;
 				}
 
-				const AfbComponentParam* value = instance->param(i_in_1 + i * 2);
+				configuredOperandCount++;
 
-				if (operandCount == 0 || value->floatValue() < minOperand.value.floatValue())
+				const AfbComponentParam* value = instance->param(i_in_1 + i * 2);
+				const double inputValue = value->floatValue();
+
+				if (version == 10 && std::isnan(inputValue) == true)
+				{
+					// In version 10, if input is NaN, then exclude it from calculation.
+					//
+					nan = true;
+					continue;
+				}
+
+				if (operandCount == 0 || inputValue < minOperand.value.floatValue())
 				{
 					minOperand = {*value, i};
 				}
 
-				if (operandCount == 0 || value->floatValue() > maxOperand.value.floatValue())
+				if (operandCount == 0 || inputValue > maxOperand.value.floatValue())
 				{
 					maxOperand = {*value, i};
 				}
 
-				operands[operandCount++] = {*value, i};
+				operands[operandCount] = {*value, i};
+				operandCount++;
 			}
 
 			// --
 			//
 			Operand median = {AfbComponentParam{static_cast<quint16>(o_med_val)}, 0};
-
 			quint16 validity = (operandCount > 0);
-			quint16 overflow = 0;
-			quint16 underflow = 0;
-			quint16 nan = 0;
-			quint16 mem_edi = 0;
 
 			switch (operandCount)
 			{
@@ -4209,7 +4236,7 @@ namespace Sim
 				median = {AfbComponentParam{0}, 0};
 				maxOperand = {AfbComponentParam{0}, 0};
 				minOperand = {AfbComponentParam{0}, 0};
-				mem_edi = 1; // <<<< Error indication
+				mem_edi = (configuredOperandCount == 0); // <<<< Configuration error indication
 				break;
 
 			case 1:
@@ -8234,5 +8261,4 @@ namespace Sim
 
 		return;
 	}
-
 } // namespace Sim
