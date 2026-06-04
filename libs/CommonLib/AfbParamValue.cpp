@@ -1,10 +1,10 @@
 #ifndef COMMON_LIB_DOMAIN
-#error Do not include this file in the project! Link DbLib instead.
+	#error Do not include this file in the project! Link DbLib instead.
 #endif
 
 #include <CommonLib/AfbParamValue.h>
-#include <optional>
 #include <QRegularExpression>
+#include <optional>
 
 namespace Afb
 {
@@ -16,6 +16,18 @@ namespace Afb
 		m_dataFormat(dataFormat),
 		m_size(size)
 	{
+		switch (m_dataFormat)
+		{
+		case E::DataFormat::Float:
+			m_value.setValue<float>(0.0f);
+			break;
+		case E::DataFormat::UnsignedInt:
+			m_value.setValue<uint>(0);
+			break;
+		case E::DataFormat::SignedInt:
+			m_value.setValue<int>(0);
+			break;
+		}
 	}
 
 	QString AfbParamValue::toString() const
@@ -93,7 +105,7 @@ namespace Afb
 	{
 		// Check if string is reference
 		//
-		thread_local const QRegularExpression rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
+		thread_local const QRegularExpression rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$"); // $(A_2A.BB_.CC3)
 		if (rx.match(str).hasMatch() == true)
 		{
 			m_reference = str;
@@ -186,8 +198,7 @@ namespace Afb
 
 	QVariant AfbParamValue::toVariant() const
 	{
-		if (bool ok = checkValue();
-			ok == false)
+		if (bool ok = checkValue(); ok == false)
 		{
 			Q_ASSERT(ok);
 			return {};
@@ -276,21 +287,20 @@ namespace Afb
 	bool AfbParamValue::checkValue() const
 	{
 		auto checkValueType = [this]<class T>(quint16 size) -> std::optional<bool>
+		{
+			if (m_size == size)
 			{
-				if (m_size == size)
-				{
-					return {m_value.canConvert<T>()};
-				}
-				return {};
-			};
+				return {m_value.canConvert<T>()};
+			}
+			return {};
+		};
 
 		switch (m_type)
 		{
 		case E::SignalType::Analog:
 			if (m_dataFormat == E::DataFormat::Float)
 			{
-				if (auto r = checkValueType.operator()<float>(32);
-					r.has_value() == false || r.value() == false)
+				if (auto r = checkValueType.operator()<float>(32); r.has_value() == false || r.value() == false)
 				{
 					Q_ASSERT(false);
 					return false;
@@ -301,8 +311,7 @@ namespace Afb
 
 			if (m_dataFormat == E::DataFormat::UnsignedInt)
 			{
-				if (auto r = checkValueType.operator()<quint16>(16);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<quint16>(16); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -315,8 +324,7 @@ namespace Afb
 					}
 				}
 
-				if (auto r = checkValueType.operator()<quint32>(32);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<quint32>(32); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -329,8 +337,7 @@ namespace Afb
 					}
 				}
 
-				if (auto r = checkValueType.operator()<quint64>(64);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<quint64>(64); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -351,8 +358,7 @@ namespace Afb
 
 			if (m_dataFormat == E::DataFormat::SignedInt)
 			{
-				if (auto r = checkValueType.operator()<qint16>(16);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<qint16>(16); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -365,8 +371,7 @@ namespace Afb
 					}
 				}
 
-				if (auto r = checkValueType.operator()<qint32>(32);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<qint32>(32); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -379,8 +384,7 @@ namespace Afb
 					}
 				}
 
-				if (auto r = checkValueType.operator()<qint64>(64);
-					r.has_value() == true)
+				if (auto r = checkValueType.operator()<qint64>(64); r.has_value() == true)
 				{
 					if (r.value() == false)
 					{
@@ -405,8 +409,7 @@ namespace Afb
 			return false;
 
 		case E::SignalType::Discrete:
-			if (m_dataFormat != E::DataFormat::UnsignedInt ||
-				m_value.canConvert<quint16>() == false)
+			if (m_dataFormat != E::DataFormat::UnsignedInt || m_value.canConvert<quint16>() == false)
 			{
 				Q_ASSERT(m_dataFormat == E::DataFormat::UnsignedInt);
 				Q_ASSERT(m_value.canConvert<quint16>());
@@ -422,4 +425,4 @@ namespace Afb
 
 		return false;
 	}
-}
+} // namespace Afb
