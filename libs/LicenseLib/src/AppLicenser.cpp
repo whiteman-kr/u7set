@@ -14,6 +14,7 @@
 
 	#ifdef FAST_SMBIOS_SYSTEM_UUID_WIN32
 		#include <comdef.h>
+		#include <memory>
 		#include <vector>
 		#include <wbemidl.h>
 		#include <windows.h>
@@ -23,6 +24,36 @@
 
 namespace
 {
+#if defined(_WIN32) && defined(FAST_SMBIOS_SYSTEM_UUID_WIN32)
+	template<typename T>
+	struct ComReleaser
+	{
+		void operator()(T* ptr) const
+		{
+			if (ptr)
+			{
+				ptr->Release();
+			}
+		}
+	};
+
+	template<typename T>
+	using ComPtr = std::unique_ptr<T, ComReleaser<T>>;
+
+	struct CoUninitializeGuard
+	{
+		bool active = false;
+
+		~CoUninitializeGuard()
+		{
+			if (active)
+			{
+				CoUninitialize();
+			}
+		}
+	};
+#endif
+
 	// Functions to get hardware identifiers
 	//
 	QString getHardwareId()
@@ -30,7 +61,6 @@ namespace
 #ifdef _WIN32
 	#ifdef FAST_SMBIOS_SYSTEM_UUID_WIN32
 		//
-		// AI generated: Claude Sonnet 3.7 Thinking
 		//
 		UINT size = GetSystemFirmwareTable('RSMB', 0, nullptr, 0);
 		if (size == 0)
@@ -108,14 +138,13 @@ namespace
 	}
 
 	// Functions to get hardware identifiers
-	// AI generated: Claude Sonnet 3.7 Thinking!
 	//
 	QString getCpuInfo()
 	{
 #ifdef _WIN32
 	#ifdef FAST_SMBIOS_SYSTEM_UUID_WIN32
 		QString result;
-		bool comInitializedHere = false;
+		CoUninitializeGuard coUninitializeGuard;
 
 		// Initialize COM
 		HRESULT hres = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -124,7 +153,7 @@ namespace
 			// COM is already initialized with a different threading model
 			// Continue anyway since we can still use COM, just with the existing threading model
 		}
-		else if (FAILED(hres) && hres != S_FALSE && hres != S_OK)
+		else if (FAILED(hres))
 		{
 			// Handle other initialization failures
 			return result;
@@ -132,7 +161,7 @@ namespace
 		else
 		{
 			// We successfully initialized COM, so we need to uninitialize it later
-			comInitializedHere = true;
+			coUninitializeGuard.active = true;
 		}
 
 		// Initialize security
@@ -145,36 +174,33 @@ namespace
 									nullptr,
 									EOAC_NONE,
 									nullptr);
+		if (FAILED(hres) && hres != RPC_E_TOO_LATE)
+		{
+			return result;
+		}
 
 		// Create WMI locator
-		IWbemLocator* pLoc = nullptr;
-		hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
+		IWbemLocator* pLocRaw = nullptr;
+		hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLocRaw);
+		ComPtr<IWbemLocator> pLoc{pLocRaw};
 
 		if (FAILED(hres) || !pLoc)
 		{
-			if (comInitializedHere)
-			{
-				CoUninitialize();
-			}
 			return result;
 		}
 
 		// Connect to WMI
-		IWbemServices* pSvc = nullptr;
-		hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
+		IWbemServices* pSvcRaw = nullptr;
+		hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, 0, 0, 0, 0, &pSvcRaw);
+		ComPtr<IWbemServices> pSvc{pSvcRaw};
 
 		if (FAILED(hres) || !pSvc)
 		{
-			pLoc->Release();
-			if (comInitializedHere)
-			{
-				CoUninitialize();
-			}
 			return result;
 		}
 
 		// Set security levels
-		hres = CoSetProxyBlanket(pSvc,
+		hres = CoSetProxyBlanket(static_cast<IUnknown*>(pSvc.get()),
 								 RPC_C_AUTHN_WINNT,
 								 RPC_C_AUTHZ_NONE,
 								 nullptr,
@@ -183,32 +209,33 @@ namespace
 								 nullptr,
 								 EOAC_NONE);
 
+		if (FAILED(hres))
+		{
+			return result;
+		}
+
 		// Execute WQL query
-		IEnumWbemClassObject* pEnumerator = nullptr;
+		IEnumWbemClassObject* pEnumeratorRaw = nullptr;
 		hres = pSvc->ExecQuery(bstr_t("WQL"),
 							   bstr_t("SELECT Name FROM Win32_Processor"),
 							   WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
 							   nullptr,
-							   &pEnumerator);
+							   &pEnumeratorRaw);
+		ComPtr<IEnumWbemClassObject> pEnumerator{pEnumeratorRaw};
 
 		if (FAILED(hres) || !pEnumerator)
 		{
-			pSvc->Release();
-			pLoc->Release();
-			if (comInitializedHere)
-			{
-				CoUninitialize();
-			}
 			return result;
 		}
 
 		// Get the data from the query
-		IWbemClassObject* pclsObj = nullptr;
 		ULONG uReturn = 0;
 
 		while (pEnumerator)
 		{
-			hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+			IWbemClassObject* pclsObjRaw = nullptr;
+			hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObjRaw, &uReturn);
+			ComPtr<IWbemClassObject> pclsObj{pclsObjRaw};
 
 			if (uReturn == 0)
 				break;
@@ -226,22 +253,11 @@ namespace
 					std::wstring wstr(vtProp.bstrVal);
 					result = QString::fromStdWString(wstr).trimmed();
 				}
-				VariantClear(&vtProp);
 			}
-
-			pclsObj->Release();
+			VariantClear(&vtProp);
 
 			// We only need the first processor in most cases
 			break;
-		}
-
-		// Cleanup
-		pEnumerator->Release();
-		pSvc->Release();
-		pLoc->Release();
-		if (comInitializedHere)
-		{
-			CoUninitialize();
 		}
 
 		return result;
@@ -287,37 +303,41 @@ namespace
 		//
 #ifdef _WIN32
 		QString result;
+		CoUninitializeGuard coUninitializeGuard;
 		HRESULT hres = CoInitializeEx(0, COINIT_MULTITHREADED);
 		if (hres == RPC_E_CHANGED_MODE)
 		{
 			// COM already initialized with different threading model, continue anyway
 		}
-		else if (FAILED(hres) && hres != S_FALSE && hres != S_OK)
+		else if (FAILED(hres))
 		{
 			return result;
 		}
+		else
+		{
+			coUninitializeGuard.active = true;
+		}
 
 		// Initialize WMI connection (similar to your CPU info code)
-		IWbemLocator* pLoc = nullptr;
-		hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
+		IWbemLocator* pLocRaw = nullptr;
+		hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLocRaw);
+		ComPtr<IWbemLocator> pLoc{pLocRaw};
 		if (FAILED(hres) || !pLoc)
 		{
-			CoUninitialize();
 			return result;
 		}
 
 		// Connect to WMI
-		IWbemServices* pSvc = nullptr;
-		hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
+		IWbemServices* pSvcRaw = nullptr;
+		hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, 0, 0, 0, 0, &pSvcRaw);
+		ComPtr<IWbemServices> pSvc{pSvcRaw};
 		if (FAILED(hres) || !pSvc)
 		{
-			pLoc->Release();
-			CoUninitialize();
 			return result;
 		}
 
 		// Set security
-		hres = CoSetProxyBlanket(pSvc,
+		hres = CoSetProxyBlanket(static_cast<IUnknown*>(pSvc.get()),
 								 RPC_C_AUTHN_WINNT,
 								 RPC_C_AUTHZ_NONE,
 								 nullptr,
@@ -326,61 +346,59 @@ namespace
 								 nullptr,
 								 EOAC_NONE);
 
+		if (FAILED(hres))
+		{
+			return result;
+		}
+
 		// Query for motherboard info
-		IEnumWbemClassObject* pEnumerator = nullptr;
+		IEnumWbemClassObject* pEnumeratorRaw = nullptr;
 		hres = pSvc->ExecQuery(bstr_t("WQL"),
 							   bstr_t("SELECT Manufacturer, Product, SerialNumber FROM Win32_BaseBoard"),
 							   WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
 							   nullptr,
-							   &pEnumerator);
+							   &pEnumeratorRaw);
+		ComPtr<IEnumWbemClassObject> pEnumerator{pEnumeratorRaw};
 
 		if (FAILED(hres) || !pEnumerator)
 		{
-			pSvc->Release();
-			pLoc->Release();
-			CoUninitialize();
 			return result;
 		}
 
 		// Process query results
-		IWbemClassObject* pclsObj = nullptr;
 		ULONG uReturn = 0;
 		QString manufacturer, product, serialNumber;
+		IWbemClassObject* pclsObjRaw = nullptr;
+		const HRESULT nextResult = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObjRaw, &uReturn);
+		ComPtr<IWbemClassObject> pclsObj{pclsObjRaw};
 
-		if (pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn) == S_OK && uReturn != 0)
+		if (nextResult == S_OK && uReturn != 0)
 		{
+			// Get manufacturer
 			VARIANT vtProp;
 			VariantInit(&vtProp);
-
-			// Get manufacturer
 			if (SUCCEEDED(pclsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0)) && vtProp.vt == VT_BSTR)
 			{
 				manufacturer = QString::fromStdWString(std::wstring(vtProp.bstrVal)).trimmed();
-				VariantClear(&vtProp);
 			}
+			VariantClear(&vtProp);
 
 			// Get product name
+			VariantInit(&vtProp);
 			if (SUCCEEDED(pclsObj->Get(L"Product", 0, &vtProp, 0, 0)) && vtProp.vt == VT_BSTR)
 			{
 				product = QString::fromStdWString(std::wstring(vtProp.bstrVal)).trimmed();
-				VariantClear(&vtProp);
 			}
+			VariantClear(&vtProp);
 
 			// Get serial number
+			VariantInit(&vtProp);
 			if (SUCCEEDED(pclsObj->Get(L"SerialNumber", 0, &vtProp, 0, 0)) && vtProp.vt == VT_BSTR)
 			{
 				serialNumber = QString::fromStdWString(std::wstring(vtProp.bstrVal)).trimmed();
-				VariantClear(&vtProp);
 			}
-
-			pclsObj->Release();
+			VariantClear(&vtProp);
 		}
-
-		// Cleanup
-		pEnumerator->Release();
-		pSvc->Release();
-		pLoc->Release();
-		CoUninitialize();
 
 		// Combine information
 		if (!manufacturer.isEmpty() || !product.isEmpty() || !serialNumber.isEmpty())
@@ -483,7 +501,7 @@ namespace
 		{
 			return QString("%1|%2|%3").arg(manufacturer, product, serialNumber);
 		}
-	
+
 		return QString();
 #endif
 	}
