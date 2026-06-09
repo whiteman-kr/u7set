@@ -211,6 +211,8 @@ void GrpcCfgLoader::onThreadStarted()
 void GrpcCfgLoader::onThreadFinished()
 {
 	stopGrpcFileClient();
+
+	qDebug() << "GrpcCfgLoader::onThreadFinished()";
 }
 
 void GrpcCfgLoader::initPaths(const QString& appEquipmentID, int appInstance)
