@@ -23,7 +23,8 @@
         },
         {
             "name": "grpc",
-            "version": "1.71.0"
+            "version": "1.71.0",
+	    "port-version": 3
         },
         {
             "name": "gtest",
@@ -39,7 +40,7 @@
         },
         {
             "name": "protobuf",
-            "version": "5.29.2"
+            "version": "5.29.5"
         },
         {
           "name": "pugixml",

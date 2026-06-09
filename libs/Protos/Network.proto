@@ -5,8 +5,6 @@ package Network;
 import "AppSignal.proto";
 import "BuildInfo.proto";
 
-option optimize_for = CODE_SIZE;
-
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
 // 2. Request GetSignalListStartReply.partCount times GetSignalListNextRequest (and get GetSignalListNextReply in reply)

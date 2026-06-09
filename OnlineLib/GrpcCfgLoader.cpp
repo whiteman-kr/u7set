@@ -211,8 +211,6 @@ void GrpcCfgLoader::onThreadStarted()
 void GrpcCfgLoader::onThreadFinished()
 {
 	stopGrpcFileClient();
-
-	qDebug() << "GrpcCfgLoader::onThreadFinished()";
 }
 
 void GrpcCfgLoader::initPaths(const QString& appEquipmentID, int appInstance)
@@ -287,7 +285,7 @@ void GrpcCfgLoader::startGrpcFileClient()
 	}
 
 	m_grpcFileClient = std::make_unique<GrpcFileClient>(m_swInfo, m_serverAddrs, m_rootFolder,
-														QStringLiteral("GrpcCfgLoader"), getLog(), 5000);
+														QStringLiteral("GrpcFileClient"), getLog(), 5000);
 
 	m_grpcFileClient->setEmitFileReady(true);
 
@@ -894,6 +892,8 @@ void GrpcCfgLoaderThread::initThread()
 
 void GrpcCfgLoaderThread::shutdownThread()
 {
+	qDebug() << "GrpcCfgLoaderThread::shutdownThread";
+
 	std::lock_guard lg(m_mutex);
 
 	if (m_thread == nullptr)
@@ -901,9 +901,9 @@ void GrpcCfgLoaderThread::shutdownThread()
 		return;
 	}
 
-	m_thread->quitAndWait();			// m_cfgLoader will be deleted here
+	bool result = m_thread->quitAndWait();			// m_cfgLoader will be deleted here
 
-	qDebug() << "GrpcCfgLoaderThread quited";
+	qDebug() << "GrpcCfgLoaderThread quited = " << result;
 
 	delete m_thread;
 

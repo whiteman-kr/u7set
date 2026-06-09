@@ -359,19 +359,16 @@ protected:
 			return st;
 		}
 
-		thread_local bool emitUnknownClientID = true;
-		thread_local bool emitWrongClientHostname = true;
-
 		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
 		{
 			if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
 			{
 				state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
 
-				if (emitUnknownClientID)
+				if (m_emitUnknownClientID)
 				{
 					emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
-					emitUnknownClientID = false;
+					m_emitUnknownClientID = false;
 				}
 			}
 			else
@@ -379,10 +376,10 @@ protected:
 				if (st.error_message() == Grpc::WRONG_HOST_NAME)
 				{
 					state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
-					if (emitWrongClientHostname)
+					if (m_emitWrongClientHostname)
 					{
 						emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
-						emitWrongClientHostname = false;
+						m_emitWrongClientHostname = false;
 					}
 				}
 				else
@@ -455,6 +452,9 @@ private:
 	std::atomic_bool m_quitRequested {false};
 
 	mutable std::atomic<int> m_srvAddrIndex{0};
+
+	bool m_emitUnknownClientID = true;
+	bool m_emitWrongClientHostname = true;
 
 	//
 

@@ -106,6 +106,32 @@
 					"type": "FILEPATH"
 				}
 			]
+		},
+		{
+			"name": "WSL-GCC-Debug-ASan",
+			"generator": "Ninja",
+			"configurationType": "Debug",
+			"buildRoot": "${projectDir}/../build-u7set-${name}",
+			"installRoot": "${projectDir}/../build-u7set-${name}/install",
+			"cmakeExecutable": "cmake",
+			"cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=/home/wm/Qt/6.8.1/gcc_64 -DQt6_DIR=/home/wm/Qt/6.8.1/gcc_64/lib/cmake/Qt6 -DVCPKG_ROOT=/home/wm/vcpkg -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld -DADDRESS_SANITIZER=ON",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "linux_x64" ],
+			"wslPath": "${defaultWSLPath}",
+			"variables": [
+				{
+					"name": "CMAKE_C_COMPILER",
+					"value": "/usr/bin/gcc-13",
+					"type": "FILEPATH"
+				},
+				{
+					"name": "CMAKE_CXX_COMPILER",
+					"value": "/usr/bin/g++-13",
+					"type": "FILEPATH"
+				}
+			]
 		}
+
 	]
 }
