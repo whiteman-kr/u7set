@@ -1,50 +1,52 @@
 {
-    "name": "u7set",
-    "version": "1.0.0",
-    "dependencies": [
-        "asio",
-        "boost-graph",
-        "grpc",
-        "gtest",
-        "libpq",
-        "lua",
-        "openssl",
-        "protobuf",
-        "pugixml"
-    ],
-    "overrides": [
-        {
-            "name": "asio",
-            "version": "1.32.0"
-        },
-        {
-            "name": "boost-graph",
-            "version": "1.86.0"
-        },
-        {
-            "name": "grpc",
-            "version": "1.71.0",
-	    "port-version": 3
-        },
-        {
-            "name": "gtest",
-            "version": "1.15.2"
-        },
-        {
-            "name": "lua",
-            "version": "5.5.0"
-        },
-        {
-            "name": "openssl",
-            "version": "3.4.0#1"
-        },
-        {
-            "name": "protobuf",
-            "version": "5.29.5"
-        },
-        {
-          "name": "pugixml",
-          "version": "1.15#1"
-        }
-    ]
+  "name": "u7set",
+  "version": "1.0.0",
+  "dependencies": [
+    "asio",
+    "boost-graph",
+    "grpc",
+    "gtest",
+    "libpq",
+    "lua",
+    "openssl",
+    "protobuf",
+    "pugixml"
+  ],
+  "overrides": [
+    {
+      "name": "asio",
+      "version": "1.32.0"
+    },
+    {
+      "name": "boost-graph",
+      "version": "1.91.0"
+    },
+    {
+      "name": "grpc",
+      "version": "1.76.0",
+      "port-version": 1
+    },
+    {
+      "name": "gtest",
+      "version": "1.15.2"
+    },
+    {
+      "name": "lua",
+      "version": "5.5.0"
+    },
+    {
+      "name": "openssl",
+      "version": "3.4.0",
+      "port-version": 1
+    },
+    {
+      "name": "protobuf",
+      "version": "6.33.4",
+      "port-version": 2
+    },
+    {
+      "name": "pugixml",
+      "version": "1.15#1"
+    }
+  ]
 }

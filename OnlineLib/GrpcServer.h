@@ -82,7 +82,7 @@ bool WriteReplyFunc(grpc::ServerContext* context, grpc::ServerWriter<REPLY_TYPE>
 
 		if (log != nullptr)
 		{
-			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: context CANCELLED").arg(QString::fromStdString(reply.GetTypeName())));
+			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: context CANCELLED").arg(QString::fromUtf8(reply.GetTypeName())));
 		}
 
 		return false;
@@ -92,7 +92,7 @@ bool WriteReplyFunc(grpc::ServerContext* context, grpc::ServerWriter<REPLY_TYPE>
 	{
 		if (log != nullptr)
 		{
-			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: writer->Write returns FALSE").arg(QString::fromStdString(reply.GetTypeName())));
+			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: writer->Write returns FALSE").arg(QString::fromUtf8(reply.GetTypeName())));
 		}
 
 		return false;
