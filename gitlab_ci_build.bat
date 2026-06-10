@@ -9,3 +9,4 @@ cmake --build ./build --clean-first &&^
 cmake --install ./build --prefix %INSTALL_OUT_DIR%  &&^
 cmake -S %INSTALL_OUT_DIR%/examples/AdsBridgeExample -B ./TestAdsBridgeBuild -DCMAKE_PREFIX_PATH="%INSTALL_OUT_DIR%" &&^
 cmake --build ./TestAdsBridgeBuild
+pause
