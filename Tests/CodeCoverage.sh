@@ -108,7 +108,7 @@ sleep 5
 
 # First run tests that require no ADS connection.
 #
-#$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTestsNoAds.*
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTestsNoAds.*
 
 # Then start ADS for other tests.
 #
@@ -117,7 +117,7 @@ sleep 5
 
 # Run other Adsgateway tests.
 #
-#$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTests.*
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTests.*
 sleep 5
 
 StopServices || true
@@ -131,7 +131,7 @@ pushd $CI_PROJECT_DIR/bin/debug
 date
 
 ./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/GatewayTests/TuningGatewayTests.js -speed_factor=x0.5 -verbose > tgw_SimulatorConsole.out 2>&1 &
-sleep 40
+sleep 10
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
