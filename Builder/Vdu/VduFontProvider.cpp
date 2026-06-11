@@ -1,6 +1,6 @@
 #include "VduFontProvider.h"
 #include "VduUnicodeSubsets.h"
-
+#include "IssueLogger.h"
 
 namespace Builder
 {
@@ -113,13 +113,13 @@ namespace Builder
 		m_symbolSubsets[vduEquipmentId]  = vduSubsets;
 	}
 
-	bool VduFontProvider::checkStringForUnicodeSubsets(const QString& vduEquipmentId, const QString& str, QString& errorMsg) const
+	void VduFontProvider::checkStringForUnicodeSubsets(const QString& vduEquipmentId, const QString& str, IssueLogger& log) const
 	{
 		const auto& subsetsIt = m_symbolSubsets.find(vduEquipmentId);
 		if (subsetsIt == m_symbolSubsets.end())
 		{
-			errorMsg = QObject::tr("The VDU %1 does not exist").arg(vduEquipmentId);
-			return false;
+			log.errEQP6010(vduEquipmentId);
+			return;
 		}
 
 		const auto& vduSubsets = subsetsIt->second;
@@ -135,7 +135,7 @@ namespace Builder
 											   return c >= subset.start && c <= subset.finish;
 										   });
 
-			if (symbolFound == false)
+			if (c.unicode() >= 0x20 && symbolFound == false)
 			{
 				// Symbol was not found - look up the required subset
 				//
@@ -148,25 +148,16 @@ namespace Builder
 
 				if (notIncludedIt == AllUnicodeSubsets.end())
 				{
-					errorMsg = QObject::tr("The string '%1' processed by the VDU '%2' contains symbols from the unknown Unicode subset.")
-								   .arg(str)
-								   .arg(vduEquipmentId);
+					log.wrnEQP6410(vduEquipmentId, str, c);
 				}
 				else
 				{
-					errorMsg =
-						QObject::tr("The string '%1' processed by the VDU '%2' contains symbols from the '%3' Unicode subset, which is "
-									"not included to the VDU")
-							.arg(str)
-							.arg(vduEquipmentId)
-							.arg(notIncludedIt->first);
+					log.wrnEQP6411(vduEquipmentId, str, c, notIncludedIt->first);
 				}
-
-				return false;
 			}
 		}
 
-		return true;
+		return;
 	}
 
 } // namespace Builder

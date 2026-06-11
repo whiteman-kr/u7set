@@ -1233,6 +1233,7 @@ namespace Builder
 				//
 				for (const auto& str : addedItemStrings)
 				{
+					context.m_vduFontProvider.checkStringForUnicodeSubsets(vduEquipmentId, str.string, log);
 					stringWriter.addString(str.string, str.stringRefOffset + out.size());
 				}
 

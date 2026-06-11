@@ -20,6 +20,8 @@ namespace Builder
 		bool load(QXmlStreamReader& reader, QString* errorMessage);
 	};
 
+	class IssueLogger;
+
 	class VduFontProvider
 	{
 	public:
@@ -35,7 +37,7 @@ namespace Builder
 
 		// Use this function to check the string if it contains unknown (not contained in m_symbolSubsets) Unicode symbols
 		//
-		bool checkStringForUnicodeSubsets(const QString& vduEquipmentId, const QString& str, QString& errorMsg) const;	
+		void checkStringForUnicodeSubsets(const QString& vduEquipmentId, const QString& str, IssueLogger& log) const;	
 
 	private:
 		std::map<QString, std::vector<VduSymbolSubset>> m_symbolSubsets;	// Key is VDU equipment Id, value is symbol subsets

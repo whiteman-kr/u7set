@@ -9730,6 +9730,59 @@ namespace Builder
 					 QString(tr("SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.")).arg(itemLabel).arg(schemaId));
 	}
 
+
+	/// IssueCode: EQP6410
+	///
+	/// IssueType: Warning
+	///
+	/// Title: The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the unknown Unicode subset.
+	///
+	/// Parameters:
+	///		%1 VDU Equipment ID
+	///		%2 String
+	///		%3 Symbol
+	///
+	/// Description:
+	///		The string processed by the VDU contains a symbol from the unknown Unicode subset.
+	///
+	void IssueLogger::wrnEQP6410(QString vduEquipmentId, QString string, QChar symbol)
+	{
+		LOG_WARNING1(IssueType::Equipment,
+					 64010,
+					 QString(tr("The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the unknown Unicode subset."))
+						 .arg(string)
+						 .arg(vduEquipmentId)
+						 .arg(symbol)
+						 .arg(QString::number(symbol.unicode(), 16)));
+	}
+
+	/// IssueCode: EQP6411
+	///
+	/// IssueType: Error
+	///
+	/// Title: The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is not included to the VDU.
+	///
+	/// Parameters:
+	///		%1 VDU Equipment ID
+	///		%2 String
+	///		%3 Symbol
+	///		%4 Subset
+	///
+	/// Description:
+	///		The string processed by the VDU contains a symbol from the unknown Unicode subset.
+	///
+	void IssueLogger::wrnEQP6411(QString vduEquipmentId, QString string, QChar symbol, QString subset)
+	{
+		LOG_WARNING1(IssueType::Equipment,
+					 64011,
+					 QString(tr("The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is not included to the VDU."))
+						 .arg(string)
+						 .arg(vduEquipmentId)
+						 .arg(symbol)
+						 .arg(QString::number(symbol.unicode(), 16))
+						 .arg(subset));
+	}
+
 	// --
 
 	/// IssueCode: DGN7000
