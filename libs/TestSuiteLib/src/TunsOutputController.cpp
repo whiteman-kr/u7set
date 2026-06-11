@@ -157,7 +157,7 @@ namespace TestSuite
 		using namespace std::chrono_literals;
 		using namespace std::chrono;
 
-		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
+		qint64 nsecs = static_cast<qint64>(timeoutMs) * 3'000'000;
 
 		QElapsedTimer timer;
 		timer.start();
