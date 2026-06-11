@@ -27,6 +27,10 @@ public:
     uint32_t firmwareCrc() const;
     void setFirmwareCrc(uint32_t value);
 
+	bool isFirmwareCrc2Enabled() const;
+    bool isFirmwareCrc2Valid() const;
+	uint32_t firmwareCrc2() const;
+	void setFirmwareCrc2(uint32_t value);
 
 private:
 	Ui::DiagTabPage ui;

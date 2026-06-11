@@ -1,9 +1,17 @@
 #include "DiagTabPage.h"
+#include <QCheckBox>
 
 DiagTabPage::DiagTabPage(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
+	connect(ui.m_pCheckCrc2,
+			&QCheckBox::checkStateChanged,
+			this,
+			[this](Qt::CheckState state)
+			{
+				ui.m_pFirwareCrc2->setEnabled(state == Qt::Checked);
+			});
 }
 
 DiagTabPage::~DiagTabPage()
@@ -83,6 +91,10 @@ void DiagTabPage::setManufactureDate(QDate value)
 	return;
 }
 
+//
+// Firmware CRC 1
+//
+
 bool DiagTabPage::isFirmwareCrcValid() const
 {
     if (ui.m_pFirwareCrc == nullptr)
@@ -124,5 +136,63 @@ void DiagTabPage::setFirmwareCrc(uint32_t value)
     ui.m_pFirwareCrc->setText(QString().setNum(value, 16));
 	return;
 }
+
+//
+// Firmware CRC 2
+//
+
+bool DiagTabPage::isFirmwareCrc2Enabled() const
+{
+	if (ui.m_pCheckCrc2 == nullptr)
+	{
+		return false;
+	}
+
+	return ui.m_pCheckCrc2->checkState() == Qt::Checked;
+}
+
+bool DiagTabPage::isFirmwareCrc2Valid() const
+{
+	if (ui.m_pFirwareCrc2 == nullptr)
+	{
+		return false;
+	}
+
+	QString text = ui.m_pFirwareCrc2->text();
+
+	bool convertResult = false;
+	std::ignore = text.toUInt(&convertResult, 16);
+
+	return convertResult;
+}
+
+uint32_t DiagTabPage::firmwareCrc2() const
+{
+	if (ui.m_pFirwareCrc2 == nullptr)
+	{
+		assert(ui.m_pFirwareCrc2);
+		return 0;
+	}
+
+	QString text = ui.m_pFirwareCrc2->text();
+
+	bool convertResult = false;
+	uint32_t value = text.toUInt(&convertResult, 16);
+
+	return convertResult ? value : 0;
+}
+
+void DiagTabPage::setFirmwareCrc2(uint32_t value)
+{
+	if (ui.m_pFirwareCrc2 == nullptr)
+	{
+		assert(ui.m_pFirwareCrc2);
+		return;
+	}
+
+	ui.m_pFirwareCrc2->setText(QString().setNum(value, 16));
+	return;
+}
+
 
 

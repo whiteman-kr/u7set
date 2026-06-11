@@ -384,10 +384,17 @@ void ModuleConfigurator::configureClicked()
 				return;
 			}
 
+			if (page->isFirmwareCrc2Enabled() == true && page->isFirmwareCrc2Valid() == false)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid Firmware CRC2."));
+				return;
+			}
+
 
 			uint32_t factoryNo = page->factoryNo();
 			QDate manufactureDate = page->manufactureDate();
 			uint32_t firmwareCrc = page->firmwareCrc();
+			uint32_t firmwareCrc2 = page->isFirmwareCrc2Enabled() == true ? page->firmwareCrc2() : 0;
 
 			if (factoryNo == 0)
 			{
@@ -404,7 +411,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeDiagData(factoryNo, manufactureDate, firmwareCrc);
+			emit writeDiagData(factoryNo, manufactureDate, firmwareCrc, firmwareCrc2);
 		}
 
 		// Write diag info, like factory no, crc, etc
@@ -687,6 +694,7 @@ void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vec
 											   serviceDataVersion.manufactureDay()));
 
 				page->setFirmwareCrc(serviceDataVersion.firmwareCrc());
+				page->setFirmwareCrc2(serviceDataVersion.firmwareCrc2());
 			}
 			break;
 		default:
