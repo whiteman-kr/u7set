@@ -143,9 +143,9 @@ export ASAN_OPTIONS=detect_container_overflow=0
 #
 date
 
-ss -ltnp | grep 5577 || true
-ps aux | grep -E "SimulatorConsole|Gateway|Tuning" | grep -v grep || true
-nc -vz 127.0.0.1 5577
+# ss -ltnp | grep 5577 || true
+# ps aux | grep -E "SimulatorConsole|Gateway|Tuning" | grep -v grep || true
+# nc -vz 127.0.0.1 5577
 
 $CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*
 date
