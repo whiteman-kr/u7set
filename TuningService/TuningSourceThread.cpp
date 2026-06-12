@@ -1797,8 +1797,8 @@ namespace Tuning
 
 		TuningCommand cmd;
 
-		//cmd.clientEquipmentID = clientEquipmentID;
-		//cmd.matsUser = matsUser;
+		cmd.clientEquipmentID = clientEquipmentID;
+		cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Write;
 		cmd.autoCommand = false;
