@@ -39,11 +39,16 @@ namespace TrendLib
 	private slots:
 		void on_buttonPoints_clicked();
 		void on_buttonApply_clicked();
+		void on_buttonApplyToAll_clicked();
+		void on_resetHigh_clicked();
+		void on_resetLow_clicked();
 		void on_viewFormatCombo_currentIndexChanged(const QString& text);
 
 	private:
+		void initUi();
 		void fillProperties();
-		bool applyProperties();
+		void updateModifiedLabels();
+		bool applyProperties(TrendLib::TrendSignalParam& trendSignal);
 
 	private:
 		Ui::DialogTrendSignalProperties* ui;
@@ -57,6 +62,20 @@ namespace TrendLib
 		E::TimeType m_timeType = E::TimeType::Plant;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 		E::TrendMode m_trendMode = E::TrendMode::Archive;
+
+		union
+		{
+			struct
+			{
+				bool precision : 1;
+				bool format : 1;
+				bool viewHighLimit : 1;
+				bool viewLowLimit : 1;
+				bool color : 1;
+				bool lineWeight : 1;
+			} bits;
+			int value;
+		} m_modifiedFields = { 0 };
 
 		//
 	};
@@ -75,8 +94,14 @@ public:
 	QColor color() const;
 	void setColor(QColor value);
 
+	bool modified() const;
+
+signals:
+	void colorChanged();
+
 private:
 	QColor m_color = Qt::black;
+	bool m_modified = false;
 };
 
 #endif // DIALOGTRENDSIGNALPROPERTIES_H
