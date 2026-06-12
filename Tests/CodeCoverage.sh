@@ -80,17 +80,17 @@ sleep 6
 
 # Run ClientTests, they are functional.
 #
-#./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
+./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
 
 # Run AdsBridgeTests, they are functional.
 #
-#./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_code_coverage
+./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_code_coverage
 
 # Run TestSuite Tests
 #
 export QT_QPA_PLATFORM=offscreen
-#./TestSuiteConsole -settings="../../Tests/TestSuiteConsoleCodeCoverage.xml" -nosecurity
-#./TestSuiteConsole -settings="../../Tests/TestSuiteConsoleCodeCoverage.xml" -scripts_path=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS01_TESTSUITE -nosecurity
+./TestSuiteConsole -settings="../../Tests/TestSuiteConsoleCodeCoverage.xml" -nosecurity
+./TestSuiteConsole -settings="../../Tests/TestSuiteConsoleCodeCoverage.xml" -scripts_path=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS01_TESTSUITE -nosecurity
 
 # Stop services after ClientTests (functional tests)
 #
