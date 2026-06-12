@@ -118,11 +118,11 @@ linux_test_job:
     - "./linux_code_coverage_systemid_clienttest_ws04_tungwslinux.sh < /dev/null > tgw_clienttest_ws04_tungwslinux.out 2>&1 &"
     - "sleep 10"
 # First run tests that require no TuningService connection.
-    - "$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5576 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*"
+    - "$CI_PROJECT_DIR/bin/release/GatewayTests --tuning-port=5576 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*"
 # Then start TuningService for other tests.
     - "./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > tgw_clienttest_ws04_tuns.out 2>&1 &"
     - "sleep 10"
-    - "$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5576 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1"
+    - "$CI_PROJECT_DIR/bin/release/GatewayTests --tuning-port=5576 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1"
     - "StopServices || true"
     - "popd"
 
