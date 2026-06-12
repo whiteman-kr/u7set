@@ -63,7 +63,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; pkill GatewaySrv || true; sleep 2; }"
+    - "function StopServices () { pkill -SIGINT CfgSrv || true; pkill -SIGINT AppDataSrv || true; pkill -SIGINT TuningSrv || true; pkill -SIGINT SimulatorConsol || true; pkill -SIGINT GatewaySrv || true; sleep 6; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin/release"
     - "StopServices || true"
