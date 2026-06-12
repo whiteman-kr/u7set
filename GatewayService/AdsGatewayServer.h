@@ -19,6 +19,23 @@
 #include "../OnlineLib/CircularLogger.h"
 #include <GrpcAppDataSrv.pb.h>
 
+struct AdsGatewaySession
+{
+	TcpSocketShared socket;
+	std::thread thread;
+	std::atomic_bool finished{false};
+	std::atomic_bool closing{false};
+
+	//
+
+	bool handshakeCompleted = false;
+	QString clientName;
+	std::atomic_bool connectedToAppDataSrv{false};
+	std::vector<char> payloadData;
+	size_t errCount = 0;
+};
+
+
 using asio::ip::tcp;
 namespace GCL = GatewayClientLib;
 

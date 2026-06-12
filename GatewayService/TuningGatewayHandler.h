@@ -36,7 +36,6 @@ namespace Gateway
 		TuningGatewayShared m_gateway;
 
 		std::mutex m_tunGatewayServerMutex;
-		std::unique_ptr<TuningGatewayServer> m_tunGatewayServer;
 
 		using AsyncTuningGatewayServer = AsyncTcpServer<TuningGatewaySession>;
 		

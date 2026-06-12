@@ -40,15 +40,6 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_tunGatewayServerMutex);
 
-		//Q_ASSERT(m_tunGatewayServer == nullptr);
-
-		//m_tunGatewayServer = std::make_unique<TuningGatewayServer>(m_swInfo,
-		//														   m_gateway->clientRequestIP1(),
-		//														   m_settings.tuningService1.address,
-		//														   m_settings.tuningService2.address,
-		//														   m_appSignals, m_log);
-		//m_tunGatewayServer->start();
-
 		Q_ASSERT(m_asyncTunGatewayServer == nullptr);
 
 		std::vector<HostAddressPort> listenAddresses;
