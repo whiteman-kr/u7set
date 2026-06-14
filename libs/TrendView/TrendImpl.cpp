@@ -1442,7 +1442,7 @@ namespace TrendLib
 
 		QRectF signalRect = signal.tempDrawRect();
 		double barWidth = 1.0 / drawParam.realDpiX(); // 1 pixel width
-		size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+		const size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
 
 		struct Bar
 		{
@@ -1662,6 +1662,7 @@ namespace TrendLib
 			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
 			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
 			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarWidthHalf = minBarWidth / 2.0;
 			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
 			const double pixelWidth = 1.0 / dpiX;
 
@@ -1671,13 +1672,13 @@ namespace TrendLib
 
 			auto color = signal.color();
 
-			for (size_t i = 0; i < bars.size(); i++)
+			for (size_t i = 0, size = bars.size(); i < size; i++)
 			{
-				Bar bar = bars[i];
+				const Bar bar = bars[i];
 
 				if (bar.hasValue == true)
 				{
-					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
+					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidthHalf;
 
 					double y;
 					double h;
@@ -1739,7 +1740,6 @@ namespace TrendLib
 		// Set clip region
 		//
 		painter->setClipRect(signalRect);
-
 		painter->setRenderHint(QPainter::Antialiasing, false);
 
 		// Draw trend
@@ -1935,15 +1935,31 @@ namespace TrendLib
 		Q_ASSERT(painter);
 		Q_ASSERT(signal.isAnalog() == true);
 
+		painter->save();
+
+		auto restorePainter = qScopeGuard(
+			[painter]()
+			{
+				painter->restore();
+			});
+
+		const auto scaleType = drawParam.scaleType();
 		QRectF signalRect = signal.tempDrawRect();
+
 		double barWidth = 1.0 / drawParam.realDpiX(); // 1 pixel width
-		size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+		const size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+
+		// Make a multiplier 1/barWidth to speed up the calculation of bar offset, as division is more expensive than multiplication. So we
+		// can calculate the bar offset by (x - signalRect.left()) * barWidthFactor instead of (x - signalRect.left()) / barWidth.
+		//
+		const double barWidthFactor = 1.0 / barWidth;
 
 		struct Bar
 		{
 			double min;
 			double max;
 			bool hasValue;
+
 			void update(double value)
 			{
 				if (hasValue == false)
@@ -1986,12 +2002,10 @@ namespace TrendLib
 		bool ok1 = false;
 		bool ok2 = false;
 
-		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok1);
-		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok2);
+		double highLimit = TrendScale::scaleHighLimit(signal, scaleType, &ok1);
+		double lowLimit = TrendScale::scaleLowLimit(signal, scaleType, &ok2);
 		if (ok1 == false || ok2 == false)
 		{
-			painter->setClipping(false);
-			painter->setRenderHint(QPainter::Antialiasing, true);
 			return;
 		}
 
@@ -1999,8 +2013,6 @@ namespace TrendLib
 		{
 			// Divide by 0 possible
 			//
-			painter->setClipping(false);
-			painter->setRenderHint(QPainter::Antialiasing, true);
 			return;
 		}
 
@@ -2027,13 +2039,15 @@ namespace TrendLib
 					break;
 				}
 
-				bool ok = false;
 				for (const TrendStateItem& state : record.states)
 				{
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
 					//
-					if (state.isValid() == false || ok == false)
+					if (state.isValid() == false)
 					{
+						// Reset prevState when current state is invalid, so that the next valid point will not connect to the previous
+						// valid point.
+						//
 						prevState.reset();
 						continue;
 					}
@@ -2052,9 +2066,9 @@ namespace TrendLib
 					double startX = TrendScale::timeToScaledPixel(prevTime, signalRect, startTimeStamp, duration);
 					double endX = TrendScale::timeToScaledPixel(currentTime, signalRect, startTimeStamp, duration);
 					double dx = endX - startX;
-					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) / barWidth));
+					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) * barWidthFactor));
 
-					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) / barWidth));
+					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) * barWidthFactor));
 					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0)
 					{
 						// This point is completely out of the left edge, skip it
@@ -2065,47 +2079,48 @@ namespace TrendLib
 
 					// Get y of the prevstate;
 					//
-					double prevStateValue = TrendScale::valueToScaleValue(prevState->value, drawParam.scaleType(), &ok);
-					double prevStateY = 0;
-					if (ok == true)
+					bool convertOk = false;
+					double prevStateValue = TrendScale::valueToScaleValue(prevState->value, scaleType, &convertOk);
+					if (convertOk == false)
 					{
-						prevStateY = TrendScale::valueToScaledPixel(prevStateValue, signalRect, lowLimit, highLimit);
+						prevState = state;
+						continue;
 					}
 
-					for (std::size_t cnt = 0; ok == true && cnt < barCount; cnt++)
+					// Fill bars between prevState and current state with the value of the prevState
+					//
 					{
-						std::ptrdiff_t index = barOffset + static_cast<std::ptrdiff_t>(cnt);
-						if (index < 0)
-						{
-							continue;
-						}
+						double prevStateY = TrendScale::valueToScaledPixel(prevStateValue, signalRect, lowLimit, highLimit);
+						const auto startIndex = std::max<std::ptrdiff_t>(barOffset, 0);
 
-						if (static_cast<size_t>(index) >= totalBars)
-						{
-							// Early exit if we are out of the right edge, no need to process more bars
-							//
-							break;
-						}
+						const auto finishIndex = std::min<std::ptrdiff_t>(barOffset + static_cast<std::ptrdiff_t>(barCount),
+																		  static_cast<std::ptrdiff_t>(totalBars));
 
-						bars[index].update(prevStateY);
+						for (std::ptrdiff_t index = startIndex; index < finishIndex; ++index)
+						{
+							bars[static_cast<size_t>(index)].update(prevStateY);
+						}
 					}
 
 					// Add a bar at the last point with the value of the current state
 					//
-					if (size_t lastBarIndex = barOffset + barCount - 1; //
-						lastBarIndex < bars.size())
+					if (const auto lastBarIndex = barOffset + static_cast<std::ptrdiff_t>(barCount) - 1; //
+						lastBarIndex >= 0 && static_cast<size_t>(lastBarIndex) < bars.size())
 					{
-						double curStateValue = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
-						if (ok == true)
+						bool convertStateOk = false;
+						double curStateValue = TrendScale::valueToScaleValue(state.value, scaleType, &convertStateOk);
+						if (convertStateOk == true)
 						{
 							double curStateY = TrendScale::valueToScaledPixel(curStateValue, signalRect, lowLimit, highLimit);
-							bars[lastBarIndex].update(curStateY);
+							bars[static_cast<size_t>(lastBarIndex)].update(curStateY);
 						}
 					}
 
-					// --
+					// Do not forget to update prevState!
 					//
 					prevState = state;
+
+					// Loop end.
 				} // for (const TrendStateItem& state : record.states)
 			} // for (const TrendStateRecord& record : data)
 
@@ -2119,7 +2134,7 @@ namespace TrendLib
 		//
 		{
 			painter->setPen(Qt::NoPen);
-			// painter->setRenderHint(QPainter::Antialiasing, false);
+			painter->setRenderHint(QPainter::Antialiasing, true);
 
 			const double dpiX = drawParam.realDpiX();
 			const double dpiY = drawParam.realDpiY();
@@ -2127,19 +2142,21 @@ namespace TrendLib
 			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
 			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
 			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarWidthHalf = minBarWidth / 2.0;
 			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
+			const double minBarHeightHalf = minBarHeight / 2.0;
 			const double pixelWidth = 1.0 / dpiX;
 			auto color = signal.color();
 
-			for (size_t i = 0; i < bars.size(); i++)
+			for (size_t i = 0, size = bars.size(); i < size; i++)
 			{
 				const Bar& bar = bars[i];
 
 				if (bar.hasValue == true)
 				{
-					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
-					double y = bar.min - minBarHeight / 2.0; // bar.min is the top of the bar, bar.max is the bottom of the bar,
-															 // because in pixel coordinates, y increases downwards
+					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidthHalf;
+					double y = bar.min - minBarHeightHalf; // bar.min is the top of the bar, bar.max is the bottom of the bar,
+														   // because in pixel coordinates, y increases downwards
 					double w = minBarWidth;
 					double h = std::max(bar.max - bar.min, minBarHeight);
 					if (h > w)
@@ -2149,15 +2166,9 @@ namespace TrendLib
 
 					painter->fillRect(QRectF{x, y, w, h}, color);
 				}
-			}
+			} // for (size_t i = 0; i < bars.size(); i++)
+		} // Draw bars
 
-			// painter->setRenderHint(QPainter::Antialiasing, true);
-		}
-
-		// Reset clipping
-		//
-		painter->setClipping(false);
-		painter->setRenderHint(QPainter::Antialiasing, true);
 		return;
 	}
 
