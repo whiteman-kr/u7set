@@ -2,6 +2,7 @@
 #include <TestSuiteLib/TestController.h>
 
 #include <QJSEngine>
+#include <QFile>
 
 #include <CommonLib/expected.hpp>
 
@@ -332,6 +333,29 @@ namespace TestSuite
 		}
 
 		return m_outputController->activateTuningSource(lmEquipmentId, activate);
+	}
+
+	QVariantMap TestController::loadTextFile(const QString& fileName)
+	{
+		QVariantMap result;
+
+		QFile file(fileName);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+		{
+			result["ok"] = false;
+			result["strings"] = QStringList();
+			return result;
+		}
+
+		QStringList strings;
+		while (file.atEnd() == false)
+		{
+			strings << file.readLine().trimmed();
+		}
+
+		result["ok"] = true;
+		result["strings"] = strings;
+		return result;
 	}
 
 	QString TestController::projectName() const

@@ -117,6 +117,12 @@ namespace TestSuite
 		/// \param activate specifies the operation type: true - activate, false - deactivate.
 		bool activateTuningSource(QString lmEquipmentId, bool activate);
 
+		/// \brief Loads an array of strings from the specified text file.
+		///
+		/// \param fileName specifies the name of the file.
+		/// Returns an object with two fields: "ok" (boolean) and "strings" (array of strings).
+		QVariantMap loadTextFile(const QString& fileName);
+
 	public:
 		QString projectName() const;
 		void setProjectName(const QString& value);
