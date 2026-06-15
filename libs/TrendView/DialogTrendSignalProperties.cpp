@@ -131,7 +131,7 @@ namespace TrendLib
 
 			// Update modification flags
 			//
-			m_modifiedFields.bits.viewHighLimit = false;
+			m_modifiedFields.bits.viewHighLimit = true;
 			updateModifiedLabels();
 		}
 	}
@@ -146,7 +146,7 @@ namespace TrendLib
 
 			// Update modification flags
 			//
-			m_modifiedFields.bits.viewLowLimit = false;
+			m_modifiedFields.bits.viewLowLimit = true;
 			updateModifiedLabels();
 		}
 	}
@@ -251,14 +251,14 @@ namespace TrendLib
 	
 	void DialogTrendSignalProperties::fillProperties()
 	{
-		ui->signalIdEdit->setText(m_trendSignal.signalId());
-		ui->captionEdit->setText(m_trendSignal.caption());
+		ui->labelAppSignalID->setText(m_trendSignal.signalId());
+		ui->labelCaption->setText(m_trendSignal.caption());
 
 		ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
 
 		if (m_trendSignal.type() == E::SignalType::Analog)
 		{
-			ui->typeEdit->setText(tr("Analog"));
+			ui->labelType->setText(tr("Analog"));
 
 			double viewHighLimit = m_trendSignal.viewHighLimit(m_scaleType);
 			double viewLowLimit = m_trendSignal.viewLowLimit(m_scaleType);
@@ -280,12 +280,10 @@ namespace TrendLib
 				viewLowLimit = TrendLib::TrendScale::periodScaleInfinity / viewLowLimit;
 			}
 
-			ui->unitsEdit->setText(m_trendSignal.unit());
+			ui->labelUnits->setText(m_trendSignal.unit());
 
-			ui->limitsEdit->setText(
-				tr("%1 - %2")
-				.arg(TrendLib::TrendScale::scaleValueText(m_trendSignal.lowLimit(), m_scaleType, m_trendSignal))
-				.arg(TrendLib::TrendScale::scaleValueText(m_trendSignal.highLimit(), m_scaleType, m_trendSignal)));
+			ui->labelHigh->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.highLimit(), m_scaleType, m_trendSignal));
+			ui->labelLow->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.lowLimit(), m_scaleType, m_trendSignal));
 
 			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueText(viewHighLimit, m_scaleType, m_trendSignal));
 			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueText(viewLowLimit, m_scaleType, m_trendSignal));
@@ -295,9 +293,11 @@ namespace TrendLib
 
 		if (m_trendSignal.type() == E::SignalType::Discrete)
 		{
-			ui->typeEdit->setText(tr("Discrete"));
+			ui->labelType->setText(tr("Discrete"));
 
-			ui->limitsEdit->setText(tr("0 - 1"));
+			ui->labelHigh->setText(tr("1"));
+			ui->labelLow->setText(tr("0"));
+			ui->labelUnits->setText("");
 			ui->viewHighEdit->setText(QString::number(1));
 			ui->viewLowEdit->setText(QString::number(0));
 			ui->viewHighEdit->setReadOnly(true);
