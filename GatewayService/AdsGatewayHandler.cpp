@@ -43,9 +43,9 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_adsGatewayServer)
+		if (m_asyncAdsGatewayServer)
 		{
-			m_adsGatewayServer->setConnectedToAppDataSrv(true);
+			m_asyncAdsGatewayServer->setConnectedToAppDataSrv(true);
 		}
 
 		m_requestIndex = 0;
@@ -57,9 +57,9 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_adsGatewayServer)
+		if (m_asyncAdsGatewayServer)
 		{
-			m_adsGatewayServer->setConnectedToAppDataSrv(false);
+			m_asyncAdsGatewayServer->setConnectedToAppDataSrv(false);
 		}
 	}
 
@@ -266,20 +266,30 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
-		Q_ASSERT(m_adsGatewayServer == nullptr);
+		Q_ASSERT(m_asyncAdsGatewayServer == nullptr);
 
-		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_appSignals, m_log);
-		m_adsGatewayServer->start();
+		std::vector<HostAddressPort> listenAddresses;
+
+		m_asyncAdsGatewayServer = std::make_unique<AsyncAdsGatewayServer>(
+			m_swInfo,
+			m_appSignals,
+			std::vector<HostAddressPort>{m_gateway->clientRequestIP1()},
+			std::vector<HostAddressPort>{m_settings.appDataService1.address, m_settings.appDataService2.address},
+			2,
+			m_log,
+			"AsyncAdsGatewayServer");
+		
+		m_asyncAdsGatewayServer->start();
 	}
 
 	void AdsGatewayHandler::stopAdsGatewayServer()
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_adsGatewayServer != nullptr)
+		if (m_asyncAdsGatewayServer != nullptr)
 		{
-			m_adsGatewayServer->stop();
-			m_adsGatewayServer.reset();
+			m_asyncAdsGatewayServer->stop();
+			m_asyncAdsGatewayServer.reset();
 		}
 	}
 

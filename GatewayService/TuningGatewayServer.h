@@ -24,7 +24,6 @@
 using asio::ip::tcp;
 namespace GCL = GatewayClientLib;
 
-
 class TuningGatewaySession : public AsyncTcpSession
 {
 private:
@@ -78,7 +77,7 @@ private:
 
 private:
 	std::unique_ptr<TuningSrvClientThread> m_tunSrvClientThread;
-	bool m_connectedToTuningSrv = false;
+	std::atomic_bool m_connectedToTuningSrv {false};
 
 	std::vector<char> m_payload;
 	quint64 m_readRequestID = 0;

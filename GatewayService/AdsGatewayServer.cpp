@@ -1,5 +1,70 @@
 #include "AdsGatewayServer.h"
 
+// -----------------------------------------------------------------------------
+//	
+//	AdsGatewaySession class implementation
+//
+// -----------------------------------------------------------------------------
+
+AdsGatewaySession::AdsGatewaySession(const SoftwareInfo& swInfo,
+	const AppSignals& appSignals,
+	const std::vector<HostAddressPort>& serviceAddresses,
+	asio::ip::tcp::socket socket,
+	CircularLoggerShared log) :
+	AsyncTcpSession(swInfo, appSignals, serviceAddresses, std::move(socket), log)
+{
+}
+
+void AdsGatewaySession::setConnectedToAppDataSrv(bool connected)
+{
+	m_connectedToAppDataSrv = connected;
+}
+
+void AdsGatewaySession::onStarted()
+{
+
+}
+
+void AdsGatewaySession::onStopped()
+{
+
+}
+
+void AdsGatewaySession::startAppDataSrvClient()
+{
+	const std::vector<HostAddressPort>& srvAddrs = serviceAdresses();
+
+	auto updater = std::make_shared<IvsImpulseAppSignalStateUpdater>(*this);
+
+	m_adsClient = std::make_unique<GrpcAdsClient>(m_swInfo,
+												  srvAddrs,
+												  QString("GatewayService %1").arg(m_swInfo.equipmentID()),
+												  m_log,
+												  GrpcAdsClient::RequestType::GetAppSignalStateConstSize,
+												  100,
+												  GrpcAdsClient::RequestType::GetGatewayAppSignalStateChanges,
+												  20,
+												  updater);
+
+	std::vector<Hash> hashes = m_appSignals.getHashes();
+
+	m_adsClient->setHashesToRequestStates(hashes);
+	m_adsClient->setHashesToRequestGatewayStateChanges(hashes);
+
+	m_adsClient->start();
+}
+
+void AdsGatewaySession::stopAppDataSrvClient() 
+{
+
+}
+
+// -----------------------------------------------------------------------------
+//
+//	AdsGatewayServer class implementation
+//
+// -----------------------------------------------------------------------------
+
 AdsGatewayServer::AdsGatewayServer(const HostAddressPort& listenIP,
 									const AppSignals& appSignals,
 									CircularLoggerShared log) :

@@ -57,12 +57,6 @@ namespace Gateway
 	{
 		std::lock_guard lg(m_tunGatewayServerMutex);
 
-		//if (m_tunGatewayServer != nullptr)
-		//{
-		//	m_tunGatewayServer->stop();
-		//	m_tunGatewayServer.reset();
-		//}
-
 		if (m_asyncTunGatewayServer != nullptr)
 		{
 			m_asyncTunGatewayServer->stop();

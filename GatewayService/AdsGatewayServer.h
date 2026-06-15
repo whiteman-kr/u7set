@@ -17,27 +17,45 @@
 #include <CommonLib/HostAddressPort.h>
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
-#include <GrpcAppDataSrv.pb.h>
-
-struct AdsGatewaySession
-{
-	TcpSocketShared socket;
-	std::thread thread;
-	std::atomic_bool finished{false};
-	std::atomic_bool closing{false};
-
-	//
-
-	bool handshakeCompleted = false;
-	QString clientName;
-	std::atomic_bool connectedToAppDataSrv{false};
-	std::vector<char> payloadData;
-	size_t errCount = 0;
-};
-
+#include "../OnlineLib/GrpcAdsClient.h"
+#include "AsyncTcpServer.h"
 
 using asio::ip::tcp;
 namespace GCL = GatewayClientLib;
+
+class AdsGatewaySession : public AsyncTcpSession
+{
+public:
+	explicit AdsGatewaySession(const SoftwareInfo& swInfo,
+							 const AppSignals& appSignals,
+							 const std::vector<HostAddressPort>& serviceAddresses,
+							 asio::ip::tcp::socket socket,
+							 CircularLoggerShared log);
+
+	void setConnectedToAppDataSrv(bool connected);
+
+protected:
+	virtual void onStarted() override;
+	virtual void onStopped() override;
+	virtual bool checkRequestID(uint32_t requestID) override;
+	virtual bool isHandshakeRequest(uint32_t requestID) override;
+	virtual bool checkPayloadSize(const GCL::GwMessageHeader& header,
+								const char* recvBuf,
+								const size_t recvBufSize,
+								GCL::GwErrorCode& errCode) override;
+	virtual bool processRequest(const GCL::GwMessageHeader& header, char* recvBuf, size_t requestSize) override;
+
+private:
+	void startAppDataSrvClient();
+	void stopAppDataSrvClient();
+
+private:
+	std::unique_ptr<GrpcAdsClient> m_appDataSrvClient;
+	std::atomic_bool m_connectedToAppDataSrv{false};
+
+	bool handshakeCompleted = false;
+	QString clientName;
+};
 
 using TcpSocketShared = std::shared_ptr<tcp::socket>;
 

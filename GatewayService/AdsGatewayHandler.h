@@ -54,7 +54,7 @@ namespace Gateway
 
 		std::mutex m_adsGatewayServerMutex;
 
-		using AsyncAdsGatewayServer = AsyncTcpServer<TuningGatewaySession>;
+		using AsyncAdsGatewayServer = AsyncTcpServer<AdsGatewaySession>;
 
 		std::unique_ptr<AsyncAdsGatewayServer> m_asyncAdsGatewayServer;
 
