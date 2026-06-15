@@ -226,6 +226,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="buttonApplyToAll">
+       <property name="toolTip">
+        <string>Apply the modified properties to all signals.</string>
+       </property>
        <property name="text">
         <string>Apply to All</string>
        </property>
@@ -264,10 +267,10 @@
   <tabstop>resetHigh</tabstop>
   <tabstop>viewLowEdit</tabstop>
   <tabstop>resetLow</tabstop>
+  <tabstop>viewLineWeightEdit</tabstop>
   <tabstop>buttonPoints</tabstop>
   <tabstop>buttonApply</tabstop>
   <tabstop>buttonApplyToAll</tabstop>
-  <tabstop>viewLineWeightEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>
