@@ -34,10 +34,10 @@ namespace TestSuite
 
 	TestSuite::~TestSuite() = default;
 
-	bool TestSuite::execute(const ::TestSuite::IScriptProvider& scriptProvider, const ::TestSuite::ControlParams& controlParams)
+	bool TestSuite::execute(const ::TestSuite::IScriptProvider& scriptProvider, const ::TestSuite::ControlParams& controlParams, const ComparatorSet* setpoints)
 	{
 		m_testLog.clear();
-		return m_testControl->execute(m_softwareInfo, scriptProvider, controlParams);
+		return m_testControl->execute(m_softwareInfo, scriptProvider, controlParams, setpoints);
 	}
 
 	void TestSuite::stop()

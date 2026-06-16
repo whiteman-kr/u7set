@@ -309,8 +309,7 @@ namespace TestSuite
 	}
 
 	bool MatsTestSuite::executeRunControl(const ::TestSuite::IScriptProvider& scriptProvider)
-	{
-		return m_runControl->execute(m_testSuite->softwareInfo(), scriptProvider, ControlParams{});
+	{ return m_runControl->execute(m_testSuite->softwareInfo(), scriptProvider, ControlParams{}, nullptr /*ComparatorSet*/);
 	}
 
 	bool MatsTestSuite::hasRunControl()
@@ -382,7 +381,7 @@ namespace TestSuite
 
 		// Execute test suite
 		//
-		return m_testSuite->execute(scriptProvider, controlParams);
+		return m_testSuite->execute(scriptProvider, controlParams, &m_configController.setpoints());
 	}
 
 	void MatsTestSuite::stop()

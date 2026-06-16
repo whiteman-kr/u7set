@@ -117,8 +117,12 @@ namespace TestSuite
 			//
 			QString softwareEquipmentId = m_softwareInfo.equipmentID();
 
-			auto testController =
-				std::make_unique<TestController>(m_appLog.logFile(), m_testLog, m_inputController.get(), m_outputController.get(), this);
+			auto testController = std::make_unique<TestController>(m_appLog.logFile(),
+																   m_testLog,
+																   m_inputController.get(),
+																   m_outputController.get(),
+																   m_setpoints,
+																   this);
 
 			testController->setProjectName(projectName());
 			testController->setBuildNo(buildNo());

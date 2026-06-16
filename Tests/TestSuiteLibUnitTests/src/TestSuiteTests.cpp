@@ -261,7 +261,7 @@ TEST_F(TestSuiteUnitTest, CreatedAndStop)
 	QSignalSpy spyTestFinished(&testSuite, &::TestSuite::TestSuite::testFinished);
 	QSignalSpy spyFinished(&testSuite, &::TestSuite::TestSuite::finished);
 
-	testSuite.execute(m_scriptProviderStub, {});
+	testSuite.execute(m_scriptProviderStub, {}, nullptr);
 	testSuite.stop();
 
 	EXPECT_EQ(spyControlTestStarted.count(), 0);
@@ -321,7 +321,7 @@ function test_simple(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -380,7 +380,7 @@ TEST_F(TestSuiteUnitTest, RunWithoutInputController)
 	//
 	for (size_t i = 0; i < scripts.size(); i++)
 	{
-		testSuite.execute(scriptProvider, {});
+		testSuite.execute(scriptProvider, {}, nullptr);
 
 		QDeadlineTimer timer{5000};
 		while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -446,7 +446,7 @@ TEST_F(TestSuiteUnitTest, RunWithoutOutputController)
 	//
 	for (size_t i = 0; i < scripts.size(); i++)
 	{
-		testSuite.execute(scriptProvider, {});
+		testSuite.execute(scriptProvider, {}, nullptr);
 
 		QDeadlineTimer timer{5000};
 		while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -502,7 +502,7 @@ TEST_F(TestSuiteUnitTest, ScriptFuncStartForMs)
 
 	QSignalSpy spyFinished(&testSuite, &::TestSuite::TestSuite::finished);
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -545,7 +545,7 @@ TEST_F(TestSuiteUnitTest, ScriptCheckProperties)
 
 	QSignalSpy spyFinished(&testSuite, &::TestSuite::TestSuite::finished);
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -637,7 +637,7 @@ function test_t2(ctrl)
 
 	QSignalSpy spyFinished(&testSuite, &::TestSuite::TestSuite::finished);
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -703,7 +703,7 @@ TEST_F(TestSuiteUnitTest, ScriptFuncSignalStateAndValue)
 	//
 	for (const auto& [fileName, script, expectedResult] : scripts)
 	{
-		testSuite.execute(scriptProvider, {});
+		testSuite.execute(scriptProvider, {}, nullptr);
 
 		QDeadlineTimer timer{5000};
 		while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -763,7 +763,7 @@ TEST_F(TestSuiteUnitTest, ScriptFuncSignalExists)
 	//
 	for (const auto& [fileName, script, expectedResult] : scripts)
 	{
-		testSuite.execute(scriptProvider, {});
+		testSuite.execute(scriptProvider, {}, nullptr);
 
 		QDeadlineTimer timer{5000};
 		while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -823,7 +823,7 @@ TEST_F(TestSuiteUnitTest, ScriptFuncSignalParam)
 	//
 	for (const auto& [fileName, script, expectedResult] : scripts)
 	{
-		testSuite.execute(scriptProvider, {});
+		testSuite.execute(scriptProvider, {}, nullptr);
 
 		QDeadlineTimer timer{5000};
 		while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -887,7 +887,7 @@ function test_simple(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -927,7 +927,7 @@ function test_createTestObserver(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -971,7 +971,7 @@ function test_createTestObserver(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -1039,7 +1039,7 @@ function test_overrideSignalValue(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)
@@ -1085,7 +1085,7 @@ function test_expectSignalValue(ctrl)
 		.Times(AtLeast(0))
 		.WillRepeatedly(Return(std::vector<TestSuite::TestScript>{TestSuite::TestScript{"ScriptName", simpleScript}}));
 
-	testSuite.execute(scriptProvider, {});
+	testSuite.execute(scriptProvider, {}, nullptr);
 
 	QDeadlineTimer timer{5000};
 	while (testSuite.isRunning() == true && timer.hasExpired() == false)

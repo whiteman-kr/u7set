@@ -41,12 +41,14 @@ namespace TestSuite
 
 	void ControlThread::setTestParams(const SoftwareInfo& softwareInfo,
 									  const IScriptProvider& scriptProvider,
-									  const ControlParams& controlParams)
+									  const ControlParams& controlParams,
+									  const ComparatorSet* setpoints)
 	{
 		Q_ASSERT(isRunning() == false);
 
 		m_softwareInfo = softwareInfo;
 		m_controlParams = controlParams;
+		m_setpoints = setpoints;
 		m_scriptProvider = &scriptProvider;
 
 		return;
@@ -185,7 +187,7 @@ namespace TestSuite
 		return;
 	}
 
-	bool Control::execute(const SoftwareInfo& softwareInfo, const IScriptProvider& scriptProvider, const ControlParams& controlParams)
+	bool Control::execute(const SoftwareInfo& softwareInfo, const IScriptProvider& scriptProvider, const ControlParams& controlParams, const ComparatorSet* setpoints)
 	{
 		if (isRunning() == true)
 		{
@@ -193,7 +195,7 @@ namespace TestSuite
 			return false;
 		}
 
-		m_controlThread->setTestParams(softwareInfo, scriptProvider, controlParams);
+		m_controlThread->setTestParams(softwareInfo, scriptProvider, controlParams, setpoints);
 
 		QEventLoop loop;
 		QObject::connect(m_controlThread.get(), &QThread::started, &loop, &QEventLoop::quit);

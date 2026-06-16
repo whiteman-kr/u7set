@@ -10,6 +10,7 @@
 #include <atomic>
 #include <set>
 
+class ComparatorSet;
 
 namespace TestSuite
 {
@@ -43,6 +44,7 @@ namespace TestSuite
 					   ILogFile* testLog,
 					   IInputController* inputController,
 					   IOutputController* outputController,
+					   const ComparatorSet* setpoints,
 					   QObject* parent = nullptr);
 
 		static void throwScriptException(const QObject* object, QString text);
@@ -123,6 +125,12 @@ namespace TestSuite
 		/// Returns an object with two fields: "ok" (boolean) and "strings" (array of strings).
 		QVariantMap loadTextFile(const QString& fileName);
 
+		/// \brief Returns list of Comparator (setpoint comparators) assigned to the signal specified by <b>signalId</b>.
+		QJSValueList setpointsByInput(QString signalId) const;
+
+		/// \brief Returns Comparator (setpoint comparator) assigned where <b>signalId</b> is an output signal.
+		QJSValue setpointByOutput(QString signalId) const;
+
 	public:
 		QString projectName() const;
 		void setProjectName(const QString& value);
@@ -144,6 +152,8 @@ namespace TestSuite
 
 		IInputController* m_inputController = nullptr;
 		IOutputController* m_outputController = nullptr;
+		
+		const ComparatorSet* m_setpoints = nullptr;
 
 		std::set<QString> m_overridenSignals; // Contains AppSignalIds of overriden signals
 

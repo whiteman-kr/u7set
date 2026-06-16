@@ -353,7 +353,12 @@ void TestListWidget::fillTestsTree()
 	TestSuite::OutputControllerStub outputControllerStub;
 	TestSuite::InputControllerStub inputControllerStub;
 	
-	TestSuite::TestController testController{nullptr, nullptr, &inputControllerStub, &outputControllerStub, nullptr};
+	TestSuite::TestController testController{nullptr,
+											 nullptr,
+											 &inputControllerStub,
+											 &outputControllerStub,
+											 nullptr /*setpoints*/,
+											 nullptr /*parent*/};
 
 	ILogFileStub testLog;
 
