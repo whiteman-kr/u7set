@@ -29,8 +29,8 @@ void AsyncTcpSession::start()
 				   [self = shared_from_this()]()
 				   {
 						self->m_quitRequested.store(false);
-						self->onStarted();
 						self->m_started = true;
+						self->onStarted();
 						self->startReceive();
 				   });
 }
@@ -41,11 +41,10 @@ void AsyncTcpSession::stop()
 				   [self = shared_from_this()]()
 				   {
 						self->m_quitRequested.store(true);
-						
 						std::error_code ec;
-
 						self->m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 						self->m_socket.close(ec);
+						self->m_started = false;
 						self->onStopped();
 				   });
 }

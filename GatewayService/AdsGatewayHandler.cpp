@@ -27,40 +27,40 @@ namespace Gateway
 
 	void AdsGatewayHandler::run()
 	{
-		prepareRequests();
-		runAppDataSrvClient();
+//		prepareRequests();
+//		runAppDataSrvClient();
 		runAdsGatewayServer();
 	}
 
 	void AdsGatewayHandler::shutdown()
 	{
 		stopAdsGatewayServer();
-		stopAppDataSrvClient();
+//		stopAppDataSrvClient();
 		Handler::shutdown();
 	}
 
 	void AdsGatewayHandler::onAppDataSrvConnected()
 	{
-		std::lock_guard lg(m_adsGatewayServerMutex);
+		//std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_asyncAdsGatewayServer)
-		{
-			m_asyncAdsGatewayServer->setConnectedToAppDataSrv(true);
-		}
+		//if (m_asyncAdsGatewayServer)
+		//{
+		//	m_asyncAdsGatewayServer->setConnectedToAppDataSrv(true);
+		//}
 
-		m_requestIndex = 0;
-		m_changesRequestCount = 0;
-		m_hasPendingChanges = false;
+		//m_requestIndex = 0;
+		//m_changesRequestCount = 0;
+		//m_hasPendingChanges = false;
 	}
 
 	void AdsGatewayHandler::onAppDataSrvDisconnected()
 	{
-		std::lock_guard lg(m_adsGatewayServerMutex);
+		//std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_asyncAdsGatewayServer)
-		{
-			m_asyncAdsGatewayServer->setConnectedToAppDataSrv(false);
-		}
+		//if (m_asyncAdsGatewayServer)
+		//{
+		//	m_asyncAdsGatewayServer->setConnectedToAppDataSrv(false);
+		//}
 	}
 
 	void AdsGatewayHandler::planNextPreparedRequest(PreparedRequest& request)
@@ -122,36 +122,36 @@ namespace Gateway
 
 	void AdsGatewayHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
-		std::lock_guard lg(m_adsGatewayServerMutex);
+		//std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_adsGatewayServer)
-		{
-			m_adsGatewayServer->updateSignalStates(reply);
-		}
+		//if (m_asyncAdsGatewayServer)
+		//{
+		//	m_asyncAdsGatewayServer->updateSignalStates(reply);
+		//}
 	}
 
 	void AdsGatewayHandler::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 	{
-		{
-			std::lock_guard lg(m_adsGatewayServerMutex);
+		//{
+		//	std::lock_guard lg(m_adsGatewayServerMutex);
 
-			if (m_adsGatewayServer)
-			{
-				m_adsGatewayServer->processStateChanges(reply);
-			}
-		}
+		//	if (m_asyncAdsGatewayServer)
+		//	{
+		//		m_asyncAdsGatewayServer->processStateChanges(reply);
+		//	}
+		//}
 
-		m_hasPendingChanges = reply.pendingstatescount() > 0;
+		//m_hasPendingChanges = reply.pendingstatescount() > 0;
 	}
 
 	void AdsGatewayHandler::invalidateSignals()
 	{
-		std::lock_guard lg(m_adsGatewayServerMutex);
+		//std::lock_guard lg(m_adsGatewayServerMutex);
 
-		if (m_adsGatewayServer)
-		{
-			m_adsGatewayServer->invalidateSignals();
-		}
+		//if (m_asyncAdsGatewayServer)
+		//{
+		//	m_asyncAdsGatewayServer->invalidateSignals();
+		//}
 	}
 
 	void AdsGatewayHandler::prepareRequests()
@@ -250,7 +250,7 @@ namespace Gateway
 		auto updater = std::make_shared<AdsGatewayAppSignalStateUpdater>(*this);
 
 		m_adsClient = std::make_unique<GrpcAdsClient>(m_swInfo, srvAddrs,
-													  QString("GatewayService %1").arg(m_swInfo.equipmentID()), m_log,
+													  QString("GrpcAdsClient GatewayService %1").arg(m_swInfo.equipmentID()), m_log,
 													  GrpcAdsClient::RequestType::GetAppSignalState, 100,
 													  GrpcAdsClient::RequestType::GetAppSignalStateChanges, 20,
 													  updater);

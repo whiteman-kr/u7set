@@ -388,6 +388,7 @@ namespace Gateway
 		for(HandlerShared& h : m_handlers)
 		{
 			h->run();
+			DEBUG_LOG_MSG(h->log(), QString("Handler for gateway %1 runned.").arg(h->gatewayID()));
 		}
 	}
 

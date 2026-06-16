@@ -1394,6 +1394,8 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+
 				GatewayClientLib::AdsGwSignalStateRequest request{};
 				GatewayClientLib::AdsGwSignalStateResponse response{};
 
@@ -1429,6 +1431,9 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
+
+	auto v = adsConn.lastStatusCode().value();
+
 	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 	EXPECT_EQ(adsConn.returnedSignalStates, 0);
 }
@@ -1503,6 +1508,8 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 			{
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
+
+				std::this_thread::sleep_for(std::chrono::seconds(2));
 
 				GatewayClientLib::AdsGwSignalStateRequest request{};
 				GatewayClientLib::AdsGwSignalStateResponse response{};

@@ -208,8 +208,6 @@ void GatewayServiceWorker::applyNewConfiguration()
 	DEBUG_LOG_ERR(logger(), QString("Handlers initialization OK"));
 
 	m_handlers.run();
-
-	DEBUG_LOG_ERR(logger(), QString("All handlers runned."));
 }
 
 void GatewayServiceWorker::clearConfiguration()
