@@ -214,14 +214,20 @@ function test1(ctrl)
     // 2. Specify tag parameter in the log writing function (for example,
     // "report_tab_tag1" or "report_text_tag1").
     //
-    // 3. To use tables in reports, generated text should be divided to
+    // 3. Tags can contain $(REPEATINDEX) macro (e.g. TO_ALG_$(REPEATINDEX)). This macro is used together with SECTION_REPEAT_COUNT(<sectionTag>) macro.
+    // The SECTION_REPEAT_COUNT value sets the number of iterations to process the single section with different iterated tags.
+    // Example: SECTION_REPEAT_COUNT(<sectionTag>) = 2, then the following tags will be iterated:
+    // TO_ALG_$(REPEATINDEX) => TO_ALG_0, TO_ALG_1
+    // This is used to split section into parts
+    //
+    // 4. To use tables in reports, generated text should be divided to
     // different columns using specified separator.
     // By default, a semicolon is used and can be changed in ReportTemplates
     // property. For example, if table has three columns, message text should
     // look like "A;B;C", where A, B and C - text to be displayed in every
     // column. See the example below.
     //
-    // 4. Report can contain multiple records with same tag. By default, every
+    // 5. Report can contain multiple records with same tag. By default, every
     // message is added to the report. To display message only once,
     // "$FIRST(tag)" and "$LAST(tag) tags descriptions are used in report
     // templates. These descriptions specify to display only first
