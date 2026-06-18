@@ -64,7 +64,7 @@ signals:
 	void readServiceInformation(int);
 	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
 
-    void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+    void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc, quint32 firmwareCrc2);
 	void writeConfData(Hardware::ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
 	void eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts);
 	

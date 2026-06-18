@@ -7,7 +7,7 @@
 #include <ranges>
 
 #define EXPERIMENTAL_TREND_DRAW_WITH_BARS
-// #define DEBUG_TIME
+#define DEBUG_TIME
 
 namespace TrendLib
 {
@@ -891,7 +891,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
+		if (std::abs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -1028,7 +1028,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
+		if (std::abs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -1129,7 +1129,7 @@ namespace TrendLib
 
 			double signalHighLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok1);
 			double signalLowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok2);
-			if (ok1 == false || ok2 == false || std::fabs(signalHighLimit - signalLowLimit) <= std::numeric_limits<double>::min())
+			if (ok1 == false || ok2 == false || std::abs(signalHighLimit - signalLowLimit) <= std::numeric_limits<double>::min())
 			{
 				return res;
 			}
@@ -1440,9 +1440,23 @@ namespace TrendLib
 		Q_ASSERT(painter);
 		Q_ASSERT(signal.isDiscrete() == true);
 
+		if (drawParam.duration() <= 0)
+		{
+			return;
+		}
+
+		painter->save();
+
+		auto restorePainter = qScopeGuard(
+			[painter]()
+			{
+				painter->restore();
+			});
+
 		QRectF signalRect = signal.tempDrawRect();
 		double barWidth = 1.0 / drawParam.realDpiX(); // 1 pixel width
-		size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+		const double barWidthFactor = 1.0 / barWidth; // How many bars per pixel
+		const size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() * barWidthFactor)) + 1;
 
 		struct Bar
 		{
@@ -1498,9 +1512,22 @@ namespace TrendLib
 		yPos1 =
 			static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY; // Make sure that Y is proper aligned for nice look of cosmetic pen
 
-		std::optional<TrendStateItem> prevState;
+		// This is unwrapped TrendScale::timeToScaledPixel
+		// rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
+		// rectLeft + (time.timeStamp - startTime.timeStamp) * rectWidthToDurationFactor
+		//
+		const double rectLeft = signalRect.left();
+		const double rectWidthToDurationFactor = signalRect.width() / drawParam.duration();
 
-		for (std::shared_ptr<const OneHourData>& hour : signalData)     // REFERENCE! To actually free memory after use
+		struct TrendPointState
+		{
+			bool stateValue;
+			double calculatedX;
+		};
+
+		std::optional<TrendPointState> prevState;
+
+		for (std::shared_ptr<const OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
 			if (stoken.stop_requested() == true)
 			{
@@ -1510,11 +1537,57 @@ namespace TrendLib
 #ifdef TREND_ZERO_COPY_TREND_DATA
 			std::shared_lock lock{hour->mutex};
 #endif
+			bool lastPointDrawn = false;
 			for (const TrendStateRecord& record : hour->data_)
 			{
-				if (stoken.stop_requested() == true)
+				if (lastPointDrawn == true || stoken.stop_requested() == true)
 				{
 					break;
+				}
+
+				if (record.states.empty() == false)
+				{
+					// Check if the LAST point is completely BEFORE the displayed trend.
+					//
+					{
+						const TrendStateItem& state = record.states.back();
+						const TimeStamp currentTime = state.getTime(timeType);
+
+						if (currentTime < startTimeStamp)
+						{
+							if (state.isValid() == true)
+							{
+								prevState = TrendPointState{.stateValue = (state.value != 0.0),
+															.calculatedX = rectLeft + (currentTime.timeStamp - startTimeStamp.timeStamp) *
+																						  rectWidthToDurationFactor};
+							}
+							else
+							{
+								prevState.reset();
+							}
+
+							continue;
+						}
+					}
+
+					// Check if the FIRST point is completely AFTER the displayed trend.
+					//
+					{
+						const TrendStateItem& state = record.states.front();
+						const TimeStamp currentTime = state.getTime(timeType);
+
+						if (currentTime > startTimeStamp.timeStamp + duration)
+						{
+							lastPointDrawn = true;
+
+							// We still might be need to draw the prev point.
+							//
+							if (prevState.has_value() == false || state.isValid() == false)
+							{
+								break; // End of drawing
+							}
+						}
+					}
 				}
 
 				for (const TrendStateItem& state : record.states)
@@ -1525,65 +1598,61 @@ namespace TrendLib
 						continue;
 					}
 
+					const TimeStamp currentTime = state.getTime(timeType);
+					const double endX = rectLeft + (currentTime.timeStamp - startTimeStamp.timeStamp) * rectWidthToDurationFactor;
+
 					if (prevState.has_value() == false)
 					{
-						prevState = state;
+						prevState = TrendPointState{.stateValue = (state.value != 0.0), .calculatedX = endX};
 						continue;
 					}
 
 					// We have a prev state and current state, draw bars between them on the level of [currentBarValue : prevState.value].
 					// Also add a bar at the [prevState.value : state.value]
+					//
+					const double startX = prevState->calculatedX;
+					const double dx = endX - startX;
 
-					TimeStamp currentTime = state.getTime(timeType);
-					TimeStamp prevTime = prevState->getTime(timeType);
+					const size_t barCount = std::max<size_t>(1, static_cast<size_t>(std::ceil(std::abs(dx) * barWidthFactor)));
 
-					double startX = TrendScale::timeToScaledPixel(prevTime, signalRect, startTimeStamp, duration);
-					double endX = TrendScale::timeToScaledPixel(currentTime, signalRect, startTimeStamp, duration);
-					double dx = endX - startX;
-					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) / barWidth));
-
-					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) / barWidth));
+					const std::ptrdiff_t barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) * barWidthFactor));
 					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0)
 					{
 						// This point is completely out of the left edge, skip it
 						//
-						prevState = state;
+						prevState = TrendPointState{.stateValue = (state.value != 0.0), .calculatedX = endX};
 						continue;
 					}
 
-					const bool prevStateValue = static_cast<bool>(prevState->value);
-					for (std::size_t cnt = 0; cnt < barCount; cnt++)
+					const bool prevStateValue = static_cast<bool>(prevState->stateValue);
+
+					const auto startIndex = std::max<std::ptrdiff_t>(barOffset, 0);
+					const auto finishIndex =
+						std::min<std::ptrdiff_t>(barOffset + static_cast<std::ptrdiff_t>(barCount), static_cast<std::ptrdiff_t>(totalBars));
+
+					for (std::ptrdiff_t index = startIndex; index < finishIndex; ++index)
 					{
-						std::ptrdiff_t index = barOffset + static_cast<std::ptrdiff_t>(cnt);
-						if (index < 0)
-						{
-							continue;
-						}
-
-						if (static_cast<size_t>(index) >= totalBars)
-						{
-							// Early exit if we are out of the right edge, no need to process more bars
-							//
-							break;
-						}
-
-						bars[index].update(prevStateValue);
+						bars[static_cast<size_t>(index)].update(prevStateValue);
 					}
 
 					// Add a bar at the last point with the value of the current state
 					//
-					if (size_t lastBarIndex = barOffset + barCount - 1; //
-						lastBarIndex < bars.size())
+					const auto lastBarIndex = barOffset + static_cast<std::ptrdiff_t>(barCount) - 1;
+					if (lastBarIndex >= 0 && static_cast<size_t>(lastBarIndex) < bars.size())
 					{
-						bars[lastBarIndex].update(state.value);
+						bars[static_cast<size_t>(lastBarIndex)].update(state.value != 0.0);
 					}
 
 					// --
 					//
-					prevState = state;
+					prevState = TrendPointState{.stateValue = (state.value != 0.0), .calculatedX = endX};
+
+					if (lastPointDrawn == true)
+					{
+						break;
+					}
 				} // for (const TrendStateItem& state : record.states)
 			}
-
 #ifdef TREND_ZERO_COPY_TREND_DATA
 #else
 			hour.reset(); // Free memory, we don't need it anymore
@@ -1625,8 +1694,8 @@ namespace TrendLib
 					}
 					else 
 					{
-						if (std::fabs(barRect.top() - y) <= std::numeric_limits<double>::epsilon() &&
-							std::fabs(barRect.height() - height) <= std::numeric_limits<double>::epsilon())
+						if (std::abs(barRect.top() - y) <= std::numeric_limits<double>::epsilon() &&
+							std::abs(barRect.height() - height) <= std::numeric_limits<double>::epsilon())
 						{
 							barRect.setWidth((x + minBarWidth) - barRect.left());
 						}
@@ -1656,12 +1725,13 @@ namespace TrendLib
 #else
 		{
 			painter->setPen(Qt::NoPen);
-			// painter->setRenderHint(QPainter::Antialiasing, false);
+			painter->setRenderHint(QPainter::Antialiasing, true);
 
 			const double cosmeticPenWidth = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiX);
 			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
 			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
 			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarWidthHalf = minBarWidth / 2.0;
 			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
 			const double pixelWidth = 1.0 / dpiX;
 
@@ -1671,13 +1741,13 @@ namespace TrendLib
 
 			auto color = signal.color();
 
-			for (size_t i = 0; i < bars.size(); i++)
+			for (size_t i = 0, size = bars.size(); i < size; i++)
 			{
-				Bar bar = bars[i];
+				const Bar bar = bars[i];
 
 				if (bar.hasValue == true)
 				{
-					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
+					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidthHalf;
 
 					double y;
 					double h;
@@ -1713,15 +1783,8 @@ namespace TrendLib
 					painter->fillRect(QRectF{x, y, minBarWidth, h}, color);
 				}
 			}
-
-			// painter->setRenderHint(QPainter::Antialiasing, true);
 		}
 #endif
-
-		// Reset clipping
-		//
-		painter->setClipping(false);
-
 		return;
 	}
 
@@ -1739,7 +1802,6 @@ namespace TrendLib
 		// Set clip region
 		//
 		painter->setClipRect(signalRect);
-
 		painter->setRenderHint(QPainter::Antialiasing, false);
 
 		// Draw trend
@@ -1758,7 +1820,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
+		if (std::abs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -1935,15 +1997,36 @@ namespace TrendLib
 		Q_ASSERT(painter);
 		Q_ASSERT(signal.isAnalog() == true);
 
+		if (drawParam.duration() <= 0)
+		{
+			return;
+		}
+
+		painter->save();
+
+		auto restorePainter = qScopeGuard(
+			[painter]()
+			{
+				painter->restore();
+			});
+
+		const auto scaleType = drawParam.scaleType();
 		QRectF signalRect = signal.tempDrawRect();
+
 		double barWidth = 1.0 / drawParam.realDpiX(); // 1 pixel width
-		size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+		const size_t totalBars = static_cast<size_t>(std::ceil(signalRect.width() / barWidth)) + 1;
+
+		// Make a multiplier 1/barWidth to speed up the calculation of bar offset, as division is more expensive than multiplication. So we
+		// can calculate the bar offset by (x - signalRect.left()) * barWidthFactor instead of (x - signalRect.left()) / barWidth.
+		//
+		const double barWidthFactor = 1.0 / barWidth;
 
 		struct Bar
 		{
 			double min;
 			double max;
 			bool hasValue;
+
 			void update(double value)
 			{
 				if (hasValue == false)
@@ -1969,6 +2052,7 @@ namespace TrendLib
 		thread_local std::vector<Bar> bars;
 		bars.clear();
 		bars.resize(totalBars, Bar{});
+		const size_t barsSize = totalBars;
 
 		// Set clip region
 		//
@@ -1986,29 +2070,42 @@ namespace TrendLib
 		bool ok1 = false;
 		bool ok2 = false;
 
-		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok1);
-		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok2);
-		if (ok1 == false || ok2 == false)
-		{
-			painter->setClipping(false);
-			painter->setRenderHint(QPainter::Antialiasing, true);
-			return;
-		}
+		const double highLimit = TrendScale::scaleHighLimit(signal, scaleType, &ok1);
+		const double lowLimit = TrendScale::scaleLowLimit(signal, scaleType, &ok2);
+		const double limitDelta = std::abs(highLimit - lowLimit);
 
-		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
+		if (ok1 == false || ok2 == false || limitDelta <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
-			painter->setClipping(false);
-			painter->setRenderHint(QPainter::Antialiasing, true);
 			return;
 		}
 
-		const E::TimeType timeType = drawParam.timeType();
+		// PosX is calculated by rectTop + (value - lowLimit) * rectWidthToDeltaFactor, so rectWidthToDeltaFactor is barWidth / limitDelta,
+		// as we need to convert the value delta to pixel delta, and then calculate the bar offset by multiplying the pixel delta with
+		// barWidthFactor.
+		//
+		// This is unwrapped TrendScale::valueToScaledPixel()
+		//
+		const double rectBottom = signalRect.bottom();
+		const double rectHeightToDeltaFactor = signalRect.height() / limitDelta;
 
+		// This is unwrapped TrendScale::timeToScaledPixel
+		// rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
+		//
+		const double rectLeft = signalRect.left();
+		const double rectWidthToDurationFactor = signalRect.width() / drawParam.duration();
+
+		const E::TimeType timeType = drawParam.timeType();
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
-		std::optional<TrendStateItem> prevState;
+
+		struct TrendPointState
+		{
+			double calculatedX;     // Got with TrendScale::timeToScaledPixel(state.getTime(timeType), signalRect, startTimeStamp, duration)
+			double calculatedValue; // Got with TrendScale::valueToScaleValue(state.value, scaleType, &ok)
+		};
+		std::optional<TrendPointState> prevState;
 
 		for (std::shared_ptr<const OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
@@ -2020,92 +2117,156 @@ namespace TrendLib
 #ifdef TREND_ZERO_COPY_TREND_DATA
 			std::shared_lock lock{hour->mutex};
 #endif
+			bool lastPointDrawn = false;
 			for (const TrendStateRecord& record : hour->data_)
 			{
-				if (stoken.stop_requested() == true)
+				if (lastPointDrawn == true || stoken.stop_requested() == true)
 				{
 					break;
 				}
 
-				bool ok = false;
+				if (record.states.empty() == false)
+				{
+					// Check if the LAST point is completely BEFORE the displayed trend.
+					//
+					{
+						const TrendStateItem& state = record.states.back();
+						const TimeStamp currentTime = state.getTime(timeType);
+
+						if (currentTime < startTimeStamp)
+						{
+							if (state.isValid() == true)
+							{
+								bool convertOk = true;
+								double x = rectLeft + (currentTime.timeStamp - startTimeStamp.timeStamp) * rectWidthToDurationFactor;
+								double value = scaleType == E::TrendScaleType::Linear ?
+												   state.value :
+												   TrendScale::valueToScaleValue(state.value, scaleType, &convertOk);
+
+								if (convertOk == true)
+								{
+									prevState = TrendPointState{.calculatedX = x, .calculatedValue = value};
+								}
+								else
+								{
+									prevState.reset();
+								}
+							}
+							else
+							{
+								prevState.reset();
+							}
+
+							continue;
+						}
+					}
+
+					// Check if the FIRST point is completely AFTER the displayed trend.
+					//
+					{
+						const TrendStateItem& state = record.states.front();
+						const TimeStamp currentTime = state.getTime(timeType);
+
+						if (currentTime > startTimeStamp.timeStamp + duration)
+						{
+							lastPointDrawn = true;
+
+							// We still might be need to draw the prev point.
+							//
+							if (prevState.has_value() == false || state.isValid() == false)
+							{
+								break; // End of drawing
+							}
+						}
+					}
+				}
+
 				for (const TrendStateItem& state : record.states)
 				{
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
 					//
-					if (state.isValid() == false || ok == false)
+					if (state.isValid() == false)
 					{
+						// Reset prevState when current state is invalid, so that the next valid point will not connect to the previous
+						// valid point.
+						//
 						prevState.reset();
 						continue;
 					}
 
-					if (prevState.has_value() == false)
+					const TimeStamp currentTime = state.getTime(timeType);
+					const double endX = rectLeft + (currentTime.timeStamp - startTimeStamp.timeStamp) * rectWidthToDurationFactor;
+
+					bool convertValueOk = true;
+					const double value = scaleType == E::TrendScaleType::Linear ?
+											 state.value :
+											 TrendScale::valueToScaleValue(state.value, scaleType, &convertValueOk);
+
+					if (prevState.has_value() == false || convertValueOk == false)
 					{
-						prevState = state;
+						if (convertValueOk == true)
+						{
+							prevState = TrendPointState{.calculatedX = endX, .calculatedValue = value};
+						}
+						else
+						{
+							prevState.reset();
+						}
 						continue;
 					}
 
-					// --
-					//
-					TimeStamp currentTime = state.getTime(timeType);
-					TimeStamp prevTime = prevState->getTime(timeType);
-
-					double startX = TrendScale::timeToScaledPixel(prevTime, signalRect, startTimeStamp, duration);
-					double endX = TrendScale::timeToScaledPixel(currentTime, signalRect, startTimeStamp, duration);
+					double startX = prevState->calculatedX;
 					double dx = endX - startX;
-					size_t barCount = static_cast<size_t>(std::ceil(std::fabs(dx) / barWidth));
 
-					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) / barWidth));
+					size_t barCount = std::max<size_t>(1, static_cast<size_t>(std::ceil(std::abs(dx) * barWidthFactor)));
+
+					auto barOffset = static_cast<std::ptrdiff_t>(std::floor((startX - signalRect.left()) * barWidthFactor));
 					if (barOffset + static_cast<std::ptrdiff_t>(barCount) < 0)
 					{
 						// This point is completely out of the left edge, skip it
 						//
-						prevState = state;
+						prevState = TrendPointState{.calculatedX = endX, .calculatedValue = value};
 						continue;
 					}
 
 					// Get y of the prevstate;
 					//
-					double prevStateValue = TrendScale::valueToScaleValue(prevState->value, drawParam.scaleType(), &ok);
-					double prevStateY = 0;
-					if (ok == true)
+					double prevStateValue = prevState->calculatedValue;
+
+					// Fill bars between prevState and current state with the value of the prevState
+					//
 					{
-						prevStateY = TrendScale::valueToScaledPixel(prevStateValue, signalRect, lowLimit, highLimit);
-					}
+						double prevStateY = rectBottom - (prevStateValue - lowLimit) * rectHeightToDeltaFactor;
 
-					for (std::size_t cnt = 0; ok == true && cnt < barCount; cnt++)
-					{
-						std::ptrdiff_t index = barOffset + static_cast<std::ptrdiff_t>(cnt);
-						if (index < 0)
+						const auto startIndex = std::max<std::ptrdiff_t>(barOffset, 0);
+						const auto finishIndex = std::min<std::ptrdiff_t>(barOffset + static_cast<std::ptrdiff_t>(barCount),
+																		  static_cast<std::ptrdiff_t>(totalBars));
+
+						for (std::ptrdiff_t index = startIndex; index < finishIndex; ++index)
 						{
-							continue;
+							bars[static_cast<size_t>(index)].update(prevStateY);
 						}
-
-						if (static_cast<size_t>(index) >= totalBars)
-						{
-							// Early exit if we are out of the right edge, no need to process more bars
-							//
-							break;
-						}
-
-						bars[index].update(prevStateY);
 					}
 
 					// Add a bar at the last point with the value of the current state
 					//
-					if (size_t lastBarIndex = barOffset + barCount - 1; //
-						lastBarIndex < bars.size())
+					if (const auto lastBarIndex = barOffset + static_cast<std::ptrdiff_t>(barCount) - 1; //
+						lastBarIndex >= 0 && static_cast<size_t>(lastBarIndex) < barsSize)
 					{
-						double curStateValue = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
-						if (ok == true)
-						{
-							double curStateY = TrendScale::valueToScaledPixel(curStateValue, signalRect, lowLimit, highLimit);
-							bars[lastBarIndex].update(curStateY);
-						}
+						double curStateY = rectBottom - (value - lowLimit) * rectHeightToDeltaFactor;
+
+						bars[static_cast<size_t>(lastBarIndex)].update(curStateY);
 					}
 
-					// --
+					// Do not forget to update prevState!
 					//
-					prevState = state;
+					prevState = TrendPointState{.calculatedX = endX, .calculatedValue = value};
+
+					if (lastPointDrawn == true)
+					{
+						break;
+					}
+					// Loop end.
 				} // for (const TrendStateItem& state : record.states)
 			} // for (const TrendStateRecord& record : data)
 
@@ -2119,7 +2280,7 @@ namespace TrendLib
 		//
 		{
 			painter->setPen(Qt::NoPen);
-			// painter->setRenderHint(QPainter::Antialiasing, false);
+			painter->setRenderHint(QPainter::Antialiasing, true);
 
 			const double dpiX = drawParam.realDpiX();
 			const double dpiY = drawParam.realDpiY();
@@ -2127,19 +2288,21 @@ namespace TrendLib
 			const double cosmeticPenHeight = drawParam.cosmeticPenWidth() ? drawParam.cosmeticPenWidth() : (1.0 / dpiY);
 			const double signalLineWeight = (signal.lineWeight() == 0.0) ? 1 : signal.lineWeight();
 			const double minBarWidth = signalLineWeight * cosmeticPenWidth;
+			const double minBarWidthHalf = minBarWidth / 2.0;
 			const double minBarHeight = signalLineWeight * cosmeticPenHeight;
+			const double minBarHeightHalf = minBarHeight / 2.0;
 			const double pixelWidth = 1.0 / dpiX;
 			auto color = signal.color();
 
-			for (size_t i = 0; i < bars.size(); i++)
+			for (size_t i = 0, size = bars.size(); i < size; i++)
 			{
 				const Bar& bar = bars[i];
 
 				if (bar.hasValue == true)
 				{
-					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidth / 2.0;
-					double y = bar.min - minBarHeight / 2.0; // bar.min is the top of the bar, bar.max is the bottom of the bar,
-															 // because in pixel coordinates, y increases downwards
+					double x = signalRect.left() + i * barWidth + pixelWidth - minBarWidthHalf;
+					double y = bar.min - minBarHeightHalf; // bar.min is the top of the bar, bar.max is the bottom of the bar,
+														   // because in pixel coordinates, y increases downwards
 					double w = minBarWidth;
 					double h = std::max(bar.max - bar.min, minBarHeight);
 					if (h > w)
@@ -2149,15 +2312,9 @@ namespace TrendLib
 
 					painter->fillRect(QRectF{x, y, w, h}, color);
 				}
-			}
+			} // for (size_t i = 0; i < bars.size(); i++)
+		} // Draw bars
 
-			// painter->setRenderHint(QPainter::Antialiasing, true);
-		}
-
-		// Reset clipping
-		//
-		painter->setClipping(false);
-		painter->setRenderHint(QPainter::Antialiasing, true);
 		return;
 	}
 
@@ -2378,7 +2535,7 @@ namespace TrendLib
 							continue;
 						}
 
-						if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
+						if (std::abs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 						{
 							continue;
 						}

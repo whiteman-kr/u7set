@@ -214,6 +214,7 @@ namespace Builder
 			//
 			std::vector<VduSymbolSubset> vduSubsets;
 			vduSubsets.push_back({"BasicLatin", 0x0020, 0x007F});
+			vduSubsets.push_back({"Latin1Supplement", 0x0080, 0x00FF});
 
 			for (const auto& specProp: vdu->specificProperties())
 			{

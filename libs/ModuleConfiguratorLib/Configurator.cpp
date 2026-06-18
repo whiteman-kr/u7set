@@ -204,6 +204,15 @@ namespace ModuleConfiguratorLib
 		m_firmwareCrc = qToBigEndian(value);
 	}
 
+	uint32_t CONF_SERVICE_DATA_V1::firmwareCrc2() const
+	{ 
+		return qFromBigEndian(m_firmwareCrc2); 
+	}
+	void CONF_SERVICE_DATA_V1::setFirmwareCrc2(uint32_t value)
+	{ 
+		m_firmwareCrc2 = qToBigEndian(value); 
+	}
+
 	//
 	// CONF_IDENTIFICATION_DATA_V1
 	//
@@ -1994,7 +2003,7 @@ namespace ModuleConfiguratorLib
 	}
 
 
-	void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc)
+	void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc, quint32 firmwareCrc2)
 	{
 		emit operationStarted();
 
@@ -2214,6 +2223,7 @@ namespace ModuleConfiguratorLib
 					writeServiceStruct.setConfigureMonth(static_cast<uint16_t>(now.month()));
 					writeServiceStruct.setConfigureDay(static_cast<uint16_t>(now.day()));
 					writeServiceStruct.setFirmwareCrc(firmwareCrc);
+					writeServiceStruct.setFirmwareCrc2(firmwareCrc2);
 
 					std::vector<quint8> writeData;
 					writeData.resize(blockSize, 0);

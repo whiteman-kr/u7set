@@ -127,6 +127,31 @@ namespace TestSuite
 			}
 		}
 
+		// Setpoints
+		//
+		{
+			QByteArray data;
+			QString errorString;
+
+			if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString); result == false)
+			{
+				m_logFile.writeError(errorString);
+			}
+			else
+			{
+				ComparatorSet setpoints;
+
+				if (bool readOk = setpoints.serializeFrom(data); readOk == false)
+				{
+					m_logFile.writeError(tr("Serialize set point list file error.") + QStringLiteral("\n"));
+				}
+				else
+				{
+					m_setpoints = std::move(setpoints);
+				}
+			}
+		}
+
 		// Get file MATS_USERS
 		//
 		if (config.tuningEnabled == true && config.login == true)
@@ -304,5 +329,10 @@ namespace TestSuite
 	{
 		QReadLocker locker(&m_confugurationLock);
 		return m_configData;
+	}
+
+	const ComparatorSet& TestSuiteConfigController::setpoints() const
+	{ 
+		return m_setpoints; 
 	}
 } // namespace TestSuite

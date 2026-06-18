@@ -4,6 +4,7 @@ namespace TrendLib
 {
 	const double TrendScale::periodScaleInfinity = 999; // Infinity value for period scale
 
+#if 0
 	double TrendScale::timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
 	{
 		if (duration == 0)
@@ -17,11 +18,11 @@ namespace TrendLib
 
 	double TrendScale::valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit)
 	{
-		double delta = std::fabs(highLimit - lowLimit);
+		double delta = std::abs(highLimit - lowLimit);
 
 		if (delta <= std::numeric_limits<double>::min())
 		{
-			Q_ASSERT(std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min());
+			Q_ASSERT(std::abs(highLimit - lowLimit) > std::numeric_limits<double>::min());
 			return 0;
 		}
 
@@ -30,10 +31,10 @@ namespace TrendLib
 
 	double TrendScale::scaledPixelToValue(double pixel, const QRectF& rect, double lowLimit, double highLimit)
 	{
-		double delta = std::fabs(highLimit - lowLimit);
+		double delta = std::abs(highLimit - lowLimit);
 		if (delta <= std::numeric_limits<double>::min())
 		{
-			Q_ASSERT(std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min());
+			Q_ASSERT(std::abs(highLimit - lowLimit) > std::numeric_limits<double>::min());
 			return 0;
 		}
 
@@ -45,6 +46,7 @@ namespace TrendLib
 
 		return lowLimit - (pixel - rect.bottom()) / (rect.height() / delta);
 	}
+#endif
 
 	double TrendScale::scaleLowLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok)
 	{
@@ -60,11 +62,12 @@ namespace TrendLib
 		return pointToScaleValue(value, scaleType, ok);
 	}
 
+#if 0
 	double TrendScale::valueToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (scaleType == E::TrendScaleType::Period)
 		{
-			if (std::fabs(value) < std::numeric_limits<double>::min())
+			if (std::abs(value) < std::numeric_limits<double>::min())
 			{
 				// Divide by 0 is possible
 				//
@@ -81,6 +84,7 @@ namespace TrendLib
 
 		return pointToScaleValue(value, scaleType, ok);
 	}
+#endif
 
 	double TrendScale::limitFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
@@ -98,7 +102,7 @@ namespace TrendLib
 
 		if (scaleType == E::TrendScaleType::Period)
 		{
-			if (std::fabs(result) < std::numeric_limits<double>::min())
+			if (std::abs(result) < std::numeric_limits<double>::min())
 			{
 				// Divide by 0 is possible
 				//
@@ -118,7 +122,11 @@ namespace TrendLib
 
 	// Build scale points for a trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(E::TrendScaleType scaleType,
+																				  double lowLimit,
+																				  double highLimit,
+																				  const QRectF& signalRect,
+																				  double minInchInterval)
 	{
 		switch (scaleType)
 		{
@@ -141,15 +149,15 @@ namespace TrendLib
 	{
 		if (scaleType == E::TrendScaleType::Period)
 		{
-			if (std::fabs(round(value)) >= periodScaleInfinity)
+			if (std::abs(round(value)) >= periodScaleInfinity)
 			{
-				return QString(QChar(0x221E));	// Infinity sign
+				return QString(QChar(0x221E)); // Infinity sign
 			}
 		}
 
 		if (scaleType == E::TrendScaleType::Log10)
 		{
-			if (std::fabs(value) <= std::numeric_limits<double>::min())
+			if (std::abs(value) <= std::numeric_limits<double>::min())
 			{
 				return "0";
 			}
@@ -174,7 +182,7 @@ namespace TrendLib
 		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
 		// This means that we take a "ghost" logarithm from negative value.
 
-		double result = std::fabs(value);
+		double result = std::abs(value);
 
 		if (result < std::numeric_limits<double>::min())
 		{
@@ -199,7 +207,7 @@ namespace TrendLib
 		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
 		// The sign of the result depened on input value sign.
 
-		double result = std::fabs(value);
+		double result = std::abs(value);
 
 		result -= std::numeric_limits<double>::max_exponent10;
 
@@ -213,6 +221,7 @@ namespace TrendLib
 		return result;
 	}
 
+#if 0
 	double TrendScale::pointToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
@@ -234,7 +243,7 @@ namespace TrendLib
 			{
 				value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
 
-				if (std::fabs(value) <= 1.0)
+				if (std::abs(value) <= 1.0)
 				{
 					return value > 0 ? std::numeric_limits<double>::min() : -std::numeric_limits<double>::min();
 				}
@@ -268,6 +277,7 @@ namespace TrendLib
 
 		return 0;
 	}
+#endif
 
 	double TrendScale::pointFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
@@ -287,7 +297,6 @@ namespace TrendLib
 				scaleValue = trendPow10(scaleValue);
 
 				return scaleValue;
-
 			}
 		case E::TrendScaleType::Period:
 			{
@@ -318,7 +327,11 @@ namespace TrendLib
 
 	// Build scale points for generic or logarithmic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(E::TrendScaleType scaleType,
+																						 double lowLimit,
+																						 double highLimit,
+																						 const QRectF& signalRect,
+																						 double minInchInterval)
 	{
 		if (scaleType != E::TrendScaleType::Linear && scaleType != E::TrendScaleType::Log10)
 		{
@@ -353,7 +366,7 @@ namespace TrendLib
 				{
 					// gridValue contains found suitable value for grid
 					//
-					mult = 1000000;		// To break outer loop
+					mult = 1000000; // To break outer loop
 					break;
 				}
 			}
@@ -382,7 +395,6 @@ namespace TrendLib
 
 		for (int i = 0; i < gridCount; i++)
 		{
-
 			double value = lowGriddedValue + i * gridValue;
 
 			bool ok = false;
@@ -402,7 +414,9 @@ namespace TrendLib
 
 	// Build scale points for periodic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(E::TrendScaleType scaleType, double lowLimit, double highLimit)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(E::TrendScaleType scaleType,
+																						double lowLimit,
+																						double highLimit)
 	{
 		if (scaleType != E::TrendScaleType::Period)
 		{
@@ -421,9 +435,8 @@ namespace TrendLib
 		// Calc vert grid
 		//
 
-		static const std::array<double, 19> possibleGridPoints = {2, 5, 10, 20, 40, 80, 160, 320, 640,
-																  TrendScale::periodScaleInfinity,
-																  -640, -320, -160, -80, -40, -20, -10, -5, -2};
+		static const std::array<double, 19> possibleGridPoints =
+			{2, 5, 10, 20, 40, 80, 160, 320, 640, TrendScale::periodScaleInfinity, -640, -320, -160, -80, -40, -20, -10, -5, -2};
 
 		std::vector<std::pair<double, double>> result;
 
@@ -449,4 +462,4 @@ namespace TrendLib
 
 		return result;
 	}
-}
+} // namespace TrendLib

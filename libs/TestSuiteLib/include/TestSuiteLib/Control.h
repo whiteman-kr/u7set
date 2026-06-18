@@ -14,6 +14,7 @@
 #include <atomic>
 #include <memory>
 
+class ComparatorSet;
 
 namespace TestSuite
 {
@@ -29,7 +30,10 @@ namespace TestSuite
 		void addInputController(std::unique_ptr<IInputController> controller);
 		void addOutputController(std::unique_ptr<IOutputController> controller);
 
-		void setTestParams(const SoftwareInfo& softwareInfo, const IScriptProvider& scriptProvider, const ControlParams& controlParams);
+		void setTestParams(const SoftwareInfo& softwareInfo,
+						   const IScriptProvider& scriptProvider,
+						   const ControlParams& controlParams,
+						   const ComparatorSet* setpoints);
 
 		int result() const;
 
@@ -62,6 +66,8 @@ namespace TestSuite
 		//
 		SoftwareInfo m_softwareInfo;
 		ControlParams m_controlParams;
+		
+		const ComparatorSet* m_setpoints = nullptr;
 
 		const IScriptProvider* m_scriptProvider = nullptr;
 
@@ -92,7 +98,10 @@ namespace TestSuite
 		void addOutputController(std::unique_ptr<IOutputController> controller);
 
 	public:
-		bool execute(const SoftwareInfo& softwareInfo, const IScriptProvider& scriptProvider, const ControlParams& controlParams);
+		bool execute(const SoftwareInfo& softwareInfo,
+					 const IScriptProvider& scriptProvider,
+					 const ControlParams& controlParams,
+					 const ComparatorSet* setpoints);
 		bool stop();
 		bool isRunning() const;
 

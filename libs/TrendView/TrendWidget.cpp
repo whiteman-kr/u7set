@@ -426,19 +426,16 @@ namespace TrendLib
 			return;
 		}
 
-		double devicePixelRatio = devicePixelRatioF();
-		QRectF hdRect{0, 0, rect().width() * devicePixelRatio, rect().height() * devicePixelRatio};
-
-		if (m_pixmap.size() != hdRect.size().toSize())
-		{
-			// New pixmap is not ready yet, scale the current one
-			//
-			painter.fillRect(rect(), m_trendParam.backColor1st());
-			painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
-			return;
-		}
-
-		painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
+#if 1
+		// Draw in a separate thread
+		//
+		painter.drawPixmap(QPoint{0, 0}, m_pixmap);
+#else
+		// Direct draw, debug only, the drawing is separate thread still happens!
+		// This branch is just for reference drawing.
+		//
+		trend().impl().draw(&painter, m_pixmapDrawParam, true);
+#endif
 
 		// Draw rulers
 		//

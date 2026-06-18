@@ -79,6 +79,7 @@ namespace TrendLib
 		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam); // Update data
 
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> trendSignals() const;
+		[[nodiscard]] std::vector<TrendLib::TrendSignalParam*> trendSignalsMutable();
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> analogSignals() const;
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
 

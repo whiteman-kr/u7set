@@ -91,123 +91,166 @@ namespace ReportLib
 	{
 		static QString firstTag = "$FIRST(";
 		static QString lastTag = "$LAST(";
-		static QString nextTag = "$NEXT(";
+		static QString repeatIndexTag = "$(REPEATINDEX)";
+		//static QString nextTag = "$NEXT(";
 
-		for (const std::shared_ptr<ObjectTemplate>& object : sectionTemplate.objects())
+		// Find the repeat count for section by its tag. If this value is zero, no repeats will be used.
+		//
+		int repeatCount = 1;
 		{
-			if (object->type() == ReportObject::Type::Text)
+			QString repeatCountRecordTag = tr("SECTION_REPEAT_COUNT(%1)").arg(sectionTemplate.tag());
+
+			bool ok = false;
+			QString repeatCountString = m_reportDataProvider.text(repeatCountRecordTag, &ok);
+			if (ok == true)
 			{
-				const TextTemplate* t = dynamic_cast<const TextTemplate*>(object.get());
-				if (t == nullptr)
+				int result = repeatCountString.toInt(&ok);
+				if (ok == true) 
 				{
-					Q_ASSERT(t);
-					return false;
+					repeatCount = result;
+				}
+			}
+		}
+		
+		for (int i = 0; i < repeatCount; i++)
+		{
+			// Process section objects
+			//
+			for (const std::shared_ptr<ObjectTemplate>& object : sectionTemplate.objects())
+			{
+				QString tag = object->tag();
+
+				// Replace $(REPEATINDEX) by iteration number
+				//
+				if (tag.isEmpty() == false && tag.contains(repeatIndexTag) == true)
+				{
+					tag = tag.replace(repeatIndexTag, tr("%1").arg(i));
 				}
 
-				const QString& tag = t->tag();
-
-				if (tag.isEmpty() == false)
+				if (object->type() == ReportObject::Type::Text)
 				{
-					if (tag.startsWith(firstTag) && tag.endsWith(")"))
+					const TextTemplate* t = dynamic_cast<const TextTemplate*>(object.get());
+					if (t == nullptr)
 					{
-						// Show only first tag
-						//
-						QString tagValue = tag;
-						tagValue = tagValue.remove(0, firstTag.length());
-						tagValue.chop(1);
-
-						bool ok = false;
-						QString s = m_reportDataProvider.text(tagValue, &ok);
-						if (ok == true)
-						{
-							section.addText(s + "\n", t->format());
-						}
+						Q_ASSERT(t);
+						return false;
 					}
-					else
+
+					if (tag.isEmpty() == false)
 					{
-						if (tag.startsWith(lastTag) && tag.endsWith(")"))
+						if (tag.startsWith(firstTag) && tag.endsWith(")"))
 						{
-							// Show only last tag
+							// Show only first tag
 							//
 							QString tagValue = tag;
-							tagValue = tagValue.remove(0, lastTag.length());
+							tagValue = tagValue.remove(0, firstTag.length());
 							tagValue.chop(1);
 
 							bool ok = false;
-							bool tagFound = false;
-							QString s;
-							do
-							{
-								QString tx = m_reportDataProvider.text(tagValue, &ok);
-								if (ok == true)
-								{
-									s = tx;
-									tagFound = true;
-								}
-							} while (ok == true);
-
-							if (tagFound == true)
+							QString s = m_reportDataProvider.text(tagValue, &ok);
+							if (ok == true)
 							{
 								section.addText(s + "\n", t->format());
 							}
 						}
 						else
 						{
-							if (tag.startsWith(nextTag) == false)
+							if (tag.startsWith(lastTag) && tag.endsWith(")"))
 							{
-								// Show all text with all all other tag instances EXCEPT %NEXT tag
+								// Show only last tag
+								//
+								QString tagValue = tag;
+								tagValue = tagValue.remove(0, lastTag.length());
+								tagValue.chop(1);
+
+								bool ok = false;
+								bool tagFound = false;
+								QString s;
+								do
+								{
+									QString tx = m_reportDataProvider.text(tagValue, &ok);
+									if (ok == true)
+									{
+										s = tx;
+										tagFound = true;
+									}
+								} while (ok == true);
+
+								if (tagFound == true)
+								{
+									section.addText(s + "\n", t->format());
+								}
+							}
+							else
+							{
+								// if (tag.startsWith(nextTag) == false)
+								//{
+								//   Show all text with all all other tag instances /*EXCEPT %NEXT tag*/
 								//
 								bool ok = false;
 								do
 								{
-									QString s = m_reportDataProvider.text(t->tag(), &ok);
+									QString s = m_reportDataProvider.text(tag, &ok);
 									if (ok == true)
 									{
 										section.addText(s + "\n", t->format());
 									}
 								} while (ok == true);
+								//}
 							}
 						}
 					}
-				}
-				else
-				{
-					QString s = t->text();
-					s.replace("\\n", "\n");
-					section.addText(s + "\n", t->format());
-				}
-			}
-
-			if (object->type() == ReportObject::Type::Table)
-			{
-				TableTemplate* t = dynamic_cast<TableTemplate*>(object.get());
-
-				// Create table object
-
-				auto table = section.addTable(t->format());
-
-				// Fill table with data
-				bool ok = false;
-				do
-				{
-					QString s = m_reportDataProvider.text(t->tag(), &ok);
-					if (ok == true)
+					else
 					{
-						QStringList l;
-						if (t->separator().isEmpty() == false)
-						{
-							l = s.split(t->separator(), Qt::SkipEmptyParts);
-						}
-						else
-						{
-							l << s;
-						}
-						table->insertRow(l);
+						QString s = t->text();
+						s.replace("\\n", "\n");
+						section.addText(s + "\n", t->format());
 					}
-				} while (ok == true);
-			}
-		}
+				}
+				else if (object->type() == ReportObject::Type::Table)
+				{
+					TableTemplate* t = dynamic_cast<TableTemplate*>(object.get());
+					if (t == nullptr)
+					{
+						Q_ASSERT(t);
+						return false;
+					}
 
+					if (tag.isEmpty() == false)
+					{
+						// Create table object
+
+						auto table = section.addTable(t->format());
+
+						// Fill table with data
+						bool ok = false;
+						do
+						{
+							QString s = m_reportDataProvider.text(tag, &ok);
+							if (ok == true)
+							{
+								QStringList l;
+								if (t->separator().isEmpty() == false)
+								{
+									l = s.split(t->separator(), Qt::SkipEmptyParts);
+								}
+								else
+								{
+									l << s;
+								}
+								table->insertRow(l);
+							}
+						} while (ok == true);
+					}
+					else
+					{
+						// Do nothing, table shall always have a tag
+					}
+				}
+			}
+		}// repeatCount
+
+		/*
 		{
 			// Place all text with $NEXT(Tag) tag
 			//
@@ -238,7 +281,7 @@ namespace ReportLib
 					}
 				}
 			}
-		}
+		}*/
 
 		return true;
 	}

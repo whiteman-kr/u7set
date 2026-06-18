@@ -970,7 +970,12 @@ void F2KeyForSchemaItem::f2KeyForConst(SchemaItemPtr item)
 
 				if (param != discreteValue)
 				{
-					m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant::fromValue(param), item);
+					// As param is anaolog for editing purpose, create a new discrete AfbParam.
+					//
+					Afb::AfbParamValue discreteParam{E::SignalType::Discrete, E::DataFormat::UnsignedInt, 1};
+					discreteParam.setValue(param.value().value<quint16>() == 0 ? 0 : 1);
+
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant::fromValue(discreteParam), item);
 				}
 			}
 			break;

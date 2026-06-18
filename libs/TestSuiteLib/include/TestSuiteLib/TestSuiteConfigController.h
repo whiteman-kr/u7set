@@ -8,6 +8,7 @@
 
 #include <ClientLib/ConfigController.h>
 #include <ReportLib/ReportTemplate.h>
+#include "../AppSignalLib/ComparatorSet.h"
 
 #include <QReadWriteLock>
 
@@ -124,6 +125,7 @@ namespace TestSuite
 		bool configurationTuningEnabled() const;
 
 		ConfigData configData() const;
+		const ComparatorSet& setpoints() const;
 
 		// Data section
 		//
@@ -133,5 +135,6 @@ namespace TestSuite
 		mutable QReadWriteLock m_confugurationLock; // for access to m_configuration and m_scripts
 		ConfigSettings m_configuration;
 		ConfigData m_configData;
+		ComparatorSet m_setpoints;
 	};
 } // namespace TestSuite

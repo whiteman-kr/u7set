@@ -346,6 +346,25 @@ namespace TrendLib
 		return result;
 	}
 
+	[[nodiscard]] std::vector<TrendLib::TrendSignalParam*> TrendSignalSet::trendSignalsMutable() 
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		std::vector<TrendSignalParam*> result;
+		result.reserve(m_signalParams.size());
+
+		int index = 0;
+		for (TrendSignalParam& s : m_signalParams)
+		{
+			auto& is = result.emplace_back(&s);
+			is->setTempSignalIndex(index);
+
+			index++;
+		}
+
+		return result;
+	}
+
 	std::vector<TrendLib::TrendSignalParam> TrendSignalSet::analogSignals() const
 	{
 		QMutexLocker locker(&m_paramMutex);

@@ -1,7 +1,9 @@
 #include <ClientLib/ScriptTestObserver.h>
 #include <TestSuiteLib/TestController.h>
+#include "../AppSignalLib/ComparatorSet.h"
 
 #include <QJSEngine>
+#include <QFile>
 
 #include <CommonLib/expected.hpp>
 
@@ -12,13 +14,19 @@ namespace TestSuite
 								   ILogFile* testLog,
 								   IInputController* inputController,
 								   IOutputController* outputController,
+								   const ComparatorSet* setpoints,
 								   QObject* parent) :
 		QObject{parent},
 		m_appLog{appLog},
 		m_testLog{testLog},
 		m_inputController{inputController},
-		m_outputController{outputController}
-	{
+		m_outputController{outputController},
+		m_setpoints{setpoints}
+	{ 
+		if (m_setpoints != nullptr)
+		{
+			m_setpoints->dump();
+		}
 	}
 
 	void TestController::throwScriptException(const QObject* object, QString text)
@@ -332,6 +340,84 @@ namespace TestSuite
 		}
 
 		return m_outputController->activateTuningSource(lmEquipmentId, activate);
+	}
+
+	QVariantMap TestController::loadTextFile(const QString& fileName)
+	{
+		QVariantMap result;
+
+		QFile file(fileName);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+		{
+			result["ok"] = false;
+			result["strings"] = QStringList();
+			return result;
+		}
+
+		QStringList strings;
+		while (file.atEnd() == false)
+		{
+			strings << file.readLine().trimmed();
+		}
+
+		result["ok"] = true;
+		result["strings"] = strings;
+		return result;
+	}
+
+	QJSValueList TestController::setpointsByInput(QString signalId) const
+	{
+		if (m_setpoints == nullptr)
+		{
+			throwScriptException(this, tr("setpointsByInput(), ComparatorSet is not set."));
+			return {};
+		}
+
+		QJSValueList result;
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		std::vector<std::shared_ptr<Comparator>> setpoints = m_setpoints->getByInputSignalID(signalId);
+		result.reserve(setpoints.size());
+
+		for (const auto& sp : setpoints)
+		{
+			result.push_back(engine->toScriptValue(*sp));
+		}
+
+		return result;
+	}
+
+	QJSValue TestController::setpointByOutput(QString signalId) const
+	{
+		if (m_setpoints == nullptr)
+		{
+			throwScriptException(this, tr("setpointsByInput(), ComparatorSet is not set."));
+			return {};
+		}
+
+		QJSValue result;
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		std::shared_ptr<Comparator> sp = m_setpoints->getByOutputSignalID(signalId);
+		if (sp != nullptr)
+		{
+			assert(sp->output().appSignalID() == signalId);
+			result = engine->toScriptValue(*sp);
+		}
+
+		return result;
 	}
 
 	QString TestController::projectName() const

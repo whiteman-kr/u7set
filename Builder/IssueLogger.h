@@ -629,6 +629,15 @@ namespace Builder
 
 		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid); // SchemaItem has an incompatible type with VDU
 
+		void wrnEQP6410(QString vduEquipmentId,
+						QString string,
+						QChar symbol); // TThe string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the unknown Unicode subset.
+		void wrnEQP6411(QString vduEquipmentId,
+						QString string,
+						QChar symbol,
+						QString subset); // The string '%1' processed by the VDU '%2' contains symbol (%3 [0x04]) from the '%5' Unicode
+										 // subset, which is not included to the VDU.
+
 		// Diagnostics compiler errors
 		//
 

@@ -28,28 +28,8 @@ namespace TrendLib
 
 	{
 		ui->setupUi(this);
-
 		setWindowTitle(tr("Properties - %1").arg(m_trendSignal.signalId()));
-
-		ui->viewLineWeightEdit->setValidator(new QIntValidator(0, 10, ui->viewLineWeightEdit));
-
-		// Select analog format
-
-		ui->viewFormatCombo->blockSignals(true);
-
-		ui->viewFormatCombo->addItems(E::enumKeyStrings<E::AnalogFormat>());
-
-		QString analogFormatString = E::valueToString<E::AnalogFormat>(m_trendSignal.analogFormat());
-		int index = ui->viewFormatCombo->findText(analogFormatString);
-		if (index != -1)
-		{
-			ui->viewFormatCombo->setCurrentIndex(index);
-		}
-
-		ui->viewFormatCombo->blockSignals(false);
-
-		//
-
+		initUi();
 		fillProperties();
 
 		return;
@@ -59,7 +39,7 @@ namespace TrendLib
 	{
 		delete ui;
 	}
-
+	
 	const TrendLib::TrendSignalParam& DialogTrendSignalProperties::trendSignal() const
 	{
 		return m_trendSignal;
@@ -67,10 +47,13 @@ namespace TrendLib
 
 	void DialogTrendSignalProperties::accept()
 	{
-		if (applyProperties() == false)
+		if (applyProperties(m_trendSignal) == false)
 		{
+			QMessageBox::critical(this, qAppName(), tr("An error has occurred while setting the propreties!"));
 			return;
 		}
+		
+		emit signalPropertiesChanged();
 
 		QDialog::accept();
 		return;
@@ -94,9 +77,78 @@ namespace TrendLib
 
 	void DialogTrendSignalProperties::on_buttonApply_clicked()
 	{
-		applyProperties();
+		if (applyProperties(m_trendSignal) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("An error has occurred while setting the propreties!"));
+		}
+		else
+		{
+			// Reset modification flags
+			//
+			m_modifiedFields.value = 0;
+			updateModifiedLabels();
+
+			emit signalPropertiesChanged();
+		}
 
 		return;
+	}
+
+	void DialogTrendSignalProperties::on_buttonApplyToAll_clicked() 
+	{ 
+		auto params = m_trendSignalSet->trendSignalsMutable();
+
+		for (TrendLib::TrendSignalParam* p : params)
+		{
+			if (applyProperties(*p) == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("An error has occurred while setting the propreties!"));
+				return;
+			}
+		}
+
+		if (applyProperties(m_trendSignal) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("An error has occurred while setting the propreties!"));
+		}
+
+		// Reset modification flags
+		//
+		m_modifiedFields.value = 0;
+		updateModifiedLabels();
+
+		emit signalPropertiesChanged();
+		return;
+	}
+
+	void DialogTrendSignalProperties::on_resetHigh_clicked()
+	{
+		if (m_trendSignal.type() == E::SignalType::Analog)
+		{
+			double highLimit = m_trendSignal.highLimit();
+			m_trendSignal.setViewHighLimit(m_scaleType, highLimit);
+			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueText(highLimit, m_scaleType, m_trendSignal));
+
+			// Update modification flags
+			//
+			m_modifiedFields.bits.viewHighLimit = true;
+			updateModifiedLabels();
+		}
+	}
+
+	void DialogTrendSignalProperties::on_resetLow_clicked()
+	{
+		if (m_trendSignal.type() == E::SignalType::Analog)
+		{
+			double lowLimit = m_trendSignal.lowLimit();
+			m_trendSignal.setViewLowLimit(m_scaleType, lowLimit);
+			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueText(lowLimit, m_scaleType, m_trendSignal));
+
+			// Update modification flags
+			//
+			m_modifiedFields.bits.viewLowLimit = true;
+			updateModifiedLabels();
+		}
 	}
 
 	void DialogTrendSignalProperties::on_viewFormatCombo_currentIndexChanged(const QString& text)
@@ -114,23 +166,99 @@ namespace TrendLib
 
 		m_trendSignal.setAnalogFormat(analogFormat);
 
-		//
-
 		fillProperties();
+
+		// Update modification flags
+		//
+		m_modifiedFields.bits.format = true;
+		updateModifiedLabels();
 
 		return;
 	}
 
+	
+	void DialogTrendSignalProperties::initUi()
+	{
+		ui->viewLineWeightEdit->setValidator(new QIntValidator(0, 10, ui->viewLineWeightEdit));
+
+		// Select analog format
+		//
+		ui->viewFormatCombo->blockSignals(true);
+
+		ui->viewFormatCombo->addItems(E::enumKeyStrings<E::AnalogFormat>());
+
+		QString analogFormatString = E::valueToString<E::AnalogFormat>(m_trendSignal.analogFormat());
+		int index = ui->viewFormatCombo->findText(analogFormatString);
+		if (index != -1)
+		{
+			ui->viewFormatCombo->setCurrentIndex(index);
+		}
+
+		ui->viewFormatCombo->blockSignals(false);
+
+		// Update modification flags events
+		//
+		connect(ui->viewFormatCombo,
+				&QComboBox::currentTextChanged,
+				this,
+				&DialogTrendSignalProperties::on_viewFormatCombo_currentIndexChanged);
+
+		connect(ui->viewPrecisionEdit,
+				&QLineEdit::textEdited,
+				this,
+				[this](const QString&)
+				{
+					m_modifiedFields.bits.precision = true;
+					updateModifiedLabels();
+				});
+
+		connect(ui->viewHighEdit,
+				&QLineEdit::textEdited,
+				this,
+				[this](const QString&)
+				{
+					m_modifiedFields.bits.viewHighLimit = true;
+					updateModifiedLabels();
+				});
+
+		connect(ui->viewLowEdit,
+				&QLineEdit::textEdited,
+				this,
+				[this](const QString&)
+				{
+					m_modifiedFields.bits.viewLowLimit = true;
+					updateModifiedLabels();
+				});
+
+		connect(ui->colorWidget,
+				&ChooseColorWidget::colorChanged,
+				this,
+				[this]()
+				{
+					m_modifiedFields.bits.color = true;
+					updateModifiedLabels();
+				});
+
+		connect(ui->viewLineWeightEdit,
+				&QLineEdit::textEdited,
+				this,
+				[this](const QString&)
+				{
+					m_modifiedFields.bits.lineWeight = true;
+					updateModifiedLabels();
+				});
+	}
+	
 	void DialogTrendSignalProperties::fillProperties()
 	{
-		ui->signalIdEdit->setText(m_trendSignal.signalId());
-		ui->captionEdit->setText(m_trendSignal.caption());
+		ui->labelAppSignalID->setText(m_trendSignal.signalId());
+		ui->labelCaption->setText(m_trendSignal.caption());
 
 		ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
 
 		if (m_trendSignal.type() == E::SignalType::Analog)
 		{
-			ui->typeEdit->setText(tr("Analog"));
+			ui->labelType->setText(tr("Analog"));
 
 			double viewHighLimit = m_trendSignal.viewHighLimit(m_scaleType);
 			double viewLowLimit = m_trendSignal.viewLowLimit(m_scaleType);
@@ -152,12 +280,10 @@ namespace TrendLib
 				viewLowLimit = TrendLib::TrendScale::periodScaleInfinity / viewLowLimit;
 			}
 
-			ui->unitsEdit->setText(m_trendSignal.unit());
+			ui->labelUnits->setText(m_trendSignal.unit());
 
-			ui->limitsEdit->setText(
-				tr("%1 - %2")
-				.arg(TrendLib::TrendScale::scaleValueText(m_trendSignal.lowLimit(), m_scaleType, m_trendSignal))
-				.arg(TrendLib::TrendScale::scaleValueText(m_trendSignal.highLimit(), m_scaleType, m_trendSignal)));
+			ui->labelHigh->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.highLimit(), m_scaleType, m_trendSignal));
+			ui->labelLow->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.lowLimit(), m_scaleType, m_trendSignal));
 
 			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueText(viewHighLimit, m_scaleType, m_trendSignal));
 			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueText(viewLowLimit, m_scaleType, m_trendSignal));
@@ -167,9 +293,11 @@ namespace TrendLib
 
 		if (m_trendSignal.type() == E::SignalType::Discrete)
 		{
-			ui->typeEdit->setText(tr("Discrete"));
+			ui->labelType->setText(tr("Discrete"));
 
-			ui->limitsEdit->setText(tr("0 - 1"));
+			ui->labelHigh->setText(tr("1"));
+			ui->labelLow->setText(tr("0"));
+			ui->labelUnits->setText("");
 			ui->viewHighEdit->setText(QString::number(1));
 			ui->viewLowEdit->setText(QString::number(0));
 			ui->viewHighEdit->setReadOnly(true);
@@ -183,7 +311,36 @@ namespace TrendLib
 		return;
 	}
 
-	bool DialogTrendSignalProperties::applyProperties()
+	void DialogTrendSignalProperties::updateModifiedLabels()
+	{
+		auto updateLabel = [](QLabel* l, bool flag)
+		{
+			QString text = l->text();
+			if (flag == false) {
+				text.remove("<b>");
+				text.remove("</b>");
+				l->setText(text);
+			}
+			else
+			{
+				if (text.startsWith("<b>") == false)
+				{
+					l->setText("<b>" + text + "</b>");
+				}
+			}
+		};
+
+		updateLabel(ui->viewPrecisionLabel, m_modifiedFields.bits.precision);
+		updateLabel(ui->viewFormatLabel, m_modifiedFields.bits.format);
+		
+		updateLabel(ui->viewHighLabel, m_modifiedFields.bits.viewHighLimit);
+		updateLabel(ui->viewLowLabel, m_modifiedFields.bits.viewLowLimit);
+		
+		updateLabel(ui->colorLabel, m_modifiedFields.bits.color);
+		updateLabel(ui->viewLineWeightLabel, m_modifiedFields.bits.lineWeight);
+	}
+
+	bool DialogTrendSignalProperties::applyProperties(TrendLib::TrendSignalParam& trendSignal)
 	{
 		bool ok = false;
 
@@ -194,10 +351,7 @@ namespace TrendLib
 			return false;
 		}
 
-		m_trendSignal.setLineWeight(lineWeight);
-		m_trendSignal.setColor(ui->colorWidget->color().rgb());
-
-		if (m_trendSignal.type() == E::SignalType::Analog)
+		if (trendSignal.type() == E::SignalType::Analog)
 		{
 			// Analog signal only
 
@@ -241,19 +395,41 @@ namespace TrendLib
 			E::AnalogFormat analogFormat = E::stringToValue<E::AnalogFormat>(analogFormatString, &ok);
 			if (ok == true)
 			{
-				m_trendSignal.setAnalogFormat(analogFormat);
+				if (m_modifiedFields.bits.format == true)
+				{
+					trendSignal.setAnalogFormat(analogFormat);
+				}
 			}
 			else
 			{
 				Q_ASSERT(ok);
 			}
 
-			m_trendSignal.setViewHighLimit(m_scaleType, qMax(viewHighLimit, viewLowLimit));
-			m_trendSignal.setViewLowLimit(m_scaleType, qMin(viewHighLimit, viewLowLimit));
-			m_trendSignal.setPrecision(precision);
+			if (m_modifiedFields.bits.viewHighLimit == true)
+			{
+				trendSignal.setViewHighLimit(m_scaleType, qMax(viewHighLimit, viewLowLimit));
+			}
+
+			if (m_modifiedFields.bits.viewLowLimit == true)
+			{
+				trendSignal.setViewLowLimit(m_scaleType, qMin(viewLowLimit, viewLowLimit));
+			}
+
+			if (m_modifiedFields.bits.precision == true)
+			{
+				trendSignal.setPrecision(precision);
+			}
 		}
 
-		emit signalPropertiesChanged();
+		if (m_modifiedFields.bits.color == true)
+		{
+			trendSignal.setColor(ui->colorWidget->color().rgb());
+		}
+
+		if (m_modifiedFields.bits.lineWeight == true)
+		{
+			trendSignal.setLineWeight(lineWeight);
+		}
 
 		return true;
 	}
@@ -283,6 +459,9 @@ void ChooseColorWidget::mousePressEvent(QMouseEvent* /*event*/)
 	{
 		m_color = d.selectedColor();
 		update();
+
+		m_modified = true;
+		emit colorChanged();
 	}
 
 	return;
@@ -295,5 +474,11 @@ QColor ChooseColorWidget::color() const
 
 void ChooseColorWidget::setColor(QColor value)
 {
+	m_modified = false;
 	m_color = value;
+}
+
+bool ChooseColorWidget::modified() const 
+{ 
+	return m_modified; 
 }

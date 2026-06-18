@@ -114,7 +114,7 @@ namespace ModuleConfiguratorLib
 		uint16_t m_reserve1_1;       // Firmware version 1
 		uint16_t m_reserve1_2;       // Firmware version 2
 		uint32_t m_firmwareCrc;      // Firmware Crc1
-		uint32_t m_reserve2_0;       // Firmware Crc2
+		uint32_t m_firmwareCrc2;     // Firmware Crc2
 		uint16_t m_reserve3_0;       // Reserve 3 -- size 16bit words
 		uint16_t m_reserve3_1;       //
 		uint16_t m_reserve3_2;       //
@@ -148,6 +148,9 @@ namespace ModuleConfiguratorLib
 
 		uint32_t firmwareCrc() const;
 		void setFirmwareCrc(uint32_t value);
+
+		uint32_t firmwareCrc2() const;
+		void setFirmwareCrc2(uint32_t value);
 
 		// --
 		//
@@ -279,7 +282,7 @@ namespace ModuleConfiguratorLib
 		void setSettings(QString device, bool showDebugInfo, bool verify);
 
 		void readServiceInformation(int param);
-		void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+		void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc, quint32 firmwareCrc2);
 
 		void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
 

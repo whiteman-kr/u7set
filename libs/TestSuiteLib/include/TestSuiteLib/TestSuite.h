@@ -16,6 +16,7 @@ namespace TestSuite
 	class TestControl;
 }
 
+class ComparatorSet;
 
 namespace TestSuite
 {
@@ -41,7 +42,9 @@ namespace TestSuite
 		static std::unique_ptr<::TestSuite::TestControl> emptyTestControlPtr(); // Hide TestControl unique ptr construction
 
 	public:
-		bool execute(const ::TestSuite::IScriptProvider& scriptProvider, const ::TestSuite::ControlParams& controlParams);
+		bool execute(const ::TestSuite::IScriptProvider& scriptProvider,
+					 const ::TestSuite::ControlParams& controlParams,
+					 const ComparatorSet* setpoints);
 		void stop();
 		[[nodiscard]] bool isRunning() const;
 
