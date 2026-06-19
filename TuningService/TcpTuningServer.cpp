@@ -242,6 +242,8 @@ namespace Tuning
 
 			if (sourceThread == nullptr)
 			{
+				DEBUG_LOG_MSG(m_logger, QString("No sourceThread for %1").arg(sourceID));
+
 				const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
 
 				TEST_PTR_CONTINUE(src);
@@ -252,6 +254,7 @@ namespace Tuning
 				{
 					if (m_service.isControlled(src->moduleEquipmentID(), lanID) == false)
 					{
+						DEBUG_LOG_MSG(m_logger, QString("Module %1 not controlled (Lan %2)").arg(src->moduleEquipmentID()).arg(lanID));
 						continue;
 					}
 
@@ -262,10 +265,20 @@ namespace Tuning
 					newTss->set_lanequipmentid(lanID.toStdString());
 					newTss->set_isreply(false);
 				}
+
+				DEBUG_LOG_MSG(m_logger,
+							  QString("m_getTuningSourcesStatesReply states count = %1")
+								  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
 			}
 			else
 			{
+				DEBUG_LOG_MSG(m_logger, QString("getSourceState for %1").arg(sourceID));
+
 				sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
+
+				DEBUG_LOG_MSG(m_logger,
+							  QString("m_getTuningSourcesStatesReply states count = %1")
+								  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
 			}
 		}
 
@@ -899,13 +912,18 @@ namespace Tuning
 
 			TuningServiceSettings::TuningClient tunClient = settings.getTuningClient(clientEquipmentID);
 
+			DEBUG_LOG_MSG(m_logger, QString("Call initClientSourcesList for %1").arg(clientEquipmentID));
+
 			if (tunClient.isValid() == false)
 			{
+				DEBUG_LOG_MSG(m_logger, QString("Client %1 not valid!").arg(clientEquipmentID));
 				Q_ASSERT(false);		// clientEquipmentID should be checked early!
 				return;
 			}
 
 			m_clientSourcesList = tunClient.uniqueSourcesIDs();
+
+			DEBUG_LOG_MSG(m_logger, QString("Sources for %1: %2").arg(clientEquipmentID).arg(m_clientSourcesList.value().join(", ")));
 		}
 	}
 
