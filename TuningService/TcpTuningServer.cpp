@@ -275,6 +275,10 @@ namespace Tuning
 
 		m_getTuningSourcesStatesReply.set_error(TO_INT(E::NetworkError::Success));
 
+		DEBUG_LOG_MSG(m_logger,
+					  QString(tr("Send reply on TDS_GET_TUNING_SOURCES_STATES, states count %1"))
+						  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
+
 		sendReply(m_getTuningSourcesStatesReply);
 	}
 
