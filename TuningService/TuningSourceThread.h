@@ -484,8 +484,8 @@ namespace Tuning
 
 		void pushReply(int channel, const RupFotip& reply);
 		void incErrReplySize(quint32 channelIP);
-		void getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
-		void getSourceState(Network::TuningSourceState* proto) const;
+		[[nodiscard]] bool getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
+		[[nodiscard]] bool getSourceState(Network::TuningSourceState* proto) const;
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,

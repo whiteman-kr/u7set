@@ -63,7 +63,12 @@ namespace Tuning
 
 			TEST_PTR_CONTINUE(thread);
 
-			thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+			bool res = thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+
+			if (res == false)
+			{
+				DEBUG_LOG_MSG(logger(), QString("Failed to get source state for %1").arg(QString::fromStdString(dsi.moduleequipmentid())));
+			}
 		}
 	}
 

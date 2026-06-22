@@ -1718,11 +1718,15 @@ namespace Tuning
 
 		for(auto handler : m_handlers)
 		{
-			TEST_PTR_CONTINUE(handler);
+			if (handler == nullptr)
+			{
+				DEBUG_LOG_MSG(m_logger,
+							  QString("TuningSourceThreadWorker::getSourceState: handler is nullptr for source %1")
+								  .arg(sourceEquipmentID()));
+				continue;
+			}
 
 			Network::TuningSourceState* newTss = reply->add_tuningsourcesstate();
-
-			TEST_PTR_CONTINUE(newTss);
 
 			handler->state().saveToProto(newTss);
 		}
@@ -2310,18 +2314,26 @@ namespace Tuning
 		m_worker->incErrReplySize(channelIP);
 	}
 
-	void TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply) const
+	[[nodiscard]] bool TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply) const
 	{
-		TEST_PTR_RETURN(m_worker);
+		if (m_worker == nullptr)
+		{
+			return false;
+		}
 
 		m_worker->getSourceState(reply);
+		return true;
 	}
 
-	void TuningSourceThread::getSourceState(Network::TuningSourceState* proto) const
+	[[nodiscard]] bool TuningSourceThread::getSourceState(Network::TuningSourceState* proto) const
 	{
-		TEST_PTR_RETURN(m_worker);
+		if (m_worker == nullptr)
+		{
+			return false;
+		}
 
 		m_worker->getSourceState(proto);
+		return true;
 	}
 
 	void TuningSourceThread::readSignalState(Network::TuningSignalState* tss) const

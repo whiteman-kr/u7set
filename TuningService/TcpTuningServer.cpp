@@ -274,7 +274,12 @@ namespace Tuning
 			{
 				DEBUG_LOG_MSG(m_logger, QString("getSourceState for %1").arg(sourceID));
 
-				sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
+				bool res = sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
+
+				if (res == false)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("No worker for %1").arg(sourceID));
+				}
 
 				DEBUG_LOG_MSG(m_logger,
 							  QString("m_getTuningSourcesStatesReply states count = %1")
