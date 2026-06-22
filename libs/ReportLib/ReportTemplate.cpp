@@ -92,7 +92,7 @@ namespace ReportLib
 
             if (ok == false)
             {
-				reader.raiseError(QObject::tr("Failed to load Text element - unknown font size."));
+				reader.raiseError(QObject::tr("Failed to load Text element - invalid font size."));
                 return false;
             }
         }
@@ -198,6 +198,7 @@ namespace ReportLib
         int fontSize{12};
 		bool fontBold{false};
         std::vector<TableFormat::ColumnFormat> columns;
+		int borderWidth{0};
 
         if (reader.attributes().hasAttribute("FontName"))
         {
@@ -210,12 +211,23 @@ namespace ReportLib
 
             if (ok == false)
             {
-				reader.raiseError(QObject::tr("Failed to load Table element - unknown font size."));
+				reader.raiseError(QObject::tr("Failed to load Table element - invalid font size."));
                 return false;
             }
         }
 
-        if (reader.attributes().hasAttribute("FontBold"))
+        if (reader.attributes().hasAttribute("BorderWidth"))
+		{
+			borderWidth = reader.attributes().value("BorderWidth").toInt(&ok);
+			
+			if (ok == false)
+			{
+				reader.raiseError(QObject::tr("Failed to load Table element - invalid border width."));
+				return false;
+			}
+		}
+
+		if (reader.attributes().hasAttribute("FontBold"))
         {
 			fontBold = reader.attributes().value("FontBold").toString().compare("True", Qt::CaseInsensitive) == 0;
         }
@@ -270,7 +282,7 @@ namespace ReportLib
                     c.width = reader.attributes().value("Width").toInt(&ok);
                     if (ok == false)
                     {
-                        reader.raiseError(QObject::tr("Failed to load TableTemplate element - unknown column width."));
+                        reader.raiseError(QObject::tr("Failed to load TableTemplate element - invalid column width."));
                         return false;
                     }
                 }
@@ -288,7 +300,7 @@ namespace ReportLib
             }
         }
 
-		m_format = {ReportFont{fontName, fontSize, fontBold ? QFont::Bold : QFont::Normal}, columns};
+		m_format = {ReportFont{fontName, fontSize, fontBold ? QFont::Bold : QFont::Normal}, columns, borderWidth};
 
         //QXmlStreamReader::TokenType tt = reader.readNext();
         //Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
@@ -308,7 +320,7 @@ namespace ReportLib
 
 	QString TableTemplate::propToText() const
 	{
-		return QString("Tag: '%1', Sep: '%2', Cols: %3").arg(tag()).arg(separator()).arg(m_format.columnsFormat().size());
+		return QString("Tag: '%1', Sep: '%2', Cols: %3, BorderWidth: %4").arg(tag()).arg(separator()).arg(m_format.columnsFormat().size()).arg(m_format.borderWidth());
 	}
 
 	//
@@ -340,7 +352,7 @@ namespace ReportLib
 
 			if (ok == false)
 			{
-				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown font size."));
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - invalid font size."));
 				return false;
 			}
 		}
@@ -409,7 +421,7 @@ namespace ReportLib
 			pageFrom = reader.attributes().value("PageFrom").toInt(&ok);
 			if (ok == false)
 			{
-				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown PageFrom."));
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - invalid PageFrom."));
 				return false;
 			}
 		}
@@ -419,7 +431,7 @@ namespace ReportLib
 			pageTo = reader.attributes().value("PageTo").toInt(&ok);
 			if (ok == false)
 			{
-				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown PageTo."));
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - invalid PageTo."));
 				return false;
 			}
 		}
@@ -615,7 +627,7 @@ namespace ReportLib
 			m_resolution = reader.attributes().value("Resolution").toInt(&ok);
 			if (ok == false)
 			{
-				reader.raiseError(QObject::tr("Failed to load ReportTemplate element - unknown Resolution."));
+				reader.raiseError(QObject::tr("Failed to load ReportTemplate element - invalid Resolution."));
 				return false;
 			}
 		}

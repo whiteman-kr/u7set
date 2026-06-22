@@ -905,8 +905,11 @@ void ProjectDiffGenerator::compareProject()
 				m_statistics.m_currentObjectName.clear();
 			}
 
-			headerTable = ReportTable::create(
-				{m_tableFont, {tr("Signal"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")}, {45, 10, 10, 15, 20}, Qt::AlignLeft});
+			headerTable = ReportTable::create({m_tableFont,
+											   {tr("Signal"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
+											   {45, 10, 10, 15, 20},
+											   Qt::AlignLeft,
+											   0 /*borderWidth*/});
 
 			fileTypeSummarySection->addTable(headerTable);
 
@@ -914,8 +917,11 @@ void ProjectDiffGenerator::compareProject()
 		}
 		else
 		{
-			headerTable = ReportTable::create(
-				{m_tableFont, {tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")}, {45, 10, 10, 15, 20}, Qt::AlignLeft});
+			headerTable = ReportTable::create({m_tableFont,
+											   {tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
+											   {45, 10, 10, 15, 20},
+											   Qt::AlignLeft,
+											   0 /*borderWidth*/});
 
 			fileTypeSummarySection->addTable(headerTable);
 
@@ -1408,8 +1414,11 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 		section->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
 
-		auto diffTable = section->addTable(
-			{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+		auto diffTable = section->addTable({m_tableFont,
+											{tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+											{15, 15, 35, 35},
+											Qt::AlignLeft,
+											0 /*borderWidth*/});
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1466,11 +1475,14 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 	//
 	// Create tables
 
-	std::shared_ptr<ReportTable> busDiffTable = ReportTable::create(
-		{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+	std::shared_ptr<ReportTable> busDiffTable = ReportTable::create({m_tableFont,
+																	 {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																	 {15, 15, 35, 35},
+																	 Qt::AlignLeft,
+																	 0 /*borderWidth*/});
 
 	std::shared_ptr<ReportTable> busSignalsDiffTable =
-		ReportTable::create({m_tableFont, {tr("SignalID"), tr("Caption"), tr("Status")}, {35, 15, 50}, Qt::AlignLeft});
+		ReportTable::create({m_tableFont, {tr("SignalID"), tr("Caption"), tr("Status")}, {35, 15, 50}, Qt::AlignLeft, 0 /*borderWidth*/});
 
 	std::vector<PropertyDiff> busDiffs;
 
@@ -1501,8 +1513,11 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 				if (busSignalDiffs.empty() == false)
 				{
-					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportTable::create(
-						{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportTable::create({m_tableFont,
+											 {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+											 {15, 15, 35, 35},
+											 Qt::AlignLeft,
+											 0 /*borderWidth*/});
 
 					busSignalsPropertiesTables[targetBusSignal.signalId()] = busSignalsPropertiesDiffTable;
 
@@ -1645,11 +1660,14 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	// Create tables
 
-	std::shared_ptr<ReportTable> schemaDiffTable = ReportTable::create(
-		{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+	std::shared_ptr<ReportTable> schemaDiffTable = ReportTable::create({m_tableFont,
+																		{tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																		{15, 15, 35, 35},
+																		Qt::AlignLeft,
+																		0 /*borderWidth*/});
 
-	std::shared_ptr<ReportTable> schemaItemsDiffTable =
-		ReportTable::create({m_tableFont, {tr("Type"), tr("Label"), tr("Layer"), tr("Status")}, {25, 35, 25, 15}, Qt::AlignLeft});
+	std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportTable::create(
+		{m_tableFont, {tr("Type"), tr("Label"), tr("Layer"), tr("Status")}, {25, 35, 25, 15}, Qt::AlignLeft, 0 /*borderWidth*/});
 
 	// Compare schemas properties
 
@@ -1713,8 +1731,11 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 					schemaItemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
 
-					std::shared_ptr<ReportTable> itemDiffTable = ReportTable::create(
-						{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+					std::shared_ptr<ReportTable> itemDiffTable = ReportTable::create({m_tableFont,
+											 {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+											 {15, 15, 35, 35},
+											 Qt::AlignLeft,
+											 0 /*borderWidth*/});
 
 					fillDiffTable(*itemDiffTable, itemDiffs);
 
@@ -1904,8 +1925,11 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 						   E::valueToString<E::VcsItemAction>(targetFile->action()),
 						   targetFile);
 
-		std::shared_ptr<ReportTable> diffTable = section->addTable(
-			{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+		std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+																	{tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																	{15, 15, 35, 35},
+																	Qt::AlignLeft,
+																	0 /*borderWidth*/});
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1966,8 +1990,11 @@ void ProjectDiffGenerator::compareDiagSignalTypes(const std::shared_ptr<DbFile>&
 
 		addHeaderTableItem(headerTable, targetType->signalTypeId(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-		std::shared_ptr<ReportTable> diffTable = section->addTable(
-			{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+		std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+																	{tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																	{15, 15, 35, 35},
+																	Qt::AlignLeft,
+																	0 /*borderWidth*/});
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -2018,8 +2045,8 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
 
-		std::shared_ptr<ReportTable> diffTable =
-			section->addTable({m_tableFont, {tr("Line"), tr("Source"), tr("Line"), tr("Target")}, {10, 40, 10, 40}, Qt::AlignLeft});
+		std::shared_ptr<ReportTable> diffTable = section->addTable(
+			{m_tableFont, {tr("Line"), tr("Source"), tr("Line"), tr("Target")}, {10, 40, 10, 40}, Qt::AlignLeft, 0 /*borderWidth*/});
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
 		std::vector<FileDiff::FileLine> fileLinesTargetAligned;
@@ -2409,8 +2436,11 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 						   E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()),
 						   targetSignal);
 
-		std::shared_ptr<ReportTable> diffTable = section->addTable(
-			{m_tableFont, {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, {15, 15, 35, 35}, Qt::AlignLeft});
+		std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+																	{tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																	{15, 15, 35, 35},
+																	Qt::AlignLeft,
+																	0 /*borderWidth*/});
 
 		fillDiffTable(*diffTable, diffs);
 	}
