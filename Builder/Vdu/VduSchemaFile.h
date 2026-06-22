@@ -37,6 +37,30 @@
 //
 #pragma pack(push, 1)
 
+struct VduValue
+{
+	enum class Type : uint16_t
+	{
+		i64 = 0,         // Not used yet, but reserved for future use.
+		i32 = 1,
+		f32 = 2,
+		f64 = 3,         // Not used yet, but reserved for future use.
+	};
+
+	union Data
+	{
+		int64_t i64;     // For future use
+		int32_t i32;
+		float f32;
+		double f64;      // For future use
+	};
+
+	Type type;           // 2 bytes
+	uint16_t reserve0;   // 2 bytes
+	uint32_t reserve1;   // 4 bytes
+	Data data;           // 8 bytes
+};
+
 struct VduSchemaFileProperties1
 {
 	uint16_t version;    // 1
@@ -107,6 +131,7 @@ const uint16_t VduFileSchemaItemRectId = 0x4352;       // RC
 const uint16_t VduFileSchemaItemImageId = 0x4D47;      // IM
 const uint16_t VduFileSchemaItemValueId = 0x4C56;      // VL
 const uint16_t VduFileSchemaItemImageValueId = 0x5649; // IV
+const uint16_t VduFileSchemaItemTrendId = 0x5254;      // TR
 
 
 // VduSchemaFileSchemaItem1 - Common schema item header, right after it follows specific schema item data.
@@ -295,6 +320,80 @@ struct VduSchemaFileSchemaItemImageValue1
 	// Then follows appSignalCount * sizeof(uint32_t) appSignalIndexes
 	//
 	// uint32_t appSignalIndexes[appSignalCount];
+};
+
+struct VduSchemaFileSchemaItemTrend1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemTrendId, 0x5254, TR
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	int16_t indentLeft;
+	int16_t indentRight;
+	int16_t indentTop;
+	int16_t indentBottom;
+
+	uint32_t reserve4[4];
+
+	uint32_t durationSecs;
+	uint16_t viewMode;  // 0 - E::TrendViewMode::Separated,
+						// 1 - E::TrendViewMode::Overlapped
+	uint16_t scaleType; // 0 - E::TrendScaleType::Linear
+						// 1 - E::TrendScaleType::Log10
+						// 2 - E::TrendScaleType::Period
+
+	uint16_t fontIndex;
+	uint16_t reserve5;
+
+	uint32_t lineColor;
+	uint32_t backColor;
+	uint32_t backColor1st;
+	uint32_t backColor2nd;
+
+	bool showSignalIds;
+	bool showSignalCaptions;
+	bool showSignalScales;
+	bool showTimeLabels;
+	bool showDateLabels;
+	bool reserve6;
+	bool reserve7;
+	bool reserve8;
+
+	uint16_t maxSignalCount;      // 16
+	uint16_t signalCount;         // Number of signals in the trend
+	uint16_t discreteSignalCount; // Number of discrete signals in the trend
+	uint16_t reserve9;
+	uint32_t reserve10;
+
+	// Filled with signalCount TrendSignal structs, followed by (maxSignalCount - signalCount) empty TrendSignal structs.
+	// The first discreteSignalCount TrendSignal structs are discrete signals.
+	//
+	struct TrendSignal
+	{
+		uint16_t version; // 1
+		uint16_t reserve0;
+
+		uint32_t appSignalIndex;
+		uint32_t validityAppSignalIndex;
+		uint32_t reserve1;
+
+		int16_t decimalPlaces; // Number of decimal places for floating point values (-1, take precision from the signal).
+		uint16_t valueFormat;  // E::DisplayValueFormat, Auto = 0, Decimal = 1, Exponential = 2
+
+		VduValue highViewLimit;
+		VduValue lowViewLimit;
+
+		uint32_t color;
+		uint16_t lineWeight;
+		uint16_t reserve2;
+	};
+
+	TrendSignal trendSignals[16];
 };
 
 #pragma pack(pop)

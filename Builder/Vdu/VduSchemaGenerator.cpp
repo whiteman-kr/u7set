@@ -15,6 +15,7 @@
 #include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduTrend.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/VduSchema.h>
@@ -26,6 +27,26 @@
 
 namespace
 {
+	VduValue toVduValue(float value)
+	{
+		VduValue result{};
+		result.type = VduValue::Type::f32;
+		result.data.f32 = value;
+		return result;
+	}
+
+	VduValue toVduValue(int32_t value)
+	{
+		VduValue result{};
+		result.type = VduValue::Type::i32;
+		result.data.i32 = value;
+		return result;
+	}
+
+	template<typename T>
+	VduValue toVduValue(T) = delete;
+
+
 	std::optional<QByteArray> compileLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
 	{
 		std::optional<QByteArray> result;
@@ -613,7 +634,256 @@ namespace
 			// OutData already set.
 			//
 			itemType = structImageValue.itemType;
+			return true;
+		}
 
+		// SchemaItemVduTrend
+		//
+		bool visit(const VFrame30::SchemaItemVduTrend& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemTrend1 structTrend{};
+
+			structTrend.version = 1;
+			structTrend.itemType = VduFileSchemaItemTrendId;
+
+			using PosType = decltype(structTrend.left);
+			using SizeType = decltype(structTrend.width);
+
+			structTrend.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structTrend.top = static_cast<PosType>(schemaItem.topDocPt());
+			structTrend.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structTrend.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			using IndentType = decltype(structTrend.indentLeft);
+			structTrend.indentLeft = static_cast<IndentType>(schemaItem.indentLeft());
+			structTrend.indentRight = static_cast<IndentType>(schemaItem.indentRight());
+			structTrend.indentTop = static_cast<IndentType>(schemaItem.indentTop());
+			structTrend.indentBottom = static_cast<IndentType>(schemaItem.indentBottom());
+
+			structTrend.durationSecs = schemaItem.durationSeconds();
+			structTrend.viewMode = static_cast<uint16_t>(schemaItem.viewMode());
+			structTrend.scaleType = static_cast<uint16_t>(schemaItem.scaleType());
+
+			int fontIndex = m_vduFontProvider.getFontIndex(m_vduEquipmentId,
+														   schemaItem.getFontName(),
+														   schemaItem.getFontSize(),
+														   schemaItem.getFontBold(),
+														   schemaItem.getFontItalic(),
+														   false);
+
+			if (fontIndex == -1)
+			{
+				// Font not found.
+				//
+				QString font = QString{"'%1, %2%3%4'"}
+								   .arg(schemaItem.getFontName())
+								   .arg(schemaItem.getFontSize())
+								   .arg(schemaItem.getFontBold() ? ", bold" : "")
+								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
+
+				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
+				return false;
+			}
+
+			structTrend.fontIndex = fontIndex;
+
+			structTrend.lineColor = schemaItem.lineColor().rgba();
+			structTrend.backColor = schemaItem.backColor().rgba();
+			structTrend.backColor1st = schemaItem.backColor1st().rgba();
+			structTrend.backColor2nd = schemaItem.backColor2nd().rgba();
+
+			structTrend.showSignalIds = schemaItem.showSignalIds();
+			structTrend.showSignalCaptions = schemaItem.showSignalCaptions();
+			structTrend.showSignalScales = schemaItem.showSignalScales();
+			structTrend.showTimeLabels = schemaItem.showTimeLabels();
+			structTrend.showDateLabels = schemaItem.showDateLabels();
+
+			// Saving signals
+			//
+			const std::size_t MaxSignalCount =
+				sizeof(VduSchemaFileSchemaItemTrend1::trendSignals) / sizeof(VduSchemaFileSchemaItemTrend1::trendSignals[0]);
+
+			auto trendSignals = schemaItem.signalParams();
+			while (trendSignals.size() > MaxSignalCount)
+			{
+				trendSignals.pop_back();
+			}
+
+			bool signalNotFound = false;
+			for (const auto& trendSignal : trendSignals)
+			{
+				// Check that AppSignalID exists.
+				//
+				{
+					Hash signalHash = ::calcHash(trendSignal->appSignalId());
+					auto sit = m_appSignalHashToSignalIndex.find(signalHash);
+
+					if (sit == m_appSignalHashToSignalIndex.end())
+					{
+						// Signal not found.
+						//
+						m_log.errEQP6400(m_vduEquipmentId,
+										 trendSignal->appSignalId(),
+										 schemaItem.parentSchema()->schemaId(),
+										 schemaItem.label(),
+										 schemaItem.guid());
+						signalNotFound = true;
+					}
+				}
+
+				// If Validity AppSignalID is not empty, then it must exist and be a discrete signal.
+				//
+				if (trendSignal->validityAppSignalId().trimmed().isEmpty() == false)
+				{
+					Hash signalHash = ::calcHash(trendSignal->validityAppSignalId());
+					auto sit = m_appSignalHashToSignalIndex.find(signalHash);
+
+					if (sit == m_appSignalHashToSignalIndex.end())
+					{
+						// Signal not found.
+						//
+						m_log.errEQP6400(m_vduEquipmentId,
+										 trendSignal->validityAppSignalId(),
+										 schemaItem.parentSchema()->schemaId(),
+										 schemaItem.label(),
+										 schemaItem.guid());
+						signalNotFound = true;
+					}
+					else
+					{
+						AppSignal* validityAppSignal = m_context.m_signalSet->getSignal(trendSignal->validityAppSignalId());
+						if (validityAppSignal == nullptr)
+						{
+							// Signal not found.
+							//
+							m_log.errEQP6400(m_vduEquipmentId,
+											 trendSignal->validityAppSignalId(),
+											 schemaItem.parentSchema()->schemaId(),
+											 schemaItem.label(),
+											 schemaItem.guid());
+							signalNotFound = true;
+						}
+						else if (validityAppSignal->isDiscrete() == false)
+						{
+							// Validity AppSignal must be discrete.
+							//
+							m_log.errEQP6402(m_vduEquipmentId,
+											 trendSignal->validityAppSignalId(),
+											 schemaItem.parentSchema()->schemaId(),
+											 schemaItem.label(),
+											 schemaItem.guid());
+							signalNotFound = true;
+						}
+					}
+				}
+			}
+
+			if (signalNotFound == true)
+			{
+				reset();
+				return false;
+			}
+
+			// Move discrete signals to the top of the vector, they will be saved first in the file.
+			//
+			auto analogIt = std::stable_partition(trendSignals.begin(),
+												  trendSignals.end(),
+												  [this](const auto& trendSignal)
+												  {
+													  AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+													  return s ? s->isDiscrete() : false;
+												  });
+
+			structTrend.maxSignalCount = static_cast<uint16_t>(MaxSignalCount);
+			structTrend.signalCount = std::clamp<uint16_t>(static_cast<uint16_t>(trendSignals.size()), 0, structTrend.maxSignalCount);
+			structTrend.discreteSignalCount = static_cast<uint16_t>(std::distance(trendSignals.begin(), analogIt));
+
+			size_t signalIndex = 0;
+			for (const auto& trendSignal : trendSignals)
+			{
+				int appSignalIndex = -1;
+				int validityAppSignalIndex = -1;
+
+				if (auto sit = m_appSignalHashToSignalIndex.find(::calcHash(trendSignal->appSignalId())); //
+					sit == m_appSignalHashToSignalIndex.end())
+				{
+					// We already checked that all signals exist, so this should not happen.
+					//
+					assert(sit != m_appSignalHashToSignalIndex.end());
+					reset();
+					return false;
+				}
+				else
+				{
+					appSignalIndex = sit->second;
+				}
+
+				if (trendSignal->validityAppSignalId().trimmed().isEmpty() == false)
+				{
+					Hash signalHash = ::calcHash(trendSignal->validityAppSignalId());
+
+					if (auto sit = m_appSignalHashToSignalIndex.find(signalHash); //
+						sit == m_appSignalHashToSignalIndex.end())
+					{
+						// We already checked that all signals exist, so this should not happen.
+						//
+						assert(sit != m_appSignalHashToSignalIndex.end());
+						reset();
+						return false;
+					}
+					else
+					{
+						validityAppSignalIndex = sit->second;
+					}
+				}
+
+				VduSchemaFileSchemaItemTrend1::TrendSignal& trendSignalStruct = structTrend.trendSignals[signalIndex++];
+				trendSignalStruct.version = 1;
+				trendSignalStruct.reserve0 = 0;
+
+				trendSignalStruct.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
+				trendSignalStruct.validityAppSignalIndex =
+					static_cast<uint32_t>(validityAppSignalIndex); // 0xFFFFFFFF if no validity signal is used.
+
+				trendSignalStruct.decimalPlaces = trendSignal->precision();
+				trendSignalStruct.valueFormat = static_cast<uint16_t>(trendSignal->valueFormat());
+
+				AppSignal* appSignal = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+				if (appSignal == nullptr)
+				{
+					// Signal not found.
+					//
+					m_log.errEQP6400(m_vduEquipmentId,
+									 trendSignal->appSignalId(),
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid());
+					reset();
+					return false;
+				}
+
+				if (appSignal->isAnalog() && appSignal->dataFormat() == E::DataFormat::Float)
+				{
+					trendSignalStruct.highViewLimit = toVduValue(static_cast<float>(trendSignal->highViewLimit()));
+					trendSignalStruct.lowViewLimit = toVduValue(static_cast<float>(trendSignal->lowViewLimit()));
+				}
+				else
+				{
+					trendSignalStruct.highViewLimit = toVduValue(static_cast<int32_t>(trendSignal->highViewLimit()));
+					trendSignalStruct.lowViewLimit = toVduValue(static_cast<int32_t>(trendSignal->lowViewLimit()));
+				}
+
+				trendSignalStruct.color = trendSignal->color().rgba();
+				trendSignalStruct.lineWeight = static_cast<uint16_t>(trendSignal->lineWeight());
+				trendSignalStruct.reserve1 = 0;
+			}
+
+			// OutData already set.
+			//
+			itemType = structTrend.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structTrend), sizeof(structTrend));
 			return true;
 		}
 	};

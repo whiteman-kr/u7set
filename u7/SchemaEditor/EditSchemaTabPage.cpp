@@ -81,6 +81,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addVduValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addVduImageValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addVduTrendAction);
 	}
 
 	if (schema->isLogicSchema() == true)

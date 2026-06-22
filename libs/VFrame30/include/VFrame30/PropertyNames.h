@@ -47,6 +47,7 @@ namespace VFrame30
 		inline static const QString valueInteger{"ValueInteger"};
 		inline static const QString valueFloat{"ValueFloat"};
 		inline static const QString valueDiscrete{"ValueDiscrete"};
+		inline static const QString valueFormat{"ValueFormat"};
 		inline static const QString precision{"Precision"};
 		inline static const QString precisionPropText{"Number of decimals after period, -1: take value from the signal description"};
 		inline static const QString analogFormat{"AnalogFormat"};
@@ -74,6 +75,7 @@ namespace VFrame30
 		inline static const QString lineWeight{"LineWeight"};
 		inline static const QString fillColor{"FillColor"};
 		inline static const QString backgroundColor{"BackgroundColor"};
+		inline static const QString backColor{"BackColor"};
 		inline static const QString fill{"Fill"};
 		inline static const QString drawRect{"DrawRect"};
 		inline static const QString textFormat{"TextFormat"};
@@ -278,6 +280,8 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString diagSignalIDs = QStringLiteral("DiagSignalIDs");
 
 		inline static const QString signalIDs = QStringLiteral("SignalIDs");
+		inline static const QString appSignalID{"AppSignalID"};
+		inline static const QString validityAppSignalID{"ValidityAppSignalID"};
 		inline static const QString appSignalIDs{"AppSignalIDs"};
 		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
 		inline static const QString appSignalIDsOrReferenceValidator{R"(^[#a-zA-Z0-9\$_\(\).;\n\r]*$)"};

@@ -7,6 +7,7 @@ namespace VFrame30
 	class SchemaItemVduImage;
 	class SchemaItemVduValue;
 	class SchemaItemVduImageValue;
+	class SchemaItemVduTrend;
 
 	class VduItemVisitor
 	{
@@ -18,5 +19,6 @@ namespace VFrame30
 		virtual bool visit(const SchemaItemVduImage& item) = 0;
 		virtual bool visit(const SchemaItemVduValue& item) = 0;
 		virtual bool visit(const SchemaItemVduImageValue& item) = 0;
+		virtual bool visit(const SchemaItemVduTrend& item) = 0;
 	};
 } // namespace VFrame30

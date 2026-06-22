@@ -265,6 +265,7 @@ message SchemaItem
 	optional SchemaItemVduValue vduValue = 302;				// +PosLineImpl
 	optional SchemaItemVduImage vduImage = 303;				// +PosRectImpl
 	optional SchemaItemVduImageValue vduImageValue = 304;	// +PosRectImpl
+	optional SchemaItemVduTrend vduTrend = 305;				// +PosRectImpl
 }
 
 //
@@ -901,6 +902,52 @@ message SchemaItemVduRect
 
 	optional int32 horzAlign = 20;
 	optional int32 vertAlign = 21;
+}
+
+//
+// SchemaItemVduTrend
+//
+message SchemaItemVduTrendSignal
+{
+	optional string appSignalId = 10;
+	optional string validityAppSignalId = 11;
+
+	optional int32 precision = 14;
+	optional int32 valueFormat = 15;
+	
+	optional double lowLimit = 20;
+	optional double highLimit = 21;
+
+	optional fixed32 color = 30;
+	optional int32 lineWeight = 50;
+}
+
+message SchemaItemVduTrend
+{
+	optional int32 durationSecs = 51;
+
+	optional int32 viewMode = 80;		// E::TrendViewMode
+	optional int32 scaleType = 81;		// E::TrendScaleType
+
+	optional int32 indentLeft = 130 [default = -1];
+	optional int32 indentRight = 131 [default = -1];
+	optional int32 indentTop = 132 [default = -1];
+	optional int32 indentBottom = 133 [default = -1];
+
+	optional fixed32 lineColor = 93;
+	optional fixed32 backColor = 94;
+	optional fixed32 backColor1st = 95;
+	optional fixed32 backColor2nd = 96;
+
+	optional FontParam font = 100;
+
+	optional bool showSignalIds = 120 [default = true];
+	optional bool showSignalCaptions = 121 [default = true];
+	optional bool showSignalScales = 122 [default = true];
+	optional bool showTimeLabels = 123 [default = true];
+	optional bool showDateLabels = 124 [default = true];
+
+	repeated SchemaItemVduTrendSignal signalParams = 110;
 }
 
 //

@@ -480,6 +480,7 @@ private:
 	QAction* m_addVduImageAction = nullptr;
 	QAction* m_addVduValueAction = nullptr;
 	QAction* m_addVduImageValueAction = nullptr;
+	QAction* m_addVduTrendAction = nullptr;
 
 	// Edit
 	//

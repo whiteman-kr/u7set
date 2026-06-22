@@ -80,6 +80,7 @@ qt_add_library(${TARGET} STATIC
 	./include/VFrame30/SchemaItemVduImageValue.h
 	./include/VFrame30/SchemaItemVduLine.h
 	./include/VFrame30/SchemaItemVduRect.h
+	./include/VFrame30/SchemaItemVduTrend.h
 	./include/VFrame30/SchemaItemVduValue.h
 	./include/VFrame30/SchemaLayer.h
 	./include/VFrame30/SchemaManager.h
@@ -136,6 +137,7 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemVduImageValue.cpp
 	./SchemaItems/SchemaItemVduLine.cpp
 	./SchemaItems/SchemaItemVduRect.cpp
+	./SchemaItems/SchemaItemVduTrend.cpp
 	./SchemaItems/SchemaItemVduValue.cpp
 
 	AppSignalController.cpp
