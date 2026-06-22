@@ -3,6 +3,7 @@
 #include <QUdpSocket>
 #include <vector>
 #include <queue>
+#include <mutex>
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
@@ -375,6 +376,7 @@ namespace Tuning
 
 		void getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
 		void getSourceState(Network::TuningSourceState* proto) const;
+		bool isHandlersInitialized() const;
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
@@ -451,7 +453,7 @@ namespace Tuning
 
 		//
 
-		mutable QMutex m_handlersMutex;
+		mutable std::mutex m_handlersMutex;
 
 		std::vector<TuningChannelHandler*> m_handlers;
 		std::map<int, TuningChannelHandler*> m_ch2handlers;			// channel => TuningChannelHandler
@@ -486,6 +488,7 @@ namespace Tuning
 		void incErrReplySize(quint32 channelIP);
 		[[nodiscard]] bool getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
 		[[nodiscard]] bool getSourceState(Network::TuningSourceState* proto) const;
+		[[nodiscard]] bool isHandlersInitialized() const;
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,

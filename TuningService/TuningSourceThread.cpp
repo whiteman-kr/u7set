@@ -1683,7 +1683,7 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::pushReply(int channel, const RupFotip& reply)
 	{
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		TuningChannelHandler* handler = getChannelHandler(channel);
 
@@ -1694,7 +1694,7 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::incErrReplySize(quint32 channelIP)
 	{
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		auto it = m_ip2handlers.find(channelIP);
 
@@ -1714,7 +1714,10 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(reply);
 
-		AUTO_LOCK(m_handlersMutex);
+		DEBUG_LOG_MSG(m_logger, QString("In TuningSourceThreadWorker::getSourceState fror source %1, m_handlers count = %2").
+					arg(sourceEquipmentID()).arg(m_handlers.size()));
+
+		std::lock_guard lg(m_handlersMutex);
 
 		for(auto handler : m_handlers)
 		{
@@ -1736,7 +1739,7 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(proto);
 
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		for(auto handler : m_handlers)
 		{
@@ -1744,6 +1747,12 @@ namespace Tuning
 
 			handler->state().saveToProto(proto);
 		}
+	}
+
+	bool TuningSourceThreadWorker::isHandlersInitialized() const
+	{
+		std::lock_guard lg(m_handlersMutex);
+		return m_handlers.empty() == false;
 	}
 
 	void TuningSourceThreadWorker::readSignalState(Network::TuningSignalState* tss) const
@@ -1836,19 +1845,20 @@ namespace Tuning
 	{
 		do
 		{
-			m_handlersMutex.lock();
-
 			bool allInitialized = true;
 
-			for(const TuningChannelHandler* handler : m_handlers)
 			{
-				allInitialized &= handler->isInitialized();
-			}
+				std::lock_guard lg(m_handlersMutex);
 
-			m_handlersMutex.unlock();
+				for (const TuningChannelHandler* handler : m_handlers)
+				{
+					allInitialized &= handler->isInitialized();
+				}
+			}
 
 			if (allInitialized == true)
 			{
+				DEBUG_LOG_MSG(m_logger, QString("TuningSourceThreadWorker::waitWhileHandlersInitialized: all handlers initialized for source %1").arg(sourceEquipmentID()));
 				break;
 			}
 
@@ -2076,7 +2086,7 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::initHandlers()
 	{
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		Q_ASSERT(m_handlers.size() == 0);
 
@@ -2098,7 +2108,7 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::shutdownHandlers()
 	{
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		for(TuningChannelHandler* handler : m_handlers)
 		{
@@ -2206,7 +2216,7 @@ namespace Tuning
 
 	E::NetworkError TuningSourceThreadWorker::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
 	{
-		AUTO_LOCK(m_handlersMutex);
+		std::lock_guard lg(m_handlersMutex);
 
 		Q_UNUSED(appSignalID);
 
@@ -2334,6 +2344,12 @@ namespace Tuning
 
 		m_worker->getSourceState(proto);
 		return true;
+	}
+
+	[[nodiscard]] bool TuningSourceThread::isHandlersInitialized() const
+	{
+		TEST_PTR_RETURN_FALSE(m_worker);
+		return m_worker->isHandlersInitialized();
 	}
 
 	void TuningSourceThread::readSignalState(Network::TuningSignalState* tss) const
