@@ -134,7 +134,7 @@ namespace VFrame30
 
 	void SchemaItemVduTrendSignalParam::setAppSignalId(const QString& value)
 	{
-		m_appSignalId = value;
+		m_appSignalId = value.trimmed();
 	}
 
 	QString SchemaItemVduTrendSignalParam::validityAppSignalId() const
@@ -144,7 +144,7 @@ namespace VFrame30
 
 	void SchemaItemVduTrendSignalParam::setValidityAppSignalId(const QString& value)
 	{
-		m_validityAppSignalId = value;
+		m_validityAppSignalId = value.trimmed();
 	}
 
 	int SchemaItemVduTrendSignalParam::precision() const

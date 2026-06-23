@@ -1,5 +1,7 @@
 #pragma once
 
+struct TrendItemSignal;
+
 namespace VFrame30
 {
 	class Schema;
@@ -24,6 +26,7 @@ namespace Builder
 									  QString subsystemId,
 									  const VFrame30::VduSchema& schema,
 									  const std::map<Hash, int>& appSignalHashToSignalIndex,
+									  const std::set<TrendItemSignal>& vduTrendSignals,
 									  QByteArray& out,
 									  Builder::Context& context);
 

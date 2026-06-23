@@ -19,6 +19,7 @@
 // 23 Jan 2025| 1.10 |	Added struct VduSchemaFileSchemaItemImageValue1
 // 06 Feb 2025| 1.11 |	Added fields onShowScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileProperties1
 // 06 Feb 2025| 1.12 |	Added fields clickScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileSchemaItem1
+// 23 Jun 2026| 1.13 |	Added struct VduSchemaFileSchemaItemTrend1
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -375,15 +376,17 @@ struct VduSchemaFileSchemaItemTrend1
 	//
 	struct TrendSignal
 	{
-		uint16_t version; // 1
+		uint16_t version;                    // 1
 		uint16_t reserve0;
 
 		uint32_t appSignalIndex;
 		uint32_t validityAppSignalIndex;
-		uint32_t reserve1;
+		uint16_t trendSignalFileRecordIndex; // Index of the record (struct TrendItemSignal)
+											 // in file File::VDU_TREND_SIGNALS ("TrendSignals.dat")
+		uint16_t reserve1;
 
-		int16_t decimalPlaces; // Number of decimal places for floating point values (-1, take precision from the signal).
-		uint16_t valueFormat;  // E::DisplayValueFormat, Auto = 0, Decimal = 1, Exponential = 2
+		int16_t decimalPlaces;               // Number of decimal places for floating point values (-1, take precision from the signal).
+		uint16_t valueFormat;                // E::DisplayValueFormat, Auto = 0, Decimal = 1, Exponential = 2
 
 		VduValue highViewLimit;
 		VduValue lowViewLimit;

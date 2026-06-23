@@ -683,6 +683,8 @@ namespace File
 
 	inline static const QString VDU_STARTUP_LOGO = "StartupLogo.bmp";
 
+	inline static const QString VDU_TREND_SIGNALS = "TrendSignals.dat";
+
 	inline static const QString SUBSYSTEM_DESC_JSON = "Description.json";
 
 	// Moved from DbStruct
