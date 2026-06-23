@@ -247,7 +247,7 @@ namespace Tuning
 					DEBUG_LOG_MSG(m_logger, QString("No sourceThread for %1").arg(sourceID));
 				}
 
-				if (sourceThread->isHandlersInitialized() == false)
+				if (sourceThread != nullptr && sourceThread->isHandlersInitialized() == false)
 				{
 					DEBUG_LOG_MSG(m_logger, QString("Handlers not initialized for %1").arg(sourceID));
 				}
