@@ -10,6 +10,8 @@ namespace ArchV3Lib
 {
 	inline constexpr quint32 FLAG_PLANT_TIME_VALID = 0x20000000;
 
+	class ArchWriter;
+
 #pragma pack(push, 1)
 
 	struct AnalogFileRecord
@@ -39,94 +41,54 @@ namespace ArchV3Lib
 	class ArchFileBase
 	{
 	public:
-		ArchFileBase(const QString& filename) :
-			m_file(filename)
-		{
-		}
+		ArchFileBase(ArchWriter& archWriter);
+		virtual ~ArchFileBase();
 
-		~ArchFileBase()
-		{
-			if (m_file.isOpen())
-			{
-				m_file.close();
-			}
-		}
+		bool setFilePath(const QString& path);
+		bool setFileName(const QString& filename);
 
-		bool openFile()
-		{ 
-			if (m_file.isOpen() == true)
-			{
-				return true;
-			}
+		// Getters
 
-			if (m_file.open(QIODevice::WriteOnly | QIODevice::Append) == false)
-			{
-				// log error
-				return false;
-			}
+		bool isOpen() const;
+		qint64 fileSize() const;
+		qint64 lastWriteTime() const;
+		qint64 lastFlushTime() const;
+		virtual size_t bufferedRecordsCount() const = 0;
 
-			return true;
-		}
+		//
 
-		void closeFile()
-		{ 
-			if (m_file.isOpen() == true)
-			{
-				m_file.close();
-			}
-		}
+		bool openFile();
+		void closeFile();
 
-		bool write(const char* data, qint64 dataSize)
-		{
-			Q_ASSERT(dataSize >= 0);
+		virtual bool write(qint64 timeUTC) = 0;
+		virtual bool flush(qint64 timeUTC);
 
-			if (dataSize == 0)
-			{
-				return true;
-			}
-
-			if (openFile() == false)
-			{
-				return false;
-			}
-
-			const qint64 written = m_file.write(data, dataSize);
-
-			if (written != dataSize)
-			{
-				// log error
-				// truncate file to integral size
-				return false;
-			}
-
-			return true;
-		}
-
-		void flush()
-		{ 
-			if (m_file.isOpen() == true)
-			{
-				m_file.flush();
-			}
-		}
+	protected:
+		bool writeRaw(const char* data, qint64 dataSize, qint64 timeUTC);
 
 	private:
+		ArchWriter& m_archWriter;
+		QString m_path;
+		QString m_filename;
+
 		QFile m_file;
+
+		qint64 m_fileSize = 0;
+		qint64 m_lastWriteTime = 0;
+		qint64 m_lastFlushTime = 0;
 	};
 
 	template<typename RecordTypeT>
 	class ArchFile : public ArchFileBase
 	{
 	public:
-		ArchFile(const QString& filename) :
-			ArchFileBase(filename)
+		ArchFile(ArchWriter& archWriter) :
+			ArchFileBase(archWriter)
 		{
 		}
 
 		~ArchFile()
 		{
-			write();
-			flush();
 		}
 
 		bool isDiscreteFile() const { return (sizeof(RecordTypeT) == DISCRETE_FILE_RECORD_SIZE); }
@@ -134,7 +96,7 @@ namespace ArchV3Lib
 
 		void append(const RecordTypeT& record) { m_records.push_back(record); }
 
-		bool write()
+		bool write(qint64 timeUTC) override
 		{
 			qint64 recordsSize = static_cast<qint64>(m_records.size() * sizeof(RecordTypeT));
 
@@ -143,14 +105,31 @@ namespace ArchV3Lib
 				return true;
 			}
 
-			bool result = ArchFileBase::write(reinterpret_cast<const char*>(m_records.data()), recordsSize);
+			bool result = writeRaw(reinterpret_cast<const char*>(m_records.data()), recordsSize, timeUTC);
 
 			if (result == true)
 			{
 				m_records.clear();
 			}
 
-			return true;
+			return result;
+		}
+
+		bool flush(qint64 timeUTC) override
+		{
+			bool result = write(timeUTC);
+
+			if (result == true)
+			{
+				result = ArchFileBase::flush(timeUTC);
+			}
+
+			return result;
+		}
+
+		size_t bufferedRecordsCount() const override
+		{ 
+			return m_records.size();
 		}
 
 		private:
