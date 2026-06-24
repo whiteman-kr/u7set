@@ -344,22 +344,21 @@ namespace TrendLib
 		m_timeCombo = new QComboBox(m_toolBar);
 		m_timeCombo->setDuplicatesEnabled(false);
 
-		m_timeCombo->addItem(tr("2 sec"), QVariant::fromValue(2_sec));
-		m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
-		m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
-		m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
-		m_timeCombo->addItem(tr("1 min"), QVariant::fromValue(1_min));
-		m_timeCombo->addItem(tr("5 min"), QVariant::fromValue(5_min));
-		m_timeCombo->addItem(tr("10 min"), QVariant::fromValue(10_min));
-		m_timeCombo->addItem(tr("30 min"), QVariant::fromValue(30_min));
-		m_timeCombo->addItem(tr("1 hour"), QVariant::fromValue(1_hour));
-		m_timeCombo->addItem(tr("3 hour"), QVariant::fromValue(3_hours));
-		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
-		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
-		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
-		m_timeCombo->addItem(tr("1 week"), QVariant::fromValue(24_hours * 7));
+		m_timeCombo->addItem(tr("10 s"), QVariant::fromValue(10_sec));
+		m_timeCombo->addItem(tr("30 s"), QVariant::fromValue(30_sec));
+		m_timeCombo->addItem(tr("5 m"), QVariant::fromValue(5_min));
+		m_timeCombo->addItem(tr("30 m"), QVariant::fromValue(30_min));
+		m_timeCombo->addItem(tr("1 h"), QVariant::fromValue(1_hour));
+		m_timeCombo->addItem(tr("3 h"), QVariant::fromValue(3_hours));
+		m_timeCombo->addItem(tr("6 h"), QVariant::fromValue(6_hours));
+		m_timeCombo->addItem(tr("12 h"), QVariant::fromValue(12_hours));
+		m_timeCombo->addItem(tr("24 h"), QVariant::fromValue(24_hours));
+		m_timeCombo->addItem(tr("7 d"), QVariant::fromValue(24_hours * 7));
+		m_timeCombo->addItem(tr("30 d"), QVariant::fromValue(24_hours * 30));
+		m_timeCombo->addItem(tr("90 d"), QVariant::fromValue(24_hours * 90));
+		m_timeCombo->addItem(tr("1 y"), QVariant::fromValue(24_hours * 365));
 
-		int currentDuartionIndex = 8;
+		int currentDuartionIndex = 4;
 
 		m_timeCombo->setCurrentIndex(currentDuartionIndex);
 		m_trendWidget->setLaneDuration(m_timeCombo->itemData(currentDuartionIndex).toLongLong());
@@ -1181,7 +1180,7 @@ namespace TrendLib
 		dateEdit->setCalendarPopup(true);
 
 		QTimeEdit* timeEdit = new QTimeEdit(mutableRuler.timeStamp().toTime());
-		timeEdit->setDisplayFormat(DateTimeFormat::time(true /*with ms*/));
+		timeEdit->setDisplayFormat(DateTimeFormat::time(true, true /*with ms*/));
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 		connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);

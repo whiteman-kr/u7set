@@ -296,10 +296,10 @@ namespace TrendLib
 
 		// Calc time grid
 		//
-		static const std::array<qint64, 31> possibleTimeGridIntervals = {
-			5_ms,   10_ms,  20_ms,  25_ms,   50_ms,   100_ms,  200_ms,   250_ms,   500_ms,      1_sec,  2_sec,
-			5_sec,  10_sec, 15_sec, 20_sec,  30_sec,  1_min,   90_sec,   2_min,    5_min,       10_min, 15_min,
-			20_min, 30_min, 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours, 24_hours * 7};
+		static const std::array possibleTimeGridIntervals{
+			5_ms,   10_ms,   20_ms,   25_ms,   50_ms,    100_ms,   200_ms,       250_ms,        500_ms,        1_sec,        2_sec,  5_sec,
+			10_sec, 15_sec,  20_sec,  30_sec,  1_min,    90_sec,   2_min,        5_min,         10_min,        15_min,       20_min, 30_min,
+			1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours, 24_hours * 7, 24_hours * 10, 24_hours * 14, 24_hours * 30};
 
 		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
 		auto estimatedStringSize = calcTextSize(painter, estimatedString, drawParam);
@@ -318,20 +318,42 @@ namespace TrendLib
 
 			double x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
 
+			// Do not move this assignment to the if statement, because we need to have the last possibleInterval, which is less than
+			// minTimeInterval
+			//
+			timeGridInterval = possibleInterval;
+			inchGridInterval = x - insideRect.left();
+
 			if (x - insideRect.left() >= minTimeInterval)
 			{
-				timeGridInterval = possibleInterval;
-				inchGridInterval = x - insideRect.left();
 				break;
 			}
+		}
+
+		bool monthInterval = false;
+		if (timeGridInterval >= 24_hours * 30)
+		{
+			monthInterval = true;
 		}
 
 		// Align startGridPosition
 		//
 		TimeStamp startGrid = drawParam.startTimeStamp();
 
-		startGrid.timeStamp /= timeGridInterval;
-		startGrid.timeStamp *= timeGridInterval;
+		if (monthInterval == false)
+		{
+			startGrid.timeStamp /= timeGridInterval;
+			startGrid.timeStamp *= timeGridInterval;
+		}
+		else
+		{
+			// Snap to first day of month
+			//
+			QDateTime dt = startGrid.toDateTime();
+			dt.setDate(QDate(dt.date().year(), dt.date().month(), 1));
+			dt.setTime(QTime(0, 0));
+			startGrid = TimeStamp{dt.toMSecsSinceEpoch()};
+		}
 
 		// calc time grid positions
 		//
@@ -352,8 +374,31 @@ namespace TrendLib
 
 		for (int i = 0; i < timeGridCount + 2; i++)
 		{
-			TimeStamp ct = TimeStamp{startGrid.timeStamp + i * timeGridInterval};
-			double x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
+			double x = 0;
+			TimeStamp ct;
+
+			if (monthInterval == false)
+			{
+				ct = TimeStamp{startGrid.timeStamp};
+				x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
+
+				// Advance startGrid to next position
+				//
+				startGrid.timeStamp += timeGridInterval;
+			}
+			else
+			{
+				ct = TimeStamp{startGrid.timeStamp};
+				x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
+
+				// Advance startGrid to next position
+				//
+				QDateTime dt = startGrid.toDateTime();
+				dt.setDate(QDate(dt.date().year(), dt.date().month(), 1));
+				dt = dt.addMonths(1);
+
+				startGrid = TimeStamp{dt.toMSecsSinceEpoch()};
+			}
 
 			// Make sure that x is proper aligned for nice look of cosmetic pen
 			//
