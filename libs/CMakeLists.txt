@@ -15,6 +15,7 @@ if (NOT STATIC_RUNTIME)
 	#
 	add_subdirectory(AdsGatewayLib)
 	add_subdirectory(AppSignalLists)
+	add_subdirectory(ArchV3Lib)
 	add_subdirectory(Behavior)
 	add_subdirectory(BuildCompLib)
 	add_subdirectory(ClientLib)
