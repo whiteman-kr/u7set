@@ -26,6 +26,7 @@
 #include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduTrend.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/Session.h>
@@ -721,6 +722,17 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
+	m_addVduTrendAction = new QAction(tr("Trend"), this);
+	m_addVduTrendAction->setEnabled(true);
+	m_addVduTrendAction->setIcon(QIcon(":/Images/Images/SchemaItemTrend.svg"));
+	connect(m_addVduTrendAction,
+			&QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemVduTrend>(schema()->unit());
+				addItem(item);
+			});
+
 	//
 	// Edit
 	//
@@ -1207,6 +1219,7 @@ void EditSchemaWidget::createActions()
 	{
 		m_addSubMenu->addAction(m_addVduValueAction);
 		m_addSubMenu->addAction(m_addVduImageValueAction);
+		m_addSubMenu->addAction(m_addVduTrendAction);
 	}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);

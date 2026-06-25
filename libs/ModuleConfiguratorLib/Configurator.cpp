@@ -896,7 +896,14 @@ namespace ModuleConfiguratorLib
 
 		CONF_HEADER nopReceivedHeader = *pingReceivedHeader;	// save the header received by nop
 
-		if (std::find(moduleUarts->begin(), moduleUarts->end(), ConfigurationUartId) == moduleUarts->end())
+		bool connectedToServiceUart = std::any_of(moduleUarts->begin(),
+												  moduleUarts->end(),
+												  [](int uart)
+												  {
+													  return (uart & ConfigurationUartMask) == ConfigurationUartValue;
+												  });
+
+		if (connectedToServiceUart == false)
 		{
 			// Send nop2 command ONLY if we are NOT working with service flash (ID 0x103)
 			//
@@ -2455,10 +2462,20 @@ namespace ModuleConfiguratorLib
 
 			// Check if we are on the correct tab: service for service UART, App for app/config/tun UART
 			//
-			bool selectedServiceUart = selectedUarts.has_value() == true && selectedUarts.value().empty() == false &&
-									   selectedUarts.value()[0] == ConfigurationUartId;
+			bool selectedServiceUart =
+				selectedUarts.has_value() && std::any_of(selectedUarts->begin(),
+														 selectedUarts->end(),
+														 [](int uart)
+														 {
+															 return (uart & ConfigurationUartMask) == ConfigurationUartValue;
+														 });
 
-			bool connectedToServiceUart = std::find(moduleUarts.begin(), moduleUarts.end(), ConfigurationUartId) != moduleUarts.end();
+			bool connectedToServiceUart = std::any_of(moduleUarts.begin(),
+													  moduleUarts.end(),
+													  [](int uart)
+													  {
+														  return (uart & ConfigurationUartMask) == ConfigurationUartValue;
+													  });
 
 			if (selectedServiceUart != connectedToServiceUart)
 			{
@@ -2531,15 +2548,18 @@ namespace ModuleConfiguratorLib
 			//
 			for (int moduleUartId : moduleUarts)
 			{
-				// Skip UART if it is not checked
-				//
-				if (selectedUarts.has_value() == true)
+				if (connectedToServiceUart == false)
 				{
-					const std::vector<int>& selectedUartsValue = selectedUarts.value();
-					if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+					// Skip UART if it is not checked
+					//
+					if (selectedUarts.has_value() == true)
 					{
-						m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
-						continue;
+						const std::vector<int>& selectedUartsValue = selectedUarts.value();
+						if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+						{
+							m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
+							continue;
+						}
 					}
 				}
 

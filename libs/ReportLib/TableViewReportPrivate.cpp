@@ -237,6 +237,7 @@ namespace ReportLib
 		//
 		ReportLib::Report report("Report", fileName);
 		ReportLib::ReportFont font{"Arial", 10};
+		int borderWidth = 0;
 
 		// Create main section
 		//
@@ -263,7 +264,7 @@ namespace ReportLib
 			columns.push_back({columnsList[m_visibleColumns[i]], columnWidth, Qt::AlignLeft});
 		}
 
-		ReportLib::TableFormat format{font, columns};
+		ReportLib::TableFormat format{font, columns, borderWidth};
 		std::shared_ptr<ReportLib::ReportTable> table = std::make_shared<ReportLib::ReportTable>(format);
 		mainSection->addTable(table);
 

@@ -1,5 +1,5 @@
 #ifndef COMMON_LIB_DOMAIN
-#error Do not include this file in the project! Link CommonLib instead.
+	#error Do not include this file in the project! Link CommonLib instead.
 #endif
 
 #include <CommonLib/Times.h>
@@ -141,7 +141,7 @@ QString DateTimeFormat::time(bool withSeconds, bool withMilliseconds, const QLoc
 	// No data found in cache
 	//
 	QString timeFmt = locale->timeFormat(QLocale::ShortFormat);
-	
+
 	if (withSeconds == false)
 	{
 		timeFmt.remove(QRegularExpression("[:]?s{1,2}"));
@@ -316,7 +316,7 @@ QString DateTimeToString::dateTimeDuration(qint64 timeStamp)
 
 QString DateTimeToString::dateTimeDurationMs(qint64 timeStamp)
 {
-	int days = static_cast<int>(timeStamp / 1_day) % 24;
+	int days = static_cast<int>(timeStamp / 1_day);
 	timeStamp -= days * 1_day;
 	int msecs = static_cast<int>(timeStamp % 1000_ms);
 	int secs = static_cast<int>(timeStamp / 1_sec) % 60;

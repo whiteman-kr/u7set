@@ -1844,8 +1844,8 @@ namespace Builder
 
 		contentsSection->addText(caption, {m_contentsTextFont, Qt::AlignHCenter});
 
-		auto contentsTable =
-			ReportTable::create({m_contentsTableFont, {tr("Schema ID"), tr("Caption"), tr("Page")}, {30, 50, 20}, Qt::AlignLeft});
+		auto contentsTable = ReportTable::create(
+			{m_contentsTableFont, {tr("Schema ID"), tr("Caption"), tr("Page")}, {30, 50, 20}, Qt::AlignLeft, 0 /*borderWidth*/});
 
 		contentsSection->addTable(contentsTable);
 
@@ -1973,7 +1973,7 @@ namespace Builder
 																   const VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		auto table = ReportTable::create(
-			{m_tableFont, {tr("Signal ID"), tr("Caption"), tr("Type"), tr("Schemas")}, {20, 30, 20, 30}, Qt::AlignLeft});
+			{m_tableFont, {tr("Signal ID"), tr("Caption"), tr("Type"), tr("Schemas")}, {20, 30, 20, 30}, Qt::AlignLeft, 0 /*borderWidth*/});
 		table->setHtmlEscaped(false);
 
 		// Get list of signals for current schema
@@ -2122,7 +2122,8 @@ namespace Builder
 																   const std::vector<SchemaInfo>& allSchemas,
 																   const VFrame30::SchemaDetailsSet& detailsSet)
 	{
-		auto table = ReportTable::create({m_tableFont, {tr("Loopback ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft});
+		auto table = ReportTable::create(
+			{m_tableFont, {tr("Loopback ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/});
 		table->setHtmlEscaped(false);
 
 		// Get list of loopbacks for current schema
@@ -2229,7 +2230,8 @@ namespace Builder
 																	 const std::vector<SchemaInfo>& allSchemas,
 																	 const VFrame30::SchemaDetailsSet& detailsSet)
 	{
-		auto table = ReportTable::create({m_tableFont, {tr("Connection ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft});
+		auto table = ReportTable::create(
+			{m_tableFont, {tr("Connection ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/});
 		table->setHtmlEscaped(false);
 
 		// Get list of signals for current schema

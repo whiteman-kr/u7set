@@ -1754,7 +1754,14 @@ public:
 		{
 			// Make a copy of the object
 			//
-			this->push_back(std::make_shared<OBJECT_TYPE>(*item));
+			if (item == nullptr)
+			{
+				this->push_back(nullptr);
+			}
+			else
+			{
+				this->push_back(std::make_shared<OBJECT_TYPE>(*item));
+			}
 		}
 
 		return *this;

@@ -543,10 +543,10 @@ public:
 	enum class TrendViewMode
 	{
 		/// \brief 0 - Draw each signal trend in its own lane.
-		Separated,
+		Separated = 0,
 
 		/// \brief 1 - Draw all analog signal trends on the same lane.
-		Overlapped
+		Overlapped = 1
 	};
 	Q_ENUM(TrendViewMode)
 
@@ -556,15 +556,25 @@ public:
 	enum class TrendScaleType
 	{
 		/// \brief 0 - Linear value scale.
-		Linear,
+		Linear = 0,
 
 		/// \brief 1 - Base-10 logarithmic value scale.
-		Log10,
+		Log10 = 1,
 
 		/// \brief 2 - Period-based scale.
-		Period
+		Period = 2
 	};
 	Q_ENUM(TrendScaleType)
+
+	// Do not change values of this enum, they are stored in vdu schema files.
+	//
+	enum class DisplayValueFormat
+	{
+		Auto = 0,
+		Decimal = 1,
+		Exponential = 2
+	};
+	Q_ENUM(DisplayValueFormat)
 
 	// Property editor type
 	//
@@ -1043,14 +1053,12 @@ namespace Cast
 	template<typename TO, typename FROM>
 	constexpr TO to(FROM value) noexcept
 	{
-		static_assert(std::is_arithmetic_v<FROM> || std::is_enum_v<FROM>,
-					  "Cast::to: FROM must be arithmetic or enum");
-		static_assert(std::is_arithmetic_v<TO> || std::is_enum_v<TO>,
-					  "Cast::to: TO must be arithmetic or enum");
+		static_assert(std::is_arithmetic_v<FROM> || std::is_enum_v<FROM>, "Cast::to: FROM must be arithmetic or enum");
+		static_assert(std::is_arithmetic_v<TO> || std::is_enum_v<TO>, "Cast::to: TO must be arithmetic or enum");
 
 		return static_cast<TO>(value);
 	}
-}
+} // namespace Cast
 
 #define TO_INT8(value) (Cast::to<std::int8_t>(value))
 #define TO_INT16(value) (Cast::to<std::int16_t>(value))

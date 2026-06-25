@@ -2,6 +2,8 @@
 
 #include "VduLuaScript.h"
 #include "VduSchemaFile.h"
+#include "VduTrendConfigGenerator.h"
+#include "VduTrendSignalsFile.h"
 
 #include "../Context.h"
 #include "../UtilsLib/Crc.h"
@@ -15,6 +17,7 @@
 #include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduTrend.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/VduSchema.h>
@@ -26,6 +29,26 @@
 
 namespace
 {
+	VduValue toVduValue(float value)
+	{
+		VduValue result{};
+		result.type = VduValue::Type::f32;
+		result.data.f32 = value;
+		return result;
+	}
+
+	VduValue toVduValue(int32_t value)
+	{
+		VduValue result{};
+		result.type = VduValue::Type::i32;
+		result.data.i32 = value;
+		return result;
+	}
+
+	template<typename T>
+	VduValue toVduValue(T) = delete;
+
+
 	std::optional<QByteArray> compileLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
 	{
 		std::optional<QByteArray> result;
@@ -202,6 +225,7 @@ namespace
 		Builder::IssueLogger& m_log;
 		const Builder::VduFontProvider& m_vduFontProvider;
 		const std::map<Hash, int>& m_appSignalHashToSignalIndex;
+		const std::set<TrendItemSignal>& m_vduTrendSignals;
 
 	public:
 		QByteArray outData;
@@ -219,13 +243,15 @@ namespace
 						   QString vduEquipmentId,
 						   QString subsystemId,
 						   const Builder::VduFontProvider& m_vduFontProvider,
-						   const std::map<Hash, int>& appSignalHashToSignalIndex) :
+						   const std::map<Hash, int>& appSignalHashToSignalIndex,
+						   const std::set<TrendItemSignal>& vduTrendSignals) :
 			m_context{context},
 			m_vduEquipmentId{vduEquipmentId},
 			m_subsystemId{subsystemId},
 			m_log{*context.m_log},
 			m_vduFontProvider{m_vduFontProvider},
-			m_appSignalHashToSignalIndex{appSignalHashToSignalIndex}
+			m_appSignalHashToSignalIndex{appSignalHashToSignalIndex},
+			m_vduTrendSignals{vduTrendSignals}
 		{
 		}
 
@@ -613,7 +639,296 @@ namespace
 			// OutData already set.
 			//
 			itemType = structImageValue.itemType;
+			return true;
+		}
 
+		// SchemaItemVduTrend
+		//
+		bool visit(const VFrame30::SchemaItemVduTrend& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemTrend1 structTrend{};
+
+			structTrend.version = 1;
+			structTrend.itemType = VduFileSchemaItemTrendId;
+
+			using PosType = decltype(structTrend.left);
+			using SizeType = decltype(structTrend.width);
+
+			structTrend.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structTrend.top = static_cast<PosType>(schemaItem.topDocPt());
+			structTrend.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structTrend.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			using IndentType = decltype(structTrend.indentLeft);
+			structTrend.indentLeft = static_cast<IndentType>(schemaItem.indentLeft());
+			structTrend.indentRight = static_cast<IndentType>(schemaItem.indentRight());
+			structTrend.indentTop = static_cast<IndentType>(schemaItem.indentTop());
+			structTrend.indentBottom = static_cast<IndentType>(schemaItem.indentBottom());
+
+			structTrend.durationSecs = schemaItem.durationSeconds();
+			structTrend.viewMode = static_cast<uint16_t>(schemaItem.viewMode());
+			structTrend.scaleType = static_cast<uint16_t>(schemaItem.scaleType());
+
+			int fontIndex = m_vduFontProvider.getFontIndex(m_vduEquipmentId,
+														   schemaItem.getFontName(),
+														   schemaItem.getFontSize(),
+														   schemaItem.getFontBold(),
+														   schemaItem.getFontItalic(),
+														   false);
+
+			if (fontIndex == -1)
+			{
+				// Font not found.
+				//
+				QString font = QString{"'%1, %2%3%4'"}
+								   .arg(schemaItem.getFontName())
+								   .arg(schemaItem.getFontSize())
+								   .arg(schemaItem.getFontBold() ? ", bold" : "")
+								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
+
+				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
+				return false;
+			}
+
+			structTrend.fontIndex = fontIndex;
+
+			structTrend.lineColor = schemaItem.lineColor().rgba();
+			structTrend.backColor = schemaItem.backColor().rgba();
+			structTrend.backColor1st = schemaItem.backColor1st().rgba();
+			structTrend.backColor2nd = schemaItem.backColor2nd().rgba();
+
+			structTrend.showSignalIds = schemaItem.showSignalIds();
+			structTrend.showSignalCaptions = schemaItem.showSignalCaptions();
+			structTrend.showSignalScales = schemaItem.showSignalScales();
+			structTrend.showTimeLabels = schemaItem.showTimeLabels();
+			structTrend.showDateLabels = schemaItem.showDateLabels();
+
+			// Saving signals
+			//
+			const std::size_t MaxSignalCount =
+				sizeof(VduSchemaFileSchemaItemTrend1::trendSignals) / sizeof(VduSchemaFileSchemaItemTrend1::trendSignals[0]);
+
+			auto trendSignals = schemaItem.signalParams();
+			while (trendSignals.size() > MaxSignalCount)
+			{
+				trendSignals.pop_back();
+			}
+
+			bool signalNotFound = false;
+			for (const auto& trendSignal : trendSignals)
+			{
+				// Check that AppSignalID exists.
+				//
+				{
+					Hash signalHash = ::calcHash(trendSignal->appSignalId());
+					auto sit = m_appSignalHashToSignalIndex.find(signalHash);
+
+					if (sit == m_appSignalHashToSignalIndex.end())
+					{
+						// Signal not found.
+						//
+						m_log.errEQP6400(m_vduEquipmentId,
+										 trendSignal->appSignalId(),
+										 schemaItem.parentSchema()->schemaId(),
+										 schemaItem.label(),
+										 schemaItem.guid());
+						signalNotFound = true;
+					}
+				}
+
+				// If Validity AppSignalID is not empty, then it must exist and be a discrete signal.
+				//
+				if (trendSignal->validityAppSignalId().trimmed().isEmpty() == false)
+				{
+					Hash signalHash = ::calcHash(trendSignal->validityAppSignalId());
+					auto sit = m_appSignalHashToSignalIndex.find(signalHash);
+
+					if (sit == m_appSignalHashToSignalIndex.end())
+					{
+						// Signal not found.
+						//
+						m_log.errEQP6400(m_vduEquipmentId,
+										 trendSignal->validityAppSignalId(),
+										 schemaItem.parentSchema()->schemaId(),
+										 schemaItem.label(),
+										 schemaItem.guid());
+						signalNotFound = true;
+					}
+					else
+					{
+						AppSignal* validityAppSignal = m_context.m_signalSet->getSignal(trendSignal->validityAppSignalId());
+						if (validityAppSignal == nullptr)
+						{
+							// Signal not found.
+							//
+							m_log.errEQP6400(m_vduEquipmentId,
+											 trendSignal->validityAppSignalId(),
+											 schemaItem.parentSchema()->schemaId(),
+											 schemaItem.label(),
+											 schemaItem.guid());
+							signalNotFound = true;
+						}
+						else if (validityAppSignal->isDiscrete() == false)
+						{
+							// Validity AppSignal must be discrete.
+							//
+							m_log.errEQP6402(m_vduEquipmentId,
+											 trendSignal->validityAppSignalId(),
+											 schemaItem.parentSchema()->schemaId(),
+											 schemaItem.label(),
+											 schemaItem.guid());
+							signalNotFound = true;
+						}
+					}
+				}
+			}
+
+			if (signalNotFound == true)
+			{
+				reset();
+				return false;
+			}
+
+			// Move discrete signals to the top of the vector, they will be saved first in the file.
+			//
+			auto analogIt = std::stable_partition(trendSignals.begin(),
+												  trendSignals.end(),
+												  [this](const auto& trendSignal)
+												  {
+													  AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+													  return s ? s->isDiscrete() : false;
+												  });
+
+			structTrend.maxSignalCount = static_cast<uint16_t>(MaxSignalCount);
+			structTrend.signalCount = std::clamp<uint16_t>(static_cast<uint16_t>(trendSignals.size()), 0, structTrend.maxSignalCount);
+			structTrend.discreteSignalCount = static_cast<uint16_t>(std::distance(trendSignals.begin(), analogIt));
+
+			size_t signalIndex = 0;
+			for (const auto& trendSignal : trendSignals)
+			{
+				int appSignalIndex = -1;
+				int validityAppSignalIndex = -1;
+				uint16_t trendItemSignalIndex = 0xFFFF;
+
+				if (auto sit = m_appSignalHashToSignalIndex.find(::calcHash(trendSignal->appSignalId())); //
+					sit == m_appSignalHashToSignalIndex.end())
+				{
+					// We already checked that all signals exist, so this should not happen.
+					//
+					assert(sit != m_appSignalHashToSignalIndex.end());
+					reset();
+					return false;
+				}
+				else
+				{
+					appSignalIndex = sit->second;
+				}
+
+				if (trendSignal->validityAppSignalId().trimmed().isEmpty() == false)
+				{
+					Hash signalHash = ::calcHash(trendSignal->validityAppSignalId());
+
+					if (auto sit = m_appSignalHashToSignalIndex.find(signalHash); //
+						sit == m_appSignalHashToSignalIndex.end())
+					{
+						// We already checked that all signals exist, so this should not happen.
+						//
+						assert(sit != m_appSignalHashToSignalIndex.end());
+						reset();
+						return false;
+					}
+					else
+					{
+						validityAppSignalIndex = sit->second;
+					}
+				}
+
+				// Find index from the set.
+				//
+				{
+					TrendItemSignal tis{};
+					tis.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
+					tis.validityAppSignalIndex = static_cast<uint32_t>(validityAppSignalIndex);
+					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationSeconds());
+
+					auto it = m_vduTrendSignals.find(tis);
+					if (it == m_vduTrendSignals.end())
+					{
+						// Internal error, this should not happen, we generated the set from the same signals.
+						//
+						assert(it != m_vduTrendSignals.end());
+						m_log.errINT1001(QString("Internal error, trend signal not found in the set, TrendItemSignal {%1, %2, %3}")
+											 .arg(tis.appSignalIndex)
+											 .arg(tis.validityAppSignalIndex)
+											 .arg(tis.durationSecs),
+										 schemaItem.parentSchema()->schemaId(),
+										 schemaItem.guid());
+						reset();
+						return false;
+					}
+
+					if (m_vduTrendSignals.size() > 65535)
+					{
+						// Internal error, too many trend signals.
+						//
+						m_log.errINT1000(QString("Internal error, too many trend signals, count = %1, vdu = %2")
+											 .arg(m_vduTrendSignals.size())
+											 .arg(m_vduEquipmentId));
+						reset();
+						return false;
+					}
+
+					trendItemSignalIndex = static_cast<uint16_t>(std::distance(m_vduTrendSignals.begin(), it));
+				}
+
+				VduSchemaFileSchemaItemTrend1::TrendSignal& trendSignalStruct = structTrend.trendSignals[signalIndex++];
+				trendSignalStruct.version = 1;
+				trendSignalStruct.reserve0 = 0;
+
+				trendSignalStruct.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
+				trendSignalStruct.validityAppSignalIndex =
+					static_cast<uint32_t>(validityAppSignalIndex); // 0xFFFFFFFF if no validity signal is used.
+				trendSignalStruct.trendSignalFileRecordIndex = trendItemSignalIndex;
+
+				trendSignalStruct.decimalPlaces = trendSignal->precision();
+				trendSignalStruct.valueFormat = static_cast<uint16_t>(trendSignal->valueFormat());
+
+				AppSignal* appSignal = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+				if (appSignal == nullptr)
+				{
+					// Signal not found.
+					//
+					m_log.errEQP6400(m_vduEquipmentId,
+									 trendSignal->appSignalId(),
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid());
+					reset();
+					return false;
+				}
+
+				if (appSignal->isAnalog() && appSignal->dataFormat() == E::DataFormat::Float)
+				{
+					trendSignalStruct.highViewLimit = toVduValue(static_cast<float>(trendSignal->highViewLimit()));
+					trendSignalStruct.lowViewLimit = toVduValue(static_cast<float>(trendSignal->lowViewLimit()));
+				}
+				else
+				{
+					trendSignalStruct.highViewLimit = toVduValue(static_cast<int32_t>(trendSignal->highViewLimit()));
+					trendSignalStruct.lowViewLimit = toVduValue(static_cast<int32_t>(trendSignal->lowViewLimit()));
+				}
+
+				trendSignalStruct.color = trendSignal->color().rgba();
+				trendSignalStruct.lineWeight = static_cast<uint16_t>(trendSignal->lineWeight());
+				trendSignalStruct.reserve1 = 0;
+			}
+
+			// OutData already set.
+			//
+			itemType = structTrend.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structTrend), sizeof(structTrend));
 			return true;
 		}
 	};
@@ -624,6 +939,7 @@ namespace
 						 QString subsystemId,
 						 const VFrame30::SchemaItem& schemaItem,
 						 const std::map<Hash, int>& appSignalHashToSignalIndex,
+						 const std::set<TrendItemSignal>& vduTrendSignals,
 						 QByteArray& out,
 						 std::list<VduFileString>& addedStrings,
 						 std::list<VduFileLuaBytecode>& addedLuaBytecodes,
@@ -688,7 +1004,12 @@ namespace
 
 		// Save specific item struct, depending on itemType.
 		//
-		SaveVduItemVisitor saveVduItemVisitor(context, vduEquipmentId, subsystemId, context.m_vduFontProvider, appSignalHashToSignalIndex);
+		SaveVduItemVisitor saveVduItemVisitor(context,
+											  vduEquipmentId,
+											  subsystemId,
+											  context.m_vduFontProvider,
+											  appSignalHashToSignalIndex,
+											  vduTrendSignals);
 
 		bool saveOk = dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
 		if (saveOk == false)
@@ -940,32 +1261,50 @@ namespace Builder
 			return module->isVdu();
 		};
 
+		struct VduInfo
+		{
+			const Hardware::DeviceModule* vdu = nullptr;
+			QString subsystemId;
+
+			QString vduDir;
+			QString vduSchemaDir;
+			QString vduImageDir;
+
+			QStringList vduSchemaTagList;
+			std::map<Hash, int> vduSignals;
+			std::set<TrendItemSignal> vduTrendSignals;
+
+			std::vector<VFrame30::VduSchema*> vduSchemas;
+		};
+
+		std::list<VduInfo> vdus;
+
 		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
 
-			LOG_MESSAGE(log, QString("Generating schemas for VDU %1.").arg(vdu->equipmentId()));
+			VduInfo vduInfo;
+			vduInfo.vdu = vdu;
 
 			// Get VDU subsystemId.
 			//
-			QString subsystemId;
+			if (auto subsystemIdProp = vdu->propertyByCaption(EquipmentPropNames::SUBSYSTEM_ID); //
+				subsystemIdProp == nullptr)
 			{
-				auto subsystemIdProp = vdu->propertyByCaption(EquipmentPropNames::SUBSYSTEM_ID);
-				if (subsystemIdProp == nullptr)
-				{
-					// Property '%1.%2' is not found.
-					//
-					log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SUBSYSTEM_ID);
-					result = false;
-					continue;
-				}
-
-				subsystemId = subsystemIdProp->value().toString();
+				// Property '%1.%2' is not found.
+				//
+				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SUBSYSTEM_ID);
+				result = false;
+				continue;
+			}
+			else
+			{
+				vduInfo.subsystemId = subsystemIdProp->value().toString();
 			}
 
-			const QString vduSchemaDir = buildResultWriter.subsystemDirectory(subsystemId) + '/' + vdu->equipmentId() + '/' + "Schemas";
-
-			const QString vduImageDir = vduSchemaDir + '/' + "Images";
+			vduInfo.vduDir = buildResultWriter.subsystemDirectory(vduInfo.subsystemId) + '/' + vdu->equipmentId();
+			vduInfo.vduSchemaDir = vduInfo.vduDir + '/' + "Schemas";
+			vduInfo.vduImageDir = vduInfo.vduSchemaDir + '/' + "Images";
 
 			// Get device tags
 			//
@@ -979,6 +1318,8 @@ namespace Builder
 				continue;
 			}
 
+			vduInfo.vduSchemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+
 			auto vduSignalsIt = context.m_vduSignals.find(vdu->equipmentId());
 			if (vduSignalsIt == context.m_vduSignals.end())
 			{
@@ -988,27 +1329,72 @@ namespace Builder
 				result = false;
 				continue;
 			}
-			const auto& vduSignals = vduSignalsIt->second;
 
-			auto vduSchemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+			vduInfo.vduSignals = vduSignalsIt->second; // Deep copy.
 
-			for (auto schema : schemas)
+			auto schemaFilterFunc = [&vduInfo](VFrame30::VduSchema* schema)
 			{
-				Q_ASSERT(schema);
+				if (schema == nullptr)
+				{
+					assert(schema);
+					return false;
+				}
 
 				// If schemaTags is empty, then all schemas are for this VDU
 				//
-				bool schemaHasTag = vduSchemaTagList.isEmpty();
-				schemaHasTag |= std::ranges::any_of(vduSchemaTagList,
-													[&schema](QString& tag)
-													{
-														return schema->tagsAsList().contains(tag.toLower());
-													});
+				bool schemaHasTag = vduInfo.vduSchemaTagList.isEmpty();
+				schemaHasTag |= std::any_of(vduInfo.vduSchemaTagList.begin(),
+											vduInfo.vduSchemaTagList.end(),
+											[&schema](const QString& tag)
+											{
+												return schema->tagsAsList().contains(tag.toLower());
+											});
+				return schemaHasTag;
+			};
 
-				if (schemaHasTag == false)
-				{
-					continue;
-				}
+			// Get all schemas.
+			//
+			vduInfo.vduSchemas.reserve(schemas.size());
+			std::copy_if(schemas.begin(), schemas.end(), std::back_inserter(vduInfo.vduSchemas), schemaFilterFunc);
+
+			// Add to the list of VDU info.
+			//
+			vdus.push_back(std::move(vduInfo));
+		}
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Generate trends for VDU.
+		//
+		for (VduInfo& vduInfo : vdus)
+		{
+			bool trendGenOk = Builder::VduTrendConfigGenerator::generate(vduInfo.vdu->equipmentId(),
+																		 vduInfo.vduDir,
+																		 vduInfo.vduSchemas,
+																		 vduInfo.vduSignals,
+																		 vduInfo.vduTrendSignals, // Out
+																		 context);
+			if (trendGenOk == false)
+			{
+				result = false;
+			}
+		}
+
+		// Generate schemas for VDU.
+		//
+		for (const VduInfo& vduInfo : vdus)
+		{
+			Q_ASSERT(vduInfo.vdu);
+			LOG_MESSAGE(log, QString("Generating schemas for VDU %1.").arg(vduInfo.vdu->equipmentId()));
+
+			// Generate schemas for VDU.
+			//
+			for (auto schema : vduInfo.vduSchemas)
+			{
+				auto schemaPtr = std::dynamic_pointer_cast<VFrame30::Schema>(schema->shared_from_this());
 
 				// Generate VDU schema.
 				//
@@ -1017,10 +1403,11 @@ namespace Builder
 				QStringList errorMessages;
 				QByteArray nativeVduData;
 
-				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(),
-																				  subsystemId,
+				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vduInfo.vdu->equipmentId(),
+																				  vduInfo.subsystemId,
 																				  *schema,
-																				  vduSignals,
+																				  vduInfo.vduSignals,
+																				  vduInfo.vduTrendSignals,
 																				  nativeVduData,
 																				  context);
 
@@ -1034,7 +1421,7 @@ namespace Builder
 				//
 				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(File::VduNativeFileExtension);
 
-				buildResultWriter.addFile(vduSchemaDir, nativeVduSchemaFileName, nativeVduData);
+				buildResultWriter.addFile(vduInfo.vduSchemaDir, nativeVduSchemaFileName, nativeVduData);
 
 #if 1
 				// Generate background bitmap from the static data.
@@ -1044,9 +1431,8 @@ namespace Builder
 					QString backgroundBitmapFileName = QString("%1.bmp").arg(schema->schemaId());
 
 					QImage backgroundImage;
+					bool genBitmapOk = Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schemaPtr, backgroundImage);
 
-					bool genBitmapOk =
-						Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schema->shared_from_this(), backgroundImage);
 					if (genBitmapOk == false)
 					{
 						log->errINT1001(QString("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:")
@@ -1059,7 +1445,7 @@ namespace Builder
 					buffer.open(QIODevice::WriteOnly);
 					backgroundImage.save(&buffer, "BMP");
 
-					buildResultWriter.addFile(vduSchemaDir, backgroundBitmapFileName, backgroundImageData);
+					buildResultWriter.addFile(vduInfo.vduSchemaDir, backgroundBitmapFileName, backgroundImageData);
 				}
 #endif
 				// Add schema to the global build context.
@@ -1078,8 +1464,9 @@ namespace Builder
 						Q_ASSERT(nativeVduData.size() >= 8);
 					}
 
-					Context::GeneratedVduSchema generatedSchema{.schema = schema->shared_from_this(), .crc64 = crc64};
-					context.m_vduSchemas[vdu->equipmentId()].push_back(generatedSchema);
+					Context::GeneratedVduSchema generatedSchema{.schema = schemaPtr, .crc64 = crc64};
+
+					context.m_vduSchemas[vduInfo.vdu->equipmentId()].push_back(generatedSchema);
 				}
 			}
 		}
@@ -1091,6 +1478,7 @@ namespace Builder
 											   QString subsystemId,
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
+											   const std::set<TrendItemSignal>& vduTrendSignals,
 											   QByteArray& out,
 											   Builder::Context& context)
 	{
@@ -1224,6 +1612,7 @@ namespace Builder
 								subsystemId,
 								*item,
 								appSignalHashToSignalIndex,
+								vduTrendSignals,
 								outSchemaItem,
 								addedItemStrings,
 								addedLuaBytecodes,

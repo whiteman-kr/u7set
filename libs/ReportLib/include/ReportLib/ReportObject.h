@@ -57,16 +57,18 @@ namespace ReportLib
 
 		TableFormat() = default;
 
-		TableFormat(const ReportFont& font, const QStringList& headerLabels, const std::vector<int> columnWidths, Qt::Alignment alignment);
+		TableFormat(const ReportFont& font, const QStringList& headerLabels, const std::vector<int> columnWidths, Qt::Alignment alignment, int borderWidth);
 
-		TableFormat(const ReportFont& font, const std::vector<ColumnFormat>& columnsFormat);
+		TableFormat(const ReportFont& font, const std::vector<ColumnFormat>& columnsFormat, int borderWidth);
 
 		const ReportFont& font() const;
 		const std::vector<ColumnFormat>& columnsFormat() const;
+		int borderWidth() const;
 
 	private:
 		ReportFont m_font{"Arial", 12, QFont::Normal};
 		std::vector<ColumnFormat> m_columnsFormat;
+		int m_borderWidth{0}; // border weight
 	};
 
 	struct SchemaFormat

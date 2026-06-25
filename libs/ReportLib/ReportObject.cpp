@@ -40,8 +40,10 @@ namespace ReportLib
 	TableFormat::TableFormat(const ReportFont& font,
 							 const QStringList& headerLabels,
 							 const std::vector<int> columnWidths,
-							 Qt::Alignment alignment) :
-		m_font(font)
+							 Qt::Alignment alignment,
+							 int borderWidth) :
+		m_font(font),
+		m_borderWidth(borderWidth)
 	{
 		if (static_cast<int>(headerLabels.size()) != columnWidths.size())
 		{
@@ -56,9 +58,10 @@ namespace ReportLib
 		}
 	}
 
-	TableFormat::TableFormat(const ReportFont& font, const std::vector<ColumnFormat>& columnsFormat) :
+	TableFormat::TableFormat(const ReportFont& font, const std::vector<ColumnFormat>& columnsFormat, int borderWidth) :
 		m_font(font),
-		m_columnsFormat(columnsFormat)
+		m_columnsFormat(columnsFormat),
+		m_borderWidth(borderWidth)
 	{
 	}
 
@@ -70,6 +73,11 @@ namespace ReportLib
 	const std::vector<TableFormat::ColumnFormat>& TableFormat::columnsFormat() const
 	{
 		return m_columnsFormat;
+	}
+
+	int TableFormat::borderWidth() const
+	{ 
+		return m_borderWidth; 
 	}
 
 	//
@@ -266,6 +274,15 @@ namespace ReportLib
 		int cols = columnCount();
 		int rows = rowCount();
 
+		QString borderFormat;
+		{
+			int borderWidth = m_format.borderWidth();
+			if (borderWidth > 0)
+			{
+				borderFormat = QObject::tr("border : %1px solid black;").arg(borderWidth);
+			}
+		}
+
 		QString html = QObject::tr("<html>\
 								   <head>\
 								   <style>\
@@ -282,10 +299,12 @@ namespace ReportLib
 									   padding: 3px;\
 								   }\
 								   tr.d0 td {\
+									   %3\
 									   background-color: #e0e0e0;\
 									   color: black;\
 								   }\
 								   tr.d1 td {\
+									   %3\
 									   background-color: #ffffff;\
 									   color: black;\
 								   }\
@@ -294,7 +313,8 @@ namespace ReportLib
 								   <body>\
 								   <table width=\"100%\">")
 						   .arg(m_format.font().family)
-						   .arg(m_format.font().pointSize * fontScaling);
+						   .arg(m_format.font().pointSize * fontScaling)
+						   .arg(borderFormat);
 
 		html += "<thead><tr>";
 		for (int c = 0; c < cols; c++)

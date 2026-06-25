@@ -31,6 +31,7 @@
 #include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduTrend.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/TuningSchema.h>
@@ -95,6 +96,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemVduImage>();
 		SchemaItemFactory.Register<SchemaItemVduValue>();
 		SchemaItemFactory.Register<SchemaItemVduImageValue>();
+		SchemaItemFactory.Register<SchemaItemVduTrend>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

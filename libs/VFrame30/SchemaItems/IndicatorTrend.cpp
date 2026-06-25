@@ -329,7 +329,7 @@ namespace VFrame30
 													   IndicatorTrend::setLaneCount);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		// laneSpacing
+		// backColor1
 		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
 													   PropertyNames::indicatorTrendBackColor1st,
@@ -338,7 +338,7 @@ namespace VFrame30
 													   IndicatorTrend::setBackColor1st);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		// laneSpacing
+		// backColor2
 		//
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
 													   PropertyNames::indicatorTrendBackColor2nd,

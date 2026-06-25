@@ -9688,7 +9688,7 @@ namespace Builder
 	///		%4 Schema item label
 	///
 	/// Description:
-	///		An application signal used in one of the schema items was not found in the VDU signal list.
+	///		An application signal used by a schema item is not found in the VDU signal list.
 	///
 	void IssueLogger::errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid)
 	{
@@ -9698,17 +9698,17 @@ namespace Builder
 		LOG_ERROR(IssueType::Equipment,
 				  6400,
 				  tr("Application signal %1 is not found in VDU %2. The signal is referenced in schema %3, schema item %4.")
-				  .arg(appSignalId)
-				  .arg(vduEquipmentId)
-				  .arg(schemaId)
-				  .arg(schemaItemLabel));
+					  .arg(appSignalId)
+					  .arg(vduEquipmentId)
+					  .arg(schemaId)
+					  .arg(schemaItemLabel));
 	}
 
 	/// IssueCode: EQP6401
 	///
 	/// IssueType: Error
 	///
-	/// Title: Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).
+	/// Title: Font %1 is not found in VDU %2, schema %3, schema item %4. Add the font to the VDU font properties (Fonts).
 	///
 	/// Parameters:
 	///		%1 Font parameters
@@ -9717,7 +9717,7 @@ namespace Builder
 	///		%4 Schema item label
 	///
 	/// Description:
-	///		The specified font was not found in the VDU's fonts. Please add the font to the VDU's font properties (Fonts).
+	///		The specified font is not found in the VDU fonts. Add the font to the VDU font properties (Fonts).
 	///
 	void IssueLogger::errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font)
 	{
@@ -9725,11 +9725,40 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6401,
-				  tr("Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).")
-				  .arg(font)
-				  .arg(vduEquipmentId)
-				  .arg(schemaId)
-				  .arg(itemLabel));
+				  tr("Font %1 is not found in VDU %2, schema %3, schema item %4. Add the font to the VDU font properties (Fonts).")
+					  .arg(font)
+					  .arg(vduEquipmentId)
+					  .arg(schemaId)
+					  .arg(itemLabel));
+	}
+
+	/// IssueCode: EQP6402
+	///
+	/// IssueType: Error
+	///
+	/// Title: Validity signal %1 must be discrete. It is referenced by VDU %2, schema %3, schema item %4.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 VDU EquipmentID
+	///		%3 SchemaID
+	///		%4 Schema item label
+	///
+	/// Description:
+	///		The validity signal used by a schema item must be discrete.
+	///
+	void IssueLogger::errEQP6402(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, 6402, schemaId);
+		addItemsIssues(OutputMessageLevel::Error, 6402, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6402,
+				  tr("Validity signal %1 must be discrete. It is referenced by VDU %2, schema %3, schema item %4.")
+					  .arg(appSignalId)
+					  .arg(vduEquipmentId)
+					  .arg(schemaId)
+					  .arg(schemaItemLabel));
 	}
 
 	/// IssueCode: EQP6405
@@ -9751,7 +9780,9 @@ namespace Builder
 
 		LOG_WARNING2(IssueType::Equipment,
 					 6405,
-					 QString(tr("SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.")).arg(itemLabel).arg(schemaId));
+					 QString(tr("SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored."))
+						 .arg(itemLabel)
+						 .arg(schemaId));
 	}
 
 
@@ -9759,7 +9790,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the unknown Unicode subset.
+	/// Title: The string '%1' processed by VDU '%2' contains symbol (%3 [0x%4]) from an unknown Unicode subset.
 	///
 	/// Parameters:
 	///		%1 VDU Equipment ID
@@ -9767,13 +9798,13 @@ namespace Builder
 	///		%3 Symbol
 	///
 	/// Description:
-	///		The string processed by the VDU contains a symbol from the unknown Unicode subset.
+	///		The string processed by the VDU contains a symbol from an unknown Unicode subset.
 	///
 	void IssueLogger::wrnEQP6410(QString vduEquipmentId, QString string, QChar symbol)
 	{
 		LOG_WARNING1(IssueType::Equipment,
 					 64010,
-					 QString(tr("The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the unknown Unicode subset."))
+					 QString(tr("The string '%1' processed by VDU '%2' contains symbol (%3 [0x%4]) from an unknown Unicode subset."))
 						 .arg(string)
 						 .arg(vduEquipmentId)
 						 .arg(symbol)
@@ -9784,7 +9815,8 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is not included to the VDU.
+	/// Title: The string '%1' processed by VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is not included in the
+	/// VDU.
 	///
 	/// Parameters:
 	///		%1 VDU Equipment ID
@@ -9793,13 +9825,14 @@ namespace Builder
 	///		%4 Subset
 	///
 	/// Description:
-	///		The string processed by the VDU contains a symbol from the unknown Unicode subset.
+	///		The string processed by the VDU contains a symbol from a Unicode subset that is not included in the VDU.
 	///
 	void IssueLogger::wrnEQP6411(QString vduEquipmentId, QString string, QChar symbol, QString subset)
 	{
 		LOG_WARNING1(IssueType::Equipment,
 					 64011,
-					 QString(tr("The string '%1' processed by the VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is not included to the VDU."))
+					 QString(tr("The string '%1' processed by VDU '%2' contains symbol (%3 [0x%4]) from the '%5' Unicode subset, which is "
+								"not included in the VDU."))
 						 .arg(string)
 						 .arg(vduEquipmentId)
 						 .arg(symbol)
