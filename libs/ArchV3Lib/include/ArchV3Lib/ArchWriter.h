@@ -27,7 +27,8 @@ namespace ArchV3
 		bool checkAndInitDirs();
 		void initArchFiles();
 
-		QString clearString(QString str) const;
+		QString archPath_00_FF(quint8 n);
+		static QString clearString(QString str);		// copy OK
 
 	private:
 		const QString m_archDir;
@@ -41,6 +42,6 @@ namespace ArchV3
 
 		QString m_archPath;
 
-		std::vector<std::unique_ptr<ArchV3Lib::ArchFileBase>> m_archFiles;
+		std::vector<std::unique_ptr<ArchFileBase>> m_archFiles;
 	};
 }

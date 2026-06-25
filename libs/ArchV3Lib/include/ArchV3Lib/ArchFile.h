@@ -6,7 +6,7 @@
 #include <QtGlobal>
 #include <QFile>
 
-namespace ArchV3Lib
+namespace ArchV3
 {
 	inline constexpr quint32 FLAG_PLANT_TIME_VALID = 0x20000000;
 

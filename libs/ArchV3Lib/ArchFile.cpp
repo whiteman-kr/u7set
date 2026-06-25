@@ -7,7 +7,7 @@
 #include <ArchV3Lib/ArchFile.h>
 #include <ArchV3Lib/ArchWriter.h>
 
-namespace ArchV3Lib
+namespace ArchV3
 {
 	ArchFileBase::ArchFileBase(ArchWriter& archWriter) :
 		m_archWriter(archWriter)
@@ -38,6 +38,7 @@ namespace ArchV3Lib
 
 	bool ArchFileBase::setFileName(const QString& filename)
 	{ 
+		m_filename = filename;
 		return true;
 	}
 

@@ -88,9 +88,10 @@ namespace ArchV3
 
 		QString path;
 
-		for (int i = 0; i < 256; i++)
+		for (quint32 n = 0; n < 256; n++)
 		{
-			path = m_archPath + QDir::separator() + QString("%1").arg(i, 2, 16, QChar('0')).toUpper();
+			path = archPath_00_FF(static_cast<quint8>(n));
+
 			bool res = QDir().mkpath(path);
 
 			if (res == false)
@@ -125,23 +126,43 @@ namespace ArchV3
 
 		m_archFiles.reserve(analogsCount + discretesCount);
 
+		QString path;
+
 		for (const AppSignal& s : m_appSignals)
 		{
+			if (s.isBus() == true)
+			{
+				continue;
+			}
+
+			quint8 n = static_cast<quint8>(s.hash() & 0xFF);
+
+			path = archPath_00_FF(n) + QDir::separator() + clearString(s.appSignalID());
+
 			if (s.isAnalog())
 			{
-//				m_archFiles.push_back(std::make_unique<ArchV3Lib::AnalogArchFile>(/* parameters */));
+				std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>(*this);
+				file->setFilePath(path);
+				m_archFiles.push_back(std::move(file));
 			}
 			else
 			{
 				if (s.isDiscrete())
 				{
-//					m_archFiles.push_back(std::make_unique<ArchV3Lib::DiscreteArchFile>(/* parameters */));
+					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>(*this);
+					file->setFilePath(path);
+					m_archFiles.push_back(std::move(file));
 				}
 			}
 		}
 	}
 
-	QString ArchWriter::clearString(QString str) const
+	QString ArchWriter::archPath_00_FF(quint8 n)
+	{ 
+		return m_archPath + QDir::separator() + QString("%1").arg(n, 2, 16, QChar('0')).toUpper();
+	}
+
+	QString ArchWriter::clearString(QString str)
 	{ 
 		str.replace(QRegularExpression("[^a-zA-Z0-9_]"), "_");
 		str.replace(QRegularExpression("_+"), "_");
