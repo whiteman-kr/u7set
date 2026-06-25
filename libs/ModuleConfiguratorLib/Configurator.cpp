@@ -2548,15 +2548,18 @@ namespace ModuleConfiguratorLib
 			//
 			for (int moduleUartId : moduleUarts)
 			{
-				// Skip UART if it is not checked
-				//
-				if (selectedUarts.has_value() == true)
+				if (connectedToServiceUart == false)
 				{
-					const std::vector<int>& selectedUartsValue = selectedUarts.value();
-					if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+					// Skip UART if it is not checked
+					//
+					if (selectedUarts.has_value() == true)
 					{
-						m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
-						continue;
+						const std::vector<int>& selectedUartsValue = selectedUarts.value();
+						if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+						{
+							m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
+							continue;
+						}
 					}
 				}
 
