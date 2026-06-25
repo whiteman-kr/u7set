@@ -1271,7 +1271,7 @@ namespace Builder
 		buildInfo().writeToXml(*xml.xmlStreamWriter());
 
 		xml.writeStartElement("Subsystems");
-		xml.writeIntAttribute("Count", subsystemsCount);
+		xml.writeInt32Attribute("Count", subsystemsCount);
 
 		QStringList subsystemIDs = subsys.keys();
 
@@ -1295,9 +1295,9 @@ namespace Builder
 
 			xml.writeStringAttribute("Id", subsystem->subsystemId());
 			xml.writeStringAttribute("Caption", subsystem->caption());
-			xml.writeIntAttribute("Index", subsystem->index());
-			xml.writeIntAttribute("Key", subsystem->key());
-			xml.writeIntAttribute("ModulesCount", static_cast<int>(subsysModuleIds.count()));
+			xml.writeInt32Attribute("Index", subsystem->index());
+			xml.writeInt32Attribute("Key", subsystem->key());
+			xml.writeInt32Attribute("ModulesCount", static_cast<int>(subsysModuleIds.count()));
 
 			for(const QString& moduleID : subsysModuleIds)
 			{
@@ -1330,12 +1330,12 @@ namespace Builder
 
 				xml.writeStringAttribute("EquipmentId", module->equipmentIdTemplate());
 				xml.writeStringAttribute("SubsystemId", lmSubsystem);
-				xml.writeIntAttribute("LmNumber", lmNumber);
-				xml.writeIntAttribute("SubsystemChannel", lmChannel);
-				xml.writeIntAttribute("ModuleType", module->moduleType());
-				xml.writeIntAttribute("ModuleFamily", module->moduleFamily());
-				xml.writeIntAttribute("ModuleVersion", module->moduleVersion());
-				xml.writeIntAttribute("CustomModuleFamily", module->customModuleFamily());
+				xml.writeInt32Attribute("LmNumber", lmNumber);
+				xml.writeInt32Attribute("SubsystemChannel", lmChannel);
+				xml.writeInt32Attribute("ModuleType", module->moduleType());
+				xml.writeInt32Attribute("ModuleFamily", module->moduleFamily());
+				xml.writeInt32Attribute("ModuleVersion", module->moduleVersion());
+				xml.writeInt32Attribute("CustomModuleFamily", module->customModuleFamily());
 
 				xml.writeEndElement(); // </Module>
 			}

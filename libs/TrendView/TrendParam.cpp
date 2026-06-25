@@ -340,7 +340,7 @@ namespace TrendLib
 
 	void TrendParam::setLaneDuration(qint64 value)
 	{
-		m_duration = std::clamp(value, 500_ms, 24_hours * 365);
+		m_duration = std::clamp(value, static_cast<qint64>(500_ms), static_cast<qint64>(24_hours * 365));
 	}
 
 	int TrendParam::hightlightRulerIndex() const

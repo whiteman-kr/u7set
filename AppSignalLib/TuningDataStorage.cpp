@@ -523,20 +523,20 @@ namespace  Tuning
 	{
 		xml.writeStartElement(XmlElement::TUNING_FLASH_MEMORY);			// <TuningFlashMemory>
 
-		xml.writeIntAttribute(XmlAttribute::FRAME_COUNT, m_tuningFlashFrameCount);
-		xml.writeIntAttribute(XmlAttribute::FRAME_PAYLOAD_B, m_tuningFlashFramePayloadB);
-		xml.writeIntAttribute(XmlAttribute::FRAME_SIZE_B, m_tuningFlashFrameSizeB);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_COUNT, m_tuningFlashFrameCount);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_PAYLOAD_B, m_tuningFlashFramePayloadB);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_SIZE_B, m_tuningFlashFrameSizeB);
 
 		xml.writeEndElement();							// </TuningFlashMemory>
 
 		xml.writeStartElement(XmlElement::TUNING_DATA_MEMORY);				// <TuningDataMemory>
 
-		xml.writeIntAttribute(XmlAttribute::DATA_OFFSET_W, m_tuningDataOffsetW);
-		xml.writeIntAttribute(XmlAttribute::DATA_SIZE_W, m_tuningDataSizeW);
-		xml.writeIntAttribute(XmlAttribute::FRAME_COUNT, m_tuningDataFrameCount);
-		xml.writeIntAttribute(XmlAttribute::FRAME_PAYLOAD_W, m_tuningDataFramePayloadW);
-		xml.writeIntAttribute(XmlAttribute::FRAME_SIZE_W, m_tuningDataFrameSizeW);
-		xml.writeIntAttribute(XmlAttribute::USED_FRAMES_COUNT, m_tuningDataUsedFramesCount);
+		xml.writeInt32Attribute(XmlAttribute::DATA_OFFSET_W, m_tuningDataOffsetW);
+		xml.writeInt32Attribute(XmlAttribute::DATA_SIZE_W, m_tuningDataSizeW);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_COUNT, m_tuningDataFrameCount);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_PAYLOAD_W, m_tuningDataFramePayloadW);
+		xml.writeInt32Attribute(XmlAttribute::FRAME_SIZE_W, m_tuningDataFrameSizeW);
+		xml.writeInt32Attribute(XmlAttribute::USED_FRAMES_COUNT, m_tuningDataUsedFramesCount);
 
 		xml.writeEndElement();							// </TuningDataMemory>
 
@@ -552,7 +552,7 @@ namespace  Tuning
 			signalCount += static_cast<int>(signalList.count());
 		}
 
-		xml.writeIntAttribute(XmlAttribute::SIGNALS_COUNT, signalCount);
+		xml.writeInt32Attribute(XmlAttribute::SIGNALS_COUNT, signalCount);
 
 		Q_ASSERT(m_signalTypeXmlElement.size() == TYPES_COUNT);
 
@@ -562,7 +562,7 @@ namespace  Tuning
 
 			xml.writeStartElement(m_signalTypeXmlElement[type]);	//	<typeSection[type]>
 
-			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningSignals.count()));
+			xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(tuningSignals.count()));
 
 			for(AppSignal* signal : tuningSignals)
 			{
@@ -872,4 +872,15 @@ namespace  Tuning
 		return it->second;
 	}
 
+	QStringList TuningDataStorage::getAllTuningSourceIDs() const
+	{
+		QStringList ids;
+
+		for(const auto& [id, data] : m_tuningDataMap)
+		{
+			ids.append(id);
+		}
+
+		return ids;
+	}
 }

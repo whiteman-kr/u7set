@@ -1,5 +1,6 @@
 #include "TcpTuningServer.h"
 #include "TuningService.h"
+#include "../OnlineLib/TcpFileTransfer.h"
 
 namespace Tuning
 {
@@ -14,14 +15,24 @@ namespace Tuning
 	quint64 TcpTuningServer::m_staticTcpConnectionID = 0;
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
-									 const TuningSources& tuningSources,
-									 std::shared_ptr<CircularLogger> logger) :
+		const TuningSources& tuningSources,
+		std::shared_ptr<std::vector<char>> tuningSourcesFileData,
+		std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo(), "TcpTuningServer"),
 		m_service(service),
 		m_tuningSources(tuningSources),
+		m_tuningSourcesFileData(tuningSourcesFileData),
 		m_logger(logger)
 	{
 		m_tcpConnectionID = ++m_staticTcpConnectionID;
+
+		Q_ASSERT(m_tuningSourcesFileData);
+
+		if (m_tuningSourcesFileData != nullptr && m_tuningSourcesFileData->empty() == false)
+		{
+			m_tuningSourcesFileCrc64 = Crc::crc64(m_tuningSourcesFileData->data(),
+											 TO_QINT64(m_tuningSourcesFileData->size()));
+		}
 
 		prepareSignalGetter();
 	}
@@ -53,7 +64,8 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources,
+														 m_tuningSourcesFileData, m_logger);
 		newServer->setListenAddress(listenAddr);
 		return newServer;
 	}
@@ -104,6 +116,10 @@ namespace Tuning
 
 		case RQID_GET_CLIENT_LIST:
 			sendClientList();
+			break;
+
+		case TDS_GET_TUNING_SOURCES_FILE:
+			onGetTuningSourcesFile(requestData, requestDataSize);
 			break;
 
 		default:
@@ -224,8 +240,18 @@ namespace Tuning
 		{
 			const TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceID);
 
-			if (sourceThread == nullptr)
+			if (sourceThread == nullptr || sourceThread->isHandlersInitialized() == false)
 			{
+				if (sourceThread == nullptr)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("No sourceThread for %1").arg(sourceID));
+				}
+
+				if (sourceThread != nullptr && sourceThread->isHandlersInitialized() == false)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("Handlers not initialized for %1").arg(sourceID));
+				}
+
 				const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
 
 				TEST_PTR_CONTINUE(src);
@@ -236,19 +262,36 @@ namespace Tuning
 				{
 					if (m_service.isControlled(src->moduleEquipmentID(), lanID) == false)
 					{
+						DEBUG_LOG_MSG(m_logger, QString("Module %1 not controlled (Lan %2)").arg(src->moduleEquipmentID()).arg(lanID));
 						continue;
 					}
 
 					Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
 
 					newTss->set_sourceid(src->ID());
+					newTss->set_moduleequipmentid(src->moduleEquipmentID().toStdString());
 					newTss->set_lanequipmentid(lanID.toStdString());
 					newTss->set_isreply(false);
 				}
+
+				DEBUG_LOG_MSG(m_logger,
+							  QString("m_getTuningSourcesStatesReply states count = %1")
+								  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
 			}
 			else
 			{
-				sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
+				DEBUG_LOG_MSG(m_logger, QString("getSourceState for %1").arg(sourceID));
+
+				bool res = sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
+
+				if (res == false)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("No worker for %1").arg(sourceID));
+				}
+
+				DEBUG_LOG_MSG(m_logger,
+							  QString("m_getTuningSourcesStatesReply states count = %1")
+								  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
 			}
 		}
 
@@ -257,6 +300,10 @@ namespace Tuning
 		m_getTuningSourcesStatesReply.set_activeclientip(m_service.activeClientIP().toStdString());
 
 		m_getTuningSourcesStatesReply.set_error(TO_INT(E::NetworkError::Success));
+
+		DEBUG_LOG_MSG(m_logger,
+					  QString(tr("Send reply on TDS_GET_TUNING_SOURCES_STATES, states count %1"))
+						  .arg(m_getTuningSourcesStatesReply.tuningsourcesstate_size()));
 
 		sendReply(m_getTuningSourcesStatesReply);
 	}
@@ -274,6 +321,7 @@ namespace Tuning
 			return;
 		}
 
+		m_tuningSignalsReadReply.set_readrequestid(m_tuningSignalsReadRequest.readrequestid());
 		m_tuningSignalsReadReply.set_pendingsignalsstatechanges(0);
 
 		E::NetworkError errCode = E::NetworkError::Success;
@@ -327,6 +375,11 @@ namespace Tuning
 				return;
 			}
 
+			int signalCount = m_tuningSignalsReadRequest.signalhash_size();
+
+			QElapsedTimer timer;
+			timer.start();
+
 			// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
 			//
 			clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
@@ -342,6 +395,10 @@ namespace Tuning
 			{
 				Q_ASSERT(false);
 			}
+
+			qint64 tm = timer.elapsed();
+
+			qDebug() << C_STR(QString("READ %1 signals, time = %2").arg(signalCount).arg(tm));
 
 			sendReply(m_tuningSignalsReadReply);
 		}
@@ -419,6 +476,8 @@ namespace Tuning
 
 		bool result = m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
 
+		m_tuningSignalsWriteReply.set_writerequestid(m_tuningSignalsWriteRequest.writerequestid());
+
 		if (result == false)
 		{
 			m_tuningSignalsWriteReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
@@ -480,6 +539,9 @@ namespace Tuning
 
 		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
 
+		//QElapsedTimer timer;
+		//timer.start();
+
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
 		clientContext->writeSignalStates(clientEquipmentID, matsUser, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
@@ -487,6 +549,8 @@ namespace Tuning
 		sendReply(m_tuningSignalsWriteReply);
 
 		errCode = static_cast<E::NetworkError>(m_tuningSignalsWriteReply.error());
+
+//		qDebug() << C_STR(QString("WRITE %1 signals, time = %2").arg(m_tuningSignalsWriteRequest.commands_size()).arg(timer.elapsed()));
 
 		QString msg = QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
 				arg(E::valueToString(errCode)).arg(peerAddr().addressStr());
@@ -760,6 +824,57 @@ namespace Tuning
 		sendReply(m_getAppSignalParamReply);
 	}
 
+	void TcpTuningServer::onGetTuningSourcesFile(const char* requestData, quint32 requestDataSize)
+	{
+		Network::GetTuningSourcesFileRequest request;
+		Network::GetTuningSourcesFileReply reply;
+
+		bool result = request.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::RequestFormatError));
+			sendReply(reply);
+			return;
+		}
+
+		if (m_tuningSourcesFileData == nullptr ||
+			m_tuningSourcesFileData->empty())
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::FileIsNotAccessible));
+			sendReply(reply);
+			return;
+		}
+
+		quint64 partNo = request.partno();
+		quint64 fileSize = TO_QUINT64(m_tuningSourcesFileData->size());
+
+		if (partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE >= fileSize)
+		{
+			reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::RequestFormatError));
+			sendReply(reply);
+			return;
+		}
+
+		//
+
+		quint64 partsCount =
+			(fileSize + TDS_TUNING_SOURCES_FILE_PART_SIZE - 1) / TDS_TUNING_SOURCES_FILE_PART_SIZE;
+
+		quint64 partStart = partNo * TDS_TUNING_SOURCES_FILE_PART_SIZE;
+		quint64 partSize = std::min(fileSize - partStart, TDS_TUNING_SOURCES_FILE_PART_SIZE);
+
+		reply.set_errcode(static_cast<qint32>(Tcp::FileTransferResult::Ok));
+		reply.set_filesize(m_tuningSourcesFileData->size());
+		reply.set_partscount(partsCount);
+		reply.set_filecrc64(m_tuningSourcesFileCrc64);
+		reply.set_partno(partNo);
+		reply.set_partsize(partSize);
+		reply.set_filepartdata(m_tuningSourcesFileData->data() + partStart, partSize);
+
+		sendReply(reply);
+	}
+
 	void TcpTuningServer::prepareSignalGetter()
 	{
 		for (const TuningSource& tuningSource : m_tuningSources)
@@ -810,13 +925,18 @@ namespace Tuning
 
 			TuningServiceSettings::TuningClient tunClient = settings.getTuningClient(clientEquipmentID);
 
+			DEBUG_LOG_MSG(m_logger, QString("Call initClientSourcesList for %1").arg(clientEquipmentID));
+
 			if (tunClient.isValid() == false)
 			{
+				DEBUG_LOG_MSG(m_logger, QString("Client %1 not valid!").arg(clientEquipmentID));
 				Q_ASSERT(false);		// clientEquipmentID should be checked early!
 				return;
 			}
 
 			m_clientSourcesList = tunClient.uniqueSourcesIDs();
+
+			DEBUG_LOG_MSG(m_logger, QString("Sources for %1: %2").arg(clientEquipmentID).arg(m_clientSourcesList.value().join(", ")));
 		}
 	}
 
@@ -827,9 +947,9 @@ namespace Tuning
 	// -------------------------------------------------------------------------------
 
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort &listenAddress,
-												 E::SecurityLevel securityLevel,
-												 TcpTuningServer* server,
-												 std::shared_ptr<CircularLogger> logger) :
+		E::SecurityLevel securityLevel,
+		TcpTuningServer* server,
+		std::shared_ptr<CircularLogger> logger) :
 		Tcp::ListenerThread(listenAddress, securityLevel, server, logger, "TcpTuningServerThread")
 	{
 	}

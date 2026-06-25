@@ -22,7 +22,7 @@ namespace ClientLib
 	{
 		tcpTuningClient =
 			new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, tuningAuthorization, logFile, tuningLog};
-		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
+		tcpTuningClient->setServers(tuns.address, tuns.address, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
 
@@ -94,7 +94,7 @@ namespace ClientLib
 		for (const auto& tuns : tuningServices)
 		{
 			m_logFile.writeMessage(
-				QString{"updateConnections(),    %1 - %2"}.arg(tuns.shortenId).arg(tuns.clientRequestAddress.toString()));
+				QString{"updateConnections(),    %1 - %2"}.arg(tuns.shortenId).arg(tuns.address.toString()));
 		}
 
 		// Number of TuningServices has been changed or any address has been changed

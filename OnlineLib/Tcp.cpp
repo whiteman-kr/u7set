@@ -653,8 +653,9 @@ namespace Tcp
 
 	void SocketWorker::errorOccurred(QAbstractSocket::SocketError socketError)
 	{
-		logError(QString("socket error - (%1) %2").
-				 arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
+		logError(QString("socket error - (%1) %2, socket state = %3, bytesToWrite = %4").
+				 arg(static_cast<int>(socketError)).arg(m_socket->errorString()).
+				arg(m_socket->state()).arg(m_socket->bytesToWrite()));
 	}
 
 	void SocketWorker::encrypted()
@@ -867,6 +868,7 @@ namespace Tcp
 		initReadStatusVariables();
 
 		m_autoAckTimer.setSingleShot(false);
+		m_sendBuf.resize(TCP_MAX_DATA_SIZE);
 	}
 
 	Server::~Server()
@@ -1009,6 +1011,12 @@ namespace Tcp
 
 		SocketWorker::Header header;
 
+		if (replyDataSize + sizeof(header) > TCP_MAX_DATA_SIZE)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
 		header.type = SocketWorker::Header::Type::Reply;
 		header.id = m_header.id;
 		header.numerator = m_header.numerator;
@@ -1016,7 +1024,31 @@ namespace Tcp
 		header.requestProcessingPorgress = 100;
 		header.calcCRC();
 
-		qint64 written = socketWrite(header);
+		std::memcpy(m_sendBuf.data(), reinterpret_cast<const char*>(&header), sizeof(header));
+
+		qint64 sendSize = sizeof(header);
+
+		//qint64 written = socketWrite(header);
+
+		//if (written == -1)
+		//{
+		//	logError(QString("socket write error: %1").arg(m_socket->errorString()));
+		//	return false;
+		//}
+
+		//if (written < static_cast<qint64>(sizeof(header)))
+		//{
+		//	Q_ASSERT(false);
+		//	return false;
+		//}
+
+		if (replyDataSize > 0)
+		{
+			std::memcpy(m_sendBuf.data() + sizeof(header), replyData, replyDataSize);
+			sendSize += replyDataSize;
+		}
+
+		qint64 written = socketWrite(m_sendBuf.data(), sendSize);
 
 		if (written == -1)
 		{
@@ -1024,27 +1056,10 @@ namespace Tcp
 			return false;
 		}
 
-		if (written < static_cast<qint64>(sizeof(header)))
+		if (written < sendSize)
 		{
 			Q_ASSERT(false);
 			return false;
-		}
-
-		if (replyDataSize > 0)
-		{
-			written = socketWrite(replyData, replyDataSize);
-
-			if (written == -1)
-			{
-				logError(QString("socket write error: %1").arg(m_socket->errorString()));
-				return false;
-			}
-
-			if (written < replyDataSize)
-			{
-				Q_ASSERT(false);
-				return false;
-			}
 		}
 
 		m_socket->flush();

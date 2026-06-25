@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../OnlineLib/BuildInfo.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/TcpConnectionState.h"
-#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../UtilsLib/ILogFile.h"
 
-#include <QSharedMemory>
+#include <QLockFile>
 #include <memory>
 
 class QDomNode;
@@ -33,7 +33,10 @@ namespace ClientLib
 		ConfigController(ConfigController&&) = delete;
 
 		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address, ILogFile* logFile);
-		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile);
+		explicit ConfigController(const SoftwareInfo& softwareInfo,
+								  const HostAddressPort& address1,
+								  const HostAddressPort& address2,
+								  ILogFile* logFile);
 		virtual ~ConfigController() override;
 
 		ConfigController& operator=(const ConfigController&) = delete;
@@ -57,11 +60,21 @@ namespace ClientLib
 		/// This function is called when the new configuration arrives, reimplement it for specific XML parsing.
 		/// Client must override an appropriate to settings class function.
 		///
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestSuiteSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const MonitorSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const DiagnosticsSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const TuningClientSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const TestClientSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const TestSuiteSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files);
 
 	private:
 		int acquireAppInstanceNo(const QString& programName);
@@ -95,9 +108,9 @@ namespace ClientLib
 	private:
 		std::unique_ptr<GrpcCfgLoaderThread> m_grpcCfgLoaderThread;
 
-		QSharedMemory m_appInstanceSharedMemory;
+		std::unique_ptr<QLockFile> m_appInstanceLockFile;
+		bool m_appInstanceNoIsFallback = false;
 		int m_appInstanceNo = -1;
-		static const int MaxInstanceCount = 512;
+		static const int MaxInstanceCount = 1024;
 	};
-}
-
+} // namespace ClientLib

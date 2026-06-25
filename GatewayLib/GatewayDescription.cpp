@@ -10,6 +10,7 @@
 #include "IvsImpulseGateway.h"
 #include "ModbusSlaveGateway.h"
 #include "AdsGateway.h"
+#include "TuningGateway.h"
 
 namespace Gateway
 {
@@ -391,7 +392,7 @@ namespace Gateway
 	void SignalList::writeSignalsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SIGNALS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalIDs.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(m_signalIDs.size()));
 
 		for(const QString& id : m_signalIDs)
 		{
@@ -461,6 +462,9 @@ namespace Gateway
 
 		case E::GatewayType::AdsGateway:
 			return std::make_shared<AdsGateway>();
+
+		case E::GatewayType::TuningGateway:
+			return std::make_shared<TuningGateway>();
 
 		default:
 			Q_ASSERT(false);
@@ -699,7 +703,7 @@ namespace Gateway
 	void Gateway::writeSignalListsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SIGNAL_LISTS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalLists.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(m_signalLists.size()));
 
 		for(const SignalListShared& sl : m_signalLists)
 		{
@@ -844,7 +848,7 @@ namespace Gateway
 		xml.writeStartDocument();
 
 		xml.writeStartElement(XmlElement::GATEWAYS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_gateways.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(m_gateways.size()));
 
 		for(GatewayShared gw : m_gateways)
 		{

@@ -323,18 +323,22 @@ void TuningValue::fromDouble(double value)
 	{
 	case TuningValueType::Discrete:
 		m_int64 = value == 0.0 ? 0 : 1;
+		m_double = 0;
 		break;
 
 	case TuningValueType::SignedInt32:
 		m_int64 = static_cast<qint32>(value);
+		m_double = 0;
 		break;
 
 	case TuningValueType::Float:
 		m_double = static_cast<float>(value);
+		m_int64 = 0;
 		break;
 
 	case TuningValueType::Double:
 		m_double = value;
+		m_int64 = 0;
 		break;
 
 	default:

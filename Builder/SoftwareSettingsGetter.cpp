@@ -1323,7 +1323,8 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 		E::SoftwareType::Metrology,
 		E::SoftwareType::Monitor,
 		E::SoftwareType::TestClient,
-		E::SoftwareType::TestSuite
+		E::SoftwareType::TestSuite,
+		E::SoftwareType::GatewayService
 	};
 
 	for(const auto& p : context->m_software)
@@ -1420,6 +1421,7 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 		case E::SoftwareType::Metrology:
 		case E::SoftwareType::TestClient:
+		case E::SoftwareType::GatewayService:
 			break;
 
 		default:
@@ -2105,7 +2107,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestAddress = tuningServiceClientAddress;
+		tsc.address = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -2478,7 +2480,7 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestAddress = tuningServiceClientAddress;
+		tsc.address = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -2761,7 +2763,7 @@ bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* 
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestAddress = clientRequestAddress;
+		tsc.address = clientRequestAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -2836,6 +2838,26 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 	appDataService1 = appDataSrvConns[0];
 	appDataService2 = appDataSrvConns[1];
 
+	// Get TuningService connections
+	//
+	std::vector<SoftwareEndpoint::TuningService> tuningSrvConns;
+
+	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::TuningService>(
+		equipment, software,
+		EquipmentPropNames::TUNING_SERVICE_ID, 2, true,
+		E::SoftwareType::TuningService,
+		EquipmentPropNames::CLIENT_REQUEST_IP,
+		EquipmentPropNames::CLIENT_REQUEST_PORT,
+		&tuningSrvConns, log);
+
+	tuningService1 = tuningSrvConns[0];
+	tuningService2 = tuningSrvConns[1];
+
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+									 &tuningSourceEquipmentIDs, log);
+
+	// Get GatewayDescription
+	//
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::GATEWAY_DESCRIPTION,
 										   &gatewayDescription, log);
 	return result;

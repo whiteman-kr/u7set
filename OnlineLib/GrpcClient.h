@@ -174,6 +174,7 @@ public:
 	void resetStub()
 	{
 		m_stub.reset();
+//		m_channel.reset();
 		m_authToken.clear();
 		adsDisconnected();
 		emit signal_disconnection();
@@ -214,7 +215,7 @@ protected:
 		const int size = TO_INT(m_serverAddress.size());
 		Q_ASSERT(size > 0);
 
-		const int idx =	(m_srvAddrIndex.fetch_add(1, std::memory_order_relaxed) + 1) % size;
+		const int idx =	m_srvAddrIndex.fetch_add(1, std::memory_order_relaxed) % size;
 
 		return m_serverAddress[idx].addressPortStr().toStdString();
 	}
@@ -297,14 +298,22 @@ protected:
 	{
 	}
 
-	virtual void createStubAndHandshake(grpc::Status* status = nullptr)
+	virtual grpc::Status createStubAndHandshake()
 	{
 		logMsg(QString("%1::createStubAndHandshake").arg(clientDescription()));
 
 		const std::string endpoint = getNextServerAddr();
 
-		auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
-		m_stub = SERVICE_TYPE::NewStub(channel);
+		if (m_channel == nullptr || m_endpoint != endpoint)
+		{
+			m_endpoint = endpoint;
+			m_channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
+		}
+
+		if (m_stub == nullptr)
+		{
+			m_stub = SERVICE_TYPE::NewStub(m_channel);
+		}
 
 		grpc::ClientContext handshakeCtx;
 
@@ -316,11 +325,6 @@ protected:
 		localSwInfo().serializeTo(req.mutable_clientsoftwareinfo());
 
 		grpc::Status st = m_stub->Handshake(&handshakeCtx, req, &rep);
-
-		if (status != nullptr)
-		{
-			*status = st;
-		}
 
 		Tcp::ConnectionState state;
 
@@ -352,11 +356,8 @@ protected:
 
 			emit signal_connection();
 			adsConnected();
-			return;
+			return st;
 		}
-
-		thread_local bool emitUnknownClientID = true;
-		thread_local bool emitWrongClientHostname = true;
 
 		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
 		{
@@ -364,10 +365,10 @@ protected:
 			{
 				state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
 
-				if (emitUnknownClientID)
+				if (m_emitUnknownClientID)
 				{
 					emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
-					emitUnknownClientID = false;
+					m_emitUnknownClientID = false;
 				}
 			}
 			else
@@ -375,10 +376,10 @@ protected:
 				if (st.error_message() == Grpc::WRONG_HOST_NAME)
 				{
 					state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
-					if (emitWrongClientHostname)
+					if (m_emitWrongClientHostname)
 					{
 						emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
-						emitWrongClientHostname = false;
+						m_emitWrongClientHostname = false;
 					}
 				}
 				else
@@ -397,7 +398,7 @@ protected:
 		logErr(QString("%1::createStubAndHandshake - Handshake Failed (%2)").
 			   arg(clientDescription()).arg(QString::fromStdString(st.error_message())));
 
-		m_stub.reset();
+		return st;
 	}
 
 	bool sendPingRequest()
@@ -450,11 +451,16 @@ private:
 	std::atomic_bool m_threadStarted {false};
 	std::atomic_bool m_quitRequested {false};
 
-	mutable std::atomic<int> m_srvAddrIndex{-1};
+	mutable std::atomic<int> m_srvAddrIndex{0};
+
+	bool m_emitUnknownClientID = true;
+	bool m_emitWrongClientHostname = true;
 
 	//
 
 	mutable std::mutex m_stateMutex;
+	std::string m_endpoint;
+	std::shared_ptr<grpc::Channel> m_channel;
 	std::unique_ptr<Stub> m_stub;
 	std::string m_authToken;
 	Tcp::ConnectionState m_state;

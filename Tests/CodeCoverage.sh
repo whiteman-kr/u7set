@@ -8,25 +8,29 @@
 #   sudo apt install lcov
 #   sudo pip install python3
 #   sudo pip install lcov-cobertura
-#
-set -x  # Echo on.
-set -e  # Terminate script if any command returns error.
+
+# Echo on.
+set -x
+
+# Terminate script if any command returns error.
+set -e
 
 # Run StopServices when exit (any error or success).
 #
 trap StopServices EXIT  
 
 function StopServices() {
-    echo "StopServices()"
+    echo "---Enter StopServices()---"
 
     # Stop services for functional tests.
     #
     pkill -SIGINT CfgSrv || true
     pkill -SIGINT AppDataSrv || true
     pkill -SIGINT TuningSrv || true
-    pkill -SIGINT SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
+    pkill -SIGINT SimulatorConsol || true
     pkill -SIGINT GatewaySrv || true
     sleep 6
+    echo "---Leave StopServices()---"
 }
 
 # Stop if any service is running.
@@ -72,7 +76,6 @@ sleep 5
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &
 
 ./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js -speed_factor=x0.5 -verbose > SimulatorConsole.out 2>&1 &
-
 sleep 6
 
 # Run ClientTests, they are functional.
@@ -93,43 +96,76 @@ export QT_QPA_PLATFORM=offscreen
 #
 StopServices || true
 
-# ----------------------------------------------
-#               Run AdsGateway tests
-# ----------------------------------------------
+echo "----------------------------------------------"
+echo "-           Run AdsGateway tests             -"
+echo "----------------------------------------------"
 pushd $CI_PROJECT_DIR/bin/debug
 StopServices || true
-sleep 5
 
-./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > agw_clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh < /dev/null > agw_clienttest_ws01_gwslinuxcc.out 2>&1 &
 sleep 5
-
-./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
-sleep 5
-
-# Check that only Gateway and Config services are running.
-#
-ps -A | grep Srv
 
 # First run tests that require no ADS connection.
 #
-$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTestsNoAds.*
 
 # Then start ADS for other tests.
 #
-./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > agw_clienttest_ws01_ads.out 2>&1 &
 sleep 5
 
 # Run other Adsgateway tests.
 #
-$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+$CI_PROJECT_DIR/bin/debug/GatewayTests --port=5567 --gtest_filter=AdsGatewayTests.*
 sleep 5
 
 StopServices || true
-sleep 5
 popd
 
-# Run other tests, not services are required here.
+echo "----------------------------------------------"
+echo "-          Run TuningGateway tests           -"
+echo "----------------------------------------------"
+
+pushd $CI_PROJECT_DIR/bin/debug
+date
+
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/GatewayTests/TuningGatewayTests.js -speed_factor=x0.5 -verbose > tgw_SimulatorConsole.out 2>&1 &
+sleep 10
+
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > tgw_clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tungwslinuxcc.sh < /dev/null > tgw_clienttest_ws04_tungwslinuxcc.out 2>&1 &
+sleep 10
+
+export ASAN_OPTIONS=detect_container_overflow=0
+
+# First run tests that require no TuningService connection.
 #
+date
+
+# ss -ltnp | grep 5577 || true
+# ps aux | grep -E "SimulatorConsole|Gateway|Tuning" | grep -v grep || true
+# nc -vz 127.0.0.1 5577
+
+$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTestsNoTuningService.*
+date
+
+# Then start TuningService for other tests.
+#
+./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > tgw_clienttest_ws04_tuns.out 2>&1 &
+sleep 10
+
+date
+$CI_PROJECT_DIR/bin/debug/GatewayTests --tuning-port=5577 --tuning-address=127.0.0.1 --gtest_filter=TuningGatewayTests.* --gtest_repeat=1
+date
+
+StopServices || true
+popd
+
+echo "----------------------------------------------------"
+echo "-  Run other tests, no services are required here  -"
+echo "----------------------------------------------------"
+
 #./LicenseLibTests
 ./MetrologyTests
 ./SimulatorTests
@@ -141,6 +177,19 @@ popd
 # Give some time to flush .gcda files.
 #
 sleep 4
+
+# Remove stale autogenerated Qt resource coverage artifacts that can break lcov.
+# CMake/Qt autogen directories are typically named <target>_autogen and may
+# contain hash-like subdirectories that differ between machines.
+#
+find ./build \( \
+    -path '*_autogen/*/qrc_*.cpp.gcda' -o \
+    -path '*/_autogen/*/qrc_*.cpp.gcda' \
+\) -delete
+find ./build \( \
+    -path '*_autogen/*/qrc_*.cpp.gcno' -o \
+    -path '*/_autogen/*/qrc_*.cpp.gcno' \
+\) -delete
 
 # Get code coverage data.
 #
@@ -266,8 +315,11 @@ lcov --ignore-errors unused --remove $OUTPUT_DIR/u7set-dirty.info \
    "*/Qt/*" \
    "*/Proto*/*" \
    "*.pb.*" \
+   "*/qrc_*.cpp" \
    "*.moc" \
    "*moc_*.cpp" \
+   "*/*_autogen/*" \
+   "*/_autogen/*" \
    "*/TestAppDataService/*" \
    "*/TestSuiteLibUnitTests/*" \
    "*/build/vcpkg_installed/*" \

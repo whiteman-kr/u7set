@@ -229,20 +229,20 @@ namespace OnlineLib
 		xml.writeStringAttribute(XmlAttribute::MODULE_EQUIPMENT_ID, m_moduleEquipmentID);
 		xml.writeStringAttribute(XmlAttribute::PROFILE, m_profile);
 		xml.writeStringAttribute(XmlAttribute::MODULE_PRESET_NAME, m_modulePresetName);
-		xml.writeIntAttribute(XmlAttribute::MODULE_TYPE, m_moduleType, true);
+		xml.writeInt32Attribute(XmlAttribute::MODULE_TYPE, m_moduleType, true);
 		xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_ID, m_subsystemID);
-		xml.writeIntAttribute(XmlAttribute::SUBSYSTEM_KEY, m_subsystemKey);
-		xml.writeIntAttribute(XmlAttribute::LM_NUMBER, m_lmNumber);
+		xml.writeInt32Attribute(XmlAttribute::SUBSYSTEM_KEY, m_subsystemKey);
+		xml.writeInt32Attribute(XmlAttribute::LM_NUMBER, m_lmNumber);
 		xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_CHANNEL, m_subsystemChannel);
 		xml.writeStringAttribute(XmlAttribute::CAPTION, m_moduleCaption);
 		xml.writeUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, m_moduleUniqueID, true);
-		xml.writeIntAttribute(XmlAttribute::MODULE_WORKCYCLE_MCS, m_moduleWorkcycle_mcs);
+		xml.writeInt32Attribute(XmlAttribute::MODULE_WORKCYCLE_MCS, m_moduleWorkcycle_mcs);
 
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes());
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes());
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, rupAppDataUID(), false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_APP_DATA_UID, rupAppDataUID(), true);
-		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity());
-		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount());
+		xml.writeInt32Attribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity());
+		xml.writeInt32Attribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount());
 
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_TUNING_DATA_UID, rupTuningDataUID(), false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_TUNING_DATA_UID, rupTuningDataUID(), true);
@@ -250,11 +250,11 @@ namespace OnlineLib
 		xml.writeUInt64Attribute(EquipmentPropNames::FOTIP_TUNING_DATA_UID, fotipTuningDataUID(), false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_FOTIP_TUNING_DATA_UID, fotipTuningDataUID(), true);
 
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes());
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes());
 		xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, rupDiagDataUID(), false);
 		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_DIAG_DATA_UID, rupDiagDataUID(), true);
-		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity());
-		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount());
+		xml.writeInt32Attribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity());
+		xml.writeInt32Attribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount());
 
 		m_lanControllersInfo.writeToXml(xml);
 

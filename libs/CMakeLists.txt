@@ -13,7 +13,6 @@ if (NOT STATIC_RUNTIME)
 	# These libraries require dynamic runtime
 	# They are dependend on Qt libraries
 	#
-	add_subdirectory(AdsGatewayLib)
 	add_subdirectory(AppSignalLists)
 	add_subdirectory(ArchV3Lib)
 	add_subdirectory(Behavior)
@@ -23,6 +22,7 @@ if (NOT STATIC_RUNTIME)
 	add_subdirectory(DbLib)
 	add_subdirectory(DiagClientLib)
 	add_subdirectory(DiagStateLib)
+	add_subdirectory(GatewayClientLib)
 	add_subdirectory(HardwareLib)
 	add_subdirectory(LicenseLib)
 	add_subdirectory(ModuleConfiguratorLib)

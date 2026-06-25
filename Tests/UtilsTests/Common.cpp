@@ -199,12 +199,6 @@ std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& proje
 	return dsLogWriter;
 }
 
-void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter)
-{
-	dsLogWriter->stop();
-	dsLogWriter.reset();
-}
-
 void logMsg(const QString& msg)
 {
 	std::cout << C_STR(QString("%1\n").arg(msg));

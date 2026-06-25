@@ -76,7 +76,7 @@ bool SoftwareSettings::startSettingsReading(XmlReadHelper& xml)
 void SoftwareSettings::writeRqControllersToXml(XmlWriteHelper& xml, const std::vector<RqCtrlSettings>& rcSettings) const
 {
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
 
 	for(const RqCtrlSettings& rcs : rcSettings)
 	{
@@ -237,7 +237,7 @@ bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
 	xml.writeEnumKeyAttribute(EquipmentPropNames::SOFTWARE_TYPE, m_softwareType);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settingsMap.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(m_settingsMap.size()));
 
 	for(auto& p : m_settingsMap)
 	{
@@ -347,7 +347,7 @@ QString SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType swType, co
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
 
 	xml.writeEnumKeyAttribute(EquipmentPropNames::SOFTWARE_TYPE, swType);
-	xml.writeIntAttribute(XmlAttribute::COUNT, 1);
+	xml.writeInt32Attribute(XmlAttribute::COUNT, 1);
 
 	settings.writeToXml(xml);
 
@@ -593,7 +593,7 @@ bool RqCtrlSettings::writeToXml(XmlWriteHelper& xml) const
 		switch(propFlag)
 		{
 		case PROP_ID:
-			xml.writeIntAttribute(XmlAttribute::ID, m_ID);
+			xml.writeInt32Attribute(XmlAttribute::ID, m_ID);
 			break;
 
 		case PROP_EQUIPMENT_ID:
@@ -708,7 +708,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	writeRqControllersToXml(xml, rcSettings);
 
 	xml.writeStartElement(XmlElement::CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(clients.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, TO_INT(clients.size()));
 
 	for(const ClientInfo& ci : clients)
 	{
@@ -1055,7 +1055,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	// write tuning clients info
 	//
 	xml.writeStartElement(XmlElement::TUNING_CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(clients.size()));
 
 	for(const TuningClient& tc : clients)
 	{
@@ -1075,7 +1075,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	// write MATS users info
 	//
 	xml.writeStartElement(XmlElement::MATS_USERS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(matsUsers.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(matsUsers.size()));
 
 	for(const auto& matsUser : matsUsers)
 	{
@@ -1257,7 +1257,7 @@ bool TuningServiceSettings::writeTuningSourcesToXml(XmlWriteHelper& xml,
 													const std::vector<TuningSource>& sources)
 {
 	xml.writeStartElement(XmlElement::TUNING_SOURCES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
 
 	for(uint i = 0; i < sources.size(); i++)
 	{
@@ -1548,12 +1548,12 @@ bool MetrologySettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, appDataServicePropertyIsValid1);
 	xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
 	xml.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, appDataServiceIP1);
-	xml.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, appDataServicePort1);
+	xml.writeInt32Attribute(XmlAttribute::APP_DATA_SERVICE_PORT1, appDataServicePort1);
 
 	xml.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, appDataServicePropertyIsValid2);
 	xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
 	xml.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, appDataServiceIP2);
-	xml.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, appDataServicePort2);
+	xml.writeInt32Attribute(XmlAttribute::APP_DATA_SERVICE_PORT2, appDataServicePort2);
 
 	xml.writeEndElement();		// </AppDataService>
 
@@ -1562,7 +1562,7 @@ bool MetrologySettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, tuningServicePropertyIsValid);
 	xml.writeStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, softwareMetrologyID);
 	xml.writeStringAttribute(XmlAttribute::TUNING_SERVICE_IP, tuningServiceIP);
-	xml.writeIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, tuningServicePort);
+	xml.writeInt32Attribute(XmlAttribute::TUNING_SERVICE_PORT, tuningServicePort);
 
 	xml.writeEndElement();		// </TuningService>
 
@@ -1637,7 +1637,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService1.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService1.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService1.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService1.address.port());
 
 		xml.writeEndElement();			// </CfgService1>
 	}
@@ -1648,7 +1648,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService2.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService2.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService2.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService2.address.port());
 
 		xml.writeEndElement();			// </CfgService2>
 	}
@@ -1671,10 +1671,10 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
 
 		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+		xml.writeInt32Attribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
 
 		xml.writeEndElement();			// </AppDataService>
 	}
@@ -1689,7 +1689,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, as.appDataServiceId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, as.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
 
 		xml.writeEndElement();			// </ArchiveService>
 	}
@@ -1698,15 +1698,15 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	//
 	xml.writeStartElement(XmlElement::TUNING_SERVICES);
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
 
 	for(const auto& tsc : tuningServices)
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.address.addressStr());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.address.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 
 		xml.writeEndElement();		// </TuningService>
@@ -1720,7 +1720,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
-	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
+	xml.writeInt32Attribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 
 	xml.writeEndElement();			// </TuningSecurity>
 
@@ -1737,7 +1737,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	// <Appearance>
 	//
 	xml.writeStartElement(XmlElement::APPEARANCE);
-	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeInt32Attribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
 	xml.writeEndElement(); // </Appearance>
 
 	// --
@@ -1887,7 +1887,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 				result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 				result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 
-				tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
+				tsc.address = {clientRequestAddress, clientRequestPort};
 
 				tuningServices.push_back(tsc);
 
@@ -1981,10 +1981,10 @@ bool AdsBridgeSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
 
 		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+		xml.writeInt32Attribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
 
 		xml.writeEndElement(); // </AppDataService>
 	}
@@ -2073,7 +2073,7 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService1.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService1.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService1.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService1.address.port());
 
 		xml.writeEndElement();			// </CfgService1>
 	}
@@ -2084,7 +2084,7 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService2.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService2.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService2.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService2.address.port());
 
 		xml.writeEndElement();			// </CfgService2>
 	}
@@ -2103,10 +2103,10 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, dds.equipmentId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, dds.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, dds.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, dds.address.port());
 
 		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, dds.realtimeAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, dds.realtimeAddress.port());
+		xml.writeInt32Attribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, dds.realtimeAddress.port());
 
 		xml.writeEndElement();			// </DiagDataServices>
 	}
@@ -2121,7 +2121,7 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, as.appDataServiceId);
 
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, as.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
 
 		xml.writeEndElement();			// </ArchiveService>
 	}
@@ -2288,15 +2288,15 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	//
 
 	xml.writeStartElement(XmlElement::TUNING_SERVICES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
 
 	for(const auto& tsc : tuningServices)
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.address.addressStr());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.address.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 		xml.writeBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, tsc.singleLmControl);
 
@@ -2312,12 +2312,12 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
-	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
-	xml.writeIntAttribute(EquipmentPropNames::APPLY_MODE, static_cast<int>(applyMode));
+	xml.writeInt32Attribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeInt32Attribute(EquipmentPropNames::APPLY_MODE, static_cast<int>(applyMode));
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
-	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
+	xml.writeInt32Attribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
 
 	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIDs.join(Separator::SEMICOLON));
@@ -2379,7 +2379,7 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 		result &= xml.readBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, &tsc.singleLmControl);
 
-		tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
+		tsc.address = {clientRequestAddress, clientRequestPort};
 
 		tuningServices.push_back(tsc);
 	}
@@ -2569,7 +2569,7 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 	//
 
 	xml.writeStartElement(XmlElement::APP_DATA_SERVICES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(appDataServices.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(appDataServices.size()));
 
 	for(const SoftwareEndpoint::AppDataService& ads : appDataServices)
 	{
@@ -2588,15 +2588,15 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement(XmlElement::TUNING_SERVICES);
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
+	xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
 
 	for(const auto& tsc : tuningServices)
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.address.addressStr());
+		xml.writeInt32Attribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.address.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 
 		xml.writeEndElement();		// </TuningService>
@@ -2713,7 +2713,7 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 
-		tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
+		tsc.address = {clientRequestAddress, clientRequestPort};
 
 		tuningServices.push_back(tsc);
 	}
@@ -2782,6 +2782,23 @@ bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 appDataService2.address);
 	//
 
+	xml.writeStringElement(EquipmentPropNames::TUNING_SERVICE_ID1,
+						   tuningService1.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP1,
+							 EquipmentPropNames::TUNING_SERVICE_PORT1,
+							 tuningService1.address);
+
+	xml.writeStringElement(EquipmentPropNames::TUNING_SERVICE_ID2,
+						   tuningService2.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP2,
+							 EquipmentPropNames::TUNING_SERVICE_PORT2,
+							 tuningService2.address);
+
+	xml.writeStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+					tuningSourceEquipmentIDs.join(QChar(';')));
+
+	//
+
 	writeEndSettings(xml);
 
 	return true;
@@ -2815,21 +2832,51 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	//
 
-	bool okApp1 = true;
+	bool res = true;
 
-	okApp1 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
-	okApp1 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
-									  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
-									  &appDataService1.address);
+	bool okApp1 = xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
 
-	bool okApp2 = true;
+	res = xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
+								  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
+								  &appDataService1.address);
 
-	okApp2 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
-	okApp2 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
-									  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
-									  &appDataService2.address);
+	okApp1 = okApp1 && (appDataService1.equipmentId.isEmpty() || res);
+
+	bool okApp2 = xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
+
+	res = xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
+								  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
+								  &appDataService2.address);
+
+	okApp2 = okApp2 && (appDataService2.equipmentId.isEmpty() || res);
 
 	result &= okApp1 || okApp2;
+
+	//
+
+	bool okTun1 = xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID1, &tuningService1.equipmentId, true);
+
+	res = xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP1,
+								  EquipmentPropNames::TUNING_SERVICE_PORT1,
+								  &tuningService1.address);
+
+	okTun1 = okTun1 && (tuningService1.equipmentId.isEmpty() || res);
+
+	bool okTun2 = xml.readStringElement(EquipmentPropNames::TUNING_SERVICE_ID2, &tuningService2.equipmentId, true);
+
+	res = xml.readHostAddressPort(EquipmentPropNames::TUNING_SERVICE_IP2,
+										  EquipmentPropNames::TUNING_SERVICE_PORT2,
+										  &tuningService2.address);
+
+	okTun2 = okTun2 && (tuningService2.equipmentId.isEmpty() || res);
+
+	result &= okTun1 || okTun2;
+
+	QString ids;
+
+	result &= xml.readStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &ids, true);
+
+	tuningSourceEquipmentIDs = ids.split(QChar(';'), Qt::SkipEmptyParts);
 
 	return result;
 }

@@ -1,0 +1,80 @@
+windows_test_job:
+  stage: test
+  needs: ["windows_build_job"]
+  tags:
+    - test
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  script:
+    - "# dir env:"
+    - "echo $Env:CI_COMMIT_SHA"
+    - "git status"
+    - "git log -1"
+#Run Create databases for compiler and simulator tests
+    - echo Creating PostgreSQL databases...
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:COMPILER_TESTS_PROJECT_NAME} OWNER u7;"
+    - Get-Content c:\Data\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql | psql -U postgres u7_${Env:COMPILER_TESTS_PROJECT_NAME}
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:SIMULATOR_PROJECT_NAME} OWNER u7;"
+    - Get-Content c:\Data\u7_${Env:SIMULATOR_PROJECT_NAME}.sql | psql -U postgres u7_${Env:SIMULATOR_PROJECT_NAME}
+#Run XML validation
+    - "# ----------------------------------------------"
+    - "#               Run XML validation"
+    - "# ----------------------------------------------"
+    - "pushd ."	
+    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
+    - "&./validate_xmls.bat"
+    - "popd"
+
+#Run unit tests
+    - "# ----------------------------------------------"
+    - "#               Run unit tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/TestSuiteLibUnitTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
+    #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Tests/u7databasetestsArgs.xml\""
+
+#Run Builder test
+    - "# ----------------------------------------------"
+    - "#               Run BuilderConsole tests"
+    - "# ----------------------------------------------"
+    - "if (Test-Path c:/temp/build/test_simulator) { Remove-Item c:/temp/build/test_simulator -Recurse -Force; }"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Tests/BuilderConsoleArgs.xml"
+
+#Run Compiler tests
+    - "# ----------------------------------------------"
+    - "#               Run Compiler tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Tests/CompilerTestsArgs.xml"
+    
+#Run Utils tests
+    - "# ----------------------------------------------"
+    - "#               Run Utils tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/UtilsTests.exe -build=c:/temp/build/$Env:COMPILER_TESTS_PROJECT_NAME/build -profile=Local"
+
+#Run Sim AFB Tests
+    - "# ----------------------------------------------"
+    - "#               Run Simulator AFBs tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimulatorLib/Scripts/SimProjectTests.js\""
+
+#Run AdsBridge tests (limited - without AppDataService)
+    - "# ----------------------------------------------"
+    - "#               Run AdsBridge tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/AdsBridgeTests.exe --config=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --gtest_filter=-AdsBridgeTests.AdsGetTcpConnectionStatuses:AdsBridgeTests.AdsSignalParamsAndStatesLoaded:AdsBridgeTests.AdsGetSignalList:AdsBridgeTests.AdsGetSignalParams:AdsBridgeTests.AdsGetSignalStates:AdsBridgeTests.AdsGetSignalStatesRequestSignal"
+
+#Run ROVT to check configuration generation
+    - "# ----------------------------------------------"
+    - "#               Run ROVT tests"
+    - "# ----------------------------------------------"
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\$Env:SIMULATOR_PROJECT_NAME\\build"

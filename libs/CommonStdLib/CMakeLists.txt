@@ -19,7 +19,7 @@ target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/inclu
 
 # Link Visaul Leak Detector
 #
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC AND NOT ADDRESS_SANITIZER)
 	
 	set(VLD_PROJECT_ROOT_PATH "${CMAKE_SOURCE_DIR}")
 	string(REPLACE "/" "\\\\"

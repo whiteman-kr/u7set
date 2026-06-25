@@ -1,10 +1,12 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
+#include "TuningServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../GatewayLib/AdsGateway.h"
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include "../GatewayLib/TuningGateway.h"
+#include <GatewayClientLib/AdsGwProtocol.hpp>
 
 namespace Builder
 {
@@ -206,11 +208,19 @@ namespace Builder
 		switch(gw->gatewayType())
 		{
 		case Gateway::E::GatewayType::IVS_Impulse:
+			result &= ivsImpulseGatewayProcessing(gw);
+			break;
+
 		case Gateway::E::GatewayType::ModbusSlave:
+			result &= modbusSlaveGatewayProcessing(gw);
 			break;
 
 		case Gateway::E::GatewayType::AdsGateway:
 			result &= adsGatewayProcessing(gw);
+			break;
+
+		case Gateway::E::GatewayType::TuningGateway:
+			result &= tuningGatewayProcessing(gw);
 			break;
 
 		default: ;
@@ -219,7 +229,25 @@ namespace Builder
 		return result;
 	}
 
-	namespace AGL = AdsGatewayLib;
+	bool GatewayServiceCfgGenerator::ivsImpulseGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::modbusSlaveGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
+
+		return result;
+	}
+
+	namespace GCL = GatewayClientLib;
 
 	bool GatewayServiceCfgGenerator::adsGatewayProcessing(const Gateway::GatewayShared& gw)
 	{
@@ -232,6 +260,10 @@ namespace Builder
 		}
 
 		bool result = true;
+
+		result = checkConnection(gw, E::AppDataService);
+
+		RETURN_IF_FALSE(result);
 
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -324,13 +356,13 @@ namespace Builder
 
 				const QString& appSignalID = appSignal->appSignalID();
 
-				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
-				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
-				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
-				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
-				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), GCL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), GCL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), GCL::STRING_LENGTH_256, QStringLiteral("tags"));
 
 				//
 
@@ -338,6 +370,138 @@ namespace Builder
 			}
 
 			adsGw->appendSignalList(profile, appSignalIDs);
+		}
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::tuningGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		result = checkConnection(gw, E::TuningService);
+
+		Gateway::TuningGatewayShared tunGw = std::dynamic_pointer_cast<Gateway::TuningGateway>(gw);
+
+		if (tunGw == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+		for(const QString& profile : profiles)
+		{
+			std::shared_ptr<const GatewayServiceSettings> settings  =
+				m_settingsSet.getSettingsProfile<GatewayServiceSettings>(profile);
+
+			TEST_PTR_CONTINUE(settings);
+
+			QVector<AppSignal*> tunSignals;
+
+			QStringList tuningSourcesIDs = settings->tuningSourceEquipmentIDs;
+
+			if (tuningSourcesIDs.empty())
+			{
+				tuningSourcesIDs = m_context->m_tuningDataStorage->getAllTuningSourceIDs();
+			}
+
+			for(const QString& tunSrcID : tuningSourcesIDs)
+			{
+				Tuning::TuningDataShared td = m_context->m_tuningDataStorage->getTuningData(tunSrcID);
+
+				if (td == nullptr)
+				{
+					// Tuning data is not found for module %1
+					//
+					m_log->errALC5197(tunSrcID);
+					result = false;
+					break;
+				}
+
+				tunSignals.append(td->getAnalogFloatSignals());
+				tunSignals.append(td->getAnalogIntSignals());
+				tunSignals.append(td->getDiscreteSignals());
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+
+			QStringList appSignalIDs;
+
+			for(const AppSignal* appSignal : tunSignals)
+			{
+				TEST_PTR_CONTINUE(appSignal);
+
+				//
+
+				const QString& appSignalID = appSignal->appSignalID();
+
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), GCL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), GCL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), GCL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), GCL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), GCL::STRING_LENGTH_256, QStringLiteral("tags"));
+
+				//
+
+				appSignalIDs.append(appSignalID);
+			}
+
+			tunGw->appendSignalList(profile, appSignalIDs);
+		}
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::checkConnection(const Gateway::GatewayShared& gw, E::SoftwareType swType)
+	{
+		TEST_PTR_RETURN_FALSE(gw);
+
+		bool result = true;
+
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+		for(const QString& profile : profiles)
+		{
+			std::shared_ptr<const GatewayServiceSettings> settings  =
+				m_settingsSet.getSettingsProfile<GatewayServiceSettings>(profile);
+
+			TEST_PTR_CONTINUE(settings);
+
+			bool res = true;
+
+			switch(swType)
+			{
+			case E::SoftwareType::AppDataService:
+				res = !(settings->appDataService1.equipmentId.isEmpty() &&
+						settings->appDataService2.equipmentId.isEmpty());
+				break;
+
+			case E::SoftwareType::TuningService:
+				res = !(settings->tuningService1.equipmentId.isEmpty() &&
+						settings->tuningService2.equipmentId.isEmpty());
+				break;
+
+			default:
+				Q_ASSERT(false);
+				res = false;
+			}
+
+			if (res == false)
+			{
+				// Gateway service %1 must be connected to %2 for Gateway %3 (type %4) profile %5
+				//
+				m_log->errCFG3056(m_software->equipmentIdTemplate(), E::valueToString(swType),
+								  gw->gatewayID(), E::valueToString(gw->gatewayType()), profile);
+			}
+
+			result &= res;
 		}
 
 		return result;

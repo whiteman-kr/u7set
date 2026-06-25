@@ -20,7 +20,7 @@ namespace SoftwareEndpoint
 	{
 		QString equipmentId;
 		QString shortenId;			// Short version of tuningServiceID
-		HostAddressPort clientRequestAddress;
+		HostAddressPort address;
 		QStringList drivenSources;
 		bool singleLmControl = false;
 

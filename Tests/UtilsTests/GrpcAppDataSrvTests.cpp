@@ -75,7 +75,6 @@ ServerStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP,
 												 listenIP, appDataSources, appDataReceiver.get(),
 												 appSignals, appSignalStates,
 												 dsLogWriter, logger);
-
 	server->start();
 
 	std::this_thread::sleep_for(1s);

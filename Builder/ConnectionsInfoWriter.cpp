@@ -51,7 +51,7 @@ void ConnectionsInfoWriter::save(QByteArray* xmlFileData) const
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_CONNECTIONS);
 
-		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(connections.size()));
+		xml.writeInt32Attribute(XmlAttribute::COUNT, static_cast<int>(connections.size()));
 
 		for(const ConnectionInfo& connectionInfo : connections)
 		{
@@ -119,11 +119,11 @@ void ConnectionsInfoWriter::save(const ConnectionInfo& ci, XmlWriteHelper& xml) 
 	xml.writeStartElement(ConnectionsInfo::ELEM_CONNECTION);
 
 	xml.writeStringAttribute(XmlAttribute::ID, ci.ID);
-	xml.writeIntAttribute(ConnectionsInfo::ATTR_LINK_ID, ci.linkID);
+	xml.writeInt32Attribute(ConnectionsInfo::ATTR_LINK_ID, ci.linkID);
 	xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, ci.typeStr);
 	xml.writeBoolAttribute(ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, ci.enableManualSettings);
 	xml.writeBoolAttribute(ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL, ci.disableDataIDControl);
-	xml.writeIntAttribute(ConnectionsInfo::ATTR_PORTS_COUNT, static_cast<int>(ci.ports.size()));
+	xml.writeInt32Attribute(ConnectionsInfo::ATTR_PORTS_COUNT, static_cast<int>(ci.ports.size()));
 
 	for(const ConnectionPortInfo& port : ci.ports)
 	{
@@ -248,9 +248,9 @@ void ConnectionsInfoWriter::save(const ConnectionPortInfo& cpi, XmlWriteHelper &
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_MANUAL_SETTINGS);
 
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_RX_WORDS_QUANTITY, cpi.manualRxWordsQuantity);
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_TX_START_ADDRESS, cpi.manualTxStartAddr);
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_TX_WORDS_QUANTITY, cpi.manualTxWordsQuantity);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_RX_WORDS_QUANTITY, cpi.manualRxWordsQuantity);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_TX_START_ADDRESS, cpi.manualTxStartAddr);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_TX_WORDS_QUANTITY, cpi.manualTxWordsQuantity);
 
 		xml.writeEndElement();
 	}
@@ -268,8 +268,8 @@ void ConnectionsInfoWriter::save(const ConnectionPortInfo& cpi, XmlWriteHelper &
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_TX);
 
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.txBufferAbsAddr);
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.txDataSizeW);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.txBufferAbsAddr);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.txDataSizeW);
 		xml.writeUInt32Attribute(XmlAttribute::DATA_ID, cpi.txDataID, false);
 		xml.writeUInt32Attribute(XmlAttribute::HEX_DATA_ID, cpi.txDataID, true);
 
@@ -284,8 +284,8 @@ void ConnectionsInfoWriter::save(const ConnectionPortInfo& cpi, XmlWriteHelper &
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_RX);
 
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.rxBufferAbsAddr);
-		xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.rxDataSizeW);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.rxBufferAbsAddr);
+		xml.writeInt32Attribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.rxDataSizeW);
 		xml.writeUInt32Attribute(XmlAttribute::DATA_ID, cpi.rxDataID, false);
 		xml.writeUInt32Attribute(XmlAttribute::HEX_DATA_ID, cpi.rxDataID, true);
 
@@ -322,7 +322,7 @@ void ConnectionsInfoWriter::save(const ConnectionTxRxSignal& cs, XmlWriteHelper&
 	xml.writeStringAttribute(ConnectionsInfo::ATTR_BUS_TYPE_ID, cs.busTypeID);
 	xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ADDR_IN_BUF, cs.addrInBuf);
 	xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ABS_ADDR, cs.absAddr);
-	xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_BITS, cs.dataSizeBits);
+	xml.writeInt32Attribute(ConnectionsInfo::ATTR_DATA_SIZE_BITS, cs.dataSizeBits);
 
 	xml.writeEndElement();
 }

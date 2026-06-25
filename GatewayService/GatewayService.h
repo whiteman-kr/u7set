@@ -53,8 +53,6 @@ private:
 
 	void onTimer();
 
-	const AppSignal* getSignalFunc(const QString& signalID);
-
 private slots:
 	virtual void onConfigurationReady(const QByteArray configurationXmlData,
 							  const BuildFileInfoArray buildFileInfoArray,
@@ -71,8 +69,6 @@ private:
 
 	Gateway::Gateways m_gateways;
 	Gateway::Handlers m_handlers;
-
-	//DynamicAppSignalStates m_appSignalStates;
 
 	QTimer m_timer;
 };

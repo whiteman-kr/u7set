@@ -759,30 +759,35 @@ public:
 	//
 	enum class NetworkError
 	{
-		Success,
-		WrongPartNo,
-		RequestParamExceed,
-		RequestStateExceed,
-		ParseRequestError,
-		RequestDataSourcesStatesExceed,
-		UnitsExceed,
-		UnknownTuningClientID,
-		UnknownSignalHash,
-		InternalError,
-		ArchiveError, // for detail information check archError field
-		WrongTuningValueType,
-		TuningValueOutOfRange,
-		SingleLmControlDisabled,
-		LmControlIsNotActive,
-		ClientIsNotActive,
-		TuningNoReply,
-		TuningValueCorrupted,
-		TuningCommandDenied, // for ex. tuning command Apply denied for TestSute client
-		UnknownMatsUser,
-		DisabledMatsUser,
-		NoSignalsAllowedToControl,
-		SignalIsNotAllowedToControl,
-		UnknownTuningSourceID
+		Success = 0,
+		WrongPartNo = 0x0001,
+		RequestParamExceed = 0x0002,
+		RequestStateExceed = 0x0003,
+		ParseRequestError = 0x0004,
+		RequestDataSourcesStatesExceed = 0x0005,
+		UnitsExceed = 0x0006,
+		UnknownTuningClientID = 0x0007,
+		UnknownSignalHash = 0x0008,
+		InternalError = 0x0009,
+		ArchiveError = 0x000A, // for detail information check archError field
+		WrongTuningValueType = 0x000B,
+		TuningValueOutOfRange = 0x000C,
+		SingleLmControlDisabled = 0x000D,
+		LmControlIsNotActive = 0x000E,
+		ClientIsNotActive = 0x000F,
+		TuningNoReply = 0x0010,
+		TuningValueCorrupted = 0x0011,
+		TuningCommandDenied = 0x0012, // for ex. tuning command Apply denied for TestSute client
+		UnknownMatsUser = 0x0013,
+		DisabledMatsUser = 0x0014,
+		NoSignalsAllowedToControl = 0x0015,
+		SignalIsNotAllowedToControl = 0x0016,
+		UnknownTuningSourceID = 0x0017,
+		TuningSourceHasNoSignals = 0x0018,
+
+		CommunicationError = 0x0080,  // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
+		CommandCanceled = 0x0081,     // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
+		ClientInternalError = 0x0082  // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
 	};
 	Q_ENUM(NetworkError)
 
@@ -1080,6 +1085,11 @@ namespace Cast
 #define TO_QVARIANT_QINT64(value) (QVariant::fromValue<qint64>(TO_QINT64(value)))
 
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
+
+inline const char* toConstCharPtr(const void* ptr)
+{
+	return reinterpret_cast<const char*>(ptr);
+}
 
 template<typename EnumType>
 EnumType IntToEnum(int value)

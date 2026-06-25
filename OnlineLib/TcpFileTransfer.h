@@ -45,6 +45,8 @@ namespace Tcp
 
 		InternalError,
 		FileTooBig,
+
+		RequestFormatError,
 	};
 
 	class FileTransfer

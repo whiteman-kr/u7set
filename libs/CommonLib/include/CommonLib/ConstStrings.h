@@ -11,6 +11,7 @@ namespace EquipmentPropNames
 	inline const QString TUNING_IP("TuningIP");
 	inline const QString TUNING_PORT("TuningPort");
 	inline const QString TUNING_SERVICE_ID("TuningServiceID");
+	inline const QString TUNING_SERVICE_IDS("TuningServiceIDs");
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString TUNING_SERVICE_NETMASK("TuningServiceNetmask");
@@ -185,6 +186,14 @@ namespace EquipmentPropNames
 	inline const QString APP_DATA_SERVICE_ID2("AppDataServiceID2");
 	inline const QString APP_DATA_SERVICE_IP2("AppDataServiceIP2");
 	inline const QString APP_DATA_SERVICE_PORT2("AppDataServicePort2");
+
+	inline const QString TUNING_SERVICE_ID1("TuningServiceID1");
+	inline const QString TUNING_SERVICE_IP1("TuningServiceIP1");
+	inline const QString TUNING_SERVICE_PORT1("TuningServicePort1");
+
+	inline const QString TUNING_SERVICE_ID2("TuningServiceID2");
+	inline const QString TUNING_SERVICE_IP2("TuningServiceIP2");
+	inline const QString TUNING_SERVICE_PORT2("TuningServicePort2");
 
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
@@ -749,6 +758,7 @@ namespace Separator
 	inline const QString YES("Yes");
 	inline const QString NO("No");
 	inline const QString QUESTIONS("???");
+	inline const QString HEX("0x");
 }
 
 namespace FormatStr

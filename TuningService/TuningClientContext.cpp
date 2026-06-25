@@ -149,9 +149,9 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(reply);
 
-		int signalCount = request.signalhash_size();
+		reply->set_readrequestid(request.readrequestid());
 
-		//reply.mutable_tuningsignalstate()->Reserve(signalCount);
+		int signalCount = request.signalhash_size();
 
 		reply->clear_tuningsignalstate();
 
@@ -219,10 +219,9 @@ namespace Tuning
 		bool autoApply = request.autoapply();
 
 		reply->clear_writeresult();
+		reply->mutable_writeresult()->Reserve(writeRequestCount);
 
 		std::set<TuningSourceThreadShared> usedSrcThreads;
-
-		bool hasErrors = false;
 
 		for(int i = 0; i < writeRequestCount; i++)
 		{
@@ -261,37 +260,25 @@ namespace Tuning
 
 			E::NetworkError err = sourceThread->writeSignalState(clientEquipmentID, matsUser, signalHash, TuningValue(writeCmd.value()));
 
-			if (err != E::NetworkError::Success)
+			writeResult->set_error(TO_INT(err));
+
+			if (err == E::NetworkError::Success && autoApply == true)
 			{
-				hasErrors = true;
-			}
-			else
-			{
-				if (autoApply == true)
-				{
-					usedSrcThreads.insert(sourceThread);
-				}
+				usedSrcThreads.insert(sourceThread);
 			}
 		}
 
-		if (autoApply == true && hasErrors == false)
+		if (autoApply == true)
 		{
 			for(const TuningSourceThreadShared& srcThread : usedSrcThreads)
 			{
 				TEST_PTR_CONTINUE(srcThread);
 
-				E::NetworkError err = srcThread->applySignalStates(clientEquipmentID, matsUser);
-
-				if (err != E::NetworkError::Success)
-				{
-					hasErrors = true;
-				}
+				srcThread->applySignalStates(clientEquipmentID, matsUser);
 			}
 		}
 
-		E::NetworkError result = (hasErrors == true ? E::NetworkError::InternalError : E::NetworkError::Success);
-
-		reply->set_error(TO_INT(result));
+		reply->set_error(TO_INT(E::NetworkError::Success));
 	}
 
 	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& matsUser) const

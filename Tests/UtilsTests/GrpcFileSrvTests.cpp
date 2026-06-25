@@ -91,6 +91,7 @@ FileServerStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP)
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
+
 	std::unique_ptr<Grpc::FileSrv::Stub> stub  = Grpc::FileSrv::NewStub(channel);
 
 	FileServerStubGuard ssg(std::move(server), std::move(stub));
@@ -100,7 +101,7 @@ FileServerStubGuard StartServerAndMakeClient(const HostAddressPort& listenIP)
 
 std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Status* status = nullptr)
 {
-	for(int retry = 0; retry < 3; retry++)
+	for(int retry = 0; retry < 5; retry++)
 	{
 		SoftwareInfo si(ci.softwareType, ci.equipmentID);
 
@@ -130,6 +131,8 @@ std::string Handshake(Grpc::FileSrv::Stub& stub, const ClientInfo& ci, grpc::Sta
 		DEBUG_LOG_WRN(logger, QString("Error handshake, status: %1, msg: %2").
 							  arg(grpcStatusCodeToString(st.error_code())).
 							  arg(QString::fromStdString(st.error_message())));
+
+		QThread::msleep(500);
 	}
 
 	return {};
@@ -318,15 +321,22 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	EXPECT_TRUE(f.exists());
 
-	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
+	bool openResult = f.open(QIODeviceBase::ReadOnly);
 
-	QByteArray fileData = f.readAll();
+	if (openResult == false)
+	{
+		EXPECT_TRUE(openResult);
+	}
+	else
+	{
+		QByteArray fileData = f.readAll();
 
-	EXPECT_EQ(fileData.size(), fr.fileData.size());
+		EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QString md5 = Md5Hash::hashStr(fileData);
+		QString md5 = Md5Hash::hashStr(fileData);
 
-	EXPECT_EQ(md5, fr.md5);
+		EXPECT_EQ(md5, fr.md5);
+	}
 
 	client->stop();
 	server->stop();
@@ -373,15 +383,22 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	EXPECT_TRUE(f.exists());
 
-	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
+	bool openResult = f.open(QIODeviceBase::ReadOnly);
 
-	QByteArray fileData = f.readAll();
+	if (openResult == false)
+	{
+		EXPECT_TRUE(openResult);
+	}
+	else
+	{
+		QByteArray fileData = f.readAll();
 
-	EXPECT_EQ(fileData.size(), fr.fileData.size());
+		EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QString md5 = Md5Hash::hashStr(fileData);
+		QString md5 = Md5Hash::hashStr(fileData);
 
-	EXPECT_EQ(md5, fr.md5);
+		EXPECT_EQ(md5, fr.md5);
+	}
 
 	client->stop();
 	server->stop();

@@ -701,6 +701,11 @@ public:
 	SoftwareEndpoint::AppDataService appDataService1;
 	SoftwareEndpoint::AppDataService appDataService2;
 
+	SoftwareEndpoint::TuningService tuningService1;
+	SoftwareEndpoint::TuningService tuningService2;
+
+	QStringList tuningSourceEquipmentIDs;
+
 	QString gatewayDescription;
 
 private:

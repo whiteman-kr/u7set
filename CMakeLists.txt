@@ -24,8 +24,16 @@ include(cmake/compiler.cmake)
 
 # Emit error if VCPKG_ROOT is not set
 #
-if(NOT DEFINED ENV{VCPKG_ROOT})
-	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+#if(NOT DEFINED ENV{VCPKG_ROOT})
+#	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+#endif()
+
+if(NOT DEFINED VCPKG_ROOT)
+	if(DEFINED ENV{VCPKG_ROOT})
+		set(VCPKG_ROOT "$ENV{VCPKG_ROOT}")
+	else()
+		message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+	endif()
 endif()
 
 if (UNIX)
@@ -105,13 +113,29 @@ endif()
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
 include(./cmake/codecoverage.cmake)
 
-# UndfineBehaviorSanitizer
+# UndefineBehaviorSanitizer
 #
 option(UB_SANITIZER "UB Sanitizer" OFF)
 
 if(UB_SANITIZER)
 	add_compile_options(-fsanitize=undefined)
 	add_link_options(-fsanitize=undefined)
+endif()
+
+# AddressSanitizer
+#
+option(ADDRESS_SANITIZER "Address Sanitizer" OFF)
+
+if(ADDRESS_SANITIZER)
+	add_compile_definitions(ADDRESS_SANITIZER)
+
+	if (MSVC)
+		add_compile_options(/fsanitize=address /EHsc)
+		add_compile_definitions(_DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
+	else()
+		add_compile_options(-fsanitize=address)
+	        add_link_options(-fsanitize=address)
+	endif()
 endif()
 
 # Update Translations
@@ -163,6 +187,7 @@ endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("UBSanitizer: " ${UB_SANITIZER})
+message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
 message("CMake version:  ${CMAKE_VERSION}")

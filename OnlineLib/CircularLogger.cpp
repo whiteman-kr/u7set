@@ -646,6 +646,10 @@ LogWrapper::LogWrapper(CircularLoggerShared log, const QString& className) :
 {
 }
 
+LogWrapper::~LogWrapper()
+{
+}
+
 CircularLoggerShared LogWrapper::getLog() const
 {
 	return m_log;
@@ -654,6 +658,11 @@ CircularLoggerShared LogWrapper::getLog() const
 void LogWrapper::setLog(CircularLoggerShared log)
 {
 	m_log = log;
+}
+
+void LogWrapper::setClassName(QString& className) 
+{
+	m_className = className;
 }
 
 void LogWrapper::logMsg(const QString& msg) const

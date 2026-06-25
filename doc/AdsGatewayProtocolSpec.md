@@ -1,10 +1,9 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.3  
+**Document Version:** 1.5  
 **Protocol Version:** 1.0  
-**Date:** 18 Mar 2026  
+**Date:** 30 Apr 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
-**Status:** Released
 
 ## Table of Contents
 
@@ -206,13 +205,13 @@ For reference implementation, see [Appendix B](#appendix-b-crc32-reference-imple
 
 | Request ID | Value (hex) | Description |
 |------------|-------------|-------------|
-| ADSGW_HANDSHAKE | 0x0001 | Initial handshake |
-| ADSGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs |
-| ADSGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs |
-| ADSGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters |
-| ADSGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters |
-| ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
-| ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
+| [ADSGW_HANDSHAKE](#61-adsgw_handshake) | 0x0001 | Initial handshake |
+| [ADSGW_SIGNAL_LIST_START](#62-adsgw_signal_list_start--adsgw_signal_list_next) | 0x0100 | Start retrieving list of AppSignalIDs |
+| [ADSGW_SIGNAL_LIST_NEXT](#62-adsgw_signal_list_start--adsgw_signal_list_next) | 0x0101 | Continue retrieving list of AppSignalIDs |
+| [ADSGW_SIGNAL_PARAM_START](#63-adsgw_signal_param_start--adsgw_signal_param_next) | 0x0200 | Start retrieving signal parameters |
+| [ADSGW_SIGNAL_PARAM_NEXT](#63-adsgw_signal_param_start--adsgw_signal_param_next) | 0x0201 | Continue retrieving signal parameters |
+| [ADSGW_SIGNAL_STATE](#64-adsgw_signal_state) | 0x0300 | Request signal states |
+| [ADSGW_SIGNAL_STATE_CHANGES](#65-adsgw_signal_state_changes) | 0x0301 | Request signal state changes |
 
 <a id="42-response-convention" name="42-response-convention"></a>
 ### 4.2 Response Convention
@@ -763,9 +762,9 @@ struct GwAppSignalParam {
     char units[128];            // Engineering units (UTF-8, null-terminated)
     char tags[256];             // Tags, space-separated (ASCII, null-terminated)
 
-    uint8_t channel;            // Channel code (see Section 7.3)
-    uint8_t inOutType;          // I/O type code (see Section 7.4)
-    uint8_t type;               // Signal type code (see Section 7.5)
+    uint8_t channel;            // Channel code (A/B/C/D. See Section 7.3)
+    uint8_t inOutType;          // I/O type code (Input/Output/Internal. See Section 7.4)
+    uint8_t type;               // Signal type code (Discrete/Analog(SI32, FP)/Bus. See Section 7.5)
     uint8_t decimalPlaces;      // Number of decimal places for analog signals
 
     uint8_t tuning;             // Tuning flag (0 = non-tunable, 1 = tunable)
@@ -886,14 +885,16 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 0 | Input | Input signal type |
 | 1 | Output | Output signal type |
 | 2 | Internal | Internal signal type |
+| 3 | SoftwareCalculated | Signal calculated in software (not directly from LM) |
 
 <a id="75-signal-type-codes" name="75-signal-type-codes"></a>
 ### 7.5 Signal Type Codes
 | Code | Name | Description |
 |------|------|-------------|
-| 0 | Analog | Analog signal type |
-| 1 | Discrete | Discrete (binary/digital) signal type |
-| 2 | Bus | Bus signal type |
+| 0x00 | Discrete | Discrete signal type |
+| 0x10 | Analog SignedInt32 | 32-bit signed integer format |
+| 0x11 | Analog Float32 | 32-bit floating point format |
+| 0x20 | Bus | Bus signal type |
 
 ---
 
@@ -928,7 +929,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 516 (0x0204) | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
 | 517 (0x0205) | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
 | 518 (0x0206) | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
-| 519 (0x0207) | GWC_INTERNAL_ERROR | Internal server error |
+| 519 (0x0207) | GWC_GATEWAY_INTERNAL_ERROR | Internal server error |
 | 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---
@@ -1155,3 +1156,5 @@ uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialC
 | 1.1 | 09 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Normalized terminology across docs |
 | 1.2 | 02 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed error code values |
 | 1.3 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added TOC and internal navigation links |
+| 1.4 | 26 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added AnalogFormat to signal type |
+| 1.5 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added navigation to Section 4.1 |

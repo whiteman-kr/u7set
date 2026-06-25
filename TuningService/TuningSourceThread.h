@@ -3,6 +3,7 @@
 #include <QUdpSocket>
 #include <vector>
 #include <queue>
+#include <mutex>
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
@@ -29,6 +30,7 @@ namespace Tuning
 		// only once initialized fields that not require std::atomic<>
 		//
 		quint64	sourceID{};					// generate by DataSource::generateID()
+		std::string moduleEquipmentID;
 		std::string lanEquipmentID;
 		int channel = CHANNEL_1;
 
@@ -175,8 +177,8 @@ namespace Tuning
 		bool pop(TuningCommand* cmd);
 
 	private:
-		QMutex m_mutex;
-		std::queue<TuningCommand> m_queue;
+		std::mutex m_mutex;
+		std::deque<TuningCommand> m_queue;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -374,6 +376,7 @@ namespace Tuning
 
 		void getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
 		void getSourceState(Network::TuningSourceState* proto) const;
+		bool isHandlersInitialized() const;
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
@@ -423,7 +426,7 @@ namespace Tuning
 
 		void checkSetSOR();
 
-		void pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID);
+		[[nodiscard]] E::NetworkError pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID);
 
 		const TuningChannelHandler* privateGetChannelHandler(int channel) const;
 		TuningSignalShared privateGetTuningSignal(Hash hash) const;
@@ -450,7 +453,7 @@ namespace Tuning
 
 		//
 
-		mutable QMutex m_handlersMutex;
+		mutable std::mutex m_handlersMutex;
 
 		std::vector<TuningChannelHandler*> m_handlers;
 		std::map<int, TuningChannelHandler*> m_ch2handlers;			// channel => TuningChannelHandler
@@ -483,8 +486,9 @@ namespace Tuning
 
 		void pushReply(int channel, const RupFotip& reply);
 		void incErrReplySize(quint32 channelIP);
-		void getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
-		void getSourceState(Network::TuningSourceState* proto) const;
+		[[nodiscard]] bool getSourceState(Network::GetTuningSourcesStatesReply* reply) const;
+		[[nodiscard]] bool getSourceState(Network::TuningSourceState* proto) const;
+		[[nodiscard]] bool isHandlersInitialized() const;
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,

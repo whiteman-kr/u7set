@@ -63,7 +63,12 @@ namespace Tuning
 
 			TEST_PTR_CONTINUE(thread);
 
-			thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+			bool res = thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+
+			if (res == false)
+			{
+				DEBUG_LOG_MSG(logger(), QString("Failed to get source state for %1").arg(QString::fromStdString(dsi.moduleequipmentid())));
+			}
 		}
 	}
 
@@ -159,6 +164,13 @@ namespace Tuning
 
 		AUTO_LOCK(m_startStopMutex);							// !!!!
 
+		if (m_tuningSources.getSourceByID(tuningSourceEquipmentID) == nullptr)
+		{
+			*controlledTuningSource = tuningSourceEquipmentID;
+			*controlIsActive = false;
+			return E::NetworkError::UnknownTuningSourceID;
+		}
+
 		stopSourcesListenerThreads();
 
 		stopTuningSourceThreads();
@@ -170,13 +182,13 @@ namespace Tuning
 			return E::NetworkError::Success;
 		}
 
-		bool result = runTuningSourceThread(true, tuningSourceEquipmentID);
+		E::NetworkError result = runTuningSourceThread(true, tuningSourceEquipmentID);
 
-		if (result == false)
+		if (result != E::NetworkError::Success)
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return E::NetworkError::InternalError;
+			return result;
 		}
 
 		runSourcesListenerThreads();
@@ -407,7 +419,8 @@ namespace Tuning
 		m_startStopMutex.unlock();
 	}
 
-	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
+	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources,
+													std::shared_ptr<std::vector<char>> tuningSourcesFileData)
 	{
 		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
@@ -416,7 +429,7 @@ namespace Tuning
 		buildServiceMaps(newSources);
 		runTuningSourceThreads();
 		runSourcesListenerThreads();
-		runTcpTuningServerThread();
+		runTcpTuningServerThread(tuningSourcesFileData);
 
 		m_startStopMutex.unlock();
 	}
@@ -549,11 +562,11 @@ namespace Tuning
 		return result;
 	}
 
-	void TuningServiceWorker::runTcpTuningServerThread()
+	void TuningServiceWorker::runTcpTuningServerThread(std::shared_ptr<std::vector<char>> tuningSourcesFileData)
 	{
 		Q_ASSERT(m_tcpTuningServerThread == nullptr);
 
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, logger());
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, tuningSourcesFileData, logger());
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
 															m_serviceSettings.securityLevel,
@@ -584,7 +597,7 @@ namespace Tuning
 		}
 	}
 
-	bool TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
+	E::NetworkError TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
 													const QString& singleSourceEquipmentID)
 	{
 		// if tuningSourceEquipmentID empty - run all sources workers
@@ -592,7 +605,7 @@ namespace Tuning
 		//
 		assert(m_sourceThreads.size() == 0);
 
-		bool result = false;
+		E::NetworkError result = E::NetworkError::InternalError;
 
 		for(const TuningSource& tuningSource : m_tuningSources)
 		{
@@ -603,7 +616,7 @@ namespace Tuning
 
 			if (m_serviceSettings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
 			{
-				continue;
+				return E::NetworkError::UnknownTuningSourceID;
 			}
 
 			if (tuningSource.hasTuningSignals() == false)
@@ -611,7 +624,7 @@ namespace Tuning
 				DEBUG_LOG_MSG(logger(),
 							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
 							  arg(tuningSource.moduleEquipmentID()));
-				continue;
+				return E::NetworkError::TuningSourceHasNoSignals;
 			}
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
@@ -622,7 +635,7 @@ namespace Tuning
 
 			setSourceThreadInTuningClientContexts(sourceThread);
 
-			result = true;
+			result = E::NetworkError::Success;
 		}
 
 		for(auto& p : m_sourceThreads)
@@ -796,6 +809,7 @@ namespace Tuning
 		bool result = true;
 
 		TuningSources newSources;
+		std::shared_ptr<std::vector<char>> tuningSourcesFileData;
 
 		for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 		{
@@ -816,6 +830,7 @@ namespace Tuning
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
 				result &= readTuningSources(fileData, sessionParams.currentSettingsProfile, &newSources);
+				tuningSourcesFileData = std::make_shared<std::vector<char>>(fileData.begin(), fileData.end());
 			}
 
 			if (result == true)
@@ -837,7 +852,7 @@ namespace Tuning
 
 			m_buildInfo = m_grpcCfgLoaderThread->buildInfo();
 
-			applyNewConfiguration(newSources);
+			applyNewConfiguration(newSources, tuningSourcesFileData);
 		}
 	}
 }

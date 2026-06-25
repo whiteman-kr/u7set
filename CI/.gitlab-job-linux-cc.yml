@@ -1,0 +1,56 @@
+linux_code_coverage_job:
+  stage: test
+  needs: ["project_backup_job"]
+  tags:
+    - testlinux
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  before_script:
+    - export PATH="/home/gitlab-runner/vcpkg:$PATH"
+    - export VCPKG_ROOT="/home/gitlab-runner/vcpkg"
+  script:
+    - "printenv"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+    - "# ----------------------------------------------"
+    - "#               Import DB Projects              "
+    - "# ----------------------------------------------"
+    - "echo Creating PostgreSQL databases..."
+    - "pushd /tmp"
+    - "cp $CI_PROJECT_DIR/Tests/ImportDatabase.sh /tmp"
+    - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME} 5434"
+    - "rm /tmp/ImportDatabase.sh"
+    - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
+    - "popd"
+    - "echo Creating PostgreSQL databases complete"
+    - "# ----------------------------------------------"
+    - "#                    Build                      "
+    - "# ----------------------------------------------"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=OFF"
+    - "cmake --build ./build"    
+    - "# ----------------------------------------------"
+    - "#           Collect Test Coverage Data          "
+    - "# ----------------------------------------------"
+    - "./Tests/CodeCoverage.sh"
+
+  coverage: '/lines......: \d+\.\d+/'
+  artifacts:
+    name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
+    paths:
+      - CodeCoverage/Report/
+      - bin/debug/*.log
+      - bin/debug/*.out
+#      - CodeCoverage/coverage.xml
+#    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: CodeCoverage/coverage.xml

@@ -137,7 +137,7 @@
 
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
-#define C_STR(qstring) qstring.toStdString().c_str()
+#define C_STR(qstring) (qstring).toStdString().c_str()
 
 #define CONTAINS_NULLPTR(vector_of_set)	(std::find(vector_of_set.begin(), vector_of_set.end(), nullptr) != vector_of_set.end())
 
@@ -464,3 +464,14 @@ const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
 
 #define VOID_PTR_CAST(v) (reinterpret_cast<void*>(v))
 #define CONST_VOID_PTR_CAST(v) (reinterpret_cast<const void*>(v))
+
+
+inline QString qstr(const std::string& str)
+{
+	return QString::fromStdString(str);
+}
+
+inline QString qstr(const char* str)
+{
+	return QString::fromUtf8(str);
+}

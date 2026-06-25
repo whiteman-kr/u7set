@@ -12,10 +12,10 @@ class TuningConnectionTests : public ::testing::Test
 protected:
 	virtual void SetUp()
 	{
-		s_tuningServices[0].clientRequestAddress.setPort(g_connectionPorts.tuningService1.clientRequestPort);
-		s_tuningServices[1].clientRequestAddress.setPort(g_connectionPorts.tuningService2.clientRequestPort);
+		s_tuningServices[0].address.setPort(g_connectionPorts.tuningService1.clientRequestPort);
+		s_tuningServices[1].address.setPort(g_connectionPorts.tuningService2.clientRequestPort);
 
-		s_safeTuningServices[0].clientRequestAddress.setPort(g_connectionPorts.tuningService3.clientRequestPort);
+		s_safeTuningServices[0].address.setPort(g_connectionPorts.tuningService3.clientRequestPort);
 
 		protoSignalSet.Clear();
 
@@ -81,18 +81,18 @@ protected:
 
 	inline static std::vector<SoftwareEndpoint::TuningService> s_tuningServices = {{.equipmentId = "SYSTEMID_CLIENTTEST_WS01_TUNS",
 																					.shortenId = "WS01_TUNS",
-																					.clientRequestAddress = {"127.0.0.1", 13333},
+																					.address = {"127.0.0.1", 13333},
 																					.drivenSources = {},
 																					.singleLmControl = false},
 																				   {.equipmentId = "SYSTEMID_CLIENTTEST_WS02_TUNS",
 																					.shortenId = "WS02_TUNS",
-																					.clientRequestAddress = {"127.0.0.1", 13334},
+																					.address = {"127.0.0.1", 13334},
 																					.drivenSources = {},
 																					.singleLmControl = false}};
 
 	inline static std::vector<SoftwareEndpoint::TuningService> s_safeTuningServices = {{.equipmentId = "SYSTEMID_CLIENTTEST_WS04_TUNS",
 																						.shortenId = "WS04_TUNS",
-																						.clientRequestAddress = {"127.0.0.1", 13335},
+																						.address = {"127.0.0.1", 13335},
 																						.drivenSources = {},
 																						.singleLmControl = true}};
 
@@ -209,8 +209,8 @@ TEST_F(TuningConnectionTests, connect)
 		EXPECT_TRUE(connStates[0].isConnected);
 		EXPECT_TRUE(connStates[1].isConnected);
 
-		EXPECT_EQ(connStates[0].peerAddr, s_tuningServices[0].clientRequestAddress);
-		EXPECT_EQ(connStates[1].peerAddr, s_tuningServices[1].clientRequestAddress);
+		EXPECT_EQ(connStates[0].peerAddr, s_tuningServices[0].address);
+		EXPECT_EQ(connStates[1].peerAddr, s_tuningServices[1].address);
 	}
 
 	return;
@@ -257,7 +257,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 		}
 	}
 
-	// Check that one connection is established.
+	// Check three connections are established.
 	//
 	std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
 
@@ -265,7 +265,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	ASSERT_TRUE(connStates[0].isConnected);
 
-	EXPECT_EQ(connStates[0].peerAddr, s_safeTuningServices[0].clientRequestAddress);
+	EXPECT_EQ(connStates[0].peerAddr, s_safeTuningServices[0].address);
 
 	// Wait for sources info arrives
 	//

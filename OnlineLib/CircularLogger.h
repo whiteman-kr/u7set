@@ -164,16 +164,19 @@ class LogWrapper
 {
 public:
 	LogWrapper(CircularLoggerShared log, const QString& className = QString());
+	virtual ~LogWrapper();
 
 	CircularLoggerShared getLog() const;
 	void setLog(CircularLoggerShared log);
+
+	void setClassName(QString& className);
 
 	void logMsg(const QString& msg) const;
 	void logWrn(const QString& wrn) const;
 	void logErr(const QString& err) const;
 
 private:
-	const QString m_className;
+	QString m_className;
 	mutable CircularLoggerShared m_log;
 };
 

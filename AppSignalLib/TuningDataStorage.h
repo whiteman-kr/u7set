@@ -165,6 +165,7 @@ namespace Tuning
 	public:
 		bool appendTuningData(const QString& lmEquipmentID, TuningDataShared tuningData);
 		TuningDataShared getTuningData(const QString& lmEquipmentID);
+		QStringList getAllTuningSourceIDs() const;
 
 	private:
 		std::map<QString, TuningDataShared> m_tuningDataMap;

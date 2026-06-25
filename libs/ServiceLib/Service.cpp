@@ -170,6 +170,10 @@ void ServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
 										SessionParams sessionParams,
 										std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 {
+	Q_UNUSED(configurationXmlData);
+	Q_UNUSED(buildFileInfoArray);
+	Q_UNUSED(sessionParams);
+	Q_UNUSED(currentSettingsProfile);
 	Q_ASSERT(false);		// should be implemented in derived classes
 }
 

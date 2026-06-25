@@ -634,6 +634,9 @@ message TuningSourceState
 	optional int64 errTuningFrameUpdate = 75 [default = 0];
 
 	optional int64 lmTime = 76 [ default = 0];
+
+	optional string moduleEquipmentID = 77;
+	optional bool buildMismatch = 78 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -676,6 +679,7 @@ message ChangeConrolledTuningSourceReply
 //
 message TuningSignalsRead
 {
+	optional uint64 readRequestID = 1 [default = 0];
     repeated uint64 signalHash = 2;
 }
 
@@ -712,6 +716,7 @@ message TuningSignalsReadReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalState tuningSignalState = 2;
 	optional int32 pendingSignalsStateChanges = 3 [default = 0];
+	optional uint64 readRequestID = 4 [default = 0];			// ID from TuningSignalsRead
 }
 
 // Get tuning signals state changes request - TDS_GET_SIGNALS_STATE_CHANGES
@@ -740,6 +745,7 @@ message TuningSignalsWrite
 	optional string matsUser = 1;
     optional bool autoApply = 2 [default = false];
     repeated TuningWriteCommand commands = 3;
+	optional uint64 writeRequestID = 4 [default = 0];
 }
 
 message TuningSignalWriteResult
@@ -752,6 +758,7 @@ message TuningSignalsWriteReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
+	optional uint64 writeRequestID = 3 [default = 0];
 }
 
 // Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY
@@ -953,3 +960,21 @@ message AcquiredDiagSignalsAndObjects
 	repeated LmDiagSignals lmDiagSignals = 1;
 	repeated AcquiredDiagObject diagObjects = 2;
 }
+
+message GetTuningSourcesFileRequest
+{
+	required uint64 partNo = 1 [default = 0];
+};
+
+message GetTuningSourcesFileReply
+{
+	required int32 errCode = 1 [default = 0];			// enum FileTransferResult values
+	required uint64 fileSize = 2 [default = 0];
+	required uint64 partsCount = 3 [default = 0];
+	required uint64 fileCrc64 = 4 [default = 0];
+
+	required uint64 partNo = 5 [default = 0];
+	required uint64 partSize = 6 [default = 0];
+
+	required bytes filePartData = 7;
+};

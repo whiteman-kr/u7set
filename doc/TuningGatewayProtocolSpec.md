@@ -1,10 +1,9 @@
 ﻿# Radiy TuningService Gateway Protocol Specification
 
-**Document Version:** 0.1  
+**Document Version:** 1.0  
 **Protocol Version:** 1.0  
-**Date:** 18 Mar 2026  
+**Date:** 08 May 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
-**Status:** Draft
 
 ## Table of Contents
 
@@ -164,6 +163,8 @@ Typical location in build output is a per-service directory named by the TuningS
 **Obtaining the file:**
 - Via protocol: Use the `TGW_GET_TUNING_SOURCES_START` / `TGW_GET_TUNING_SOURCES_NEXT` requests ([Section 5.2](#52-tgw_get_tuning_sources_start--tgw_get_tuning_sources_next)) to retrieve the file contents from the Gateway in parts
 - From build output: Load the file directly from the RPCT build output directory
+
+When the Gateway has already established a connection to TuningService but has not received `TuningSources.xml` from it yet, `TGW_GET_TUNING_SOURCES_START` and `TGW_GET_TUNING_SOURCES_NEXT` may temporarily respond with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` ([Section 7.2](#72-error-codes)). This is not a critical error: the client may wait and repeat `TGW_GET_TUNING_SOURCES_START` later.
 
 Before starting work, an external client should read and parse this file to obtain the configuration and identifiers required for correct protocol usage.
 
@@ -367,14 +368,14 @@ For reference implementation, see Appendix B.
 
 | Request ID | Value (hex) | Description |
 |------------|-------------|-------------|
-| TGW_HANDSHAKE | 0x1500 | Initial handshake |
-| TGW_GET_TUNING_SOURCES_START | 0x1521 | Start retrieval of tuning sources file (TuningSources.xml) |
-| TGW_GET_TUNING_SOURCES_NEXT | 0x1522 | Retrieve next part of tuning sources file |
-| TGW_GET_TUNING_SOURCE_STATES | 0x1502 | Retrieve tuning sources states |
-| TGW_TUNING_SIGNALS_READ | 0x1503 | Read tuning signals states |
-| TGW_TUNING_SIGNALS_WRITE | 0x1504 | Write tuning signals values |
-| TGW_TUNING_SIGNALS_APPLY | 0x1505 | Apply (commit) written tuning values |
-| TGW_CHANGE_CONTROLLED_TUNING_SOURCE | 0x1506 | Enable/disable tuning source control (activate LM control) |
+| [TGW_HANDSHAKE](#51-tgw_handshake) | 0x1500 | Initial handshake |
+| [TGW_GET_TUNING_SOURCES_START](#52-tgw_get_tuning_sources_start--tgw_get_tuning_sources_next) | 0x1521 | Start retrieval of tuning sources file (TuningSources.xml) |
+| [TGW_GET_TUNING_SOURCES_NEXT](#52-tgw_get_tuning_sources_start--tgw_get_tuning_sources_next) | 0x1522 | Retrieve next part of tuning sources file |
+| [TGW_GET_TUNING_SOURCE_STATES](#53-tgw_get_tuning_source_states) | 0x1502 | Retrieve tuning sources states |
+| [TGW_TUNING_SIGNALS_READ](#54-tgw_tuning_signals_read) | 0x1503 | Read tuning signals states |
+| [TGW_TUNING_SIGNALS_WRITE](#55-tgw_tuning_signals_write) | 0x1504 | Write tuning signals values |
+| [TGW_TUNING_SIGNALS_APPLY](#56-tgw_tuning_signals_apply) | 0x1505 | Apply (commit) written tuning values |
+| [TGW_CHANGE_CONTROLLED_TUNING_SOURCE](#57-tgw_change_controlled_tuning_source) | 0x1506 | Enable/disable tuning source control (activate LM control) |
 
 <a id="42-response-convention" name="42-response-convention"></a>
 ### 4.2 Response Convention
@@ -537,13 +538,14 @@ Total size: 12 bytes
 - No file data is included in the `TGW_GET_TUNING_SOURCES_START` response — all data is retrieved via `TGW_GET_TUNING_SOURCES_NEXT` requests
 - For the XML format description, see [Appendix C: TuningSources.xml File Format](#appendix-c-tuningsourcesxml-file-format)
 - If no tuning sources are configured, the server returns a valid XML with an empty `DataSources` element (`Count="0"`)
+- If the Gateway is already connected to TuningService but has not received `TuningSources.xml` from it yet, the server responds with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` and no payload. This condition is temporary and not critical; the client may wait and repeat `TGW_GET_TUNING_SOURCES_START`.
 
 ---
 
 #### Request Payload (TGW_GET_TUNING_SOURCES_NEXT)
 ```cpp
 struct GwGetTuningSourcesNextRequest {
-    uint32_t partNo;        // Part number to retrieve (0-based)
+    uint32_t part;      // Part number to retrieve (0-based)
 };
 
 static_assert(sizeof(GwGetTuningSourcesNextRequest) == 4);
@@ -585,6 +587,7 @@ Total size: `8 + partSize` bytes
 - `partSize` is the number of bytes in the `data` field of this part
 - Client must concatenate all parts in order (0, 1, ..., `partCount` - 1) to reconstruct the complete UTF-8 XML file content
 - The sum of all `partSize` values across all parts equals `totalSize`
+- If the Gateway is already connected to TuningService but has not received `TuningSources.xml` from it yet, the server responds with Status Code = `GWC_TUNING_SOURCES_FILE_NOT_READY` and no payload. The client should treat this as a temporary condition, wait, and restart retrieval with `TGW_GET_TUNING_SOURCES_START`.
 
 **Example Flow:**
 ```
@@ -638,7 +641,8 @@ The response contains an array of tuning source states.
 ```cpp
 struct GwGetTuningSourceStatesResponse {
     uint32_t count;                             // Number of tuning source states in response
-    uint32_t reserved;
+    uint8_t clientIsActive;                     // Current client is active
+    uint8_t reserved[3];
     GwTuningSourceState sourceStates[count];    // Array of tuning source states
 };
 ```
@@ -646,7 +650,8 @@ struct GwGetTuningSourceStatesResponse {
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `count` |
-| 4 | 4 | `uint32_t` | `reserved` |
+| 4 | 1 | `uint8_t` | `clientIsActive` |
+| 5 | 3 | `uint8_t[3]` | `reserved` |
 | 8 | `count * sizeof(GwTuningSourceState)` | `GwTuningSourceState[]` | `sourceStates[]` |
 
 Total size: `8 + (count * sizeof(GwTuningSourceState))` bytes
@@ -763,16 +768,16 @@ Total size: `8 + (count * sizeof(GwTuningSignalState))` bytes
 **Response Behavior:**
 - `count` equals the number of returned states.
 - States are returned in the same order as requested hashes.
-- Missing signals: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
+- Missing signals: If a requested signal hash is not found in the system, the corresponding returned `GwTuningSignalState` has `hash` set to the requested hash and `errorCode = GWC_UNKNOWN_SIGNAL_HASH` ([Section 7.2](#72-error-codes)).
 
 **Example Flow:**
 ```
 Client -> Server: TGW_TUNING_SIGNALS_READ (count=3, hashes=[0x123, 0x456, 0x999])
 Server -> Client: TGW_TUNING_SIGNALS_READ (Status=0, count=3,
     states=[
-        { hash=0x123, ... },
-        { hash=0x456, ... },
-        { hash=0x999, ... }
+        { hash=0x123, errorCode=0, ... },
+        { hash=0x456, errorCode=0, ... },
+        { hash=0x999, errorCode=GWC_UNKNOWN_SIGNAL_HASH, ... }
     ])
 ```
 
@@ -980,11 +985,13 @@ Total size: 4 bytes
 ### 5.7 TGW_CHANGE_CONTROLLED_TUNING_SOURCE
 
 #### Purpose
-Select a tuning source (LogicModule) and enable/disable its control.
+Select a tuning source (LogicModule), activate the current client, and enable or disable control for the selected tuning source.
 
 This request is intended for systems where TuningService is configured with `SingleLmControl = true` ([Section 1.6](#16-single-lm-control-mode-singlelmcontrol)). It is used to:
 - Make the current client active
 - Activate or deactivate LM control for a specified tuning source
+
+When `SingleLmControl = true`, only one tuning source can have active control at a time. Activating control for one tuning source automatically deactivates the tuning source that is currently active, if any.
 
 The tuning source is identified by `moduleEquipmentId`, which corresponds to `DataSource/@ModuleEquipmentID` in `TuningSources.xml` (Appendix C).
 
@@ -995,11 +1002,9 @@ The tuning source is identified by `moduleEquipmentId`, which corresponds to `Da
 struct GwChangeControlledTuningSourceRequest {
     char     moduleEquipmentId[128];  // Tuning source module equipment ID 
                                       // (ASCII, null-terminated)
-    uint8_t  activateControl;         // 1 = activate control for this tuning source,
-                                      // 0 = deactivate control
-    uint8_t  takeControl;             // 1 = force take control (make this client active),
-                                      // 0 = do not force (fail if another client is active)
-    uint8_t  reserved[2];             // Reserved
+    uint8_t  activateControl;         // 1 = activate tuning source,
+                                      // 0 = deactivate tuning source
+    uint8_t  reserved[3];             // Reserved
 };
 
 static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
@@ -1009,8 +1014,7 @@ static_assert(sizeof(GwChangeControlledTuningSourceRequest) == 132);
 |--------|------|------|-------|
 | 0 | 128 | `char[128]` | `moduleEquipmentId` |
 | 128 | 1 | `uint8_t` | `activateControl` |
-| 129 | 1 | `uint8_t` | `takeControl` |
-| 130 | 2 | `uint8_t[2]` | `reserved` |
+| 129 | 3 | `uint8_t[3]` | `reserved` |
 
 Total size: 132 bytes
 
@@ -1019,15 +1023,14 @@ Total size: 132 bytes
 | Field | Description |
 |-------|-------------|
 | `moduleEquipmentId` | Identifies the tuning source to control. Must match `GwTuningSourceState.moduleEquipmentId` ([Section 5.3](#53-tgw_get_tuning_source_states)) and `DataSource/@ModuleEquipmentID` in `TuningSources.xml` ([Appendix C](#appendix-c-tuningsourcesxml-file-format)). |
-| `activateControl` | Controls whether LM control is active for this tuning source after the request. |
-| `takeControl` | When `SingleLmControl = true`, forces the server to make the current client active even if another client is currently active. |
+| `activateControl` | Activate or deactivate LM control for a specified tuning source. |
 
 **Request Behavior:**
 - This request requires the Gateway to be connected to TuningService. If not connected, the server responds with Status Code = `GWC_NO_TS_CONNECTION` and no payload.
 - If the `moduleEquipmentId` does not match any configured tuning source, the server responds with Status Code = `GWC_UNKNOWN_TUNING_SOURCE_ID` and no payload.
+- If `activateControl = 1` and the specified tuning source has no signals available for control, the server responds with Status Code = `GWC_TUNING_SOURCE_HAS_NO_SIGNALS` and no payload.
 - If `SingleLmControl = false`, the server responds with Status Code = `GWC_SINGLE_LM_CONTROL_DISABLED` and no payload.
-- If another client is active and `takeControl = 0`, the server responds with Status Code = `GWC_CLIENT_IS_NOT_ACTIVE` and no payload.
-- If another client is active and `takeControl = 1`, the server makes the current client active and proceeds.
+- If `activateControl = 1`, the requested tuning source becomes the only tuning source with active control for the current client. Any previously active tuning source is deactivated as part of the same operation.
 
 ---
 
@@ -1055,13 +1058,13 @@ Total size: 132 bytes
 **Response Behavior:**
 - A top-level Status Code = 0 indicates the tuning source selection/control command was accepted.
 - `controlledModuleEquipmentId` echoes the controlled tuning source module equipment ID for which the operation was performed.
+- If `controlIsActive = 1`, the response indicates that the specified tuning source is now the only active controlled tuning source for the current client.
 - To verify the resulting system state, the client can call `TGW_GET_TUNING_SOURCE_STATES` and check `GwTuningSourceState.controlIsActive`.
 
 **Example Flow:**
 ```
 Client -> Server: TGW_CHANGE_CONTROLLED_TUNING_SOURCE (
     moduleEquipmentId="SDS_SPC1_WS_LM1",
-    takeControl=0,
     activateControl=1)
 
 Server -> Client: TGW_CHANGE_CONTROLLED_TUNING_SOURCE (Status=0,
@@ -1184,6 +1187,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 21 (0x0015) | GWC_NO_SIGNALS_ALLOWED_TO_CONTROL | No signals are allowed to control |
 | 22 (0x0016) | GWC_SIGNAL_IS_NOT_ALLOWED_TO_CONTROL | Signal is not allowed to control |
 | 23 (0x0017) | GWC_UNKNOWN_TUNING_SOURCE_ID | Unknown tuning source ID |
+| 24 (0x0018) | GWC_TUNING_SOURCE_HAS_NO_SIGNALS | Tuning source has no signals and cannot be activated |
 | 513 (0x0201) | GWC_INVALID_REQUEST | Unknown or unsupported Request ID |
 | 514 (0x0202) | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
 | 515 (0x0203) | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
@@ -1193,6 +1197,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 519 (0x0207) | GWC_GATEWAY_INTERNAL_ERROR | Internal gateway-level error (distinct from TuningService-level `GWC_INTERNAL_ERROR`) |
 | 520 (0x0208) | GWC_NO_TS_CONNECTION | TuningGateway not connected to TuningService |
 | 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
+| 523 (0x020B) | GWC_TUNING_SOURCES_FILE_NOT_READY | Gateway is connected to TuningService but has not received `TuningSources.xml` yet |
 
 ---
 
@@ -1426,7 +1431,9 @@ uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialC
 
 Typical location in build output is a per-service directory named by the TuningService EquipmentID, for example: `./SDS_SPC1_WS_TUNS/TuningSources.xml`.
 
-The file describes tuning sources (logic modules/equipment), their tuning communication parameters, and the list of tunable signals associated with each source.
+The file describes tuning sources (logic modules/equipment), their tuning communication parameters, and the tunable signals associated with each source.
+
+This appendix focuses on the subset of the XML that external clients typically need. The complete XML may contain additional RPCT metadata that can be ignored unless explicitly required by a particular client implementation.
 
 #### C.1 Top-Level Structure
 
@@ -1435,7 +1442,7 @@ The file describes tuning sources (logic modules/equipment), their tuning commun
         - Element: `BuildInfo`
         - Element: `DataSources`
 - Element: `BuildInfo` (child of `Content`)
-    - RPCT build provenance information (informational; clients can ignore)
+    - RPCT build provenance information
     - Common attributes: `Project`, `ID`, `Date`, `Changeset`, `User`, `Workstation`
 - Element: `DataSources` (child of `Content`)
     - Attribute: `Count` (number of `DataSource` elements)
@@ -1443,85 +1450,184 @@ The file describes tuning sources (logic modules/equipment), their tuning commun
         - Represents one tuning source (typically one logic module configuration)
         - The same `ModuleEquipmentID` may appear multiple times for different `Profile` values
 
-**Client guidance:** Multiple `Profile` variants may be generated to modify connection/settings in a simulated environment (e.g., test jobs). External clients should use the `DataSource` entry with `Profile="Default"` unless a different runtime profile is explicitly selected.
+**Client guidance:** Multiple `Profile` variants may be generated to modify connection/settings in simulated environments (for example, coverage or test-job profiles). External clients should normally use only `DataSource` entries with `Profile="Default"` and ignore the rest unless explicit profile selection is part of the application.
 
-#### C.2 Key Elements and Fields
+#### C.2 Client-Relevant Data Subset
 
-Within each `DataSource` element:
+Typical external tuning clients commonly consume the following data from `TuningSources.xml`:
+
+- `Content/BuildInfo/@Project`, `@ID`, `@Date`, `@User`
+- `Content/DataSources/DataSource/@ModuleEquipmentID`, `@Caption`, `@SubsystemID`, `@SubsystemChannel`
+- Per-signal data from `Content/DataSources/DataSource/TuningData/*Signals/Signal`
+
+Other elements commonly present in the XML, such as `AppSignals`, `DiagSignals`, `SwCalcSignals`, `TuningFlashMemory`, and `TuningDataMemory`, are not required for basic tuning-client parsing.
+
+Within each `DataSource` element, the client-relevant fields are:
 
 - `Profile` (attribute)
-    - Configuration profile name for the same tuning source (commonly includes `Default` and simulation/test profiles).
+    - Configuration profile name for the same tuning source.
+    - Production/external clients should normally accept only `Profile="Default"`.
 
 - `ModuleEquipmentID` (attribute)
     - Equipment identifier of the logic module used as the tuning source.
     - This value is used by `TGW_CHANGE_CONTROLLED_TUNING_SOURCE` as `moduleEquipmentId` ([Section 5.7](#57-tgw_change_controlled_tuning_source)).
     - Do not confuse with `LanController/@EquipmentID` (LAN controller identifier).
 
+- `Caption` (attribute)
+    - Caption of the logic module.
+
+- `SubsystemID` (attribute)
+    - Subsystem identifier of the tuning source.
+
+- `SubsystemChannel` (attribute)
+    - Channel identifier of the tuning source.
+    - Expected values are single ASCII letters `A`, `B`, `C`, or `D`.
+
 - `LanControllers/LanController/TuningParams` (element)
     - Contains tuning communication parameters.
-    - Common attributes:
-        - `TuningEnable` ("true"/"false")
-        - `TuningIP` / `TuningPort` (IP/port of the tuning endpoint)
-        - `TuningServiceID` (TuningService equipment ID)
-        - `TuningServiceIP` / `TuningServicePort` (service endpoint; used by internal services)
+    - Common attributes include:
+        - `TuningEnable` (`"true"` / `"false"`)
+        - `TuningIP` / `TuningPort`
+        - `TuningServiceID`
+        - `TuningServiceIP` / `TuningServicePort`
         - `TuningServiceNetmask`
+    - These fields may be useful for diagnostics or tooling, but are not required for basic signal-definition parsing.
 
 - `TuningSignals` (element)
-    - Comma-separated list of AppSignalIDs (each must start with `#`).
-    - This list defines which signals are intended to be tunable for the source.
+    - Comma-separated list of `AppSignalID` values.
+    - This list is useful as a compact summary, but client parsers should build the actual signal definitions from `TuningData`, not from this text list.
+    - The element may be empty when the tuning source has no tunable signals.
 
 - `TuningData` (element)
-    - Detailed per-signal information grouped by signal type:
+    - Contains the per-signal definitions used by clients.
+    - `@SignalsCount` gives the total number of tunable signals under that `DataSource`.
+    - Signals are grouped by type:
         - `AnalogFloatSignals/Signal`
         - `AnalogInt32Signals/Signal`
         - `DiscreteSignals/Signal`
-    - Each `Signal` typically contains:
-        - `AppSignalID` (string, starts with `#`)
-        - Tuning-related bounds/defaults (e.g., `TuningDefaultValue`, `TuningLowBound`, `TuningHighBound`)
-        - Signal type/format information (e.g., `Type`, `DataSize`, `AnalogSignalFormat`)
+    - The containing group determines the client signal type:
+        - `AnalogFloatSignals` -> `AnalogFloat` / `Float32`
+        - `AnalogInt32Signals` -> `AnalogInt32` / `SignedInt32`
+        - `DiscreteSignals` -> `Discrete`
 
-**Client guidance:** External clients should primarily rely on `TuningSignals` / `AppSignalID` values for identifying tunable signals.
+For each `TuningData/*Signals/Signal` entry, clients commonly consume these attributes:
 
-#### C.3 Minimal Example (Illustrative)
+- `AppSignalID`
+    - Canonical signal identifier.
+    - Must start with `#`.
+    - The client can calculate the signal hash from this value using the algorithm from [Section 1.7.2](#172-appsignalid-hash).
+
+- `CustomAppSignalID`
+    - Human-oriented signal identifier without protocol-specific formatting.
+
+- `Caption`
+    - Human-readable signal caption.
+
+- `EquipmentID`
+    - Equipment identifier associated with the signal.
+
+- `Unit`
+    - Engineering unit string.
+
+- `Tags`
+    - Comma-separated tag list in XML.
+    - Client libraries may normalize this representation internally (for example, by replacing commas with spaces).
+
+- `DecimalPlaces`
+    - Recommended display precision.
+
+- `LowEngineeringUnits`, `HighEngineeringUnits`
+    - Engineering-range metadata used by clients as valid range information when present.
+
+- `TuningDefaultValueHex`, `TuningLowBoundHex`, `TuningHighBoundHex`
+    - Preferred tuning default and bound values for protocol/client parsing.
+
+- `TuningDefaultValue`, `TuningLowBound`, `TuningHighBound`
+    - Human-readable textual representations of the same values.
+    - These fields are useful for diagnostics and documentation, but clients should parse the corresponding `*Hex` fields instead.
+
+#### C.3 Signal Value Parsing Rules
+
+When parsing tuning signal values from `TuningSources.xml`, clients should use the `*Hex` attributes instead of the textual decimal attributes.
+
+**Value fields to use for parsing:**
+- `TuningDefaultValueHex`
+- `TuningLowBoundHex`
+- `TuningHighBoundHex`
+
+The `*Hex` fields store the value in the signal's native representation:
+
+| Signal group | Native representation of `*Hex` fields | Client interpretation |
+|-------------|-----------------------------------------|-----------------------|
+| `AnalogFloatSignals/Signal` | 32-bit IEEE 754 floating-point (`float`) | Decode as binary32, then convert to client numeric type if needed |
+| `AnalogInt32Signals/Signal` | 32-bit signed integer in two's-complement form | Decode as signed `int32_t` |
+| `DiscreteSignals/Signal` | 32-bit unsigned integer | Interpret `0` as false/off and non-zero as true/on |
+
+**Client guidance:**
+- Use the `TuningDefaultValueHex`, `TuningLowBoundHex`, and `TuningHighBoundHex` fields when parsing default values and bounds.
+
+#### C.4 Minimal Example (Illustrative)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Content>
     <BuildInfo
-        Project="knpp_1u_sds"
-        ID="3752"
-        Date="22.08.2025 12:31:47"
+         Project="test_simulator"
+        ID="2658"
+        Date="30-Apr-2026 10:30"
         Changeset="0"
         User="Administrator"
-        Workstation="WITP17P"/>
+        Workstation="SERHIY-TP17P"/>
 
     <DataSources Count="1">
         <DataSource
-            ModuleEquipmentID="SYSTEMID_..."
-            Profile="Default" ...>
+            ModuleEquipmentID="SYSTEMID_CLIENTTEST_CH12_MD00"
+            Profile="Default"
+            Caption="LM1-SR05"
+            SubsystemID="CLIENTTESTTUNING"
+            SubsystemChannel="A">
             <LanControllers Count="1">
                 <LanController
-                    LanControllerType="Tuning" ...>
+                    EquipmentID="SYSTEMID_CLIENTTEST_CH12_MD00_ETHERNET02"
+                    ControllerNo="2"
+                    LanControllerType="Tuning">
                     <TuningParams
                         TuningEnable="true"
                         TuningIP="127.0.33.101"
-                        TuningPort="50000" />
+                        TuningPort="50000"
+                        TuningServiceID="SYSTEMID_CLIENTTEST_WS04_TUNS"
+                        TuningServiceIP="127.0.33.1"
+                        TuningServicePort="13332"
+                        TuningServiceNetmask="255.255.255.0" />
                 </LanController>
             </LanControllers>
 
             <TuningSignals>
-                #SIGNAL_1,#SIGNAL_2
+                #TEST_TUNING_LIMITS_FP32
             </TuningSignals>
 
-            <TuningData ...>
-                <DiscreteSignals Count="1">
+            <TuningData SignalsCount="1">
+                <AnalogFloatSignals Count="1">
                     <Signal
-                        AppSignalID="#SIGNAL_1"
+                        AppSignalID="#TEST_TUNING_LIMITS_FP32"
+                        CustomAppSignalID="TEST_TUNING_LIMITS_FP32"
+                        Caption="App signal #TEST_TUNING_LIMITS_FP32"
+                        EquipmentID="SYSTEMID_CLIENTTEST_CH12_MD00"
+                        Unit="mm"
+                        Tags=""
+                        DecimalPlaces="3"
                         EnableTuning="true"
-                        TuningDefaultValue="0"
-                        TuningLowBound="0"
-                        TuningHighBound="1" />
-                </DiscreteSignals>
+                        LowEngineeringUnits="0"
+                        HighEngineeringUnits="100"
+                        TuningDefaultValue="999"
+                        TuningLowBound="-10345.5"
+                        TuningHighBound="18345.5"
+                        TuningDefaultValueHex="0x4479C000"
+                        TuningLowBoundHex="0xC621A600"
+                        TuningHighBoundHex="0x468F5300" />
+                </AnalogFloatSignals>
+                <AnalogInt32Signals Count="0"/>
+                <DiscreteSignals Count="0"/>
             </TuningData>
         </DataSource>
     </DataSources>
@@ -1536,3 +1642,9 @@ Within each `DataSource` element:
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
 | 0.1 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.2 | 06 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated TGW_CHANGE_CONTROLLED_TUNING_SOURCE |
+| 0.3 | 15 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added error GWC_TUNING_SOURCES_FILE_NOT_READY |
+| 0.4 | 27 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Changed TGW_TUNING_SIGNALS_READ missing-signal behavior |
+| 0.5 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Clarified tuning source activation behavior |
+| 0.6 | 30 Apr 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated Appendix C to document the client-relevant `TuningSources.xml` subset and `*Hex` signal parsing |
+| 1.0 | 08 May 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |

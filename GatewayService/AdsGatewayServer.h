@@ -11,123 +11,91 @@
 #include <atomic>
 
 #include <asio.hpp>
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
-#include <AdsGatewayLib/GwCrc32.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
 
 #include <CommonLib/HostAddressPort.h>
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
-#include <GrpcAppDataSrv.pb.h>
+#include "../OnlineLib/GrpcAdsClient.h"
+#include "AsyncTcpServer.h"
 
 using asio::ip::tcp;
-namespace AGL = AdsGatewayLib;
+namespace GCL = GatewayClientLib;
 
-using TcpSocketShared = std::shared_ptr<tcp::socket>;
+class AdsGatewaySession;
 
-class AdsGatewayServer : public LogWrapper
+class AdsGatewaySessionAppSignalStateUpdater : public IAppSignalStateUpdater
 {
 public:
-	struct Session
-	{
-		TcpSocketShared socket;
-		std::thread thread;
-		std::atomic_bool finished {false};
-		std::atomic_bool closing { false };
+	AdsGatewaySessionAppSignalStateUpdater(AdsGatewaySession& session);
 
-		//
+	virtual void adsConnected() override;
+	virtual void adsDisconnected() override;
 
-		bool handshakeCompleted = false;
-		QString clientName;
-		std::atomic_bool connectedToAppDataSrv {false};
-		std::vector<char> payloadData;
-		size_t errCount = 0;
-	};
+	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+	virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
 
-	using SessionShared = std::shared_ptr<Session>;
+private:
+	AdsGatewaySession& m_session;
+};
 
-	static constexpr size_t MAX_SESSION_ERRORS = 100;
-
+class AdsGatewaySession : public AsyncTcpSession
+{
 public:
-	AdsGatewayServer(const HostAddressPort& listenIP, const AppSignals& appSignals, CircularLoggerShared log);
-	virtual ~AdsGatewayServer();
+	explicit AdsGatewaySession(const SoftwareInfo& swInfo,
+							 const AppSignals& appSignals,
+							 const std::vector<HostAddressPort>& serviceAddresses,
+							 asio::ip::tcp::socket socket,
+							 CircularLoggerShared log);
 
-	void run();
-	void stop();
-
-	void updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply);
-	void processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply);
-	void invalidateSignals();
+	virtual ~AdsGatewaySession();
 
 	void setConnectedToAppDataSrv(bool connected);
 
-private:
-	void runAcceptLoop();
-	void sessionThread(SessionShared stc);
-	void reapFinishedSessions();
-	void closeSocket(SessionShared stc);
-	void requestCloseSession(SessionShared stc);
-	void closeSessions();
-	void joinAllSessions();
-	void resetAcceptor();
+	void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
+	void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply);
+	void invalidateSignals();
 
-	void processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize);
+protected:
+	void startGrpcAppDataSrvClient(); 
+	void stopGrpcAppDataSrvClient(); 
 
-	bool processHandshakeRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalListStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalListNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalParamNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, const size_t requestSize);
-	bool processSignalStateRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										 const char* recvBuf, const size_t requestSize);
-	bool processSignalStateChangesRequest(SessionShared stc, const AGL::GwMessageHeader& header,
-										 const char* recvBuf, const size_t requestSize);
+	virtual void onStarted() override;
+	virtual void onStopped() override;
+	virtual bool checkRequestID(uint32_t requestID) override;
+	virtual bool isHandshakeRequest(uint32_t requestID) override;
+	virtual bool checkPayloadSize(const GCL::GwMessageHeader& header,
+								const char* recvBuf,
+								const size_t recvBufSize,
+								GCL::GwErrorCode& errCode) override;
 
-	bool checkPayloadSize(const AGL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, AGL::GwErrorCode& errCode);
-	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
+	virtual bool processRequest(const GCL::GwMessageHeader& header, char* recvBuf, size_t requestSize) override;
 
-	void sendErrReply(SessionShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
-	void sendOkReply(SessionShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
-	void sendReply(SessionShared stc,
-				   uint32_t requestID, AGL::GwErrorCode errCode,
-				   const char* payloadData, size_t payloadSize);
-
-	bool checkNullTerminated(const char* str, size_t size) const;
-	QString getIpPortStr(const tcp::socket& socket) const;
-
-	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
-	uint8_t channelChar(E::Channel ch) const;
-
-	void updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply);
+	bool processHandshakeRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
+	bool processSignalListStartRequest(const GCL::GwMessageHeader& header,const char* recvBuf, const size_t requestSize);
+	bool processSignalListNextRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
+	bool processSignalParamStartRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
+	bool processSignalParamNextRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
+	bool processSignalStateRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
+	bool processSignalStateChangesRequest(const GCL::GwMessageHeader& header, const char* recvBuf, const size_t requestSize);
 
 private:
-	HostAddressPort m_listenIP;
-	const AppSignals& m_appSignals;
+	void updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& reply);
 
-	std::atomic<bool> m_running { false };
-	std::thread m_serverThread;
+private:
+	std::atomic_bool m_connectedToAppDataSrv{false};
 
-	asio::io_context m_io;
-
-	std::mutex m_acceptorMutex;
-	std::shared_ptr<tcp::acceptor> m_acceptor;
-
-	std::mutex m_sessionsMutex;
-	std::set<SessionShared> m_sessions;
+	std::unique_ptr<GrpcAdsClient > m_adsClient;
 
 	std::mutex m_signalStatesMutex;
 	std::vector<SimpleAppSignalState> m_signalStates;
 	std::unordered_map<Hash, int> m_hashToIndex;
+	std::vector<int> m_indexes;
 
 	std::mutex m_signalStateChangesMutex;
-	std::deque<AGL::GwAppSignalState> m_signalStateChanges;
+	std::deque<GCL::GwAppSignalState> m_signalStateChanges;
 
-	std::atomic_bool m_connectedToAppDataSrv {false};
-
-	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
-	static constexpr int BAD_INDEX = -1;
+	std::vector<char> m_payload;
 };

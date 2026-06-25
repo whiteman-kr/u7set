@@ -20,7 +20,8 @@ namespace Gateway
 			Unknown,
 			IVS_Impulse,
 			ModbusSlave,
-			AdsGateway
+			AdsGateway,
+			TuningGateway
 		};
 		Q_ENUM(GatewayType)
 
