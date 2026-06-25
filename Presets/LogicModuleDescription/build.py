@@ -6,11 +6,12 @@ import xml.etree.ElementTree as ET
 file_pairs = [
     ("LM1_SF40.templ", "LM1_SF40.templ_inst", "./generated/LM1_SF40.xml"),
     ("LM_SF41.templ", "LM_SF41.templ_inst", "./generated/LM_SF41.xml"),
-    ("LM1_SR03.templ", "LM1_SR03.templ_inst", "./generated/LM1_SR03.xml"),    
-    ("LM1_SR04.templ", "LM1_SR04.templ_inst", "./generated/LM1_SR04.xml"),    
+    ("LM1_SR03.templ", "LM1_SR03.templ_inst", "./generated/LM1_SR03.xml"),
+    ("LM1_SR04.templ", "LM1_SR04.templ_inst", "./generated/LM1_SR04.xml"),
     ("LM1_SR05.templ", "LM1_SR05.templ_inst", "./generated/LM1_SR05.xml"),
-    ("LM1_SR20.templ", "LM1_SR20.templ_inst", "./generated/LM1_SR20.xml"),    
-    ("LM11_SR90.templ", "LM11_SR90.templ_inst", "./generated/LM11_SR90.xml"),    
+    ("LM1_SR20.templ", "LM1_SR20.templ_inst", "./generated/LM1_SR20.xml"),
+    ("LM11_SR90.templ", "LM11_SR90.templ_inst", "./generated/LM11_SR90.xml"),
+    ("ACM1_SR70.templ", "ACM1_SR70.templ_inst", "./generated/ACM1_SR70.xml"),
 ]
 
 # Iterate over the file pairs
