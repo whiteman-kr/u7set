@@ -3,6 +3,7 @@
 #endif
 
 #include <thread>
+#include <unordered_map>
 
 #include <ArchV3Lib/ArchWriter.h>
 
@@ -30,11 +31,42 @@ namespace ArchV3
 	{
 	}
 
-	void ArchWriter::run()
-	{ 
-		bool workable = start();
+	void ArchWriter::start()
+	{
+		std::shared_ptr<ArchWriter> self = shared_from_this();
 
-		if (!workable)
+		m_thread = std::thread(
+			[self]()
+			{
+				self->run();
+			});
+	}
+
+	void ArchWriter::stop() 
+	{ 
+		m_quitRequested.store(true);
+		m_cv.notify_one();
+
+		if (m_thread.joinable())
+		{
+			m_thread.join();
+		}
+	}
+
+	void ArchWriter::requestQuit()
+	{ 
+	}
+
+	bool ArchWriter::isWorkable() const
+	{ 
+		return m_isWorkable.load();
+	}
+
+	void ArchWriter::run()
+	{
+		m_isWorkable.store(init());
+
+		if (!m_isWorkable.load())
 		{
 			logErr("IS NOT WORKABLE!");
 
@@ -46,17 +78,40 @@ namespace ArchV3
 			return;
 		}
 
-		// do work
+		std::unique_lock<std::mutex> lock(m_cvMutex);
 
-		stop();
+		while (m_quitRequested.load(std::memory_order::relaxed) == false)
+		{
+			bool signaled = m_cv.wait_for(lock,	std::chrono::milliseconds(5),
+				[this]
+				{
+					return m_quitRequested.load(std::memory_order::relaxed);
+				});
+
+			if (m_quitRequested.load(std::memory_order::relaxed) == true)
+			{
+				lock.unlock();	
+				break;
+			}
+
+			lock.unlock();
+
+			if (signaled)
+			{
+				// real processing
+			}
+			else
+			{
+				// timeout, idle processing 
+			}
+
+			lock.lock();	
+		}
+
+		shutdown();
 	}
 
-	void ArchWriter::requestQuit()
-	{ 
-		m_quitRequested.store(true);
-	}
-
-	bool ArchWriter::start()
+	bool ArchWriter::init()
 	{
 		bool result = true;
 
@@ -70,7 +125,7 @@ namespace ArchV3
 		return result;
 	}
 
-	void ArchWriter::stop()
+	void ArchWriter::shutdown()
 	{
 	}
 
@@ -127,6 +182,12 @@ namespace ArchV3
 		m_archFiles.reserve(analogsCount + discretesCount);
 
 		QString path;
+		std::unordered_map<quint8, QStringList> signlsInGroups;
+
+		for (quint32 n = 0; n < 256; n++)
+		{
+			signlsInGroups[static_cast<quint8>(n)] = QStringList();
+		}
 
 		for (const AppSignal& s : m_appSignals)
 		{
@@ -136,6 +197,8 @@ namespace ArchV3
 			}
 
 			quint8 n = static_cast<quint8>(s.hash() & 0xFF);
+
+			signlsInGroups[n].push_back(s.appSignalID());
 
 			path = archPath_00_FF(n) + QDir::separator() + clearString(s.appSignalID());
 
@@ -155,6 +218,8 @@ namespace ArchV3
 				}
 			}
 		}
+
+		writeSignalInGropsFile(signlsInGroups);
 	}
 
 	QString ArchWriter::archPath_00_FF(quint8 n)
@@ -170,5 +235,33 @@ namespace ArchV3
 		str.remove(QRegularExpression("_+$"));
 
 		return str;
+	}
+
+	void ArchWriter::writeSignalInGropsFile(const std::unordered_map<quint8, QStringList>& signlsInGroups)
+	{ 
+		QFile file(m_archPath + QDir::separator() + "SignalsInGroups.txt");
+
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+		{
+			QTextStream stream(&file);
+			for (const auto& pair : signlsInGroups)
+			{
+				stream << QString("Group %1:\n").arg(pair.first, 2, 16, QChar('0')).toUpper();
+				for (const QString& signalID : pair.second)
+				{
+					const AppSignal* appSignal = m_appSignals.getByAppSignalID(signalID);
+
+					if (appSignal != nullptr)
+					{
+						stream << (appSignal->isAnalog() ? "Analog  " : (appSignal->isDiscrete() ? "Discrete" : "Unknown")) << "  "
+							   << appSignal->appSignalID() << "\n";
+					}
+				}
+			}
+		}
+		else
+		{
+			logErr(QString("Failed to open SignalsInGroups.txt for writing in %1").arg(m_archPath));
+		}
 	}
 }

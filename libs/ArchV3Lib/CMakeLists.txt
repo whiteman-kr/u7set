@@ -13,8 +13,10 @@ set(TARGET ArchV3Lib)
 qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/ArchFile.h
 	./include/ArchV3Lib/ArchWriter.h
+	./include/ArchV3Lib/ArchV3Core.h
 	ArchFile.cpp
 	ArchWriter.cpp
+	ArchV3Core.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE

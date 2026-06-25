@@ -6,7 +6,7 @@
 
 namespace ArchV3
 {
-	class ArchWriter : public LogWrapper
+	class ArchWriter : public std::enable_shared_from_this<ArchWriter>, public LogWrapper
 	{
 	public:
 		ArchWriter(	const QString& archDir, 
@@ -16,19 +16,25 @@ namespace ArchV3
 					CircularLoggerShared logger);
 		~ArchWriter();
 
-		void run();
+		void start();
+		void stop();
 
 		void requestQuit();
+		bool isWorkable() const;
 
 	private:
-		bool start();
-		void stop();
+		void run();
+
+		bool init();
+		void shutdown();
 
 		bool checkAndInitDirs();
 		void initArchFiles();
 
 		QString archPath_00_FF(quint8 n);
 		static QString clearString(QString str);		// copy OK
+
+		void writeSignalInGropsFile(const std::unordered_map<quint8, QStringList>& signlsInGroups);
 
 	private:
 		const QString m_archDir;
@@ -37,11 +43,17 @@ namespace ArchV3
 		const AppSignals& m_appSignals;
 
 		//
+		std::thread m_thread;
+		std::mutex m_cvMutex;
+		std::condition_variable m_cv;
 
-		std::atomic_bool m_quitRequested{false};
+		std::atomic<bool> m_isWorkable {false};
+		std::atomic<bool> m_quitRequested {false};
 
 		QString m_archPath;
 
 		std::vector<std::unique_ptr<ArchFileBase>> m_archFiles;
 	};
+
+	using ArchWriterShared = std::shared_ptr<ArchWriter>;
 }

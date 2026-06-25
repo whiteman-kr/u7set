@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/Types.h>
 
 // ----------------------------------------------------------------------------------------
 //
