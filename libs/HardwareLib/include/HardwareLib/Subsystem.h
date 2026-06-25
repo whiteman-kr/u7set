@@ -46,7 +46,8 @@ namespace Hardware
 		void setKey(int value);
 
 	public:
-		static const int MaxKeyValue = 63;
+		static const int MaxSsKeyValue = 63;   // 4 bit CRC + 6 bit SSKey, + 6 bit Channel
+		static const int MaxChannelValue = 63; //
 
 	private:
 		int m_index = 0;
@@ -54,5 +55,4 @@ namespace Hardware
 		QString m_subsystemId;
 		QString m_caption;
 	};
-}
-
+} // namespace Hardware

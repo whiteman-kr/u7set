@@ -18,10 +18,13 @@ namespace Builder
 		std::shared_ptr<Hardware::Subsystem> get(int index) const;
 		void clear();
 
-		const std::vector<std::shared_ptr<Hardware::Subsystem>>& subsystems();
+		using const_iterator = typename std::vector<std::shared_ptr<Hardware::Subsystem>>::const_iterator;
 
-		bool load(DbController* db, QString &errorCode);
-		bool save(DbController* db, const QString &comment);
+		const_iterator begin() const;
+		const_iterator end() const;
+
+		bool load(DbController* db, QString& errorCode);
+		bool save(DbController* db, const QString& comment);
 
 		Q_INVOKABLE int ssKey(QString subsysId);
 		Q_INVOKABLE int ssKeyForVdu(QString subsysId);
@@ -30,7 +33,8 @@ namespace Builder
 
 	private:
 		std::vector<std::shared_ptr<Hardware::Subsystem>> m_subsystems;
+
 		const QString fileName = "SubsystemsList.xml";
 	};
 
-}
+} // namespace Builder

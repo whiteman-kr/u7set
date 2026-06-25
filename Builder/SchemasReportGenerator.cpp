@@ -1264,24 +1264,13 @@ namespace Builder
 					throw(tr("DbController::getFileListTree failed on fileId = %1").arg(stp.fileId()));
 				}
 
-				const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
-
-				for (auto it = files.begin(); it != files.end(); it++)
+				auto isSchemaFile = [](const std::shared_ptr<DbFileInfo>& fi)
 				{
-					const std::shared_ptr<DbFileInfo>& fi = it->second;
+					return File::isSchemaFileExtension(fi->extension());
+				};
 
-					// Filter files by extension
-					//
-					if (fi->fileName().endsWith("." + QString(File::AlFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(File::UfbFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(File::MvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(File::TvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(File::DvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(File::VduFileExtension)) == false)
-					{
-						continue;
-					}
-
+				for (const auto& fi : fileTree.files() | std::views::values | std::views::filter(isSchemaFile))
+				{
 					// Filter files by schema tags if tags exist
 					//
 					VFrame30::SchemaDetails details;
@@ -1310,7 +1299,6 @@ namespace Builder
 				// Load and parse schemas
 				//
 				std::vector<SchemaInfo> schemas;
-
 				VFrame30::SchemaDetailsSet detailsSet;
 
 				loadSchemas(m_options.singleFile() ? allFoldersTree : fileTree, schemasFiles, schemas, detailsSet);

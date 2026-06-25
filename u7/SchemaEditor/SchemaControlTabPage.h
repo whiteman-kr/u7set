@@ -1,7 +1,7 @@
 #pragma once
 
-#include <VFrame30/SchemaDetails.h>
 #include "GlobalMessanger.h"
+#include <VFrame30/SchemaDetails.h>
 
 class EditSchemaTabPage;
 class AppSignalSetProvider;
@@ -11,12 +11,18 @@ namespace UiLib
 	class TagSelectorWidget;
 }
 
+namespace VFrame30
+{
+	class ActuatorHeader;
+}
+
 //
 //
 // SchemaListModel
 //
 //
-class SchemaListModel : public QAbstractItemModel, protected HasDbController
+class SchemaListModel : public QAbstractItemModel,
+						protected HasDbController
 {
 	Q_OBJECT
 
@@ -36,7 +42,10 @@ public:
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
 	bool deleteFilesUpdate(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
-	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
+	bool moveFilesUpdate(const QModelIndexList& selectedIndexes,
+						 int movedToParnetId,
+						 const std::vector<DbFileInfo>& movedFiles,
+						 std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 	bool updateShemaDetails(VFrame30::SchemaDetails details);
@@ -116,7 +125,7 @@ public:
 private:
 	DbFileInfo m_parentFile;
 	DbFileTree m_files;
-	
+
 	mutable QString m_searchText;                     // Set in match(), used in data for SearchSchemaRole()
 	mutable QString m_filterText;
 	std::set<int> m_searchByFileIds;
@@ -158,7 +167,8 @@ private:
 // SchemaFileView
 //
 //
-class SchemaFileView : public QTreeView, public HasDbController
+class SchemaFileView : public QTreeView,
+					   public HasDbController
 {
 	Q_OBJECT
 
@@ -179,6 +189,9 @@ protected:
 	//
 public:
 	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles() const;
+
+	bool isActuatorFolder(const QModelIndex& index) const;
+	bool isActuatorFolder(DbFileInfo fileInfo) const;
 
 	void refreshFiles();
 
@@ -210,6 +223,8 @@ public slots:
 	//
 public:
 	SchemaListModel& filesModel();
+	const SchemaListModel& filesModel() const;
+
 	SchemaProxyListModel& proxyModel();
 
 	//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
@@ -220,7 +235,6 @@ public:
 	// Protected properties
 	//
 protected:
-
 	// Data
 	//
 private:
@@ -270,7 +284,8 @@ public:
 // SchemaControlTabPage
 //
 //
-class SchemaControlTabPage : public QWidget, public HasDbController
+class SchemaControlTabPage : public QWidget,
+							 public HasDbController
 {
 	Q_OBJECT
 
@@ -303,6 +318,8 @@ public slots:
 	void openFile(const DbFileInfo& file);
 	void viewFile(const DbFileInfo& file);
 	void viewFile(const DbFileInfo& file, int changesetId);
+	void viewSchemaFile(const DbFile& file);
+	void viewActuatorHeaderFile(const DbFile& file);
 
 
 protected slots:
@@ -313,18 +330,29 @@ protected slots:
 
 	void openSelectedFile();
 	void viewSelectedFile();
-	
+
 	void schemaWasSaved(QString schemaDetails); // Called from EditSchemaTabPage for update file details in the model.
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
+
 	void addFile();
+	void addSchema(const DbFileInfo& parentFile);
+	void addActuator(const DbFileInfo& parentFile);
 
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, int parentFileId);
 	void addSchemaFileToDb(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex);
 
+	void addActuatorHeaderFile(std::shared_ptr<VFrame30::ActuatorHeader> actuatorHeader, QString fileExtension, int parentFileId);
+	void addActuatorHeaderFileToDb(std::shared_ptr<VFrame30::ActuatorHeader> actuatorHeader,
+								   QString fileExtension,
+								   QModelIndex parentIndex);
+
 	void addFolder();
 
 	void cloneFile();
+	void cloneSchema(const DbFile& file);
+	void cloneActuatorHeader(const DbFile& file);
+
 	void deleteFiles();
 	void moveFiles();
 
@@ -344,6 +372,9 @@ protected slots:
 	void exportToAlbum();
 
 	void showFileProperties();
+	void showSchemaProperties(const std::vector<std::shared_ptr<DbFile>>& files, bool readOnly);
+	void showActuatorHeaderProperties(const std::vector<std::shared_ptr<DbFile>>& files, bool readOnly);
+
 	void showBehaviorEditor();
 
 private slots:
@@ -380,10 +411,9 @@ private:
 
 	UiLib::TagSelectorWidget* m_tagSelector = nullptr;
 
-	std::list<EditSchemaTabPage*> m_openedFiles;		// Opened files (for edit and view)
+	std::list<EditSchemaTabPage*> m_openedFiles; // Opened files (for edit and view)
 
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	int m_lastSelectedNewSchemaForLmFileId = -1;
 };
-

@@ -1,37 +1,38 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <cassert>
-#include <map>
-#include <functional>
-#include <QString>
 #include <QDateTime>
+#include <QString>
+#include <cassert>
+#include <functional>
+#include <map>
+#include <memory>
+#include <vector>
 
 class AppSignal;
 
 enum class DbDir
 {
-	RootDir,					// $root$
-	AfblDir,					// $root$/AFBL
-	SchemasDir,					// $root$/Schemas
-	UfblDir,					// $root$/Schemas/UFBL
-	AppLogicDir,				// $root$/Schemas/ApplicationLogic
-	MonitorSchemasDir,			// $root$/Schemas/Monitor
-	TuningSchemasDir,			// $root$/Schemas/Tuning
-	DiagSchemasDir,				// $root$/Schemas/Diagnostics
-	VduSchemasDir,				// $root$/Schemas/VDU
-	HardwareConfigurationDir,	// $root$/HC
-	HardwarePresetsDir,			// $root$/HP
-	ModuleConfigurationDir,		// $root$/MC
-	ConnectionsDir,				// $root$/CONNECTIONS
-	BusTypesDir,				// $root$/BUSTYPES
-	AppSignalListsDir,			// $root$/AppSignalLists
-	EtcDir,						// $root$/ETC
-	TestsDir,					// $root$/Tests
-	SimTestsDir,				// $root$/Tests/SimTests
-	HardwareTestsDir,			// $root$/Tests/HardwareTestsDir
-	DiagSignalTypesDir			// $root$/DiagSignalTypes
+	RootDir,                  // $root$
+	AfblDir,                  // $root$/AFBL
+	SchemasDir,               // $root$/Schemas
+	UfblDir,                  // $root$/Schemas/UFBL
+	AppLogicDir,              // $root$/Schemas/ApplicationLogic
+	MonitorSchemasDir,        // $root$/Schemas/Monitor
+	TuningSchemasDir,         // $root$/Schemas/Tuning
+	DiagSchemasDir,           // $root$/Schemas/Diagnostics
+	VduSchemasDir,            // $root$/Schemas/VDU
+	ActuatorsDir,             // $root$/Schemas/Actuators
+	HardwareConfigurationDir, // $root$/HC
+	HardwarePresetsDir,       // $root$/HP
+	ModuleConfigurationDir,   // $root$/MC
+	ConnectionsDir,           // $root$/CONNECTIONS
+	BusTypesDir,              // $root$/BUSTYPES
+	AppSignalListsDir,        // $root$/AppSignalLists
+	EtcDir,                   // $root$/ETC
+	TestsDir,                 // $root$/Tests
+	SimTestsDir,              // $root$/Tests/SimTests
+	HardwareTestsDir,         // $root$/Tests/HardwareTestsDir
+	DiagSignalTypesDir,       // $root$/DiagSignalTypes
 };
 
 namespace Db
@@ -43,23 +44,26 @@ namespace Db
 
 		constexpr static const char* Description = "Description";
 		constexpr static const char* SafetyProject = "Safety Project";
-		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
+		constexpr static const char* SuppressWarnings = "SuppressWarnings";                   // A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
-		
-		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";			// Generate file AppSignals.xml on build
+
+		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";       // Generate file AppSignals.xml on build
 		constexpr static const char* GenerateAppSignalsXmlDescription = "Generate file AppSignals.xml on build";
 
-		constexpr static const char* GenerateAppSignalsExtXml = "Generate AppSignalsExt.xml";	// Generate file AppSignalsExt.xml on build
-		constexpr static const char* GenerateAppSignalsExtXmlDescription = "Generate file AppSignalsExt.xml on build";	// Generate file AppSignalsExt.xml on build
-		
-		constexpr static const char* GenerateAppLogicDrawings = "Generate App Logic Drawings";	// Generate file AppLogicDrawings.pdf on build
-		constexpr static const char* GenerateAppLogicDrawingsDescription = "Generate 'Schemas.pdf/Application Logic.pdf'";
-		
-		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
+		constexpr static const char* GenerateAppSignalsExtXml = "Generate AppSignalsExt.xml"; // Generate file AppSignalsExt.xml on build
+		constexpr static const char* GenerateAppSignalsExtXmlDescription =
+			"Generate file AppSignalsExt.xml on build";                                       // Generate file AppSignalsExt.xml on build
 
-		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
-		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";			// Simulator run tests script timeout
-		constexpr static const char* MismatchPresetVersionAsWarning = "Mismatch Preset Version as Warning";	// If preset version mismatch is detected, treat it as a warning
+		constexpr static const char* GenerateAppLogicDrawings =
+			"Generate App Logic Drawings";                                                    // Generate file AppLogicDrawings.pdf on build
+		constexpr static const char* GenerateAppLogicDrawingsDescription = "Generate 'Schemas.pdf/Application Logic.pdf'";
+
+		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";    // Generate extra debug information on build
+
+		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";     // Run simulator based tests on build project
+		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";       // Simulator run tests script timeout
+		constexpr static const char* MismatchPresetVersionAsWarning =
+			"Mismatch Preset Version as Warning"; // If preset version mismatch is detected, treat it as a warning
 		constexpr static const char* ProjectDefaults = "Project Defaults";
 	};
 
@@ -68,45 +72,42 @@ namespace Db
 	public:
 		File() = delete;
 
-		inline static const std::map<DbDir, QString> s_dirToName =
-			{
-		        {DbDir::RootDir, QStringLiteral("$root$")},										// Root
-				{DbDir::AfblDir, QStringLiteral("$root$/AFBL")},								// Application Functional Block Library
+		inline static const std::map<DbDir, QString> s_dirToName = {
+			{DbDir::RootDir, QStringLiteral("$root$")},                              // Root
+			{DbDir::AfblDir, QStringLiteral("$root$/AFBL")},                         // Application Functional Block Library
 
-				{DbDir::SchemasDir, QStringLiteral("$root$/Schemas")},							// Schemas root fie
-				{DbDir::UfblDir, QStringLiteral("$root$/Schemas/UFBL")},						// User Functional Block Library
-				{DbDir::AppLogicDir, QStringLiteral("$root$/Schemas/ApplicationLogic")},		// Application Logic Schemas
-				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
-				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
-				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
-				{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},					// VDU Schemas
-				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuration
-				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
-				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
-				{DbDir::ConnectionsDir, QStringLiteral("$root$/CONNECTIONS")},					// Connections
-				{DbDir::BusTypesDir, QStringLiteral("$root$/BUSTYPES")},						// Bus Types
-				{DbDir::AppSignalListsDir, QStringLiteral("$root$/AppSignalLists")},			// AppSignalLists
-				{DbDir::EtcDir, QStringLiteral("$root$/ETC")},									// ETC
-				{DbDir::TestsDir, QStringLiteral("$root$/Tests")},								// Tests
-				{DbDir::SimTestsDir, QStringLiteral("$root$/Tests/SimTests")},					// Simulator based tests
-				{DbDir::HardwareTestsDir, QStringLiteral("$root$/Tests/HardwareTests")},		// Hardware tests
-				{DbDir::DiagSignalTypesDir, QStringLiteral("$root$/DiagSignalTypes")},			// Signal types for diagnostcics signals
-			};
+			{DbDir::SchemasDir, QStringLiteral("$root$/Schemas")},                   // Schemas root fie
+			{DbDir::UfblDir, QStringLiteral("$root$/Schemas/UFBL")},                 // User Functional Block Library
+			{DbDir::AppLogicDir, QStringLiteral("$root$/Schemas/ApplicationLogic")}, // Application Logic Schemas
+			{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},    // Monitor Video Schemas
+			{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},      // TuningClient Schemas
+			{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},   // Diagnostics Schemas
+			{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},            // VDU Schemas
+			{DbDir::ActuatorsDir, QStringLiteral("$root$/Schemas/Actuators")},
+			{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},          // Hardware Configuration
+			{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},                // Hardware Presets
+			{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},            // Module Configuration
+			{DbDir::ConnectionsDir, QStringLiteral("$root$/CONNECTIONS")},           // Connections
+			{DbDir::BusTypesDir, QStringLiteral("$root$/BUSTYPES")},                 // Bus Types
+			{DbDir::AppSignalListsDir, QStringLiteral("$root$/AppSignalLists")},     // AppSignalLists
+			{DbDir::EtcDir, QStringLiteral("$root$/ETC")},                           // ETC
+			{DbDir::TestsDir, QStringLiteral("$root$/Tests")},                       // Tests
+			{DbDir::SimTestsDir, QStringLiteral("$root$/Tests/SimTests")},           // Simulator based tests
+			{DbDir::HardwareTestsDir, QStringLiteral("$root$/Tests/HardwareTests")}, // Hardware tests
+			{DbDir::DiagSignalTypesDir, QStringLiteral("$root$/DiagSignalTypes")},   // Signal types for diagnostcics signals
+		};
 
 		static QString systemDirToName(DbDir systemDir);
 	};
-}
+} // namespace Db
 
 // signal management error codes
 // returns in ObjectState.errCode field
 //
-const int	ERR_SIGNAL_OK = 0,
-			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
-			ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER = 2,
-			ERR_SIGNAL_DELETED = 3,
-			ERR_SIGNAL_NOT_FOUND = 4,
+const int ERR_SIGNAL_OK = 0, ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1, ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER = 2, ERR_SIGNAL_DELETED = 3,
+		  ERR_SIGNAL_NOT_FOUND = 4,
 
-			ERR_SIGNAL_EXISTS = 100;
+		  ERR_SIGNAL_EXISTS = 100;
 
 struct ObjectState
 {
@@ -160,7 +161,7 @@ protected:
 
 struct UpgradeItem
 {
-    QString upgradeFileName;
+	QString upgradeFileName;
 	QString text;
 };
 
@@ -239,8 +240,8 @@ public:
 	explicit DbUser(int userId);
 
 public:
-	bool operator== (const DbUser& u) const;
-	bool operator!= (const DbUser& u) const;
+	bool operator==(const DbUser& u) const;
+	bool operator!=(const DbUser& u) const;
 
 public:
 	[[nodiscard]] int userId() const;
@@ -283,7 +284,7 @@ private:
 	QString m_lastName;
 
 	QString m_password;
-	QString m_newPassword;				// Required for setting new password
+	QString m_newPassword; // Required for setting new password
 
 	bool m_administrator = false;
 	bool m_readonly = false;
@@ -311,23 +312,17 @@ public:
 public:
 	// Iteration
 	//
-	[[nodiscard]] auto begin() const
-	{
-		return m_files.begin();
-	}
+	[[nodiscard]] auto begin() const { return m_files.begin(); }
 
-	[[nodiscard]] auto end() const
-	{
-		return m_files.end();
-	}
+	[[nodiscard]] auto end() const { return m_files.end(); }
 
 	void clear();
 
 	[[nodiscard]] int size() const;
 	[[nodiscard]] bool empty() const;
 
-	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile with data or tree is empty
-	[[nodiscard]] bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
+	[[nodiscard]] bool isDbFile() const;     // true if contains DbFile with data or tree is empty
+	[[nodiscard]] bool isDbFileInfo() const; // true if contains DbFileInfo or tree is empty
 
 	[[nodiscard]] bool isRoot(int fileId) const;
 	[[nodiscard]] bool isRoot(const DbFileInfo& fileInfo) const;
@@ -340,7 +335,7 @@ public:
 	[[nodiscard]] std::shared_ptr<DbFileInfo> file(int fileId);
 	[[nodiscard]] std::shared_ptr<DbFileInfo> file(int fileId) const;
 
-	[[nodiscard]] QString filePath(int fileId) const;		// Return file path "/ABC/DEF/", "/"
+	[[nodiscard]] QString filePath(int fileId) const; // Return file path "/ABC/DEF/", "/"
 
 	[[nodiscard]] const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
 	[[nodiscard]] std::vector<DbFileInfo> toVector(bool excludeRoot) const;
@@ -377,7 +372,6 @@ public:
 	bool removeFile(const DbFileInfo& fileInfo);
 	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
 
-	bool removeFilesWithExtension(QString ext);
 	bool removeIf(std::function<bool(const DbFileInfo&)> pred);
 
 private:
@@ -390,8 +384,8 @@ private:
 private:
 	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
-	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileId, values are its' children
-	std::map<int, std::shared_ptr<DbFileInfo>> m_files;			// Key if fileId, value is DbFile(Info) object
+	std::map<int, FileChildren> m_fileIdToChildren;     // Key is fileId, values are its' children
+	std::map<int, std::shared_ptr<DbFileInfo>> m_files; // Key if fileId, value is DbFile(Info) object
 	int m_rootFileId = -1;
 	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
@@ -423,19 +417,20 @@ public:
 	// Properties
 	//
 public:
-	[[nodiscard]] const QString& fileName() const noexcept;
+	[[nodiscard]] const QString& fileName() const;
 	void setFileName(const QString& value);
 
-	[[nodiscard]] QString extension() const noexcept;
+	[[nodiscard]] QString ext() const;
+	[[nodiscard]] QString extension() const;
 
-	[[nodiscard]] int fileId() const noexcept;
+	[[nodiscard]] int fileId() const;
 	void setFileId(int value);
 	void resetFileId();
 	[[nodiscard]] bool hasFileId() const;
 
-	[[nodiscard]] bool isNull() const noexcept;
+	[[nodiscard]] bool isNull() const;
 
-	[[nodiscard]] int parentId() const noexcept;
+	[[nodiscard]] int parentId() const;
 	void setParentId(int value);
 
 	[[nodiscard]] virtual qsizetype size() const;
@@ -444,7 +439,7 @@ public:
 	[[nodiscard]] bool deleted() const;
 	void setDeleted(bool value);
 
-	[[nodiscard]] int changeset() const noexcept;
+	[[nodiscard]] int changeset() const;
 	void setChangeset(int value);
 
 	[[nodiscard]] QDateTime created() const;
@@ -455,17 +450,17 @@ public:
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	[[nodiscard]] const E::VcsState& state() const noexcept;
+	[[nodiscard]] const E::VcsState& state() const;
 	void setState(const E::VcsState& state);
 
-	[[nodiscard]] const E::VcsItemAction& action() const noexcept;
+	[[nodiscard]] const E::VcsItemAction& action() const;
 	void setAction(const E::VcsItemAction& action);
 
-	[[nodiscard]] int userId() const noexcept;
+	[[nodiscard]] int userId() const;
 	void setUserId(int value);
 
-	[[nodiscard]] const QString& details() const noexcept;
-	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
+	[[nodiscard]] const QString& details() const;
+	void setDetails(const QString& value); // Value must be valid JSON, Example: "{}"
 
 	// File Attributes
 	//
@@ -483,7 +478,7 @@ protected:
 	int m_fileId = DbFileInfo::Null;
 	int m_parentId = 0;
 	qsizetype m_size = 0;
-	bool m_deleted = false;				// File was deleted from database, from all tables, such FileInfo does not exist anymore
+	bool m_deleted = false; // File was deleted from database, from all tables, such FileInfo does not exist anymore
 
 	int m_changeset = 0;
 	QDateTime m_created;
@@ -500,7 +495,7 @@ protected:
 	{
 		struct
 		{
-			qint32 m_attrDirectory: 1;
+			qint32 m_attrDirectory : 1;
 		};
 		qint32 m_attributes = 0;
 	};
@@ -509,9 +504,9 @@ public:
 	static const int Null = -1;
 	static const int ATTRIBUTE_DIRECTORY = 0x00000001;
 
-	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
+	static QString fullPathToFileName(const QString& fullPathName); // $root$/Schemas/Monitor -> Monitor
 
-	friend bool operator< (const DbFileInfo& a, const DbFileInfo& b);
+	friend bool operator<(const DbFileInfo& a, const DbFileInfo& b);
 };
 
 
@@ -533,12 +528,12 @@ public:
 	bool readFromDisk(const QString& fileName);
 	bool writeToDisk(const QString& directory) const;
 
-	void convertToDatabaseString(QString* str);										// returns E'\\x00010203......'
-	static void convertToDatabaseString(const QByteArray& data, QString* result);	// returns E'\\x00010203......'
+	void convertToDatabaseString(QString* str);                                   // returns E'\\x00010203......'
+	static void convertToDatabaseString(const QByteArray& data, QString* result); // returns E'\\x00010203......'
 
-	DbFile& operator= (const DbFileInfo& fileInfo);
+	DbFile& operator=(const DbFileInfo& fileInfo);
 
-	// Properties
+																				  // Properties
 	//
 public:
 	[[nodiscard]] const QByteArray& data() const;
@@ -633,7 +628,7 @@ public:
 public:
 	enum class Type
 	{
-		File,					//	Values are hardcoded in DB
+		File, //	Values are hardcoded in DB
 		Signal
 	};
 
@@ -667,8 +662,8 @@ public:
 
 private:
 	Type m_type = Type::File;
-	int m_id = -1;				// File.FileID or Signal.SignalsID
-	QString m_name;				// FileName or AppSignalID
+	int m_id = -1;  // File.FileID or Signal.SignalsID
+	QString m_name; // FileName or AppSignalID
 	QString m_caption;
 	E::VcsItemAction m_action{E::VcsItemAction::Added};
 	QString m_parent;
@@ -698,7 +693,6 @@ Q_DECLARE_METATYPE(DbProject)
 Q_DECLARE_METATYPE(std::vector<DbProject>)
 Q_DECLARE_METATYPE(std::vector<DbFileInfo>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
-//Q_DECLARE_METATYPE(std::vector<int>)
+// Q_DECLARE_METATYPE(std::vector<int>)
 Q_DECLARE_METATYPE(std::vector<DbChangeset>)
 Q_DECLARE_METATYPE(std::vector<DbChangesetDetails>)
-

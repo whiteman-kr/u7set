@@ -5,7 +5,7 @@ namespace EquipmentPropNames
 	// Ethernet controller properties
 	//
 	inline const QString LAN_CONTROLLER_TYPE("LanControllerType");
-	inline const QString CONTROLLER_NO("ControllerNo");				// equals to Place
+	inline const QString CONTROLLER_NO("ControllerNo"); // equals to Place
 
 	inline const QString TUNING_ENABLE("TuningEnable");
 	inline const QString TUNING_IP("TuningIP");
@@ -201,9 +201,9 @@ namespace EquipmentPropNames
 	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIDs");
 	inline const QString APP_SIGNAL_LIST_MASKS("AppSignalListMasks");
 	inline const QString APP_SIGNAL_LIST_TAGS("AppSignalListTags");
-	
+
 	inline const QString UI_CONFIGURATION("UiConfiguration");
-	
+
 
 	inline const QString FONTS("Fonts");
 	inline const QString UNICODDE_SUBSETS("UnicodeSubsets");
@@ -240,7 +240,7 @@ namespace EquipmentPropNames
 	// Opto modules properties
 	//
 	inline const QString ALLOW_INCHASSIS_OPTO_CONNECTIONS("AllowInchassisOptoConnections");
-}
+} // namespace EquipmentPropNames
 
 namespace XmlElement
 {
@@ -287,7 +287,7 @@ namespace XmlElement
 	inline const QString SIGNAL_LOG_ATTRIBUTE_TAG_WARNING("TagWarning");
 
 	inline const QString TUNING_SECURITY("TuningSecurity");
-	
+
 	inline const QString TESTING_SETTINGS("TestingSettings");
 	inline const QString TESTING_SECURITY("TestingSecurity");
 	inline const QString TESTING_REPORTS("TestingReports");
@@ -337,7 +337,7 @@ namespace XmlElement
 	inline const QString BUILD("Build");
 	inline const QString FILES("Files");
 	inline const QString FILE("File");
-}
+} // namespace XmlElement
 
 namespace XmlAttribute
 {
@@ -492,13 +492,13 @@ namespace XmlAttribute
 	inline const QString RT_TRENDS_REQUEST_IP("RtTrendsRequestIP");
 	inline const QString SECURITY_LEVEL("SecurityLevel");
 	inline const QString ENABLE("Enable");
-}
+} // namespace XmlAttribute
 
 namespace Latin1Char
 {
 	inline const QLatin1Char ZERO('0');
 	inline const QLatin1Char SPACE(' ');
-}
+} // namespace Latin1Char
 
 namespace CfgFileId
 {
@@ -535,14 +535,14 @@ namespace CfgFileId
 	inline const QString TESTSUITE_REPORTTEMPLATES("TESTSUITE_REPORTTEMPLATES");
 
 	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
-}
+} // namespace CfgFileId
 
 namespace CfgFileTag
 {
 	inline const QString APPSIGNALLISTS("APPSIGNALLISTS");
 }
 
-namespace  SettingsProfile
+namespace SettingsProfile
 {
 	inline const QString DEFAULT("Default");
 }
@@ -576,7 +576,7 @@ namespace SoftwareSetting
 	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
 
 	inline const QString READ_ONLY_ARCHIVE_PATH("ReadOnlyArchivePath");
-}
+} // namespace SoftwareSetting
 
 namespace CmdLineArg
 {
@@ -611,7 +611,7 @@ namespace CmdLineArg
 
 	inline const QString PTC("ptc");
 	inline const QString RECVIP("recvip");
-}
+} // namespace CmdLineArg
 
 namespace Directory
 {
@@ -627,7 +627,7 @@ namespace Directory
 	inline const QString SUBSYSTEMS("Subsystems");
 	inline const QString TESTS("Tests");
 	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
-}
+} // namespace Directory
 
 namespace File
 {
@@ -702,37 +702,59 @@ namespace File
 	inline const QString TagsFileName = "Tags.csv";
 	inline const QString SimProfilesFileName = "SimProfiles.txt";
 
-	inline const QString AlFileExtension = "als";                  // Application Logic schema file extension
-	inline const QString AlTemplExtension = "templ_als";           // Application Logic schema template file extension
+	inline const QString AlFileExtension = "als";                          // Application Logic schema file extension
+	inline const QString AlTemplExtension = "templ_als";                   // Application Logic schema template file extension
 
-	inline const QString UfbFileExtension = "ufb";                 // User Functional Block schema file extension
-	inline const QString UfbTemplExtension = "templ_ufb";          // User Functional Block template file extension
+	inline const QString UfbFileExtension = "ufb";                         // User Functional Block schema file extension
+	inline const QString UfbTemplExtension = "templ_ufb";                  // User Functional Block template file extension
 
-	inline const QString MvsFileExtension = "mvs";                 // Monitor schema file extension
-	inline const QString MvsTemplExtension = "templ_mvs";          // Monitor schema template file extension
+	inline const QString MvsFileExtension = "mvs";                         // Monitor schema file extension
+	inline const QString MvsTemplExtension = "templ_mvs";                  // Monitor schema template file extension
 
-	inline const QString TvsFileExtension = "tvs";                 // TuningClient schema file extension
-	inline const QString TvsTemplExtension = "templ_tvs";          // TuningClient schema template file extension
+	inline const QString TvsFileExtension = "tvs";                         // TuningClient schema file extension
+	inline const QString TvsTemplExtension = "templ_tvs";                  // TuningClient schema template file extension
 
-	inline const QString DvsFileExtension = "dvs";                 // Diagnostics schema file extension
-	inline const QString DvsTemplExtension = "templ_dvs";          // Diagnostics schema template file extension
+	inline const QString DvsFileExtension = "dvs";                         // Diagnostics schema file extension
+	inline const QString DvsTemplExtension = "templ_dvs";                  // Diagnostics schema template file extension
 
-	inline const QString VduFileExtension = "vus";                 // VDU schema file extension
-	inline const QString VduTemplExtension = "templ_vus";          // VDU schema template file extension
-	inline const QString VduNativeFileExtension = "vbs";           // VDU schema file extension in native VDU format
+	inline const QString VduFileExtension = "vus";                         // VDU schema file extension
+	inline const QString VduTemplExtension = "templ_vus";                  // VDU schema template file extension
+	inline const QString VduNativeFileExtension = "vbs";                   // VDU schema file extension in native VDU format
 
-	inline const QString OclFileExtension = "ocl";                 // (Optical) Connection Link
-	inline const QString BusFileExtension = "bus_type";            // Bus type
+	inline const QString ActuatorHeaderFileExtension = "ach";              // Actuator Header
 
-	inline const QString AppSignalFileExtension = "asg";           // Application signal file extention (::Proto::AppSignal message)
-	inline const QString AppSignalSetFileExtension = "asgs";       // AppSignalSet file extention (::Proto::AppSignalSet message)
+	inline const QString OclFileExtension = "ocl";                         // (Optical) Connection Link
+	inline const QString BusFileExtension = "bus_type";                    // Bus type
 
-	inline const QString AppSignalListFileExtension = "aslist";    // Application signals list file extention
+	inline const QString AppSignalFileExtension = "asg";                   // Application signal file extention (::Proto::AppSignal message)
+	inline const QString AppSignalSetFileExtension = "asgs";               // AppSignalSet file extention (::Proto::AppSignalSet message)
 
-	inline const QString JavaScriptFileExtension = "js";           // JavaScript file extension
+	inline const QString AppSignalListFileExtension = "aslist";            // Application signals list file extention
 
-	inline const QString DiagSignalTypeFileExtension = "dsgt";     // Diagnostics Signal Type file extension
-	inline const QString DiagSignalTypeSetFileExtension = "dsgts"; // Diagnostics Signal Types set file extension
+	inline const QString JavaScriptFileExtension = "js";                   // JavaScript file extension
+
+	inline const QString DiagSignalTypeFileExtension = "dsgt";             // Diagnostics Signal Type file extension
+	inline const QString DiagSignalTypeSetFileExtension = "dsgts";         // Diagnostics Signal Types set file extension
+
+	inline bool isSchemaFileExtension(const QString& ext)
+	{
+		return ext.compare(AlFileExtension, Qt::CaseInsensitive) == 0 ||   //
+			   ext.compare(UfbFileExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(MvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(TvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(DvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(VduFileExtension, Qt::CaseInsensitive) == 0;
+	}
+
+	inline bool isSchemaTemplateFileExtension(const QString& ext)
+	{
+		return ext.compare(AlTemplExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(UfbTemplExtension, Qt::CaseInsensitive) == 0 || //
+			   ext.compare(MvsTemplExtension, Qt::CaseInsensitive) == 0 || //
+			   ext.compare(TvsTemplExtension, Qt::CaseInsensitive) == 0 || //
+			   ext.compare(DvsTemplExtension, Qt::CaseInsensitive) == 0 || //
+			   ext.compare(VduTemplExtension, Qt::CaseInsensitive) == 0;
+	}
 } // namespace File
 
 namespace Separator
@@ -749,9 +771,9 @@ namespace Separator
 	inline const QString BACK_DIR("\\");
 	inline const QString EMPTY_STR("");
 	inline const QString NEW_LINE("\n");
-	inline const QString CR("\r");					// Carriage Return
-	inline const QString LF("\n");					// Line Feed
-	inline const QString TAB("\t");					// Line Feed
+	inline const QString CR("\r");  // Carriage Return
+	inline const QString LF("\n");  // Line Feed
+	inline const QString TAB("\t"); // Line Feed
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");
@@ -759,23 +781,23 @@ namespace Separator
 	inline const QString NO("No");
 	inline const QString QUESTIONS("???");
 	inline const QString HEX("0x");
-}
+} // namespace Separator
 
 namespace FormatStr
 {
 	inline const QString POSTGRES_DATE_TIME("yyyy-MM-ddTHH:mm:ss");
 	inline const QString DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5.%6.%7");
-}
+} // namespace FormatStr
 
 namespace TemplateMacro
 {
 	inline const QString START_TOKEN("$(");
 	inline const QString END_TOKEN(")");
-}
+} // namespace TemplateMacro
 
 namespace AppSignalPropNames
 {
-	inline const QString ID("ID");										// Optimization, to share one string among all Signal instances
+	inline const QString ID("ID"); // Optimization, to share one string among all Signal instances
 	inline const QString SIGNAL_GROUP_ID("SignalGroupID");
 	inline const QString SIGNAL_INSTANCE_ID("SignalInstanceID");
 	inline const QString CHANGESET_ID("ChangesetID");
@@ -818,7 +840,7 @@ namespace AppSignalPropNames
 	inline const QString R0_OHM("R0_Ohm");
 	inline const QString OUTPUT_MODE("OutputMode");
 	inline const QString OUTPUT_MODE_STR("OutputModeStr");
-    inline const QString INPUT_RANGE("InputRange");
+	inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
 	inline const QString LOG("Log");
@@ -855,7 +877,7 @@ namespace AppSignalPropNames
 
 	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
-}
+} // namespace AppSignalPropNames
 
 namespace AppSignalTags
 {
@@ -879,8 +901,11 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n"
-		"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;false;false;;true;None\n"
-		"4;SpreadTolerance;4 Signal processing;double;;;2;5;false;false;Spread tolerance of signal measurement channels in percents;true;None");
+		"4;SensorType;5 Electric parameters;DynamicEnum "
+		"[NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_"
+		"W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;false;false;;true;None\n"
+		"4;SpreadTolerance;4 Signal processing;double;;;2;5;false;false;Spread tolerance of signal measurement channels in "
+		"percents;true;None");
 
 	inline const QString OUTPUT_ANALOG(
 		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
@@ -890,7 +915,8 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
 		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;false;false;Low DAC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
-		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
+		"4;OutputMode;5 Electric parameters;DynamicEnum "
+		"[Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
 
 	inline const QString INTERNAL_ANALOG(
 		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
@@ -903,12 +929,12 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
-}
+} // namespace AppSignalDefaultSpecPropStruct
 
 namespace Manufacturer
 {
-	inline const QString RADIY("RadiyQt6");		// Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
-												// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
+	inline const QString RADIY("RadiyQt6"); // Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
+											// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
 	inline const QString RADIY_ORGANIZATION("Radiy");
 	inline const QString SITE("radiy.com");
 
@@ -920,7 +946,7 @@ namespace Manufacturer
 	inline const QString GATEWAY_SERVICE("Gateway Service");
 	inline const QString SERVICE_CONTROL_MANAGER("Service Control Manager");
 	inline const QString METROLOGY("Metrology");
-}
+} // namespace Manufacturer
 
 namespace Busses
 {
@@ -930,7 +956,7 @@ namespace Busses
 	inline const QString MACRO_BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
 	inline const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
 	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
-}
+} // namespace Busses
 
 namespace Afb
 {
@@ -1038,7 +1064,7 @@ namespace Afb
 	inline const QString SET_FLAGS("set_flags");
 	inline const QString SIMLOCK("simlock");
 	inline const QString MISMATCH("mismatch");
-}
+} // namespace Afb
 
 namespace LmDescriptionName
 {
@@ -1050,7 +1076,7 @@ namespace LmDescriptionName
 
 	inline const QString LM11_SR90("LM11_SR90");
 	inline const QString LM_SF41("LM_SF41");
-}
+} // namespace LmDescriptionName
 
 namespace BOM
 {
@@ -1062,6 +1088,7 @@ namespace Grpc
 	inline const std::string SESSION_AUTH_TOKEN("session-auth-token");
 	inline const std::string WRONG_HOST_NAME("Wrong host name");
 	inline const std::string WRONG_CLIENT_EQUIPMENT_ID("Wrong client EquipmentID");
-	inline const std::string SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX("Signal hashes count exceeds ADS_GET_APP_SIGNAL_STATE_MAX");
+	inline const std::string SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX(
+		"Signal hashes count exceeds ADS_GET_APP_SIGNAL_STATE_MAX");
 	inline const std::string INVALID_OR_EXPIRED_SESSION("Invalid or expired session");
-}
+} // namespace Grpc

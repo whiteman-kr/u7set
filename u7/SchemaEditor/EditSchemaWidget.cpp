@@ -4320,7 +4320,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 		return false;
 	}
 
-	std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
+	auto fileList = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
 			return file.fileName().endsWith(QString(".") + File::UfbFileExtension, Qt::CaseInsensitive) == true && file.isFolder() == false;
@@ -5033,7 +5033,6 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 		//
 		itemsAppSignals.clear(); // clear - means generate new AppSignalIds
 	}
-	else {}
 
 	m_createSignalDialogOptions.init(schema()->schemaId(), schema()->caption(), equipmentIdList, itemsAppSignals);
 
@@ -9215,7 +9214,6 @@ void SchemaFindDialog::ensureVisible()
 		move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
 			 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
 	}
-	else {}
 
 	return;
 }

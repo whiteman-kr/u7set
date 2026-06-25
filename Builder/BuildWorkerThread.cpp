@@ -759,7 +759,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : *m_context->m_subsystems)
 		{
 			Q_ASSERT(subsystem);
 
@@ -792,7 +792,7 @@ namespace Builder
 
 		// Check if all LMs in subsystem have the same version and LmDescriptionFile
 		//
-		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : *m_context->m_subsystems)
 		{
 			Q_ASSERT(subsystem);
 
@@ -1010,24 +1010,13 @@ namespace Builder
 		std::set<QString> schemaIds;
 		bool success = true;
 
-		for (auto& [fileId, file] : files)
+		auto isSchemaFile = [](const std::shared_ptr<DbFileInfo>& f)
 		{
-			if (file->isFolder() == true)
-			{
-				continue;
-			}
+			return File::isSchemaFileExtension(f->extension());
+		};
 
-			QString fileExt = file->extension();
-
-			if (fileExt.compare(File::AlFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(File::UfbFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(File::MvsFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(File::DvsFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(File::VduFileExtension, Qt::CaseInsensitive) != 0)
-			{
-				continue;
-			}
-
+		for (const auto& file : files | std::views::values | std::views::filter(isSchemaFile))
+		{
 			VFrame30::SchemaDetails details;
 			bool parseDetailsOk = details.parseDetails(file->details());
 

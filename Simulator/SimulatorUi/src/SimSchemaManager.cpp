@@ -43,6 +43,8 @@ namespace SimUi
 
 		for (auto ext : folders)
 		{
+			// Form file name like "C:/build/Schemas.als/SCHEMAID.als", "C:/build/Schemas.tvs/SCHEMAID.tvs", ...
+			//
 			QString fileName = buildPath + QString("Schemas.%1/").arg(ext) + schemaId + "." + QString(ext);
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileName);
 

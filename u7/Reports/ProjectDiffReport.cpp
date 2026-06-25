@@ -2675,28 +2675,8 @@ bool ProjectDiffGenerator::isTextFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 {
-	const std::array<QString, 12> TextExtensions = {File::AlFileExtension,   // Script
-													File::AlTemplExtension,  // Xml Document
-													File::UfbFileExtension,  // Xml Schema
-													File::UfbTemplExtension, // Table
-													File::MvsFileExtension,
-													File::MvsTemplExtension,
-													File::TvsFileExtension,
-													File::TvsTemplExtension,
-													File::DvsFileExtension,
-													File::DvsTemplExtension,
-													File::VduFileExtension,
-													File::VduTemplExtension};
-
-	for (const QString& ext : TextExtensions)
-	{
-		if (fileName.endsWith(ext) == true)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	QString extension = QFileInfo(fileName).suffix();
+	return File::isSchemaFileExtension(extension) || File::isSchemaTemplateFileExtension(extension);
 }
 
 std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPageLayout& pageLayout,

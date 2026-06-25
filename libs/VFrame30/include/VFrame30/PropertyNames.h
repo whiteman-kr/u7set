@@ -320,6 +320,7 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString busInbusSettingCategory{"InBus Settings (Manual Signal Placement)"};
 
 		inline static const QString commonCategory{"Common"};
+		inline static const QString actuatorCategory{"Actuator"};
 		inline static const QString behaviourCategory{"Behaviour"};
 		inline static const QString appearanceCategory{"Appearance"};
 		inline static const QString functionalCategory{"Functional"};
@@ -368,6 +369,13 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString scriptGlobalVariableSignals{"signals"};
 		inline static const QString scriptGlobalVariableEquipment{"equipment"};
 		inline static const QString scriptGlobalVariableLog{"log"};
+
+		inline static const QString ActuatorTypeId{"ActuatorTypeID"};
+		inline static const QString acmPreset{"AcmPreset"};
+		inline static const QString descriptionFile{"DescriptionFile"};
+		inline static const QString lmNumber{"LmNumber"};
+		inline static const QString subsystemId{"SubsystemID"};
+		inline static const QString excludeFromBuild{"ExcludeFromBuild"};
 
 		// clang-format on
 	};

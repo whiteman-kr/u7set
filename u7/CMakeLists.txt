@@ -45,6 +45,7 @@ set (U7_SOURCES
 	./EditEngine/EditEngineSetProperty.h
 	./EditEngine/EditEngineSetSchemaProperty.cpp
 	./EditEngine/EditEngineSetSchemaProperty.h
+
 	./EquipmentEditor/DialogChoosePreset.cpp
 	./EquipmentEditor/DialogChoosePreset.h
 	./EquipmentEditor/DialogImportPreset.cpp
@@ -57,6 +58,7 @@ set (U7_SOURCES
 	./EquipmentEditor/EquipmentVcsDialog.h
 	./EquipmentEditor/EquipmentView.cpp
 	./EquipmentEditor/EquipmentView.h
+
 	./Forms/ChangesetDetailsDialog.cpp
 	./Forms/ChangesetDetailsDialog.h
 	./Forms/ChooseAfbDialog.cpp
@@ -81,8 +83,10 @@ set (U7_SOURCES
 	./Forms/ProjectPropertiesForm.h
 	./Forms/SelectChangesetDialog.cpp
 	./Forms/SelectChangesetDialog.h
+
 	./Legacy/TuningFilterEditor.cpp
 	./Legacy/TuningFilterEditor.h
+
 	./Locator/AppSignalLocatorProvider.cpp
 	./Locator/AppSignalLocatorProvider.h
 	./Locator/ConnectionLocatorProvider.cpp
@@ -99,6 +103,7 @@ set (U7_SOURCES
 	./Locator/LocatorProvider.h
 	./Locator/SchemaLocatorProvider.cpp
 	./Locator/SchemaLocatorProvider.h
+
 	./ProjectsTabPage/CreateProjectDialog.cpp
 	./ProjectsTabPage/CreateProjectDialog.h
 	./ProjectsTabPage/LoginDialog.cpp
@@ -107,6 +112,7 @@ set (U7_SOURCES
 	./ProjectsTabPage/ProjectBackup.h
 	./ProjectsTabPage/ProjectsTabPage.cpp
 	./ProjectsTabPage/ProjectsTabPage.h
+
 	./Reports/DialogReportPageSetup.cpp
 	./Reports/DialogReportPageSetup.h
 	./Reports/DialogSchemasExport.cpp
@@ -119,8 +125,11 @@ set (U7_SOURCES
 	./Reports/ReportPropertyEditor.h
 	./Reports/SchemasReport.cpp
 	./Reports/SchemasReport.h
+
 	./SchemaEditor/AutoFblItemConnection.cpp
 	./SchemaEditor/AutoFblItemConnection.h
+	./SchemaEditor/CreateActuatorDialog.cpp
+	./SchemaEditor/CreateActuatorDialog.h
 	./SchemaEditor/CreateSchemaDialog.cpp
 	./SchemaEditor/CreateSchemaDialog.h
 	./SchemaEditor/CreateSignalDialog.cpp
@@ -151,14 +160,17 @@ set (U7_SOURCES
 	./SchemaEditor/SchemaPropertiesDialog.h
 	./SchemaEditor/SchemasTabPage.cpp
 	./SchemaEditor/SchemasTabPage.h
+
 	./Simulator/SimProfileEditor.cpp
 	./Simulator/SimProfileEditor.h
 	./Simulator/SimSelectBuildDialog.cpp
 	./Simulator/SimSelectBuildDialog.h
+
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/TextEditCompleter.cpp
 	./Ui/TextEditCompleter.h
+
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp

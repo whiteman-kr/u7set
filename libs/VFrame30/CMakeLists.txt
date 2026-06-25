@@ -19,6 +19,7 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
+	./include/VFrame30/ActuatorHeader.h
 	./include/VFrame30/AppSignalController.h
 	./include/VFrame30/BaseSchemaWidget.h
 	./include/VFrame30/ClientSchemaView.h
@@ -140,6 +141,7 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemVduTrend.cpp
 	./SchemaItems/SchemaItemVduValue.cpp
 
+	ActuatorHeader.cpp
 	AppSignalController.cpp
 	BaseSchemaWidget.cpp
 	ClientSchemaView.cpp

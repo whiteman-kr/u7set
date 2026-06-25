@@ -202,13 +202,7 @@ namespace Builder
 		std::vector<DbFileInfo> files = filesTree.toVectorIf(
 			[](const DbFileInfo& f)
 			{
-				return (f.action() != E::VcsItemAction::Deleted) && (f.isFolder() == false) &&
-					   (f.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) ||
-						f.fileName().endsWith(QLatin1String(".") + File::MvsFileExtension, Qt::CaseInsensitive) ||
-						f.fileName().endsWith(QLatin1String(".") + File::DvsFileExtension, Qt::CaseInsensitive) ||
-						f.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) ||
-						f.fileName().endsWith(QLatin1String(".") + File::TvsFileExtension, Qt::CaseInsensitive) ||
-						f.fileName().endsWith(QLatin1String(".") + File::VduFileExtension, Qt::CaseInsensitive));
+				return f.action() != E::VcsItemAction::Deleted && File::isSchemaFileExtension(f.ext()) == true;
 			});
 
 		// Multithreaded load all schemas

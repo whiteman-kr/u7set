@@ -14,8 +14,8 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		enum FamilyType		// WARNING!!! Only high byte can be used as a part of the type
-		{					// (high byte is a module family, low byte is a module version)
+		enum FamilyType // WARNING!!! Only high byte can be used as a part of the type
+		{               // (high byte is a module family, low byte is a module version)
 			OTHER = 0x0000,
 			LM = 0x1100,
 			AIM = 0x1200,
@@ -30,11 +30,12 @@ namespace Hardware
 			FIM = 0x1B00,
 			VDU = 0x1C00,
 			PLM = 0x1D00,
+			ACM = 0x1E00,
 
 			MSO = 0x2200,
 			MPS = 0x5100,
-			BVK4 = 0x5300,	// obsolete, for compatibility
-			BP336 = 0x5500,	// obsolete, for compatibility
+			BVK4 = 0x5300,  // obsolete, for compatibility
+			BP336 = 0x5500, // obsolete, for compatibility
 			BVB = 0x5600,
 			BUIM = 0x5700,
 		};
@@ -47,13 +48,14 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const override;
+		virtual bool SaveData(Proto::Envelope* message,
+							  bool saveTree,
+							  const std::function<bool(const DeviceObject&)>& predicate) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Public Methods
 		//
 	public:
-
 		// Properties
 		//
 	public:
@@ -92,7 +94,7 @@ namespace Hardware
 		// Data
 		//
 	private:
-		uint16_t m_type = 0;	// high byte is family type, low byte is module version
+		uint16_t m_type = 0; // high byte is family type, low byte is module version
 
 		uint16_t m_customModuleFamily = 0;
 

@@ -178,10 +178,11 @@ namespace Locator
 			return false;
 		}
 
-		m_files.removeFilesWithExtension(File::AlTemplExtension);
-		m_files.removeFilesWithExtension(File::MvsTemplExtension);
-		m_files.removeFilesWithExtension(File::UfbTemplExtension);
-		m_files.removeFilesWithExtension(File::DvsTemplExtension);
+		m_files.removeIf(
+			[](auto&& f)
+			{
+				return File::isSchemaTemplateFileExtension(f.extension());
+			});
 
 		m_schemaDetails.reserve(m_files.size());
 		for (const auto&[fileId, fileInfo] : m_files)

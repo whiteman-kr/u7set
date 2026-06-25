@@ -79,6 +79,8 @@ extend Envelope
 	// ?Not Used? optional FblElement fblelement = 102;				// Fbl::FblElement
 	// ?Not Used? optional Configuration configuration = 103;			// VFrame30::Configuration
 	optional SchemaDetailsSet schemaDetailsSet = 105;	// VFrame30::SchemaDetailsSet
+
+	optional ActuatorHeader actuatorHeader = 106;		// VFrame30::ActuatorHeader
 }
 
 
@@ -1025,6 +1027,20 @@ message SchemaDetails
 	repeated string packedLogicIds = 27;
 
 	repeated TrendIndicatorSchemaItems trendIndicators = 30;
+}
+
+message ActuatorHeader
+{
+	optional string actuatorTypeId = 10;
+	optional string caption = 11;
+
+	optional string acmPresetName = 20;
+	optional string descriptionFile = 21;
+
+	optional int32 lmNumber = 30;
+	optional string subsystemId = 31;
+	
+	optional bool excludeFromBuild = 50;
 }
 
 //

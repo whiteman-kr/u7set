@@ -5,9 +5,7 @@ namespace Builder
 	//
 	// SubsystemStorage
 	//
-	SubsystemStorage::SubsystemStorage()
-	{
-	}
+	SubsystemStorage::SubsystemStorage() {}
 
 	void SubsystemStorage::add(std::shared_ptr<Hardware::Subsystem> subsystem)
 	{
@@ -34,12 +32,17 @@ namespace Builder
 		m_subsystems.clear();
 	}
 
-	const std::vector<std::shared_ptr<Hardware::Subsystem>>& SubsystemStorage::subsystems()
+	SubsystemStorage::const_iterator SubsystemStorage::begin() const
 	{
-		return m_subsystems;
+		return m_subsystems.begin();
 	}
 
-	bool SubsystemStorage::load(DbController *db, QString& errorCode)
+	SubsystemStorage::const_iterator SubsystemStorage::end() const
+	{
+		return m_subsystems.end();
+	}
+
+	bool SubsystemStorage::load(DbController* db, QString& errorCode)
 	{
 		if (db == nullptr)
 		{
@@ -110,7 +113,7 @@ namespace Builder
 		return !reader.hasError();
 	}
 
-	bool SubsystemStorage::save(DbController *db, const QString& comment)
+	bool SubsystemStorage::save(DbController* db, const QString& comment)
 	{
 		if (db == nullptr)
 		{
@@ -206,7 +209,7 @@ namespace Builder
 		return -1;
 	}
 
-	int SubsystemStorage::ssKeyForVdu(QString subsysId) 
+	int SubsystemStorage::ssKeyForVdu(QString subsysId)
 	{
 		Hash hash = ::calcHash(subsysId);
 		return hash & 0xffff;
@@ -216,4 +219,4 @@ namespace Builder
 	{
 		return ssKey(subsystemID);
 	}
-}
+} // namespace Builder

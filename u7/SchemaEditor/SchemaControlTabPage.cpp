@@ -3,9 +3,11 @@
 #include <HardwareLib/PropertyNames.h>
 #include <UiLib/StandardColors.h>
 #include <UiLib/TagSelectorWidget.h>
+#include <VFrame30/ActuatorHeader.h>
 #include <VFrame30/DiagSchema.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/MonitorSchema.h>
+#include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItem.h>
 #include <VFrame30/TuningSchema.h>
 #include <VFrame30/UfbSchema.h>
@@ -13,17 +15,19 @@
 
 #include "AppSettings.h"
 #include "CheckInDialog.h"
+#include "CreateActuatorDialog.h"
 #include "CreateSchemaDialog.h"
 #include "DialogClientBehavior.h"
 #include "EditSchemaTabPage.h"
+#include "IdePropertyEditor.h"
+#include "SchemasTabPage.h"
+
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/SelectChangesetDialog.h"
-#include "IdePropertyEditor.h"
 #include "Reports/DialogSchemasExport.h"
 #include "Reports/SchemasReport.h"
-#include "SchemasTabPage.h"
 
 
 #ifdef _DEBUG
@@ -1115,18 +1119,18 @@ void SchemaListModel::refresh()
 	//
 	DbFileTree files;
 	bool ok = dbc()->getFileListTree(&files, m_parentFile.fileId(), true, nullptr);
-
 	if (ok == false)
 	{
 		return; // do not reset model, just leave it as is
 	}
 
-	files.removeFilesWithExtension(File::AlTemplExtension);
-	files.removeFilesWithExtension(File::MvsTemplExtension);
-	files.removeFilesWithExtension(File::UfbTemplExtension);
-	files.removeFilesWithExtension(File::DvsTemplExtension);
+	files.removeIf(
+		[](auto&& f)
+		{
+			return File::isSchemaTemplateFileExtension(f.extension());
+		});
 
-	// Parse file details, befor applying filter, as we want to keep tags for all schemas
+	// Parse file details, before applying filter, as we want to keep tags for all schemas
 	//
 	std::map<int, VFrame30::SchemaDetails> detailsMap;
 
@@ -1471,7 +1475,7 @@ void SchemaFileView::createActions()
 	// clang-format off
 	m_newFileAction = new QAction(tr("New Schema..."), parent());
 	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
-	m_newFileAction->setStatusTip(tr("Add new schema to version control..."));
+	m_newFileAction->setStatusTip(tr("Add new file to version control..."));
 	m_newFileAction->setEnabled(false);
 	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
 
@@ -1480,19 +1484,19 @@ void SchemaFileView::createActions()
 	m_newFolderAction->setStatusTip(tr("Add new folder to version control..."));
 	m_newFolderAction->setEnabled(false);
 
-	m_cloneFileAction = new QAction(tr("Clone Schema"), parent());
+	m_cloneFileAction = new QAction(tr("Clone"), parent());
 	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
 	m_cloneFileAction->setStatusTip(tr("Clone file..."));
 	m_cloneFileAction->setEnabled(false);
 
-	m_openAction = new QAction(tr("Open Schema"), parent());
+	m_openAction = new QAction(tr("Open"), parent());
 	m_openAction->setIcon(QIcon(":/Images/Images/SchemaOpen.svg"));
 	m_openAction->setStatusTip(tr("Open file to edit"));
 	m_openAction->setEnabled(false);
 
-	m_viewAction = new QAction(tr("View Schema..."), parent());
+	m_viewAction = new QAction(tr("View..."), parent());
 	m_viewAction->setIcon(QIcon(":/Images/Images/SchemaView.svg"));
-	m_viewAction->setStatusTip(tr("Open schema to view"));
+	m_viewAction->setStatusTip(tr("Open file to view"));
 	m_viewAction->setEnabled(false);
 
 	m_deleteAction = new QAction(tr("Delete"), parent());
@@ -1501,8 +1505,8 @@ void SchemaFileView::createActions()
 	m_deleteAction->setEnabled(false);
 	m_deleteAction->setShortcut(QKeySequence::Delete);
 
-	m_moveFileAction = new QAction(tr("Move Schema(s)"), parent());
-	m_moveFileAction->setStatusTip(tr("Move Schema(s) to another folder..."));
+	m_moveFileAction = new QAction(tr("Move"), parent());
+	m_moveFileAction->setStatusTip(tr("Move file(s) to another folder..."));
 	m_moveFileAction->setEnabled(false);
 
 	// --
@@ -1704,6 +1708,30 @@ std::vector<std::shared_ptr<DbFileInfo>> SchemaFileView::selectedFiles() const
 	}
 
 	return result;
+}
+
+bool SchemaFileView::isActuatorFolder(const QModelIndex& index) const
+{
+	return isActuatorFolder(filesModel().file(index));
+}
+
+bool SchemaFileView::isActuatorFolder(DbFileInfo fileInfo) const
+{
+	auto actuatorsDirId = db()->systemFileId(DbDir::ActuatorsDir);
+	bool isActuatorFolder = false;
+
+	while (fileInfo.isNull() == false)
+	{
+		if (fileInfo.fileId() == actuatorsDirId)
+		{
+			isActuatorFolder = true;
+			break;
+		}
+
+		fileInfo = filesModel().file(fileInfo.parentId());
+	}
+
+	return isActuatorFolder;
 }
 
 void SchemaFileView::refreshFiles()
@@ -2196,11 +2224,40 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 {
 	QTreeView::selectionChanged(selected, deselected);
 
-	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = this->selectedFiles();
+	auto selectedFiles = this->selectedFiles();
+	auto selectedFolders = selectedFiles | std::views::filter(
+											   [](const std::shared_ptr<DbFileInfo>& file)
+											   {
+												   return file->isFolder() == true;
+											   });
+	auto selectedActuatorHeaders = selectedFiles | std::views::filter(
+													   [this](const std::shared_ptr<DbFileInfo>& file)
+													   {
+														   return file->extension() == File::ActuatorHeaderFileExtension;
+													   });
+	auto selectedSchemas =
+		selectedFiles | std::views::filter(
+							[](const std::shared_ptr<DbFileInfo>& file)
+							{
+								return file->isFolder() == false && file->extension() != File::ActuatorHeaderFileExtension;
+							});
+
 	bool selectedOneNonSystemFile = selectedFiles.size() == 1 && db()->systemFileInfo(selectedFiles.front()->fileId()).isNull() == true &&
 									selectedFiles.front()->directoryAttribute() == false;
 
 	m_newFileAction->setEnabled(selectedFiles.size() == 1);
+	if (m_newFileAction->isEnabled() == true)
+	{
+		if (isActuatorFolder(*selectedFiles.front()) == true)
+		{
+			m_newFileAction->setText(tr("New Actuator..."));
+		}
+		else
+		{
+			m_newFileAction->setText(tr("New Schema..."));
+		}
+	}
+
 	m_newFolderAction->setEnabled(selectedFiles.size() == 1);
 	m_cloneFileAction->setEnabled(selectedOneNonSystemFile);
 
@@ -2221,8 +2278,6 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 
 	bool canGetWorkcopy = false;
 	int canSetWorkcopy = 0;
-
-	bool schemaPoperties = (selectedFiles.empty() == false);
 
 	// hasAbilityToOpen
 	//
@@ -2316,16 +2371,24 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 	m_compareAction->setEnabled(selectedFiles.size() == 1);
 
 	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
-	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1); // can set work copy just for one file
+	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);                        // can set work copy just for one file
 
 	m_exportToPdfAction->setEnabled(canExportToPdf > 0);
 
-	m_propertiesAction->setEnabled(schemaPoperties);            // can set work copy just for one file
+	bool selectedOnlySchemasOrOnlyActuatorHeaders = selectedFolders.empty() == true && //
+													((selectedSchemas.empty() == false && selectedActuatorHeaders.empty() == true) || //
+													 (selectedSchemas.empty() == true && selectedActuatorHeaders.empty() == false));
+	m_propertiesAction->setEnabled(selectedOnlySchemasOrOnlyActuatorHeaders);
 
 	return;
 }
 
 SchemaListModel& SchemaFileView::filesModel()
+{
+	return m_filesModel;
+}
+
+const SchemaListModel& SchemaFileView::filesModel() const
 {
 	return m_filesModel;
 }
@@ -2728,13 +2791,14 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 	// If parent  or it's parent... is $root$/Schemas/ApplicationLogic
 	// the create als
 	// clang-format off
-	const std::map<int, std::function<std::shared_ptr<VFrame30::Schema>()>> createSchemaMap = {
+	static const std::map<int, std::function<std::shared_ptr<VFrame30::Schema>()>> createSchemaMap = {
 		{db()->systemFileId(DbDir::AppLogicDir), []() { return std::make_shared<VFrame30::LogicSchema>(); }},
 		{db()->systemFileId(DbDir::MonitorSchemasDir), []() { return std::make_shared<VFrame30::MonitorSchema>(); }},
 		{db()->systemFileId(DbDir::TuningSchemasDir), []() { return std::make_shared<VFrame30::TuningSchema>(); }},
 		{db()->systemFileId(DbDir::UfblDir), []() { return std::make_shared<VFrame30::UfbSchema>(); }},
 		{db()->systemFileId(DbDir::DiagSchemasDir), []() { return std::make_shared<VFrame30::DiagSchema>(); }},
-		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }}
+		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }},
+		//{db()->systemFileId(DbDir::ActuatorsDir), []() { return std::make_shared<VFrame30::ActuatorHeader>(); }},
 	};
 	// clang-format on
 
@@ -2908,56 +2972,73 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 		return;
 	}
 
-	// Load file
+	// Chose between schema file and actuator header file by extension.
 	//
-	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
-
-	if (vf == nullptr)
+	if (out[0]->extension() == File::ActuatorHeaderFileExtension)
 	{
-		QMessageBox::critical(this, tr("Error"), tr("File %1 cannot be read or is corrupted.").arg(out[0]->fileName()));
-		return;
+		auto actuatorHeader = VFrame30::ActuatorHeader::Create(out[0].get()->data());
+		if (actuatorHeader == nullptr)
+		{
+			QMessageBox::critical(this, tr("Error"), tr("File %1 cannot be read or is corrupted.").arg(out[0]->fileName()));
+			return;
+		}
+
+		// Show properties dialog for actuator header file
+		//
+		showActuatorHeaderProperties({out[0]}, false);
 	}
-
-	// Create TabPage and add it to the TabControl
-	//
-	DbFileInfo fi(*(out.front().get()));
-
-	EditSchemaTabPage* editTabPage = new EditSchemaTabPage{tabWidget, vf, fi, db(), m_signalSetProvider};
-
-	connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, m_filesView, &SchemaFileView::slot_refreshFiles);
-	connect(editTabPage, &EditSchemaTabPage::aboutToClose, this, &SchemaControlTabPage::removeFromOpenedList);
-	connect(editTabPage, &EditSchemaTabPage::pleaseDetachOrAttachWindow, this, &SchemaControlTabPage::detachOrAttachWindow);
-	connect(editTabPage, &EditSchemaTabPage::fileWasSaved, this, &SchemaControlTabPage::schemaWasSaved);
-
-	Q_ASSERT(tabWidget->parent());
-
-	SchemasTabPage* schemasTabPage = dynamic_cast<SchemasTabPage*>(tabWidget->parent());
-	if (schemasTabPage == nullptr)
+	else
 	{
-		Q_ASSERT(dynamic_cast<SchemasTabPage*>(tabWidget->parent()));
-		return;
+		// Load schema file
+		//
+		std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
+		if (vf == nullptr)
+		{
+			QMessageBox::critical(this, tr("Error"), tr("File %1 cannot be read or is corrupted.").arg(out[0]->fileName()));
+			return;
+		}
+
+		// Create TabPage and add it to the TabControl
+		//
+		DbFileInfo fi(*(out.front().get()));
+
+		EditSchemaTabPage* editTabPage = new EditSchemaTabPage{tabWidget, vf, fi, db(), m_signalSetProvider};
+
+		connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, m_filesView, &SchemaFileView::slot_refreshFiles);
+		connect(editTabPage, &EditSchemaTabPage::aboutToClose, this, &SchemaControlTabPage::removeFromOpenedList);
+		connect(editTabPage, &EditSchemaTabPage::pleaseDetachOrAttachWindow, this, &SchemaControlTabPage::detachOrAttachWindow);
+		connect(editTabPage, &EditSchemaTabPage::fileWasSaved, this, &SchemaControlTabPage::schemaWasSaved);
+
+		Q_ASSERT(tabWidget->parent());
+
+		SchemasTabPage* schemasTabPage = dynamic_cast<SchemasTabPage*>(tabWidget->parent());
+		if (schemasTabPage == nullptr)
+		{
+			Q_ASSERT(dynamic_cast<SchemasTabPage*>(tabWidget->parent()));
+			return;
+		}
+
+		connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
+
+		// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
+		// to the tab page title
+		//
+		editTabPage->updateAfbSchemaItems();
+		editTabPage->updateUfbSchemaItems();
+		editTabPage->updateBussesSchemaItems();
+
+		// Do this ONLY after update, because during updateAfbSchemaItems/updateUfbSchemaItems/updateBussesSchemaItems
+		// window can be closed by Ctrl+w, and programm crashes then
+		//
+		editTabPage->setReadOnly(false);
+
+		tabWidget->addTab(editTabPage, editTabPage->windowTitle());
+		tabWidget->setCurrentWidget(editTabPage);
+
+		editTabPage->updateZoomAndScrolls(true, false);
+
+		m_openedFiles.push_back(editTabPage);
 	}
-
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
-
-	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
-	// to the tab page title
-	//
-	editTabPage->updateAfbSchemaItems();
-	editTabPage->updateUfbSchemaItems();
-	editTabPage->updateBussesSchemaItems();
-
-	// Do this ONLY after update, because during updateAfbSchemaItems/updateUfbSchemaItems/updateBussesSchemaItems
-	// window can be closed by Ctrl+w, and programm crashes then
-	//
-	editTabPage->setReadOnly(false);
-
-	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
-	tabWidget->setCurrentWidget(editTabPage);
-
-	editTabPage->updateZoomAndScrolls(true, false);
-
-	m_openedFiles.push_back(editTabPage);
 
 	return;
 }
@@ -2993,15 +3074,6 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 		return;
 	}
 
-	// --
-	//
-	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-	if (tabWidget == nullptr)
-	{
-		Q_ASSERT(tabWidget != nullptr);
-		return;
-	}
-
 	// Get file with choosen changeset
 	//
 	std::shared_ptr<DbFile> out;
@@ -3014,18 +3086,39 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 
 	DbFileInfo fi(*out);
 
-	// Load file
-	//
-	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out->data()));
+	if (fi.isFolder() == false && //
+		(File::isSchemaFileExtension(fi.fileName()) == true || File::isSchemaTemplateFileExtension(fi.fileName()) == true))
+	{
+		viewSchemaFile(*out);
+	}
+
+	if (fi.isFolder() == false && fi.ext().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0)
+	{
+		viewActuatorHeaderFile(*out);
+	}
+
+	return;
+}
+
+void SchemaControlTabPage::viewSchemaFile(const DbFile& file)
+{
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		Q_ASSERT(tabWidget != nullptr);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(file.data()));
 
 	// Find the opened read only file with the same changeset
 	//
-	if (auto editTabPage = findOpenedFile(fi, true); editTabPage != nullptr)
+	if (auto editTabPage = findOpenedFile(file, true); editTabPage != nullptr)
 	{
 		// File already opened, check if it is opened for edit then activate this tab
 		//
-		if (editTabPage->readOnly() == true && editTabPage->fileInfo().fileId() == fi.fileId() &&
-			editTabPage->fileInfo().changeset() == fi.changeset())
+		if (editTabPage->readOnly() == true && editTabPage->fileInfo().fileId() == file.fileId() &&
+			editTabPage->fileInfo().changeset() == file.changeset())
 		{
 			if (tabWidget->indexOf(editTabPage) != -1)
 			{
@@ -3045,7 +3138,7 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 
 	// Create TabPage and add it to the TabControl
 	//
-	EditSchemaTabPage* editTabPage = new EditSchemaTabPage{tabWidget, vf, fi, db(), m_signalSetProvider};
+	EditSchemaTabPage* editTabPage = new EditSchemaTabPage{tabWidget, vf, file, db(), m_signalSetProvider};
 
 	connect(editTabPage, &EditSchemaTabPage::aboutToClose, this, &SchemaControlTabPage::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPage::pleaseDetachOrAttachWindow, this, &SchemaControlTabPage::detachOrAttachWindow);
@@ -3058,8 +3151,12 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 	editTabPage->updateZoomAndScrolls(true, false);
 
 	m_openedFiles.push_back(editTabPage);
-
 	return;
+}
+
+void SchemaControlTabPage::viewActuatorHeaderFile(const DbFile& file)
+{
+	showActuatorHeaderProperties({std::make_shared<DbFile>(file)}, true);
 }
 
 void SchemaControlTabPage::projectOpened()
@@ -3338,7 +3435,7 @@ void SchemaControlTabPage::addFile()
 
 	DbFileInfo parentFile;
 
-	// If folder selected, then create new file in this bolder
+	// If folder selected, then create new file in this folder
 	//
 	if (selectedFile.directoryAttribute() == true)
 	{
@@ -3358,6 +3455,20 @@ void SchemaControlTabPage::addFile()
 		return;
 	}
 
+	// If parent folder is ${root}/Schemas/Actuators or has such parent folder, then create Actuator file, otherwise - Schema file
+	//
+	if (m_filesView->isActuatorFolder(parentFile) == true)
+	{
+		return addActuator(parentFile);
+	}
+
+	// Add Schema file
+	//
+	return addSchema(parentFile);
+}
+
+void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
+{
 	// Creating new schema depends on parent, if it is ApplicationLogic, then ALS file is created,
 	// if Monitor, then MVS, so on
 	//
@@ -3456,7 +3567,8 @@ void SchemaControlTabPage::addFile()
 		}
 	}
 
-
+	// --
+	//
 	CreateSchemaDialog propertiesDialog(schema, db(), this);
 
 	if (propertiesDialog.exec() != QDialog::Accepted)
@@ -3468,6 +3580,68 @@ void SchemaControlTabPage::addFile()
 
 	return;
 }
+
+void SchemaControlTabPage::addActuator(const DbFileInfo& parentFile)
+{
+	auto actuatorHeader = std::make_shared<VFrame30::ActuatorHeader>();
+
+	actuatorHeader->setActuatorTypeId("ACTUATORID_" + QString::number(db()->nextCounterValue()).rightJustified(6, '0'));
+	actuatorHeader->setCaption("Valve");
+	actuatorHeader->setAcmPresetName("PRESET_ACM1");
+
+	{
+		bool ok = false;
+		QString value;
+
+		ok = db()->getUserProperty("NewActuatorLastParam/PresetName", &value, this);
+		if (ok == true && value.isEmpty() == false)
+		{
+			actuatorHeader->setAcmPresetName(value); // To update description file based on preset name
+		}
+
+		ok = db()->getUserProperty("NewActuatorLastParam/DescriptionFile", &value, this);
+		if (ok == true && value.isEmpty() == false)
+		{
+			actuatorHeader->setDescriptionFile(value);
+		}
+
+		ok = db()->getUserProperty("NewActuatorLastParam/SubsystemID", &value, this);
+		if (ok == true && value.isEmpty() == false)
+		{
+			actuatorHeader->setSubsystemId(value);
+		}
+
+		ok = db()->getUserProperty("NewActuatorLastParam/LmNumber", &value, this);
+		if (ok == true && value.isEmpty() == false)
+		{
+			bool lmNumberOk = false;
+			int lmNumber = value.toInt(&lmNumberOk);
+			if (lmNumberOk == true)
+			{
+				actuatorHeader->setLmNumber(lmNumber + 1);
+			}
+		}
+	}
+
+	CreateActuatorDialog dialog{actuatorHeader, db(), this};
+	auto result = dialog.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		addActuatorHeaderFile(actuatorHeader, File::ActuatorHeaderFileExtension, parentFile.fileId());
+
+		// Save last used params.
+		//
+		db()->setUserProperty("NewActuatorLastParam/PresetName", actuatorHeader->acmPresetName(), this);
+		db()->setUserProperty("NewActuatorLastParam/DescriptionFile", actuatorHeader->descriptionFile(), this);
+
+		db()->setUserProperty("NewActuatorLastParam/SubsystemID", actuatorHeader->subsystemId(), this);
+		db()->setUserProperty("NewActuatorLastParam/LmNumber", QString::number(actuatorHeader->lmNumber()), this);
+	}
+
+	return;
+}
+
 
 // Find the QModelIndex for FileID, and call addSchemaFileToDb
 //
@@ -3531,6 +3705,106 @@ void SchemaControlTabPage::addSchemaFileToDb(std::shared_ptr<VFrame30::Schema> s
 	}
 
 	if (bool ok = db()->addUniqueFile(file, parentFileId, db()->systemFileId(DbDir::SchemasDir), this); ok == false)
+	{
+		return;
+	}
+
+	// Add file to the FileModel and select it
+	//
+	if (file->fileId() != -1)
+	{
+		// Clear file data, we don't need it anymore, if file will be added to the model with data it will just waste memory
+		//
+		file->clearData();
+
+		m_filesView->selectionModel()->clear();
+		auto [addedModelIndex, addResult] = m_filesView->filesModel().addFile(parentIndex, file);
+
+		if (addResult == true)
+		{
+			QModelIndex addedProxyIndex = m_filesView->proxyModel().mapFromSource(addedModelIndex);
+			QModelIndex parentProxyIndex = addedProxyIndex.parent();
+
+			if (m_filesView->isExpanded(parentProxyIndex) == false)
+			{
+				m_filesView->expand(parentProxyIndex);
+			}
+
+			m_filesView->scrollTo(addedProxyIndex);
+			m_filesView->selectionModel()->setCurrentIndex(addedProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows); //
+		}
+	}
+
+	return;
+}
+
+// Find the QModelIndex for FileID, and call addSchemaFileToDb
+//
+void SchemaControlTabPage::addActuatorHeaderFile(std::shared_ptr<VFrame30::ActuatorHeader> actuatorHeader,
+												 QString fileExtension,
+												 int parentFileId)
+{
+	QModelIndex parentIndex;
+	QModelIndexList matched = m_filesView->filesModel().match(m_filesView->filesModel().index(0, 0),
+															  Qt::UserRole,
+															  QVariant::fromValue(parentFileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot find parent item for new file."));
+		return;
+	}
+
+	parentIndex = matched.front();
+
+	addActuatorHeaderFileToDb(actuatorHeader, fileExtension, parentIndex);
+
+	return;
+}
+
+// Add file to DB
+//
+void SchemaControlTabPage::addActuatorHeaderFileToDb(std::shared_ptr<VFrame30::ActuatorHeader> actuatorHeader,
+													 QString fileExtension,
+													 QModelIndex parentIndex)
+{
+	if (actuatorHeader == nullptr)
+	{
+		Q_ASSERT(actuatorHeader);
+		return;
+	}
+
+	//  Save file in DB
+	//
+	if (fileExtension.isEmpty() == false && fileExtension.startsWith('.') == false)
+	{
+		fileExtension = '.' + fileExtension;
+	}
+
+	QByteArray data;
+	actuatorHeader->saveToByteArray(&data);
+
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+	file->setFileName(actuatorHeader->actuatorTypeId() + fileExtension);
+	// file->setDetails(actuatorHeader->details(QString{})); // Ignore path here
+	file->swapData(data);
+
+	int parentFileId = -1;
+
+	if (parentIndex.isValid() == false)
+	{
+		parentFileId = parentFile().fileId();
+	}
+	else
+	{
+		parentFileId = static_cast<int>(parentIndex.internalId());
+	}
+
+	if (bool ok = db()->addUniqueFile(file, parentFileId, db()->systemFileId(DbDir::ActuatorsDir), this); //
+		ok == false)
 	{
 		return;
 	}
@@ -3700,9 +3974,21 @@ void SchemaControlTabPage::cloneFile()
 		return;
 	}
 
-	// Load file
-	//
-	std::shared_ptr<VFrame30::Schema> schema(VFrame30::Schema::Create(out->data()));
+	if (out->extension() == File::ActuatorHeaderFileExtension)
+	{
+		cloneActuatorHeader(*out);
+	}
+	else
+	{
+		cloneSchema(*out);
+	}
+
+	return;
+}
+
+void SchemaControlTabPage::cloneSchema(const DbFile& file)
+{
+	std::shared_ptr<VFrame30::Schema> schema(VFrame30::Schema::Create(file.data()));
 	if (schema == nullptr)
 	{
 		Q_ASSERT(schema != nullptr);
@@ -3766,14 +4052,55 @@ void SchemaControlTabPage::cloneFile()
 
 	// Get folder for clonned schema
 	//
-	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::SchemasDir), fileToClone.parentId(), false);
+	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::SchemasDir), file.parentId(), false);
 	if (parentFileId == -1)
 	{
 		return;
 	}
 
-	addSchemaFile(schema, fileToClone.extension(), parentFileId);
+	addSchemaFile(schema, file.extension(), parentFileId);
+	return;
+}
 
+void SchemaControlTabPage::cloneActuatorHeader(const DbFile& file)
+{
+	auto actuatorHeader = VFrame30::ActuatorHeader::Create(file.data());
+	if (actuatorHeader == nullptr)
+	{
+		Q_ASSERT(actuatorHeader != nullptr);
+		return;
+	}
+
+	// Get new typeID
+	//
+	bool ok = false;
+	int globalCounter = db()->nextCounterValue();
+	QString newTypeId = QInputDialog::getText(this,
+											  qAppName(),
+											  tr("New ActuatorTypeID:"),
+											  QLineEdit::Normal,
+											  actuatorHeader->actuatorTypeId() + QString::number(globalCounter),
+											  &ok,
+											  Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+	if (ok == false || newTypeId.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Set new IDs, labels, etc.
+	//
+	actuatorHeader->setActuatorTypeId(newTypeId);
+
+	// Get folder for clonned actuator header.
+	//
+	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::ActuatorsDir), file.parentId(), false);
+	if (parentFileId == -1)
+	{
+		return;
+	}
+
+	addActuatorHeaderFile(actuatorHeader, file.extension(), parentFileId);
 	return;
 }
 
@@ -4340,23 +4667,12 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 
 	// Check file extension,
 	// can compare next files
-	// clang-format off
-	if (object.name().endsWith("." + QString(File::AlFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::AlTemplExtension)) == false &&
-		object.name().endsWith("." + QString(File::UfbFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::UfbTemplExtension)) == false &&
-		object.name().endsWith("." + QString(File::MvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::MvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(File::TvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::TvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(File::DvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::DvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(File::VduFileExtension)) == false &&
-		object.name().endsWith("." + QString(File::VduTemplExtension)) == false)
+	//
+	if (QString ext = QFileInfo(object.name()).suffix(); //
+		File::isSchemaFileExtension(ext) == false && File::isSchemaTemplateFileExtension(ext) == false)
 	{
 		return;
 	}
-	// clang-format on
 
 	// Get versions from the project database
 	//
@@ -4890,19 +5206,58 @@ void SchemaControlTabPage::showFileProperties()
 	std::vector<std::shared_ptr<DbFile>> out;
 
 	bool ok = db()->getLatestVersion(requestFiles, &out, this);
-	if (ok == false)
+	if (ok == false || out.empty() == true)
 	{
 		return;
 	}
 
+	// Expected: all files either schemas or actuator headers.
+	//
+	bool allAreActuatorHeaders =
+		std::ranges::all_of(out,
+							[](const std::shared_ptr<DbFile>& f)
+							{
+								return f->isFolder() == false && f->extension() == File::ActuatorHeaderFileExtension;
+							});
+	bool allAreSchemaFiles = std::ranges::all_of(out,
+												 [](const std::shared_ptr<DbFile>& f)
+												 {
+													 return f->isFolder() == false && File::isSchemaFileExtension(f->extension());
+												 });
+
+	// Only one type of files can be processed, so if there are mixed types, just return
+	//
+	if (allAreSchemaFiles == true && allAreActuatorHeaders == false)
+	{
+		showSchemaProperties(out, readOnly);
+	}
+	else if (allAreActuatorHeaders == true && allAreSchemaFiles == false)
+	{
+		showActuatorHeaderProperties(out, readOnly);
+	}
+	else
+	{
+		assert(allAreActuatorHeaders == true && allAreSchemaFiles == false);
+	}
+
+	return;
+}
+
+void SchemaControlTabPage::showSchemaProperties(const std::vector<std::shared_ptr<DbFile>>& files, bool readOnly)
+{
 	// Read schemas
 	//
 	std::vector<std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>>> schemas;
-	schemas.reserve(out.size());
+	schemas.reserve(files.size());
 
 	QString initialSchemasId;
 
-	for (std::shared_ptr<DbFile> file : out)
+	auto filterFunc = [](const std::shared_ptr<DbFile>& file)
+	{
+		return file->isFolder() == false && File::isSchemaFileExtension(file->extension()) == true;
+	};
+
+	for (std::shared_ptr<DbFile> file : files | std::views::filter(filterFunc))
 	{
 		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 		if (schema == nullptr)
@@ -5030,7 +5385,8 @@ void SchemaControlTabPage::showFileProperties()
 				//
 				QString newFileName = schema->schemaId() + "." + file->extension();
 
-				if (ok = db()->renameFile(*file, newFileName, file.get(), this); ok == false)
+				if (bool ok = db()->renameFile(*file, newFileName, file.get(), this); //
+					ok == false)
 				{
 					// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
 					// Just return
@@ -5043,6 +5399,166 @@ void SchemaControlTabPage::showFileProperties()
 				// and it will be written to DB later (db()->setWorkcopy(filesToSave, this);)
 				//
 				file->setDetails(schema->details(QString{})); // Ignore path here
+			}
+		}
+
+		if (filesToSave.empty() == false)
+		{
+			db()->setWorkcopy(filesToSave, this);
+			m_filesView->refreshFiles();
+		}
+	}
+
+	return;
+}
+
+void SchemaControlTabPage::showActuatorHeaderProperties(const std::vector<std::shared_ptr<DbFile>>& files, bool readOnly)
+{
+	// Read schemas
+	//
+	std::vector<std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::ActuatorHeader>>> actuatorHeaders;
+	actuatorHeaders.reserve(files.size());
+
+	QString initialId;
+
+	auto filterFunc = [](const std::shared_ptr<DbFile>& file)
+	{
+		return file->isFolder() == false && file->extension().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0;
+	};
+
+	for (auto file : files | std::views::filter(filterFunc))
+	{
+		std::shared_ptr<VFrame30::ActuatorHeader> actuatorHeader = VFrame30::ActuatorHeader::Create(file->data());
+		if (actuatorHeader == nullptr)
+		{
+			Q_ASSERT(actuatorHeader != nullptr);
+			return;
+		}
+
+		actuatorHeaders.push_back({file, actuatorHeader});
+
+		initialId = actuatorHeader->actuatorTypeId(); // Has sense if only one actuator header is selected
+	}
+
+	// Show actuator header properties dialog
+	//
+	QDialog d{this};
+
+	d.setWindowTitle(tr("Actuator Header(s) Properties"));
+	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint & ~Qt::WindowContextHelpButtonHint) |
+					 Qt::CustomizeWindowHint);
+
+	IdePropertyEditor* propertyEditor = new IdePropertyEditor(this, dbc());
+	propertyEditor->setReadOnly(readOnly);
+	propertyEditor->setDefaultSpecificPropertyCategory(tr("Params"));
+
+	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
+	propertyObjects.reserve(actuatorHeaders.size());
+
+	for (auto actuatorHeader : actuatorHeaders | std::views::values)
+	{
+		Q_ASSERT(actuatorHeader);
+		propertyObjects.push_back(actuatorHeader);
+
+		// Now allow to edit ActuatorTypeID, only if one file is selected
+		//
+		auto actuatorTypeIdProp = actuatorHeader->propertyByCaption(VFrame30::PropertyNames::ActuatorTypeId);
+		if (actuatorTypeIdProp == nullptr)
+		{
+			Q_ASSERT(actuatorTypeIdProp);
+			continue;
+		}
+
+		actuatorTypeIdProp->setReadOnly(actuatorHeaders.size() != 1);
+	}
+
+	propertyEditor->setObjects(propertyObjects);
+	propertyEditor->autoAdjustSplitterPosition();
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(propertyEditor);
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	if (QSize s = QSettings().value("ActuatorHeaderFileProperties/size").toSize(); s.isValid() == true)
+	{
+		d.resize(s);
+	}
+	else
+	{
+		d.resize(d.sizeHint() * 2);
+	}
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// Show proprties dialog
+	// and save result on accept
+	//
+	int result = d.exec();
+
+	QSettings().setValue("ActuatorHeaderFileProperties/size", d.size());
+
+	if (result == QDialog::Accepted)
+	{
+		std::vector<std::shared_ptr<DbFile>> filesToSave;
+		filesToSave.reserve(actuatorHeaders.size());
+
+		for (auto [file, actuatorHeader] : actuatorHeaders)
+		{
+			if (file->state() != E::VcsState::CheckedOut ||
+				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdministrator() == false))
+			{
+				continue;
+			}
+
+			QByteArray data;
+			actuatorHeader->saveToByteArray(&data);
+
+			if (data.isEmpty() == true)
+			{
+				Q_ASSERT(data.isEmpty() == false);
+				return;
+			}
+
+			// --
+			//
+			file->swapData(data);
+			// file->setDetails(actuatorHeader->details(QString{})); // Ignore path here
+
+			filesToSave.push_back(file);
+		}
+
+		// Check if ActuatorTypeID was changed and we need to rename file
+		//
+		if (actuatorHeaders.size() == 1)
+		{
+			auto file = actuatorHeaders.front().first;
+			auto actuatorHeader = actuatorHeaders.front().second;
+
+			if (actuatorHeader->actuatorTypeId() != initialId)
+			{
+				// File must be renamed to new name
+				//
+				QString newFileName = actuatorHeader->actuatorTypeId() + "." + file->extension();
+
+				if (bool ok = db()->renameFile(*file, newFileName, file.get(), this); //
+					ok == false)
+				{
+					// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
+					// Just return
+					//
+					return;
+				}
+
+				// variable file has spoiled 'details' while db()->renameFile (it returns new DbFileInfo into file)
+				// so we need to update details again!!!
+				// and it will be written to DB later (db()->setWorkcopy(filesToSave, this);)
+				//
+				// file->setDetails(actuatorHeader->details(QString{})); // Ignore path here
 			}
 		}
 

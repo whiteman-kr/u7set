@@ -17,7 +17,7 @@ namespace Db
 		auto it = s_dirToName.find(systemDir);
 		return it != s_dirToName.end() ? it->second : QString{};
 	}
-}
+} // namespace Db
 
 //
 //
@@ -91,59 +91,108 @@ DbProjectProperties::DbProjectProperties()
 {
 	Property* p = nullptr;
 
-	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::Description, true, DbProjectProperties::description, DbProjectProperties::setDescription);
+	p = ADD_PROPERTY_GETTER_SETTER(QString,
+								   Db::ProjectProperty::Description,
+								   true,
+								   DbProjectProperties::description,
+								   DbProjectProperties::setDescription);
 	p->setCategory("Project");
 	p->setDescription("Project description");
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::SafetyProject, true, DbProjectProperties::safetyProject, DbProjectProperties::setSafetyProject);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::SafetyProject,
+								   true,
+								   DbProjectProperties::safetyProject,
+								   DbProjectProperties::setSafetyProject);
 	p->setCategory("Project");
 	p->setDescription("Safety Project");
 
 	// --
 	//
-	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
+	p = ADD_PROPERTY_GETTER_SETTER(QString,
+								   Db::ProjectProperty::SuppressWarnings,
+								   true,
+								   DbProjectProperties::suppressWarningsAsString,
+								   DbProjectProperties::setSuppressWarnings);
 	p->setCategory("Build");
 	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::UppercaseAppSignalId,
+								   true,
+								   DbProjectProperties::uppercaseAppSignalId,
+								   DbProjectProperties::setUppercaseAppSignalId);
 	p->setCategory("Editor");
 	p->setDescription("Uppercase AppSignalIDs, to apply option reopen project is required");
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsXml, true, DbProjectProperties::generateAppSignalsXml, DbProjectProperties::setGenerateAppSignalsXml);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::GenerateAppSignalsXml,
+								   true,
+								   DbProjectProperties::generateAppSignalsXml,
+								   DbProjectProperties::setGenerateAppSignalsXml);
 	p->setCategory("Build");
 	p->setDescription(Db::ProjectProperty::GenerateAppSignalsXmlDescription);
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsExtXml, true, DbProjectProperties::generateAppSignalsExtXml, DbProjectProperties::setGenerateAppSignalsExtXml);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::GenerateAppSignalsExtXml,
+								   true,
+								   DbProjectProperties::generateAppSignalsExtXml,
+								   DbProjectProperties::setGenerateAppSignalsExtXml);
 	p->setCategory("Build");
 	p->setDescription(Db::ProjectProperty::GenerateAppSignalsExtXmlDescription);
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppLogicDrawings, true, DbProjectProperties::generateAppLogicDrawings, DbProjectProperties::setGenerateAppLogicDrawings);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::GenerateAppLogicDrawings,
+								   true,
+								   DbProjectProperties::generateAppLogicDrawings,
+								   DbProjectProperties::setGenerateAppLogicDrawings);
 	p->setCategory("Build");
 	p->setDescription(Db::ProjectProperty::GenerateAppLogicDrawingsDescription);
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::GenerateExtraDebugInfo,
+								   true,
+								   DbProjectProperties::generateExtraDebugInfo,
+								   DbProjectProperties::setGenerateExtraDebugInfo);
 	p->setCategory("Build");
 	p->setDescription("Generate extra debug information on build");
 
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::MismatchPresetVersionAsWarning, true, DbProjectProperties::mismatchPresetVersionAsWarning, DbProjectProperties::setMismatchPresetVersionAsWarning);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::MismatchPresetVersionAsWarning,
+								   true,
+								   DbProjectProperties::mismatchPresetVersionAsWarning,
+								   DbProjectProperties::setMismatchPresetVersionAsWarning);
 	p->setCategory("Build");
 	p->setDescription("If preset version mismatch is detected, treat it as a warning");
 
 	// --
 	//
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   Db::ProjectProperty::RunSimTestsOnBuild,
+								   true,
+								   DbProjectProperties::runSimTestsOnBuild,
+								   DbProjectProperties::setRunSimTestsOnBuild);
 	p->setCategory("Tests");
 	p->setDescription("Run simulator based tests on project build");
 
-	p = ADD_PROPERTY_GETTER_SETTER(int, Db::ProjectProperty::SimulatorTestsTimeout, true, DbProjectProperties::simTestsTimeout, DbProjectProperties::setSimTestsTimeout);
+	p = ADD_PROPERTY_GETTER_SETTER(int,
+								   Db::ProjectProperty::SimulatorTestsTimeout,
+								   true,
+								   DbProjectProperties::simTestsTimeout,
+								   DbProjectProperties::setSimTestsTimeout);
 	p->setCategory("Tests");
 	p->setDescription("Timeout (in ms) for running simulator based script tests, -1 no timeout");
 
 	// --
 	//
-	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::ProjectDefaults, true, DbProjectProperties::projectDefaults, DbProjectProperties::setProjectDefaults);
+	p = ADD_PROPERTY_GETTER_SETTER(QString,
+								   Db::ProjectProperty::ProjectDefaults,
+								   true,
+								   DbProjectProperties::projectDefaults,
+								   DbProjectProperties::setProjectDefaults);
 	p->setCategory("Other");
-	p->setDescription("Project defaults, ini-file in format:\n[SchemaItemLink]\nLineWeight = 0\nLineColor = #000080\n// Comment\nAlignHorz = AlignHCenter");
+	p->setDescription("Project defaults, ini-file in format:\n[SchemaItemLink]\nLineWeight = 0\nLineColor = #000080\n// Comment\nAlignHorz "
+					  "= AlignHCenter");
 
 	return;
 }
@@ -283,7 +332,7 @@ void DbProjectProperties::setGenerateExtraDebugInfo(bool value)
 
 bool DbProjectProperties::mismatchPresetVersionAsWarning() const
 {
-		return m_mismatchPresetVersionAsWarning;
+	return m_mismatchPresetVersionAsWarning;
 }
 
 void DbProjectProperties::setMismatchPresetVersionAsWarning(bool value)
@@ -309,7 +358,7 @@ void DbProjectProperties::setProjectDefaults(const QString& value)
 //
 DbUser::DbUser()
 {
-	m_username = "";		// it makes qstring not null, null is bad for database
+	m_username = ""; // it makes qstring not null, null is bad for database
 	m_firstName = "";
 	m_lastName = "";
 	m_password = "";
@@ -319,19 +368,19 @@ DbUser::DbUser()
 DbUser::DbUser(int userId) :
 	m_userId(userId)
 {
-	m_username = "";		// it makes qstring not null, null is bad for database
+	m_username = ""; // it makes qstring not null, null is bad for database
 	m_firstName = "";
 	m_lastName = "";
 	m_password = "";
 	m_newPassword = "";
 }
 
-bool DbUser::operator== (const DbUser& u) const
+bool DbUser::operator==(const DbUser& u) const
 {
 	return this->m_userId == u.m_userId;
 }
 
-bool DbUser::operator!= (const DbUser& u) const
+bool DbUser::operator!=(const DbUser& u) const
 {
 	return this->m_userId != u.m_userId;
 }
@@ -461,7 +510,7 @@ DbFileTree::DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, in
 
 DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId)
 {
-	for (const auto&[fileId, file] : files)
+	for (const auto& [fileId, file] : files)
 	{
 		Q_UNUSED(fileId);
 		addFile(file);
@@ -624,7 +673,7 @@ std::vector<DbFileInfo> DbFileTree::toVector(bool excludeRoot) const
 	std::vector<DbFileInfo> fileList;
 	fileList.reserve(m_files.size());
 
-	for (auto&[fileId, fileInfo] : m_files)
+	for (auto& [fileId, fileInfo] : m_files)
 	{
 		if (excludeRoot == true && fileId == rootFileId())
 		{
@@ -642,7 +691,7 @@ std::vector<DbFileInfo> DbFileTree::toVectorIf(std::function<bool(const DbFileIn
 	std::vector<DbFileInfo> fileList;
 	fileList.reserve(m_files.size());
 
-	for (auto&[fileId, fileInfo] : m_files)
+	for (auto& [fileId, fileInfo] : m_files)
 	{
 		if (pred(*fileInfo) == false)
 		{
@@ -655,12 +704,12 @@ std::vector<DbFileInfo> DbFileTree::toVectorIf(std::function<bool(const DbFileIn
 	return fileList;
 }
 
-std::vector<std::shared_ptr<DbFileInfo> > DbFileTree::toVectorOfSharedPointers(bool excludeRoot) const
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::toVectorOfSharedPointers(bool excludeRoot) const
 {
 	std::vector<std::shared_ptr<DbFileInfo>> fileList;
 	fileList.reserve(m_files.size());
 
-	for (auto&[fileId, fileInfo] : m_files)
+	for (auto& [fileId, fileInfo] : m_files)
 	{
 		if (excludeRoot == true && fileId == rootFileId())
 		{
@@ -778,7 +827,6 @@ int DbFileTree::childrenCount(int parentFileId) const
 
 int DbFileTree::indexInParent(int fileId) const
 {
-
 	// Get the file itself
 	//
 	auto fit = m_files.find(fileId);
@@ -800,7 +848,7 @@ int DbFileTree::indexInParent(int fileId) const
 	auto it = m_fileIdToChildren.find(file->parentId());
 	if (it == m_fileIdToChildren.end())
 	{
-		assert(it != m_fileIdToChildren.end());	// Why do we asking index in parent for this fileId, it really can be an error
+		assert(it != m_fileIdToChildren.end()); // Why do we asking index in parent for this fileId, it really can be an error
 		return -1;
 	}
 
@@ -815,7 +863,7 @@ int DbFileTree::indexInParent(int fileId) const
 			return index;
 		}
 
-		index ++;
+		index++;
 	}
 
 	return -1;
@@ -880,7 +928,7 @@ void DbFileTree::addFile(std::shared_ptr<DbFileInfo> fileInfo)
 
 	if (fileChildren.m_children.empty() == true)
 	{
-		fileChildren.m_fileId = parentId;							// Just created
+		fileChildren.m_fileId = parentId; // Just created
 	}
 	else
 	{
@@ -906,8 +954,7 @@ bool DbFileTree::removeFile(int fileId)
 
 	// Recursively delete children
 	//
-	if (auto it = m_fileIdToChildren.find(fileInfo->fileId());
-		it == m_fileIdToChildren.end())
+	if (auto it = m_fileIdToChildren.find(fileInfo->fileId()); it == m_fileIdToChildren.end())
 	{
 		// It is possible that file has not any children
 		//
@@ -925,7 +972,7 @@ bool DbFileTree::removeFile(int fileId)
 			childFilesIds.push_back(fc->fileId());
 		}
 
-		for(int childFileId : childFilesIds)
+		for (int childFileId : childFilesIds)
 		{
 			removeFile(childFileId);
 		}
@@ -933,8 +980,7 @@ bool DbFileTree::removeFile(int fileId)
 
 	// Remove from children record
 	//
-	if (auto it = m_fileIdToChildren.find(fileInfo->parentId());
-		it == m_fileIdToChildren.end())
+	if (auto it = m_fileIdToChildren.find(fileInfo->parentId()); it == m_fileIdToChildren.end())
 	{
 		assert(it != m_fileIdToChildren.end());
 	}
@@ -949,7 +995,7 @@ bool DbFileTree::removeFile(int fileId)
 										   ch.m_children.end(),
 										   [fileId](const auto& f)
 										   {
-												return f->fileId() == fileId;
+											   return f->fileId() == fileId;
 										   }),
 							ch.m_children.end());
 	}
@@ -971,51 +1017,12 @@ bool DbFileTree::removeFile(std::shared_ptr<DbFileInfo> fileInfo)
 	return removeFile(fileInfo->fileId());
 }
 
-bool DbFileTree::removeFilesWithExtension(QString ext)
-{
-	// Remove all file with extension
-	//
-	if (ext.isEmpty() == true)
-	{
-		return false;
-	}
-
-	// Find all files with extension
-	//
-	std::vector<std::shared_ptr<DbFileInfo>> filesToRemove;
-	filesToRemove.reserve(64);
-
-	for (auto[fileId, fileInfo] : m_files)
-	{
-		if (fileId != fileInfo->fileId())
-		{
-			assert(fileId != fileInfo->fileId());
-			continue;
-		}
-
-		if (fileInfo->extension().compare(ext, Qt::CaseInsensitive) == 0)
-		{
-			filesToRemove.push_back(fileInfo);
-		}
-	}
-
-	// Remove all files with extension
-	//
-	bool ok = true;
-	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
-	{
-		ok &= removeFile(file);
-	}
-
-	return ok;
-}
-
 bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 {
 	std::vector<std::shared_ptr<DbFileInfo>> filesToRemove;
 	filesToRemove.reserve(64);
 
-	for (auto[fileId, fileInfo] : m_files)
+	for (auto [fileId, fileInfo] : m_files)
 	{
 		if (fileId != fileInfo->fileId())
 		{
@@ -1034,7 +1041,7 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 	bool ok = true;
 	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
 	{
-		if (m_files.contains(file->fileId()) == true)		// to avoid assert when try to remove recursively deleted files
+		if (m_files.contains(file->fileId()) == true) // to avoid assert when try to remove recursively deleted files
 		{
 			ok &= removeFile(file);
 		}
@@ -1081,7 +1088,7 @@ void DbFileInfo::trace() const
 	return;
 }
 
-const QString& DbFileInfo::fileName() const noexcept
+const QString& DbFileInfo::fileName() const
 {
 	return m_fileName;
 }
@@ -1091,7 +1098,12 @@ void DbFileInfo::setFileName(const QString& value)
 	m_fileName = value;
 }
 
-QString DbFileInfo::extension() const noexcept
+QString DbFileInfo::ext() const
+{
+	return extension();
+}
+
+QString DbFileInfo::extension() const
 {
 	qsizetype pointPos = m_fileName.lastIndexOf('.');
 	if (pointPos == -1)
@@ -1113,7 +1125,7 @@ void DbFileInfo::setSize(qsizetype size)
 	m_size = size;
 }
 
-int DbFileInfo::fileId() const noexcept
+int DbFileInfo::fileId() const
 {
 	return m_fileId;
 }
@@ -1133,12 +1145,12 @@ bool DbFileInfo::hasFileId() const
 	return m_fileId != DbFileInfo::Null;
 }
 
-bool DbFileInfo::isNull() const noexcept
+bool DbFileInfo::isNull() const
 {
 	return m_fileId == DbFileInfo::Null;
 }
 
-int DbFileInfo::parentId() const noexcept
+int DbFileInfo::parentId() const
 {
 	return m_parentId;
 }
@@ -1158,7 +1170,7 @@ void DbFileInfo::setDeleted(bool value)
 	m_deleted = value;
 }
 
-int DbFileInfo::changeset() const noexcept
+int DbFileInfo::changeset() const
 {
 	return m_changeset;
 }
@@ -1181,7 +1193,7 @@ void DbFileInfo::setCreated(const QDateTime& value)
 void DbFileInfo::setCreated(const QString& value)
 {
 	QDateTime dt = QDateTime::fromString(value, "yyyy-MM-ddThh:mm:ss");
-	//QDateTime dt = QDateTime::fromString(value, Qt::RFC2822Date);
+	// QDateTime dt = QDateTime::fromString(value, Qt::RFC2822Date);
 	setCreated(dt);
 }
 
@@ -1201,7 +1213,7 @@ void DbFileInfo::setLastCheckIn(const QString& value)
 	setLastCheckIn(dt);
 }
 
-const E::VcsState &DbFileInfo::state() const noexcept
+const E::VcsState& DbFileInfo::state() const
 {
 	return m_state;
 }
@@ -1211,7 +1223,7 @@ void DbFileInfo::setState(const E::VcsState& state)
 	m_state = state;
 }
 
-const E::VcsItemAction& DbFileInfo::action() const noexcept
+const E::VcsItemAction& DbFileInfo::action() const
 {
 	return m_action;
 }
@@ -1221,7 +1233,7 @@ void DbFileInfo::setAction(const E::VcsItemAction& action)
 	m_action = action;
 }
 
-int DbFileInfo::userId() const noexcept
+int DbFileInfo::userId() const
 {
 	return m_userId;
 }
@@ -1231,7 +1243,7 @@ void DbFileInfo::setUserId(int value)
 	m_userId = value;
 }
 
-const QString& DbFileInfo::details() const noexcept
+const QString& DbFileInfo::details() const
 {
 	return m_details;
 }
@@ -1287,7 +1299,7 @@ QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
 	return result;
 }
 
-bool operator< (const DbFileInfo& a, const DbFileInfo& b)
+bool operator<(const DbFileInfo& a, const DbFileInfo& b)
 {
 	// Used in SchemaTabPage for map
 	// DO NOT add to this m_state, as it will break finding open windows in SchemaTab
@@ -1325,7 +1337,7 @@ bool DbFile::readFromDisk(const QString& fileName)
 
 	m_data = file.readAll();
 
-	//m_fileId =	Leave the same
+	// m_fileId =	Leave the same
 	m_size = m_data.size();
 	m_fileName = QFileInfo(file).fileName();
 	m_lastCheckIn = QDateTime();
@@ -1359,25 +1371,25 @@ void DbFile::convertToDatabaseString(QString* str)
 	str->reserve(m_data.size() * 2 + 256);
 	str->append("E'\\\\x");
 
-const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
-							"101112131415161718191a1b1c1d1e1f"
-							"202122232425262728292a2b2c2d2e2f"
-							"303132333435363738393a3b3c3d3e3f"
-							"404142434445464748494a4b4c4d4e4f"
-							"505152535455565758595a5b5c5d5e5f"
-							"606162636465666768696a6b6c6d6e6f"
-							"707172737475767778797a7b7c7d7e7f"
-							"808182838485868788898a8b8c8d8e8f"
-							"909192939495969798999a9b9c9d9e9f"
-							"a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
-							"b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
-							"c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
-							"d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
-							"e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
-							"f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
+	const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
+								 "101112131415161718191a1b1c1d1e1f"
+								 "202122232425262728292a2b2c2d2e2f"
+								 "303132333435363738393a3b3c3d3e3f"
+								 "404142434445464748494a4b4c4d4e4f"
+								 "505152535455565758595a5b5c5d5e5f"
+								 "606162636465666768696a6b6c6d6e6f"
+								 "707172737475767778797a7b7c7d7e7f"
+								 "808182838485868788898a8b8c8d8e8f"
+								 "909192939495969798999a9b9c9d9e9f"
+								 "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
+								 "b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
+								 "c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
+								 "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+								 "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
+								 "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-    QString hex(rawhex);
-    const QChar* hexptr = hex.data();
+	QString hex(rawhex);
+	const QChar* hexptr = hex.data();
 
 	qsizetype fileSize = m_data.size();
 	const char* dataptr = m_data.constData();
@@ -1385,9 +1397,9 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 	for (int i = 0; i < fileSize; i++)
 	{
 		unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
-		str->append(hexptr + asbyte*2, 2);
+		str->append(hexptr + asbyte * 2, 2);
 
-		dataptr ++;
+		dataptr++;
 	}
 
 	str->append("'");
@@ -1402,22 +1414,22 @@ void DbFile::convertToDatabaseString(const QByteArray& data, QString* result)
 	result->reserve(data.size() * 2 + 256);
 	result->append("E'\\\\x");
 
-const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
-							"101112131415161718191a1b1c1d1e1f"
-							"202122232425262728292a2b2c2d2e2f"
-							"303132333435363738393a3b3c3d3e3f"
-							"404142434445464748494a4b4c4d4e4f"
-							"505152535455565758595a5b5c5d5e5f"
-							"606162636465666768696a6b6c6d6e6f"
-							"707172737475767778797a7b7c7d7e7f"
-							"808182838485868788898a8b8c8d8e8f"
-							"909192939495969798999a9b9c9d9e9f"
-							"a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
-							"b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
-							"c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
-							"d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
-							"e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
-							"f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
+	const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
+								 "101112131415161718191a1b1c1d1e1f"
+								 "202122232425262728292a2b2c2d2e2f"
+								 "303132333435363738393a3b3c3d3e3f"
+								 "404142434445464748494a4b4c4d4e4f"
+								 "505152535455565758595a5b5c5d5e5f"
+								 "606162636465666768696a6b6c6d6e6f"
+								 "707172737475767778797a7b7c7d7e7f"
+								 "808182838485868788898a8b8c8d8e8f"
+								 "909192939495969798999a9b9c9d9e9f"
+								 "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
+								 "b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
+								 "c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
+								 "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+								 "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
+								 "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
 	QString hex(rawhex);
 	const QChar* hexptr = hex.data();
@@ -1428,18 +1440,18 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 	for (int i = 0; i < fileSize; i++)
 	{
 		unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
-		result->append(hexptr + asbyte*2, 2);
+		result->append(hexptr + asbyte * 2, 2);
 
-		dataptr ++;
+		dataptr++;
 	}
 
 	result->append("'");
 	return;
 }
 
-DbFile& DbFile::operator= (const DbFileInfo& fileInfo)
+DbFile& DbFile::operator=(const DbFileInfo& fileInfo)
 {
-	*(static_cast<DbFileInfo*>(this)) = fileInfo;			// Downcast to DbFileInfo to call just DbFileInfo::operator=();
+	*(static_cast<DbFileInfo*>(this)) = fileInfo; // Downcast to DbFileInfo to call just DbFileInfo::operator=();
 	return *this;
 }
 
@@ -1448,10 +1460,10 @@ const QByteArray& DbFile::data() const
 	return m_data;
 }
 
-//QByteArray& DbFile::data()
+// QByteArray& DbFile::data()
 //{
 //	return m_data;
-//}
+// }
 
 void DbFile::setData(const QByteArray& data)
 {
@@ -1488,9 +1500,7 @@ qsizetype DbFile::size() const
 // DbChangeset
 //
 //
-DbChangeset::DbChangeset()
-{
-}
+DbChangeset::DbChangeset() {}
 
 int DbChangeset::changeset() const
 {
@@ -1579,9 +1589,7 @@ void DbChangesetDetails::addObject(const DbChangesetObject& object)
 }
 
 
-DbChangesetObject::DbChangesetObject()
-{
-}
+DbChangesetObject::DbChangesetObject() {}
 
 DbChangesetObject::DbChangesetObject(const DbFileInfo& file) :
 	m_type(Type::File),
