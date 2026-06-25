@@ -569,7 +569,7 @@ void ModuleConfigurator::eraseClicked()
 			disableControls();
 
 			std::optional<std::vector<int>> selectedUarts;
-			selectedUarts = {ModuleConfiguratorLib::ConfigurationUartId}; // ID of service flash
+			selectedUarts = {ModuleConfiguratorLib::ConfigurationUartValue}; // ID of service flash
 
 			emit eraseFlashMemory(0, selectedUarts);
 		}
