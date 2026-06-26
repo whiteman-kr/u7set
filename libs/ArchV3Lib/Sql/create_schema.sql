@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE archive_info
 (
     archive_info_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -8,3 +10,5 @@ CREATE TABLE archive_info
     description TEXT NOT NULL,
     applied_utc BIGINT NOT NULL
 );
+
+COMMIT;
