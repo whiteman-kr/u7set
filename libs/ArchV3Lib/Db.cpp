@@ -2,6 +2,8 @@
 	#error Do not include this file in the project! Link ArchV3Lib instead.
 #endif
 
+#include <QLatin1StringView>
+
 #include <ArchV3Lib/Db.h>
 #include <ArchV3Lib/Utils.h>
 
@@ -9,13 +11,15 @@
 
 namespace ArchV3
 {
+	constexpr QLatin1StringView TABLE_ARCHIVE_INFO("archive_info");
+
 	Db::Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
-			CircularLoggerShared logger, const QString& className) :
-			LogWrapper(logger, className),
-			m_projectID(projectID),
-			m_appDataSrvID(appDataSrvID),
-			m_dbConnInfo(dbConnInfo)
+			CircularLoggerShared logger) :
+		LogWrapper(logger, QString("Db '%1'").arg(makeDatabaseName(projectID, appDataSrvID))),
+		m_projectID(projectID),  
+		m_appDataSrvID(appDataSrvID),
+		m_dbConnInfo(dbConnInfo)
 	{
 	}
 
@@ -26,35 +30,83 @@ namespace ArchV3
 
 	bool Db::open()
 	{ 
-		if (m_postgresDb == nullptr)
+		if (isOpen() == true)
 		{
-			m_postgresDb = std::make_unique<Postgres>(m_dbConnInfo, DbName::POSTGRES, getLog());
-
-			if (m_postgresDb->open() == false)
-			{
-				m_postgresDb.reset();
-				return false;
-			}
+			Q_ASSERT(false);
+			close();
 		}
 
 		QString dbName = makeDatabaseName(m_projectID, m_appDataSrvID);
 
+
+		{
+			Postgres postgresDb(m_dbConnInfo, DbName::POSTGRES, getLog());
+
+			if (postgresDb.open() == false)
+			{
+				return false;
+			}
+
+			if (postgresDb.createDatabase(dbName) == false)
+			{
+				return false;
+			}
+		}
+
 		m_db = std::make_unique<Postgres>(m_dbConnInfo, dbName, getLog());
+
+		if (m_db->open() == false)
+		{
+			m_db.reset();
+			return false;
+		}
+
+		if (createSchema() == false)
+		{
+			m_db->close();
+			m_db.reset();
+			return false;
+		}
+
+		return true;
 	}
 
 	void Db::close() 
 	{
-		if (m_postgresDb != nullptr)
-		{
-			m_postgresDb->close();
-			m_postgresDb.reset();
-		}
-
 		if (m_db != nullptr)
 		{
 			m_db->close();
 			m_db.reset();
 		}
+	}
+
+	bool Db::isOpen() const
+	{
+		return m_db != nullptr && m_db->isOpen(); 
+	}
+
+	bool Db::createSchema()
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		if (m_db->tableExists(TABLE_ARCHIVE_INFO) == false)
+		{
+			logErr("schema not created!");
+		}
+		else
+		{
+			logErr("schema Ok!");
+		}
+		return true;
+	}
+
+	QString Db::loadScript(const QString& scriptFileName) const
+	{ 
+		return QString();
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

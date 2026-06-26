@@ -34,6 +34,9 @@ namespace ArchV3
 
 		bool isOpen() const;
 
+		bool tableExists(const QString& schemaName, const QString& tableName);
+		bool tableExists(const QString& tableName);
+
 		// for 'postgres' database only
 
 		bool createDatabase(const QString& dbName);

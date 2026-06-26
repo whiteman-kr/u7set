@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <ArchV3Lib/Postgres.h>
 
 namespace ArchV3
@@ -9,13 +11,17 @@ namespace ArchV3
 	public:
 		Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
-			CircularLoggerShared logger, const QString& className);
+			CircularLoggerShared logger);
 		~Db();
 
 		bool open();
 		void close();
 
+		bool isOpen() const;
+
 	private:
+		bool createSchema();
+		QString loadScript(const QString& scriptFileName) const;
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 
 	private:
@@ -24,6 +30,5 @@ namespace ArchV3
 		DbConnectionInfo m_dbConnInfo;
 
 		std::unique_ptr<Postgres> m_db;
-		std::unique_ptr<Postgres> m_postgresDb;
 	};
 } // namespace ArchV3

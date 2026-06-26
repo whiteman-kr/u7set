@@ -12,6 +12,8 @@
 
 namespace ArchV3
 {
+	constexpr QLatin1StringView SHEMA_PUBLIC("public");
+
 	Postgres::Postgres(const DbConnectionInfo& dbConnInfo, const QString& dbName, 
 		CircularLoggerShared logger) :
 		LogWrapper(logger, QString("Db '%1'").arg(dbName)),
@@ -55,6 +57,7 @@ namespace ArchV3
 		if (q.exec("SET client_encoding TO 'UTF8'") == false)
 		{
 			logErr(q.lastError().text());
+			close();
 			return false;
 		}
 
@@ -65,7 +68,9 @@ namespace ArchV3
 
 	void Postgres::close()
 	{
-		if (m_db.isOpen())
+		const bool wasOpen = m_db.isOpen();
+
+		if (wasOpen == true)
 		{
 			m_db.close();
 		}
@@ -77,7 +82,10 @@ namespace ArchV3
 			QSqlDatabase::removeDatabase(m_connectionName);
 		}
 
-		logMsg("closed");
+		if (wasOpen == true)
+		{
+			logMsg("closed");
+		}
 
 		m_connectionName.clear();
 	}
@@ -85,6 +93,38 @@ namespace ArchV3
 	bool Postgres::isOpen() const
 	{ 
 		return m_db.isOpen(); 
+	}
+
+	bool Postgres::tableExists(const QString& schemaName, const QString& tableName)
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		QSqlQuery query(m_db);
+
+		query.prepare("SELECT 1 "
+					  "FROM information_schema.tables "
+					  "WHERE table_schema = :shema_name "
+					  "AND table_name = :table_name");
+
+		query.bindValue(":schema_name", schemaName);
+		query.bindValue(":table_name", tableName);
+
+		if (query.exec() == false)
+		{
+			logErr(query.lastError().text());
+			return false;
+		}
+
+		return query.next();
+	}
+
+	bool Postgres::tableExists(const QString& tableName)
+	{ 
+		return tableExists(SHEMA_PUBLIC, tableName);
 	}
 
 	bool Postgres::createDatabase(const QString& dbName)
@@ -146,6 +186,8 @@ namespace ArchV3
 			return false;
 		}
 
+		bool result = true;
+
 		while (query.next())
 		{
 			const QString dbName = query.value(0).toString();
@@ -159,7 +201,11 @@ namespace ArchV3
 
 			terminateQuery.bindValue(":db_name", dbName);
 
-			terminateQuery.exec();
+			if (terminateQuery.exec() == false)
+			{
+				logErr(QString("failed to terminate connections for database '%1': %2").
+					arg(dbName).arg(terminateQuery.lastError().text()));
+			}
 
 			QSqlQuery dropQuery(m_db);
 
@@ -168,13 +214,14 @@ namespace ArchV3
 			if (dropQuery.exec(sql) == false)
 			{
 				logErr(QString("failed to drop database '%1': %2").arg(dbName).arg(dropQuery.lastError().text()));
+				result = false;
 				continue;
 			}
 
 			logMsg(QString("database '%1' dropped").arg(dbName));
 		}
 
-		return true;
+		return result;
 	}
 
 	bool Postgres::isPostgresDatabase() const

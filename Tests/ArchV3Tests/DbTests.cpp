@@ -4,7 +4,7 @@
 
 #include "Common.h"
 
-ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5433, .user = "u7arch", .password = "P2ssw0rd"};
+ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5432, .user = "u7arch", .password = "P2ssw0rd"};
 
 class DbTests : public ::testing::Test
 {
@@ -32,7 +32,7 @@ protected:
 
 TEST_F(DbTests, OpenCreatesDatabase)
 {
-	ArchV3::Db db("TEST_PROJECT", "APP_DATA_SRV", dbConnInfo, logger, "ArchV3DbTests");
+	ArchV3::Db db("TEST_PROJECT", "APP_DATA_SRV", dbConnInfo, logger);
 
 	ASSERT_TRUE(db.open());
 	EXPECT_TRUE(db.isOpen());
