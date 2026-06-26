@@ -6,7 +6,7 @@ project(ArchV3Lib LANGUAGES CXX)
 #set(CMAKE_AUTOMOC ON)
 #set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core Sql)
 
 set(TARGET ArchV3Lib)
 
@@ -14,9 +14,12 @@ qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/ArchFile.h
 	./include/ArchV3Lib/ArchWriter.h
 	./include/ArchV3Lib/ArchV3Core.h
+	./include/ArchV3Lib/Db.h
+	./include/ArchV3Lib/Utils.h
 	ArchFile.cpp
 	ArchWriter.cpp
 	ArchV3Core.cpp
+	Db.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -64,7 +67,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_compile_definitions(${TARGET} PRIVATE ARCH_V3_LIB_DOMAIN)
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Core)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Sql)
 target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
