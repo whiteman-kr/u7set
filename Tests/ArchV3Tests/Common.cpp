@@ -1,0 +1,121 @@
+#include "Common.h"
+//#include "../../AppDataService/AppDataSrvTools.h"
+
+CircularLoggerShared logger;
+
+QString buildPath;
+QString profileName;
+
+OnlineLib::BuildInfo buildInfo;
+SoftwareSettingsSet settingsSet;
+
+AppSignals appSignals;
+
+bool isGTestDeathChild(const QStringList& args)
+{
+	for(const QString& arg : args)
+	{
+		if (arg.startsWith("--gtest_internal_run_death_test="))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//
+
+bool loadConfiguration()
+{
+	//QString filePath = buildPath + "/SYSTEMID_RACK01_WS00_ADS/Configuration.xml";
+
+	//QFile f(filePath);
+
+	//if (!f.open(QIODeviceBase::ReadOnly))
+	//{
+	//	logMsg(QString("Error read file: %1").arg(filePath));
+	//	return false;
+	//}
+
+	//QByteArray fileData = f.readAll();
+
+	//XmlReadHelper xmlReader(fileData);
+
+	//bool res = buildInfo.readFromXml(xmlReader);
+
+	//if (res == false)
+	//{
+	//	logMsg("Error read BuildInfo!");
+	//	return false;
+	//}
+
+	//logMsg("BuildInfo read Ok");
+
+	//res = settingsSet.readFromXml(xmlReader);
+
+	//if (res == false)
+	//{
+	//	logMsg("Error read SettingsSet!");
+	//	return false;
+	//}
+
+	//logMsg("SettingsSet read Ok");
+
+	//std::shared_ptr<const AppDataServiceSettings> st = settingsSet.getSettingsProfile<AppDataServiceSettings>(profileName);
+
+	//if (st == nullptr)
+	//{
+	//	DEBUG_LOG_ERR(logger, QString("Error loading AppDataServiceSettings profile '%1'!").arg(profileName));
+	//	return false;
+	//}
+
+	//logMsg(QString("AppDataServiceSettings profile '%1' read Ok").arg(profileName));
+
+	//appDataSrvSettings = *st.get();
+
+	//return res;
+
+	return true;
+}
+
+bool loadAppSignals()
+{
+	/* QString filePath = buildPath + "/SYSTEMID_RACK01_WS00_ADSV3/AcquiredAppSignals.asgs";
+
+	QFile f(filePath);
+
+	if (!f.open(QIODeviceBase::ReadOnly))
+	{
+		logMsg(QString("Error read file: %1").arg(filePath));
+		return false;
+	}
+
+	QByteArray fileData = f.readAll();
+
+	fileData = qUncompress(fileData);
+
+	bool res = AppDataSrvTools::readAppSignals(fileData, appSignals);
+
+	if (res == false)
+	{
+		logMsg("Error loading AppSignals!");
+		return false;
+	}
+
+	logMsg("AppDataSignals read Ok");
+
+	return res;*/
+
+	return true;
+}
+
+void createAndInitSignalStates()
+{
+//	AppDataSrvTools::createAndInitSignalStates(appSignals, appSignalStates, 4);
+}
+
+void logMsg(const QString& msg)
+{
+	std::cout << C_STR(QString("%1\n").arg(msg));
+}

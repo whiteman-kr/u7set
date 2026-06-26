@@ -5,7 +5,7 @@
 #include <thread>
 #include <unordered_map>
 
-#include <ArchV3Lib/ArchWriter.h>
+#include <ArchV3Lib/Writer.h>
 
 #include <QRegularExpression>
 #include <QDir>

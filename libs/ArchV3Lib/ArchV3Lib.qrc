@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/ArchV3Lib/Sql">
+		<file>Sql/create_schema.sql</file>
+	</qresource>
+</RCC>

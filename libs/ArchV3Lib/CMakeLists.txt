@@ -12,14 +12,18 @@ set(TARGET ArchV3Lib)
 
 qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/ArchFile.h
-	./include/ArchV3Lib/ArchWriter.h
-	./include/ArchV3Lib/ArchV3Core.h
+	./include/ArchV3Lib/Core.h
 	./include/ArchV3Lib/Db.h
+	./include/ArchV3Lib/Postgres.h
 	./include/ArchV3Lib/Utils.h
+	./include/ArchV3Lib/Writer.h
 	ArchFile.cpp
-	ArchWriter.cpp
-	ArchV3Core.cpp
+	Core.cpp
 	Db.cpp
+	Writer.cpp
+	Postgres.cpp
+
+	ArchV3Lib.qrc
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -68,7 +72,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE ARCH_V3_LIB_DOMAIN)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Sql)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

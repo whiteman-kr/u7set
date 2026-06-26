@@ -1065,3 +1065,8 @@ namespace Grpc
 	inline const std::string SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX("Signal hashes count exceeds ADS_GET_APP_SIGNAL_STATE_MAX");
 	inline const std::string INVALID_OR_EXPIRED_SESSION("Invalid or expired session");
 }
+
+namespace DbName
+{
+	inline const QString POSTGRES("postgres");
+}

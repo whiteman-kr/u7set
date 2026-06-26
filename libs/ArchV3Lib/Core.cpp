@@ -2,7 +2,7 @@
 	#error Do not include this file in the project! Link ArchV3Lib instead.
 #endif
 
-#include <ArchV3Lib/ArchV3Core.h>
+#include <ArchV3Lib/Core.h>
 
 namespace ArchV3
 {

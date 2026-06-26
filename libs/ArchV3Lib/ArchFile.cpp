@@ -5,7 +5,7 @@
 #include <QDir>
 
 #include <ArchV3Lib/ArchFile.h>
-#include <ArchV3Lib/ArchWriter.h>
+#include <ArchV3Lib/Writer.h>
 
 namespace ArchV3
 {

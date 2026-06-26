@@ -5,7 +5,8 @@
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../OnlineLib/CircularLogger.h"
 
-#include "ArchWriter.h"
+#include "Writer.h"
+#include "Db.h"
 
 namespace ArchV3
 {
