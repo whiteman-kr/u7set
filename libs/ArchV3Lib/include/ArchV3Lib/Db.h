@@ -21,8 +21,12 @@ namespace ArchV3
 
 	private:
 		bool schemaCheckAndCreate();
+
 		bool schemaCreate();
 		bool schemaCleanup();
+
+		bool typesCreate();
+		bool functionsCreate();
 
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 

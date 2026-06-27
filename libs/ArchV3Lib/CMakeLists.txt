@@ -4,7 +4,7 @@ project(ArchV3Lib LANGUAGES CXX)
 
 #set(CMAKE_AUTOUIC ON)
 #set(CMAKE_AUTOMOC ON)
-#set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Sql)
 
@@ -17,13 +17,14 @@ qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/Postgres.h
 	./include/ArchV3Lib/Utils.h
 	./include/ArchV3Lib/Writer.h
+	
 	ArchFile.cpp
 	Core.cpp
 	Db.cpp
 	Writer.cpp
 	Postgres.cpp
 
-	ArchV3Lib.qrc
+	./Sql/Sql.qrc
 )
 
 target_precompile_headers(${TARGET} PRIVATE

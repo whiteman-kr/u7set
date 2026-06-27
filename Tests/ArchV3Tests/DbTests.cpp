@@ -4,7 +4,7 @@
 
 #include "Common.h"
 
-ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5432, .user = "u7arch", .password = "P2ssw0rd"};
+ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5433, .user = "u7arch", .password = "P2ssw0rd"};
 
 class DbTests : public ::testing::Test
 {

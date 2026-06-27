@@ -34,6 +34,8 @@ namespace ArchV3
 
 		bool isOpen() const;
 
+		bool execSql(const QString& sql);
+
 		bool tableExists(const QString& schemaName, const QString& tableName);
 		bool tableExists(const QString& tableName);
 

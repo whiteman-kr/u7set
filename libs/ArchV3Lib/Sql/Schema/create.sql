@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE archive_info
 (
     archive_info_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -32,7 +30,7 @@ CREATE TABLE signals
 
 CREATE TABLE archive_files
 (
-    archive_file_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    archive_file_id BIGINT GENERATED ALWAYS AS IDENTITY,
 
     signal_id BIGINT NOT NULL,
     bucket SMALLINT NOT NULL,
@@ -50,6 +48,9 @@ CREATE TABLE archive_files
 
     created_utc BIGINT NOT NULL,
 
+    CONSTRAINT archive_files_pk
+        PRIMARY KEY (bucket, archive_file_id),
+
     CONSTRAINT archive_files_signal_fk
         FOREIGN KEY (signal_id)
         REFERENCES signals(signal_id),
@@ -65,5 +66,3 @@ ON archive_files
     signal_id,
     time_from_utc
 );
-
-COMMIT;

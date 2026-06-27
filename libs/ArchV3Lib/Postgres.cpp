@@ -5,6 +5,7 @@
 #include <QUuid>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
+#include <QRegularExpression>
 
 #include <ArchV3Lib/Postgres.h>
 
@@ -19,7 +20,14 @@ namespace ArchV3
 		LogWrapper(logger, QString("Db '%1'").arg(dbName)),
 		m_dbConnInfo(dbConnInfo),
 		m_dbName(dbName)
-	{ 
+	{
+		static std::once_flag once;
+
+		std::call_once(once,
+					   []()
+					   {
+						   Q_INIT_RESOURCE(Sql);
+					   });
 	}
 
 	Postgres::~Postgres()
@@ -95,6 +103,25 @@ namespace ArchV3
 		return m_db.isOpen(); 
 	}
 
+	bool Postgres::execSql(const QString& sql)
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		QSqlQuery query(m_db);
+
+		if (query.exec(sql) == false)
+		{
+			logErr(QString("failed to execute SQL: %1").arg(query.lastError().text()));
+			return false;
+		}
+
+		return true;
+	}
+
 	bool Postgres::tableExists(const QString& schemaName, const QString& tableName)
 	{
 		if (isOpen() == false)
@@ -105,10 +132,14 @@ namespace ArchV3
 
 		QSqlQuery query(m_db);
 
-		query.prepare("SELECT 1 "
-					  "FROM information_schema.tables "
-					  "WHERE table_schema = :shema_name "
-					  "AND table_name = :table_name");
+		if (query.prepare("SELECT 1 "
+			"FROM information_schema.tables "
+			"WHERE table_schema = :schema_name "
+			"AND table_name = :table_name") == false)
+		{
+			logErr(query.lastError().text());
+			return false;
+		}
 
 		query.bindValue(":schema_name", schemaName);
 		query.bindValue(":table_name", tableName);
@@ -127,7 +158,7 @@ namespace ArchV3
 		return tableExists(SHEMA_PUBLIC, tableName);
 	}
 
-		QString Postgres::loadScript(const QString& scriptFileName) const
+	QString Postgres::loadScript(const QString& scriptFileName) const
 	{
 		const QString resourcePath = QString(":/ArchV3Lib/Sql/%1").arg(scriptFileName);
 
@@ -150,12 +181,36 @@ namespace ArchV3
 			return false;
 		}
 
-		QSqlQuery query(m_db);
+		static const QRegularExpression dollarQuotedRegex(R"(\$[A-Za-z0-9_]*\$)");
 
-		if (query.exec(script) == false)
+		bool noSplit = script.contains(dollarQuotedRegex);
+
+
+		if (noSplit)
 		{
-			logErr(QString("failed to execute SQL script: %1").arg(query.lastError().text()));
-			return false;
+			QSqlQuery query(m_db);
+
+			if (query.exec(script) == false)
+			{
+				logErr(QString("failed to execute SQL script: %1").arg(query.lastError().text()));
+				return false;
+			}
+		}
+		else
+		{
+			QStringList statements = script.split(";", Qt::SkipEmptyParts);
+			
+			for (const QString& statement : statements)
+			{
+				QSqlQuery query(m_db);
+
+				if (query.exec(statement) == false)
+				{
+					logErr(QString("failed to execute SQL statement %1: %2").
+						arg(statement).arg(query.lastError().text()));
+					return false;
+				}
+			}
 		}
 
 		return true;
@@ -170,7 +225,18 @@ namespace ArchV3
 			return false;
 		}
 
-		return executeScript(script);
+		bool result = executeScript(script);
+
+		if (result)
+		{
+			logMsg(QString("SQL script '%1' executed successfully").arg(scriptFileName));
+		}
+		else
+		{
+			logErr(QString("SQL script '%1' execution ERROR!").arg(scriptFileName));
+		}
+
+		return result;
 	}
 
 	bool Postgres::createDatabase(const QString& dbName)

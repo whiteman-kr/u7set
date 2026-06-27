@@ -15,9 +15,6 @@ namespace ArchV3
 {
 	constexpr QLatin1StringView TABLE_ARCHIVE_INFO("archive_info");
 
-	constexpr QLatin1StringView SQL_SCHEMA_CREATE("schema_create.sql");
-	constexpr QLatin1StringView SQL_SCHEMA_CLEANUP("schema_cleanup.sql");
-
 	Db::Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
 			CircularLoggerShared logger) :
@@ -42,7 +39,6 @@ namespace ArchV3
 		}
 
 		QString dbName = makeDatabaseName(m_projectID, m_appDataSrvID);
-
 
 		{
 			Postgres postgresDb(m_dbConnInfo, DbName::POSTGRES, getLog());
@@ -103,10 +99,21 @@ namespace ArchV3
 		if (m_db->tableExists(TABLE_ARCHIVE_INFO) == false)
 		{
 			result &= schemaCreate();
+			result &= typesCreate();
+			result &= functionsCreate();
+
+			if (result)
+			{
+				logMsg("schema created successfully");
+			}
+			else
+			{
+				logErr("schema creation ERROR!");
+			}
 		}
 		else
 		{
-			logErr("schema Ok!");
+			logErr("schema already exists");
 		}
 
 		RETURN_IF_FALSE(result);
@@ -117,13 +124,46 @@ namespace ArchV3
 	bool Db::schemaCreate()
 	{ 
 		TEST_PTR_RETURN_FALSE(m_db);
-		return m_db->loadAndExecuteScript(SQL_SCHEMA_CREATE);
+		
+		bool result = true;
+
+		result &= m_db->loadAndExecuteScript("Schema/create.sql");
+		result &= m_db->loadAndExecuteScript("Schema/create_partitions.sql");
+
+		return result;
 	}
 
 	bool Db::schemaCleanup()
 	{
 		TEST_PTR_RETURN_FALSE(m_db);
-		return m_db->loadAndExecuteScript(SQL_SCHEMA_CLEANUP);
+
+		bool result = true;
+
+		result &= m_db->loadAndExecuteScript("Schema/cleanup.sql");
+
+		return result;
+	}
+
+	bool Db::typesCreate()
+	{ 
+		TEST_PTR_RETURN_FALSE(m_db);
+
+		bool result = true;
+
+		result &= m_db->loadAndExecuteScript("Types/signal_register_info.sql");
+
+		return result;
+	}
+
+	bool Db::functionsCreate()
+	{
+		TEST_PTR_RETURN_FALSE(m_db);
+
+		bool result = true;
+
+		result &= m_db->loadAndExecuteScript("Functions/fn_register_signals.sql");
+
+		return result;
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

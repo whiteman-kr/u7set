@@ -1,0 +1,11 @@
+<RCC>
+	<qresource prefix="/ArchV3Lib/Sql">
+		<file>Schema/create.sql</file>
+		<file>Schema/cleanup.sql</file>
+		<file>Schema/create_partitions.sql</file>
+
+		<file>Types/signal_register_info.sql</file>
+
+		<file>Functions/fn_register_signals.sql</file>
+	</qresource>
+</RCC>
