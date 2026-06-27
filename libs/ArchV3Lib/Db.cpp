@@ -9,9 +9,14 @@
 
 #include <CommonLib/ConstStrings.h>
 
+#include "../../UtilsLib/WUtils.h"
+
 namespace ArchV3
 {
 	constexpr QLatin1StringView TABLE_ARCHIVE_INFO("archive_info");
+
+	constexpr QLatin1StringView SQL_SCHEMA_CREATE("schema_create.sql");
+	constexpr QLatin1StringView SQL_SCHEMA_CLEANUP("schema_cleanup.sql");
 
 	Db::Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
@@ -61,7 +66,7 @@ namespace ArchV3
 			return false;
 		}
 
-		if (createSchema() == false)
+		if (schemaCheckAndCreate() == false)
 		{
 			m_db->close();
 			m_db.reset();
@@ -85,7 +90,7 @@ namespace ArchV3
 		return m_db != nullptr && m_db->isOpen(); 
 	}
 
-	bool Db::createSchema()
+	bool Db::schemaCheckAndCreate()
 	{
 		if (isOpen() == false)
 		{
@@ -93,20 +98,32 @@ namespace ArchV3
 			return false;
 		}
 
+		bool result = true;
+
 		if (m_db->tableExists(TABLE_ARCHIVE_INFO) == false)
 		{
-			logErr("schema not created!");
+			result &= schemaCreate();
 		}
 		else
 		{
 			logErr("schema Ok!");
 		}
-		return true;
+
+		RETURN_IF_FALSE(result);
+
+		return result;
 	}
 
-	QString Db::loadScript(const QString& scriptFileName) const
+	bool Db::schemaCreate()
 	{ 
-		return QString();
+		TEST_PTR_RETURN_FALSE(m_db);
+		return m_db->loadAndExecuteScript(SQL_SCHEMA_CREATE);
+	}
+
+	bool Db::schemaCleanup()
+	{
+		TEST_PTR_RETURN_FALSE(m_db);
+		return m_db->loadAndExecuteScript(SQL_SCHEMA_CLEANUP);
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

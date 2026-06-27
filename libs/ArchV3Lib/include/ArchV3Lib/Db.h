@@ -20,8 +20,10 @@ namespace ArchV3
 		bool isOpen() const;
 
 	private:
-		bool createSchema();
-		QString loadScript(const QString& scriptFileName) const;
+		bool schemaCheckAndCreate();
+		bool schemaCreate();
+		bool schemaCleanup();
+
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 
 	private:

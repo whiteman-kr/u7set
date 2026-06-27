@@ -37,12 +37,18 @@ namespace ArchV3
 		bool tableExists(const QString& schemaName, const QString& tableName);
 		bool tableExists(const QString& tableName);
 
+		QString loadScript(const QString& scriptFileName) const;
+		bool executeScript(const QString& script) const;
+
+		bool loadAndExecuteScript(const QString& scriptFileName) const;
+
 		// for 'postgres' database only
 
 		bool createDatabase(const QString& dbName);
 		bool dropDatabases(const QString& databaseNamePattern);		// like "u7arch_test_%"
 
 	private:
+
 		bool isPostgresDatabase() const;
 
 	private: 

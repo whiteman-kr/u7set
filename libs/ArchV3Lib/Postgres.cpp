@@ -127,6 +127,52 @@ namespace ArchV3
 		return tableExists(SHEMA_PUBLIC, tableName);
 	}
 
+		QString Postgres::loadScript(const QString& scriptFileName) const
+	{
+		const QString resourcePath = QString(":/ArchV3Lib/Sql/%1").arg(scriptFileName);
+
+		QFile file(resourcePath);
+
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+		{
+			logErr(QString("failed to open SQL script '%1': %2").arg(resourcePath).arg(file.errorString()));
+			return QString();
+		}
+
+		return QString::fromUtf8(file.readAll());
+	}
+
+	bool Postgres::executeScript(const QString& script) const
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		QSqlQuery query(m_db);
+
+		if (query.exec(script) == false)
+		{
+			logErr(QString("failed to execute SQL script: %1").arg(query.lastError().text()));
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Postgres::loadAndExecuteScript(const QString& scriptFileName) const
+	{ 
+		QString script = loadScript(scriptFileName);
+
+		if (script.isEmpty())
+		{
+			return false;
+		}
+
+		return executeScript(script);
+	}
+
 	bool Postgres::createDatabase(const QString& dbName)
 	{
 		if (isPostgresDatabase() == false)
