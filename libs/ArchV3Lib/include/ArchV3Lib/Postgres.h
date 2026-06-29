@@ -34,10 +34,10 @@ namespace ArchV3
 
 		bool isOpen() const;
 
-		bool execSql(const QString& sql);
+		bool execSql(const QString& sql) const;
 
-		bool tableExists(const QString& schemaName, const QString& tableName);
-		bool tableExists(const QString& tableName);
+		bool tableExists(const QString& schemaName, const QString& tableName) const;
+		bool tableExists(const QString& tableName) const;
 
 		QString loadScript(const QString& scriptFileName) const;
 		bool executeScript(const QString& script) const;
@@ -46,8 +46,8 @@ namespace ArchV3
 
 		// for 'postgres' database only
 
-		bool createDatabase(const QString& dbName);
-		bool dropDatabases(const QString& databaseNamePattern);		// like "u7arch_test_%"
+		bool createDatabase(const QString& dbName) const;
+		bool dropDatabases(const QString& databaseNamePattern) const;		// like "u7arch_test_%"
 
 	private:
 
@@ -59,5 +59,8 @@ namespace ArchV3
 
 		QString m_connectionName;
 		QSqlDatabase m_db;
+
+		static constexpr QLatin1StringView SQL_RESOURCE_PREFIX{":/ArchV3Lib/Sql/"};
+		static constexpr QLatin1StringView DEFAULT_SCHEMA{"public"};
 	};
 }

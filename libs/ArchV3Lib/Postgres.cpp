@@ -2,10 +2,13 @@
 	#error Do not include this file in the project! Link ArchV3Lib instead.
 #endif
 
+#include <mutex>
+
 #include <QUuid>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QRegularExpression>
+#include <QFile>
 
 #include <ArchV3Lib/Postgres.h>
 
@@ -13,8 +16,6 @@
 
 namespace ArchV3
 {
-	constexpr QLatin1StringView SHEMA_PUBLIC("public");
-
 	Postgres::Postgres(const DbConnectionInfo& dbConnInfo, const QString& dbName, 
 		CircularLoggerShared logger) :
 		LogWrapper(logger, QString("Db '%1'").arg(dbName)),
@@ -103,7 +104,7 @@ namespace ArchV3
 		return m_db.isOpen(); 
 	}
 
-	bool Postgres::execSql(const QString& sql)
+	bool Postgres::execSql(const QString& sql) const
 	{
 		if (isOpen() == false)
 		{
@@ -122,7 +123,7 @@ namespace ArchV3
 		return true;
 	}
 
-	bool Postgres::tableExists(const QString& schemaName, const QString& tableName)
+	bool Postgres::tableExists(const QString& schemaName, const QString& tableName) const
 	{
 		if (isOpen() == false)
 		{
@@ -153,14 +154,14 @@ namespace ArchV3
 		return query.next();
 	}
 
-	bool Postgres::tableExists(const QString& tableName)
+	bool Postgres::tableExists(const QString& tableName) const
 	{ 
-		return tableExists(SHEMA_PUBLIC, tableName);
+		return tableExists(DEFAULT_SCHEMA, tableName);
 	}
 
 	QString Postgres::loadScript(const QString& scriptFileName) const
 	{
-		const QString resourcePath = QString(":/ArchV3Lib/Sql/%1").arg(scriptFileName);
+		const QString resourcePath = QString("%1/%2").arg(SQL_RESOURCE_PREFIX).arg(scriptFileName);
 
 		QFile file(resourcePath);
 
@@ -185,7 +186,6 @@ namespace ArchV3
 
 		bool noSplit = script.contains(dollarQuotedRegex);
 
-
 		if (noSplit)
 		{
 			QSqlQuery query(m_db);
@@ -204,10 +204,10 @@ namespace ArchV3
 			{
 				QSqlQuery query(m_db);
 
-				if (query.exec(statement) == false)
+				if (query.exec(statement.trimmed()) == false)
 				{
 					logErr(QString("failed to execute SQL statement %1: %2").
-						arg(statement).arg(query.lastError().text()));
+						arg(statement.trimmed()).arg(query.lastError().text()));
 					return false;
 				}
 			}
@@ -239,7 +239,7 @@ namespace ArchV3
 		return result;
 	}
 
-	bool Postgres::createDatabase(const QString& dbName)
+	bool Postgres::createDatabase(const QString& dbName) const
 	{
 		if (isPostgresDatabase() == false)
 		{
@@ -276,7 +276,7 @@ namespace ArchV3
 		return true;
 	}
 
-	bool Postgres::dropDatabases(const QString& databaseNamePattern)
+	bool Postgres::dropDatabases(const QString& databaseNamePattern) const
 	{
 		if (isPostgresDatabase() == false)
 		{

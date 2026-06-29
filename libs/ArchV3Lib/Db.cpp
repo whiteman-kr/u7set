@@ -58,14 +58,13 @@ namespace ArchV3
 
 		if (m_db->open() == false)
 		{
-			m_db.reset();
+			close();
 			return false;
 		}
 
 		if (schemaCheckAndCreate() == false)
 		{
-			m_db->close();
-			m_db.reset();
+			close();
 			return false;
 		}
 
