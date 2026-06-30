@@ -3538,10 +3538,26 @@ void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
 
 	// Set default EqupmnetIDs for LogicSchema
 	//
-	if (dynamic_cast<VFrame30::LogicSchema*>(schema.get()) != nullptr)
+	if (schema->isLogicSchema() == true)
 	{
-		VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
-		logicSchema->setEquipmentIds("SYSTEMID_RACKID_CH01_MD00");
+		auto logicSchema = schema->toLogicSchema();
+
+		QString defaultEquipmentIds;
+		dbc()->getUserProperty("SchemaEditor/NewLogicSchemaLastParam/EquipmentIds", &defaultEquipmentIds, this);
+		if (defaultEquipmentIds.isEmpty() == true)
+		{
+			defaultEquipmentIds = "SYSTEMID_RACKID_CH01_MD00";
+		}
+
+		QString defaultLmDescriptionFile;
+		dbc()->getUserProperty("SchemaEditor/NewLogicSchemaLastParam/LmDescriptionFile", &defaultLmDescriptionFile, this);
+		if (defaultLmDescriptionFile.isEmpty() == true)
+		{
+			defaultLmDescriptionFile = "LM_SF41.xml";
+		}
+
+		logicSchema->setEquipmentIds(defaultEquipmentIds);
+		logicSchema->setLmDescriptionFile(defaultLmDescriptionFile);
 	}
 
 	// Set Width and Height
@@ -3576,6 +3592,15 @@ void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
 		return;
 	}
 
+	// Save default params for next time
+	//
+	if (schema->isLogicSchema() == true)
+	{
+		auto logicSchema = schema->toLogicSchema();
+		dbc()->setUserProperty("SchemaEditor/NewLogicSchemaLastParam/EquipmentIds", logicSchema->equipmentIds(), this);
+		dbc()->setUserProperty("SchemaEditor/NewLogicSchemaLastParam/LmDescriptionFile", logicSchema->lmDescriptionFile(), this);
+	}
+
 	addSchemaFile(schema, extension, parentFile.fileId());
 
 	return;
@@ -3593,25 +3618,25 @@ void SchemaControlTabPage::addActuator(const DbFileInfo& parentFile)
 		bool ok = false;
 		QString value;
 
-		ok = db()->getUserProperty("NewActuatorLastParam/PresetName", &value, this);
+		ok = db()->getUserProperty("SchemaEditor/NewActuatorLastParam/PresetName", &value, this);
 		if (ok == true && value.isEmpty() == false)
 		{
 			actuatorHeader->setAcmPresetName(value); // To update description file based on preset name
 		}
 
-		ok = db()->getUserProperty("NewActuatorLastParam/DescriptionFile", &value, this);
+		ok = db()->getUserProperty("SchemaEditor/NewActuatorLastParam/DescriptionFile", &value, this);
 		if (ok == true && value.isEmpty() == false)
 		{
 			actuatorHeader->setDescriptionFile(value);
 		}
 
-		ok = db()->getUserProperty("NewActuatorLastParam/SubsystemID", &value, this);
+		ok = db()->getUserProperty("SchemaEditor/NewActuatorLastParam/SubsystemID", &value, this);
 		if (ok == true && value.isEmpty() == false)
 		{
 			actuatorHeader->setSubsystemId(value);
 		}
 
-		ok = db()->getUserProperty("NewActuatorLastParam/LmNumber", &value, this);
+		ok = db()->getUserProperty("SchemaEditor/NewActuatorLastParam/LmNumber", &value, this);
 		if (ok == true && value.isEmpty() == false)
 		{
 			bool lmNumberOk = false;
@@ -3632,11 +3657,11 @@ void SchemaControlTabPage::addActuator(const DbFileInfo& parentFile)
 
 		// Save last used params.
 		//
-		db()->setUserProperty("NewActuatorLastParam/PresetName", actuatorHeader->acmPresetName(), this);
-		db()->setUserProperty("NewActuatorLastParam/DescriptionFile", actuatorHeader->descriptionFile(), this);
+		db()->setUserProperty("SchemaEditor/NewActuatorLastParam/PresetName", actuatorHeader->acmPresetName(), this);
+		db()->setUserProperty("SchemaEditor/NewActuatorLastParam/DescriptionFile", actuatorHeader->descriptionFile(), this);
 
-		db()->setUserProperty("NewActuatorLastParam/SubsystemID", actuatorHeader->subsystemId(), this);
-		db()->setUserProperty("NewActuatorLastParam/LmNumber", QString::number(actuatorHeader->lmNumber()), this);
+		db()->setUserProperty("SchemaEditor/NewActuatorLastParam/SubsystemID", actuatorHeader->subsystemId(), this);
+		db()->setUserProperty("SchemaEditor/NewActuatorLastParam/LmNumber", QString::number(actuatorHeader->lmNumber()), this);
 	}
 
 	return;
