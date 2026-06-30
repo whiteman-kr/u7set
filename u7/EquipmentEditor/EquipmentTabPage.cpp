@@ -9,6 +9,7 @@
 #include "EquipmentView.h"
 #include "IdePropertyEditor.h"
 
+#include <HardwareLib/DeviceAppSignal.h>
 #include <HardwareLib/DeviceController.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/PropertyNames.h>
@@ -737,21 +738,20 @@ void EquipmentTabPage::setActionState()
 	{
 		// Allow to add selected signals
 		//
-		bool allSelectedAreAppSignals = true;
+		bool allAreInstantiable = std::all_of(selectedIndexList.begin(),
+											  selectedIndexList.end(),
+											  [this](const QModelIndex& si)
+											  {
+												  auto device = m_equipmentModel->deviceObject(si);
+												  if (device == nullptr)
+												  {
+													  assert(device);
+													  return false;
+												  }
+												  return device->isAppSignal() == true && device->toAppSignal()->isInstantiable();
+											  });
 
-		for (auto& si : selectedIndexList)
-		{
-			auto device = m_equipmentModel->deviceObject(si);
-			assert(device);
-
-			if (device->isAppSignal() == false)
-			{
-				allSelectedAreAppSignals = false;
-				break;
-			}
-		}
-
-		m_createInOutsToSignals->setEnabled(allSelectedAreAppSignals);
+		m_createInOutsToSignals->setEnabled(allAreInstantiable);
 		m_createInOutsToSignals->setVisible(true);
 	}
 
@@ -1184,7 +1184,7 @@ void EquipmentTabPage::setProperties()
 		{
 			checkedOutList << device;
 		}
-		else 
+		else
 		{
 			checkedInList << device;
 		}

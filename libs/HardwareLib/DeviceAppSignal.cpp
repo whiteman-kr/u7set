@@ -14,11 +14,17 @@ namespace Hardware
 		// These properties are used in setType()
 		// So they don take part in PropertyOnDemand
 		//
-		addProperty<E::AnalogAppSignalFormat, DeviceAppSignal, &DeviceAppSignal::appSignalDataFormat, &DeviceAppSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAppSignal, true)
+		addProperty<E::AnalogAppSignalFormat,
+					DeviceAppSignal,
+					&DeviceAppSignal::appSignalDataFormat,
+					&DeviceAppSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAppSignal, true)
 			->setUpdateFromPreset(true)
 			.setExpert(preset);
 
-		addProperty<QString, DeviceAppSignal, &DeviceAppSignal::appSignalBusTypeId, &DeviceAppSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryAppSignal, true)
+		addProperty<QString, DeviceAppSignal, &DeviceAppSignal::appSignalBusTypeId, &DeviceAppSignal::setAppSignalBusTypeId>(
+			PropertyNames::appSignalBusTypeId,
+			PropertyNames::categoryAppSignal,
+			true)
 			->setUpdateFromPreset(true)
 			.setExpert(preset);
 
@@ -33,44 +39,50 @@ namespace Hardware
 	{
 		DeviceObject::propertyDemand(prop);
 
+		if (prop.isEmpty() == true || prop == PropertyNames::isInstantiable)
+		{
+			auto instantiableProp = addProperty<bool, DeviceAppSignal, &DeviceAppSignal::isInstantiable, &DeviceAppSignal::setInstantiable>(
+				PropertyNames::isInstantiable,
+				PropertyNames::categoryAppSignal,
+				true);
+			instantiableProp->setUpdateFromPreset(true);
+			instantiableProp->setExpert(isPreset());
+		}
+
 		if (prop.isEmpty() == true || prop == PropertyNames::type)
 		{
 			auto typeProp = addProperty<E::SignalType, DeviceAppSignal, &DeviceAppSignal::signalType, &DeviceAppSignal::setSignalType>(
 				PropertyNames::type,
-				QLatin1String(),
+				PropertyNames::categoryAppSignal,
 				true);
 			typeProp->setUpdateFromPreset(true);
-			typeProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::function)
 		{
 			auto functionProp = addProperty<E::SignalFunction, DeviceAppSignal, &DeviceAppSignal::function, &DeviceAppSignal::setFunction>(
 				PropertyNames::function,
-				QLatin1String(),
+				PropertyNames::categoryAppSignal,
 				true);
 			functionProp->setUpdateFromPreset(true);
-			functionProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::byteOrder)
 		{
 			auto byteOrderProp = addProperty<E::ByteOrder, DeviceAppSignal, &DeviceAppSignal::byteOrder, &DeviceAppSignal::setByteOrder>(
 				PropertyNames::byteOrder,
-				QLatin1String(),
+				PropertyNames::categoryAppSignal,
 				true);
 			byteOrderProp->setUpdateFromPreset(true);
-			byteOrderProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::format)
 		{
-			auto formatProp =
-				addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(PropertyNames::format,
-																												   QLatin1String(),
-																												   true);
+			auto formatProp = addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(
+				PropertyNames::format,
+				PropertyNames::categoryAppSignal,
+				true);
 			formatProp->setUpdateFromPreset(true);
-			formatProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::memoryArea)
@@ -78,26 +90,25 @@ namespace Hardware
 			auto memoryAreaProp =
 				addProperty<E::MemoryArea, DeviceAppSignal, &DeviceAppSignal::memoryArea, &DeviceAppSignal::setMemoryArea>(
 					PropertyNames::memoryArea,
-					QLatin1String(),
+					PropertyNames::categoryAppSignal,
 					true);
 			memoryAreaProp->setUpdateFromPreset(true);
-			memoryAreaProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::size)
 		{
-			auto sizeProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size,
-																												 QLatin1String(),
-																												 true);
+			auto sizeProp =
+				addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size,
+																									 PropertyNames::categoryAppSignal,
+																									 true);
 			sizeProp->setUpdateFromPreset(true);
-			sizeProp->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::valueOffset)
 		{
 			auto valueOffsetProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueOffset, &DeviceAppSignal::setValueOffset>(
 				PropertyNames::valueOffset,
-				QLatin1String(),
+				PropertyNames::categoryAppSignal,
 				true);
 			valueOffsetProp->setUpdateFromPreset(true);
 			valueOffsetProp->setExpert(isPreset());
@@ -105,10 +116,10 @@ namespace Hardware
 
 		if (prop.isEmpty() == true || prop == PropertyNames::valueBit)
 		{
-			auto valueBitProp =
-				addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueBit, &DeviceAppSignal::setValueBit>(PropertyNames::valueBit,
-																											 QLatin1String(),
-																											 true);
+			auto valueBitProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueBit, &DeviceAppSignal::setValueBit>(
+				PropertyNames::valueBit,
+				PropertyNames::categoryAppSignal,
+				true);
 			valueBitProp->setUpdateFromPreset(true);
 			valueBitProp->setExpert(isPreset());
 		}
@@ -118,10 +129,9 @@ namespace Hardware
 			auto validitySignalId =
 				addProperty<QString, DeviceAppSignal, &DeviceAppSignal::validitySignalId, &DeviceAppSignal::setValiditySignalId>(
 					PropertyNames::validitySignalId,
-					QLatin1String(),
+					PropertyNames::categoryAppSignal,
 					true);
 			validitySignalId->setUpdateFromPreset(true);
-			validitySignalId->setExpert(isPreset());
 		}
 
 		if (prop.isEmpty() == true || prop == PropertyNames::signalSpecificProperties)
@@ -154,6 +164,8 @@ namespace Hardware
 		//
 		auto signalMessage = message->MutableExtension(::Proto::deviceobject)->mutable_appsignal();
 
+		signalMessage->set_instantiable(m_instantiable);
+
 		signalMessage->set_type(static_cast<int>(m_signalType));
 		signalMessage->set_function(static_cast<int>(m_function));
 
@@ -179,7 +191,7 @@ namespace Hardware
 		signalMessage->set_appsignalbustypeid(m_appSignalBusTypeId.toStdString());
 
 		signalMessage->set_signalspecpropsstruct(m_signalSpecPropsStruct.toUtf8());
-		signalMessage->set_signalspecpropsstructwasfixed(true);		// m_signalSpecPropsStruct was fixed on loading
+		signalMessage->set_signalspecpropsstructwasfixed(true); // m_signalSpecPropsStruct was fixed on loading
 
 		return true;
 	}
@@ -209,6 +221,8 @@ namespace Hardware
 		}
 
 		const auto& signalMessage = deviceobject.appsignal();
+
+		m_instantiable = signalMessage.instantiable();
 
 		if (signalMessage.has_obsoletetype() == true)
 		{
@@ -259,7 +273,7 @@ namespace Hardware
 		}
 		else
 		{
-			setSignalType(static_cast<E::SignalType>(signalMessage.type()));				// Show hide some props
+			setSignalType(static_cast<E::SignalType>(signalMessage.type())); // Show hide some props
 			m_function = static_cast<E::SignalFunction>(signalMessage.function());
 		}
 
@@ -330,54 +344,14 @@ namespace Hardware
 		return;
 	}
 
-	//	quint32 DeviceAppSignal::valueToMantExp1616(double value)
-	//	{
-	//		if (value == 0)
-	//			return 0;
-
-	//		//value = 2;
-
-	//		double m = 0;
-	//		int p = 1;
-
-	//		m = frexp (value, &p);
-
-	//		p+= 30;
-
-	//		if (abs((int)m) < 0x3fffffff)
-	//		{
-	//			while (abs((int)m) < 0x3fffffff)
-	//			{
-	//				m *= 2;
-	//				p--;
-	//			}
-
-	//			if ((int)m == -0x40000000)
-	//			{
-	//				m *= 2;
-	//				p--;
-	//			}
-	//		}
-	//		else
-	//		{
-	//			while (abs((int)m) > 0x20000000)
-	//			{
-	//				m /= 2;
-	//				p++;
-	//			}
-	//		}
-
-	//		if (p < -256 || p > 255)
-	//		{
-	//			return 0;
-	//		}
-
-	//		quint16 _m16 = (int)m >> 16;
-	//		quint16 _p16 = static_cast<quint16>(p);
-
-	//		quint32 result = (_m16 << 16) | _p16;
-	//		return result;
-	//	}
+	bool DeviceAppSignal::isInstantiable() const
+	{
+		return m_instantiable;
+	}
+	void DeviceAppSignal::setInstantiable(bool value)
+	{
+		m_instantiable = value;
+	}
 
 	E::SignalType DeviceAppSignal::signalType() const
 	{
@@ -388,8 +362,7 @@ namespace Hardware
 	{
 		m_signalType = value;
 
-		if (function() == E::SignalFunction::Input ||
-			function() == E::SignalFunction::Output)
+		if (function() == E::SignalFunction::Input || function() == E::SignalFunction::Output)
 		{
 			bool analogSignalProps = false;
 			bool busSignalProps = false;
@@ -410,9 +383,7 @@ namespace Hardware
 
 			bool propertiesWereChanged = false;
 
-			if (auto p = propertyByCaption(PropertyNames::appSignalDataFormat);
-				p != nullptr &&
-				p->visible() != analogSignalProps)
+			if (auto p = propertyByCaption(PropertyNames::appSignalDataFormat); p != nullptr && p->visible() != analogSignalProps)
 			{
 				p->setVisible(analogSignalProps);
 				propertiesWereChanged = true;
@@ -422,9 +393,7 @@ namespace Hardware
 				Q_ASSERT(p);
 			}
 
-			if (auto p = propertyByCaption(PropertyNames::appSignalBusTypeId);
-				p != nullptr &&
-				p->visible() != busSignalProps)
+			if (auto p = propertyByCaption(PropertyNames::appSignalBusTypeId); p != nullptr && p->visible() != busSignalProps)
 			{
 				p->setVisible(busSignalProps);
 				propertiesWereChanged = true;

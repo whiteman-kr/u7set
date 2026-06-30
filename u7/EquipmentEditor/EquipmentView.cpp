@@ -1193,7 +1193,14 @@ void EquipmentView::createInOutsToSignals()
 			return;
 		}
 
-		hardwareAppSignals.push_back(deviceObject->toAppSignal());
+		auto deviceAppSignal = deviceObject->toAppSignal();
+
+		if (deviceAppSignal->isInstantiable() == false)
+		{
+			continue;
+		}
+
+		hardwareAppSignals.push_back(deviceAppSignal);
 	}
 
 	addInOutsToSignals(hardwareAppSignals);
@@ -1253,7 +1260,7 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 	std::function<void(Hardware::DeviceObject*)> getInOuts =
 		[&inOuts, &getInOuts](Hardware::DeviceObject* device)
 		{
-			if (device->deviceType() == Hardware::DeviceType::AppSignal)
+			if (device->deviceType() == Hardware::DeviceType::AppSignal && device->toAppSignal()->isInstantiable())
 			{
 				Hardware::DeviceAppSignal* signal = dynamic_cast<Hardware::DeviceAppSignal*>(device);
 				Q_ASSERT(signal);

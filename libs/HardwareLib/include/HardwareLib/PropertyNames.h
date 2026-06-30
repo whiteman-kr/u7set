@@ -64,6 +64,7 @@ namespace Hardware
 		inline static const QString lmSubsystemChannel = QStringLiteral("SubsystemChannel");
 		inline static const QString lmSubsystemID = QStringLiteral("SubsystemID");
 
+		inline static const QString isInstantiable = QStringLiteral("IsInstantiable");
 		inline static const QString type = QStringLiteral("Type");
 		inline static const QString function = QStringLiteral("Function");
 		inline static const QString byteOrder = QStringLiteral("ByteOrder");
