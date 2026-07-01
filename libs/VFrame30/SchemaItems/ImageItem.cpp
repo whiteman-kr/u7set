@@ -1,4 +1,6 @@
 #include <VFrame30/ImageItem.h>
+
+#include <VFrame30/DrawParam.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaView.h>
 

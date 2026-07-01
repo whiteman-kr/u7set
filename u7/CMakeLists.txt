@@ -152,6 +152,8 @@ set (U7_SOURCES
 	./SchemaEditor/F2KeyForSchemaItem.h
 	./SchemaEditor/SchemaControlTabPage.cpp
 	./SchemaEditor/SchemaControlTabPage.h
+	./SchemaEditor/SchemaFindDialog.cpp
+	./SchemaEditor/SchemaFindDialog.h
 	./SchemaEditor/SchemaItemPropertiesDialog.cpp
 	./SchemaEditor/SchemaItemPropertiesDialog.h
 	./SchemaEditor/SchemaLayersDialog.cpp

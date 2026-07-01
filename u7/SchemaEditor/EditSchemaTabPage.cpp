@@ -2,6 +2,9 @@
 #include "CheckInDialog.h"
 #include "EditSchemaWidget.h"
 
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemSignal.h>
+
 //
 //
 // EditSchemaTabPage
@@ -61,104 +64,43 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	m_toolBar->setMovable(false);
 	m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
+	// File
+	//
 	m_toolBar->addAction(m_fileAction);
-
 	m_toolBar->addSeparator();
-	if (schema->isVduSchema() == false)
-	{
-		m_toolBar->addAction(m_schemaWidget->m_addLineAction);
-		m_toolBar->addAction(m_schemaWidget->m_addRectAction);
-		m_toolBar->addAction(m_schemaWidget->m_addPathAction);
-		m_toolBar->addAction(m_schemaWidget->m_addTextAction);
-		m_toolBar->addAction(m_schemaWidget->m_addImageAction);
-	}
-	else
-	{
-		m_toolBar->addAction(m_schemaWidget->m_addVduLineAction);
-		m_toolBar->addAction(m_schemaWidget->m_addVduRectAction);
-		m_toolBar->addAction(m_schemaWidget->m_addVduImageAction);
-
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addVduValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addVduImageValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addVduTrendAction);
-	}
 
 	if (schema->isLogicSchema() == true)
 	{
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
-		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
-		m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
-		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
-		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
-		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
-		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
-		m_toolBar->addAction(m_schemaWidget->m_addUfbAction);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorConn);
-		m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
-		m_toolBar->addAction(m_schemaWidget->m_addReceiver);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
-		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
-		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
-		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
-		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
+		m_schemaWidget->fillActionsForLogicSchema(m_toolBar);
 	}
 
 	if (schema->isUfbSchema() == true)
 	{
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
-		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
-		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
-		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
-		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
-		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
-		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
-		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
-
-		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
-		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
-		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
+		m_schemaWidget->fillActionsForUfbSchema(m_toolBar);
 	}
 
 	if (schema->isMonitorSchema() == true)
 	{
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
-		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
-		m_toolBar->addAction(m_schemaWidget->m_addSliderAction);
-		m_toolBar->addAction(m_schemaWidget->m_addIndicatorAction);
+		m_schemaWidget->fillActionsForMonitorSchema(m_toolBar);
 	}
 
 	if (schema->isTuningSchema() == true)
 	{
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
-		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
-		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
-		m_toolBar->addAction(m_schemaWidget->m_addSliderAction);
+		m_schemaWidget->fillActionsForTuningSchema(m_toolBar);
 	}
 
 	if (schema->isDiagSchema() == true)
 	{
-		m_toolBar->addSeparator();
-		m_toolBar->addAction(m_schemaWidget->m_addDiagSignalAction);
+		m_schemaWidget->fillActionsForDiagSchema(m_toolBar);
 	}
 
+	if (schema->isVduSchema() == true)
+	{
+		m_schemaWidget->fillActionsForVduSchema(m_toolBar);
+	}
+
+	// Other menu items
+	//
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_orderAction);
 	m_toolBar->addAction(m_alignAction);

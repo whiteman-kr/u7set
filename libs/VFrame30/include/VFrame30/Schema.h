@@ -101,6 +101,39 @@ namespace VFrame30
 
 
 	//
+	//	SchemaTraits
+	//
+	struct SchemaTraits
+	{
+		virtual ~SchemaTraits() = default;
+
+		template<typename ItemType>
+		bool isItemSupported() const
+		{
+			auto mo = QMetaType::fromType<ItemType>().metaObject();
+			if (mo == nullptr)
+			{
+				assert(mo);
+				return false;
+			}
+
+			QString clearClassName = mo->className();
+
+			auto findResult = clearClassName.lastIndexOf("::");
+			if (findResult != -1)
+			{
+				Q_ASSERT(findResult + 2 < clearClassName.size());
+				clearClassName = clearClassName.mid(findResult + 2);
+			}
+
+			return isItemSupported(clearClassName);
+		}
+
+		virtual bool isItemSupported(const QString& clearClassName) const = 0;
+	};
+
+
+	//
 	//	Schema
 	//
 	class Schema : public PropertyObject,
@@ -117,6 +150,8 @@ namespace VFrame30
 		virtual ~Schema(void);
 
 		void Init(void);
+
+		virtual const SchemaTraits& traits() const = 0;
 
 		// Serialization
 		//

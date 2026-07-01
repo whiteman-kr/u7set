@@ -1,6 +1,41 @@
+#include <VFrame30/TuningSchema.h>
+
+#include <VFrame30/SchemaItemImage.h>
+#include <VFrame30/SchemaItemImageValue.h>
+#include <VFrame30/SchemaItemLine.h>
+#include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/SchemaItemPath.h>
+#include <VFrame30/SchemaItemPushButton.h>
+#include <VFrame30/SchemaItemRect.h>
+#include <VFrame30/SchemaItemSlider.h>
 #include <VFrame30/SchemaItemValue.h>
 #include <VFrame30/SchemaLayer.h>
-#include <VFrame30/TuningSchema.h>
+
+
+namespace
+{
+	struct TuningSchemaTraits : VFrame30::SchemaTraits
+	{
+		bool isItemSupported(const QString& clearClassName) const override
+		{
+			static const std::set<QString> supportedItems{
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImage>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLine>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImageValue>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLineEdit>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPushButton>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemSlider>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemValue>(),
+			};
+
+			return supportedItems.contains(clearClassName);
+		}
+	};
+} // namespace
+
 
 namespace VFrame30
 {
@@ -20,6 +55,12 @@ namespace VFrame30
 		setTagsList(QStringList{"tuning"});
 
 		return;
+	}
+
+	const SchemaTraits& TuningSchema::traits() const
+	{
+		static const TuningSchemaTraits st{};
+		return st;
 	}
 
 	bool TuningSchema::SaveData(Proto::Envelope* message) const

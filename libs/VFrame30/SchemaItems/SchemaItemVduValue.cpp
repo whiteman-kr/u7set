@@ -128,6 +128,8 @@ namespace VFrame30
 
 		m_font.setSize(12.0, units);
 
+		m_text = "%v";
+
 		// --
 		//
 		m_static = false;

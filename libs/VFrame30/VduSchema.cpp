@@ -1,9 +1,38 @@
-#include <VFrame30/SchemaLayer.h>
 #include <VFrame30/VduSchema.h>
+
+#include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
+#include <VFrame30/SchemaItemVduLine.h>
+#include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduTrend.h>
+#include <VFrame30/SchemaItemVduValue.h>
+#include <VFrame30/SchemaLayer.h>
+
+
+namespace
+{
+	struct VduSchemaTraits : VFrame30::SchemaTraits
+	{
+		bool isItemSupported(const QString& clearClassName) const override
+		{
+			static const std::set<QString> supportedItems{
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduImage>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduLine>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduRect>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduImageValue>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduTrend>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemVduValue>(),
+			};
+
+			return supportedItems.contains(clearClassName);
+		}
+	};
+} // namespace
+
 
 namespace VFrame30
 {
-
 	VduSchema::VduSchema(void) :
 		Schema()
 	{
@@ -21,6 +50,12 @@ namespace VFrame30
 		setTagsList(QStringList{"vdu"});
 
 		return;
+	}
+
+	const SchemaTraits& VduSchema::traits() const
+	{
+		static const VduSchemaTraits st{};
+		return st;
 	}
 
 	bool VduSchema::SaveData(Proto::Envelope* message) const

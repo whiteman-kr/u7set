@@ -1,6 +1,49 @@
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/SchemaLayer.h>
 #include <VFrame30/UfbSchema.h>
+
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaItemBus.h>
+#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/SchemaItemImage.h>
+#include <VFrame30/SchemaItemLine.h>
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemPath.h>
+#include <VFrame30/SchemaItemRect.h>
+#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaLayer.h>
+
+
+namespace
+{
+	struct UfbSchemaTraits : VFrame30::SchemaTraits
+	{
+		bool isItemSupported(const QString& clearClassName) const override
+		{
+			static const std::set<QString> supportedItems{
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImage>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLine>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemAfb>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusComposer>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusExtractor>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemConst>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemInput>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLink>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLoopbackSource>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLoopbackTarget>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemOutput>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemTerminator>(),
+			};
+
+			return supportedItems.contains(clearClassName);
+		}
+	};
+} // namespace
+
 
 namespace VFrame30
 {
@@ -36,6 +79,12 @@ namespace VFrame30
 	}
 
 	UfbSchema::~UfbSchema(void) {}
+
+	const SchemaTraits& UfbSchema::traits() const
+	{
+		static const UfbSchemaTraits st{};
+		return st;
+	}
 
 	bool UfbSchema::SaveData(Proto::Envelope* message) const
 	{

@@ -1,6 +1,43 @@
 #include <VFrame30/MonitorSchema.h>
 #include <VFrame30/SchemaLayer.h>
 
+#include <VFrame30/SchemaItemImage.h>
+#include <VFrame30/SchemaItemLine.h>
+#include <VFrame30/SchemaItemPath.h>
+#include <VFrame30/SchemaItemRect.h>
+
+#include <VFrame30/SchemaItemImageValue.h>
+#include <VFrame30/SchemaItemIndicator.h>
+#include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/SchemaItemPushButton.h>
+#include <VFrame30/SchemaItemSlider.h>
+#include <VFrame30/SchemaItemValue.h>
+
+
+namespace
+{
+	struct MonitorSchemaTraits : VFrame30::SchemaTraits
+	{
+		bool isItemSupported(const QString& clearClassName) const override
+		{
+			static const std::set<QString> supportedItems{
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLine>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImage>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemValue>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemSlider>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPushButton>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLineEdit>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemIndicator>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImageValue>(),
+			};
+
+			return supportedItems.contains(clearClassName);
+		}
+	};
+} // namespace
 
 namespace VFrame30
 {
@@ -21,6 +58,12 @@ namespace VFrame30
 		setTagsList(QStringList{"monitor"});
 
 		return;
+	}
+
+	const SchemaTraits& MonitorSchema::traits() const
+	{
+		static const MonitorSchemaTraits st{};
+		return st;
 	}
 
 	bool MonitorSchema::SaveData(Proto::Envelope* message) const

@@ -4,7 +4,6 @@
 
 namespace VFrame30
 {
-
 	class WiringSchema : public Schema
 	{
 		Q_OBJECT
@@ -12,7 +11,7 @@ namespace VFrame30
 	public:
 		WiringSchema(void);
 		virtual ~WiringSchema(void);
+
+		virtual const SchemaTraits& traits() const override;
 	};
-}
-
-
+} // namespace VFrame30

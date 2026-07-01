@@ -13,12 +13,12 @@ namespace VFrame30
 	public:
 		MonitorSchema(void);
 
+		virtual const SchemaTraits& traits() const override;
+
 		// Serialization
 		//
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 	};
-}
-
-
+} // namespace VFrame30

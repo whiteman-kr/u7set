@@ -9,6 +9,8 @@
 #include <QColor>
 #include <QJSValue>
 
+#include <type_traits>
+
 
 class QJSEngine;
 class QPaintDevice;
@@ -270,6 +272,29 @@ namespace VFrame30
 		bool IsDynamic() const noexcept;
 
 		QString type() const;
+
+		template<typename SchemaItemType>
+			requires std::is_base_of_v<VFrame30::SchemaItem, SchemaItemType>
+		static QString type()
+		{
+			auto mo = QMetaType::fromType<SchemaItemType>().metaObject();
+			if (mo == nullptr)
+			{
+				assert(mo);
+				return QString{};
+			}
+
+			QString clearClassName = mo->className();
+
+			auto findResult = clearClassName.lastIndexOf("::");
+			if (findResult != -1)
+			{
+				Q_ASSERT(findResult + 2 < clearClassName.size());
+				clearClassName = clearClassName.mid(findResult + 2);
+			}
+
+			return clearClassName;
+		}
 
 		bool isFblItemRect() const noexcept;
 		FblItemRect* toFblItemRect();

@@ -12,7 +12,8 @@ namespace VFrame30
 	public:
 		DiagSchema(void);
 		virtual ~DiagSchema(void);
+
+		virtual const SchemaTraits& traits() const override;
 	};
 
-}
-
+} // namespace VFrame30

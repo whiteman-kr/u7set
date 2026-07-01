@@ -1,14 +1,13 @@
 #pragma once
 
 #include <VFrame30/IMatsSchemaItemAssociations.h>
+#include <VFrame30/ImageItem.h>
 #include <VFrame30/PosRectImpl.h>
 #include <VFrame30/SchemaItemVdu.h>
 
 
 namespace VFrame30
 {
-	// class ImageItem;
-
 	class SchemaItemVduImageValue : public PosRectImpl,
 									public IMatsSchemaItemAssociations,
 									public SchemaItemVduVisitable<SchemaItemVduImageValue>

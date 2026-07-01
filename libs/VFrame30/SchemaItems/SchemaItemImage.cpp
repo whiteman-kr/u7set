@@ -57,6 +57,8 @@ namespace VFrame30
 		return;
 	}
 
+	SchemaItemImage::~SchemaItemImage() = default;
+
 	// Serialization
 	//
 	bool SchemaItemImage::SaveData(Proto::Envelope* message) const

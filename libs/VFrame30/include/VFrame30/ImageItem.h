@@ -1,6 +1,4 @@
 #pragma once
-#include <VFrame30/DrawParam.h>
-
 #include <QImage>
 #include <QSvgRenderer>
 #include <optional>
@@ -13,6 +11,9 @@ namespace Proto
 
 namespace VFrame30
 {
+	class CDrawParam;
+
+
 	class ImageItem : public PropertyObject
 	{
 		Q_OBJECT

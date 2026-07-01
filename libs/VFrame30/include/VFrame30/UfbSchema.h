@@ -13,6 +13,8 @@ namespace VFrame30
 		UfbSchema(void);
 		virtual ~UfbSchema(void);
 
+		virtual const SchemaTraits& traits() const override;
+
 		// Serialization
 		//
 	protected:
@@ -27,12 +29,12 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		[[nodiscard]]QString description() const;
+		[[nodiscard]] QString description() const;
 		void setDescription(QString value);
 
-		[[nodiscard]]int version() const;
+		[[nodiscard]] int version() const;
 
-		[[nodiscard]]QString lmDescriptionFile() const;
+		[[nodiscard]] QString lmDescriptionFile() const;
 		void setLmDescriptionFile(QString value);
 
 		[[nodiscard]] QString specificProperties() const;
@@ -42,10 +44,10 @@ namespace VFrame30
 		//
 	private:
 		QString m_description;
-		mutable int m_version = 1;								// Version is inceremented every save
-		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
+		mutable int m_version = 1;                           // Version is incremented every save
+		QString m_lmDescriptionFile = "LogicModule0000.xml"; // LogicModule Description
 
-		QString m_specificPropertiesStruct;						// Description of the UFB's specific properties
+		QString m_specificPropertiesStruct;                  // Description of the UFB's specific properties
 	};
 
-}
+} // namespace VFrame30

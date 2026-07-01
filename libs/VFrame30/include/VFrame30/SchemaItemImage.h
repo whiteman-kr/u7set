@@ -99,6 +99,7 @@ namespace VFrame30
 	public:
 		SchemaItemImage(void);
 		explicit SchemaItemImage(SchemaUnit unit);
+		~SchemaItemImage() override;
 
 		// Serialization
 		//

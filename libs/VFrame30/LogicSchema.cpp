@@ -1,9 +1,72 @@
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/PropertyNames.h>
+
+
+#include <VFrame30/SchemaItemImage.h>
+#include <VFrame30/SchemaItemLine.h>
+#include <VFrame30/SchemaItemPath.h>
+#include <VFrame30/SchemaItemRect.h>
+
+#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemSignal.h>
+
+#include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
 #include <VFrame30/SchemaItemLoopback.h>
-#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaItemUfb.h>
+
+#include <VFrame30/SchemaItemImageValue.h>
+#include <VFrame30/SchemaItemIndicator.h>
+#include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/SchemaItemPushButton.h>
+#include <VFrame30/SchemaItemSlider.h>
+#include <VFrame30/SchemaItemValue.h>
+
 #include <VFrame30/SchemaLayer.h>
+
+
+namespace
+{
+	struct LogicSchemaTraits : VFrame30::SchemaTraits
+	{
+		bool isItemSupported(const QString& clearClassName) const override
+		{
+			static const std::set<QString> supportedItems{
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImage>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLine>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemAfb>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusComposer>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusExtractor>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemConst>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemInOut>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemInput>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLink>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLoopbackSource>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLoopbackTarget>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemOutput>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemReceiver>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemTerminator>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemTransmitter>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemUfb>(),
+
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemImageValue>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemIndicator>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemLineEdit>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemPushButton>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemSlider>(),
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemValue>(),
+			};
+
+			return supportedItems.contains(clearClassName);
+		}
+	};
+} // namespace
 
 namespace VFrame30
 {
@@ -35,6 +98,12 @@ namespace VFrame30
 	LogicSchema ::~LogicSchema(void)
 	{
 		// qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
+	}
+
+	const SchemaTraits& LogicSchema::traits() const
+	{
+		static const LogicSchemaTraits st;
+		return st;
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const
