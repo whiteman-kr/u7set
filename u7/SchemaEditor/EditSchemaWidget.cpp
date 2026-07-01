@@ -446,9 +446,6 @@ void EditSchemaWidget::createActions()
 	//			});
 
 	// ----------------------------------------
-	m_addSeparatorAction0 = new QAction(this);
-	m_addSeparatorAction0->setSeparator(true);
-
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
 	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
@@ -519,9 +516,6 @@ void EditSchemaWidget::createActions()
 			});
 
 	// ----------------------------------------
-	m_addSeparatorAfb = new QAction(this);
-	m_addSeparatorAfb->setSeparator(true);
-
 	m_addAfbAction = new QAction(tr("App Functional Block"), this);
 	m_addAfbAction->setEnabled(true);
 	m_addAfbAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
@@ -535,8 +529,11 @@ void EditSchemaWidget::createActions()
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
 	// ----------------------------------------
-	m_addSeparatorConn = new QAction(this);
-	m_addSeparatorConn->setSeparator(true);
+	m_addConnection = new QAction(tr("Connection"), this);
+	m_addConnection->setEnabled(true);
+	m_addConnection->setIcon(QIcon(":/Images/Images/SchemaTransmitter.svg"));
+	m_addConnection->setToolTip(tr("Connection\nType: SchemaItemTransmitter/SchemaItemReceiver"));
+	connect(m_addConnection, &QAction::triggered, this, &EditSchemaWidget::addConnection);
 
 	m_addTransmitter = new QAction(tr("Transmitter"), this);
 	m_addTransmitter->setEnabled(true);
@@ -551,8 +548,11 @@ void EditSchemaWidget::createActions()
 	connect(m_addReceiver, &QAction::triggered, this, &EditSchemaWidget::addReceiver);
 
 	// ----------------------------------------
-	m_addSeparatorLoop = new QAction(this);
-	m_addSeparatorLoop->setSeparator(true);
+	m_addLoopback = new QAction(tr("Loopback"), this);
+	m_addLoopback->setEnabled(true);
+	m_addLoopback->setIcon(QIcon(":/Images/Images/SchemaLoopbackSource.svg"));
+	m_addLoopback->setToolTip(tr("Loopback Source/Target\nType: SchemaItemLoopbackSource/SchemaItemLoopbackTarget"));
+	connect(m_addLoopback, &QAction::triggered, this, &EditSchemaWidget::addLoopback);
 
 	m_addLoopbackSource = new QAction(tr("Loopback Source"), this);
 	m_addLoopbackSource->setEnabled(true);
@@ -567,21 +567,12 @@ void EditSchemaWidget::createActions()
 	connect(m_addLoopbackTarget, &QAction::triggered, this, &EditSchemaWidget::addLoopbackTarget);
 
 	// ----------------------------------------
-	m_addSeparatorBus = new QAction(this);
-	m_addSeparatorBus->setSeparator(true);
 
-	m_addBusComposer = new QAction(tr("Bus Composer"), this);
-	m_addBusComposer->setEnabled(true);
-	m_addBusComposer->setIcon(QIcon(":/Images/Images/SchemaBusComposer.svg"));
-	m_addBusComposer->setToolTip(tr("Bus Composer\nType: SchemaItemBusComposer"));
-	connect(m_addBusComposer, &QAction::triggered, this, &EditSchemaWidget::addBusComposer);
-
-	m_addBusExtractor = new QAction(tr("Bus Extractor"), this);
-	m_addBusExtractor->setEnabled(true);
-	m_addBusExtractor->setIcon(QIcon(":/Images/Images/SchemaBusExtractor.svg"));
-	m_addBusExtractor->setToolTip(tr("Bus Extractor\nType: SchemaItemBusExtractor"));
-	connect(m_addBusExtractor, &QAction::triggered, this, &EditSchemaWidget::addBusExtractor);
-
+	m_addBus = new QAction(tr("Bus Composer/Extractor"), this);
+	m_addBus->setEnabled(true);
+	m_addBus->setIcon(QIcon(":/Images/Images/SchemaBusComposer.svg"));
+	m_addBus->setToolTip(tr("Bus Composer/Extractor\nType: SchemaItemBusComposer/SchemaItemBusExtractor"));
+	connect(m_addBus, &QAction::triggered, this, &EditSchemaWidget::addBus);
 
 	m_addValueAction = new QAction(tr("Value"), this);
 	m_addValueAction->setEnabled(true);
@@ -1252,20 +1243,10 @@ void EditSchemaWidget::fillActionsForLogicSchema(QWidget* widget)
 	separator = new QAction(widget);
 	separator->setSeparator(true);
 	widget->addAction(separator);
-	widget->addAction(m_addTransmitter);
-	widget->addAction(m_addReceiver);
 
-	separator = new QAction(widget);
-	separator->setSeparator(true);
-	widget->addAction(separator);
-	widget->addAction(m_addLoopbackSource);
-	widget->addAction(m_addLoopbackTarget);
-
-	separator = new QAction(widget);
-	separator->setSeparator(true);
-	widget->addAction(separator);
-	widget->addAction(m_addBusComposer);
-	widget->addAction(m_addBusExtractor);
+	widget->addAction(m_addConnection);
+	widget->addAction(m_addLoopback);
+	widget->addAction(m_addBus);
 
 	return;
 }
@@ -1293,19 +1274,15 @@ void EditSchemaWidget::fillActionsForUfbSchema(QWidget* widget)
 	separator = new QAction(widget);
 	separator->setSeparator(true);
 	widget->addAction(separator);
+
 	widget->addAction(m_addAfbAction);
 
 	separator = new QAction(widget);
 	separator->setSeparator(true);
 	widget->addAction(separator);
-	widget->addAction(m_addLoopbackSource);
-	widget->addAction(m_addLoopbackTarget);
 
-	separator = new QAction(widget);
-	separator->setSeparator(true);
-	widget->addAction(separator);
-	widget->addAction(m_addBusComposer);
-	widget->addAction(m_addBusExtractor);
+	widget->addAction(m_addLoopback);
+	widget->addAction(m_addBus);
 
 	return;
 }
@@ -6449,6 +6426,15 @@ void EditSchemaWidget::clipboardDataChanged()
 	return;
 }
 
+void EditSchemaWidget::addConnection()
+{
+	QMenu menu{this};
+	menu.addAction(m_addTransmitter);
+	menu.addAction(m_addReceiver);
+
+	menu.exec(QCursor::pos());
+}
+
 void EditSchemaWidget::addTransmitter()
 {
 	if (isLogicSchema() == false)
@@ -6489,6 +6475,15 @@ void EditSchemaWidget::addReceiver()
 
 	addItem(schemaItem);
 	return;
+}
+
+void EditSchemaWidget::addLoopback()
+{
+	QMenu menu{this};
+	menu.addAction(m_addLoopbackSource);
+	menu.addAction(m_addLoopbackTarget);
+
+	menu.exec(QCursor::pos());
 }
 
 void EditSchemaWidget::addLoopbackSource()
@@ -6603,82 +6598,63 @@ void EditSchemaWidget::addUfbElement()
 	return;
 }
 
-void EditSchemaWidget::addBusComposer()
+void EditSchemaWidget::addBus()
 {
-	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusComposer>(schema()->unit());
-	addBusItem(schemaItem);
-}
+	QMenu menu{this};
+	QMenu* composerMenu = menu.addMenu(QIcon(":/Images/Images/SchemaBusComposer.svg"), tr("Bus Composer"));
+	QMenu* extractorMenu = menu.addMenu(QIcon(":/Images/Images/SchemaBusExtractor.svg"), tr("Bus Extractor"));
 
-void EditSchemaWidget::addBusExtractor()
-{
-	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusExtractor>(schema()->unit());
-	addBusItem(schemaItem);
-}
-
-void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem)
-{
-	if (schema()->isLogicSchema() == false && schema()->isUfbSchema() == false)
-	{
-		assert(false); // No sense to add sconnection to non applogic schema
-		return;
-	}
-
-	// Get Bus list
-	//
 	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = F2KeyForSchemaItem::loadBusses(db(), &busses, this);
-
 	if (ok == false)
 	{
 		return;
 	}
 
-	// Select BustType from existing
-	//
-
-	// Show menu
-	//
-	QObject actionParent;
-	QList<QAction*> menuActions;
-
-	for (const AppSignalLib::Bus& bus : busses)
+	for (const auto& bus : busses)
 	{
 		QString caption = QString("%1").arg(bus.busTypeId());
-		QAction* a = new QAction(caption, &actionParent);
-		a->setData(bus.busTypeId());
 
-		menuActions << a;
+		QAction* composerAction = new QAction(caption, composerMenu);
+		composerAction->setData(bus.busTypeId());
+		composerMenu->addAction(composerAction);
+
+		QAction* extractorAction = new QAction(caption, extractorMenu);
+		extractorAction->setData(bus.busTypeId());
+		extractorMenu->addAction(extractorAction);
 	}
 
-	QPoint menuPos = QCursor::pos();
 
-	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
+	QAction* triggeredAction = menu.exec(QCursor::pos());
 	if (triggeredAction == nullptr)
 	{
 		return;
 	}
 
-	// --
-	//
-	QString selectedBusId = triggeredAction->data().toString();
+	std::shared_ptr<VFrame30::SchemaItemBus> schemaItem;
 
+	if (qobject_cast<QMenu*>(triggeredAction->parent()) == composerMenu)
+	{
+		schemaItem = std::make_shared<VFrame30::SchemaItemBusComposer>(schema()->unit());
+	}
+	else
+	{
+		schemaItem = std::make_shared<VFrame30::SchemaItemBusExtractor>(schema()->unit());
+	}
+
+	QString selectedBusId = triggeredAction->data().toString();
 	for (const AppSignalLib::Bus& bus : busses)
 	{
 		if (bus.busTypeId() == selectedBusId)
 		{
 			schemaItem->setBusType(bus);
 
-			// Add item
-			//
 			addItem(schemaItem);
 			return;
 		}
 	}
 
-	// Selected bus not found
-	//
-	assert(false);
 	return;
 }
 

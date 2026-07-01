@@ -21,6 +21,7 @@ class SchemaItemPropertiesDialog;
 class EditSchemaTabPage;
 class SchemaFindDialog;
 class AppSignalSetProvider;
+class QMenu;
 
 namespace EditEngine
 {
@@ -231,18 +232,18 @@ protected slots:
 
 	void clipboardDataChanged();
 
+	void addConnection();
 	void addTransmitter();
 	void addReceiver();
 
+	void addLoopback();
 	void addLoopbackSource();
 	void addLoopbackTarget();
 
 	void addAfbElement(); // Add Application Functional Block
 	void addUfbElement(); // Add User Functional Block
 
-	void addBusComposer();
-	void addBusExtractor();
-	void addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem);
+	void addBus();
 
 	void onLeftKey(QKeyEvent* e);
 	void onRightKey(QKeyEvent* e);
@@ -444,7 +445,6 @@ private:
 	QAction* m_addImageAction = nullptr;
 	// QAction* m_addFrameAction = nullptr;
 	//  ------------------------------
-	QAction* m_addSeparatorAction0 = nullptr;
 	QAction* m_addLinkAction = nullptr;
 	QAction* m_addInputSignalAction = nullptr;
 	QAction* m_addInOutSignalAction = nullptr;
@@ -452,21 +452,18 @@ private:
 	QAction* m_addConstantAction = nullptr;
 	QAction* m_addTerminatorAction = nullptr;
 	// ------------------------------
-	QAction* m_addSeparatorAfb = nullptr;
 	QAction* m_addAfbAction = nullptr;
 	QAction* m_addUfbAction = nullptr;
 	// ------------------------------
-	QAction* m_addSeparatorConn = nullptr;
+	QAction* m_addConnection = nullptr;
 	QAction* m_addTransmitter = nullptr;
 	QAction* m_addReceiver = nullptr;
 	// ------------------------------
-	QAction* m_addSeparatorLoop = nullptr;
+	QAction* m_addLoopback = nullptr;
 	QAction* m_addLoopbackSource = nullptr;
 	QAction* m_addLoopbackTarget = nullptr;
 	// ------------------------------
-	QAction* m_addSeparatorBus = nullptr;
-	QAction* m_addBusComposer = nullptr;
-	QAction* m_addBusExtractor = nullptr;
+	QAction* m_addBus = nullptr;
 
 	// Monitor and Tuning items
 	//
