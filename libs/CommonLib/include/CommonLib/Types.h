@@ -186,13 +186,13 @@ public:
 	};
 	Q_ENUM(ColumnData)
 
-	// SignalType
+	// SignalType, saved in files, do not change values.
 	//
 	enum SignalType
 	{
-		Analog,   // 0
-		Discrete, // 1
-		Bus       // 2
+		Analog = 0,
+		Discrete = 1,
+		Bus = 2
 	};
 	Q_ENUM(SignalType)
 
@@ -785,9 +785,9 @@ public:
 		UnknownTuningSourceID = 0x0017,
 		TuningSourceHasNoSignals = 0x0018,
 
-		CommunicationError = 0x0080,  // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
-		CommandCanceled = 0x0081,     // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
-		ClientInternalError = 0x0082  // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
+		CommunicationError = 0x0080, // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
+		CommandCanceled = 0x0081,    // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
+		ClientInternalError = 0x0082 // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
 	};
 	Q_ENUM(NetworkError)
 

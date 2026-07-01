@@ -4119,7 +4119,7 @@ void SchemaControlTabPage::cloneActuatorHeader(const DbFile& file)
 
 	// Get folder for clonned actuator header.
 	//
-	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::ActuatorsDir), file.parentId(), false);
+	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::ActuatorsDir), file.parentId(), true);
 	if (parentFileId == -1)
 	{
 		return;

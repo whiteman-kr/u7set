@@ -6,11 +6,48 @@
 namespace Proto
 {
 	class Envelope;
+	class ActuatorSignal;
 } // namespace Proto
 
 
 namespace VFrame30
 {
+	class ActuatorSignal : public PropertyObject
+	{
+		Q_OBJECT
+
+	public:
+		ActuatorSignal();
+		ActuatorSignal(const ActuatorSignal& other);
+
+	private:
+		void init();
+
+	public:
+		void save(Proto::ActuatorSignal& message) const;
+		void load(const Proto::ActuatorSignal& message);
+
+	public:
+		[[nodiscard]] QString signalId() const;
+		void setSignalId(const QString& signalId);
+
+		[[nodiscard]] E::SignalType signalType() const;
+		void setSignalType(E::SignalType signalType);
+
+		[[nodiscard]] E::AnalogAppSignalFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogAppSignalFormat analogFormat);
+
+		[[nodiscard]] QString busTypeId() const;
+		void setBusTypeId(const QString& busTypeId);
+
+	private:
+		QString m_signalId = "";
+		E::SignalType m_signalType = E::SignalType::Discrete;
+		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::Float32;
+		QString m_busTypeId;
+	};
+
+
 	class ActuatorHeader : public PropertyObject,
 						   public Proto::ObjectSerialization<ActuatorHeader>
 	{
@@ -63,5 +100,8 @@ namespace VFrame30
 		QString m_subsystemId;
 
 		bool m_excludeFromBuild = false;
+
+		PropertyVector<ActuatorSignal> m_inputs;
+		PropertyVector<ActuatorSignal> m_outputs;
 	};
 } // namespace VFrame30

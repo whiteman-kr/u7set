@@ -1029,6 +1029,14 @@ message SchemaDetails
 	repeated TrendIndicatorSchemaItems trendIndicators = 30;
 }
 
+message ActuatorSignal
+{
+	optional string signalId = 1;
+	optional int32 signalType = 2 [default = 1];		// E::SignalType, 1 - Discrete
+	optional int32 analogFormat = 3 [default = 2];		// E::AnalogAppSignalFormat, 2 - Float32
+	optional string busTypeId = 4;
+}
+
 message ActuatorHeader
 {
 	optional string actuatorTypeId = 10;
@@ -1041,6 +1049,9 @@ message ActuatorHeader
 	optional string subsystemId = 31;
 	
 	optional bool excludeFromBuild = 50;
+
+	repeated ActuatorSignal inputs = 100;
+	repeated ActuatorSignal outputs = 101;
 }
 
 //
