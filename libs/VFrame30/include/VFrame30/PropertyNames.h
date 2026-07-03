@@ -92,6 +92,7 @@ namespace VFrame30
 		inline static const QString labelPos = QStringLiteral("LabelPos");
 		inline static const QString caption = QStringLiteral("Caption");
 		inline static const QString userCaption = QStringLiteral("UserCaption");
+		inline static const QString description = QStringLiteral("Description");
 		inline static const QString maxLength = QStringLiteral("MaxLength");
 		inline static const QString multiLine = QStringLiteral("MultiLine");
 
@@ -251,6 +252,7 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 
 		inline static const QString ufbSchemaId = QStringLiteral("UFBSchemaID");
 		inline static const QString ufbSchemaVersion = QStringLiteral("UFBSchemaVersion");
+		inline static const QString actuatorVersion = QStringLiteral("ActuatorVersion");
 
 		inline static const QString specificProperties = QStringLiteral("SpecificProperties");
 
@@ -377,7 +379,10 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString scriptGlobalVariableLog = QStringLiteral("log");
 
 		inline static const QString ActuatorTypeId = QStringLiteral("ActuatorTypeID");
+		inline static const QString ActuatorCaption = QStringLiteral("ActuatorCaption");
 		inline static const QString acmPreset = QStringLiteral("AcmPreset");
+		inline static const QString acmEquipmentId = QStringLiteral("AcmEquipmentID");
+
 		inline static const QString descriptionFile = QStringLiteral("DescriptionFile");
 		inline static const QString lmNumber = QStringLiteral("LmNumber");
 		inline static const QString subsystemId = QStringLiteral("SubsystemID");

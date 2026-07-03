@@ -61,6 +61,8 @@ set (U7_SOURCES
 
 	./Forms/ChangesetDetailsDialog.cpp
 	./Forms/ChangesetDetailsDialog.h
+	./Forms/ChooseActuatorDialog.cpp
+	./Forms/ChooseActuatorDialog.h
 	./Forms/ChooseAfbDialog.cpp
 	./Forms/ChooseAfbDialog.h
 	./Forms/ChooseUfbDialog.cpp

@@ -71,58 +71,58 @@ namespace VFrame30
 
 	void ActuatorSignal::save(Proto::ActuatorSignal& message) const
 	{
-		message.set_signalid(m_signalId.toStdString());
-		message.set_signaltype(static_cast<int>(m_signalType));
-		message.set_analogformat(static_cast<int>(m_analogFormat));
-		message.set_bustypeid(m_busTypeId.toStdString());
+		message.set_signalid(m_data.signalId.toStdString());
+		message.set_signaltype(static_cast<int>(m_data.signalType));
+		message.set_analogformat(static_cast<int>(m_data.analogFormat));
+		message.set_bustypeid(m_data.busTypeId.toStdString());
 	}
 
 	void ActuatorSignal::load(const Proto::ActuatorSignal& message)
 	{
-		m_signalId = QString::fromStdString(message.signalid());
-		m_signalType = static_cast<E::SignalType>(message.signaltype());
-		m_analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
-		m_busTypeId = QString::fromStdString(message.bustypeid());
+		m_data.signalId = QString::fromStdString(message.signalid());
+		m_data.signalType = static_cast<E::SignalType>(message.signaltype());
+		m_data.analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
+		m_data.busTypeId = QString::fromStdString(message.bustypeid());
 	}
 
 	QString ActuatorSignal::signalId() const
 	{
-		return m_signalId;
+		return m_data.signalId;
 	}
 
 	void ActuatorSignal::setSignalId(const QString& signalId)
 	{
-		m_signalId = signalId;
+		m_data.signalId = signalId;
 	}
 
 	E::SignalType ActuatorSignal::signalType() const
 	{
-		return m_signalType;
+		return m_data.signalType;
 	}
 
 	void ActuatorSignal::setSignalType(E::SignalType signalType)
 	{
-		m_signalType = signalType;
+		m_data.signalType = signalType;
 	}
 
 	E::AnalogAppSignalFormat ActuatorSignal::analogFormat() const
 	{
-		return m_analogFormat;
+		return m_data.analogFormat;
 	}
 
 	void ActuatorSignal::setAnalogFormat(E::AnalogAppSignalFormat analogFormat)
 	{
-		m_analogFormat = analogFormat;
+		m_data.analogFormat = analogFormat;
 	}
 
 	QString ActuatorSignal::busTypeId() const
 	{
-		return m_busTypeId;
+		return m_data.busTypeId;
 	}
 
 	void ActuatorSignal::setBusTypeId(const QString& busTypeId)
 	{
-		m_busTypeId = busTypeId;
+		m_data.busTypeId = busTypeId;
 	}
 
 	//
@@ -151,13 +151,22 @@ namespace VFrame30
 			.setViewOrder(2);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::description,
+								 PropertyNames::actuatorCategory,
+								 true,
+								 ActuatorHeader::description,
+								 ActuatorHeader::setDescription)
+			->setDescription(tr("Description for the actuator type."))
+			.setViewOrder(3);
+
+		ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::acmPreset,
 								 PropertyNames::actuatorCategory,
 								 true,
 								 ActuatorHeader::acmPresetName,
 								 ActuatorHeader::setAcmPresetName)
 			->setDescription(tr("ACM preset name for the actuator type."))
-			.setViewOrder(3);
+			.setViewOrder(4);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::descriptionFile,
@@ -166,7 +175,7 @@ namespace VFrame30
 								 ActuatorHeader::descriptionFile,
 								 ActuatorHeader::setDescriptionFile)
 			->setDescription(tr("Description file for the actuator type."))
-			.setViewOrder(4);
+			.setViewOrder(5);
 
 		// Subsystem
 		//
@@ -177,7 +186,7 @@ namespace VFrame30
 								 ActuatorHeader::subsystemId,
 								 ActuatorHeader::setSubsystemId)
 			->setDescription(tr("SubsystemID for the actuator type."))
-			.setViewOrder(5);
+			.setViewOrder(6);
 
 		ADD_PROPERTY_GET_SET_CAT(int,
 								 PropertyNames::lmNumber,
@@ -186,7 +195,7 @@ namespace VFrame30
 								 ActuatorHeader::lmNumber,
 								 ActuatorHeader::setLmNumber)
 			->setDescription(tr("LM number in subsystem for the actuator type."))
-			.setViewOrder(6);
+			.setViewOrder(7);
 
 		ADD_PROPERTY_GET_SET_CAT(bool,
 								 PropertyNames::excludeFromBuild,
@@ -195,15 +204,48 @@ namespace VFrame30
 								 ActuatorHeader::excludeFromBuild,
 								 ActuatorHeader::setExcludeFromBuild)
 			->setDescription(tr("Exclude the actuator type from the build process."))
-			.setViewOrder(7);
-
-		ADD_PROPERTY_CAT_VAR(PropertyVector<ActuatorSignal>, PropertyNames::inputs, PropertyNames::commonCategory, true, m_inputs)
-			->setDescription(tr("Input signals for the actuator type."))
 			.setViewOrder(8);
 
-		ADD_PROPERTY_CAT_VAR(PropertyVector<ActuatorSignal>, PropertyNames::outputs, PropertyNames::commonCategory, true, m_outputs)
-			->setDescription(tr("Output signals for the actuator type."))
+
+		addProperty<PropertyVector<ActuatorSignal>>(
+			PropertyNames::inputs,
+			PropertyNames::commonCategory,
+			true,
+			[this]()
+			{
+				return m_inputs;
+			},
+			[this](const auto& v)
+			{
+				if (m_inputs != v)
+				{
+					m_modified = true;
+					m_inputs = v;
+				}
+			})
+			->setDescription(tr("Input signals for the actuator type."))
 			.setViewOrder(9);
+
+		addProperty<PropertyVector<ActuatorSignal>>(
+			PropertyNames::outputs,
+			PropertyNames::commonCategory,
+			true,
+			[this]()
+			{
+				return m_outputs;
+			},
+			[this](const auto& v)
+			{
+				if (m_outputs != v)
+				{
+					m_modified = true;
+					m_outputs = v;
+				}
+			})
+			->setDescription(tr("Output signals for the actuator type."))
+			.setViewOrder(10);
+
+		ADD_PROPERTY_GETTER(int, QStringLiteral("Version"), true, ActuatorHeader::version)->setViewOrder(100);
 
 		return;
 	}
@@ -224,32 +266,14 @@ namespace VFrame30
 	{
 		message->set_classnamehash(::ClassNameHashCode("ActuatorHeader"));
 
+		if (m_modified == true)
+		{
+			m_version++;
+			m_modified = false;
+		}
+
 		auto* m = message->MutableExtension(::Proto::actuatorHeader);
-
-		m->set_actuatortypeid(m_actuatorTypeId.toStdString());
-		m->set_caption(m_caption.toStdString());
-
-		m->set_acmpresetname(m_acmPresetName.toStdString());
-		m->set_descriptionfile(m_descriptionFile.toStdString());
-
-		m->set_lmnumber(m_lmNumber);
-		m->set_subsystemid(m_subsystemId.toStdString());
-
-		m->set_excludefrombuild(m_excludeFromBuild);
-
-		for (const auto& input : m_inputs)
-		{
-			auto* inputMessage = m->add_inputs();
-			input->save(*inputMessage);
-		}
-
-		for (const auto& output : m_outputs)
-		{
-			auto* outputMessage = m->add_outputs();
-			output->save(*outputMessage);
-		}
-
-		return true;
+		return SaveData(m);
 	}
 
 	bool ActuatorHeader::LoadData(const ::Proto::Envelope& message)
@@ -260,22 +284,59 @@ namespace VFrame30
 			return false;
 		}
 
+		m_modified = false;
+
 		const auto& m = message.GetExtension(::Proto::actuatorHeader);
+		return LoadData(m);
+	}
 
-		m_actuatorTypeId = QString::fromStdString(m.actuatortypeid());
-		m_caption = QString::fromStdString(m.caption());
+	bool ActuatorHeader::SaveData(Proto::ActuatorHeader* message) const
+	{
+		message->set_actuatortypeid(m_actuatorTypeId.toStdString());
+		message->set_caption(m_caption.toStdString());
+		message->set_description(m_description.toStdString());
 
-		m_acmPresetName = QString::fromStdString(m.acmpresetname());
-		m_descriptionFile = QString::fromStdString(m.descriptionfile());
+		message->set_acmpresetname(m_acmPresetName.toStdString());
+		message->set_descriptionfile(m_descriptionFile.toStdString());
 
-		m_lmNumber = m.lmnumber();
-		m_subsystemId = QString::fromStdString(m.subsystemid());
+		message->set_lmnumber(m_lmNumber);
+		message->set_subsystemid(m_subsystemId.toStdString());
 
-		m_excludeFromBuild = m.excludefrombuild();
+		message->set_excludefrombuild(m_excludeFromBuild);
+
+		for (const auto& input : m_inputs)
+		{
+			auto* inputMessage = message->add_inputs();
+			input->save(*inputMessage);
+		}
+
+		for (const auto& output : m_outputs)
+		{
+			auto* outputMessage = message->add_outputs();
+			output->save(*outputMessage);
+		}
+
+		message->set_version(m_version);
+		return true;
+	}
+
+	bool ActuatorHeader::LoadData(const Proto::ActuatorHeader& message)
+	{
+		m_actuatorTypeId = QString::fromStdString(message.actuatortypeid());
+		m_caption = QString::fromStdString(message.caption());
+		m_description = QString::fromStdString(message.description());
+
+		m_acmPresetName = QString::fromStdString(message.acmpresetname());
+		m_descriptionFile = QString::fromStdString(message.descriptionfile());
+
+		m_lmNumber = message.lmnumber();
+		m_subsystemId = QString::fromStdString(message.subsystemid());
+
+		m_excludeFromBuild = message.excludefrombuild();
 
 		m_inputs.clear();
-		m_inputs.reserve(m.inputs_size());
-		for (const auto& inputMessage : m.inputs())
+		m_inputs.reserve(message.inputs_size());
+		for (const auto& inputMessage : message.inputs())
 		{
 			auto s = m_inputs.createItem();
 			s->load(inputMessage);
@@ -283,18 +344,17 @@ namespace VFrame30
 		}
 
 		m_outputs.clear();
-		m_outputs.reserve(m.outputs_size());
-		for (const auto& outputMessage : m.outputs())
+		m_outputs.reserve(message.outputs_size());
+		for (const auto& outputMessage : message.outputs())
 		{
 			auto s = m_outputs.createItem();
 			s->load(outputMessage);
 			m_outputs.push_back(std::move(s));
 		}
 
+		m_version = message.version();
 		return true;
 	}
-
-	void ActuatorHeader::propertyDemand([[maybe_unused]] const QString& prop) {}
 
 	QString ActuatorHeader::actuatorTypeId() const
 	{
@@ -303,7 +363,11 @@ namespace VFrame30
 
 	void ActuatorHeader::setActuatorTypeId(const QString& actuatorTypeId)
 	{
-		m_actuatorTypeId = actuatorTypeId;
+		if (m_actuatorTypeId != actuatorTypeId)
+		{
+			m_actuatorTypeId = actuatorTypeId;
+			m_modified = true;
+		}
 	}
 
 	QString ActuatorHeader::caption() const
@@ -313,7 +377,25 @@ namespace VFrame30
 
 	void ActuatorHeader::setCaption(const QString& caption)
 	{
-		m_caption = caption;
+		if (m_caption != caption)
+		{
+			m_caption = caption.trimmed();
+			m_modified = true;
+		}
+	}
+
+	QString ActuatorHeader::description() const
+	{
+		return m_description;
+	}
+
+	void ActuatorHeader::setDescription(const QString& description)
+	{
+		if (m_description != description)
+		{
+			m_description = description.trimmed();
+			m_modified = true;
+		}
 	}
 
 	QString ActuatorHeader::acmPresetName() const
@@ -323,7 +405,11 @@ namespace VFrame30
 
 	void ActuatorHeader::setAcmPresetName(const QString& acmPresetName)
 	{
-		m_acmPresetName = acmPresetName;
+		if (m_acmPresetName != acmPresetName)
+		{
+			m_acmPresetName = acmPresetName.trimmed();
+			m_modified = true;
+		}
 	}
 
 	QString ActuatorHeader::descriptionFile() const
@@ -333,7 +419,11 @@ namespace VFrame30
 
 	void ActuatorHeader::setDescriptionFile(const QString& descriptionFile)
 	{
-		m_descriptionFile = descriptionFile;
+		if (m_descriptionFile != descriptionFile)
+		{
+			m_descriptionFile = descriptionFile.trimmed();
+			m_modified = true;
+		}
 	}
 
 	int ActuatorHeader::lmNumber() const
@@ -343,7 +433,12 @@ namespace VFrame30
 
 	void ActuatorHeader::setLmNumber(int lmNumber)
 	{
-		m_lmNumber = std::clamp(lmNumber, 0, maxLmNumber());
+		int clampedLmNumber = std::clamp(lmNumber, 0, maxLmNumber());
+		if (m_lmNumber != clampedLmNumber)
+		{
+			m_lmNumber = clampedLmNumber;
+			m_modified = true;
+		}
 	}
 
 	int ActuatorHeader::maxLmNumber()
@@ -358,7 +453,11 @@ namespace VFrame30
 
 	void ActuatorHeader::setSubsystemId(const QString& subsystemId)
 	{
-		m_subsystemId = subsystemId;
+		if (m_subsystemId != subsystemId)
+		{
+			m_subsystemId = subsystemId.trimmed();
+			m_modified = true;
+		}
 	}
 
 	bool ActuatorHeader::excludeFromBuild() const
@@ -371,4 +470,18 @@ namespace VFrame30
 		m_excludeFromBuild = excludeFromBuild;
 	}
 
+	PropertyVector<ActuatorSignal> ActuatorHeader::inputs() const
+	{
+		return m_inputs;
+	}
+
+	PropertyVector<ActuatorSignal> ActuatorHeader::outputs() const
+	{
+		return m_outputs;
+	}
+
+	int ActuatorHeader::version() const
+	{
+		return m_version;
+	}
 } // namespace VFrame30

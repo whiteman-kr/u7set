@@ -6,6 +6,7 @@
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/MonitorSchema.h>
 #include <VFrame30/Schema.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
@@ -39,6 +40,7 @@
 #include <VFrame30/VduSchema.h>
 #include <VFrame30/WiringSchema.h>
 
+
 namespace VFrame30
 {
 	bool init()
@@ -63,6 +65,7 @@ namespace VFrame30
 		//
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
+		SchemaItemFactory.Register<SchemaItemActuator>();
 		SchemaItemFactory.Register<SchemaItemAfb>();
 		SchemaItemFactory.Register<SchemaItemBus>();
 		SchemaItemFactory.Register<SchemaItemBusComposer>();
@@ -91,12 +94,12 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemUfb>();
 		SchemaItemFactory.Register<SchemaItemValue>();
 
+		SchemaItemFactory.Register<SchemaItemVduImage>();
+		SchemaItemFactory.Register<SchemaItemVduImageValue>();
 		SchemaItemFactory.Register<SchemaItemVduLine>();
 		SchemaItemFactory.Register<SchemaItemVduRect>();
-		SchemaItemFactory.Register<SchemaItemVduImage>();
-		SchemaItemFactory.Register<SchemaItemVduValue>();
-		SchemaItemFactory.Register<SchemaItemVduImageValue>();
 		SchemaItemFactory.Register<SchemaItemVduTrend>();
+		SchemaItemFactory.Register<SchemaItemVduValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

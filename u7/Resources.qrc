@@ -25,6 +25,7 @@
         <file>Images/pencil.png</file>
         <file>Images/plus.png</file>
         <file>Images/PreviousIssue.svg</file>
+        <file>Images/SchemaActuatorElement.svg</file>
         <file>Images/SchemaAddFile.svg</file>
         <file>Images/SchemaAddFolder.svg</file>
         <file>Images/SchemaAddFolder2.svg</file>
@@ -51,7 +52,7 @@
         <file>Images/SchemaItemLineEdit.svg</file>
         <file>Images/SchemaItemPushButton.svg</file>
         <file>Images/SchemaItemSlider.svg</file>
-		<file>Images/SchemaItemTrend.svg</file>
+        <file>Images/SchemaItemTrend.svg</file>
         <file>Images/SchemaItemValue.svg</file>
         <file>Images/SchemaLine.svg</file>
         <file>Images/SchemaLink.svg</file>

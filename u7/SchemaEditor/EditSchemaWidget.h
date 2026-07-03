@@ -31,7 +31,8 @@ namespace EditEngine
 namespace VFrame30
 {
 	class SchemaItemBus;
-}
+	class ActuatorHeader;
+} // namespace VFrame30
 
 //
 // SchemaItemsClipboard
@@ -169,6 +170,7 @@ protected:
 	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
+	bool loadActuatorHeaders(std::vector<std::shared_ptr<VFrame30::ActuatorHeader>>* out);
 
 public:
 	void resetAction();
@@ -242,6 +244,7 @@ protected slots:
 
 	void addAfbElement(); // Add Application Functional Block
 	void addUfbElement(); // Add User Functional Block
+	void addActuatorElement();
 
 	void addBus();
 
@@ -454,6 +457,7 @@ private:
 	// ------------------------------
 	QAction* m_addAfbAction = nullptr;
 	QAction* m_addUfbAction = nullptr;
+	QAction* m_addActuatorAction = nullptr;
 	// ------------------------------
 	QAction* m_addConnection = nullptr;
 	QAction* m_addTransmitter = nullptr;

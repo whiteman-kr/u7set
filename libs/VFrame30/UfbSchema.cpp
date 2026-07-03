@@ -1,6 +1,7 @@
 #include <VFrame30/UfbSchema.h>
 
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConst.h>
@@ -27,6 +28,7 @@ namespace
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
 
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemActuator>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemAfb>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusComposer>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusExtractor>(),

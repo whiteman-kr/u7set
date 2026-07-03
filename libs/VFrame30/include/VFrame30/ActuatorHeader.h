@@ -1,11 +1,12 @@
 #pragma once
 
-#include <CommonLib/PropertyObject.h>
-
+#include <compare>
+#include <memory>
 
 namespace Proto
 {
 	class Envelope;
+	class ActuatorHeader;
 	class ActuatorSignal;
 } // namespace Proto
 
@@ -19,6 +20,8 @@ namespace VFrame30
 	public:
 		ActuatorSignal();
 		ActuatorSignal(const ActuatorSignal& other);
+
+		auto operator<=>(const ActuatorSignal& other) const { return m_data <=> other.m_data; }
 
 	private:
 		void init();
@@ -41,10 +44,15 @@ namespace VFrame30
 		void setBusTypeId(const QString& busTypeId);
 
 	private:
-		QString m_signalId = "";
-		E::SignalType m_signalType = E::SignalType::Discrete;
-		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::Float32;
-		QString m_busTypeId;
+		struct Data
+		{
+			QString signalId = "";
+			E::SignalType signalType = E::SignalType::Discrete;
+			E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
+			QString busTypeId;
+
+			auto operator<=>(const Data&) const = default;
+		} m_data;
 	};
 
 
@@ -54,6 +62,8 @@ namespace VFrame30
 	public:
 		ActuatorHeader(QObject* parent = nullptr);
 
+		ActuatorHeader& operator=(const ActuatorHeader& other) = delete;
+
 	protected:
 	private:
 		friend class Proto::ObjectSerialization<ActuatorHeader>;
@@ -62,8 +72,10 @@ namespace VFrame30
 		virtual bool SaveData(::Proto::Envelope* message) const override;
 		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
-	private:
-		virtual void propertyDemand(const QString& prop) override;
+	public:
+		bool SaveData(Proto::ActuatorHeader* message) const;
+		bool LoadData(const Proto::ActuatorHeader& message);
+
 
 	public:
 		QString actuatorTypeId() const;
@@ -71,6 +83,9 @@ namespace VFrame30
 
 		QString caption() const;
 		void setCaption(const QString& caption);
+
+		QString description() const;
+		void setDescription(const QString& description);
 
 		QString acmPresetName() const;
 		void setAcmPresetName(const QString& acmPresetName);
@@ -89,9 +104,15 @@ namespace VFrame30
 		bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool excludeFromBuild);
 
+		PropertyVector<ActuatorSignal> inputs() const;
+		PropertyVector<ActuatorSignal> outputs() const;
+
+		[[nodiscard]] int version() const;
+
 	private:
 		QString m_actuatorTypeId;
 		QString m_caption;
+		QString m_description;
 
 		QString m_acmPresetName;   // HardwareLib::DeviceObject::presetName()
 		QString m_descriptionFile; // HardwareLib::PropertyNames::lmDescriptionFile
@@ -103,5 +124,8 @@ namespace VFrame30
 
 		PropertyVector<ActuatorSignal> m_inputs;
 		PropertyVector<ActuatorSignal> m_outputs;
+
+		mutable int m_version = 1; // Version is incremented every save
+		mutable bool m_modified = false;
 	};
 } // namespace VFrame30

@@ -1,7 +1,19 @@
 #include "EditSchemaWidget.h"
 
+#include "F2KeyForSchemaItem.h"
+#include "GlobalMessanger.h"
+#include "ProjectDefaults.h"
+#include "SchemaFindDialog.h"
+#include "SchemaItemPropertiesDialog.h"
+#include "SchemaLayersDialog.h"
+#include "SchemaPropertiesDialog.h"
+#include "Settings.h"
+#include "SignalPropertiesDialog.h"
+
 #include <HardwareLib/LmDescription.h>
+#include <VFrame30/ActuatorHeader.h>
 #include <VFrame30/SchemaDetails.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
@@ -35,18 +47,10 @@
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalSetProvider.h"
 #include "../EditEngine/EditEngine.h"
+#include "../Forms/ChooseActuatorDialog.h"
 #include "../Forms/ChooseAfbDialog.h"
 #include "../Forms/ChooseUfbDialog.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
-#include "F2KeyForSchemaItem.h"
-#include "GlobalMessanger.h"
-#include "ProjectDefaults.h"
-#include "SchemaFindDialog.h"
-#include "SchemaItemPropertiesDialog.h"
-#include "SchemaLayersDialog.h"
-#include "SchemaPropertiesDialog.h"
-#include "Settings.h"
-#include "SignalPropertiesDialog.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] = {
@@ -525,8 +529,14 @@ void EditSchemaWidget::createActions()
 	m_addUfbAction = new QAction(tr("User Functional Block"), this);
 	m_addUfbAction->setEnabled(true);
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
-	m_addUfbAction->setToolTip(tr("App Functional Block\nType: SchemaItemUfb"));
+	m_addUfbAction->setToolTip(tr("User Functional Block\nType: SchemaItemUfb"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+
+	m_addActuatorAction = new QAction(tr("Actuator"), this);
+	m_addActuatorAction->setEnabled(true);
+	m_addActuatorAction->setIcon(QIcon(":/Images/Images/SchemaActuatorElement.svg"));
+	m_addActuatorAction->setToolTip(tr("Actuator\nType: SchemaItemActuator"));
+	connect(m_addActuatorAction, &QAction::triggered, this, &EditSchemaWidget::addActuatorElement);
 
 	// ----------------------------------------
 	m_addConnection = new QAction(tr("Connection"), this);
@@ -1239,6 +1249,7 @@ void EditSchemaWidget::fillActionsForLogicSchema(QWidget* widget)
 
 	widget->addAction(m_addAfbAction);
 	widget->addAction(m_addUfbAction);
+	widget->addAction(m_addActuatorAction);
 
 	separator = new QAction(widget);
 	separator->setSeparator(true);
@@ -1276,6 +1287,7 @@ void EditSchemaWidget::fillActionsForUfbSchema(QWidget* widget)
 	widget->addAction(separator);
 
 	widget->addAction(m_addAfbAction);
+	widget->addAction(m_addActuatorAction);
 
 	separator = new QAction(widget);
 	separator->setSeparator(true);
@@ -4491,6 +4503,65 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	return true;
 }
 
+bool EditSchemaWidget::loadActuatorHeaders(std::vector<std::shared_ptr<VFrame30::ActuatorHeader>>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	DbFileTree filesTree;
+
+	bool ok = db()->getFileListTree(&filesTree, DbDir::ActuatorsDir, "%", true, this);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	auto fileList = filesTree.toVectorIf(
+		[](const DbFileInfo& file)
+		{
+			return file.fileName().endsWith(QString(".") + File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == true &&
+				   file.isFolder() == false;
+		});
+
+	// Get UFBs latest version from the DB
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	ok = db()->getLatestVersion(fileList, &files, this);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Parse files, create actual ActuatorHeaders
+	//
+	std::vector<std::shared_ptr<VFrame30::ActuatorHeader>> actuatorHeaders;
+	actuatorHeaders.reserve(files.size());
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		if (f->deleted() == true || f->action() == E::VcsItemAction::Deleted)
+		{
+			continue;
+		}
+
+		auto ah = VFrame30::ActuatorHeader::Create(f->data());
+		if (ah == nullptr)
+		{
+			assert(ah);
+			continue;
+		}
+
+		actuatorHeaders.push_back(ah);
+	}
+
+	*out = std::move(actuatorHeaders);
+	return true;
+}
+
 void EditSchemaWidget::resetAction()
 {
 	setMouseState(MouseState::None);
@@ -6569,7 +6640,6 @@ void EditSchemaWidget::addUfbElement()
 	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
 
 	bool ok = loadUfbSchemas(&ufbs);
-
 	if (ok == false)
 	{
 		return;
@@ -6593,6 +6663,29 @@ void EditSchemaWidget::addUfbElement()
 		{
 			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
 		}
+	}
+
+	return;
+}
+
+void EditSchemaWidget::addActuatorElement()
+{
+	std::vector<std::shared_ptr<VFrame30::ActuatorHeader>> actuatorHeaders;
+
+	bool ok = loadActuatorHeaders(&actuatorHeaders);
+	if (ok == false)
+	{
+		return;
+	}
+
+	ChooseActuatorDialog dialog{actuatorHeaders, this};
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		auto actuatorHeader = dialog.result();
+		assert(actuatorHeader);
+
+		addItem(std::make_shared<VFrame30::SchemaItemActuator>(schema()->unit(), *actuatorHeader));
 	}
 
 	return;

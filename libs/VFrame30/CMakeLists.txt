@@ -54,6 +54,7 @@ qt_add_library(${TARGET} STATIC
 	./include/VFrame30/Schema.h
 	./include/VFrame30/SchemaDetails.h
 	./include/VFrame30/SchemaItem.h
+	./include/VFrame30/SchemaItemActuator.h
 	./include/VFrame30/SchemaItemAfb.h
 	./include/VFrame30/SchemaItemBus.h
 	./include/VFrame30/SchemaItemConnection.h
@@ -112,6 +113,7 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/PosRectImpl.cpp
 	./SchemaItems/PosRectRotatable.cpp
 	./SchemaItems/SchemaItem.cpp
+	./SchemaItems/SchemaItemActuator.cpp
 	./SchemaItems/SchemaItemAfb.cpp
 	./SchemaItems/SchemaItemBus.cpp
 	./SchemaItems/SchemaItemConnection.cpp

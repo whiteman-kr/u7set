@@ -1,30 +1,26 @@
 #include <VFrame30/LogicSchema.h>
+
 #include <VFrame30/PropertyNames.h>
-
-
-#include <VFrame30/SchemaItemImage.h>
-#include <VFrame30/SchemaItemLine.h>
-#include <VFrame30/SchemaItemPath.h>
-#include <VFrame30/SchemaItemRect.h>
-
-#include <VFrame30/SchemaItemConst.h>
-#include <VFrame30/SchemaItemLink.h>
-#include <VFrame30/SchemaItemSignal.h>
-
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
-#include <VFrame30/SchemaItemLoopback.h>
-#include <VFrame30/SchemaItemTerminator.h>
-#include <VFrame30/SchemaItemUfb.h>
-
+#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/SchemaItemImage.h>
 #include <VFrame30/SchemaItemImageValue.h>
 #include <VFrame30/SchemaItemIndicator.h>
+#include <VFrame30/SchemaItemLine.h>
 #include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemPath.h>
 #include <VFrame30/SchemaItemPushButton.h>
+#include <VFrame30/SchemaItemRect.h>
+#include <VFrame30/SchemaItemSignal.h>
 #include <VFrame30/SchemaItemSlider.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaItemValue.h>
-
 #include <VFrame30/SchemaLayer.h>
 
 
@@ -40,6 +36,7 @@ namespace
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemPath>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemRect>(),
 
+				VFrame30::SchemaItem::type<VFrame30::SchemaItemActuator>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemAfb>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusComposer>(),
 				VFrame30::SchemaItem::type<VFrame30::SchemaItemBusExtractor>(),
