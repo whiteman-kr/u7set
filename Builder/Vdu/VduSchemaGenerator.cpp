@@ -650,7 +650,7 @@ namespace
 
 			VduSchemaFileSchemaItemTrend1 structTrend{};
 
-			structTrend.version = 1;
+			structTrend.version = 2;
 			structTrend.itemType = VduFileSchemaItemTrendId;
 
 			using PosType = decltype(structTrend.left);
@@ -668,6 +668,24 @@ namespace
 			structTrend.indentBottom = static_cast<IndentType>(schemaItem.indentBottom());
 
 			structTrend.durationSecs = schemaItem.durationSeconds();
+			structTrend.columnCount = schemaItem.columnCount();
+
+			const std::size_t MaxExtraDuration =
+				sizeof(VduSchemaFileSchemaItemTrend1::extraDurations) / sizeof(VduSchemaFileSchemaItemTrend1::extraDurations[0]);
+			for (int i = 0; i < MaxExtraDuration; i++)
+			{
+				structTrend.extraDurations[i] = 0;
+			}
+			auto extraDurations = schemaItem.extraDurationsSeconds();
+			while (extraDurations.size() > MaxExtraDuration)
+			{
+				extraDurations.pop_back();
+			}
+			for (int i = 0; i < extraDurations.size(); i++)
+			{
+				structTrend.extraDurations[i] = extraDurations[i]->duration();
+			}
+			
 			structTrend.viewMode = static_cast<uint16_t>(schemaItem.viewMode());
 			structTrend.scaleType = static_cast<uint16_t>(schemaItem.scaleType());
 
@@ -791,19 +809,16 @@ namespace
 				return false;
 			}
 
-			// Move discrete signals to the top of the vector, they will be saved first in the file.
-			//
-			auto analogIt = std::stable_partition(trendSignals.begin(),
-												  trendSignals.end(),
-												  [this](const auto& trendSignal)
-												  {
-													  AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
-													  return s ? s->isDiscrete() : false;
-												  });
-
 			structTrend.maxSignalCount = static_cast<uint16_t>(MaxSignalCount);
 			structTrend.signalCount = std::clamp<uint16_t>(static_cast<uint16_t>(trendSignals.size()), 0, structTrend.maxSignalCount);
-			structTrend.discreteSignalCount = static_cast<uint16_t>(std::distance(trendSignals.begin(), analogIt));
+
+			structTrend.discreteSignalCount = std::count_if(trendSignals.begin(),
+															trendSignals.end(),
+															[this](const auto& trendSignal)
+															{
+																AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+																return s ? s->isDiscrete() : false;
+															});
 
 			size_t signalIndex = 0;
 			for (const auto& trendSignal : trendSignals)
@@ -852,6 +867,7 @@ namespace
 					tis.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
 					tis.validityAppSignalIndex = static_cast<uint32_t>(validityAppSignalIndex);
 					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationSeconds());
+					tis.columnCount = static_cast<uint32_t>(schemaItem.columnCount());
 
 					auto it = m_vduTrendSignals.find(tis);
 					if (it == m_vduTrendSignals.end())

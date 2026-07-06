@@ -16,7 +16,7 @@
 
 struct TrendItemSignalsHeader
 {
-	uint32_t version; // 1
+	uint32_t version; // 2
 	uint32_t recordSize;
 	uint32_t count;
 	uint32_t reserve;
@@ -27,6 +27,8 @@ struct TrendItemSignal
 	uint32_t appSignalIndex;
 	uint32_t validityAppSignalIndex; // 0xFFFFFFFF if no validity signal is used
 	uint32_t durationSecs;
+	uint32_t columnCount;			// added in version 2
+
 	uint32_t reserve;
 
 	auto operator<=>(const TrendItemSignal&) const = default;

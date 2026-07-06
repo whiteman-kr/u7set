@@ -8,6 +8,7 @@
 namespace Proto
 {
 	class SchemaItemVduTrendSignal;
+	class SchemaItemVduTrendDuration;
 }
 
 namespace VFrame30
@@ -66,6 +67,28 @@ namespace VFrame30
 		uint16_t m_lineWeight = 1;
 	};
 
+class SchemaItemVduTrendDuration : public PropertyObject
+	{
+		Q_OBJECT
+
+	public:
+		SchemaItemVduTrendDuration();
+		SchemaItemVduTrendDuration(const SchemaItemVduTrendDuration& src);
+
+	private:
+		void init();
+
+	public:
+		void save(Proto::SchemaItemVduTrendDuration* message) const;
+		void load(const Proto::SchemaItemVduTrendDuration& message);
+
+	public:
+		int duration() const;
+		void setDuration(int value);
+
+	private:
+		int m_duration = 600;
+	};
 
 	class SchemaItemVduTrend : public PosRectImpl,
 							   public IMatsSchemaItemAssociations,
@@ -109,6 +132,11 @@ namespace VFrame30
 	public:
 		int durationSeconds() const;
 		void setDurationSeconds(int value);
+
+		int columnCount() const;
+
+		PropertyVector<SchemaItemVduTrendDuration> extraDurationsSeconds() const;
+		void setExtraDurationsSeconds(const PropertyVector<SchemaItemVduTrendDuration>& value);
 
 		E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
@@ -167,6 +195,9 @@ namespace VFrame30
 
 	private:
 		uint32_t m_durationSecs = 600; // Duration of the trend, in seconds. Default is 10 minutes (600 seconds).
+
+		static const size_t MaxExtraDurations = 16;
+		PropertyVector<SchemaItemVduTrendDuration> m_extraDurationSecs; // Other durations, that can be set by scripts
 
 		E::TrendViewMode m_viewMode = E::TrendViewMode::Separated;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;

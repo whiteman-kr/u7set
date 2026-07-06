@@ -213,6 +213,66 @@ namespace VFrame30
 		m_lineWeight = std::clamp(value, 1, 6); // Assuming the valid range for line weight is 1 to 6
 	}
 
+	//
+	// SchemaItemVduTrendSignalParam
+	//
+	SchemaItemVduTrendDuration::SchemaItemVduTrendDuration()
+	{
+		init();
+		return;
+	}
+
+	SchemaItemVduTrendDuration::SchemaItemVduTrendDuration(const SchemaItemVduTrendDuration& src)
+	{
+		Proto::SchemaItemVduTrendDuration message;
+
+		src.save(&message);
+		load(message);
+
+		init();
+		return;
+	}
+
+	void SchemaItemVduTrendDuration::init()
+	{
+		removeAllProperties();
+
+		Property* p = nullptr;
+
+		p = ADD_PROPERTY_GETTER_SETTER(int,
+									   PropertyNames::indicatorTrendLaneDuration,
+									   true,
+									   SchemaItemVduTrendDuration::duration,
+									   SchemaItemVduTrendDuration::setDuration);
+		p->setDescription(PropertyNames::indicatorTrendLaneDuration);
+		p->setViewOrder(3);
+
+	}
+
+	void SchemaItemVduTrendDuration::save(Proto::SchemaItemVduTrendDuration* message) const
+	{
+		assert(message != nullptr);
+
+		message->set_duration(m_duration);
+		return;
+	}
+
+	void SchemaItemVduTrendDuration::load(const Proto::SchemaItemVduTrendDuration& message)
+	{
+		m_duration = message.duration();
+
+		return;
+	}
+
+	int SchemaItemVduTrendDuration::duration() const
+	{
+		return m_duration; 
+	}
+
+	void SchemaItemVduTrendDuration::setDuration(int value)
+	{ 
+		m_duration = value; 
+	}
 
 	//
 	// SchemaItemVduTrend
@@ -244,6 +304,17 @@ namespace VFrame30
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
 
+		
+		// Extra Durations
+		//
+		ADD_PROPERTY_GETTER_SETTER(PropertyVector<SchemaItemVduTrendDuration>,
+								   PropertyNames::indicatorTrendLaneExtraDurations,
+								   true,
+								   SchemaItemVduTrend::extraDurationsSeconds,
+								   SchemaItemVduTrend::setExtraDurationsSeconds)
+			->setCategory(PropertyNames::indicatorSettings); 
+		p->setDescription(PropertyNames::indicatorTrendLaneExtraDurationsToolTip);
+		
 		// viewMode
 		//
 		p = ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode,
@@ -452,6 +523,13 @@ namespace VFrame30
 		auto trendMessage = message->MutableExtension(Proto::schemaitem)->mutable_vdutrend();
 
 		trendMessage->set_durationsecs(m_durationSecs);
+
+		for (const auto& ed : m_extraDurationSecs)
+		{
+			trendMessage->add_extradurationssecs(ed->duration());
+		}
+
+
 		trendMessage->set_viewmode(static_cast<int32_t>(m_viewMode));
 		trendMessage->set_scaletype(static_cast<int32_t>(m_scaleType));
 
@@ -515,6 +593,14 @@ namespace VFrame30
 		const auto& trendMessage = schemaItemMessage.vdutrend();
 
 		m_durationSecs = trendMessage.durationsecs();
+
+		m_extraDurationSecs.clear();
+		for (const auto& ed : trendMessage.extradurationssecs())
+		{
+			auto edPtr = std::make_shared<SchemaItemVduTrendDuration>();
+			edPtr->setDuration(ed);
+			m_extraDurationSecs.push_back(edPtr);
+		}
 
 		m_viewMode = static_cast<E::TrendViewMode>(trendMessage.viewmode());
 		m_scaleType = static_cast<E::TrendScaleType>(trendMessage.scaletype());
@@ -766,6 +852,55 @@ namespace VFrame30
 		m_durationSecs = value < 0 ? 0u : static_cast<uint32_t>(value);
 	}
 
+	int SchemaItemVduTrend::columnCount() const
+	{
+		int result = width();
+
+		const int TrendDefaultItend = 5;
+		const int TrendDefaultScaleIdent = 100;
+
+		if (indentLeft() != -1)
+		{
+			result -= (indentLeft() + showSignalScales() ? TrendDefaultScaleIdent : TrendDefaultItend);
+		}
+		else
+		{
+			result -= (TrendDefaultItend + showSignalScales() ? TrendDefaultScaleIdent : TrendDefaultItend);
+		}
+
+		if (indentRight() != -1)
+		{
+			result -= indentRight();
+		}
+		else
+		{
+			result -= TrendDefaultItend;
+		}
+
+		if (result < 0) 
+		{
+			Q_ASSERT(result >= 0);
+			result = 0;
+		}
+
+		return result;
+	}
+	
+	PropertyVector<SchemaItemVduTrendDuration> SchemaItemVduTrend::extraDurationsSeconds() const 
+	{ 
+		return m_extraDurationSecs;
+	}
+
+	void SchemaItemVduTrend::setExtraDurationsSeconds(const PropertyVector<SchemaItemVduTrendDuration>& value) 
+	{ 
+		m_extraDurationSecs = value;
+
+		while (m_extraDurationSecs.size() > SchemaItemVduTrend::MaxExtraDurations)
+		{
+			m_extraDurationSecs.pop_back();
+		}
+	}
+	
 	E::TrendViewMode SchemaItemVduTrend::viewMode() const
 	{
 		return m_viewMode;

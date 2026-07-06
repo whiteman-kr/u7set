@@ -99,6 +99,7 @@ namespace Builder
 						// Set DurationSecs
 						//
 						record.durationSecs = static_cast<uint32_t>(trendItem->durationSeconds());
+						record.columnCount = static_cast<uint32_t>(trendItem->columnCount());
 						record.reserve = 0;
 
 						vduTrendRecords.insert(record);
@@ -119,7 +120,7 @@ namespace Builder
 		data.fill(0);
 
 		TrendItemSignalsHeader header{};
-		header.version = 1;
+		header.version = 2;
 		header.recordSize = sizeof(TrendItemSignal);
 		header.count = static_cast<uint32_t>(vduTrendRecords.size());
 		header.reserve = 0;

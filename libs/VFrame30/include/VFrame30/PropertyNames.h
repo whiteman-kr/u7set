@@ -188,6 +188,9 @@ namespace VFrame30
 		inline static const QString indicatorTrendLaneCount{"LaneCount"};
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};
+		inline static const QString indicatorTrendLaneExtraDurations{"ExtraDurations"};
+		inline static const QString indicatorTrendLaneExtraDurationsToolTip{"Lane extra durations that can be set by scripts, seconds"};
+		
 		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
 		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
 		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};

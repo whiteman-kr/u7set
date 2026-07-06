@@ -922,6 +922,11 @@ message SchemaItemVduTrendSignal
 	optional int32 lineWeight = 50;
 }
 
+message SchemaItemVduTrendDuration
+{
+	optional int32 duration = 1;
+}
+
 message SchemaItemVduTrend
 {
 	optional int32 durationSecs = 51;
@@ -948,6 +953,7 @@ message SchemaItemVduTrend
 	optional bool showDateLabels = 124 [default = true];
 
 	repeated SchemaItemVduTrendSignal signalParams = 110;
+	repeated int32 extraDurationsSecs = 112;
 }
 
 //
