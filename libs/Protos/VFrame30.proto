@@ -922,14 +922,9 @@ message SchemaItemVduTrendSignal
 	optional int32 lineWeight = 50;
 }
 
-message SchemaItemVduTrendDuration
-{
-	optional int32 duration = 1;
-}
-
 message SchemaItemVduTrend
 {
-	optional int32 durationSecs = 51;
+	optional string durationsSecs = 52;
 
 	optional int32 viewMode = 80;		// E::TrendViewMode
 	optional int32 scaleType = 81;		// E::TrendScaleType

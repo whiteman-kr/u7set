@@ -214,67 +214,6 @@ namespace VFrame30
 	}
 
 	//
-	// SchemaItemVduTrendSignalParam
-	//
-	SchemaItemVduTrendDuration::SchemaItemVduTrendDuration()
-	{
-		init();
-		return;
-	}
-
-	SchemaItemVduTrendDuration::SchemaItemVduTrendDuration(const SchemaItemVduTrendDuration& src)
-	{
-		Proto::SchemaItemVduTrendDuration message;
-
-		src.save(&message);
-		load(message);
-
-		init();
-		return;
-	}
-
-	void SchemaItemVduTrendDuration::init()
-	{
-		removeAllProperties();
-
-		Property* p = nullptr;
-
-		p = ADD_PROPERTY_GETTER_SETTER(int,
-									   PropertyNames::indicatorTrendLaneDuration,
-									   true,
-									   SchemaItemVduTrendDuration::duration,
-									   SchemaItemVduTrendDuration::setDuration);
-		p->setDescription(PropertyNames::indicatorTrendLaneDuration);
-		p->setViewOrder(3);
-
-	}
-
-	void SchemaItemVduTrendDuration::save(Proto::SchemaItemVduTrendDuration* message) const
-	{
-		assert(message != nullptr);
-
-		message->set_duration(m_duration);
-		return;
-	}
-
-	void SchemaItemVduTrendDuration::load(const Proto::SchemaItemVduTrendDuration& message)
-	{
-		m_duration = message.duration();
-
-		return;
-	}
-
-	int SchemaItemVduTrendDuration::duration() const
-	{
-		return m_duration; 
-	}
-
-	void SchemaItemVduTrendDuration::setDuration(int value)
-	{ 
-		m_duration = value; 
-	}
-
-	//
 	// SchemaItemVduTrend
 	//
 	SchemaItemVduTrend::SchemaItemVduTrend(void) :
@@ -294,26 +233,16 @@ namespace VFrame30
 		//
 		Property* p{};
 
-		// Duration
+		// Durations
 		//
-		p = ADD_PROPERTY_GETTER_SETTER(int,
-									   PropertyNames::indicatorTrendLaneDuration,
+		p = ADD_PROPERTY_GETTER_SETTER(QString,
+									   PropertyNames::indicatorTrendLaneDurations,
 									   true,
-									   SchemaItemVduTrend::durationSeconds,
-									   SchemaItemVduTrend::setDurationSeconds);
+									   SchemaItemVduTrend::durationsSecondsStr,
+									   SchemaItemVduTrend::setDurationsSecondsStr);
 		p->setCategory(PropertyNames::indicatorSettings);
-		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
+		p->setDescription(PropertyNames::indicatorTrendLaneDurationsToolTip);
 
-		
-		// Extra Durations
-		//
-		ADD_PROPERTY_GETTER_SETTER(PropertyVector<SchemaItemVduTrendDuration>,
-								   PropertyNames::indicatorTrendLaneExtraDurations,
-								   true,
-								   SchemaItemVduTrend::extraDurationsSeconds,
-								   SchemaItemVduTrend::setExtraDurationsSeconds)
-			->setCategory(PropertyNames::indicatorSettings); 
-		p->setDescription(PropertyNames::indicatorTrendLaneExtraDurationsToolTip);
 		
 		// viewMode
 		//
@@ -522,13 +451,7 @@ namespace VFrame30
 		//
 		auto trendMessage = message->MutableExtension(Proto::schemaitem)->mutable_vdutrend();
 
-		trendMessage->set_durationsecs(m_durationSecs);
-
-		for (const auto& ed : m_extraDurationSecs)
-		{
-			trendMessage->add_extradurationssecs(ed->duration());
-		}
-
+		trendMessage->set_durationssecs(m_durationsSecs.toStdString());
 
 		trendMessage->set_viewmode(static_cast<int32_t>(m_viewMode));
 		trendMessage->set_scaletype(static_cast<int32_t>(m_scaleType));
@@ -592,15 +515,7 @@ namespace VFrame30
 
 		const auto& trendMessage = schemaItemMessage.vdutrend();
 
-		m_durationSecs = trendMessage.durationsecs();
-
-		m_extraDurationSecs.clear();
-		for (const auto& ed : trendMessage.extradurationssecs())
-		{
-			auto edPtr = std::make_shared<SchemaItemVduTrendDuration>();
-			edPtr->setDuration(ed);
-			m_extraDurationSecs.push_back(edPtr);
-		}
+		m_durationsSecs = QString::fromStdString(trendMessage.durationssecs());
 
 		m_viewMode = static_cast<E::TrendViewMode>(trendMessage.viewmode());
 		m_scaleType = static_cast<E::TrendScaleType>(trendMessage.scaletype());
@@ -842,14 +757,52 @@ namespace VFrame30
 		return {};
 	}
 
-	int SchemaItemVduTrend::durationSeconds() const
-	{
-		return static_cast<int>(m_durationSecs);
+	QString SchemaItemVduTrend::durationsSecondsStr() const
+	{ 
+		return m_durationsSecs;
 	}
 
-	void SchemaItemVduTrend::setDurationSeconds(int value)
+	void SchemaItemVduTrend::setDurationsSecondsStr(QString value)
+	{ 
+		if (value.isEmpty() == true) 
+		{
+			return;
+		}
+
+		static const auto re = QRegularExpression("\\W+");
+		QStringList l = value.split(re, Qt::SkipEmptyParts);
+
+		for (const QString& s : l)
+		{
+			bool ok = false;
+			s.toULong(&ok);
+			if (ok == false)
+			{
+				return;
+			}
+		}
+
+		m_durationsSecs = value;
+	}
+
+	std::vector<uint32_t> SchemaItemVduTrend::durationsSeconds() const
 	{
-		m_durationSecs = value < 0 ? 0u : static_cast<uint32_t>(value);
+		std::vector<uint32_t> result;
+
+		static const auto re = QRegularExpression("\\W+");
+		QStringList l = m_durationsSecs.split(re, Qt::SkipEmptyParts);
+
+		for (const QString& s : l) 
+		{
+			bool ok = false;
+			uint32_t v = s.toULong(&ok);
+			if (ok == true) 
+			{
+				result.push_back(v);
+			}
+		}
+
+		return result;
 	}
 
 	int SchemaItemVduTrend::columnCount() const
@@ -885,21 +838,7 @@ namespace VFrame30
 
 		return result;
 	}
-	
-	PropertyVector<SchemaItemVduTrendDuration> SchemaItemVduTrend::extraDurationsSeconds() const 
-	{ 
-		return m_extraDurationSecs;
-	}
 
-	void SchemaItemVduTrend::setExtraDurationsSeconds(const PropertyVector<SchemaItemVduTrendDuration>& value) 
-	{ 
-		m_extraDurationSecs = value;
-
-		while (m_extraDurationSecs.size() > SchemaItemVduTrend::MaxExtraDurations)
-		{
-			m_extraDurationSecs.pop_back();
-		}
-	}
 	
 	E::TrendViewMode SchemaItemVduTrend::viewMode() const
 	{

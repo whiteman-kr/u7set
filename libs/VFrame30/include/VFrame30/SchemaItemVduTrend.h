@@ -67,29 +67,6 @@ namespace VFrame30
 		uint16_t m_lineWeight = 1;
 	};
 
-class SchemaItemVduTrendDuration : public PropertyObject
-	{
-		Q_OBJECT
-
-	public:
-		SchemaItemVduTrendDuration();
-		SchemaItemVduTrendDuration(const SchemaItemVduTrendDuration& src);
-
-	private:
-		void init();
-
-	public:
-		void save(Proto::SchemaItemVduTrendDuration* message) const;
-		void load(const Proto::SchemaItemVduTrendDuration& message);
-
-	public:
-		int duration() const;
-		void setDuration(int value);
-
-	private:
-		int m_duration = 600;
-	};
-
 	class SchemaItemVduTrend : public PosRectImpl,
 							   public IMatsSchemaItemAssociations,
 							   public SchemaItemVduVisitable<SchemaItemVduTrend>
@@ -130,13 +107,11 @@ class SchemaItemVduTrendDuration : public PropertyObject
 		// Properties and Data
 		//
 	public:
-		int durationSeconds() const;
-		void setDurationSeconds(int value);
+		QString durationsSecondsStr() const;
+		void setDurationsSecondsStr(QString value);
+		std::vector<uint32_t> durationsSeconds() const;
 
 		int columnCount() const;
-
-		PropertyVector<SchemaItemVduTrendDuration> extraDurationsSeconds() const;
-		void setExtraDurationsSeconds(const PropertyVector<SchemaItemVduTrendDuration>& value);
 
 		E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
@@ -194,10 +169,8 @@ class SchemaItemVduTrendDuration : public PropertyObject
 		DECLARE_FONT_PROPERTIES(Font)
 
 	private:
-		uint32_t m_durationSecs = 600; // Duration of the trend, in seconds. Default is 10 minutes (600 seconds).
-
 		static const size_t MaxExtraDurations = 16;
-		PropertyVector<SchemaItemVduTrendDuration> m_extraDurationSecs; // Other durations, that can be set by scripts
+		QString m_durationsSecs = "600";  // Durations, multiple can be set using separator
 
 		E::TrendViewMode m_viewMode = E::TrendViewMode::Separated;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;

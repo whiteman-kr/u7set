@@ -667,23 +667,25 @@ namespace
 			structTrend.indentTop = static_cast<IndentType>(schemaItem.indentTop());
 			structTrend.indentBottom = static_cast<IndentType>(schemaItem.indentBottom());
 
-			structTrend.durationSecs = schemaItem.durationSeconds();
 			structTrend.columnCount = schemaItem.columnCount();
 
 			const std::size_t MaxExtraDuration =
-				sizeof(VduSchemaFileSchemaItemTrend1::extraDurations) / sizeof(VduSchemaFileSchemaItemTrend1::extraDurations[0]);
-			for (int i = 0; i < MaxExtraDuration; i++)
+				sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs) / sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs[0]);
+
+			std::vector<uint32_t> durations = schemaItem.durationsSeconds();
+			if (durations.size() == 0) 
 			{
-				structTrend.extraDurations[i] = 0;
+				m_log.errINT1001(QString("Internal error, no duration values are set for SchemaItemVduTrend {%1, %2, %3}"),
+								 schemaItem.parentSchema()->schemaId(),
+								 schemaItem.guid());
+				
+				reset();
+				return false;
 			}
-			auto extraDurations = schemaItem.extraDurationsSeconds();
-			while (extraDurations.size() > MaxExtraDuration)
+
+			for (std::size_t i = 0; i < durations.size() && i < MaxExtraDuration; i++)
 			{
-				extraDurations.pop_back();
-			}
-			for (int i = 0; i < extraDurations.size(); i++)
-			{
-				structTrend.extraDurations[i] = extraDurations[i]->duration();
+				structTrend.durationsSecs[i] = durations[i];
 			}
 			
 			structTrend.viewMode = static_cast<uint16_t>(schemaItem.viewMode());
@@ -866,7 +868,7 @@ namespace
 					TrendItemSignal tis{};
 					tis.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
 					tis.validityAppSignalIndex = static_cast<uint32_t>(validityAppSignalIndex);
-					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationSeconds());
+					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationsSeconds()[0]);
 					tis.columnCount = static_cast<uint32_t>(schemaItem.columnCount());
 
 					auto it = m_vduTrendSignals.find(tis);

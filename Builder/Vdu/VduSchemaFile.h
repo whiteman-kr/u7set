@@ -341,8 +341,7 @@ struct VduSchemaFileSchemaItemTrend1
 
 	uint32_t reserve4[4];
 
-	uint32_t durationSecs;
-	uint32_t extraDurations[16];	// added in version 2
+	uint32_t durationsSecs[16];     // Durations, added in version 2
 
 	uint32_t columnCount;			// added in version 2
 
