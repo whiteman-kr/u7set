@@ -4,6 +4,7 @@
 
 #include <QJSEngine>
 #include <QFile>
+#include <QStandardPaths>
 
 #include <CommonLib/expected.hpp>
 
@@ -342,9 +343,14 @@ namespace TestSuite
 		return m_outputController->activateTuningSource(lmEquipmentId, activate);
 	}
 
-	QVariantMap TestController::loadTextFile(const QString& fileName)
+	QVariantMap TestController::loadTextFile(QString fileName)
 	{
 		QVariantMap result;
+
+		if (fileName.contains("%TEMP") == true) 
+		{
+			fileName.replace("%TEMP%", QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+		}
 
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)

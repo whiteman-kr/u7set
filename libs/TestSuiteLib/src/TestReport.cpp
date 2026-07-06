@@ -88,7 +88,7 @@ namespace TestSuite
 	//
 	// TestReport
 	//
-	void TestReport::generateReport(const ReportLib::ReportTemplateStorage& templates,
+	bool TestReport::generateReport(const ReportLib::ReportTemplateStorage& templates,
 									const TestSuite::TestLog& testLog,
 									const QString& caption,
 									QWidget* parent)
@@ -99,7 +99,7 @@ namespace TestSuite
 														QObject::tr("PDF Files (*.pdf);;All Files (*.*)"));
 		if (fileName.isEmpty() == true)
 		{
-			return;
+			return false;
 		}
 
 		bool found = false;
@@ -107,7 +107,7 @@ namespace TestSuite
 		if (found == false)
 		{
 			Q_ASSERT(found);
-			return;
+			return false;
 		}
 
 		TestReportDataProvider dataProvider(testLog);
@@ -119,13 +119,14 @@ namespace TestSuite
 		if (generator.generate(buffer, stop) == false)
 		{
 			QMessageBox::critical(parent, qAppName(), QObject::tr("Report '%1' generation error!").arg(caption));
-			return;
+			return false;
 		}
 
 		QFile f(fileName);
 		if (f.open(QFile::WriteOnly) == false || f.write(buffer.data()) == false)
 		{
 			QMessageBox::critical(parent, qAppName(), QObject::tr("Report file '%1' saving error!").arg(fileName));
+			return false;
 		}
 		else
 		{
@@ -134,9 +135,55 @@ namespace TestSuite
 				UiTools::openPdf(fileName, parent);
 			}
 		}
+
+		return true;
 	}
 
-	void TestReport::generateReports(const ReportLib::ReportTemplateStorage& templates,
+	bool TestReport::generateReport(const ReportLib::ReportTemplateStorage& templates,
+									const TestSuite::TestLog& testLog,
+									const QString& caption,
+									const QString& fileName,
+									QWidget* parent)
+	{
+		bool found = false;
+		const ReportLib::ReportTemplate& templ = templates.templateByCaption(caption, &found);
+		if (found == false)
+		{
+			Q_ASSERT(found);
+			return false;
+		}
+
+		TestReportDataProvider dataProvider(testLog);
+		ReportLib::TaggedReportGenerator generator(templ, dataProvider);
+
+		std::atomic_bool stop = false;
+
+		QBuffer buffer;
+		if (generator.generate(buffer, stop) == false)
+		{
+			QMessageBox::critical(parent, qAppName(), QObject::tr("Report '%1' generation error!").arg(caption));
+			return false;
+		}
+
+		QFile f(fileName);
+		if (f.open(QFile::WriteOnly) == false || f.write(buffer.data()) == false)
+		{
+			QMessageBox::critical(parent, qAppName(), QObject::tr("Report file '%1' saving error!").arg(fileName));
+			return false;
+		}
+		else
+		{
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you wish to open it?")) ==
+				QMessageBox::Yes)
+			{
+				UiTools::openPdf(fileName, parent);
+			}
+		}
+
+		return true;
+	}
+
+	bool TestReport::generateReports(const ReportLib::ReportTemplateStorage& templates,
 									 const TestSuite::TestLog& testLog,
 									 const QString& captionMask, // if empty - generate all
 									 const QString& path,
@@ -145,7 +192,7 @@ namespace TestSuite
 		if (QDir().mkpath(path) == false)
 		{
 			appLog->writeError(QObject::tr("Report path '%1' creating error!").arg(path));
-			return;
+			return false;
 		}
 
 		for (const ReportLib::ReportTemplate& templ : templates.templates())
@@ -175,7 +222,7 @@ namespace TestSuite
 			if (generator.generate(buffer, stop) == false)
 			{
 				appLog->writeError(QObject::tr("Report '%1' generation error!").arg(templ.caption()));
-				return;
+				return false;
 			}
 
 			QString fileName = QString("%1%2%3.pdf").arg(path).arg(QDir::separator()).arg(templ.caption());
@@ -184,11 +231,14 @@ namespace TestSuite
 			if (f.open(QFile::WriteOnly) == false || f.write(buffer.data()) == false)
 			{
 				appLog->writeError(QObject::tr("Report file '%1' saving error!").arg(fileName));
+				return false;
 			}
 			else
 			{
 				appLog->writeMessage(QObject::tr("Report file '%1' saved successfully.").arg(fileName));
 			}
 		}
+
+		return true;
 	}
 } // namespace TestSuite
