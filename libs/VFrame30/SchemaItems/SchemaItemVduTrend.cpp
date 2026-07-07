@@ -387,6 +387,15 @@ namespace VFrame30
 									   SchemaItemVduTrend::setShowDateLabels);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// use24hTimeFormat
+		//
+		p = ADD_PROPERTY_GETTER_SETTER(bool,
+									   PropertyNames::indicatorTrendUse24hTimeFormat,
+									   true,
+									   SchemaItemVduTrend::use24hTimeFormat,
+									   SchemaItemVduTrend::setUse24hTimeFormat);
+		p->setCategory(PropertyNames::indicatorSettings);
+
 		// trendSignalParams
 		//
 		ADD_PROPERTY_GETTER_SETTER(PropertyVector<SchemaItemVduTrendSignalParam>,
@@ -471,6 +480,7 @@ namespace VFrame30
 		trendMessage->set_showsignalscales(m_showSignalScales);
 		trendMessage->set_showtimelabels(m_showTimeLabels);
 		trendMessage->set_showdatelabels(m_showDateLabels);
+		trendMessage->set_use24htimeformat(m_use24hTimeFormat);
 
 		// save m_signalParams
 		//
@@ -535,6 +545,7 @@ namespace VFrame30
 		m_showSignalScales = trendMessage.showsignalscales();
 		m_showTimeLabels = trendMessage.showtimelabels();
 		m_showDateLabels = trendMessage.showdatelabels();
+		m_use24hTimeFormat = trendMessage.use24htimeformat();
 
 		// Load m_signalParams
 		//
@@ -988,6 +999,16 @@ namespace VFrame30
 	void SchemaItemVduTrend::setShowDateLabels(bool value)
 	{
 		m_showDateLabels = value;
+	}
+
+	bool SchemaItemVduTrend::use24hTimeFormat() const 
+	{ 
+		return m_use24hTimeFormat;
+	}
+
+	void SchemaItemVduTrend::setUse24hTimeFormat(bool value) 
+	{ 
+		m_use24hTimeFormat = value;
 	}
 
 	PropertyVector<SchemaItemVduTrendSignalParam> SchemaItemVduTrend::signalParams() const

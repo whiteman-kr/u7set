@@ -669,8 +669,11 @@ namespace
 
 			structTrend.columnCount = schemaItem.columnCount();
 
-			const std::size_t MaxExtraDuration =
+			const std::size_t MaxDurationsCount =
 				sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs) / sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs[0]);
+			
+			const uint32_t MinDuration = 30;
+			const uint32_t MaxDuration = 72 * 60 * 60;	// 72 hours in seconds
 
 			std::vector<uint32_t> durations = schemaItem.durationsSeconds();
 			if (durations.size() == 0) 
@@ -683,8 +686,32 @@ namespace
 				return false;
 			}
 
-			for (std::size_t i = 0; i < durations.size() && i < MaxExtraDuration; i++)
+			if (durations.size() > MaxDurationsCount) 
 			{
+				m_log.errEQP6420(m_vduEquipmentId,
+								 schemaItem.parentSchema()->schemaId(),
+								 schemaItem.label(),
+								 schemaItem.guid(),
+								 durations.size());
+
+				reset();
+				return false;
+			}
+
+			for (std::size_t i = 0; i < durations.size() && i < MaxDurationsCount; i++)
+			{
+				if (durations[i] < MinDuration || durations[i] > MaxDuration)
+				{
+					m_log.errEQP6421(m_vduEquipmentId,
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid(),
+									 durations[i]);
+
+					reset();
+					return false;
+				}
+
 				structTrend.durationsSecs[i] = durations[i];
 			}
 			
@@ -724,6 +751,7 @@ namespace
 			structTrend.showSignalScales = schemaItem.showSignalScales();
 			structTrend.showTimeLabels = schemaItem.showTimeLabels();
 			structTrend.showDateLabels = schemaItem.showDateLabels();
+			structTrend.use24hTimeFormat = schemaItem.use24hTimeFormat();
 
 			// Saving signals
 			//

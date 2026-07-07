@@ -180,6 +180,7 @@ namespace VFrame30
 		inline static const QString indicatorTrendShowSignalScales{"ShowSignalScales"};
 		inline static const QString indicatorTrendShowTimeLabels{"ShowTimeLabels"};
 		inline static const QString indicatorTrendShowDateLabels{"ShowDateLabels"};
+		inline static const QString indicatorTrendUse24hTimeFormat{"Use24hTimeFormat"};
 		inline static const QString indicatorTrendIndentLeft{"IndentLeft"};
 		inline static const QString indicatorTrendIndentRight{"IndentRight"};
 		inline static const QString indicatorTrendIndentTop{"IndentTop"};
@@ -189,7 +190,7 @@ namespace VFrame30
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};
 		inline static const QString indicatorTrendLaneDurations{"LaneDurations"};
-		inline static const QString indicatorTrendLaneDurationsToolTip{"Lane durations, in seconds, separated by semicolon or new line"};
+		inline static const QString indicatorTrendLaneDurationsToolTip{"Lane durations, in seconds (30 - 259200 (72h)), separated by semicolon or new line"};
 		
 		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
 		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};

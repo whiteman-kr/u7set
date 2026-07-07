@@ -163,6 +163,9 @@ namespace VFrame30
 		bool showDateLabels() const;
 		void setShowDateLabels(bool value);
 
+		bool use24hTimeFormat() const;
+		void setUse24hTimeFormat(bool value);
+
 		PropertyVector<SchemaItemVduTrendSignalParam> signalParams() const;
 		void setSignalParams(const PropertyVector<SchemaItemVduTrendSignalParam>& value);
 
@@ -193,6 +196,7 @@ namespace VFrame30
 		bool m_showSignalScales = true;
 		bool m_showTimeLabels = true;
 		bool m_showDateLabels = true;
+		bool m_use24hTimeFormat = true;
 
 		FontParam m_font;
 	};

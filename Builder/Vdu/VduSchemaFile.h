@@ -364,6 +364,7 @@ struct VduSchemaFileSchemaItemTrend1
 	bool showSignalScales;
 	bool showTimeLabels;
 	bool showDateLabels;
+	bool use24hTimeFormat;
 	bool reserve6;
 	bool reserve7;
 	bool reserve8;
