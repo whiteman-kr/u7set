@@ -256,6 +256,8 @@ if((NOT STATIC_RUNTIME) AND (NOT CODE_COVERAGE))
 	if (BUILD_LICENSER_BLACKLIST_GENERATOR)
 		add_subdirectory(./Tools/LicenserBlacklistGenerator)
 	endif()
+
+	add_subdirectory(./Tools/PluginTO5)
 endif()
 
 # Create install target.

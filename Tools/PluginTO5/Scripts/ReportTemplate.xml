@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportTemplateStorage Version="1">
+	<Report Caption="ÐÀÅÑ ÊÑÁ ÒÎ-5" Version="1">
+		<Header Caption="Header" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1">
+			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Tag="$FIRST(PLANT)" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Tag="$FIRST(UNIT)" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Tag="$FIRST(SYSTEM)" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Text="\n\nÏðîòîêîë ¹ ________ ÒÎ-5\n\n" FontName="Arial" FontSize="16" Alignment="Center"/>
+			<Text Tag="$FIRST(START_TIME)" FontName="Arial" FontSize="12" Alignment="Center"/>
+		</Header>
+		<Section Caption="Main" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1" Tag="to5">
+			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Tag="TO_ALG_$(REPEATINDEX)" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Left"/>
+			<Table Tag="TO_TABLE_$(REPEATINDEX)" FontName="Arial" FontSize="10" Separator=";" BorderWidth="1">
+				<Column Caption="Íàéìåíóâàííÿ" Alignment="Left" Width = "30"/>
+				<Column Caption="²Ä" Alignment="Left" Width = "20"/>
+				<Column Caption="Øàôà" Alignment="Left" Width = "15"/>
+				<Column Caption="Çíà÷. ñèãíàëà" Alignment="Left" Width = "10"/>
+				<Column Caption="Åòàëîí óñò." Alignment="Left" Width = "10"/>
+				<Column Caption="Çíà÷. óñò." Alignment="Left" Width = "10"/>
+				<Column Caption="Â³äïîâ³äí³ñòü" Alignment="Left" Width = "5"/>
+			</Table>
+		</Section>
+		<Footer Caption="Footer" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1">
+			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
+			<Text Tag="TO_RESULT" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Left"/>
+			<Text Text="\n\nÍÇ ÖÒÀÂ: ___________________________" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Center"/>
+			<Text Text="ï³äïèñ, Ï.².Á." FontName="Arial" FontSize="10" Alignment="Center"/>
+			<Text Text="\n\nÍÇ ÐÖ-2: ___________________________" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Center"/>
+			<Text Text="ï³äïèñ, Ï.².Á." FontName="Arial" FontSize="10" Alignment="Center"/>
+		</Footer>
+		<MarginItem Text="Monitor" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Left" VertPosition="Top" Version="1"/>
+		<MarginItem Text="Ïðîòîêîë ÒÎ-5" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Center" VertPosition="Top" Version="1"/>
+		<MarginItem Text="Radiy" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Right" VertPosition="Top" Version="1"/>
+		<MarginItem Text="%PAGE%" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Center" VertPosition="Bottom" Version="1"/>
+	</Report>
+</ReportTemplateStorage>
