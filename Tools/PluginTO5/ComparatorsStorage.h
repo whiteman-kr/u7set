@@ -5,6 +5,7 @@
 
 #include "../../AppSignalLib/ComparatorSet.h"
 #include "../../AppSignalLib/AppSignal.h"
+#include <CommonLib/Hash.h>
 #include <CommonLib/Types.h>
 
 #include "OutputLog.h"

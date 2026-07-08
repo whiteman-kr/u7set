@@ -1142,7 +1142,7 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 		m_tableWidget->setItem(row, c++, createTableItem(QString::number(data.defaultValue), false));
 
 		QTableWidgetItem* criteriaItem = createTableItem(QString::number(data.currentValue), true);
-		criteriaItem->setData(Qt::UserRole, data.hash);
+		criteriaItem->setData(Qt::UserRole, static_cast<qulonglong>(data.hash));
 		if (data.isValueOverriden())
 		{
 			criteriaItem->setBackground(Qt::yellow);

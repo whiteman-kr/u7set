@@ -1,5 +1,4 @@
 #include "ComparatorsStorage.h"
-#include <CommonLib/Hash.h>
 #include "../../UtilsLib/CsvFile.h"
 
 #include <vector>
