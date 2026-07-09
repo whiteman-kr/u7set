@@ -53,16 +53,50 @@ PluginTO5MainWindow::PluginTO5MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	m_logFile{qAppName(),
 			  QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + PluginTO5Settings::restore().equipmentId},
-	m_comparatorsStorage(),
 	m_runner(m_logFile)
 {
+
+	// Init translator
+	//
+	m_translator.addLanguage("en", "English");
+	m_translator.addLanguage("uk", "Ukrainian");
+
+	for (const QString& l : m_translator.languagesList())
+	{
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/PluginTO5_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TestSuiteLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UiLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ReportLib_%1.qm").arg(l));
+	}
+
+	QString language = QSettings().value("MainWindow/language", "uk").toString();
+
+	if (language != "en")
+	{
+		QStringList failedTranslations;
+		if (m_translator.setLanguage(language, failedTranslations) == false)
+		{
+			if (failedTranslations.isEmpty() == false)
+			{
+				m_logFile.writeError("Failed to load translation files:\n" + failedTranslations.join('\n'));
+			}
+			else
+			{
+				m_logFile.writeError("Failed to set language: " + language);
+			}
+		}
+	}
+	//
+
+	m_comparatorsStorage = ComparatorsStorage();
 
 	m_maskHelp = tr("A mask contains '*' and '?' symbols.\n\
 	'*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.\n\
 	Several masks can be separated by semicolon or space.\n\n\
 	Examples:\n\n\
 	TZB* (mask for Schema Id),\n\
-	? (mask for CustomAppSignalID),\n\
 	To apply the filter, enter the mask and press Enter.");
 	m_maskHelp.remove('\t');
 
@@ -129,10 +163,10 @@ PluginTO5MainWindow::PluginTO5MainWindow(QWidget* parent) :
 		};
 
 		{
-			hideColumn("InputAppSignalCaption");
-			hideColumn("Type");
-			hideColumn("SetpointAppSignalID");
-			hideColumn("SetpointAppSignalCaption");
+			hideColumn(tr("InputAppSignalCaption"));
+			hideColumn(tr("Type"));
+			hideColumn(tr("SetpointAppSignalID"));
+			hideColumn(tr("SetpointAppSignalCaption"));
 		}
 
 		m_tableWidget->resizeColumnsToContents();
@@ -153,9 +187,6 @@ PluginTO5MainWindow::PluginTO5MainWindow(QWidget* parent) :
 
 PluginTO5MainWindow::~PluginTO5MainWindow()
 {
-	//m_control.execute();
-	//m_control.stop();
-
 	QSettings().setValue("MainWindow/pos", pos());
 	QSettings().setValue("MainWindow/geometry", saveGeometry());
 	QSettings().setValue("MainWindow/splitter", m_splitter->saveState());
@@ -166,7 +197,6 @@ PluginTO5MainWindow::~PluginTO5MainWindow()
 	QSettings().setValue("MainWindow/tableState", m_tableWidget->horizontalHeader()->saveState());
 
 	QSettings().setValue("MainWindow/filterType", static_cast<int>(m_filterType));
-	QSettings().setValue("MainWindow/comboBoxIndex", m_comboBox->currentIndex());
 }
 
 void PluginTO5MainWindow::showAppLog()
@@ -182,7 +212,7 @@ void PluginTO5MainWindow::showAboutQt()
 
 void PluginTO5MainWindow::showAbout()
 {
-	QString text = qApp->applicationName() + " provides the online operator-support system.";
+	QString text = qApp->applicationName() + tr(" provides the online operator-support system.");
 
 	UiLib::DialogAbout::show(this, text, {});
 
@@ -213,8 +243,14 @@ void PluginTO5MainWindow::onSettings()
 	layout->addRow(tr("Configurator Port 2:"), port2);
 
 
-	//QLineEdit* language = new QLineEdit(&dialog);
-	//layout->addRow(tr("Language:"), language); // TODO: language!!!
+	m_language = new QComboBox(&dialog);
+	m_language->addItems(m_translator.languagesList());
+	m_language->setCurrentIndex(m_translator.languagesList().indexOf(QSettings().value("MainWindow/language", "uk").toString()));
+	connect(m_language, &QComboBox::currentTextChanged, [this]()
+	{
+		QSettings().setValue("MainWindow/language", m_language->currentText());
+	});
+	layout->addRow(tr("Language:"), m_language);
 	{
 		PluginTO5Settings settings = PluginTO5Settings::restore();
 
@@ -223,6 +259,7 @@ void PluginTO5MainWindow::onSettings()
 		port1->setText(settings.port1);
 		ipAddress2->setText(settings.ipAddress2);
 		port2->setText(settings.port2);
+		m_language->setCurrentText(QSettings().value("MainWindow/language", "uk").toString());
 	}
 
 	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -262,7 +299,7 @@ void PluginTO5MainWindow::onNewComparators()
 
 void PluginTO5MainWindow::onOpenComparators()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, "Open Comparators CSV", "", "CSV Files (*.csv)");
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open Comparators CSV"), "", tr("CSV Files (*.csv)"));
 	if (fileName.isEmpty())
 	{
 		return;
@@ -290,7 +327,7 @@ void PluginTO5MainWindow::onSaveComparators()
 
 void PluginTO5MainWindow::onSaveAsComparators()
 {
-	QString fileName = QFileDialog::getSaveFileName(this, "Save Comparators CSV", "", "CSV Files (*.csv)");
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Comparators CSV"), "", tr("CSV Files (*.csv)"));
 	if (fileName.isEmpty())
 	{
 		return;
@@ -354,6 +391,7 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 	}
 
 	// Prevent recursive itemChanged signals
+	//
 	QSignalBlocker blocker(m_tableWidget);
 
 	const QString value = item->text();
@@ -378,7 +416,6 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 							   .toULongLong();
 
 			bool ok = false;
-			
 			double v = value.toDouble(&ok);
 			Q_ASSERT(ok);
 
@@ -387,6 +424,7 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 				const auto& cd = m_comparatorsStorage.comparator(cmpHash, &ok);
 				if (ok == true)
 				{
+					v = QString::number(value.toDouble(), 'f', cd.precision).toDouble();
 					m_comparatorsStorage.setComparatorCriteria(cmpHash, v);
 
 					if (cd.isValueOverriden() == true)
@@ -420,7 +458,7 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 
 	QLineEdit* reportFileEdit = new QLineEdit;
 
-	QPushButton* reportPathBrowse = new QPushButton(tr("Browse"));
+	QPushButton* reportPathBrowse = new QPushButton(tr("Browse..."));
 	
 	QHBoxLayout* reportLayout = new QHBoxLayout;
 	reportLayout->setContentsMargins(0, 0, 0, 0);
@@ -455,7 +493,7 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 
 	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttons->button(QDialogButtonBox::Ok)->setText(tr("Create"));
-
+	buttons->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 	layout->addRow(buttons);
 
 	connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
@@ -645,29 +683,29 @@ void PluginTO5MainWindow::createMenu()
 
 	fileMenu->addSeparator();
 
-	QAction* newAction = new QAction("New", this);
+	QAction* newAction = new QAction(tr("New"), this);
 	connect(newAction, &QAction::triggered, this, &PluginTO5MainWindow::onNewComparators);
 	fileMenu->addAction(newAction);
 
-	QAction* open = new QAction("Open", this);
+	QAction* open = new QAction(tr("Open..."), this);
 	connect(open, &QAction::triggered, this, &PluginTO5MainWindow::onOpenComparators);
 	fileMenu->addAction(open);
 
-	QAction* save = new QAction("Save", this);
+	QAction* save = new QAction(tr("Save"), this);
 	connect(save, &QAction::triggered, this, &PluginTO5MainWindow::onSaveComparators);
 	fileMenu->addAction(save);
 
-	QAction* saveAs = new QAction("Save As...", this);
+	QAction* saveAs = new QAction(tr("Save As..."), this);
 	connect(saveAs, &QAction::triggered, this, &PluginTO5MainWindow::onSaveAsComparators);
 	fileMenu->addAction(saveAs);
 
-	QAction* a = new QAction("Exit", this);
+	QAction* a = new QAction(tr("Exit"), this);
 	connect(a, &QAction::triggered, this, &QMainWindow::close);
 	fileMenu->addAction(a);
 
 
 	auto reportsMenu = menuBar()->addMenu(tr("&Reports"));
-	QAction* reportByCase = new QAction("Create a Report by CaseID", this);
+	QAction* reportByCase = new QAction(tr("Report by CaseID"), this);
 	connect(reportByCase,
 			&QAction::triggered,
 			this,
@@ -677,7 +715,7 @@ void PluginTO5MainWindow::createMenu()
 			});
 	reportsMenu->addAction(reportByCase);
 
-	QAction* reportBySchema = new QAction("Create a Report by SchemaID", this);
+	QAction* reportBySchema = new QAction(tr("Report by SchemaID"), this);
 	connect(reportBySchema,
 			&QAction::triggered,
 			this,
@@ -689,7 +727,7 @@ void PluginTO5MainWindow::createMenu()
 
 	auto toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	QAction* import = new QAction("Import Comparators", this);
+	QAction* import = new QAction(tr("Import..."), this);
 	connect(import, &QAction::triggered, this, &PluginTO5MainWindow::onImportComparators);
 	toolsMenu->addAction(import);
 
@@ -742,8 +780,10 @@ void PluginTO5MainWindow::createFilterListWidget()
 
 	m_comboBox = new QComboBox();
 
-	m_comboBox->addItem(FilterTypeStr[static_cast<int>(FilterType::BySchemaID)], static_cast<int>(FilterType::BySchemaID));
-	m_comboBox->addItem(FilterTypeStr[static_cast<int>(FilterType::ByCaseID)], static_cast<int>(FilterType::ByCaseID));
+	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::BySchemaID)],
+						static_cast<int>(FilterType::BySchemaID));
+	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::ByCaseID)], 
+						static_cast<int>(FilterType::ByCaseID));
 
 	m_comboBox->setCurrentIndex(QSettings().value("MainWindow/comboBoxIndex", 0).toInt());
 
@@ -770,7 +810,7 @@ void PluginTO5MainWindow::createFilterListWidget()
 		maskLayout->setContentsMargins(0, 0, 0, 0);
 
 		m_editMask = new QLineEdit();
-		m_editMask->setPlaceholderText("Enter mask (\"*,?\") here");
+		m_editMask->setPlaceholderText(tr("Enter mask (\"*,?\") here"));
 		m_editMask->setToolTip(m_maskHelp);
 		connect(m_editMask, &QLineEdit::returnPressed, this, &PluginTO5MainWindow::editMaskReturnPressed);
 		maskLayout->addWidget(m_editMask);
@@ -785,10 +825,11 @@ void PluginTO5MainWindow::createFilterListWidget()
 void PluginTO5MainWindow::createTableWidget()
 {
 	m_tableHeaders.clear();
-	m_tableHeaders << "CaseID" << "SchemaID" << "InputAppSignalID" << "InputAppSignalCaption" << "OutputAppSignalID"
-			<< "OutputAppSignalCaption" << "Default" << "Criteria" << "Type" << "SetpointAppSignalID" << "SetpointAppSignalCaption";
+	m_tableHeaders << tr("CaseID") << tr("SchemaID") << tr("InputAppSignalID") << tr("InputAppSignalCaption") << tr("OutputAppSignalID")
+				   << tr("OutputAppSignalCaption") << tr("Default") << tr("Criteria") << tr("Type") << tr("SetpointAppSignalID")
+				   << tr("SetpointAppSignalCaption");
 
-	m_criteriaColumn = m_tableHeaders.indexOf("Criteria");
+	m_criteriaColumn = m_tableHeaders.indexOf(tr("Criteria"));
 	if (m_criteriaColumn == -1) 
 	{
 		Q_ASSERT(false);
@@ -920,7 +961,7 @@ void PluginTO5MainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(QString(tr(" Log E: %1 W: %2 ")).arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{

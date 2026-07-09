@@ -20,7 +20,7 @@ DialogImport::DialogImport(const QString& comparatorsFile, const QString& appSig
 
 	QFormLayout* layout = new QFormLayout;
 
-	QPushButton* comparatorsBrowse = new QPushButton(tr("Browse"));
+	QPushButton* comparatorsBrowse = new QPushButton(tr("Browse..."));
 	QHBoxLayout* comparatorsLayout = new QHBoxLayout;
 	comparatorsLayout->setContentsMargins(0, 0, 0, 0);
 	comparatorsLayout->addWidget(m_fileComparatorsEdit);
@@ -47,7 +47,7 @@ DialogImport::DialogImport(const QString& comparatorsFile, const QString& appSig
 
 	layout->addRow(tr("Comparators File:"), comparatorsLayout);
 
-	QPushButton* appSignalsBrowse = new QPushButton(tr("Browse"));
+	QPushButton* appSignalsBrowse = new QPushButton(tr("Browse..."));
 
 	QHBoxLayout* appSignalsLayout = new QHBoxLayout;
 	appSignalsLayout->setContentsMargins(0, 0, 0, 0);
@@ -90,7 +90,7 @@ DialogImport::DialogImport(const QString& comparatorsFile, const QString& appSig
 
 	setLayout(layout);
 
-	setFixedSize(420, 160);
+	setFixedSize(620, 140);
 }
 
 QString DialogImport::comparatorsFile() const

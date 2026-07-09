@@ -15,7 +15,7 @@ ComparatorsStorage::ComparatorsStorage()
 				 << "InputAppSignalID" << "InputCustomAppSignalID" << "InputAppSignalCaption"
 				 << "OutputAppSignalID" << "OutputCustomAppSignalID" << "OutputAppSignalCaption"
 				 << "DefaultCriteria" << "Criteria" << "Type"
-				 << "SetpointAppSignalID" << "SetpointCustomAppSignalID" << "SetpointAppSignalCaption";
+				 << "SetpointAppSignalID" << "SetpointCustomAppSignalID" << "SetpointAppSignalCaption" << "Precision";
 }
 
 ComparatorsStorage::~ComparatorsStorage() 
@@ -95,6 +95,7 @@ bool ComparatorsStorage::loadFromFile(const QString& fileName, QString* errorMsg
 		data.setpointAppSignalID = fields[c++];
 		data.setpointCustomAppSignalID = fields[c++];
 		data.setpointAppSignalCaption = fields[c++];
+		data.precision = fields[c++].toInt();
 		
 		Hash hash = ::calcHash(data.outputAppSignalID);
 		data.hash = hash;
@@ -120,7 +121,7 @@ static QStringList getComparatorDataAsStringList(const ComparatorData& data)
 		<< data.inputAppSignalID << data.inputCustomAppSignalID << data.inputSignalCaption
 		<< data.outputAppSignalID << data.outputCustomAppSignalID << data.outputSignalCaption
 		<< QString::number(data.defaultValue) << QString::number(data.currentValue) << data.type
-		<< data.setpointAppSignalID << data.setpointCustomAppSignalID << data.setpointAppSignalCaption;
+		<< data.setpointAppSignalID << data.setpointCustomAppSignalID << data.setpointAppSignalCaption << QString::number(data.precision);
 	return fields;
 }
 
@@ -162,6 +163,7 @@ static bool updateComparatorData(const QString& lmId,
 		data.inputAppSignalID = inputSignal->appSignalID();
 		data.inputCustomAppSignalID = inputSignal->customAppSignalID();
 		data.inputSignalCaption = inputSignal->caption();
+		data.precision = inputSignal->decimalPlaces();
 	}
 	else 
 	{

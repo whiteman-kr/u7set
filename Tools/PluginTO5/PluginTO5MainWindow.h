@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../UtilsLib/LogFile.h"
+#include <ClientLib/ClientTranslator.h>
 #include "../../OnlineLib/TcpClientStatistics.h"
 #include "ComparatorsStorage.h"
 
@@ -81,12 +82,15 @@ private:
 	ComparatorsStorage m_comparatorsStorage;
 	TO5Runner m_runner;
 
+	ClientLib::ClientTranslator m_translator;
+
 
 	// Ui
 	//
 	QSplitter* m_splitter = nullptr;
 
 	QWidget* m_mainWidget = nullptr;
+	QComboBox* m_language = nullptr;
 
 	QListWidget* m_filtersListWidget = nullptr;
 	QTableWidget* m_tableWidget = nullptr;

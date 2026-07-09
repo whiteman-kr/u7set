@@ -17,7 +17,6 @@ enum class FilterType
 	Count = 2
 };
 
-static inline QString FilterTypeStr[static_cast<int>(FilterType::Count)] = {"Schema ID", "Case ID"};
 
 struct ComparatorData
 {
@@ -35,6 +34,7 @@ struct ComparatorData
 
 	double defaultValue = 0;	// default setpoint value from the project
 	double currentValue = 0;	// current setpoint value
+	int precision = 0;
 
 	bool isDynamic = false;         // true - dynamic setpoint, false - static setpoint
 
@@ -90,6 +90,8 @@ public:
 	// Update comparator
 	//
 	void setComparatorCriteria(Hash hash, double criteria);
+
+	QString FilterTypeStr[static_cast<int>(FilterType::Count)] = {QObject::tr("Schema ID"), QObject::tr("Case ID")};
 
 private:
 	bool loadComparators(const QString& comparatorsFile, ComparatorSet& comparatorSet) const;

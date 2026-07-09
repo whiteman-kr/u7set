@@ -271,6 +271,7 @@ function testTO5BySchemaID(ctrl)
 	log.writeMessage(`${schemaIDList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
 
 	let setpointMismatch = 0;
+	let errorReadData = false;
 	let currentSchemaID = "";
 	for (let i = 0; i < schemaIDList.length; i++)
 	{
@@ -285,8 +286,16 @@ function testTO5BySchemaID(ctrl)
 			const schemaID = data[1 /*SchemaID*/];
 			const inputAppSignalID = data[2 /*InputAppSignalID*/];
 			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
-			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/]
-			const criteria = data[9 /*Criteria*/];
+			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/];
+			let criteria = data[9 /*Criteria*/];
+			const round = data[14 /*Precision*/];
+			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
+
+			if (outputAppSignalID === "")
+			{
+				errorReadData = true;
+				continue;
+			}
 
 			let correct = "";
 			
@@ -311,17 +320,24 @@ function testTO5BySchemaID(ctrl)
 			}
 		}
 	}
-	
-	if (setpointMismatch === 0)
+
+	if (errorReadData === true)
 	{
-		log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
 	}
 	else
 	{
-		log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
-	}
+		if (setpointMismatch === 0)
+		{
+			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+		}
 	
-	log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+	}
 }
 
 // TO5 Report by CaseID
@@ -360,6 +376,7 @@ function testTO5ByCaseID(ctrl)
 
 	let setpointMismatch = 0;
 	let currentCaseID = "";
+	let errorReadData = false;
 	for (let i = 0; i < caseIDList.length; i++)
 	{
 		for (const data of setpointsData)
@@ -374,9 +391,17 @@ function testTO5ByCaseID(ctrl)
 			const inputAppSignalID = data[2 /*InputAppSignalID*/];
 			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
 			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/]
-			const criteria = data[9 /*Criteria*/];
+			let criteria = data[9 /*Criteria*/];
+			const round = data[14 /*Precision*/];
+			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
 
 			let correct = "";
+
+			if (outputAppSignalID === "")
+			{
+				errorReadData = true;
+				continue;
+			}
 			
 			if (currentCaseID !== caseIDList[i])
 			{
@@ -400,16 +425,23 @@ function testTO5ByCaseID(ctrl)
 		}
 	}
 	
-	if (setpointMismatch === 0)
+	if (errorReadData === true)
 	{
-		log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
 	}
 	else
 	{
-		log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
-	}
+		if (setpointMismatch === 0)
+		{
+			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+		}
 	
-	log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+	}
 }
 	
     /*

@@ -30,7 +30,7 @@
 			<Text Text="\n\nÍÇ ÐÖ-2: ___________________________" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Center"/>
 			<Text Text="ï³äïèñ, Ï.².Á." FontName="Arial" FontSize="10" Alignment="Center"/>
 		</Footer>
-		<MarginItem Text="Monitor" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Left" VertPosition="Top" Version="1"/>
+		<MarginItem Text="TO-5" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Left" VertPosition="Top" Version="1"/>
 		<MarginItem Text="Ïðîòîêîë ÒÎ-5" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Center" VertPosition="Top" Version="1"/>
 		<MarginItem Text="Radiy" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Right" VertPosition="Top" Version="1"/>
 		<MarginItem Text="%PAGE%" PageFrom = "-1" PageTo = "-1" FontName="Arial" FontSize="10" HorzPosition="Center" VertPosition="Bottom" Version="1"/>
