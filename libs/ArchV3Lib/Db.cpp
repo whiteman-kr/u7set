@@ -85,6 +85,19 @@ namespace ArchV3
 		return m_db != nullptr && m_db->isOpen(); 
 	}
 
+	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals)
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		Q_ASSERT(false);
+
+		return true;
+	}
+
 	bool Db::schemaCheckAndCreate()
 	{
 		if (isOpen() == false)

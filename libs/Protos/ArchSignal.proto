@@ -21,3 +21,18 @@ message ArchInfo
 	required string archiveServiceID = 2;
 	repeated ArchSignal archSignal = 3;
 }
+
+// ClientArchSignals is a message that contains the client ID and a list of ArchSignal messages for that client.
+
+message ClientArchSignals
+{
+	required string clientID = 1;
+	repeated ArchSignal archSignal = 2;
+}
+
+message ArchInfoV3
+{
+	required BuildInfo buildInfo = 1;
+	required string archiveServiceID = 2;
+	repeated ClientArchSignals clientArchSignals = 3;
+}

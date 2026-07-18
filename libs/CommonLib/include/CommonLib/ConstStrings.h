@@ -674,6 +674,7 @@ namespace File
 	inline const QString CRYPTO_CA_CLIENT_PRIVATE_KEY = "/Crypto/ca_client_private.key";
 
 	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
+	inline const QString ARCH_INFO_V3_PROTO = "ArchInfoV3.proto";
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
 	inline const QString ARCHIVE_INFO = "archive.info";
 

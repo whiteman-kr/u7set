@@ -2,7 +2,8 @@
 
 #include <memory>
 
-#include <ArchV3Lib/Postgres.h>
+#include "Postgres.h"
+#include "ArchSignal.h"
 
 namespace ArchV3
 {
@@ -18,6 +19,8 @@ namespace ArchV3
 		void close();
 
 		bool isOpen() const;
+
+		bool registerSignals(const std::vector<ArchSignal>& archSignals);
 
 	private:
 		bool schemaCheckAndCreate();
