@@ -9,6 +9,17 @@ namespace ArchV3
 {
 	class Db : public LogWrapper
 	{
+	private:
+		struct RegisteredSignalInfo
+		{
+			quint64 signalID;
+			E::SignalType signalType;
+			QString appSignalID;
+			Hash hash;
+			quint8 bucket;
+			qint64 createdUtc;
+		};
+
 	public:
 		Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
@@ -30,6 +41,9 @@ namespace ArchV3
 
 		bool typesCreate();
 		bool functionsCreate();
+
+		bool getRegisteredSignals(std::unordered_map<Hash, RegisteredSignalInfo>* registeredSignals) const;
+		bool deleteSignals(const std::vector<QString>& ids) const;
 
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 

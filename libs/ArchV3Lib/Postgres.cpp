@@ -6,7 +6,6 @@
 
 #include <QUuid>
 #include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
 #include <QRegularExpression>
 #include <QFile>
 
@@ -121,6 +120,25 @@ namespace ArchV3
 		}
 
 		return true;
+	}
+
+	std::optional<QSqlQuery> Postgres::execQuery(const QString& sql) const
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return std::nullopt;
+		}
+
+		QSqlQuery query(m_db);
+
+		if (query.exec(sql) == false)
+		{
+			logErr(QString("failed to execute query %1: %2").arg(sql).arg(query.lastError().text()));
+			return std::nullopt;
+		}
+
+		return query;
 	}
 
 	bool Postgres::tableExists(const QString& schemaName, const QString& tableName) const

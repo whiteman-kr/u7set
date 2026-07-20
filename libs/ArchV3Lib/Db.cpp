@@ -87,11 +87,42 @@ namespace ArchV3
 
 	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals)
 	{
-		if (isOpen() == false)
+		std::unordered_map<Hash, RegisteredSignalInfo> registeredSignals;
+
+		bool result = getRegisteredSignals(&registeredSignals);
+
+		RETURN_IF_FALSE(result);
+
+		std::unordered_set<Hash> signalsToRegister;
+		std::vector<QString> signalsToDelete;
+
+		for (const ArchSignal& signal : archSignals)
 		{
-			logErr("database not open!");
-			return false;
+			Hash hash = calcHash(signal.appSignalID);
+			quint8 bucket = hash & 0xFF;
+
+			auto it = registeredSignals.find(hash);
+
+			if (it == registeredSignals.end())
+			{
+				signalsToRegister.insert(hash);
+				continue;
+			}
+
+			// signal already restered, check if it needs to be updated
+
+			RegisteredSignalInfo& rsi = it->second;
+			
+			if (rsi.signalType != signal.signalType ||
+				rsi.hash != hash ||
+				rsi.bucket != bucket)
+			{
+				signalsToDelete.push_back(signal.appSignalID);
+				signalsToRegister.insert(hash);
+			}
 		}
+
+		result = deleteSignals(signalsToDelete);
 
 		Q_ASSERT(false);
 
@@ -174,8 +205,62 @@ namespace ArchV3
 		bool result = true;
 
 		result &= m_db->loadAndExecuteScript("Functions/fn_register_signals.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
 
 		return result;
+	}
+
+	bool Db::getRegisteredSignals(std::unordered_map<Hash, RegisteredSignalInfo>* registeredSignals) const
+	{ 
+		TEST_PTR_RETURN_FALSE(registeredSignals);	
+
+		auto query = m_db->execQuery("SELECT * FROM fn_get_registered_signals()");
+
+		if (!query)
+		{
+			return false;
+		}
+
+		static constexpr int COL_SIGNAL_ID = 0;
+		static constexpr int COL_SIGNAL_TYPE = 1;
+		static constexpr int COL_APP_SIGNAL_ID = 2;
+		static constexpr int COL_HASH = 3;
+		static constexpr int COL_BUCKET = 4;
+		static constexpr int COL_CREATED_UTC = 5;
+
+		registeredSignals->clear();
+		registeredSignals->reserve(query->size());
+
+		RegisteredSignalInfo rsi;
+
+		while (query->next())
+		{
+			rsi.signalID = query->value(COL_SIGNAL_ID).toULongLong();
+			rsi.signalType = static_cast<E::SignalType>(query->value(COL_SIGNAL_TYPE).toInt());
+			rsi.appSignalID = query->value(COL_APP_SIGNAL_ID).toString();
+			rsi.hash = static_cast<Hash>(query->value(COL_HASH).toULongLong());
+			rsi.bucket = static_cast<quint8>(query->value(COL_BUCKET).toInt());
+
+			registeredSignals->emplace(rsi.hash, rsi);
+		}
+
+		return true;
+	}
+
+	bool Db::deleteSignals(const std::vector<QString>& ids) const
+	{
+		QStringList values;
+
+		for (const QString& id : ids)
+		{
+			values << QString::number(calcHash(id));
+		}
+
+		const QString sql = QString("SELECT fn_delete_signals_by_hash(ARRAY[%1]::BIGINT[])").arg(values.join(","));
+
+		bool res = m_db->execSql(sql);
+
+		return res;
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

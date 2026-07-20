@@ -13,10 +13,11 @@ CREATE TABLE signals
 (
     signal_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    app_signal_id TEXT NOT NULL,
-    hash BIGINT NOT NULL,
-
     signal_type SMALLINT NOT NULL,
+
+    app_signal_id TEXT NOT NULL,
+
+    hash BIGINT NOT NULL,
     bucket SMALLINT NOT NULL,
 
     created_utc BIGINT NOT NULL,
