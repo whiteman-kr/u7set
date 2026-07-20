@@ -8,6 +8,7 @@
 namespace Proto
 {
 	class SchemaItemVduTrendSignal;
+	class SchemaItemVduTrendDuration;
 }
 
 namespace VFrame30
@@ -66,7 +67,6 @@ namespace VFrame30
 		uint16_t m_lineWeight = 1;
 	};
 
-
 	class SchemaItemVduTrend : public PosRectImpl,
 							   public IMatsSchemaItemAssociations,
 							   public SchemaItemVduVisitable<SchemaItemVduTrend>
@@ -107,8 +107,11 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		int durationSeconds() const;
-		void setDurationSeconds(int value);
+		QString durationsSecondsStr() const;
+		void setDurationsSecondsStr(QString value);
+		std::vector<uint32_t> durationsSeconds() const;
+
+		int columnCount() const;
 
 		E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
@@ -160,13 +163,17 @@ namespace VFrame30
 		bool showDateLabels() const;
 		void setShowDateLabels(bool value);
 
+		bool use24hTimeFormat() const;
+		void setUse24hTimeFormat(bool value);
+
 		PropertyVector<SchemaItemVduTrendSignalParam> signalParams() const;
 		void setSignalParams(const PropertyVector<SchemaItemVduTrendSignalParam>& value);
 
 		DECLARE_FONT_PROPERTIES(Font)
 
 	private:
-		uint32_t m_durationSecs = 600; // Duration of the trend, in seconds. Default is 10 minutes (600 seconds).
+		static const size_t MaxExtraDurations = 16;
+		QString m_durationsSecs = "600";  // Durations, multiple can be set using separator
 
 		E::TrendViewMode m_viewMode = E::TrendViewMode::Separated;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
@@ -189,6 +196,7 @@ namespace VFrame30
 		bool m_showSignalScales = true;
 		bool m_showTimeLabels = true;
 		bool m_showDateLabels = true;
+		bool m_use24hTimeFormat = true;
 
 		FontParam m_font;
 	};

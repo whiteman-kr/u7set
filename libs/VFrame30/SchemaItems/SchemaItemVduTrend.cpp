@@ -213,7 +213,6 @@ namespace VFrame30
 		m_lineWeight = std::clamp(value, 1, 6); // Assuming the valid range for line weight is 1 to 6
 	}
 
-
 	//
 	// SchemaItemVduTrend
 	//
@@ -234,16 +233,17 @@ namespace VFrame30
 		//
 		Property* p{};
 
-		// Duration
+		// Durations
 		//
-		p = ADD_PROPERTY_GETTER_SETTER(int,
-									   PropertyNames::indicatorTrendLaneDuration,
+		p = ADD_PROPERTY_GETTER_SETTER(QString,
+									   PropertyNames::indicatorTrendLaneDurations,
 									   true,
-									   SchemaItemVduTrend::durationSeconds,
-									   SchemaItemVduTrend::setDurationSeconds);
+									   SchemaItemVduTrend::durationsSecondsStr,
+									   SchemaItemVduTrend::setDurationsSecondsStr);
 		p->setCategory(PropertyNames::indicatorSettings);
-		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
+		p->setDescription(PropertyNames::indicatorTrendLaneDurationsToolTip);
 
+		
 		// viewMode
 		//
 		p = ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode,
@@ -387,6 +387,15 @@ namespace VFrame30
 									   SchemaItemVduTrend::setShowDateLabels);
 		p->setCategory(PropertyNames::indicatorSettings);
 
+		// use24hTimeFormat
+		//
+		p = ADD_PROPERTY_GETTER_SETTER(bool,
+									   PropertyNames::indicatorTrendUse24hTimeFormat,
+									   true,
+									   SchemaItemVduTrend::use24hTimeFormat,
+									   SchemaItemVduTrend::setUse24hTimeFormat);
+		p->setCategory(PropertyNames::indicatorSettings);
+
 		// trendSignalParams
 		//
 		ADD_PROPERTY_GETTER_SETTER(PropertyVector<SchemaItemVduTrendSignalParam>,
@@ -451,7 +460,8 @@ namespace VFrame30
 		//
 		auto trendMessage = message->MutableExtension(Proto::schemaitem)->mutable_vdutrend();
 
-		trendMessage->set_durationsecs(m_durationSecs);
+		trendMessage->set_durationssecs(m_durationsSecs.toStdString());
+
 		trendMessage->set_viewmode(static_cast<int32_t>(m_viewMode));
 		trendMessage->set_scaletype(static_cast<int32_t>(m_scaleType));
 
@@ -470,6 +480,7 @@ namespace VFrame30
 		trendMessage->set_showsignalscales(m_showSignalScales);
 		trendMessage->set_showtimelabels(m_showTimeLabels);
 		trendMessage->set_showdatelabels(m_showDateLabels);
+		trendMessage->set_use24htimeformat(m_use24hTimeFormat);
 
 		// save m_signalParams
 		//
@@ -514,7 +525,7 @@ namespace VFrame30
 
 		const auto& trendMessage = schemaItemMessage.vdutrend();
 
-		m_durationSecs = trendMessage.durationsecs();
+		m_durationsSecs = QString::fromStdString(trendMessage.durationssecs());
 
 		m_viewMode = static_cast<E::TrendViewMode>(trendMessage.viewmode());
 		m_scaleType = static_cast<E::TrendScaleType>(trendMessage.scaletype());
@@ -534,6 +545,7 @@ namespace VFrame30
 		m_showSignalScales = trendMessage.showsignalscales();
 		m_showTimeLabels = trendMessage.showtimelabels();
 		m_showDateLabels = trendMessage.showdatelabels();
+		m_use24hTimeFormat = trendMessage.use24htimeformat();
 
 		// Load m_signalParams
 		//
@@ -756,16 +768,89 @@ namespace VFrame30
 		return {};
 	}
 
-	int SchemaItemVduTrend::durationSeconds() const
-	{
-		return static_cast<int>(m_durationSecs);
+	QString SchemaItemVduTrend::durationsSecondsStr() const
+	{ 
+		return m_durationsSecs;
 	}
 
-	void SchemaItemVduTrend::setDurationSeconds(int value)
-	{
-		m_durationSecs = value < 0 ? 0u : static_cast<uint32_t>(value);
+	void SchemaItemVduTrend::setDurationsSecondsStr(QString value)
+	{ 
+		if (value.isEmpty() == true) 
+		{
+			return;
+		}
+
+		static const auto re = QRegularExpression("\\W+");
+		QStringList l = value.split(re, Qt::SkipEmptyParts);
+
+		for (const QString& s : l)
+		{
+			bool ok = false;
+			s.toULong(&ok);
+			if (ok == false)
+			{
+				return;
+			}
+		}
+
+		m_durationsSecs = value;
 	}
 
+	std::vector<uint32_t> SchemaItemVduTrend::durationsSeconds() const
+	{
+		std::vector<uint32_t> result;
+
+		static const auto re = QRegularExpression("\\W+");
+		QStringList l = m_durationsSecs.split(re, Qt::SkipEmptyParts);
+
+		for (const QString& s : l) 
+		{
+			bool ok = false;
+			uint32_t v = s.toULong(&ok);
+			if (ok == true) 
+			{
+				result.push_back(v);
+			}
+		}
+
+		return result;
+	}
+
+	int SchemaItemVduTrend::columnCount() const
+	{
+		int result = width();
+
+		const int TrendDefaultItend = 5;
+		const int TrendDefaultScaleIdent = 100;
+
+		if (indentLeft() != -1)
+		{
+			result -= (indentLeft() + showSignalScales() ? TrendDefaultScaleIdent : TrendDefaultItend);
+		}
+		else
+		{
+			result -= (TrendDefaultItend + showSignalScales() ? TrendDefaultScaleIdent : TrendDefaultItend);
+		}
+
+		if (indentRight() != -1)
+		{
+			result -= indentRight();
+		}
+		else
+		{
+			result -= TrendDefaultItend;
+		}
+
+		if (result < 0) 
+		{
+			Q_ASSERT(result >= 0);
+			result = 0;
+		}
+
+		return result;
+	}
+
+	
 	E::TrendViewMode SchemaItemVduTrend::viewMode() const
 	{
 		return m_viewMode;
@@ -914,6 +999,16 @@ namespace VFrame30
 	void SchemaItemVduTrend::setShowDateLabels(bool value)
 	{
 		m_showDateLabels = value;
+	}
+
+	bool SchemaItemVduTrend::use24hTimeFormat() const 
+	{ 
+		return m_use24hTimeFormat;
+	}
+
+	void SchemaItemVduTrend::setUse24hTimeFormat(bool value) 
+	{ 
+		m_use24hTimeFormat = value;
 	}
 
 	PropertyVector<SchemaItemVduTrendSignalParam> SchemaItemVduTrend::signalParams() const

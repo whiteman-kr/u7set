@@ -924,7 +924,7 @@ message SchemaItemVduTrendSignal
 
 message SchemaItemVduTrend
 {
-	optional int32 durationSecs = 51;
+	optional string durationsSecs = 52;
 
 	optional int32 viewMode = 80;		// E::TrendViewMode
 	optional int32 scaleType = 81;		// E::TrendScaleType
@@ -946,8 +946,10 @@ message SchemaItemVduTrend
 	optional bool showSignalScales = 122 [default = true];
 	optional bool showTimeLabels = 123 [default = true];
 	optional bool showDateLabels = 124 [default = true];
+	optional bool use24hTimeFormat = 126 [default = true];
 
 	repeated SchemaItemVduTrendSignal signalParams = 110;
+	repeated int32 extraDurationsSecs = 112;
 }
 
 //

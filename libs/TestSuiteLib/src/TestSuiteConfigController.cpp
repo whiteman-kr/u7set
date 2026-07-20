@@ -59,7 +59,7 @@ namespace TestSuite
 		config.login = settings.login;
 		config.userAccounts = settings.getUsersAccounts();
 
-		if (config.login == false)
+		if (config.tuningEnabled == true && config.login == false)
 		{
 			m_logFile.writeWarning(tr("Testing user authorization is disabled. Tests can be executed without supplying a password!"));
 		}

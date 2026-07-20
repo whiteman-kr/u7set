@@ -44,64 +44,69 @@ namespace Builder
 						continue;
 					}
 
-					for (const auto& trendSignal : trendItem->signalParams())
+					std::vector<uint32_t>  durations = trendItem->durationsSeconds();
+					for (auto duration : durations)
 					{
-						TrendItemSignal record{};
-
-						// Find AppSignalIndex
-						//
-						if (auto sit = appSignalHashToSignalIndex.find(::calcHash(trendSignal->appSignalId()));
-							sit == appSignalHashToSignalIndex.end())
+						for (const auto& trendSignal : trendItem->signalParams())
 						{
-							// Signal not found.
+							TrendItemSignal record{};
+
+							// Find AppSignalIndex
 							//
-							context.m_log->errEQP6400(vduEquipmentId,
-													  trendSignal->appSignalId(),
-													  schemaItem->parentSchema()->schemaId(),
-													  schemaItem->label(),
-													  schemaItem->guid());
-
-							result = false;
-							continue;
-						}
-						else
-						{
-							record.appSignalIndex = static_cast<uint32_t>(sit->second);
-						}
-
-						// Find ValidityAppSignalIndex
-						//
-						if (trendSignal->validityAppSignalId().isEmpty() == false)
-						{
-							auto sit = appSignalHashToSignalIndex.find(::calcHash(trendSignal->validityAppSignalId()));
-							if (sit == appSignalHashToSignalIndex.end())
+							if (auto sit = appSignalHashToSignalIndex.find(::calcHash(trendSignal->appSignalId()));
+								sit == appSignalHashToSignalIndex.end())
 							{
 								// Signal not found.
 								//
 								context.m_log->errEQP6400(vduEquipmentId,
-														  trendSignal->validityAppSignalId(),
+														  trendSignal->appSignalId(),
 														  schemaItem->parentSchema()->schemaId(),
 														  schemaItem->label(),
 														  schemaItem->guid());
+
 								result = false;
 								continue;
 							}
 							else
 							{
-								record.validityAppSignalIndex = static_cast<uint32_t>(sit->second);
+								record.appSignalIndex = static_cast<uint32_t>(sit->second);
 							}
-						}
-						else
-						{
-							record.validityAppSignalIndex = 0xFFFFFFFF; // No validity signal
-						}
 
-						// Set DurationSecs
-						//
-						record.durationSecs = static_cast<uint32_t>(trendItem->durationSeconds());
-						record.reserve = 0;
+							// Find ValidityAppSignalIndex
+							//
+							if (trendSignal->validityAppSignalId().isEmpty() == false)
+							{
+								auto sit = appSignalHashToSignalIndex.find(::calcHash(trendSignal->validityAppSignalId()));
+								if (sit == appSignalHashToSignalIndex.end())
+								{
+									// Signal not found.
+									//
+									context.m_log->errEQP6400(vduEquipmentId,
+															  trendSignal->validityAppSignalId(),
+															  schemaItem->parentSchema()->schemaId(),
+															  schemaItem->label(),
+															  schemaItem->guid());
+									result = false;
+									continue;
+								}
+								else
+								{
+									record.validityAppSignalIndex = static_cast<uint32_t>(sit->second);
+								}
+							}
+							else
+							{
+								record.validityAppSignalIndex = 0xFFFFFFFF; // No validity signal
+							}
 
-						vduTrendRecords.insert(record);
+							// Set DurationSecs
+							//
+							record.durationSecs = duration;
+							record.columnCount = static_cast<uint32_t>(trendItem->columnCount());
+							record.reserve = 0;
+
+							vduTrendRecords.insert(record);
+						}
 					}
 				}
 			}
@@ -119,7 +124,7 @@ namespace Builder
 		data.fill(0);
 
 		TrendItemSignalsHeader header{};
-		header.version = 1;
+		header.version = 2;
 		header.recordSize = sizeof(TrendItemSignal);
 		header.count = static_cast<uint32_t>(vduTrendRecords.size());
 		header.reserve = 0;

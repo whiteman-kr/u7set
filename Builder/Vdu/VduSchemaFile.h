@@ -325,7 +325,7 @@ struct VduSchemaFileSchemaItemImageValue1
 
 struct VduSchemaFileSchemaItemTrend1
 {
-	uint16_t version;  // 1
+	uint16_t version;  // 2
 	uint16_t itemType; // VduFileSchemaItemTrendId, 0x5254, TR
 	uint32_t reserve0;
 
@@ -341,7 +341,10 @@ struct VduSchemaFileSchemaItemTrend1
 
 	uint32_t reserve4[4];
 
-	uint32_t durationSecs;
+	uint32_t durationsSecs[16];     // Durations, added in version 2
+
+	uint32_t columnCount;			// added in version 2
+
 	uint16_t viewMode;  // 0 - E::TrendViewMode::Separated,
 						// 1 - E::TrendViewMode::Overlapped
 	uint16_t scaleType; // 0 - E::TrendScaleType::Linear
@@ -361,6 +364,7 @@ struct VduSchemaFileSchemaItemTrend1
 	bool showSignalScales;
 	bool showTimeLabels;
 	bool showDateLabels;
+	bool use24hTimeFormat;
 	bool reserve6;
 	bool reserve7;
 	bool reserve8;

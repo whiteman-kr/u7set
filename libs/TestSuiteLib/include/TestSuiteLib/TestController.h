@@ -121,9 +121,9 @@ namespace TestSuite
 
 		/// \brief Loads an array of strings from the specified text file.
 		///
-		/// \param fileName specifies the name of the file.
+		/// \param fileName specifies the name of the file. Can contain "%TEMP%" macro to specify a temp path.
 		/// Returns an object with two fields: "ok" (boolean) and "strings" (array of strings).
-		QVariantMap loadTextFile(const QString& fileName);
+		QVariantMap loadTextFile(QString fileName);
 
 		/// \brief Returns list of Comparator (setpoint comparators) assigned to the signal specified by <b>signalId</b>.
 		QJSValueList setpointsByInput(QString signalId) const;

@@ -39,12 +39,18 @@ namespace TestSuite
 	class TestReport
 	{
 	public:
-		static void generateReport(const ::ReportLib::ReportTemplateStorage& templates,
+		static bool generateReport(const ::ReportLib::ReportTemplateStorage& templates,
 								   const ::TestSuite::TestLog& testLog,
 								   const QString& caption,
 								   QWidget* parent);
 
-		static void generateReports(const ReportLib::ReportTemplateStorage& templates,
+		static bool generateReport(const ::ReportLib::ReportTemplateStorage& templates,
+								   const ::TestSuite::TestLog& testLog,
+								   const QString& caption,
+								   const QString& fileName,
+								   QWidget* parent);
+
+		static bool generateReports(const ReportLib::ReportTemplateStorage& templates,
 									const ::TestSuite::TestLog& testLog,
 									const QString& captionMask, // if empty - generate all
 									const QString& path,
