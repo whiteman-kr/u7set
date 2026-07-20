@@ -255,7 +255,7 @@ namespace VFrame30
 
 		// scaleType
 		//
-		p = ADD_PROPERTY_GETTER_SETTER(E::TrendScaleType,
+		p = ADD_PROPERTY_GETTER_SETTER(E::VduTrendScaleType,
 									   PropertyNames::indicatorTrendScaleType,
 									   true,
 									   SchemaItemVduTrend::scaleType,
@@ -528,7 +528,7 @@ namespace VFrame30
 		m_durationsSecs = QString::fromStdString(trendMessage.durationssecs());
 
 		m_viewMode = static_cast<E::TrendViewMode>(trendMessage.viewmode());
-		m_scaleType = static_cast<E::TrendScaleType>(trendMessage.scaletype());
+		m_scaleType = static_cast<E::VduTrendScaleType>(trendMessage.scaletype());
 
 		m_indentLeft = trendMessage.indentleft();
 		m_indentRight = trendMessage.indentright();
@@ -861,12 +861,12 @@ namespace VFrame30
 		m_viewMode = value;
 	}
 
-	E::TrendScaleType SchemaItemVduTrend::scaleType() const
+	E::VduTrendScaleType SchemaItemVduTrend::scaleType() const
 	{
 		return m_scaleType;
 	}
 
-	void SchemaItemVduTrend::setScaleType(E::TrendScaleType value)
+	void SchemaItemVduTrend::setScaleType(E::VduTrendScaleType value)
 	{
 		m_scaleType = value;
 	}

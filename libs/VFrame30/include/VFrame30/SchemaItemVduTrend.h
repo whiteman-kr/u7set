@@ -116,8 +116,8 @@ namespace VFrame30
 		E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
 
-		E::TrendScaleType scaleType() const;
-		void setScaleType(E::TrendScaleType value);
+		E::VduTrendScaleType scaleType() const;
+		void setScaleType(E::VduTrendScaleType value);
 
 		// Indent properties
 		// Gets and sets indents in native units (mm/in/pixels).
@@ -176,7 +176,7 @@ namespace VFrame30
 		QString m_durationsSecs = "600";  // Durations, multiple can be set using separator
 
 		E::TrendViewMode m_viewMode = E::TrendViewMode::Separated;
-		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
+		E::VduTrendScaleType m_scaleType = E::VduTrendScaleType::Linear;
 
 		static const size_t MaxSignalCount = 16;
 		PropertyVector<SchemaItemVduTrendSignalParam> m_signalParams;
