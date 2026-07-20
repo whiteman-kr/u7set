@@ -126,8 +126,14 @@ namespace TrendLib
 		if (m_trendSignal.type() == E::SignalType::Analog)
 		{
 			double highLimit = m_trendSignal.highLimit();
+
+			if (m_scaleType == E::TrendScaleType::Period)
+			{
+				highLimit = 1;
+			}
+
 			m_trendSignal.setViewHighLimit(m_scaleType, highLimit);
-			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueText(highLimit, m_scaleType, m_trendSignal));
+			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueNumber(highLimit, m_scaleType, m_trendSignal));
 
 			// Update modification flags
 			//
@@ -141,8 +147,14 @@ namespace TrendLib
 		if (m_trendSignal.type() == E::SignalType::Analog)
 		{
 			double lowLimit = m_trendSignal.lowLimit();
+
+			if (m_scaleType == E::TrendScaleType::Period)
+			{
+				lowLimit = -1;
+			}
+
 			m_trendSignal.setViewLowLimit(m_scaleType, lowLimit);
-			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueText(lowLimit, m_scaleType, m_trendSignal));
+			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueNumber(lowLimit, m_scaleType, m_trendSignal));
 
 			// Update modification flags
 			//
@@ -260,12 +272,20 @@ namespace TrendLib
 		{
 			ui->labelType->setText(tr("Analog"));
 
+			double highLimit = m_trendSignal.highLimit();
+			double lowLimit = m_trendSignal.lowLimit();
+
 			double viewHighLimit = m_trendSignal.viewHighLimit(m_scaleType);
 			double viewLowLimit = m_trendSignal.viewLowLimit(m_scaleType);
 
 			if (m_scaleType == E::TrendScaleType::Period)
 			{
-				// Limit values are reversed in periodic scale
+				// Limit values in periodic scale
+				//
+				highLimit = 1;
+				lowLimit = -1;
+
+				// Limit view values in periodic scale
 				//
 				if (std::fabs(viewHighLimit) < 1)
 				{
@@ -282,11 +302,11 @@ namespace TrendLib
 
 			ui->labelUnits->setText(m_trendSignal.unit());
 
-			ui->labelHigh->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.highLimit(), m_scaleType, m_trendSignal));
-			ui->labelLow->setText(TrendLib::TrendScale::scaleValueText(m_trendSignal.lowLimit(), m_scaleType, m_trendSignal));
+			ui->labelHigh->setText(TrendLib::TrendScale::scaleValueNumber(highLimit, m_scaleType, m_trendSignal));
+			ui->labelLow->setText(TrendLib::TrendScale::scaleValueNumber(lowLimit, m_scaleType, m_trendSignal));
 
-			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueText(viewHighLimit, m_scaleType, m_trendSignal));
-			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueText(viewLowLimit, m_scaleType, m_trendSignal));
+			ui->viewHighEdit->setText(TrendLib::TrendScale::scaleValueNumber(viewHighLimit, m_scaleType, m_trendSignal));
+			ui->viewLowEdit->setText(TrendLib::TrendScale::scaleValueNumber(viewLowLimit, m_scaleType, m_trendSignal));
 
 			ui->viewPrecisionEdit->setText(QString::number(m_trendSignal.precision()));
 		}

@@ -202,7 +202,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 			{
 				return QString("???");
 			}
-			return TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal);
+			return TrendLib::TrendScale::scaleValueNumber(stateItem.value, m_scaleType, m_trendSignal);
 
 		case static_cast<int>(Columns::Realtime):
 			if (stateItem.isRealtimePoint() == true)

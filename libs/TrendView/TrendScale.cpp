@@ -175,6 +175,28 @@ namespace TrendLib
 		}
 	}
 
+	QString TrendScale::scaleValueNumber(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam)
+	{
+		if (scaleType == E::TrendScaleType::Log10)
+		{
+			if (std::abs(value) <= std::numeric_limits<double>::min())
+			{
+				return "0";
+			}
+		}
+
+		E::AnalogFormat format = signalParam.analogFormat();
+
+		if (format == E::AnalogFormat::G_9_or_9E || format == E::AnalogFormat::g_9_or_9e)
+		{
+			return QString::number(value, static_cast<char>(signalParam.analogFormat())); // Let Qt choose best format and precision
+		}
+		else
+		{
+			return QString::number(value, static_cast<char>(signalParam.analogFormat()), signalParam.precision());
+		}
+	}
+
 	double TrendScale::trendLog10(double value)
 	{
 		// Logarithm calculation.

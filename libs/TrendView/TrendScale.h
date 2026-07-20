@@ -103,6 +103,7 @@ namespace TrendLib
 		// Text formatting functions
 		//
 		static QString scaleValueText(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam);
+		static QString scaleValueNumber(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam);
 
 	private:
 		static double trendLog10(double value);

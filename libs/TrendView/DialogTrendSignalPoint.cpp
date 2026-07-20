@@ -24,7 +24,7 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 		if (firstItem == true)
 		{
 			ui->dateTimeEdit->setDateTime(stateItem.getTime(m_timeType).toDateTime());
-			ui->editValue->setText(TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal));
+			ui->editValue->setText(TrendLib::TrendScale::scaleValueNumber(stateItem.value, m_scaleType, m_trendSignal));
 			ui->checkBoxValid->setChecked(stateItem.isValid());
 			ui->checkBoxRealtime->setChecked(stateItem.isRealtimePoint());
 			firstItem = false;
