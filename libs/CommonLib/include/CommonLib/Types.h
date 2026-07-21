@@ -572,10 +572,10 @@ public:
 	enum class VduTrendScaleType
 	{
 		/// \brief 0 - Linear value scale.
-		Linear = TrendScaleType::Linear,
+		Linear = static_cast<int>(TrendScaleType::Linear),
 
 		/// \brief 1 - Base-10 logarithmic value scale.
-		Log10 = TrendScaleType::Log10
+		Log10 = static_cast<int>(TrendScaleType::Log10)
 	};
 	Q_ENUM(VduTrendScaleType)
 
@@ -798,9 +798,9 @@ public:
 		UnknownTuningSourceID = 0x0017,
 		TuningSourceHasNoSignals = 0x0018,
 
-		CommunicationError = 0x0080,  // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
-		CommandCanceled = 0x0081,     // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
-		ClientInternalError = 0x0082  // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
+		CommunicationError = 0x0080, // For gateway client communication errors, enum GwErrorCode::GWC_COMMUNICATION_ERROR
+		CommandCanceled = 0x0081,    // For gateway client command canceled errors, enum GwErrorCode::GWC_COMMAND_CANCELED
+		ClientInternalError = 0x0082 // For gateway client internal errors, enum GwErrorCode::GWC_CLIENT_INTERNAL_ERROR
 	};
 	Q_ENUM(NetworkError)
 
