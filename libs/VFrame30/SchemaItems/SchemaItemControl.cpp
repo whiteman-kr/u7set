@@ -1,6 +1,8 @@
-#include <VFrame30/SchemaItemControl.h>
-#include <VFrame30/PropertyNames.h>
 #include <VFrame30/ClientSchemaView.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemControl.h>
+
+#include <QScreen>
 
 namespace VFrame30
 {
@@ -15,10 +17,20 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::appearanceCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::styleSheet,
+									 PropertyNames::appearanceCategory,
+									 true,
+									 SchemaItemControl::styleSheet,
+									 SchemaItemControl::setStyleSheet);
 		p->setDescription(PropertyNames::widgetPropStyleSheet);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::commonCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::toolTip,
+									 PropertyNames::commonCategory,
+									 true,
+									 SchemaItemControl::toolTip,
+									 SchemaItemControl::setToolTip);
 		p->setDescription(PropertyNames::widgetPropToolTip);
 
 		// --
@@ -27,9 +39,7 @@ namespace VFrame30
 		setItemUnit(unit);
 	}
 
-	SchemaItemControl::~SchemaItemControl(void)
-	{
-	}
+	SchemaItemControl::~SchemaItemControl(void) {}
 
 	// Serialization
 	//
@@ -42,7 +52,7 @@ namespace VFrame30
 			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
-		
+
 		// --
 		//
 		Proto::SchemaItemControl* controlMessage = message->MutableExtension(Proto::schemaitem)->mutable_control();
@@ -79,8 +89,9 @@ namespace VFrame30
 
 		const Proto::SchemaItemControl& controlMessage = message.GetExtension(Proto::schemaitem).control();
 
-		setStyleSheet(QString::fromStdString(controlMessage.stylesheet()));		// Text setters can have some string optimization for default values
-		setToolTip(QString::fromStdString(controlMessage.tooltip()));			// Text setters can have some string optimization for default values
+		setStyleSheet(
+			QString::fromStdString(controlMessage.stylesheet()));     // Text setters can have some string optimization for default values
+		setToolTip(QString::fromStdString(controlMessage.tooltip())); // Text setters can have some string optimization for default values
 
 		return true;
 	}
@@ -127,9 +138,7 @@ namespace VFrame30
 
 		bool updateRequired = false;
 
-		if (widget->isEnabled() == isCommented() ||
-			widget->styleSheet() != styleSheet() ||
-			widget->toolTip() != toolTip())
+		if (widget->isEnabled() == isCommented() || widget->styleSheet() != styleSheet() || widget->toolTip() != toolTip())
 		{
 			updateRequired = true;
 		}
@@ -179,12 +188,16 @@ namespace VFrame30
 
 		if (m_widget != nullptr)
 		{
-			connect(m_widget, &QObject::destroyed, this, [this](QObject* object) {
-				if (m_widget == object)
-				{
-					associateWidget(nullptr);
-				}
-			});
+			connect(m_widget,
+					&QObject::destroyed,
+					this,
+					[this](QObject* object)
+					{
+						if (m_widget == object)
+						{
+							associateWidget(nullptr);
+						}
+					});
 		}
 
 		return;
@@ -223,21 +236,18 @@ namespace VFrame30
 				double dpiX = widgetScreen ? widgetScreen->physicalDotsPerInchX() : widget->physicalDpiX();
 				double dpiY = widgetScreen ? widgetScreen->physicalDotsPerInchY() : widget->physicalDpiY();
 
-				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 * dpiX),
-							  static_cast<int>(topDocPt() * zoom / 100.0 * dpiY)};
+				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 * dpiX), static_cast<int>(topDocPt() * zoom / 100.0 * dpiY)};
 
-				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0 * dpiX),
-							   static_cast<int>(heightDocPt() * zoom / 100.0 * dpiY)};
+				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0 * dpiX), static_cast<int>(heightDocPt() * zoom / 100.0 * dpiY)};
 			}
 			break;
 		default:
 			assert(false);
 		}
 
-		if (widget->pos() != displayPos ||
-			widget->size() != displaySize)
+		if (widget->pos() != displayPos || widget->size() != displaySize)
 		{
-			 updateRequired = true;
+			updateRequired = true;
 		}
 
 		if (updateRequired == true)
@@ -304,5 +314,4 @@ namespace VFrame30
 		m_toolTip = value;
 	}
 
-}
-
+} // namespace VFrame30

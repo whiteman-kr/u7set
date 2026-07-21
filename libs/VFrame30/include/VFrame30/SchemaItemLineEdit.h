@@ -1,8 +1,8 @@
 #pragma once
-#include <VFrame30/SchemaItemControl.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemControl.h>
 
-class QLineEdit;
+#include <QLineEdit>
 
 namespace VFrame30
 {
@@ -18,7 +18,8 @@ namespace VFrame30
 
 		- <b>PreDrawScript</b> contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn;<br>
 		- <b>AfterCreate</b> contains creation event handler code. This event is generated when schema item is created;<br>
-		- <b>EditingFinished</b> contains editing finished event handler code. This event is generated when text editing is finished and focus is switched to another item;<br>
+		- <b>EditingFinished</b> contains editing finished event handler code. This event is generated when text editing is finished and
+	   focus is switched to another item;<br>
 		- <b>ReturnPressed</b> contains return pressing event handler code. This event is generated when Enter key is pressed;<br>
 		- <b>TextChanged</b> contains text changing event handler code. This event is generated when text is modified.<br>
 
@@ -123,7 +124,8 @@ namespace VFrame30
 			}
 		}
 
-		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal with <b>signalId</b> identifier
+		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal with
+	   <b>signalId</b> identifier
 		//
 		function enableControlBySignal(objectName, signalId)
 		{
@@ -200,7 +202,7 @@ namespace VFrame30
 		// Methods
 	public:
 		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom) override;
-		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const  override;
+		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const override;
 
 	protected:
 		virtual void afterCreateImpl(QWidget* control) override;
@@ -328,28 +330,29 @@ namespace VFrame30
 		/// \brief This property holds whether the widget is modified by user. This flag is reset by setting text (widget.text = value)
 		Q_PROPERTY(bool modified READ someBoolProperty WRITE setSomeBoolProperty)
 
-			/*! \brief This property holds the widget's style sheet
+		/*! \brief This property holds the widget's style sheet
 
-		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
+	The style sheet contains a textual description of customizations to the widget's style, as described in the <a
+	href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 
-		<b>Example</b>
+	<b>Example</b>
 
-		\code
-		// Event handler sets new styleSheet for a line edit with custom border style, padding, background color and background selection color
-		//
-		(function(schemaItem, lineEditWidget, checked)
-		{
+	\code
+	// Event handler sets new styleSheet for a line edit with custom border style, padding, background color and background selection color
+	//
+	(function(schemaItem, lineEditWidget, checked)
+	{
 
-			lineEditWidget.styleSheet = "QLineEdit {\
-					border: 2px solid gray;\
-					border-radius: 10px;\
-					padding: 0 8px;\
-					background: yellow;\
-					selection-background-color: darkgray;\
-					}";
-		})
-		\endcode
-		*/
+		lineEditWidget.styleSheet = "QLineEdit {\
+				border: 2px solid gray;\
+				border-radius: 10px;\
+				padding: 0 8px;\
+				background: yellow;\
+				selection-background-color: darkgray;\
+				}";
+	})
+	\endcode
+	*/
 		Q_PROPERTY(QString styleSheet READ someStringProperty WRITE setSomeStringProperty)
 
 		/// \brief This property holds the widget's tooltip
@@ -365,31 +368,31 @@ namespace VFrame30
 		/// \brief This enum describes text alignment
 		enum class Alignment
 		{
-			AlignLeft = 0x01,		/**< AlignLeft = 0x01*/
-			AlignRight = 0x02,		/**< AlignRight = 0x02*/
-			AlignHCenter = 0x04,	/**< AlignHCenter = 0x04*/
-			AlignJustify = 0x08,	/**< AlignJustify = 0x08*/
-			AlignAbsolute = 0x10,	/**< AlignAbsolute = 0x10*/
+			AlignLeft = 0x01,     /**< AlignLeft = 0x01*/
+			AlignRight = 0x02,    /**< AlignRight = 0x02*/
+			AlignHCenter = 0x04,  /**< AlignHCenter = 0x04*/
+			AlignJustify = 0x08,  /**< AlignJustify = 0x08*/
+			AlignAbsolute = 0x10, /**< AlignAbsolute = 0x10*/
 
-			AlignTop = 0x20,		/**< AlignTop = 0x20*/
-			AlignBottom = 0x40,		/**< AlignBottom = 0x40*/
-			AlignVCenter = 0x80,	/**< AlignVCenter = 0x80*/
-			AlignBaseline = 0x100	/**< AlignBaseline = 0x100*/
+			AlignTop = 0x20,      /**< AlignTop = 0x20*/
+			AlignBottom = 0x40,   /**< AlignBottom = 0x40*/
+			AlignVCenter = 0x80,  /**< AlignVCenter = 0x80*/
+			AlignBaseline = 0x100 /**< AlignBaseline = 0x100*/
 		};
 
 		// Empty property getters and setters
 
-		bool someBoolProperty() const {return false;}
-		void setSomeBoolProperty(bool value) {Q_UNUSED(value);}
+		bool someBoolProperty() const { return false; }
+		void setSomeBoolProperty(bool value) { Q_UNUSED(value); }
 
-		int someIntProperty() const {return 0;}
-		void setSomeIntProperty(int value) {Q_UNUSED(value);}
+		int someIntProperty() const { return 0; }
+		void setSomeIntProperty(int value) { Q_UNUSED(value); }
 
-		QString someStringProperty() const {return QString();}
-		void setSomeStringProperty(QString value) {Q_UNUSED(value);}
+		QString someStringProperty() const { return QString(); }
+		void setSomeStringProperty(QString value) { Q_UNUSED(value); }
 
-		Alignment someAlignmentProperty() const {return Alignment::AlignLeft;}
-		void setSomeAlignmentProperty(Alignment value) {Q_UNUSED(value);}
+		Alignment someAlignmentProperty() const { return Alignment::AlignLeft; }
+		void setSomeAlignmentProperty(Alignment value) { Q_UNUSED(value); }
 	};
 
-}
+} // namespace VFrame30

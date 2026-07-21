@@ -3,6 +3,11 @@
 #include <VFrame30/Context.h>
 #include <VFrame30/PropertyNames.h>
 
+#include <QDrag>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QScrollBar>
+
 namespace VFrame30
 {
 

@@ -1,6 +1,9 @@
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/SchemaItemPushButton.h>
 
+#include <QStyle>
+#include <QSvgRenderer>
+
 namespace
 {
 	QPixmap svgToPixmap(const QByteArray& svgData, QSize size)

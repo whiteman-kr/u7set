@@ -1,7 +1,9 @@
 #include <VFrame30/BaseSchemaWidget.h>
-#include <VFrame30/SchemaView.h>
 #include <VFrame30/Schema.h>
+#include <VFrame30/SchemaView.h>
 
+#include <QScrollBar>
+#include <QWheelEvent>
 
 namespace VFrame30
 {
@@ -38,28 +40,24 @@ namespace VFrame30
 		//         list while. So it is commented ((
 		//
 
-//		QWidget* dummyNativeWidget = new QWidget(this);
-//		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+		//		QWidget* dummyNativeWidget = new QWidget(this);
+		//		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
 
-//		if (dummyNativeWidget->windowHandle() != nullptr)
-//		{
-//			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
-//		}
-//		else
-//		{
-//			assert(dummyNativeWidget->windowHandle());
-//		}
+		//		if (dummyNativeWidget->windowHandle() != nullptr)
+		//		{
+		//			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
+		//		}
+		//		else
+		//		{
+		//			assert(dummyNativeWidget->windowHandle());
+		//		}
 
 		return;
 	}
 
-	BaseSchemaWidget::~BaseSchemaWidget()
-	{
-	}
+	BaseSchemaWidget::~BaseSchemaWidget() {}
 
-	void BaseSchemaWidget::createActions()
-	{
-	}
+	void BaseSchemaWidget::createActions() {}
 
 	void BaseSchemaWidget::wheelEvent(QWheelEvent* event)
 	{
@@ -75,7 +73,7 @@ namespace VFrame30
 			return;
 		}
 
-        int numDegrees = event->angleDelta().y() / 8;
+		int numDegrees = event->angleDelta().y() / 8;
 		int numSteps = numDegrees / 15;
 
 		if (numSteps != 0)
@@ -244,7 +242,7 @@ namespace VFrame30
 		if (schemaView() == nullptr)
 		{
 			assert(schemaView() != nullptr);
-			return 1.0;							// if return value is 0 then it is potential divide by 0
+			return 1.0; // if return value is 0 then it is potential divide by 0
 		}
 
 		return schemaView()->zoom();
@@ -253,12 +251,12 @@ namespace VFrame30
 	void BaseSchemaWidget::setZoom(double zoom, bool repaint, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
 	{
 		QPoint widgetCenterPoint(viewport()->size().width() / 2, viewport()->size().height() / 2);
-		QPointF oldDocPos =	widgetPointToDocument(widgetCenterPoint);
+		QPointF oldDocPos = widgetPointToDocument(widgetCenterPoint);
 
-		zoom = schemaView()->setZoom(zoom, repaint);	// new zoom can be set
+		zoom = schemaView()->setZoom(zoom, repaint); // new zoom can be set
 
 		QPointF newDocPos = widgetPointToDocument(widgetCenterPoint);
-		QPointF dPos = (newDocPos - oldDocPos);							// Delta in document units
+		QPointF dPos = (newDocPos - oldDocPos);      // Delta in document units
 
 		switch (schema()->unit())
 		{
@@ -283,4 +281,4 @@ namespace VFrame30
 		return;
 	}
 
-}
+} // namespace VFrame30

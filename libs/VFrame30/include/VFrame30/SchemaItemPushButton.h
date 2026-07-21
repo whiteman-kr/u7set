@@ -2,6 +2,8 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemControl.h>
 
+#include <QPushButton>
+
 namespace VFrame30
 {
 	/*! \class SchemaItemPushButton

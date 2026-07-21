@@ -4,6 +4,7 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaView.h>
 
+#include <QBuffer>
 #include <QPrinter>
 
 namespace VFrame30

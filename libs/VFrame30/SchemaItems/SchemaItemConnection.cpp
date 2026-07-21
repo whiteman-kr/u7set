@@ -6,7 +6,6 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemSignal.h>
 
-
 namespace VFrame30
 {
 

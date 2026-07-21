@@ -1,13 +1,15 @@
+#include <VFrame30/IndicatorTrend.h>
+
+#include <TrendView/TrendSignalSet.h>
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
-#include <VFrame30/IndicatorTrend.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemIndicator.h>
 
-#include <TrendView/TrendSignalSet.h>
-
+#include <QCache>
+#include <QtConcurrent/QtConcurrent>
 
 namespace
 {

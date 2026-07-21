@@ -2,6 +2,8 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemControl.h>
 
+#include <QSlider>
+
 namespace VFrame30
 {
 	/*! \class SchemaItemSlider
@@ -16,10 +18,12 @@ namespace VFrame30
 
 		- <b>PreDrawScript</b> contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn;<br>
 		- <b>AfterCreate</b> contains creation event handler code. This event is generated when schema item is created;<br>
-		- <b>SliderMoved</b> contains handler code for event when sliderDown is true and the slider moves. This usually happens when the user is dragging the slider. The value is the new slider position. This signal is emitted even when tracking is turned off;<br>
+		- <b>SliderMoved</b> contains handler code for event when sliderDown is true and the slider moves. This usually happens when the
+	   user is dragging the slider. The value is the new slider position. This signal is emitted even when tracking is turned off;<br>
 		- <b>SliderPressed</b> contains handler code for event when the user releases the slider with the mouse;<br>
 		- <b>SliderReleased</b> contains handler code for event when the user presses the slider with the mouse;<br>
-		- <b>ValueChanged</b> contains handler code for event when the slider value has changed, with the new slider value as argument. Typically the user should use this script to obtain a new value of the slider;<br>
+		- <b>ValueChanged</b> contains handler code for event when the slider value has changed, with the new slider value as argument.
+	   Typically the user should use this script to obtain a new value of the slider;<br>
 
 		<b>ValueChanged</b> event handler function porotype:
 		\code
@@ -32,7 +36,8 @@ namespace VFrame30
 		Parameters:<br>
 		<i>schemaItem</i> - a handle to schema item, type: SchemaItemSlider.<br>
 
-		<b>AfterCreate</b>, <b>SliderMoved</b>, <b>SliderPressed</b>, <b>SliderReleased</b> <b>ValueChanged</b> event handlers function porotypes:
+		<b>AfterCreate</b>, <b>SliderMoved</b>, <b>SliderPressed</b>, <b>SliderReleased</b> <b>ValueChanged</b> event handlers function
+	   porotypes:
 
 		\code
 		function(schemaItem, sliderWidget, value)
@@ -47,7 +52,8 @@ namespace VFrame30
 
 		Slider widget is used to read or modify slider control properties. It is implemented by SliderWidget class.
 
-		Widget can be accessed by <i>sliderWidget</i> parameter, requested by <i>findWidget</i> function of ScriptSchemaView class, or get by property <i>SchemaItemControl.widget</i>.
+		Widget can be accessed by <i>sliderWidget</i> parameter, requested by <i>findWidget</i> function of ScriptSchemaView class, or get
+	   by property <i>SchemaItemControl.widget</i>.
 	*/
 	class SchemaItemSlider final : public SchemaItemControl
 	{
@@ -208,8 +214,8 @@ namespace VFrame30
 
 		/// \brief This property holds whether or not the slider inverts its wheel and key events.
 		///
-		/// If this property is false, scrolling the mouse wheel "up" and using keys like page up will increase the slider's value towards its maximum.
-		/// Otherwise pressing page up will move value towards the slider's minimum.
+		/// If this property is false, scrolling the mouse wheel "up" and using keys like page up will increase the slider's value towards
+		/// its maximum. Otherwise pressing page up will move value towards the slider's minimum.
 		Q_PROPERTY(bool invertedControls READ someBoolProperty WRITE setSomeBoolProperty)
 
 		/// \brief This property holds the slider's maximum value.
@@ -262,7 +268,8 @@ namespace VFrame30
 		Q_PROPERTY(int value READ someIntProperty WRITE setSomeIntProperty)
 
 		/// \brief This property holds the widget's style sheet
-		// The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
+		// The style sheet contains a textual description of customizations to the widget's style, as described in the <a
+		// href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 		Q_PROPERTY(QString styleSheet READ someStringProperty WRITE setSomeStringProperty)
 
 		/// \brief This property holds the widget's tooltip

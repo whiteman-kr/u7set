@@ -3,7 +3,11 @@
 #include <TrendView/TrendSignal.h>
 #include <VFrame30/Indicator.h>
 
-#include <mutex>
+#include <QFuture>
+#include <QFutureWatcher>
+
+#include <atomic>
+#include <stop_token>
 
 
 namespace VFrame30

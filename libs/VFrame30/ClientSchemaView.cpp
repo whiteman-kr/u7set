@@ -7,6 +7,10 @@
 #include <HardwareLib/DeviceRoot.h>
 #include <HardwareLib/ScriptEquipment.h>
 
+#include <QJSValueIterator>
+#include <QMouseEvent>
+#include <QTimer>
+
 namespace VFrame30
 {
 	//

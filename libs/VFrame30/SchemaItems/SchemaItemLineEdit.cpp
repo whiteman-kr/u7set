@@ -1,7 +1,9 @@
-#include <VFrame30/SchemaItemLineEdit.h>
 #include <VFrame30/ClientSchemaView.h>
-#include <VFrame30/TuningController.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/TuningController.h>
+
+#include <QStyle>
 
 namespace
 {
@@ -46,43 +48,91 @@ namespace VFrame30
 
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::controlCategory, true, SchemaItemLineEdit::text, SchemaItemLineEdit::setText);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::text,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemLineEdit::text,
+									 SchemaItemLineEdit::setText);
 		p->setDescription(PropertyNames::lineEditPropText);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::placeholderText, PropertyNames::controlCategory, true, SchemaItemLineEdit::placeholderText, SchemaItemLineEdit::setPlaceholderText);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::placeholderText,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemLineEdit::placeholderText,
+									 SchemaItemLineEdit::setPlaceholderText);
 		p->setDescription(PropertyNames::lineEditPropPlaceholderText);
 
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::appearanceCategory, true, SchemaItemLineEdit::horzAlign, SchemaItemLineEdit::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::appearanceCategory, true, SchemaItemLineEdit::vertAlign, SchemaItemLineEdit::setVertAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign,
+								 PropertyNames::alignHorz,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemLineEdit::horzAlign,
+								 SchemaItemLineEdit::setHorzAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign,
+								 PropertyNames::alignVert,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemLineEdit::vertAlign,
+								 SchemaItemLineEdit::setVertAlign);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::maxLength, PropertyNames::controlCategory, true, SchemaItemLineEdit::maxLength, SchemaItemLineEdit::setMaxLength);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::maxLength,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemLineEdit::maxLength,
+									 SchemaItemLineEdit::setMaxLength);
 		p->setDescription(PropertyNames::lineEditPropMaxLength);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::readOnly, PropertyNames::controlCategory, true, SchemaItemLineEdit::readOnly, SchemaItemLineEdit::setReadOnly);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::readOnly,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemLineEdit::readOnly,
+									 SchemaItemLineEdit::setReadOnly);
 		p->setDescription(PropertyNames::lineEditPropReadOnly);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptAfterCreate, SchemaItemLineEdit::setScriptAfterCreate);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::afterCreate,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemLineEdit::scriptAfterCreate,
+									 SchemaItemLineEdit::setScriptAfterCreate);
 		p->setDescription(PropertyNames::widgetPropAfterCreate);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::editingFinished, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptEditingFinished, SchemaItemLineEdit::setScriptEditingFinished);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::editingFinished,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemLineEdit::scriptEditingFinished,
+									 SchemaItemLineEdit::setScriptEditingFinished);
 		p->setDescription(PropertyNames::lineEditPropEditingFinished);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::returnPressed, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptReturnPressed, SchemaItemLineEdit::setScriptReturnPressed);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::returnPressed,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemLineEdit::scriptReturnPressed,
+									 SchemaItemLineEdit::setScriptReturnPressed);
 		p->setDescription(PropertyNames::lineEditPropReturnPressed);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textChanged, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptTextChanged, SchemaItemLineEdit::setScriptTextChanged);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::textChanged,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemLineEdit::scriptTextChanged,
+									 SchemaItemLineEdit::setScriptTextChanged);
 		p->setDescription(PropertyNames::lineEditPropTextChanged);
 		p->setIsScript(true);
 
 		return;
 	}
 
-	SchemaItemLineEdit::~SchemaItemLineEdit(void)
-	{
-	}
+	SchemaItemLineEdit::~SchemaItemLineEdit(void) {}
 
 	void SchemaItemLineEdit::draw(CDrawParam* drawParam) const
 	{
@@ -112,7 +162,7 @@ namespace VFrame30
 
 		assert(schemaItemMessage->has_posrectimpl());
 		assert(schemaItemMessage->has_control());
-		
+
 		// --
 		//
 		Proto::SchemaItemLineEdit* lineEditMessage = schemaItemMessage->mutable_lineedit();
@@ -156,7 +206,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemLineEdit& lineEditMessage = schemaItemMessage.lineedit();
 
-		setText(QString::fromStdString(lineEditMessage.text()));							// Text setters can have some string optimization for default values
+		setText(QString::fromStdString(lineEditMessage.text())); // Text setters can have some string optimization for default values
 		setPlaceholderText(QString::fromStdString(lineEditMessage.placeholdertext()));
 
 		m_maxLength = lineEditMessage.maxlength();
@@ -166,10 +216,14 @@ namespace VFrame30
 
 		m_readOnly = lineEditMessage.readonly();
 
-		setScriptAfterCreate(QString::fromStdString(lineEditMessage.scriptaftercreate()));			// Text setters can have some string optimization for default values
-		setScriptEditingFinished(QString::fromStdString(lineEditMessage.scripteditingfinished()));	// Text setters can have some string optimization for default values
-		setScriptReturnPressed(QString::fromStdString(lineEditMessage.scriptreturnpressed()));		// Text setters can have some string optimization for default values
-		setScriptTextChanged(QString::fromStdString(lineEditMessage.scripttextchanged()));			// Text setters can have some string optimization for default values
+		setScriptAfterCreate(QString::fromStdString(
+			lineEditMessage.scriptaftercreate()));     // Text setters can have some string optimization for default values
+		setScriptEditingFinished(QString::fromStdString(
+			lineEditMessage.scripteditingfinished())); // Text setters can have some string optimization for default values
+		setScriptReturnPressed(QString::fromStdString(
+			lineEditMessage.scriptreturnpressed()));   // Text setters can have some string optimization for default values
+		setScriptTextChanged(QString::fromStdString(
+			lineEditMessage.scripttextchanged()));     // Text setters can have some string optimization for default values
 
 		return true;
 	}
@@ -193,20 +247,17 @@ namespace VFrame30
 		{
 			// Connect slots only if it has any sense
 			//
-			if (scriptEditingFinished().isEmpty() == false &&
-				scriptEditingFinished() != PropertyNames::lineEditDefaultEventScript)
+			if (scriptEditingFinished().isEmpty() == false && scriptEditingFinished() != PropertyNames::lineEditDefaultEventScript)
 			{
 				connect(control, &QLineEdit::editingFinished, this, &SchemaItemLineEdit::editingFinished);
 			}
 
-			if (scriptReturnPressed().isEmpty() == false &&
-				scriptReturnPressed() != PropertyNames::lineEditDefaultEventScript)
+			if (scriptReturnPressed().isEmpty() == false && scriptReturnPressed() != PropertyNames::lineEditDefaultEventScript)
 			{
 				connect(control, &QLineEdit::returnPressed, this, &SchemaItemLineEdit::returnPressed);
 			}
 
-			if (scriptTextChanged().isEmpty() == false &&
-				scriptTextChanged() != PropertyNames::lineEditDefaultEventScript)
+			if (scriptTextChanged().isEmpty() == false && scriptTextChanged() != PropertyNames::lineEditDefaultEventScript)
 			{
 				connect(control, &QLineEdit::textChanged, this, &SchemaItemLineEdit::textChanged);
 			}
@@ -236,11 +287,9 @@ namespace VFrame30
 
 		bool updateRequired = false;
 
-		if (control->text() != text() ||
-			control->placeholderText() != placeholderText() ||
+		if (control->text() != text() || control->placeholderText() != placeholderText() ||
 			static_cast<int>(control->alignment()) != (static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign)) ||
-			control->maxLength() != maxLength() ||
-			control->isReadOnly() != readOnly())
+			control->maxLength() != maxLength() || control->isReadOnly() != readOnly())
 		{
 			updateRequired = true;
 		}
@@ -272,7 +321,7 @@ namespace VFrame30
 		}
 
 		if (m_scriptAfterCreate.trimmed().isEmpty() == true ||
-			m_scriptAfterCreate == PropertyNames::lineEditDefaultEventScript)	// Suppose Default script does nothing, just return
+			m_scriptAfterCreate == PropertyNames::lineEditDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -283,8 +332,7 @@ namespace VFrame30
 		{
 			m_jsAfterCreate = evaluateScript("AfterCreate", lineEditWidget, m_scriptAfterCreate);
 
-			if (m_jsAfterCreate.isError() == true ||
-				m_jsAfterCreate.isNull() == true)
+			if (m_jsAfterCreate.isError() == true || m_jsAfterCreate.isNull() == true)
 			{
 				return;
 			}
@@ -302,7 +350,7 @@ namespace VFrame30
 		qDebug() << Q_FUNC_INFO;
 
 		if (m_scriptEditingFinished.isEmpty() == true ||
-			m_scriptEditingFinished == PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptEditingFinished == PropertyNames::lineEditDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -320,8 +368,7 @@ namespace VFrame30
 		{
 			m_jsEditingFinished = evaluateScript("EditingFinished", senderWidget, m_scriptEditingFinished);
 
-			if (m_jsEditingFinished.isError() == true ||
-				m_jsEditingFinished.isNull() == true)
+			if (m_jsEditingFinished.isError() == true || m_jsEditingFinished.isNull() == true)
 			{
 				return;
 			}
@@ -339,7 +386,7 @@ namespace VFrame30
 		qDebug() << Q_FUNC_INFO;
 
 		if (m_scriptReturnPressed.isEmpty() == true ||
-			m_scriptReturnPressed == PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptReturnPressed == PropertyNames::lineEditDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -357,8 +404,7 @@ namespace VFrame30
 		{
 			m_jsReturnPressed = evaluateScript("ReturnPressed", senderWidget, m_scriptReturnPressed);
 
-			if (m_jsReturnPressed.isError() == true ||
-				m_jsReturnPressed.isNull() == true)
+			if (m_jsReturnPressed.isError() == true || m_jsReturnPressed.isNull() == true)
 			{
 				return;
 			}
@@ -376,7 +422,7 @@ namespace VFrame30
 		qDebug() << Q_FUNC_INFO;
 
 		if (m_scriptTextChanged.isEmpty() == true ||
-			m_scriptTextChanged== PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptTextChanged == PropertyNames::lineEditDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -394,8 +440,7 @@ namespace VFrame30
 		{
 			m_jsTextChanged = evaluateScript("TextChanged", senderWidget, m_scriptTextChanged);
 
-			if (m_jsTextChanged.isError() == true ||
-				m_jsTextChanged.isNull() == true)
+			if (m_jsTextChanged.isError() == true || m_jsTextChanged.isNull() == true)
 			{
 				return;
 			}
@@ -472,7 +517,7 @@ namespace VFrame30
 
 	void SchemaItemLineEdit::setReadOnly(bool value)
 	{
-		m_readOnly= value;
+		m_readOnly = value;
 	}
 
 	void SchemaItemLineEdit::setStyleSheet(QString value)
@@ -589,7 +634,7 @@ namespace VFrame30
 			font.setSize(12.0, schema->unit());
 			break;
 		case SchemaUnit::Inch:
-			font.setSize(1.0 / 8.0, schema->unit());		// 1/8"
+			font.setSize(1.0 / 8.0, schema->unit()); // 1/8"
 			break;
 		case SchemaUnit::Millimeter:
 			font.setSize(mm2in(3), schema->unit());
@@ -598,14 +643,8 @@ namespace VFrame30
 			assert(false);
 		}
 
-		DrawHelper::drawText(p,
-							 font,
-							 schema->unit(),
-							 m_text,
-							 r,
-							 Qt::AlignCenter | Qt::AlignHCenter);
+		DrawHelper::drawText(p, font, schema->unit(), m_text, r, Qt::AlignCenter | Qt::AlignHCenter);
 		return;
 	}
 
-}
-
+} // namespace VFrame30

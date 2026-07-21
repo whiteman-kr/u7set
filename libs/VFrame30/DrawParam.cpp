@@ -4,6 +4,8 @@
 #include <Behavior/MonitorBehavior.h>
 #include <Behavior/TuningClientBehavior.h>
 
+#include <QCache>
+#include <QScreen>
 #include <QSvgRenderer>
 
 namespace

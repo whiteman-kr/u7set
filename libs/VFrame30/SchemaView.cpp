@@ -1,15 +1,17 @@
-#include <VFrame30/SchemaView.h>
-#include <VFrame30/SchemaItemControl.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/Schema.h>
+#include <VFrame30/SchemaItemControl.h>
 #include <VFrame30/SchemaLayer.h>
+#include <VFrame30/SchemaView.h>
+
+#include <QAbstractScrollArea>
+#include <QMouseEvent>
+#include <QScreen>
 
 namespace VFrame30
 {
 
-	SchemaView::SchemaView()
-	{
-	}
+	SchemaView::SchemaView() {}
 
 	SchemaView::SchemaView(std::shared_ptr<Schema> schema) :
 		m_schema(schema)
@@ -24,7 +26,7 @@ namespace VFrame30
 			assert(device);
 			return;
 		}
-		
+
 		double dpix;
 		double dpiy;
 
@@ -45,7 +47,14 @@ namespace VFrame30
 		return SchemaView::Ajust(painter, dpix, dpiy, dpr, units, startX, startY, zoom);
 	}
 
-	void SchemaView::Ajust(QPainter* painter, double dpiX, double dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom)
+	void SchemaView::Ajust(QPainter* painter,
+						   double dpiX,
+						   double dpiY,
+						   double devicePixelRatioF,
+						   SchemaUnit units,
+						   double startX,
+						   double startY,
+						   double zoom)
 	{
 		// Set transform matrix
 		//
@@ -321,8 +330,7 @@ namespace VFrame30
 				continue;
 			}
 
-			if (auto foundIt = controlItems.find(widgetUuid);
-				foundIt != controlItems.end())
+			if (auto foundIt = controlItems.find(widgetUuid); foundIt != controlItems.end())
 			{
 				// childWidget cannot just be deleted, as some events for this widget still can be in the message queue.
 				// deleteLater() will delete object.
@@ -421,8 +429,7 @@ namespace VFrame30
 	{
 		// If any control key is pressed, pass control further
 		//
-		if (event->buttons().testFlag(Qt::LeftButton) == true ||
-			event->buttons().testFlag(Qt::RightButton) == true ||
+		if (event->buttons().testFlag(Qt::LeftButton) == true || event->buttons().testFlag(Qt::RightButton) == true ||
 			event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			unsetCursor(); // set cursor to parent cursor
@@ -461,9 +468,7 @@ namespace VFrame30
 
 			for (const auto& item : layer->items() | std::views::reverse)
 			{
-				if (item->acceptClick() == true &&
-					item->isIntersectPoint(x, y) == true &&
-					item->clickScript().isEmpty() == false)
+				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
 					setCursor(Qt::PointingHandCursor);
 					event->accept();
@@ -494,7 +499,8 @@ namespace VFrame30
 		if (value == 0)
 		{
 			QWidget* viewportWidget = this->parentWidget(); // Viewport can be real from QAbstractScrollArea or just any widget
-			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget ? viewportWidget->parentWidget() : nullptr);
+			QAbstractScrollArea* abstractScrollArea =
+				qobject_cast<QAbstractScrollArea*>(viewportWidget ? viewportWidget->parentWidget() : nullptr);
 
 			if (viewportWidget == nullptr)
 			{
@@ -542,17 +548,15 @@ namespace VFrame30
 
 		// Width and height of the document in physical dpi's, taking into account devicePixelRatio
 		// schema()->GetDocumentWidth() returns integer, for better precision we use double.
-		// 
-		//int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
-		//int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
+		//
+		// int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
+		// int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
 
-		double widthInPixel = schema()->unit() == SchemaUnit::Display ?
-								  schema()->docWidth() * (m_zoom / 100.0) :
-								  schema()->docWidth() * realDpiX * (m_zoom / 100.0);
+		double widthInPixel = schema()->unit() == SchemaUnit::Display ? schema()->docWidth() * (m_zoom / 100.0) :
+																		schema()->docWidth() * realDpiX * (m_zoom / 100.0);
 
-		double heightInPixel = schema()->unit() == SchemaUnit::Display ?
-								   schema()->docHeight() * (m_zoom / 100.0) :
-								   schema()->docHeight() * realDpiY * (m_zoom / 100.0);
+		double heightInPixel = schema()->unit() == SchemaUnit::Display ? schema()->docHeight() * (m_zoom / 100.0) :
+																		 schema()->docHeight() * realDpiY * (m_zoom / 100.0);
 
 		// The size of window is set in different points
 		// Qt widget points must be corrected according to devicePixelRatio()

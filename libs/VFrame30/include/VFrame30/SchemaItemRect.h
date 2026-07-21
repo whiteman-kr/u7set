@@ -3,6 +3,8 @@
 #include <VFrame30/FontParam.h>
 #include <VFrame30/PosRectRotatable.h>
 
+#include <QTextDocument>
+
 // #define SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 
 class QPen;

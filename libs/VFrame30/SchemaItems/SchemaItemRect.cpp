@@ -4,6 +4,7 @@
 #include <VFrame30/SchemaItemRect.h>
 #include <VFrame30/SchemaView.h>
 
+#include <QAbstractTextDocumentLayout>
 
 namespace VFrame30
 {

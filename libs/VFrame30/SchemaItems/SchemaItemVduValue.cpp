@@ -4,7 +4,6 @@
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 
-
 namespace VFrame30
 {
 	SchemaItemVduValue::SchemaItemVduValue(void) :

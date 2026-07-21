@@ -5,6 +5,8 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaLayer.h>
 
+#include <QBuffer>
+
 
 namespace VFrame30
 {

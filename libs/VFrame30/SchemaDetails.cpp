@@ -8,6 +8,10 @@
 #include <VFrame30/SchemaItemIndicator.h>
 #include <VFrame30/UfbSchema.h>
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 namespace VFrame30
 {
 	//

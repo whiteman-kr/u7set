@@ -247,8 +247,10 @@ private:
 	//
 public:
 	// --
-	QAction* m_newFileAction = nullptr;
+	QAction* m_newSchemaAction = nullptr;
+	QAction* m_newActuatorAction = nullptr;
 	QAction* m_newFolderAction = nullptr;
+
 	QAction* m_openAction = nullptr;
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;
@@ -335,8 +337,10 @@ protected slots:
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 
-	void addFile();
+	void onAddSchemaFile();
 	void addSchema(const DbFileInfo& parentFile);
+
+	void onAddActuatorFile();
 	void addActuator(const DbFileInfo& parentFile);
 
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, int parentFileId);

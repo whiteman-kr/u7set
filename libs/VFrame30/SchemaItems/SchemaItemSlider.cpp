@@ -1,6 +1,9 @@
-#include <VFrame30/SchemaItemSlider.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemSlider.h>
 #include <VFrame30/TuningController.h>
+
+#include <QStyle>
+#include <QWheelEvent>
 
 namespace
 {
@@ -17,7 +20,7 @@ namespace
 			//// Focus does not appear in the Monitor initial Tab key is pressed, I did not dig deep enough to understand
 			//// the nature of this behavior. Just forbad focus.
 			////
-			//setFocusPolicy(Qt::FocusPolicy::NoFocus);
+			// setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
 			if (m_editMode == true)
 			{
@@ -78,59 +81,144 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(Qt::Orientation, PropertyNames::orientation, PropertyNames::appearanceCategory, true, SchemaItemSlider::orientation, SchemaItemSlider::setOrientation);
+		p = ADD_PROPERTY_GET_SET_CAT(Qt::Orientation,
+									 PropertyNames::orientation,
+									 PropertyNames::appearanceCategory,
+									 true,
+									 SchemaItemSlider::orientation,
+									 SchemaItemSlider::setOrientation);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::sliderInvertedAppearance, PropertyNames::appearanceCategory, true, SchemaItemSlider::invertedAppearance, SchemaItemSlider::setInvertedAppearance);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::sliderInvertedAppearance,
+									 PropertyNames::appearanceCategory,
+									 true,
+									 SchemaItemSlider::invertedAppearance,
+									 SchemaItemSlider::setInvertedAppearance);
 		p->setDescription(PropertyNames::sliderInvertedAppearanceToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::sliderInvertedControls, PropertyNames::behaviourCategory, true, SchemaItemSlider::invertedControls, SchemaItemSlider::setInvertedControls);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::sliderInvertedControls,
+									 PropertyNames::behaviourCategory,
+									 true,
+									 SchemaItemSlider::invertedControls,
+									 SchemaItemSlider::setInvertedControls);
 		p->setDescription(PropertyNames::sliderInvertedControlsToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::sliderEnableMouseWheel, PropertyNames::behaviourCategory, true, SchemaItemSlider::enableMouseWheel, SchemaItemSlider::setEnableMouseWheel);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::sliderEnableMouseWheel,
+									 PropertyNames::behaviourCategory,
+									 true,
+									 SchemaItemSlider::enableMouseWheel,
+									 SchemaItemSlider::setEnableMouseWheel);
 		p->setDescription(PropertyNames::sliderEnableMouseWheelToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderMaximum, PropertyNames::controlCategory, true, SchemaItemSlider::maximum, SchemaItemSlider::setMaximum);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderMaximum,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemSlider::maximum,
+									 SchemaItemSlider::setMaximum);
 		p->setDescription(PropertyNames::sliderMaximumToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderMinimum, PropertyNames::controlCategory, true, SchemaItemSlider::minimum, SchemaItemSlider::setMinimum);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderMinimum,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemSlider::minimum,
+									 SchemaItemSlider::setMinimum);
 		p->setDescription(PropertyNames::sliderMinimumToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderPageStep, PropertyNames::controlCategory, true, SchemaItemSlider::pageStep, SchemaItemSlider::setPageStep);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderPageStep,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemSlider::pageStep,
+									 SchemaItemSlider::setPageStep);
 		p->setDescription(PropertyNames::sliderPageStepToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderSingleStep, PropertyNames::controlCategory, true, SchemaItemSlider::singleStep, SchemaItemSlider::setSingleStep);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderSingleStep,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemSlider::singleStep,
+									 SchemaItemSlider::setSingleStep);
 		p->setDescription(PropertyNames::sliderSingleStepToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::sliderTracking, PropertyNames::behaviourCategory, true, SchemaItemSlider::tracking, SchemaItemSlider::setTracking);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::sliderTracking,
+									 PropertyNames::behaviourCategory,
+									 true,
+									 SchemaItemSlider::tracking,
+									 SchemaItemSlider::setTracking);
 		p->setDescription(PropertyNames::sliderTrackingToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderTickInterval, PropertyNames::appearanceCategory, true, SchemaItemSlider::tickInterval, SchemaItemSlider::setTickInterval);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderTickInterval,
+									 PropertyNames::appearanceCategory,
+									 true,
+									 SchemaItemSlider::tickInterval,
+									 SchemaItemSlider::setTickInterval);
 		p->setDescription(PropertyNames::sliderTickIntervalToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QSlider::TickPosition, PropertyNames::sliderTickPosition, PropertyNames::appearanceCategory, true, SchemaItemSlider::tickPosition, SchemaItemSlider::setTickPosition);
+		p = ADD_PROPERTY_GET_SET_CAT(QSlider::TickPosition,
+									 PropertyNames::sliderTickPosition,
+									 PropertyNames::appearanceCategory,
+									 true,
+									 SchemaItemSlider::tickPosition,
+									 SchemaItemSlider::setTickPosition);
 		p->setDescription(PropertyNames::sliderTickPositionToolTip);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::sliderDefaultValue, PropertyNames::controlCategory, true, SchemaItemSlider::defaultValue, SchemaItemSlider::setDefaultValue);
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::sliderDefaultValue,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemSlider::defaultValue,
+									 SchemaItemSlider::setDefaultValue);
 
 		// Script properties.
 		//
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemSlider::scriptAfterCreate, SchemaItemSlider::setScriptAfterCreate);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::afterCreate,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemSlider::scriptAfterCreate,
+									 SchemaItemSlider::setScriptAfterCreate);
 		p->setDescription(PropertyNames::widgetPropAfterCreate);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::sliderMoved, PropertyNames::scriptsCategory, true, SchemaItemSlider::scriptSliderMoved, SchemaItemSlider::setScriptSliderMoved);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::sliderMoved,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemSlider::scriptSliderMoved,
+									 SchemaItemSlider::setScriptSliderMoved);
 		p->setDescription(PropertyNames::sliderMovedToolTip);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::sliderPressed, PropertyNames::scriptsCategory, true, SchemaItemSlider::scriptSliderPressed, SchemaItemSlider::setScriptSliderPressed);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::sliderPressed,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemSlider::scriptSliderPressed,
+									 SchemaItemSlider::setScriptSliderPressed);
 		p->setDescription(PropertyNames::sliderPressedToolTip);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::sliderReleased, PropertyNames::scriptsCategory, true, SchemaItemSlider::scriptSliderReleased, SchemaItemSlider::setScriptSliderReleased);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::sliderReleased,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemSlider::scriptSliderReleased,
+									 SchemaItemSlider::setScriptSliderReleased);
 		p->setDescription(PropertyNames::sliderReleasedToolTip);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::sliderValueChanged, PropertyNames::scriptsCategory, true, SchemaItemSlider::scriptValueChanged, SchemaItemSlider::setScriptValueChanged);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::sliderValueChanged,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemSlider::scriptValueChanged,
+									 SchemaItemSlider::setScriptValueChanged);
 		p->setDescription(PropertyNames::sliderValueChangedToolTip);
 		p->setIsScript(true);
 
@@ -296,26 +384,22 @@ namespace VFrame30
 		{
 			// Connect slots only if it has any sense
 			//
-			if (scriptSliderMoved().isEmpty() == false &&
-				scriptSliderMoved() != PropertyNames::sliderDefaultEventScript)
+			if (scriptSliderMoved().isEmpty() == false && scriptSliderMoved() != PropertyNames::sliderDefaultEventScript)
 			{
 				connect(control, &QSlider::sliderMoved, this, &SchemaItemSlider::sliderMoved);
 			}
 
-			if (scriptSliderPressed().isEmpty() == false &&
-				scriptSliderPressed() != PropertyNames::sliderDefaultEventScript)
+			if (scriptSliderPressed().isEmpty() == false && scriptSliderPressed() != PropertyNames::sliderDefaultEventScript)
 			{
 				connect(control, &QSlider::sliderPressed, this, &SchemaItemSlider::sliderPressed);
 			}
 
-			if (scriptSliderReleased().isEmpty() == false &&
-				scriptSliderReleased() != PropertyNames::sliderDefaultEventScript)
+			if (scriptSliderReleased().isEmpty() == false && scriptSliderReleased() != PropertyNames::sliderDefaultEventScript)
 			{
 				connect(control, &QSlider::sliderReleased, this, &SchemaItemSlider::sliderReleased);
 			}
 
-			if (scriptValueChanged().isEmpty() == false &&
-				scriptValueChanged() != PropertyNames::sliderDefaultEventScript)
+			if (scriptValueChanged().isEmpty() == false && scriptValueChanged() != PropertyNames::sliderDefaultEventScript)
 			{
 				connect(control, &QSlider::valueChanged, this, &SchemaItemSlider::valueChanged);
 			}
@@ -345,16 +429,10 @@ namespace VFrame30
 
 		bool updateRequired = false;
 
-		if (control->orientation() != orientation() ||
-			control->invertedAppearance() != invertedAppearance() ||
-			control->invertedControls() != invertedControls() ||
-			control->maximum() != maximum() ||
-			control->minimum() != minimum() ||
-			control->pageStep() != pageStep() ||
-			control->singleStep() != singleStep() ||
-			control->hasTracking() != tracking() ||
-			control->tickInterval() != tickInterval() ||
-			control->tickPosition() != tickPosition())
+		if (control->orientation() != orientation() || control->invertedAppearance() != invertedAppearance() ||
+			control->invertedControls() != invertedControls() || control->maximum() != maximum() || control->minimum() != minimum() ||
+			control->pageStep() != pageStep() || control->singleStep() != singleStep() || control->hasTracking() != tracking() ||
+			control->tickInterval() != tickInterval() || control->tickPosition() != tickPosition())
 		{
 			updateRequired = true;
 		}
@@ -385,8 +463,7 @@ namespace VFrame30
 			const_cast<SchemaItemSlider*>(this)->setMinimum(control->minimum());
 		}
 
-		if (editMode == true &&
-			control->value() != defaultValue())
+		if (editMode == true && control->value() != defaultValue())
 		{
 			control->setUpdatesEnabled(false);
 			control->setValue(defaultValue());
@@ -418,8 +495,7 @@ namespace VFrame30
 		{
 			m_jsAfterCreate = evaluateScript("AfterCreate", sliderWidget, m_scriptAfterCreate);
 
-			if (m_jsAfterCreate.isError() == true ||
-				m_jsAfterCreate.isNull() == true)
+			if (m_jsAfterCreate.isError() == true || m_jsAfterCreate.isNull() == true)
 			{
 				return;
 			}
@@ -473,8 +549,7 @@ namespace VFrame30
 		{
 			js = evaluateScript(scriptName, sliderWidget, script);
 
-			if (js.isError() == true ||
-				js.isNull() == true)
+			if (js.isError() == true || js.isNull() == true)
 			{
 				return;
 			}

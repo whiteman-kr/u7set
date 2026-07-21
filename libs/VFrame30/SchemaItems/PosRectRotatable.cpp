@@ -1,11 +1,11 @@
 #include <VFrame30/PosRectRotatable.h>
 #include <VFrame30/PropertyNames.h>
 
+#include <QPainterPath>
+
 namespace VFrame30
 {
-	PosRectRotatable::PosRectRotatable(void)
-	{
-	}
+	PosRectRotatable::PosRectRotatable(void) {}
 
 	void PosRectRotatable::propertyDemand(const QString& prop)
 	{
@@ -73,7 +73,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const
 	{
-		return drawRotated(drawParam, [drawParam, &rect, this]()
+		return drawRotated(drawParam,
+						   [drawParam, &rect, this]()
 						   {
 							   return PosRectImpl::drawHighlightRect(drawParam, rect);
 						   });
@@ -81,7 +82,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawOutline(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return PosRectImpl::drawOutline(drawParam);
 						   });
@@ -89,7 +91,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
 	{
-		return drawRotated(drawParam, [drawParam, issue, this]()
+		return drawRotated(drawParam,
+						   [drawParam, issue, this]()
 						   {
 							   return PosRectImpl::drawIssue(drawParam, issue);
 						   });
@@ -97,7 +100,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawSelection(CDrawParam* drawParam, bool drawSelection) const
 	{
-		return drawRotated(drawParam, [drawParam, drawSelection, this]()
+		return drawRotated(drawParam,
+						   [drawParam, drawSelection, this]()
 						   {
 							   return drawSelectionPrivate(drawParam, drawSelection);
 						   });
@@ -133,21 +137,21 @@ namespace VFrame30
 
 		if (drawSizeBar == true && isLocked() == false)
 		{
-			//double fx = r.left();
-			//double fy = r.top();
-			//double width = r.width();
-			//double height = r.height();
+			// double fx = r.left();
+			// double fy = r.top();
+			// double width = r.width();
+			// double height = r.height();
 
 			// For tilted item draw only three control bars, right, bottom and bottom right.
 			// The first in pair is a flag to draw the control bar if angle != 0.
 			//
 			std::array<QRectF, 8> controlRectangles = controlBarRects(drawParam->controlBarSize());
-			
+
 			if (angle() != 0)
 			{
 				// controlBarRects returns rectangles in the schema coordinate system,
 				// but if angle is no 0, then we need to translate them to the rotation point.
-				// 
+				//
 				auto rotationPoint = rotationPointInDocPt();
 				for (auto& rect : controlRectangles)
 				{
@@ -177,7 +181,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawCompareAction(CDrawParam* drawParam, QColor color) const
 	{
-		return drawRotated(drawParam, [drawParam, color, this]()
+		return drawRotated(drawParam,
+						   [drawParam, color, this]()
 						   {
 							   return PosRectImpl::drawCompareAction(drawParam, color);
 						   });
@@ -185,7 +190,8 @@ namespace VFrame30
 
 	void PosRectRotatable::drawCommentDim(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return PosRectImpl::drawCommentDim(drawParam);
 						   });
@@ -221,9 +227,9 @@ namespace VFrame30
 				controlRectangles[0] = {}; // Top left
 				controlRectangles[1] = {}; // Top
 				controlRectangles[2] = {}; // Top right
-				//controlRectangles[3] = {}; // Right
-				//controlRectangles[4] = {}; // Bottom right
-				//controlRectangles[5] = {}; // Bottom
+				// controlRectangles[3] = {}; // Right
+				// controlRectangles[4] = {}; // Bottom right
+				// controlRectangles[5] = {}; // Bottom
 				controlRectangles[6] = {}; // Bottom left
 				controlRectangles[7] = {}; // Left
 				break;
@@ -233,25 +239,25 @@ namespace VFrame30
 				controlRectangles[2] = {}; // Top right
 				controlRectangles[3] = {}; // Right
 				controlRectangles[4] = {}; // Bottom right
-				//controlRectangles[5] = {}; // Bottom
-				//controlRectangles[6] = {}; // Bottom left
-				//controlRectangles[7] = {}; // Left
+				// controlRectangles[5] = {}; // Bottom
+				// controlRectangles[6] = {}; // Bottom left
+				// controlRectangles[7] = {}; // Left
 				break;
 			case RotationPoint::BottomRight:
-				//controlRectangles[0] = {}; // Top left
-				//controlRectangles[1] = {}; // Top
+				// controlRectangles[0] = {}; // Top left
+				// controlRectangles[1] = {}; // Top
 				controlRectangles[2] = {}; // Top right
 				controlRectangles[3] = {}; // Right
 				controlRectangles[4] = {}; // Bottom right
 				controlRectangles[5] = {}; // Bottom
 				controlRectangles[6] = {}; // Bottom left
-				//controlRectangles[7] = {}; // Left
+				// controlRectangles[7] = {}; // Left
 				break;
 			case RotationPoint::BottomLeft:
 				controlRectangles[0] = {}; // Top left
-				//controlRectangles[1] = {}; // Top
-				//controlRectangles[2] = {}; // Top right
-				//controlRectangles[3] = {}; // Right
+				// controlRectangles[1] = {}; // Top
+				// controlRectangles[2] = {}; // Top right
+				// controlRectangles[3] = {}; // Right
 				controlRectangles[4] = {}; // Bottom right
 				controlRectangles[5] = {}; // Bottom
 				controlRectangles[6] = {}; // Bottom left

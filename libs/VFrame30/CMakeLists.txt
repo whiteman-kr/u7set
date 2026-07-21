@@ -20,6 +20,7 @@ set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
 	./include/VFrame30/ActuatorHeader.h
+	./include/VFrame30/ActuatorSchema.h
 	./include/VFrame30/AppSignalController.h
 	./include/VFrame30/BaseSchemaWidget.h
 	./include/VFrame30/ClientSchemaView.h
@@ -143,23 +144,29 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemVduTrend.cpp
 	./SchemaItems/SchemaItemVduValue.cpp
 
+	./Schemas/ActuatorSchema.cpp
+	./Schemas/DiagSchema.cpp
+	./Schemas/LogicSchema.cpp
+	./Schemas/MonitorSchema.cpp
+	./Schemas/Schema.cpp
+	./Schemas/TuningSchema.cpp
+	./Schemas/UfbSchema.cpp
+	./Schemas/VduSchema.cpp
+	./Schemas/WiringSchema.cpp
+
 	ActuatorHeader.cpp
 	AppSignalController.cpp
 	BaseSchemaWidget.cpp
 	ClientSchemaView.cpp
 	ClientSchemaWidget.cpp
 	Context.cpp
-	DiagSchema.cpp
 	DiagStateController.cpp
 	DrawParam.cpp
 	FontParam.cpp
 	HorzVertLinks.cpp
 	LogController.cpp
-	LogicSchema.cpp
 	MacrosExpander.cpp
-	MonitorSchema.cpp
 	PropertyNames.cpp
-	Schema.cpp
 	SchemaDetails.cpp
 	SchemaLayer.cpp
 	SchemaManager.cpp
@@ -168,12 +175,8 @@ qt_add_library(${TARGET} STATIC
 	Session.cpp
 	Settings.cpp
 	TuningController.cpp
-	TuningSchema.cpp
-	UfbSchema.cpp
-	VduSchema.cpp
 	VFrame30Library.cpp
 	VFrameTools.cpp
-	WiringSchema.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -201,43 +204,16 @@ target_precompile_headers(${TARGET} PRIVATE
 		<variant>
 		<vector>
 
-		<QAction>
 		<QApplication>
 		<QDebug>
-		<QDomElement>
-		<QDrag>
 		<qglobal.h>
 		<QJSEngine>
-		<QJsonDocument>
-		<QJsonObject>
-		<QLineEdit>
-		<QMainWindow>
 		<QMessageBox>
-		<QMouseEvent>
-		<QMutex>
 		<QPainter>
-		<QPainterPath>
 		<QPdfWriter>
-		<QPushButton>
-		<QJSEngine>
-		<QJSValueIterator>
 		<QRect>
-		<QScreen>
-		<QScrollArea>
-		<QScrollBar>
-		<QSlider>
-		<QStaticText>
-		<QStyleOptionButton>
-		<QStyleOptionFrame>
-		<QAbstractTextDocumentLayout>
-		<QSvgRenderer>
-		<QTextDocument>
+		<QRegularExpression>
 		<QUuid>
-		<QWheelEvent>
-		<QWindow>
-		<QXmlStreamReader>
-
-		<QtConcurrent/QtConcurrent>
 
 		<CommonLib/Types.h>
 		<CommonLib/Hash.h>

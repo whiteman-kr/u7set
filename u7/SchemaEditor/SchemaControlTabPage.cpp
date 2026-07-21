@@ -34,6 +34,14 @@
 	#include <QAbstractItemModelTester>
 #endif
 
+namespace
+{
+	bool isFileActuatorHeader(const DbFileInfo& file)
+	{
+		return file.ext().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0;
+	}
+} // namespace
+
 //
 //
 // SchemaListModel
@@ -1473,11 +1481,17 @@ SchemaFileView::~SchemaFileView()
 void SchemaFileView::createActions()
 {
 	// clang-format off
-	m_newFileAction = new QAction(tr("New Schema..."), parent());
-	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
-	m_newFileAction->setStatusTip(tr("Add new file to version control..."));
-	m_newFileAction->setEnabled(false);
-	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
+	m_newSchemaAction = new QAction(tr("New Schema..."), parent());
+	m_newSchemaAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
+	m_newSchemaAction->setStatusTip(tr("Add new file to version control..."));
+	m_newSchemaAction->setEnabled(false);
+	m_newSchemaAction->setShortcut(QKeySequence::StandardKey::New);
+
+	m_newActuatorAction = new QAction(tr("New Actuator..."), parent());
+	m_newActuatorAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
+	m_newActuatorAction->setStatusTip(tr("Add new file to version control..."));
+	m_newActuatorAction->setEnabled(false);
+	m_newActuatorAction->setShortcut(QKeySequence::StandardKey::New);
 
 	m_newFolderAction = new QAction(tr("New Folder..."), parent());
 	m_newFolderAction->setIcon(QIcon(":/Images/Images/SchemaAddFolder2.svg"));
@@ -1600,7 +1614,9 @@ void SchemaFileView::createContextMenu()
 	separator->setSeparator(true);
 	addAction(separator);
 
-	addAction(m_newFileAction);
+	addAction(m_newSchemaAction);
+	addAction(m_newActuatorAction);
+
 	addAction(m_newFolderAction);
 	addAction(m_cloneFileAction);
 	addAction(m_deleteAction);
@@ -2159,7 +2175,8 @@ void SchemaFileView::projectOpened()
 
 void SchemaFileView::projectClosed()
 {
-	m_newFileAction->setEnabled(false);
+	m_newSchemaAction->setEnabled(false);
+	m_newActuatorAction->setEnabled(false);
 	m_newFolderAction->setEnabled(false);
 	m_cloneFileAction->setEnabled(false);
 	m_refreshFileAction->setEnabled(false);
@@ -2233,29 +2250,48 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 	auto selectedActuatorHeaders = selectedFiles | std::views::filter(
 													   [this](const std::shared_ptr<DbFileInfo>& file)
 													   {
-														   return file->extension() == File::ActuatorHeaderFileExtension;
+														   return isFileActuatorHeader(*file);
 													   });
-	auto selectedSchemas =
-		selectedFiles | std::views::filter(
-							[](const std::shared_ptr<DbFileInfo>& file)
-							{
-								return file->isFolder() == false && file->extension() != File::ActuatorHeaderFileExtension;
-							});
+	auto selectedSchemas = selectedFiles | std::views::filter(
+											   [](const std::shared_ptr<DbFileInfo>& file)
+											   {
+												   return file->isFolder() == false && isFileActuatorHeader(*file) == false;
+											   });
 
 	bool selectedOneNonSystemFile = selectedFiles.size() == 1 && db()->systemFileInfo(selectedFiles.front()->fileId()).isNull() == true &&
 									selectedFiles.front()->directoryAttribute() == false;
 
-	m_newFileAction->setEnabled(selectedFiles.size() == 1);
-	if (m_newFileAction->isEnabled() == true)
+	if (selectedFiles.size() == 1)
 	{
+		// Can create some file, depending on the type of the selection.
+
+		bool isActuator = false;
+
 		if (isActuatorFolder(*selectedFiles.front()) == true)
 		{
-			m_newFileAction->setText(tr("New Actuator..."));
+			// If selected file is Actuator or has Actuator as one of the parents, then add Schema.
+			//
+			DbFileInfo selectedFile = *selectedFiles.front();
+
+			while (selectedFile.isNull() == false && selectedFile.fileId() != dbc()->rootFileId())
+			{
+				if (isFileActuatorHeader(selectedFile) == true)
+				{
+					isActuator = true;
+					break;
+				}
+
+				selectedFile = filesModel().file(selectedFile.parentId());
+			}
 		}
-		else
-		{
-			m_newFileAction->setText(tr("New Schema..."));
-		}
+
+		bool actuatorCanBeCreated = isActuatorFolder(*selectedFiles.front()) == true && isActuator == false;
+
+		m_newActuatorAction->setVisible(actuatorCanBeCreated);
+		m_newActuatorAction->setEnabled(actuatorCanBeCreated);
+
+		m_newSchemaAction->setVisible(!actuatorCanBeCreated);
+		m_newSchemaAction->setEnabled(!actuatorCanBeCreated);
 	}
 
 	m_newFolderAction->setEnabled(selectedFiles.size() == 1);
@@ -2440,7 +2476,9 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	connect(m_filesView->m_openAction, &QAction::triggered, this, &SchemaControlTabPage::openSelectedFile);
 	connect(m_filesView->m_viewAction, &QAction::triggered, this, &SchemaControlTabPage::viewSelectedFile);
 
-	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPage::addFile);
+	connect(m_filesView->m_newSchemaAction, &QAction::triggered, this, &SchemaControlTabPage::onAddSchemaFile);
+	connect(m_filesView->m_newActuatorAction, &QAction::triggered, this, &SchemaControlTabPage::onAddActuatorFile);
+
 	connect(m_filesView->m_newFolderAction, &QAction::triggered, this, &SchemaControlTabPage::addFolder);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPage::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPage::deleteFiles);
@@ -2750,7 +2788,8 @@ void SchemaControlTabPage::createToolBar()
 	m_toolBar->addAction(m_filesView->m_viewAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_filesView->m_newFileAction);
+	m_toolBar->addAction(m_filesView->m_newSchemaAction);
+	m_toolBar->addAction(m_filesView->m_newActuatorAction);
 	m_toolBar->addAction(m_filesView->m_newFolderAction);
 	m_toolBar->addAction(m_filesView->m_cloneFileAction);
 	m_toolBar->addAction(m_filesView->m_deleteAction);
@@ -2815,7 +2854,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 	} while (lookForSystemParent.isNull() == false);
 
 	// What kind of schema suppose to be created?
-	//
+	// 
 	Q_ASSERT(false);
 
 	return {};
@@ -2974,7 +3013,7 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 
 	// Chose between schema file and actuator header file by extension.
 	//
-	if (out[0]->extension() == File::ActuatorHeaderFileExtension)
+	if (isFileActuatorHeader(*out[0]))
 	{
 		auto actuatorHeader = VFrame30::ActuatorHeader::Create(out[0].get()->data());
 		if (actuatorHeader == nullptr)
@@ -3092,7 +3131,7 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 		viewSchemaFile(*out);
 	}
 
-	if (fi.isFolder() == false && fi.ext().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0)
+	if (fi.isFolder() == false && isFileActuatorHeader(fi) == true)
 	{
 		viewActuatorHeaderFile(*out);
 	}
@@ -3421,7 +3460,7 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 	return;
 }
 
-void SchemaControlTabPage::addFile()
+void SchemaControlTabPage::onAddSchemaFile()
 {
 	QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
 	if (selectedRows.size() != 1)
@@ -3455,15 +3494,6 @@ void SchemaControlTabPage::addFile()
 		return;
 	}
 
-	// If parent folder is ${root}/Schemas/Actuators or has such parent folder, then create Actuator file, otherwise - Schema file
-	//
-	if (m_filesView->isActuatorFolder(parentFile) == true)
-	{
-		return addActuator(parentFile);
-	}
-
-	// Add Schema file
-	//
 	return addSchema(parentFile);
 }
 
@@ -3604,6 +3634,43 @@ void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
 	addSchemaFile(schema, extension, parentFile.fileId());
 
 	return;
+}
+
+void SchemaControlTabPage::onAddActuatorFile()
+{
+	QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
+	if (selectedRows.size() != 1)
+	{
+		Q_ASSERT(selectedRows.size() == 1);
+		return;
+	}
+
+	QModelIndex selectedModelIndex = m_filesView->proxyModel().mapToSource(selectedRows.front());
+	DbFileInfo selectedFile = m_filesView->filesModel().file(selectedModelIndex);
+
+	DbFileInfo parentFile;
+
+	// If folder selected, then create new file in this folder
+	//
+	if (selectedFile.directoryAttribute() == true)
+	{
+		parentFile = selectedFile;
+	}
+	else
+	{
+		// If File selected, the create new file in the same folder as selected one
+		//
+		parentFile = m_filesView->filesModel().file(selectedFile.parentId());
+	}
+
+	if (parentFile.isNull() == true || parentFile.directoryAttribute() == false)
+	{
+		Q_ASSERT(parentFile.isNull() == false);
+		Q_ASSERT(parentFile.directoryAttribute());
+		return;
+	}
+
+	return addActuator(parentFile);
 }
 
 void SchemaControlTabPage::addActuator(const DbFileInfo& parentFile)
@@ -3865,7 +3932,7 @@ void SchemaControlTabPage::addActuatorHeaderFileToDb(std::shared_ptr<VFrame30::A
 
 void SchemaControlTabPage::addFolder()
 {
-	// Folder can be created only for another folder
+	// Folder can be created only for another folder or Actuator
 	//
 	QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
 	if (selectedRows.size() != 1)
@@ -3881,7 +3948,7 @@ void SchemaControlTabPage::addFolder()
 
 	// If folder selected, then create new folder in the selected one
 	//
-	if (selectedFile.directoryAttribute() == true)
+	if (selectedFile.directoryAttribute() == true || isFileActuatorHeader(selectedFile) == true)
 	{
 		parentFile = selectedFile;
 	}
@@ -3999,7 +4066,7 @@ void SchemaControlTabPage::cloneFile()
 		return;
 	}
 
-	if (out->extension() == File::ActuatorHeaderFileExtension)
+	if (isFileActuatorHeader(*out) == true)
 	{
 		cloneActuatorHeader(*out);
 	}
@@ -5238,12 +5305,11 @@ void SchemaControlTabPage::showFileProperties()
 
 	// Expected: all files either schemas or actuator headers.
 	//
-	bool allAreActuatorHeaders =
-		std::ranges::all_of(out,
-							[](const std::shared_ptr<DbFile>& f)
-							{
-								return f->isFolder() == false && f->extension() == File::ActuatorHeaderFileExtension;
-							});
+	bool allAreActuatorHeaders = std::ranges::all_of(out,
+													 [](const std::shared_ptr<DbFile>& f)
+													 {
+														 return f->isFolder() == false && isFileActuatorHeader(*f) == true;
+													 });
 	bool allAreSchemaFiles = std::ranges::all_of(out,
 												 [](const std::shared_ptr<DbFile>& f)
 												 {
@@ -5448,7 +5514,7 @@ void SchemaControlTabPage::showActuatorHeaderProperties(const std::vector<std::s
 
 	auto filterFunc = [](const std::shared_ptr<DbFile>& file)
 	{
-		return file->isFolder() == false && file->extension().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0;
+		return file->isFolder() == false && isFileActuatorHeader(*file) == true;
 	};
 
 	for (auto file : files | std::views::filter(filterFunc))
