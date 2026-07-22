@@ -1,22 +1,25 @@
+#include <VFrame30/Schema.h>
+
+#include <VFrame30/ActuatorSchema.h>
+#include <VFrame30/DiagSchema.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/MonitorSchema.h>
+#include <VFrame30/TuningSchema.h>
+#include <VFrame30/UfbSchema.h>
+#include <VFrame30/VduSchema.h>
+
 #include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/Context.h>
-#include <VFrame30/DiagSchema.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/FblItem.h>
 #include <VFrame30/HorzVertLinks.h>
-#include <VFrame30/LogicSchema.h>
-#include <VFrame30/MonitorSchema.h>
 #include <VFrame30/PropertyNames.h>
-#include <VFrame30/Schema.h>
 #include <VFrame30/SchemaDetails.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemLink.h>
 #include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaLayer.h>
-#include <VFrame30/TuningSchema.h>
-#include <VFrame30/UfbSchema.h>
-#include <VFrame30/VduSchema.h>
 
 
 namespace VFrame30
@@ -1367,7 +1370,6 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-
 	const std::vector<std::shared_ptr<SchemaLayer>>& Schema::layers() const
 	{
 #ifdef QT_DEBUG
@@ -1988,6 +1990,11 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::VduSchema*>(this) != nullptr;
 	}
 
+	bool Schema::isActuatorSchema() const
+	{
+		return dynamic_cast<const VFrame30::ActuatorSchema*>(this) != nullptr;
+	}
+
 	LogicSchema* Schema::toLogicSchema()
 	{
 		return dynamic_cast<VFrame30::LogicSchema*>(this);
@@ -2006,6 +2013,16 @@ namespace VFrame30
 	const UfbSchema* Schema::toUfbSchema() const
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this);
+	}
+
+	ActuatorSchema* Schema::toActuatorSchema()
+	{
+		return dynamic_cast<VFrame30::ActuatorSchema*>(this);
+	}
+
+	const ActuatorSchema* Schema::toActuatorSchema() const
+	{
+		return dynamic_cast<const VFrame30::ActuatorSchema*>(this);
 	}
 
 	int Schema::changeset() const

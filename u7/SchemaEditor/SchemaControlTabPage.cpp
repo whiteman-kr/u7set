@@ -4,6 +4,7 @@
 #include <UiLib/StandardColors.h>
 #include <UiLib/TagSelectorWidget.h>
 #include <VFrame30/ActuatorHeader.h>
+#include <VFrame30/ActuatorSchema.h>
 #include <VFrame30/DiagSchema.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/MonitorSchema.h>
@@ -38,7 +39,8 @@ namespace
 {
 	bool isFileActuatorHeader(const DbFileInfo& file)
 	{
-		return file.ext().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0;
+		return file.isNull() == false && file.isFolder() == false &&
+			   file.ext().compare(File::ActuatorHeaderFileExtension, Qt::CaseInsensitive) == 0;
 	}
 } // namespace
 
@@ -2837,7 +2839,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 		{db()->systemFileId(DbDir::UfblDir), []() { return std::make_shared<VFrame30::UfbSchema>(); }},
 		{db()->systemFileId(DbDir::DiagSchemasDir), []() { return std::make_shared<VFrame30::DiagSchema>(); }},
 		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }},
-		//{db()->systemFileId(DbDir::ActuatorsDir), []() { return std::make_shared<VFrame30::ActuatorHeader>(); }},
+		{db()->systemFileId(DbDir::ActuatorsDir), []() { return std::make_shared<VFrame30::ActuatorSchema>(); }},
 	};
 	// clang-format on
 
@@ -2854,7 +2856,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 	} while (lookForSystemParent.isNull() == false);
 
 	// What kind of schema suppose to be created?
-	// 
+	//
 	Q_ASSERT(false);
 
 	return {};
@@ -3474,9 +3476,10 @@ void SchemaControlTabPage::onAddSchemaFile()
 
 	DbFileInfo parentFile;
 
-	// If folder selected, then create new file in this folder
+	// If folder selected, then create new file in this folder.
+	// If ActuatorHeader is selected, then we can add schema directly to it, like to folder.
 	//
-	if (selectedFile.directoryAttribute() == true)
+	if (selectedFile.directoryAttribute() == true || isFileActuatorHeader(selectedFile) == true)
 	{
 		parentFile = selectedFile;
 	}
@@ -3487,10 +3490,10 @@ void SchemaControlTabPage::onAddSchemaFile()
 		parentFile = m_filesView->filesModel().file(selectedFile.parentId());
 	}
 
-	if (parentFile.isNull() == true || parentFile.directoryAttribute() == false)
+	if (parentFile.isNull() == true || (parentFile.directoryAttribute() == false && isFileActuatorHeader(parentFile) == false))
 	{
 		Q_ASSERT(parentFile.isNull() == false);
-		Q_ASSERT(parentFile.directoryAttribute());
+		Q_ASSERT(parentFile.directoryAttribute() || isFileActuatorHeader(parentFile));
 		return;
 	}
 
@@ -3558,6 +3561,12 @@ void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
 		extension = File::VduFileExtension;
 	}
 
+	if (schema->isActuatorSchema() == true)
+	{
+		defaultId = "ACTUATORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = File::ActuatorFileExtension;
+	}
+
 	Q_ASSERT(extension.isEmpty() == false);
 
 	schema->setSchemaId(defaultId);
@@ -3588,6 +3597,46 @@ void SchemaControlTabPage::addSchema(const DbFileInfo& parentFile)
 
 		logicSchema->setEquipmentIds(defaultEquipmentIds);
 		logicSchema->setLmDescriptionFile(defaultLmDescriptionFile);
+	}
+
+	if (schema->isActuatorSchema() == true)
+	{
+		auto actuatorSchema = schema->toActuatorSchema();
+
+		// Get ActuatorHeader for this schema.
+		//
+		{
+			DbFileInfo actuatorHeaderFile = parentFile;
+
+			while (actuatorHeaderFile.isNull() == false && actuatorHeaderFile.fileId() != dbc()->rootFileId())
+			{
+				if (isFileActuatorHeader(actuatorHeaderFile) == true)
+				{
+					break;
+				}
+
+				actuatorHeaderFile = m_filesView->filesModel().file(actuatorHeaderFile.parentId());
+			}
+
+			if (isFileActuatorHeader(actuatorHeaderFile) == true)
+			{
+				std::shared_ptr<DbFile> file;
+				bool readOk = dbc()->getLatestVersion(actuatorHeaderFile, &file, this);
+				if (readOk == true)
+				{
+					auto actuatorHeader = VFrame30::ActuatorHeader::Create(file->data());
+					if (actuatorHeader != nullptr)
+					{
+						actuatorSchema->setActuatorTypeId(actuatorHeader->actuatorTypeId());
+						actuatorSchema->setLmDescriptionFile(actuatorHeader->descriptionFile());
+					}
+				}
+			}
+			else
+			{
+				assert(isFileActuatorHeader(actuatorHeaderFile) == true);
+			}
+		}
 	}
 
 	// Set Width and Height

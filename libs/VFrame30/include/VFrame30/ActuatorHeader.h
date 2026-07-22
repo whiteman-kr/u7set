@@ -76,7 +76,6 @@ namespace VFrame30
 		bool SaveData(Proto::ActuatorHeader* message) const;
 		bool LoadData(const Proto::ActuatorHeader& message);
 
-
 	public:
 		QString actuatorTypeId() const;
 		void setActuatorTypeId(const QString& actuatorTypeId);

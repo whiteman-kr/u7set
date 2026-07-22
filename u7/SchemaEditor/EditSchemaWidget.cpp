@@ -947,16 +947,19 @@ void EditSchemaWidget::createActions()
 	// Transform Into->Input
 	//
 	m_transformIntoInputAction = new QAction(tr("Input"), this);
+	m_transformIntoInputAction->setIcon(QIcon(":/Images/Images/SchemaInputSignal.svg"));
 	connect(m_transformIntoInputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInput);
 
 	// Transform Into->In/Out
 	//
 	m_transformIntoInOutAction = new QAction(tr("In/Out"), this);
+	m_transformIntoInOutAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
 	connect(m_transformIntoInOutAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInOut);
 
 	// Transform Into->Output
 	//
 	m_transformIntoOutputAction = new QAction(tr("Output"), this);
+	m_transformIntoOutputAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
 	connect(m_transformIntoOutputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoOutput);
 
 	//
@@ -1158,6 +1161,11 @@ void EditSchemaWidget::createActions()
 	if (schema()->isVduSchema() == true)
 	{
 		fillActionsForVduSchema(m_addSubMenu);
+	}
+
+	if (schema()->isActuatorSchema() == true)
+	{
+		fillActionsForActuatorSchema(m_addSubMenu);
 	}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);
@@ -1383,6 +1391,45 @@ void EditSchemaWidget::fillActionsForVduSchema(QWidget* widget)
 
 	return;
 }
+
+void EditSchemaWidget::fillActionsForActuatorSchema(QWidget* widget)
+{
+	assert(widget);
+
+	widget->addAction(m_addLineAction);
+	widget->addAction(m_addRectAction);
+	widget->addAction(m_addPathAction);
+	widget->addAction(m_addTextAction);
+	widget->addAction(m_addImageAction);
+
+	auto separator = new QAction(widget);
+	separator->setSeparator(true);
+	widget->addAction(separator);
+
+	widget->addAction(m_addLinkAction);
+	widget->addAction(m_addInputSignalAction);
+	widget->addAction(m_addInOutSignalAction);
+	widget->addAction(m_addOutputSignalAction);
+	widget->addAction(m_addConstantAction);
+	widget->addAction(m_addTerminatorAction);
+
+	separator = new QAction(widget);
+	separator->setSeparator(true);
+	widget->addAction(separator);
+
+	widget->addAction(m_addAfbAction);
+	widget->addAction(m_addUfbAction);
+
+	separator = new QAction(widget);
+	separator->setSeparator(true);
+	widget->addAction(separator);
+
+	widget->addAction(m_addLoopback);
+	widget->addAction(m_addBus);
+
+	return;
+}
+
 
 bool EditSchemaWidget::event(QEvent* event)
 {
@@ -3402,6 +3449,11 @@ bool EditSchemaWidget::isVduSchema() const
 	return schema()->isVduSchema();
 }
 
+bool EditSchemaWidget::isActuatorSchema() const
+{
+	return schema()->isActuatorSchema();
+}
+
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
 {
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schemaSharedPtr());
@@ -4327,7 +4379,7 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 		return false;
 	}
 
-	if (isLogicSchema() == false && isUfbSchema() == false)
+	if (isLogicSchema() == false && isUfbSchema() == false && isActuatorSchema() == false)
 	{
 		// this function is not applicable
 		//
@@ -4336,14 +4388,16 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	QString LmDescriptionFile;
 
-	if (isLogicSchema() == true)
 	{
-		LmDescriptionFile = schema()->toLogicSchema()->lmDescriptionFile();
-	}
-
-	if (isUfbSchema() == true)
-	{
-		LmDescriptionFile = schema()->toUfbSchema()->lmDescriptionFile();
+		auto lmp = schema()->propertyByCaption(VFrame30::PropertyNames::lmDescriptionFile);
+		if (lmp != nullptr)
+		{
+			LmDescriptionFile = lmp->value().toString();
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	if (LmDescriptionFile.isEmpty() == true)
@@ -4427,18 +4481,25 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 		});
 
 
-	// Get UFBs where LmDescriptionFile same with this chema
+	// Get UFBs where LmDescriptionFile same with this schema
 	//
 	std::vector<DbFileInfo> filteredFileList;
 	filteredFileList.reserve(fileList.size());
 
-	if (schema()->isLogicSchema() == true)
+	if (schema()->isLogicSchema() == true || schema()->isActuatorSchema() == true)
 	{
+		QString schemaLmDescriptionFile;
+		auto lmp = schema()->propertyByCaption(VFrame30::PropertyNames::lmDescriptionFile);
+		if (lmp != nullptr)
+		{
+			schemaLmDescriptionFile = lmp->value().toString();
+		}
+
 		for (const auto& fi : fileList)
 		{
 			VFrame30::SchemaDetails details(fi.details());
 
-			if (details.m_lmDescriptionFile == schema()->toLogicSchema()->lmDescriptionFile())
+			if (details.m_lmDescriptionFile == schemaLmDescriptionFile)
 			{
 				filteredFileList.push_back(fi);
 			}
@@ -6591,6 +6652,7 @@ void EditSchemaWidget::addAfbElement()
 
 	if (ok == false)
 	{
+		QMessageBox::critical(this, QObject::tr("Error"), tr("Cannot load AFB descriptions! Check LmDescriptionFile."));
 		return;
 	}
 
@@ -9159,7 +9221,6 @@ void EditSchemaWidget::setModified()
 	assert(m_editEngine);
 	m_editEngine->setModified();
 }
-
 
 void EditSchemaWidget::resetModified()
 {

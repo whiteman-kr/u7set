@@ -1,6 +1,7 @@
 #include "CreateSchemaDialog.h"
 
 #include <HardwareLib/PropertyNames.h>
+#include <VFrame30/ActuatorSchema.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/Schema.h>
 #include <VFrame30/SchemaItem.h>
@@ -11,11 +12,10 @@
 #include "ui_CreateSchemaDialog.h"
 
 
-//1. ���� �������� ����� �� ���� �������� ��������� �������
-//2. ��� ��������� ������ ������ ������ �
+// 1. ���� �������� ����� �� ���� �������� ��������� �������
+// 2. ��� ��������� ������ ������ ������ �
 //	setGridSize(Settings::defaultGridSize(unit()));
 //	setPinGridStep(4); � ��� �� ���� ��������� � ����????? � ���������
-
 
 
 CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, QWidget* parent) :
@@ -42,7 +42,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	auto mmUnits = std::make_pair<QString, SchemaUnit>("Millimeters", SchemaUnit::Inch);
 	auto inUnits = std::make_pair<QString, SchemaUnit>("Inches", SchemaUnit::Inch);
 
-	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
+	if (isLogicSchema() == true)
 	{
 		idLabel = "AppSchemaID";
 
@@ -59,9 +59,9 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		}
 	}
 
-	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
+	if (isUfbSchema() == true)
 	{
-		idLabel = "UserFunctionalBlock ID";
+		idLabel = "UserFunctionalBlockID";
 
 		tempateParentFileId = db->systemFileId(DbDir::UfblDir);
 		templateFileExtension = File::UfbTemplExtension;
@@ -143,9 +143,26 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		units.push_back(pxUnits);
 	}
 
+	if (isActuatorSchema() == true)
+	{
+		idLabel = "ActuatorTypeID";
+
+		tempateParentFileId = db->systemFileId(DbDir::ActuatorsDir);
+		templateFileExtension = File::ActuatorTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+		}
+	}
+
 	assert(tempateParentFileId != -1);
 	assert(templateFileExtension.isEmpty() == false);
-	assert(idLabel.isEmpty() == false);							// Should be corresponded to schema type
+	assert(idLabel.isEmpty() == false); // Should be corresponded to schema type
 
 	ui->strIdLabel->setText(idLabel);
 
@@ -153,11 +170,12 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	//
 	int setUnitIndex = -1;
 	int unitIndex = 0;
-	SchemaUnit s_lastSelectedMonitorUnits =
-			static_cast<SchemaUnit>(QSettings().value("CreateSchemaDialog/s_lastSelectedMonitorUnits",
-																QVariant(static_cast<int>(VFrame30::Settings::regionalUnit()))).toInt());
+	SchemaUnit s_lastSelectedMonitorUnits = static_cast<SchemaUnit>(
+		QSettings()
+			.value("CreateSchemaDialog/s_lastSelectedMonitorUnits", QVariant(static_cast<int>(VFrame30::Settings::regionalUnit())))
+			.toInt());
 
-	for (auto&[unitsCaption, schemaUnits] : units)
+	for (auto& [unitsCaption, schemaUnits] : units)
 	{
 		ui->unitsComboBox->addItem(unitsCaption, static_cast<int>(schemaUnits));
 
@@ -166,7 +184,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			setUnitIndex = unitIndex;
 		}
 
-		unitIndex ++;
+		unitIndex++;
 	}
 
 	ui->unitsComboBox->setCurrentIndex(setUnitIndex >= 0 ? setUnitIndex : 0);
@@ -201,8 +219,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// LogicSchame/UfbSchema LmDescriptionFile
 	//
-	if (isLogicSchema() == true ||
-		isUfbSchema() == true)
+	if (isLogicSchema() == true || isUfbSchema() == true)
 	{
 		ui->lmDescrFileLabel->setVisible(true);
 		ui->lmDescriptionFileComboBox->setVisible(true);
@@ -213,11 +230,12 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		if (ok == true)
 		{
-			std::sort(files.begin(), files.end(),
-				[](const DbFileInfo& f1, const DbFileInfo& f2) -> bool
-				{
-					return f1.fileName() < f2.fileName();
-				});
+			std::sort(files.begin(),
+					  files.end(),
+					  [](const DbFileInfo& f1, const DbFileInfo& f2) -> bool
+					  {
+						  return f1.fileName() < f2.fileName();
+					  });
 
 			for (const DbFileInfo& fi : files)
 			{
@@ -228,15 +246,14 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		QString lmDescriptionFile;
 
-		if (isLogicSchema() == true ||
-			isUfbSchema() == true)
+		if (isLogicSchema() == true || isUfbSchema() == true || isActuatorSchema() == true)
 		{
 			lmDescriptionFile = schema->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
 		}
 
 		QString defaultLmDescriptionFile;
 
-		if ((isLogicSchema() == true ||	isUfbSchema() == true) &&
+		if ((isLogicSchema() == true || isUfbSchema() == true) &&
 			(lmDescriptionFile.isEmpty() == false || theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true))
 		{
 			defaultLmDescriptionFile = lmDescriptionFile;
@@ -246,8 +263,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			defaultLmDescriptionFile = theSettings.m_lastSelectedLmDescriptionFile;
 		}
 
-		if (fileNameList.contains(defaultLmDescriptionFile) == false &&
-			fileNameList.isEmpty() == false)
+		if (fileNameList.contains(defaultLmDescriptionFile) == false && fileNameList.isEmpty() == false)
 		{
 			defaultLmDescriptionFile = fileNameList.first();
 		}
@@ -260,12 +276,11 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		ui->lmDescriptionFileComboBox->setVisible(false);
 	}
 
-
 	setWindowTitle(tr("Schema Properties"));
 
 	// Fill Template combo box
 	//
-	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1));		// -1 means Blank, any other number is DbFileID
+	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1)); // -1 means Blank, any other number is DbFileID
 
 	std::vector<DbFileInfo> templates;
 	bool ok = db->getFileList(&templates, tempateParentFileId, templateFileExtension, true, parent);
@@ -274,11 +289,12 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		// Sort files
 		//
-		std::sort(templates.begin(), templates.end(),
-			[](const DbFileInfo& f1, const DbFileInfo& f2)
-			{
-				return f1.fileName() < f2.fileName();
-			});
+		std::sort(templates.begin(),
+				  templates.end(),
+				  [](const DbFileInfo& f1, const DbFileInfo& f2)
+				  {
+					  return f1.fileName() < f2.fileName();
+				  });
 
 		// read files
 		//
@@ -290,7 +306,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		for (size_t i = 0; i < m_templates.size(); i++)
 		{
 			std::shared_ptr<DbFile> f = m_templates[i];
-			std::shared_ptr<VFrame30::Schema> schemaTemplate =  VFrame30::Schema::Create(f->data());
+			std::shared_ptr<VFrame30::Schema> schemaTemplate = VFrame30::Schema::Create(f->data());
 
 			// Check if type the sane
 			//
@@ -302,8 +318,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 			ui->templateComboBox->addItem(schemaTemplate->caption(), QVariant(f->fileId()));
 
-			if (defultIndex == -1 &&
-				f->fileName().startsWith(QLatin1String("Default."), Qt::CaseInsensitive) == true)
+			if (defultIndex == -1 && f->fileName().startsWith(QLatin1String("Default."), Qt::CaseInsensitive) == true)
 			{
 				defultIndex = static_cast<int>(i);
 			}
@@ -322,8 +337,10 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// --
 	//
-	connect(ui->templateComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-			this, &CreateSchemaDialog::templateChanged);
+	connect(ui->templateComboBox,
+			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this,
+			&CreateSchemaDialog::templateChanged);
 
 	return;
 }
@@ -371,8 +388,7 @@ void CreateSchemaDialog::accept()
 	bool widthResult = false;
 	double width = ui->widthEdit->text().toDouble(&widthResult);
 
-	if (widthResult == false ||
-		width <= 0.0)
+	if (widthResult == false || width <= 0.0)
 	{
 		QMessageBox msgBox(this);
 		msgBox.setText(tr("Enter valid width."));
@@ -387,8 +403,7 @@ void CreateSchemaDialog::accept()
 	bool heightResult = false;
 	double height = ui->heightEdit->text().toDouble(&heightResult);
 
-	if (heightResult == false ||
-		height <= 0.0)
+	if (heightResult == false || height <= 0.0)
 	{
 		QMessageBox msgBox(this);
 		msgBox.setText(tr("Enter valid height."));
@@ -411,8 +426,7 @@ void CreateSchemaDialog::accept()
 	//
 	QString lmDescriptionFile;
 
-	if (isLogicSchema() == true ||
-		isUfbSchema())
+	if (isLogicSchema() == true || isUfbSchema())
 	{
 		lmDescriptionFile = ui->lmDescriptionFileComboBox->currentText();
 	}
@@ -636,6 +650,11 @@ bool CreateSchemaDialog::isVduSchema() const
 	return m_schema->isVduSchema();
 }
 
+bool CreateSchemaDialog::isActuatorSchema() const
+{
+	return m_schema->isActuatorSchema();
+}
+
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()
 {
 	assert(isLogicSchema());
@@ -646,4 +665,10 @@ std::shared_ptr<VFrame30::UfbSchema> CreateSchemaDialog::ufbSchema()
 {
 	assert(isUfbSchema());
 	return std::dynamic_pointer_cast<VFrame30::UfbSchema>(m_schema);
+}
+
+std::shared_ptr<VFrame30::ActuatorSchema> CreateSchemaDialog::actuatorSchema()
+{
+	assert(isActuatorSchema());
+	return std::dynamic_pointer_cast<VFrame30::ActuatorSchema>(m_schema);
 }

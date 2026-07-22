@@ -139,6 +139,7 @@ message Schema
 	//
 	optional LogicSchema logic_schema = 200;
 	optional UfbSchema ufb_schema = 201;
+	optional ActuatorSchema actuator_schema = 202;
 }
 
 //
@@ -164,6 +165,18 @@ message UfbSchema
 	optional int32 version = 2 [default = 1];
 	optional string lmDescriptionFile = 3;
 	optional string specific_properties_struct = 6;
+}
+
+//
+//
+// ActuatorSchema
+//
+//
+message ActuatorSchema
+{
+	optional string actuatorTypeId = 1;
+	optional int32 counter = 2;
+	optional string lmDescriptionFile = 3;
 }
 
 //------------------------------------------------------------------------------------------

@@ -99,6 +99,11 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_schemaWidget->fillActionsForVduSchema(m_toolBar);
 	}
 
+	if (schema->isActuatorSchema() == true)
+	{
+		m_schemaWidget->fillActionsForActuatorSchema(m_toolBar);
+	}
+
 	// Other menu items
 	//
 	m_toolBar->addSeparator();

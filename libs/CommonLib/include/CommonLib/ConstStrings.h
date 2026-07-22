@@ -721,7 +721,10 @@ namespace File
 	inline const QString VduTemplExtension = "templ_vus";                  // VDU schema template file extension
 	inline const QString VduNativeFileExtension = "vbs";                   // VDU schema file extension in native VDU format
 
-	inline const QString ActuatorHeaderFileExtension = "ach";              // Actuator Header
+	inline const QString ActuatorHeaderFileExtension = "ach";              // Actuator header
+	inline const QString ActuatorFileExtension = "acs";                    // Actuator schema file extension
+	inline const QString ActuatorTemplExtension = "templ_acs";             // Actuator schema template file extension
+
 
 	inline const QString OclFileExtension = "ocl";                         // (Optical) Connection Link
 	inline const QString BusFileExtension = "bus_type";                    // Bus type
@@ -743,7 +746,8 @@ namespace File
 			   ext.compare(MvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
 			   ext.compare(TvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
 			   ext.compare(DvsFileExtension, Qt::CaseInsensitive) == 0 ||  //
-			   ext.compare(VduFileExtension, Qt::CaseInsensitive) == 0;
+			   ext.compare(VduFileExtension, Qt::CaseInsensitive) == 0 ||  //
+			   ext.compare(ActuatorFileExtension, Qt::CaseInsensitive) == 0;
 	}
 
 	inline bool isSchemaTemplateFileExtension(const QString& ext)
@@ -753,7 +757,8 @@ namespace File
 			   ext.compare(MvsTemplExtension, Qt::CaseInsensitive) == 0 || //
 			   ext.compare(TvsTemplExtension, Qt::CaseInsensitive) == 0 || //
 			   ext.compare(DvsTemplExtension, Qt::CaseInsensitive) == 0 || //
-			   ext.compare(VduTemplExtension, Qt::CaseInsensitive) == 0;
+			   ext.compare(VduTemplExtension, Qt::CaseInsensitive) == 0 || //
+			   ext.compare(ActuatorTemplExtension, Qt::CaseInsensitive) == 0;
 	}
 } // namespace File
 

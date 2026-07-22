@@ -19,12 +19,14 @@ namespace AppSignalLib
 
 namespace VFrame30
 {
-	class Context;
-	class Schema;
 	class CDrawParam;
-	class SchemaItem;
-	class LogicSchema;
+	class Context;
 	class UfbSchema;
+
+	class ActuatorSchema;
+	class LogicSchema;
+	class Schema;
+	class SchemaItem;
 
 	extern ::Factory<VFrame30::Schema> SchemaFactory;
 
@@ -307,12 +309,16 @@ namespace VFrame30
 		[[nodiscard]] bool isTuningSchema() const;
 		[[nodiscard]] bool isDiagSchema() const;
 		[[nodiscard]] bool isVduSchema() const;
+		[[nodiscard]] bool isActuatorSchema() const;
 
 		[[nodiscard]] LogicSchema* toLogicSchema();
 		[[nodiscard]] const LogicSchema* toLogicSchema() const;
 
 		[[nodiscard]] UfbSchema* toUfbSchema();
 		[[nodiscard]] const UfbSchema* toUfbSchema() const;
+
+		[[nodiscard]] ActuatorSchema* toActuatorSchema();
+		[[nodiscard]] const ActuatorSchema* toActuatorSchema() const;
 
 		[[nodiscard]] int changeset() const;
 		void setChangeset(int value);

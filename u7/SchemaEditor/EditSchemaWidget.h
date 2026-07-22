@@ -73,6 +73,7 @@ public:
 	void fillActionsForTuningSchema(QWidget* widget);
 	void fillActionsForDiagSchema(QWidget* widget);
 	void fillActionsForVduSchema(QWidget* widget);
+	void fillActionsForActuatorSchema(QWidget* widget);
 
 protected:
 	virtual bool event(QEvent* event) override;
@@ -315,6 +316,7 @@ public:
 	bool isTuningSchema() const;
 	bool isDiagSchema() const;
 	bool isVduSchema() const;
+	bool isActuatorSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;

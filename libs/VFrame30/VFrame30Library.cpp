@@ -1,11 +1,16 @@
 #include <VFrame30/VFrame30Library.h>
 
+#include <VFrame30/ActuatorSchema.h>
 #include <VFrame30/DiagSchema.h>
-#include <VFrame30/FblItemLine.h>
-#include <VFrame30/FblItemRect.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/MonitorSchema.h>
-#include <VFrame30/Schema.h>
+#include <VFrame30/TuningSchema.h>
+#include <VFrame30/UfbSchema.h>
+#include <VFrame30/VduSchema.h>
+#include <VFrame30/WiringSchema.h>
+
+#include <VFrame30/FblItemLine.h>
+#include <VFrame30/FblItemRect.h>
 #include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
@@ -35,10 +40,6 @@
 #include <VFrame30/SchemaItemVduTrend.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaLayer.h>
-#include <VFrame30/TuningSchema.h>
-#include <VFrame30/UfbSchema.h>
-#include <VFrame30/VduSchema.h>
-#include <VFrame30/WiringSchema.h>
 
 
 namespace VFrame30
@@ -49,13 +50,14 @@ namespace VFrame30
 
 		// Registering Schemas
 		//
+		SchemaFactory.Register<ActuatorSchema>();
 		SchemaFactory.Register<DiagSchema>();
 		SchemaFactory.Register<LogicSchema>();
-		SchemaFactory.Register<UfbSchema>();
 		SchemaFactory.Register<MonitorSchema>();
 		SchemaFactory.Register<TuningSchema>();
-		SchemaFactory.Register<WiringSchema>();
+		SchemaFactory.Register<UfbSchema>();
 		SchemaFactory.Register<VduSchema>();
+		SchemaFactory.Register<WiringSchema>();
 
 		// Registering VideoLayers
 		//

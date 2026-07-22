@@ -1,6 +1,7 @@
 #pragma once
 
-namespace Ui {
+namespace Ui
+{
 	class CreateSchemaDialog;
 }
 
@@ -9,12 +10,13 @@ namespace VFrame30
 	class Schema;
 	class LogicSchema;
 	class UfbSchema;
-}
+	class ActuatorSchema;
+} // namespace VFrame30
 
 class CreateSchemaDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, QWidget* parent);
 	virtual ~CreateSchemaDialog();
@@ -32,12 +34,14 @@ private:
 	bool isTuningSchema() const;
 	bool isDiagSchema() const;
 	bool isVduSchema() const;
+	bool isActuatorSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	std::shared_ptr<VFrame30::UfbSchema> ufbSchema();
-	
+	std::shared_ptr<VFrame30::ActuatorSchema> actuatorSchema();
+
 private:
-	Ui::CreateSchemaDialog *ui;
+	Ui::CreateSchemaDialog* ui;
 
 	DbController* m_db = nullptr;
 
@@ -46,4 +50,3 @@ private:
 
 	std::vector<std::shared_ptr<DbFile>> m_templates;
 };
-
