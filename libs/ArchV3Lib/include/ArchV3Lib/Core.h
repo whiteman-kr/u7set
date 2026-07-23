@@ -7,9 +7,10 @@
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../OnlineLib/CircularLogger.h"
 
-#include "Writer.h"
+#include "Postgres.h"
 #include "Db.h"
 #include "ArchSignal.h"
+#include "Writer.h"
 
 namespace ArchV3
 {
@@ -18,7 +19,6 @@ namespace ArchV3
 	public:
 		Core(const QString& archDir, 
 			const QByteArray& archInfoV3Data, 
-			const AppSignals& appSignals,
 			const DbConnectionInfo& dbConnInfo, 
 			CircularLoggerShared logger);
 		~Core();
@@ -33,7 +33,6 @@ namespace ArchV3
 		QString m_archDir;
 		QString m_projectName;
 		std::unique_ptr<Proto::ArchInfoV3> m_archInfoV3;
-		const AppSignals& m_appSignals;
 		const DbConnectionInfo m_dbConnInfo;
 		CircularLoggerShared m_logger;
 

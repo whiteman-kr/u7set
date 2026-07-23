@@ -289,6 +289,14 @@ namespace ArchV3
 			return false;
 		}
 
+		//const QString sql2 = QString("ALTER DATABASE %1 SET lc_messages TO 'C'").arg(dbName);
+
+		//if (query.exec(sql2) == false)
+		//{
+		//	logErr(QString("failed to alter database '%1': %2").arg(dbName).arg(query.lastError().text()));
+		//	return false;
+		//}
+
 		logMsg(QString("database '%1' created").arg(dbName));
 
 		return true;
@@ -305,7 +313,7 @@ namespace ArchV3
 
 		query.prepare("SELECT datname "
 					  "FROM pg_database "
-					  "WHERE datname LIKE :pattern");
+					  "WHERE datname ILIKE :pattern");
 
 		query.bindValue(":pattern", databaseNamePattern);
 

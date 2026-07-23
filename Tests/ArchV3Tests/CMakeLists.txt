@@ -13,7 +13,7 @@ add_executable(${TARGET}
 	Common.cpp
 	Common.h
 	ArchV3TestsMain.cpp
-	DbTests.cpp)
+	DbTests.cpp "CoreTests.cpp")
 
  target_compile_definitions(${TARGET} PRIVATE
     _WIN32_WINNT=0x0A00

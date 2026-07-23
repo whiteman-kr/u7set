@@ -71,17 +71,19 @@ int main(int argc, char *argv[])
 
 	bool res = true;
 
-	res &= loadConfiguration();
+	res &= loadArchInfoV3Data();
 	RETURN_VALUE_IF_FALSE(res, 1);
 
-	res &= loadAppSignals();
-	RETURN_VALUE_IF_FALSE(res, 2);
+	//res &= loadAppSignals();
+	//RETURN_VALUE_IF_FALSE(res, 2);
 
 //	createAndInitSignalStates();
 
 	::testing::InitGoogleTest(&argc, argv);
 
 	auto result = RUN_ALL_TESTS();
+
+	cleanup();
 
 	return result;
 }

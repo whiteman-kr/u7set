@@ -150,6 +150,12 @@ namespace Builder
 
 			std::shared_ptr<AppDataServiceCfgGenerator> appDataServiceCfgGen = std::dynamic_pointer_cast<AppDataServiceCfgGenerator>(it->second);
 
+			if (appDataServiceCfgGen == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				continue;
+			}
+
 			const std::set<Hash>& acquiredSignals = appDataServiceCfgGen->acquiredAppSignals();
 
 			if (appDataServiceCfgGen == nullptr)
@@ -176,12 +182,20 @@ namespace Builder
 					continue;
 				}
 
+				if (s->signalType() != E::SignalType::Discrete &&
+					s->signalType() != E::SignalType::Analog)
+				{
+					continue;
+				}
+
 				Proto::ArchSignal ps;
 
 				bool res = copyArchSignal(s, &ps);
 
 				if (res == false)
 				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
 					continue;
 				}
 
@@ -198,10 +212,15 @@ namespace Builder
 
 		qsizetype size = static_cast<qsizetype>(archInfo.ByteSizeLong());
 
-		QByteArray data;
-		data.resize(size);
+		QByteArray data(size, Qt::Uninitialized);
 
-		archInfo.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.data()));
+		result = archInfo.SerializeToArray(data.data(), data.size());
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, "Serialization error");
+			return false;
+		}
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
 															File::ARCH_INFO_V3_PROTO,

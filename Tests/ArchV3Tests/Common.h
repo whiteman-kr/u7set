@@ -8,6 +8,8 @@
 #include "../../AppDataService/DiscretesLog.h"
 #include "../../AppSignalLib/AppSignal.h"
 
+#include <ArchV3Lib/Core.h>
+
 extern CircularLoggerShared logger;
 
 extern QString buildPath;
@@ -17,6 +19,13 @@ extern OnlineLib::BuildInfo buildInfo;
 extern SoftwareSettingsSet settingsSet;
 
 extern AppSignals appSignals;
+
+extern std::unique_ptr<QByteArray> achInfoV3Data;
+
+inline const QString TEST_PROJECT = "TEST_PROJECT";
+inline const QString TEST_PROJECT_DB_PATTERN = "u7arch_TEST_PROJECT_%";
+
+inline ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5433, .user = "u7arch", .password = "P2ssw0rd"};
 
 //
 
@@ -38,6 +47,10 @@ public:
 };
 
 bool isGTestDeathChild(const QStringList& args);
+
+bool loadArchInfoV3Data();
+void cleanup();
+void dropDatabases(const QString& patternName);
 
 bool loadConfiguration();
 bool loadAppSignals();

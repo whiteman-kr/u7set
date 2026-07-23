@@ -9,12 +9,10 @@ namespace ArchV3
 {
 	Core::Core(const QString& archDir,
 			   const QByteArray& archInfoV3Data,
-			   const AppSignals& appSignals,
 			   const DbConnectionInfo& dbConnInfo, 
 			   CircularLoggerShared logger) :
 		LogWrapper(logger, "ArchV3::Core"),
 		m_archDir(archDir),
-		m_appSignals(appSignals),
 		m_dbConnInfo(dbConnInfo),
 		m_logger(logger)
 	{ 
@@ -103,24 +101,24 @@ namespace ArchV3
 
 	ArchWriterShared Core::getArchWriter(const QString& srcEquipmentID)
 	{
-		std::lock_guard<std::mutex> lock(m_archWritersMutex);
+		//std::lock_guard<std::mutex> lock(m_archWritersMutex);
 
-		auto it = m_archWriters.find(srcEquipmentID);
+		//auto it = m_archWriters.find(srcEquipmentID);
 
-		if (it != m_archWriters.end())
-		{
-			return it->second;
-		}
+		//if (it != m_archWriters.end())
+		//{
+		//	return it->second;
+		//}
 
-		auto archWriter = std::make_shared<ArchWriter>(
-			m_archDir,
-			m_projectName,
-			srcEquipmentID,
-			m_appSignals,
-			m_logger
-		);
+		//auto archWriter = std::make_shared<ArchWriter>(
+		//	m_archDir,
+		//	m_projectName,
+		//	srcEquipmentID,
+		//	m_logger
+		//);
 
-		m_archWriters[srcEquipmentID] = archWriter;
-		return archWriter;
+		//m_archWriters[srcEquipmentID] = archWriter;
+//		return archWriter;
+		return nullptr;
 	}
 } // namespace ArchV3

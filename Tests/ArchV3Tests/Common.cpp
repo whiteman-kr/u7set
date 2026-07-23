@@ -11,6 +11,8 @@ SoftwareSettingsSet settingsSet;
 
 AppSignals appSignals;
 
+std::unique_ptr<QByteArray> achInfoV3Data;
+
 bool isGTestDeathChild(const QStringList& args)
 {
 	for(const QString& arg : args)
@@ -25,6 +27,45 @@ bool isGTestDeathChild(const QStringList& args)
 }
 
 //
+
+bool loadArchInfoV3Data()
+{
+	QString filePath = buildPath + "/SYSTEMID_RACK01_WS00_ARCHSV3/ArchInfoV3.proto";
+
+	QFile f(filePath);
+
+	if (!f.open(QIODeviceBase::ReadOnly))
+	{
+		logMsg(QString("Error read file: %1").arg(filePath));
+		return false;
+	}
+
+	achInfoV3Data = std::make_unique<QByteArray>(qUncompress(f.readAll()));
+
+	logMsg(QString("ArchInfoV3 read Ok, size=%1").arg(achInfoV3Data->size()));
+
+	return true;
+}
+
+void cleanup()
+{ 
+	achInfoV3Data.reset();
+}
+
+void dropDatabases(const QString& patternName)
+{
+	ArchV3::Postgres pg(dbConnInfo, DbName::POSTGRES, logger);
+
+	if (pg.open() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	pg.dropDatabases(patternName);
+}
+
+
 
 bool loadConfiguration()
 {

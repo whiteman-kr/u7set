@@ -124,6 +124,10 @@ namespace ArchV3
 
 		result = deleteSignals(signalsToDelete);
 
+		RETURN_IF_FALSE(result);
+
+		result = registerSignals(archSignals, signalsToRegister);
+
 		Q_ASSERT(false);
 
 		return true;
@@ -206,6 +210,7 @@ namespace ArchV3
 
 		result &= m_db->loadAndExecuteScript("Functions/fn_register_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_delete_signals_by_hash.sql");
 
 		return result;
 	}
@@ -261,6 +266,68 @@ namespace ArchV3
 		bool res = m_db->execSql(sql);
 
 		return res;
+	}
+
+	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals, const std::unordered_set<Hash>& signalsToRegister)
+	{
+		if (signalsToRegister.empty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		QStringList values;
+
+		quint32 ctr = 0;
+
+		const QString query("SELECT fn_register_signals(ARRAY[%1]::signal_register_info[], %2::BIGINT)");
+
+		qint64 utc = QDateTime::currentMSecsSinceEpoch();
+
+		for (const ArchSignal& signal : archSignals)
+		{
+			Hash hash = calcHash(signal.appSignalID);
+
+			if (signalsToRegister.find(hash) == signalsToRegister.end())
+			{
+				continue;
+			}
+
+			QString value = QString("('%1', %2, %3, %4)").
+								arg(signal.appSignalID).
+								arg(static_cast<qint64>(hash)).
+								arg(static_cast<quint8>(signal.signalType)).
+								arg(static_cast<quint8>(hash & 0xFF));
+			values << value;
+
+			ctr++;
+
+			if (ctr >= 1000)
+			{
+				const QString sql = QString(query).arg(values.join(",")).arg(utc);
+
+				if (m_db->execSql(sql) == false)
+				{
+					result = false;
+				}
+
+				values.clear();
+				ctr = 0;
+			}
+		}
+
+		if (values.isEmpty() == false)
+		{
+			const QString sql = QString(query).arg(values.join(",")).arg(utc);
+
+			if (m_db->execSql(sql) == false)
+			{
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

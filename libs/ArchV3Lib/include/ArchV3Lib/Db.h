@@ -44,6 +44,7 @@ namespace ArchV3
 
 		bool getRegisteredSignals(std::unordered_map<Hash, RegisteredSignalInfo>* registeredSignals) const;
 		bool deleteSignals(const std::vector<QString>& ids) const;
+		bool registerSignals(const std::vector<ArchSignal>& archSignals, const std::unordered_set<Hash>& signalsToRegister);
 
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 
