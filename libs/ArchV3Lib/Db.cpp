@@ -6,6 +6,7 @@
 
 #include <ArchV3Lib/Db.h>
 #include <ArchV3Lib/Utils.h>
+#include <ArchV3Lib/Storage.h>
 
 #include <CommonLib/ConstStrings.h>
 
@@ -85,8 +86,10 @@ namespace ArchV3
 		return m_db != nullptr && m_db->isOpen(); 
 	}
 
-	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals)
+	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals, std::vector<QString>* filesToDelete)
 	{
+		TEST_PTR_RETURN_FALSE(filesToDelete);
+
 		std::unordered_map<Hash, RegisteredSignalInfo> registeredSignals;
 
 		bool result = getRegisteredSignals(&registeredSignals);
@@ -122,15 +125,18 @@ namespace ArchV3
 			}
 		}
 
-		result = deleteSignals(signalsToDelete);
+		result = deleteSignals(signalsToDelete, filesToDelete);
+
+		if (result == false)
+		{
+			filesToDelete->clear();
+		}
 
 		RETURN_IF_FALSE(result);
 
 		result = registerSignals(archSignals, signalsToRegister);
 
-		Q_ASSERT(false);
-
-		return true;
+		return result;
 	}
 
 	bool Db::schemaCheckAndCreate()
@@ -211,6 +217,7 @@ namespace ArchV3
 		result &= m_db->loadAndExecuteScript("Functions/fn_register_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_delete_signals_by_hash.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_create_archive_file.sql");
 
 		return result;
 	}
@@ -252,8 +259,17 @@ namespace ArchV3
 		return true;
 	}
 
-	bool Db::deleteSignals(const std::vector<QString>& ids) const
+	bool Db::deleteSignals(const std::vector<QString>& ids, std::vector<QString>* filesToDelete) const
 	{
+		TEST_PTR_RETURN_FALSE(filesToDelete);
+
+		if (ids.empty())
+		{
+			return true;
+		}
+
+		filesToDelete->clear();
+
 		QStringList values;
 
 		for (const QString& id : ids)
@@ -261,11 +277,28 @@ namespace ArchV3
 			values << QString::number(calcHash(id));
 		}
 
-		const QString sql = QString("SELECT fn_delete_signals_by_hash(ARRAY[%1]::BIGINT[])").arg(values.join(","));
+		const QString sql = QString("SELECT * FROM fn_delete_signals_by_hash(ARRAY[%1]::BIGINT[])").arg(values.join(","));
 
-		bool res = m_db->execSql(sql);
+		auto query = m_db->execQuery(sql);
 
-		return res;
+		if (!query)
+		{
+			return false;
+		}
+
+		filesToDelete->reserve(query->size());
+
+		while (query->next())
+		{
+			QString filePath = query->value(0).toString();
+
+			if (filePath.isEmpty() == false)
+			{
+				filesToDelete->push_back(filePath);
+			}
+		}
+
+		return true;
 	}
 
 	bool Db::registerSignals(const std::vector<ArchSignal>& archSignals, const std::unordered_set<Hash>& signalsToRegister)
@@ -328,6 +361,24 @@ namespace ArchV3
 		}
 
 		return result;
+	}
+
+	qint64 Db::createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const
+	{
+		quint8 bucket = static_cast<quint8>(calcHash(appSignalID) & 0xFF);
+
+		const QString fileName = Storage::makeArchiveFileName(appSignalID, bucket, timeFromUtc, true);
+		const QString sql = QString("SELECT fn_create_archive_file(%1, %2, '%3', %4, %5)").
+							arg(signalID).arg(bucket).arg(timeFromUtc).arg(createdUtc);
+
+		auto query = m_db->execQuery(sql);
+
+		if (!query || query->next() == false)
+		{
+			return BAD_ARCHIVE_FILE_ID;
+		}
+
+		return query->value(0).toLongLong();
 	}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const

@@ -11,6 +11,7 @@
 #include "Db.h"
 #include "ArchSignal.h"
 #include "Writer.h"
+#include "Storage.h"
 
 namespace ArchV3
 {

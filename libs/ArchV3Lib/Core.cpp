@@ -76,13 +76,19 @@ namespace ArchV3
 				continue;
 			}
 
-			res = db.registerSignals(archSignals);
+			std::vector<QString> filesToDelete;
+
+			res = db.registerSignals(archSignals, &filesToDelete);
 
 			if (res == false)
 			{
 				result = false;
 				continue;
 			}
+
+			Storage s(m_archDir, m_projectName, clientID);
+
+			s.deleteFiles(filesToDelete);
 
 		}
 

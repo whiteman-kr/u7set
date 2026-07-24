@@ -15,14 +15,16 @@ qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/Core.h
 	./include/ArchV3Lib/Db.h
 	./include/ArchV3Lib/Postgres.h
+	./include/ArchV3Lib/Storage.h
 	./include/ArchV3Lib/Utils.h
 	./include/ArchV3Lib/Writer.h
 	
 	ArchFile.cpp
 	Core.cpp
 	Db.cpp
-	Writer.cpp
 	Postgres.cpp
+	Storage.cpp
+	Writer.cpp
 
 	./Sql/Sql.qrc
 )

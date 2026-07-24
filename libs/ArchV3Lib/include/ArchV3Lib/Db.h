@@ -21,6 +21,9 @@ namespace ArchV3
 		};
 
 	public:
+		static constexpr qint64 BAD_ARCHIVE_FILE_ID = -1;
+
+	public:
 		Db(	const QString& projectID, const QString& appDataSrvID, 
 			const DbConnectionInfo& dbConnInfo,
 			CircularLoggerShared logger);
@@ -31,7 +34,7 @@ namespace ArchV3
 
 		bool isOpen() const;
 
-		bool registerSignals(const std::vector<ArchSignal>& archSignals);
+		bool registerSignals(const std::vector<ArchSignal>& archSignals, std::vector<QString>* filesToDelete);
 
 	private:
 		bool schemaCheckAndCreate();
@@ -43,8 +46,9 @@ namespace ArchV3
 		bool functionsCreate();
 
 		bool getRegisteredSignals(std::unordered_map<Hash, RegisteredSignalInfo>* registeredSignals) const;
-		bool deleteSignals(const std::vector<QString>& ids) const;
+		bool deleteSignals(const std::vector<QString>& ids, std::vector<QString>* filesToDelete) const;
 		bool registerSignals(const std::vector<ArchSignal>& archSignals, const std::unordered_set<Hash>& signalsToRegister);
+		qint64 createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const;
 
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 

@@ -9,6 +9,7 @@
 		<file>Functions/fn_register_signals.sql</file>
 		<file>Functions/fn_get_registered_signals.sql</file>
 		<file>Functions/fn_delete_signals_by_hash.sql</file>
+		<file>Functions/fn_create_archive_file.sql</file>
 
 	</qresource>
 </RCC>
