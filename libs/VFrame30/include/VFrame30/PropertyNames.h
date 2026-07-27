@@ -286,6 +286,8 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 
 		inline static const QString signalIDs = QStringLiteral("SignalIDs");
 		inline static const QString signalId = QStringLiteral("SignalID");
+		inline static const QString signalIdChannel1 = QStringLiteral("SignalIDChannel1");
+		inline static const QString signalIdChannel2 = QStringLiteral("SignalIDChannel2");
 		inline static const QString appSignalID = QStringLiteral("AppSignalID");
 		inline static const QString validityAppSignalID = QStringLiteral("ValidityAppSignalID");
 		inline static const QString appSignalIDs = QStringLiteral("AppSignalIDs");

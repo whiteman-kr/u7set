@@ -3067,6 +3067,7 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 		editTabPage->updateAfbSchemaItems();
 		editTabPage->updateUfbSchemaItems();
 		editTabPage->updateBussesSchemaItems();
+		editTabPage->updateActuatorSchemaItems();
 
 		// Do this ONLY after update, because during updateAfbSchemaItems/updateUfbSchemaItems/updateBussesSchemaItems
 		// window can be closed by Ctrl+w, and programm crashes then

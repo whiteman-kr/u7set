@@ -8,6 +8,7 @@
 #include <VFrame30/UfbSchema.h>
 #include <VFrame30/VduSchema.h>
 
+#include <VFrame30/ActuatorHeader.h>
 #include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
@@ -15,6 +16,7 @@
 #include <VFrame30/HorzVertLinks.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaDetails.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemLink.h>
@@ -1031,6 +1033,68 @@ namespace VFrame30
 		return errorMessage->isEmpty();
 	}
 
+	bool Schema::updateAllSchemaItemActuators(const std::vector<std::shared_ptr<ActuatorHeader>>& actuatorHeaders,
+											  int* updatedItemCount,
+											  QString* errorMessage)
+	{
+		if (updatedItemCount == nullptr || errorMessage == nullptr)
+		{
+			assert(updatedItemCount);
+			assert(errorMessage);
+			return false;
+		}
+
+		*updatedItemCount = 0;
+
+		// Find all VFrame30::SchemaItemActuator items
+		//
+		std::vector<std::shared_ptr<VFrame30::SchemaItemActuator>> schemaItemActuators;
+
+		for (const std::shared_ptr<SchemaLayer>& l : layers())
+		{
+			for (const auto& si : l->items())
+			{
+				auto schemaItemActuator = std::dynamic_pointer_cast<VFrame30::SchemaItemActuator>(si);
+
+				if (schemaItemActuator != nullptr && schemaItemActuator->isCommented() == false)
+				{
+					schemaItemActuators.push_back(schemaItemActuator);
+				}
+			}
+		}
+
+		// Update found items
+		//
+		for (auto& si : schemaItemActuators)
+		{
+			auto foundIt = std::find_if(actuatorHeaders.begin(),
+										actuatorHeaders.end(),
+										[&si](const auto& actuatorHeader)
+										{
+											return si->actuatorTypeId() == actuatorHeader->actuatorTypeId();
+										});
+
+			if (foundIt == actuatorHeaders.end())
+			{
+				*errorMessage +=
+					tr("Can't find ActuatorType %1. Schema %2.\n").arg(si->actuatorTypeId()).arg(si->parentSchema()->schemaId());
+				continue;
+			}
+
+			const auto& actuatorHeader = *foundIt;
+
+			if (si->actuatorHeaderVersion() != actuatorHeader->version())
+			{
+				si->updateElement(*actuatorHeader);
+				si->adjustHeight(gridSize(), pinGridStep());
+
+				(*updatedItemCount)++;
+			}
+		}
+
+		return errorMessage->isEmpty();
+	}
+
 	QStringList Schema::getSignalList() const
 	{
 		std::set<QString> signalMap; // signal ids can be duplicated, std::set removes duplicates.
@@ -1379,6 +1443,16 @@ namespace VFrame30
 		}
 #endif
 		return m_layers;
+	}
+
+	Schema::LayerIt Schema::begin() const
+	{
+		return m_layers.cbegin();
+	}
+
+	Schema::LayerIt Schema::end() const
+	{
+		return m_layers.cend();
 	}
 
 	int Schema::activeLayerIndex() const

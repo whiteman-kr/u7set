@@ -11,20 +11,40 @@ namespace Hardware
 	DeviceModule::DeviceModule(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
 		DeviceObject(DeviceType::Module, preset, parent)
 	{
-		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, QLatin1String("ModuleFamily"), true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily);
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType,
+														 QLatin1String("ModuleFamily"),
+														 true,
+														 DeviceModule::moduleFamily,
+														 DeviceModule::setModuleFamily);
 		familyTypeProp->setExpert(true);
 
-		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, QLatin1String("ModuleVersion"), true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion);
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int,
+															QLatin1String("ModuleVersion"),
+															true,
+															DeviceModule::moduleVersion,
+															DeviceModule::setModuleVersion);
 		moduleVersionProp->setExpert(true);
 
-		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, QLatin1String("ConfigurationScript"), true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript);
+		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString,
+														   QLatin1String("ConfigurationScript"),
+														   true,
+														   DeviceModule::configurationScript,
+														   DeviceModule::setConfigurationScript);
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
 
-		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, QLatin1String("RawDataDescription"), true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription);
+		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString,
+														   QLatin1String("RawDataDescription"),
+														   true,
+														   DeviceModule::rawDataDescription,
+														   DeviceModule::setRawDataDescription);
 		rawDataDescrProp->setExpert(true);
 
-		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, QLatin1String("CustomModuleFamily"), true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily);
+		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int,
+															   QLatin1String("CustomModuleFamily"),
+															   true,
+															   DeviceModule::customModuleFamily,
+															   DeviceModule::setCustomModuleFamily);
 		customFamilyTypeProp->setExpert(true);
 
 		familyTypeProp->setUpdateFromPreset(true);
@@ -100,23 +120,18 @@ namespace Hardware
 		{
 			m_type = static_cast<decltype(m_type)>(modulemessage.typeobsolete());
 
-			if ((m_type & 0xff00) == 0x0100
-				|| (m_type & 0xff00) == 0x0200
-				|| (m_type & 0xff00) == 0x0300
-				|| (m_type & 0xff00) == 0x0400
-				|| (m_type & 0xff00) == 0x0500
-				|| (m_type & 0xff00) == 0x0600
-				|| (m_type & 0xff00) == 0x0700
-				)
+			if ((m_type & 0xff00) == 0x0100 || (m_type & 0xff00) == 0x0200 || (m_type & 0xff00) == 0x0300 || (m_type & 0xff00) == 0x0400 ||
+				(m_type & 0xff00) == 0x0500 || (m_type & 0xff00) == 0x0600 || (m_type & 0xff00) == 0x0700)
 			{
-				m_type |= 0x1000;	// Module family 01..07 changed to 11..17, this is for compatibitity
+				m_type |= 0x1000; // Module family 01..07 changed to 11..17, this is for compatibitity
 			}
 		}
 
 		m_customModuleFamily = static_cast<uint16_t>(modulemessage.custommodulefamily());
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
-		m_configurationScript = replaceEngeneeringToEngineering(m_configurationScript);		// Shit happens. We had a situaltion when misprinting was detected (EngEneering vs EngIneering).
+		m_configurationScript = replaceEngeneeringToEngineering(
+			m_configurationScript); // Shit happens. We had a situaltion when misprinting was detected (EngEneering vs EngIneering).
 		// To avoid manual replacement of this typo for non platform modules, the replace just made.
 
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
@@ -208,21 +223,15 @@ namespace Hardware
 	{
 		FamilyType family = moduleFamily();
 
-		return	family == FamilyType::AIM ||
-			family == FamilyType::DIM ||
-			family == FamilyType::WAIM ||
-			family == FamilyType::TIM ||
-			family == FamilyType::RIM ||
-			family == FamilyType::AIFM ||
-			family == FamilyType::MPS;
+		return family == FamilyType::AIM || family == FamilyType::DIM || family == FamilyType::WAIM || family == FamilyType::TIM ||
+			   family == FamilyType::RIM || family == FamilyType::AIFM || family == FamilyType::MPS;
 	}
 
 	bool DeviceModule::isOutputModule() const
 	{
 		FamilyType family = moduleFamily();
 
-		return	family == FamilyType::AOM ||
-			family == FamilyType::DOM;
+		return family == FamilyType::AOM || family == FamilyType::DOM;
 	}
 
 	bool DeviceModule::isLogicModule() const
@@ -232,9 +241,7 @@ namespace Hardware
 
 	bool DeviceModule::isFSCConfigurationModule() const
 	{
-		return moduleFamily() == FamilyType::LM ||
-			   moduleFamily() == FamilyType::VDU ||
-			   moduleFamily() == FamilyType::BVB ||
+		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::VDU || moduleFamily() == FamilyType::BVB ||
 			   moduleFamily() == FamilyType::MSO;
 	}
 
@@ -269,4 +276,8 @@ namespace Hardware
 		return moduleFamily() == FamilyType::VDU;
 	}
 
+	bool DeviceModule::isAcm() const
+	{
+		return moduleFamily() == FamilyType::ACM;
+	}
 } // namespace Hardware

@@ -337,6 +337,18 @@ void EditSchemaTabPage::updateBussesSchemaItems()
 	return;
 }
 
+void EditSchemaTabPage::updateActuatorSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		Q_ASSERT(m_schemaWidget);
+		return;
+	}
+
+	m_schemaWidget->updateActuatorsForSchema();
+	return;
+}
+
 void EditSchemaTabPage::detachOrAttachWindow()
 {
 	emit pleaseDetachOrAttachWindow(this);

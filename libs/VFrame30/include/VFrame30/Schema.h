@@ -24,6 +24,7 @@ namespace VFrame30
 	class UfbSchema;
 
 	class ActuatorSchema;
+	class ActuatorHeader;
 	class LogicSchema;
 	class Schema;
 	class SchemaItem;
@@ -181,6 +182,9 @@ namespace VFrame30
 									QString* errorMessage);
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage);
+		bool updateAllSchemaItemActuators(const std::vector<std::shared_ptr<ActuatorHeader>>& actuatorHeaders,
+										  int* updatedItemCount,
+										  QString* errorMessage);
 
 		[[nodiscard]] QStringList getSignalList() const;
 		[[nodiscard]] virtual QStringList getLabels() const;
@@ -225,6 +229,11 @@ namespace VFrame30
 		// Do not change to value semantic, as ITERATORS from this getter are used in algs
 		//
 		const std::vector<std::shared_ptr<SchemaLayer>>& layers() const;
+
+		using LayerIt = std::vector<std::shared_ptr<SchemaLayer>>::const_iterator;
+
+		[[nodiscard]] LayerIt begin() const;
+		[[nodiscard]] LayerIt end() const;
 
 		[[nodiscard]] int activeLayerIndex() const;
 		[[nodiscard]] QUuid activeLayerGuid() const;

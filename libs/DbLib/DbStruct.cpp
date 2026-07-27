@@ -1455,6 +1455,11 @@ DbFile& DbFile::operator=(const DbFileInfo& fileInfo)
 	return *this;
 }
 
+const DbFileInfo& DbFile::fileInfo() const
+{
+	return *this;
+}
+
 const QByteArray& DbFile::data() const
 {
 	return m_data;

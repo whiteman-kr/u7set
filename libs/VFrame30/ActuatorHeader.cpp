@@ -40,13 +40,23 @@ namespace VFrame30
 			.setValidator("[A-Za-z0-9_]+")
 			.setViewOrder(1);
 
+		ADD_PROPERTY_GETTER(QString, PropertyNames::signalIdChannel1, true, ActuatorSignal::signalIdChannel1)
+			->setDescription(tr("SignalID for channel 1 of the actuator type."))
+			.setCategory(PropertyNames::commonCategory)
+			.setViewOrder(2);
+
+		ADD_PROPERTY_GETTER(QString, PropertyNames::signalIdChannel2, true, ActuatorSignal::signalIdChannel2)
+			->setDescription(tr("SignalID for channel 2 of the actuator type."))
+			.setCategory(PropertyNames::commonCategory)
+			.setViewOrder(3);
+
 		ADD_PROPERTY_GET_SET_CAT(E::SignalType,
 								 PropertyNames::signalType,
 								 PropertyNames::commonCategory,
 								 true,
 								 ActuatorSignal::signalType,
 								 ActuatorSignal::setSignalType)
-			->setViewOrder(2);
+			->setViewOrder(4);
 
 		ADD_PROPERTY_GET_SET_CAT(E::AnalogAppSignalFormat,
 								 PropertyNames::analogFormat,
@@ -55,7 +65,7 @@ namespace VFrame30
 								 ActuatorSignal::analogFormat,
 								 ActuatorSignal::setAnalogFormat)
 			->setDescription(tr("Analog signal format for the actuator type if applicable."))
-			.setViewOrder(3);
+			.setViewOrder(5);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::busTypeId,
@@ -64,7 +74,7 @@ namespace VFrame30
 								 ActuatorSignal::busTypeId,
 								 ActuatorSignal::setBusTypeId)
 			->setDescription(tr("BusTypeID for the actuator type if applicable."))
-			.setViewOrder(4);
+			.setViewOrder(6);
 
 		return;
 	}
@@ -88,6 +98,16 @@ namespace VFrame30
 	QString ActuatorSignal::signalId() const
 	{
 		return m_data.signalId;
+	}
+
+	QString ActuatorSignal::signalIdChannel1() const
+	{
+		return m_data.signalId + ":1";
+	}
+
+	QString ActuatorSignal::signalIdChannel2() const
+	{
+		return m_data.signalId + ":2";
 	}
 
 	void ActuatorSignal::setSignalId(const QString& signalId)

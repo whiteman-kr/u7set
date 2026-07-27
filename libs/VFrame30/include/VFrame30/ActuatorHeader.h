@@ -32,6 +32,9 @@ namespace VFrame30
 
 	public:
 		[[nodiscard]] QString signalId() const;
+		[[nodiscard]] QString signalIdChannel1() const;
+		[[nodiscard]] QString signalIdChannel2() const;
+
 		void setSignalId(const QString& signalId);
 
 		[[nodiscard]] E::SignalType signalType() const;

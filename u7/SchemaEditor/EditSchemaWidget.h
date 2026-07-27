@@ -141,6 +141,7 @@ public:
 	bool updateAfbsForSchema();
 	bool updateUfbsForSchema();
 	bool updateBussesForSchema();
+	bool updateActuatorsForSchema();
 
 protected:
 	void addItem(SchemaItemPtr newItem);

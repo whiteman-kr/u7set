@@ -46,6 +46,7 @@ public:
 	void updateAfbSchemaItems();
 	void updateUfbSchemaItems();
 	void updateBussesSchemaItems();
+	void updateActuatorSchemaItems();
 
 signals:
 	void vcsFileStateChanged();

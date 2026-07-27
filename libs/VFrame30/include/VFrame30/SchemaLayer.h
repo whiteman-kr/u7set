@@ -47,11 +47,10 @@ namespace VFrame30
 	};
 
 
-	class SchemaLayer :
-		public QObject,
-		public Proto::ObjectSerialization<SchemaLayer>,
-		public std::enable_shared_from_this<SchemaLayer>,
-		public DebugInstCounter<SchemaLayer>
+	class SchemaLayer : public QObject,
+						public Proto::ObjectSerialization<SchemaLayer>,
+						public std::enable_shared_from_this<SchemaLayer>,
+						public DebugInstCounter<SchemaLayer>
 	{
 		Q_OBJECT
 
@@ -87,7 +86,7 @@ namespace VFrame30
 		int GetPinPosConnectinCount(SchemaPoint pinPos) const;
 
 		template<typename SchemaItemType>
-		std::shared_ptr<SchemaItemType> getItemUnderPointByType(QPointF point) const;		// This will work only inside VFrame30 :(
+		std::shared_ptr<SchemaItemType> getItemUnderPointByType(QPointF point) const; // This will work only inside VFrame30 :(
 
 		std::shared_ptr<SchemaItem> getItemUnderPoint(QPointF point, const QString& className = QString{}) const;
 		std::list<std::shared_ptr<SchemaItem>> getItemListUnderPoint(QPointF point, const QString& className = QString{}) const;
@@ -122,7 +121,16 @@ namespace VFrame30
 		// DO NOT modify it to the value semantic, ide relies on getting an iterator for m_items,
 		// for example for searching next.
 		//
-		const std::vector<SchemaItemPtr>& items() const;
+		[[nodiscard]] const std::vector<SchemaItemPtr>& items() const;
+
+		using ItemConstIt = std::vector<SchemaItemPtr>::const_iterator;
+		using ItemIt = std::vector<SchemaItemPtr>::iterator;
+
+		[[nodiscard]] ItemConstIt begin() const;
+		[[nodiscard]] ItemConstIt end() const;
+
+		[[nodiscard]] ItemIt begin();
+		[[nodiscard]] ItemIt end();
 
 		// Properties
 		//
@@ -149,12 +157,12 @@ namespace VFrame30
 		// Data
 		//
 	public:
-		std::map<SchemaPoint, int> connectionMap;			// Key is pin position, value is count of pins on the point
+		std::map<SchemaPoint, int> connectionMap;         // Key is pin position, value is count of pins on the point
 
 	private:
 		Schema* m_parentSchema = nullptr;
 
-		std::vector<std::shared_ptr<SchemaItem>> m_items;		// Layer items
+		std::vector<std::shared_ptr<SchemaItem>> m_items; // Layer items
 
 		QUuid m_guid;
 		QString m_name;
@@ -163,4 +171,4 @@ namespace VFrame30
 		bool m_print = true;
 	};
 
-}
+} // namespace VFrame30

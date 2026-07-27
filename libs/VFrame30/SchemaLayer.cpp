@@ -17,16 +17,12 @@ namespace VFrame30
 
 	QString ScriptSchemaLayer::caption() const
 	{
-		return m_schemaLayer ?
-					m_schemaLayer->name() :
-					QString{};
+		return m_schemaLayer ? m_schemaLayer->name() : QString{};
 	}
 
 	bool ScriptSchemaLayer::visible() const
 	{
-		return m_schemaLayer ?
-					m_schemaLayer->show() :
-					false;
+		return m_schemaLayer ? m_schemaLayer->show() : false;
 	}
 
 	void ScriptSchemaLayer::setVisible(bool value)
@@ -54,7 +50,7 @@ namespace VFrame30
 
 	SchemaLayer::~SchemaLayer(void)
 	{
-		clearItems();	// It will reset parents for items.
+		clearItems(); // It will reset parents for items.
 	}
 
 	void SchemaLayer::Init(const QString& name, bool compile)
@@ -73,7 +69,7 @@ namespace VFrame30
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Required field, hash of the class name, it restores the class.
+		message->set_classnamehash(classnamehash); // Required field, hash of the class name, it restores the class.
 
 		auto layer = message->MutableExtension(Proto::schemalayer);
 
@@ -124,7 +120,7 @@ namespace VFrame30
 		for (int i = 0; i < layer.items().size(); i++)
 		{
 			std::shared_ptr<SchemaItem> item = SchemaItem::Create(layer.items(i));
-			
+
 			if (item == nullptr)
 			{
 				assert(item != nullptr);
@@ -137,11 +133,12 @@ namespace VFrame30
 				//
 				if (item->toType<PosConnectionImpl>()->GetPointList().size() < 2)
 				{
-					qDebug() << "Warning, PosConnectionImpl is skipped while loading schema layer. it has only " << item->toType<PosConnectionImpl>()->GetPointList().size() << " points.";
+					qDebug() << "Warning, PosConnectionImpl is skipped while loading schema layer. it has only "
+							 << item->toType<PosConnectionImpl>()->GetPointList().size() << " points.";
 					continue;
 				}
 			}
-			
+
 			pushBackItem(item);
 		}
 
@@ -176,11 +173,12 @@ namespace VFrame30
 	//
 	std::shared_ptr<SchemaItem> SchemaLayer::getItemById(const QUuid id) const
 	{
-		auto foundItem = std::find_if(m_items.begin(), m_items.end(),
-			[&](const std::shared_ptr<SchemaItem>& vi)
-			{
-				return vi->guid() == id;
-			});
+		auto foundItem = std::find_if(m_items.begin(),
+									  m_items.end(),
+									  [&](const std::shared_ptr<SchemaItem>& vi)
+									  {
+										  return vi->guid() == id;
+									  });
 
 		if (foundItem != m_items.end())
 		{
@@ -229,8 +227,7 @@ namespace VFrame30
 
 		for (const auto& item : m_items | std::views::reverse)
 		{
-			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
-				item->isIntersectPoint(x, y) == true)
+			if (qobject_cast<SchemaItemType>(item.get()) != nullptr && item->isIntersectPoint(x, y) == true)
 			{
 				result = std::dynamic_pointer_cast<SchemaItemType>(item);
 				break;
@@ -250,8 +247,7 @@ namespace VFrame30
 		{
 			if (item->isIntersectPoint(x, y) == true)
 			{
-				if ((className.isEmpty() == true) ||
-					(className == item->metaObject()->className()))
+				if ((className.isEmpty() == true) || (className == item->metaObject()->className()))
 				{
 					result = item;
 					break;
@@ -273,8 +269,7 @@ namespace VFrame30
 		{
 			if (item->isIntersectPoint(x, y) == true)
 			{
-				if ((className.isEmpty() == true) ||
-					(className == item->metaObject()->className()))
+				if ((className.isEmpty() == true) || (className == item->metaObject()->className()))
 				{
 					out.push_back(item);
 				}
@@ -288,12 +283,13 @@ namespace VFrame30
 	{
 		std::list<std::shared_ptr<SchemaItem>> out;
 
-		std::copy_if(m_items.begin(), m_items.end(), std::back_inserter(out),
-				[&rect](std::shared_ptr<SchemaItem> item)
-				{
-			        return item->isIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
-				}
-			);
+		std::copy_if(m_items.begin(),
+					 m_items.end(),
+					 std::back_inserter(out),
+					 [&rect](std::shared_ptr<SchemaItem> item)
+					 {
+						 return item->isIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
+					 });
 
 		return out;
 	}
@@ -306,8 +302,7 @@ namespace VFrame30
 
 		for (const auto& item : m_items | std::views::reverse)
 		{
-			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
-			    item->isIntersectPoint(x, y) == true)
+			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr && item->isIntersectPoint(x, y) == true)
 			{
 				VFrame30::FblItemRect* fbl = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
@@ -338,10 +333,11 @@ namespace VFrame30
 
 	void SchemaLayer::clearItems()
 	{
-		std::ranges::for_each(m_items, [](auto& item)
-		{
-			item->setParentLayer({});
-		});
+		std::ranges::for_each(m_items,
+							  [](auto& item)
+							  {
+								  item->setParentLayer({});
+							  });
 		m_items.clear();
 		return;
 	}
@@ -371,6 +367,26 @@ namespace VFrame30
 	const std::vector<std::shared_ptr<SchemaItem>>& SchemaLayer::items() const
 	{
 		return m_items;
+	}
+
+	SchemaLayer::ItemConstIt SchemaLayer::begin() const
+	{
+		return m_items.begin();
+	}
+
+	SchemaLayer::ItemConstIt SchemaLayer::end() const
+	{
+		return m_items.end();
+	}
+
+	SchemaLayer::ItemIt SchemaLayer::begin()
+	{
+		return m_items.begin();
+	}
+
+	SchemaLayer::ItemIt SchemaLayer::end()
+	{
+		return m_items.end();
 	}
 
 	// Properties
@@ -435,4 +451,4 @@ namespace VFrame30
 	{
 		m_print = value;
 	}
-}
+} // namespace VFrame30

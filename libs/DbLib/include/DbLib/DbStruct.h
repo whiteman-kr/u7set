@@ -533,9 +533,11 @@ public:
 
 	DbFile& operator=(const DbFileInfo& fileInfo);
 
-																				  // Properties
+	// Properties
 	//
 public:
+	[[nodiscard]] const DbFileInfo& fileInfo() const;
+
 	[[nodiscard]] const QByteArray& data() const;
 	void setData(const QByteArray& data);
 	void setData(QByteArray&& data);

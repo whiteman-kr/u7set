@@ -1,12 +1,13 @@
 #include "MainWindow.h"
-#include "../Builder/LogicModuleSet.h"
-#include <UiLib/UiTools.h>
+
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
+#include "./Forms/DialogProjectDiff.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/PendingChangesDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
 #include "./ProjectsTabPage/ProjectsTabPage.h"
+#include "./Reports/SchemasReport.h"
 #include "./SchemaEditor/EditSchemaWidget.h"
 #include "./SchemaEditor/F2KeyForSchemaItem.h"
 #include "./SchemaEditor/SchemasTabPage.h"
@@ -24,18 +25,22 @@
 #include "DialogSubsystemListEditor.h"
 #include "DialogTagsEditor.h"
 #include "FilesTabPage.h"
-#include "Forms/DialogProjectDiff.h"
 #include "GlobalMessanger.h"
 #include "ProjectDefaults.h"
-#include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"
 #include "SimulatorTabPage.h"
 #include "TestsTabPage.h"
 #include "UploadTabPage.h"
 #include "UserManagementDialog.h"
+
+#include "../Builder/LogicModuleSet.h"
+
 #include <LicenseLib/AppLicenser.h>
 #include <UiLib/DialogAbout.h>
+#include <UiLib/UiTools.h>
+#include <VFrame30/ActuatorHeader.h>
+#include <VFrame30/PropertyNames.h>
 
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
@@ -999,8 +1004,8 @@ void MainWindow::updateUfbsAfbsBusses()
 	}
 
 	QMessageBox mb(this);
-	mb.setText(tr("Update schemas AFBs/UFBs/Busses."));
-	mb.setInformativeText(tr("To prevent data loss all ApplicationLogic and UFB schemas must be checked in."));
+	mb.setText(tr("Update schemas AFBs/UFBs/Actuators/Busses."));
+	mb.setInformativeText(tr("To prevent data loss all schemas files must be checked in."));
 	mb.setIcon(QMessageBox::NoIcon);
 	QPushButton* updateButton = mb.addButton(tr("Update"), QMessageBox::ActionRole);
 	mb.addButton(QMessageBox::Cancel);
@@ -1014,55 +1019,41 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	GlobalMessanger::instance().fireChangeCurrentTab(m_schemaTabPage);
 
-	// Get Busses
+	// Get all files we will need.
 	//
-	std::vector<AppSignalLib::Bus> busses;
-	bool ok = F2KeyForSchemaItem::loadBusses(dbController(), &busses, this);
-
-	if (ok == false)
+	auto getFilesFunc = [this](DbDir dir, const QString& extension) -> std::vector<DbFileInfo>
 	{
-		return;
-	}
+		DbFileTree filesTree;
+		db()->getFileListTree(&filesTree, dir, "%", true, this);
 
-	// Get UFB schema list
+		std::vector<DbFileInfo> schemaFileInfos = filesTree.toVectorIf(
+			[extension](const DbFileInfo& file)
+			{
+				return file.fileName().endsWith(QLatin1String(".") + extension, Qt::CaseInsensitive) == true && file.isFolder() == false;
+			});
+
+		return schemaFileInfos;
+	};
+
+	auto ufbSchemaFileInfos = getFilesFunc(DbDir::UfblDir, File::UfbFileExtension);
+	auto alSchemaFileInfos = getFilesFunc(DbDir::AppLogicDir, File::AlFileExtension);
+	auto actuatorSchemaFileInfos = getFilesFunc(DbDir::ActuatorsDir, File::ActuatorFileExtension);
+	auto actuatorHeadersFileInfos = getFilesFunc(DbDir::ActuatorsDir, File::ActuatorHeaderFileExtension);
+
+	int totalSchemas = static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size() + actuatorSchemaFileInfos.size());
+
+	// Check checked out schemas
 	//
+	auto allSchemaFiles =
+		std::array{std::views::all(ufbSchemaFileInfos), std::views::all(alSchemaFileInfos), std::views::all(actuatorSchemaFileInfos)} |
+		std::views::join;
+
 	QStringList checkedOutFiles;
-
-	DbFileTree filesTree;
-	db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
-
-	std::vector<DbFileInfo> ufbSchemaFileInfos = filesTree.toVectorIf(
-		[](const DbFileInfo& file)
-		{
-			return file.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) == true &&
-				   file.isFolder() == false;
-		});
-
-	for (const DbFileInfo& f : ufbSchemaFileInfos)
+	for (const auto& fi : allSchemaFiles)
 	{
-		if (f.state() == E::VcsState::CheckedOut)
+		if (fi.state() == E::VcsState::CheckedOut)
 		{
-			checkedOutFiles.push_back(f.fileName());
-		}
-	}
-
-	// Get ApplicationLogic schema list
-	//
-	filesTree.clear();
-	db()->getFileListTree(&filesTree, DbDir::AppLogicDir, "%", true, this);
-
-	std::vector<DbFileInfo> alSchemaFileInfos = filesTree.toVectorIf(
-		[](const DbFileInfo& file)
-		{
-			return file.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) == true &&
-				   file.isFolder() == false;
-		});
-
-	for (const DbFileInfo& f : alSchemaFileInfos)
-	{
-		if (f.state() == E::VcsState::CheckedOut)
-		{
-			checkedOutFiles.push_back(f.fileName());
+			checkedOutFiles.push_back(fi.fileName());
 		}
 	}
 
@@ -1071,41 +1062,92 @@ void MainWindow::updateUfbsAfbsBusses()
 		QMessageBox mbError(this);
 
 		mbError.setIcon(QMessageBox::Critical);
-		mbError.setText(tr("Update AFBs/UFBs/Busses error."));
+		mbError.setText(tr("Update AFBs/UFBs/Actuators/Busses error."));
 		mbError.setInformativeText(
-			"There are some checked out Application Logic and/or UFB schemas. CheckIn these files and repeat operation.");
+			"There are some checked out Application Logic, Actuators and/or UFB schemas. CheckIn these files and repeat operation.");
 		mbError.setDetailedText(checkedOutFiles.join(QChar::LineSeparator));
 
 		mbError.exec();
 		return;
 	}
 
-	// Update UFB schemas
+	// Get all busses
 	//
-	LogicModuleSet logicModuleSet;
-	int totalUpdatedAfbs = 0;
+	std::vector<AppSignalLib::Bus> busses;
+	bool gettingBussesOk = F2KeyForSchemaItem::loadBusses(dbController(), &busses, this);
+	if (gettingBussesOk == false)
+	{
+		return;
+	}
 
-	QProgressDialog progress("Updating AFBs/Bussses on UFB schemas...",
-							 "Abort",
-							 0,
-							 static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()),
-							 this);
+	// Get all ActuatorHeaders
+	//
+	std::vector<std::shared_ptr<VFrame30::ActuatorHeader>> actuatorHeaders;
+
+	if (actuatorHeadersFileInfos.empty() == false)
+	{
+		std::vector<std::shared_ptr<DbFile>> files;
+		actuatorHeaders.reserve(actuatorHeadersFileInfos.size());
+
+		bool getFilesOk = db()->getLatestVersion(actuatorHeadersFileInfos, &files, this);
+		if (getFilesOk == false)
+		{
+			return;
+		}
+
+		for (std::shared_ptr<DbFile>& file : files)
+		{
+			auto actuatorHeader = VFrame30::ActuatorHeader::Create(file->data());
+			if (actuatorHeader == nullptr)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Error parsing Actuator Header %1.").arg(file->fileName()));
+				return;
+			}
+
+			actuatorHeaders.push_back(actuatorHeader);
+		}
+	}
+
+	// Update UFB schemas, updating AFBs, Busses and Actuators
+	//
+	struct UpdateItemParams
+	{
+		bool updateAfbItems = true;
+		bool updateUfbItems = true;
+		bool updateActuatorItems = true;
+		bool updateBusItems = true;
+		std::vector<DbFileInfo>& fileInfos;
+
+		std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbSchemas;
+		std::vector<AppSignalLib::Bus>& busses;
+		std::vector<std::shared_ptr<VFrame30::ActuatorHeader>>& actuatorHeaders;
+	};
+
+	QProgressDialog progress{"Updating AFBs/UFBs/Busses/Actuators on schemas...", "Abort", 0, totalSchemas, this};
 	progress.setWindowModality(Qt::WindowModal);
-	int progressIndicator = 0;
 
+	int progressIndicator = 0;
 	QStringList updateDetails;
 
+	struct
 	{
-		std::vector<DbFileInfo> allFiles;
-		allFiles.reserve(ufbSchemaFileInfos.size() + alSchemaFileInfos.size());
+		int updatedAfbItems = 0;
+		int updatedUfbItems = 0;
+		int updatedBusItems = 0;
+		int updatedActuatorItems = 0;
 
-		allFiles.insert(allFiles.end(), ufbSchemaFileInfos.begin(), ufbSchemaFileInfos.end());
-		allFiles.insert(allFiles.end(), alSchemaFileInfos.begin(), alSchemaFileInfos.end());
+		int sum() const { return updatedAfbItems + updatedUfbItems + updatedBusItems + updatedActuatorItems; }
+	} totals;
 
-		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbSchemas;
-		ufbSchemas.reserve(ufbSchemaFileInfos.size());
+	LogicModuleSet logicModuleSet;
 
-		for (DbFileInfo& fi : allFiles)
+	auto updateSchemaItemFunc =
+		[&logicModuleSet, this, &totals, &progress, &progressIndicator, &updateDetails](const UpdateItemParams& params,
+																						QString updateCaption)
+	{
+		progress.setLabelText(updateCaption);
+
+		for (DbFileInfo& fi : params.fileInfos)
 		{
 			progress.setValue(progressIndicator++);
 			if (progress.wasCanceled() == true)
@@ -1113,68 +1155,39 @@ void MainWindow::updateUfbsAfbsBusses()
 				break;
 			}
 
-			// Get latest version
-			//
 			std::shared_ptr<DbFile> file;
-			ok = db()->getLatestVersion(fi, &file, this);
-
-			if (ok == false || file == nullptr)
+			bool getFileOk = db()->getLatestVersion(fi, &file, this);
+			if (getFileOk == false || file == nullptr)
 			{
 				break;
 			}
 
-			// Load schema from file
-			//
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
-
 			if (schema == nullptr)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
 				break;
 			}
 
-			if (schema->isUfbSchema() == false && schema->isLogicSchema() == false)
+			if (schema->isUfbSchema() == false && schema->isLogicSchema() == false && schema->isActuatorSchema() == false)
 			{
-				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true);
-				QMessageBox::critical(this, qAppName(), tr("File %1 must be AppLogic or UFB schema.").arg(file->fileName()));
+				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true || schema->isActuatorSchema() == true);
+				QMessageBox::critical(this, qAppName(), tr("File %1 must be AppLogic, UFB, or Actuator schema.").arg(file->fileName()));
 				break;
 			}
 
-			// Get UFB schema logic module description
-			//
 			QString lmDescriptionFile;
-
-			if (schema->isUfbSchema() == true)
+			auto lmp = schema->propertyByCaption(VFrame30::PropertyNames::lmDescriptionFile);
+			if (lmp != nullptr)
 			{
-				std::shared_ptr<VFrame30::UfbSchema> ufbSchema = std::dynamic_pointer_cast<VFrame30::UfbSchema>(schema);
-				assert(ufbSchema);
-
-				ufbSchemas.push_back(ufbSchema);
-
-				lmDescriptionFile = ufbSchema->lmDescriptionFile();
-			}
-			else
-			{
-				if (schema->isLogicSchema())
-				{
-					std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema);
-					assert(logicSchema);
-
-					lmDescriptionFile = logicSchema->lmDescriptionFile();
-				}
-				else
-				{
-					assert(false);
-					break;
-				}
+				lmDescriptionFile = lmp->value().toString();
 			}
 
 			if (logicModuleSet.has(lmDescriptionFile) == false)
 			{
 				QString errorMessage;
-				ok = logicModuleSet.loadFile(db(), lmDescriptionFile, &errorMessage);
-
-				if (ok == false)
+				bool fileIsLoaded = logicModuleSet.loadFile(db(), lmDescriptionFile, &errorMessage);
+				if (fileIsLoaded == false)
 				{
 					QMessageBox::critical(this, qAppName(), errorMessage);
 					break;
@@ -1188,60 +1201,77 @@ void MainWindow::updateUfbsAfbsBusses()
 				break;
 			}
 
-			// Update AFBs on schemas
+			// Update AFBs  on schemas
 			//
 			int thisSchemaUpdatedCount = 0;
 
+			if (params.updateAfbItems == true)
 			{
 				int updatedCount = 0;
 				QString updateErrorMessage;
 
-				ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbElements(), &updatedCount, &updateErrorMessage);
-
+				bool ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbElements(), &updatedCount, &updateErrorMessage);
 				if (ok == false)
 				{
 					QMessageBox::critical(this, qAppName(), updateErrorMessage);
 					break;
 				}
 
-				totalUpdatedAfbs += updatedCount;
+				totals.updatedAfbItems += updatedCount;
 				thisSchemaUpdatedCount += updatedCount;
 			}
 
 			// Update Busses on schemas
 			//
+			if (params.updateBusItems == true)
 			{
 				int updatedCount = 0;
 				QString updateErrorMessage;
 
-				ok = schema->updateAllSchemaItemBusses(busses, &updatedCount, &updateErrorMessage);
-
+				bool ok = schema->updateAllSchemaItemBusses(params.busses, &updatedCount, &updateErrorMessage);
 				if (ok == false)
 				{
 					QMessageBox::critical(this, qAppName(), updateErrorMessage);
 					break;
 				}
 
-				totalUpdatedAfbs += updatedCount;
+				totals.updatedBusItems += updatedCount;
 				thisSchemaUpdatedCount += updatedCount;
 			}
 
 			// Update UFBs on schemas
 			//
-			if (schema->isLogicSchema() == true)
+			if (params.updateUfbItems == true)
 			{
 				int updatedCount = 0;
 				QString updateErrorMessage;
 
-				ok = schema->updateAllSchemaItemUfb(ufbSchemas, &updatedCount, &updateErrorMessage);
-
+				bool ok = schema->updateAllSchemaItemUfb(params.ufbSchemas, &updatedCount, &updateErrorMessage);
 				if (ok == false)
 				{
 					QMessageBox::critical(this, qAppName(), updateErrorMessage);
 					break;
 				}
 
-				totalUpdatedAfbs += updatedCount;
+				totals.updatedUfbItems += updatedCount;
+				thisSchemaUpdatedCount += updatedCount;
+			}
+
+			// Update ActuatorItems on schemas
+			//
+			if (params.updateActuatorItems == true)
+			{
+				int updatedCount = 0;
+				QString updateErrorMessage;
+
+				bool ok = schema->updateAllSchemaItemActuators(params.actuatorHeaders, &updatedCount, &updateErrorMessage);
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), updateErrorMessage);
+					break;
+				}
+
+				totals.updatedActuatorItems += updatedCount;
 				thisSchemaUpdatedCount += updatedCount;
 			}
 
@@ -1249,8 +1279,7 @@ void MainWindow::updateUfbsAfbsBusses()
 			//
 			if (thisSchemaUpdatedCount > 0)
 			{
-				ok = db()->checkOut(fi, this);
-
+				bool ok = db()->checkOut(fi, this);
 				if (ok == false || fi.state() != E::VcsState::CheckedOut)
 				{
 					break;
@@ -1277,34 +1306,125 @@ void MainWindow::updateUfbsAfbsBusses()
 				}
 			}
 
-			updateDetails << tr("%1: %2, updated %3 item(s)")
-								 .arg(schema->isUfbSchema() ? "UFB" : "AL")
-								 .arg(schema->schemaId())
-								 .arg(thisSchemaUpdatedCount);
+			QString schemaType;
+			if (schema->isUfbSchema() == true)
+			{
+				schemaType = "UfbSchema";
+			}
+			if (schema->isLogicSchema() == true)
+			{
+				schemaType = "AppLogicSchema";
+			}
+			if (schema->isActuatorSchema() == true)
+			{
+				schemaType = "ActuatorSchema";
+			}
+
+			updateDetails << QString{"%1: %2, updated %3 item(s)"}.arg(schemaType).arg(schema->schemaId()).arg(thisSchemaUpdatedCount);
 		}
 
-		if (static_cast<size_t>(progressIndicator) != allFiles.size())
+		return;
+	};
+
+	// Update UFB schemas first, it'll bump UFB versions, so we will need to update SchemaItemUfbs on AppLogic schemas after that.
+	//
+	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbSchemas;
+
+	{
+		UpdateItemParams params{.updateAfbItems = true,
+								.updateUfbItems = false,
+								.updateActuatorItems = true,
+								.updateBusItems = true,
+								.fileInfos = ufbSchemaFileInfos,
+								.ufbSchemas = ufbSchemas,
+								.busses = busses,
+								.actuatorHeaders = actuatorHeaders};
+
+		updateSchemaItemFunc(params, "Updating UFB schemas");
+
+		std::vector<std::shared_ptr<DbFile>> files;
+		ufbSchemas.reserve(ufbSchemaFileInfos.size());
+
+		bool getFilesOk = db()->getLatestVersion(ufbSchemaFileInfos, &files, this);
+		if (getFilesOk == false)
 		{
-			updateDetails << tr("...");
-			updateDetails << tr("Operation is aborted");
+			return;
 		}
-		else
+
+		for (std::shared_ptr<DbFile>& file : files)
 		{
-			updateDetails << QString("Done");
+			auto ufbSchema = std::dynamic_pointer_cast<VFrame30::UfbSchema>(VFrame30::UfbSchema::Create(file->data()));
+			if (ufbSchema == nullptr)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Error parsing UFB schema %1.").arg(file->fileName()));
+				return;
+			}
+
+			ufbSchemas.push_back(ufbSchema);
 		}
+	}
+
+	// Update AppLogic schemas
+	//
+	{
+		UpdateItemParams params{.updateAfbItems = true,
+								.updateUfbItems = true,
+								.updateActuatorItems = true,
+								.updateBusItems = true,
+								.fileInfos = alSchemaFileInfos,
+								.ufbSchemas = ufbSchemas,
+								.busses = busses,
+								.actuatorHeaders = actuatorHeaders};
+
+		updateSchemaItemFunc(params, "Updating AppLogic schemas");
+	}
+
+	// Update Actuator schemas
+	//
+	{
+		UpdateItemParams params{.updateAfbItems = true,
+								.updateUfbItems = true,
+								.updateActuatorItems = true,
+								.updateBusItems = true,
+								.fileInfos = actuatorSchemaFileInfos,
+								.ufbSchemas = ufbSchemas,
+								.busses = busses,
+								.actuatorHeaders = actuatorHeaders};
+
+		updateSchemaItemFunc(params, "Updating Actuator schemas");
+	}
+
+	// --
+	//
+	if (progressIndicator != totalSchemas)
+	{
+		updateDetails << tr("...");
+		updateDetails << tr("Operation is aborted");
+	}
+	else
+	{
+		updateDetails << QString("Done");
 	}
 
 	progress.setValue(progress.maximum());
 
 	// Show result, refresh files list
 	//
-	if (totalUpdatedAfbs != 0)
+	if (totals.sum() > 0)
 	{
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(qApp->applicationName());
-		msgBox.setText(tr("%1 AFB(s) are updated according to the latest AFB description.").arg(totalUpdatedAfbs));
+		msgBox.setText(tr("Updated %1 schema item(s).").arg(totals.sum()));
 		msgBox.setInformativeText("Please, check input/output pins and parameters.\nCheckIn schemas to accept changes, Undo to reject.");
 		msgBox.setDetailedText(updateDetails.join(QChar::LineSeparator));
+		msgBox.exec();
+	}
+	else
+	{
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("No schema items were updated."));
+		msgBox.setInformativeText("All schemas are up to date.");
 		msgBox.exec();
 	}
 

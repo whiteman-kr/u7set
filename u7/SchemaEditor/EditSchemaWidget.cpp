@@ -3640,6 +3640,50 @@ bool EditSchemaWidget::updateBussesForSchema()
 	return true;
 }
 
+bool EditSchemaWidget::updateActuatorsForSchema()
+{
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
+	// Get ActuatorHeaders list
+	//
+	std::vector<std::shared_ptr<VFrame30::ActuatorHeader>> actuatorHeaders;
+
+	bool ok = loadActuatorHeaders(&actuatorHeaders);
+	if (ok == false)
+	{
+		QApplication::restoreOverrideCursor();
+		return false;
+	}
+
+	// Update
+	//
+	QString errorMessage;
+	int updatedItemCount = 0;
+
+	ok = schema()->updateAllSchemaItemActuators(actuatorHeaders, &updatedItemCount, &errorMessage);
+
+	QApplication::restoreOverrideCursor();
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("Update Actuator schema items error: ") + errorMessage);
+		return false;
+	}
+
+	if (updatedItemCount != 0)
+	{
+		setModified();
+
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("%1 Actuator(s) are updated according to the latest ActuatorType.").arg(updatedItemCount));
+		msgBox.setInformativeText("Please, check input/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.exec();
+	}
+
+	return true;
+}
 
 void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 {
