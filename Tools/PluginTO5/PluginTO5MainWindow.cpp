@@ -263,7 +263,8 @@ void PluginTO5MainWindow::onSettings()
 	}
 
 	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
+	buttons->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+	buttons->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 	layout->addRow(buttons);
 
 	connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);

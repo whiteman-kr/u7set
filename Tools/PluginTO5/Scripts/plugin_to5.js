@@ -301,7 +301,7 @@ function testTO5BySchemaID(ctrl)
 			
 			if (currentSchemaID !== schemaIDList[i])
 			{
-				log.writeMessage(`Алгоритм: ${schemaID}`, `TO_ALG_${i}`);
+				log.writeMessage(`Схема: ${schemaID}`, `TO_ALG_${i}`);
 				currentSchemaID = schemaIDList[i];
 			}
 			
@@ -405,7 +405,7 @@ function testTO5ByCaseID(ctrl)
 			
 			if (currentCaseID !== caseIDList[i])
 			{
-				log.writeMessage(`Алгоритм: ${caseId}`, `TO_ALG_${i}`);
+				log.writeMessage(`Шафа: ${caseId}`, `TO_ALG_${i}`);
 				currentCaseID = caseIDList[i];
 			}
 			
