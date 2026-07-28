@@ -367,7 +367,7 @@ namespace ArchV3
 	{
 		quint8 bucket = static_cast<quint8>(calcHash(appSignalID) & 0xFF);
 
-		const QString fileName = Storage::makeArchiveFileName(appSignalID, bucket, timeFromUtc, true);
+		const QString fileName = Storage::makeArchiveFileName(bucket, appSignalID, timeFromUtc, true);
 		const QString sql = QString("SELECT fn_create_archive_file(%1, %2, '%3', %4, %5)").
 							arg(signalID).arg(bucket).arg(timeFromUtc).arg(createdUtc);
 

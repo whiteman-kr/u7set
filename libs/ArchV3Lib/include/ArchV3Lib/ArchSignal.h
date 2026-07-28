@@ -9,6 +9,8 @@ namespace ArchV3
 	{
 		E::SignalType signalType;
 		QString appSignalID;
+		Hash hash;
+		quint8 bucket;
 
 		double lowLimit;
 		double highLimit;
@@ -22,6 +24,8 @@ namespace ArchV3
 		{ 
 			signalType = static_cast<E::SignalType>(ps.signaltype());
 			appSignalID = QString::fromStdString(ps.appsignalid());
+			hash = calcHash(appSignalID);
+			bucket = static_cast<quint8>(hash & 0xFF);
 
 			if (signalType == E::SignalType::Analog)
 			{

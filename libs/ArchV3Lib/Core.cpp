@@ -86,10 +86,7 @@ namespace ArchV3
 				continue;
 			}
 
-			Storage s(m_archDir, m_projectName, clientID);
-
-			s.deleteFiles(filesToDelete);
-
+			Storage::deleteFiles(m_archDir, m_projectName, clientID, filesToDelete);
 		}
 
 		m_archInfoV3.reset();
@@ -105,26 +102,43 @@ namespace ArchV3
 		return m_workable.load(); 
 	}
 
-	ArchWriterShared Core::getArchWriter(const QString& srcEquipmentID)
+	void Core::pushArchData(const QString& clientID, const char* archData, size_t archDataSize) 
+	{ 
+		ArchWriterShared writer = getArchWriter(clientID);
+
+		TEST_PTR_RETURN(writer);
+
+		writer->pushArchData(archData, archDataSize);
+	}
+
+	ArchWriterShared Core::getArchWriter(const QString& clientID)
 	{
-		//std::lock_guard<std::mutex> lock(m_archWritersMutex);
+		ArchWriterShared archWriter;
 
-		//auto it = m_archWriters.find(srcEquipmentID);
+		{
+			std::lock_guard<std::mutex> lock(m_archWritersMutex);
 
-		//if (it != m_archWriters.end())
-		//{
-		//	return it->second;
-		//}
+			auto it = m_archWriters.find(clientID);
 
-		//auto archWriter = std::make_shared<ArchWriter>(
-		//	m_archDir,
-		//	m_projectName,
-		//	srcEquipmentID,
-		//	m_logger
-		//);
+			if (it != m_archWriters.end())
+			{
+				return it->second;
+			}
 
-		//m_archWriters[srcEquipmentID] = archWriter;
-//		return archWriter;
-		return nullptr;
+			auto it2 = m_clientSignals.find(clientID);
+
+			if (it2 == m_clientSignals.end())
+			{
+				return nullptr;
+			}
+
+			archWriter = std::make_shared<ArchWriter>(m_archDir, m_projectName, clientID, it2->second, m_logger);
+
+			m_archWriters.emplace(clientID, archWriter);
+		}
+
+		archWriter->start();
+		
+		return archWriter;
 	}
 } // namespace ArchV3

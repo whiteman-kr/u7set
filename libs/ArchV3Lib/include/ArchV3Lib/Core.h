@@ -28,7 +28,10 @@ namespace ArchV3
 
 		bool isWorkable() const;
 
-		ArchWriterShared getArchWriter(const QString& srcEquipmentID);
+		void pushArchData(const QString& clientID, const char* archData, size_t archDataSize);
+
+	private:
+		ArchWriterShared getArchWriter(const QString& clientID);
 
 	private:
 		QString m_archDir;

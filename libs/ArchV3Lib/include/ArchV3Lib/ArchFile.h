@@ -32,6 +32,9 @@ namespace ArchV3
 
 #pragma pack(pop)
 
+	static_assert(std::is_trivially_copyable_v<AnalogFileRecord>);
+	static_assert(std::is_trivially_copyable_v<DiscreteFileRecord>);
+
 	inline constexpr size_t ANALOG_FILE_RECORD_SIZE = 24;
 	static_assert(sizeof(AnalogFileRecord) == ANALOG_FILE_RECORD_SIZE);
 
@@ -41,7 +44,7 @@ namespace ArchV3
 	class ArchFileBase
 	{
 	public:
-		ArchFileBase(ArchWriter& archWriter);
+		ArchFileBase();
 		virtual ~ArchFileBase();
 
 		bool setFilePath(const QString& path);
@@ -67,7 +70,6 @@ namespace ArchV3
 		bool writeRaw(const char* data, qint64 dataSize, qint64 timeUTC);
 
 	private:
-		ArchWriter& m_archWriter;
 		QString m_path;
 		QString m_filename;
 
@@ -82,8 +84,7 @@ namespace ArchV3
 	class ArchFile : public ArchFileBase
 	{
 	public:
-		ArchFile(ArchWriter& archWriter) :
-			ArchFileBase(archWriter)
+		ArchFile()
 		{
 		}
 

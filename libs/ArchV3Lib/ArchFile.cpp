@@ -9,8 +9,7 @@
 
 namespace ArchV3
 {
-	ArchFileBase::ArchFileBase(ArchWriter& archWriter) :
-		m_archWriter(archWriter)
+	ArchFileBase::ArchFileBase()
 	{
 	}
 
@@ -26,14 +25,14 @@ namespace ArchV3
 	{
 		m_path = path;
 		
-		bool result = QDir().mkpath(m_path);
+		//bool result = QDir().mkpath(m_path);
 
-		if (result == false)
-		{
-			m_archWriter.logErr(QString("Failed to create directory: %1").arg(m_path));
-		}
+		//if (result == false)
+		//{
+		//	m_archWriter.logErr(QString("Failed to create directory: %1").arg(m_path));
+		//}
 
-		return result;
+		return true;
 	}
 
 	bool ArchFileBase::setFileName(const QString& filename)

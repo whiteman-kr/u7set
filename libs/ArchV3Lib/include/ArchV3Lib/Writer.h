@@ -1,8 +1,11 @@
 #pragma once
 
-#include "../../AppSignalLib/AppSignal.h"
+#include <deque>
+
 #include "../../OnlineLib/CircularLogger.h"
 #include "ArchFile.h"
+#include "ArchSignal.h"
+#include "Storage.h"
 
 namespace ArchV3
 {
@@ -11,8 +14,8 @@ namespace ArchV3
 	public:
 		ArchWriter(	const QString& archDir, 
 					const QString& projectName, 
-					const QString& srcEquipmentID,
-					const AppSignals& appSignals, 
+					const QString& clientID,
+					const std::vector<ArchSignal>& archSignals, 
 					CircularLoggerShared logger);
 		~ArchWriter();
 
@@ -22,17 +25,13 @@ namespace ArchV3
 		void requestQuit();
 		bool isWorkable() const;
 
+		void pushArchData(const char* archData, size_t archDataSize);
+
 	private:
 		void run();
 
 		bool init();
 		void shutdown();
-
-		bool checkAndInitDirs();
-		void initArchFiles();
-
-		QString archPath_00_FF(quint8 n);
-		static QString clearString(QString str);		// copy OK
 
 		void writeSignalInGropsFile(const std::unordered_map<quint8, QStringList>& signlsInGroups);
 
@@ -40,12 +39,19 @@ namespace ArchV3
 		const QString m_archDir;
 		const QString m_projectName;
 		const QString m_srcEquipmentID;
-		const AppSignals& m_appSignals;
 
 		//
+
+		Storage m_storage;
+
 		std::thread m_thread;
 		std::mutex m_cvMutex;
 		std::condition_variable m_cv;
+		
+		using ArchData = std::vector<char>;
+
+		std::mutex m_queueMutex;
+		std::deque<ArchData> m_queue;
 
 		std::atomic<bool> m_isWorkable {false};
 		std::atomic<bool> m_quitRequested {false};
