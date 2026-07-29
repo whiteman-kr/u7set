@@ -649,6 +649,11 @@ namespace Builder
 						QString subset); // The string '%1' processed by the VDU '%2' contains symbol (%3 [0x04]) from the '%5' Unicode
 										 // subset, which is not included to the VDU.
 
+		void errEQP6420(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, int durationsCount);	// Trend durations count %1 is too large in VDU %2, 
+																															// schema %3, schema item %4. Maximum durations count is 16.
+		void errEQP6421(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, int duration);			// Trend duration %1 is out of range in VDU %2, schema %3, 
+																															// schema item %4. Allowed duration is 30 seconds to 72 hours (259200).
+
 		// Diagnostics compiler errors
 		//
 

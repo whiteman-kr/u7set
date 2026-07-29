@@ -15,3 +15,4 @@ VDU-1
 	14.02.2025	Version: 13	VDU-1_v13.u7devp RPCT-3995: Master PIN is visible
 	08.08.2025	Version: 14	RVDU_v14.u7devp 	RPCT-4047: VDU-1 renamed to RVDU, Added property StartupLogo
 	15.05.2025	Version: 15	RVDU_v15.u7devp 	RADIX-4025: Add ITSEnable, Trackball, Touchscreen and Keyboard properties
+	22.06.2026	Version: 16	RVDU_v16.u7devp 	RADIX-4078: Add TempDataValidity signal to RVDU

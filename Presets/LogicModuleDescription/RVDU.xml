@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="RVDU" DescriptionNumber="2" ConfigurationScriptFile="ConfigScript.js" Version="1.1">
+<LogicModule Name="RVDU" DescriptionNumber="2" ConfigurationScriptFile="ConfigScript.js" Version="1.2">
 	<FlashMemory>
 	    <AppLogicFrameCount>0</AppLogicFrameCount>
 		<AppLogicFramePayload>0</AppLogicFramePayload>
 		<AppLogicFrameSize>0</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
-		<ConfigFrameCount>162</ConfigFrameCount>
+		<ConfigFrameCount>512</ConfigFrameCount>
 		<ConfigFramePayload>1016</ConfigFramePayload>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>9218</ConfigUartID>

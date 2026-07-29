@@ -650,7 +650,7 @@ namespace
 
 			VduSchemaFileSchemaItemTrend1 structTrend{};
 
-			structTrend.version = 1;
+			structTrend.version = 2;
 			structTrend.itemType = VduFileSchemaItemTrendId;
 
 			using PosType = decltype(structTrend.left);
@@ -667,7 +667,54 @@ namespace
 			structTrend.indentTop = static_cast<IndentType>(schemaItem.indentTop());
 			structTrend.indentBottom = static_cast<IndentType>(schemaItem.indentBottom());
 
-			structTrend.durationSecs = schemaItem.durationSeconds();
+			structTrend.columnCount = schemaItem.columnCount();
+
+			const std::size_t MaxDurationsCount =
+				sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs) / sizeof(VduSchemaFileSchemaItemTrend1::durationsSecs[0]);
+			
+			const uint32_t MinDuration = 30;
+			const uint32_t MaxDuration = 72 * 60 * 60;	// 72 hours in seconds
+
+			std::vector<uint32_t> durations = schemaItem.durationsSeconds();
+			if (durations.size() == 0) 
+			{
+				m_log.errINT1001(QString("Internal error, no duration values are set for SchemaItemVduTrend {%1, %2, %3}"),
+								 schemaItem.parentSchema()->schemaId(),
+								 schemaItem.guid());
+				
+				reset();
+				return false;
+			}
+
+			if (durations.size() > MaxDurationsCount) 
+			{
+				m_log.errEQP6420(m_vduEquipmentId,
+								 schemaItem.parentSchema()->schemaId(),
+								 schemaItem.label(),
+								 schemaItem.guid(),
+								 durations.size());
+
+				reset();
+				return false;
+			}
+
+			for (std::size_t i = 0; i < durations.size() && i < MaxDurationsCount; i++)
+			{
+				if (durations[i] < MinDuration || durations[i] > MaxDuration)
+				{
+					m_log.errEQP6421(m_vduEquipmentId,
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid(),
+									 durations[i]);
+
+					reset();
+					return false;
+				}
+
+				structTrend.durationsSecs[i] = durations[i];
+			}
+			
 			structTrend.viewMode = static_cast<uint16_t>(schemaItem.viewMode());
 			structTrend.scaleType = static_cast<uint16_t>(schemaItem.scaleType());
 
@@ -704,6 +751,7 @@ namespace
 			structTrend.showSignalScales = schemaItem.showSignalScales();
 			structTrend.showTimeLabels = schemaItem.showTimeLabels();
 			structTrend.showDateLabels = schemaItem.showDateLabels();
+			structTrend.use24hTimeFormat = schemaItem.use24hTimeFormat();
 
 			// Saving signals
 			//
@@ -791,19 +839,16 @@ namespace
 				return false;
 			}
 
-			// Move discrete signals to the top of the vector, they will be saved first in the file.
-			//
-			auto analogIt = std::stable_partition(trendSignals.begin(),
-												  trendSignals.end(),
-												  [this](const auto& trendSignal)
-												  {
-													  AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
-													  return s ? s->isDiscrete() : false;
-												  });
-
 			structTrend.maxSignalCount = static_cast<uint16_t>(MaxSignalCount);
 			structTrend.signalCount = std::clamp<uint16_t>(static_cast<uint16_t>(trendSignals.size()), 0, structTrend.maxSignalCount);
-			structTrend.discreteSignalCount = static_cast<uint16_t>(std::distance(trendSignals.begin(), analogIt));
+
+			structTrend.discreteSignalCount = std::count_if(trendSignals.begin(),
+															trendSignals.end(),
+															[this](const auto& trendSignal)
+															{
+																AppSignal* s = m_context.m_signalSet->getSignal(trendSignal->appSignalId());
+																return s ? s->isDiscrete() : false;
+															});
 
 			size_t signalIndex = 0;
 			for (const auto& trendSignal : trendSignals)
@@ -851,7 +896,8 @@ namespace
 					TrendItemSignal tis{};
 					tis.appSignalIndex = static_cast<uint32_t>(appSignalIndex);
 					tis.validityAppSignalIndex = static_cast<uint32_t>(validityAppSignalIndex);
-					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationSeconds());
+					tis.durationSecs = static_cast<uint32_t>(schemaItem.durationsSeconds()[0]);
+					tis.columnCount = static_cast<uint32_t>(schemaItem.columnCount());
 
 					auto it = m_vduTrendSignals.find(tis);
 					if (it == m_vduTrendSignals.end())

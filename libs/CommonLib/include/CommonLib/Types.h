@@ -566,6 +566,19 @@ public:
 	};
 	Q_ENUM(TrendScaleType)
 
+	/// \brief Trend axis scaling type for VDU.
+	///
+	/// Selects how the trend value axis is scaled when drawing indicator data.
+	enum class VduTrendScaleType
+	{
+		/// \brief 0 - Linear value scale.
+		Linear = static_cast<int>(TrendScaleType::Linear),
+
+		/// \brief 1 - Base-10 logarithmic value scale.
+		Log10 = static_cast<int>(TrendScaleType::Log10)
+	};
+	Q_ENUM(VduTrendScaleType)
+
 	// Do not change values of this enum, they are stored in vdu schema files.
 	//
 	enum class DisplayValueFormat

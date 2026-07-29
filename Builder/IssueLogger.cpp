@@ -10019,6 +10019,64 @@ namespace Builder
 						 .arg(subset));
 	}
 
+	/// IssueCode: EQP6420
+	///
+	/// IssueType: Error
+	///
+	/// Title: Trend durations count %1 is too large in VDU %2, schema %3, schema item %4. Maximum durations count is 16.
+	///
+	/// Parameters:
+	///		%1 VDU EquipmentID
+	///		%2 SchemaID
+	///		%3 Schema item label
+	///		%4 Schema item UUID
+	///		%5 Durations count
+	/// 	
+	/// Description:
+	///		Trend durations count is too large. Maximum durations count is 16.
+	///
+	void IssueLogger::errEQP6420(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, int durationsCount)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6420, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6420,
+				  tr("Trend durations count %1 is too large in VDU %2, schema %3, schema item %4. Maximum durations count is 16.")
+					  .arg(durationsCount)
+					  .arg(vduEquipmentId)
+					  .arg(schemaId)
+					  .arg(itemLabel));
+	}
+
+	/// IssueCode: EQP6421
+	///
+	/// IssueType: Error
+	///
+	/// Title: Trend duration %1 is out of range in VDU %2, schema %3, schema item %4. Allowed duration is 30 seconds to 72 hours (259200).
+	///
+	/// Parameters:
+	///		%1 VDU EquipmentID
+	///		%2 SchemaID
+	///		%3 Schema item label
+	///		%4 Schema item UUID
+	///		%5 Duration
+	///
+	/// Description:
+	///		Trend duration is out of range. Allowed duration is 30 seconds to 72 hours (259200).
+	///
+	void IssueLogger::errEQP6421(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, int duration)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6421, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6421,
+				  tr("Trend duration %1 is out of range in VDU %2, schema %3, schema item %4. Allowed duration is 30 seconds to 72 hours (259200).")
+					  .arg(duration)
+					  .arg(vduEquipmentId)
+					  .arg(schemaId)
+					  .arg(itemLabel));
+	} 
+	
 	// --
 
 	/// IssueCode: DGN7000
