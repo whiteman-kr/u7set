@@ -518,7 +518,7 @@ namespace Hardware
 	std::vector<std::shared_ptr<DeviceAppSignal>> DeviceObject::getAllAppSignals() const
 	{
 		std::vector<std::shared_ptr<DeviceAppSignal>> deviceSignals;
-		deviceSignals.reserve(128);
+		deviceSignals.reserve(256);
 
 		getAllAppSignalsRecursive(&deviceSignals);
 
@@ -548,7 +548,7 @@ namespace Hardware
 			if (child->deviceType() == DeviceType::AppSignal)
 			{
 				deviceSignals->push_back(std::dynamic_pointer_cast<DeviceAppSignal>(child));
-				Q_ASSERT(dynamic_cast<DeviceAppSignal*>(deviceSignals->back().get()) != nullptr);
+				Q_ASSERT(deviceSignals->back() != nullptr);
 			}
 			else
 			{

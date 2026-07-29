@@ -25,7 +25,9 @@ namespace Hardware
 		[[nodiscard]] std::shared_ptr<DeviceRoot> root();
 		[[nodiscard]] const std::shared_ptr<DeviceRoot> root() const;
 
-		[[nodiscard]] std::vector<std::shared_ptr<DeviceObject>> devices();
+		[[nodiscard]] std::vector<std::shared_ptr<DeviceObject>> devices() const;
+		[[nodiscard]] std::vector<std::shared_ptr<DeviceObject>> devices(
+			const std::function<bool(const std::shared_ptr<DeviceObject>&)>& filter) const;
 
 		void dump(bool dumpProps, QDebug d) const;
 

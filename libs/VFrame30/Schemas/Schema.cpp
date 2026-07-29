@@ -211,6 +211,51 @@ namespace VFrame30
 	}
 
 	//
+	// SchemaTraits
+	//
+	bool SchemaTraits::isItemSupported(const SchemaItem& item) const
+	{
+		return isItemSupported(&item);
+	}
+
+	bool SchemaTraits::isItemSupported(const std::shared_ptr<SchemaItem>& item) const
+	{
+		return isItemSupported(item.get());
+	}
+
+	bool SchemaTraits::isItemSupported(const SchemaItem* item) const
+	{
+		if (item == nullptr)
+		{
+			assert(item);
+			return false;
+		}
+
+		return isItemSupported(item->metaObject());
+	}
+
+	bool SchemaTraits::isItemSupported(const QMetaObject* mo) const
+	{
+		if (mo == nullptr)
+		{
+			assert(mo);
+			return false;
+		}
+
+		QString clearClassName = mo->className();
+
+		auto findResult = clearClassName.lastIndexOf("::");
+		if (findResult != -1)
+		{
+			Q_ASSERT(findResult + 2 < clearClassName.size());
+			clearClassName = clearClassName.mid(findResult + 2);
+		}
+
+		return isItemSupported(clearClassName);
+	}
+
+
+	//
 	// Schema
 	//
 	Schema::Schema(void)

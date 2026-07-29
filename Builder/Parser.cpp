@@ -3,14 +3,17 @@
 #include "SignalSet.h"
 
 #include <HardwareLib/Afb.h>
+#include <HardwareLib/DeviceAppSignal.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/PropertyNames.h>
 
+#include <VFrame30/ActuatorSchema.h>
 #include <VFrame30/FblItemRect.h>
 #include <VFrame30/HorzVertLinks.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
@@ -31,7 +34,9 @@
 
 #include <deque>
 #include <queue>
+#include <ranges>
 #include <stdexcept>
+
 
 using AppLogicGraphBase = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS>;
 
@@ -1778,6 +1783,67 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicData::addActuatorData(const BushContainer& bushContainer,
+									   std::shared_ptr<VFrame30::ActuatorSchema> schema,
+									   const BuildActuatorType& bat)
+	{
+		if (bushContainer.bushes.empty() == true)
+		{
+			// It is not error, just algorithm does not contain any fbl elements
+			//
+			return true;
+		}
+
+		if (schema == nullptr)
+		{
+			assert(schema);
+			m_log.errINT1000(QString(__FUNCTION__) + QString(", schema is nullptr."));
+			return false;
+		}
+
+		// Check for actuatorTypeId, but in reality, we do not care if they are different.
+		//
+		assert(bat.actuatorHeader.actuatorTypeId() == schema->actuatorTypeId());
+
+		// Get module (m_actuators), if it is not in the list, add it
+		//
+		bool result = true;
+
+		auto moduleIt = m_actuators.find(bat.actuatorHeader.actuatorTypeId());
+		if (moduleIt == m_actuators.end())
+		{
+			auto lmDescription = m_lmDescriptions.get(schema->lmDescriptionFile());
+			if (lmDescription == nullptr)
+			{
+				assert(lmDescription);
+				m_log.errINT1000(QString(__FUNCTION__) + QString(", lmDescription %1 was not found.").arg(schema->lmDescriptionFile()));
+			}
+
+			// Module was not found, add it
+			//
+			BuildActuatorType newBat{.actuatorHeader = bat.actuatorHeader,
+									 .acmPreset = bat.acmPreset,
+									 .acmInputs = bat.acmInputs,
+									 .acmOutputs = bat.acmOutputs};
+			newBat.parseResult =
+				std::make_shared<AppLogicModule>(schema->actuatorTypeId(), schema->lmDescriptionFile(), *lmDescription, m_log);
+
+			auto [it, _] = m_actuators.emplace(bat.actuatorHeader.actuatorTypeId(), newBat);
+			moduleIt = it;
+		}
+
+		assert(moduleIt != m_actuators.end());
+		assert(moduleIt->second.actuatorHeader.actuatorTypeId() == bat.actuatorHeader.actuatorTypeId());
+		assert(moduleIt->second.parseResult != nullptr);
+
+		// add new branch to module
+		//
+		moduleIt->second.schemas.push_back(schema);
+		result &= moduleIt->second.parseResult->addBranch(schema, bushContainer);
+
+		return result;
+	}
+
 	bool AppLogicData::orderLogicModuleItems()
 	{
 		bool result = true;
@@ -1841,12 +1907,51 @@ namespace Builder
 		return result;
 	}
 
-	bool AppLogicData::expandUfbs()
+	bool AppLogicData::orderActuatorSchemaItems()
+	{
+		bool result = true;
+
+		for (auto& [_, buildActuatorType] : m_actuators)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			assert(buildActuatorType.parseResult != nullptr);
+
+			result &= buildActuatorType.parseResult->createGraph();
+			result &= buildActuatorType.parseResult->orderItems();
+		}
+
+		return result;
+	}
+
+	bool AppLogicData::expandUfbsForAppLogic()
+	{
+		std::vector<std::shared_ptr<AppLogicModule>> modules{m_modules.begin(), m_modules.end()};
+		return expandUfbs(modules);
+	}
+
+	bool AppLogicData::expandUfbsForActuatorLogic()
+	{
+		std::vector<std::shared_ptr<AppLogicModule>> modules;
+		modules.reserve(m_actuators.size());
+
+		for (auto& [_, buildActuatorType] : m_actuators)
+		{
+			modules.push_back(buildActuatorType.parseResult);
+		}
+
+		return expandUfbs(modules);
+	}
+
+	bool AppLogicData::expandUfbs(std::vector<std::shared_ptr<AppLogicModule>> modules)
 	{
 		bool result = true;
 		bool interruptRequest = false;
 
-		for (std::shared_ptr<AppLogicModule> module : m_modules)
+		for (std::shared_ptr<AppLogicModule> module : modules)
 		{
 			interruptRequest = QThread::currentThread()->isInterruptionRequested();
 			if (interruptRequest == true)
@@ -2910,13 +3015,26 @@ namespace Builder
 		return result;
 	}
 
-	bool AppLogicData::setInputOutputsElementsConnection()
+	bool AppLogicData::setInputOutputsElementsConnectionAppLogic()
 	{
 		bool result = true;
 
 		for (auto& module : m_modules)
 		{
 			result &= module->setInputOutputsElementsConnection();
+		}
+
+		return result;
+	}
+
+	bool AppLogicData::setInputOutputsElementsConnectionActuatorLogic()
+	{
+		bool result = true;
+
+		for (auto& [_, buildActuatorType] : m_actuators)
+		{
+			assert(buildActuatorType.parseResult != nullptr);
+			result &= buildActuatorType.parseResult->setInputOutputsElementsConnection();
 		}
 
 		return result;
@@ -3047,6 +3165,23 @@ namespace Builder
 		}
 	}
 
+	const std::map<QString, BuildActuatorType>& AppLogicData::actuators() const
+	{
+		return m_actuators;
+	}
+
+	BuildActuatorType AppLogicData::actuator(const QString& actuatorTypeId) const
+	{
+		auto it = m_actuators.find(actuatorTypeId);
+		if (it == m_actuators.end())
+		{
+			return BuildActuatorType();
+		}
+		else
+		{
+			return it->second;
+		}
+	}
 
 	void ReadyParseDataContainer::add(QString equipmentId,
 									  std::shared_ptr<BushContainer> bushContainer,
@@ -3109,17 +3244,42 @@ namespace Builder
 	{
 		bool result = true;
 
-		//
-		//
 		// User Functional Blocks
 		//
+		result = parseUfbs();
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Actuator Logic
 		//
+		result = parseActuatorLogic();
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Application Logic
+		//
+		result = parseApplicationLogic();
+		if (result == false)
+		{
+			return false;
+		}
+
+		return result;
+	}
+
+	bool Parser::parseUfbs()
+	{
+		bool result = true;
 
 		// Load User Functional Blocks
 		//
 		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
 
-		if (bool ok = loadUfbFiles(db(), &ufbs); ok == false)
+		if (bool ok = loadUfbFiles(ufbs); ok == false)
 		{
 			return ok;
 		}
@@ -3167,7 +3327,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			return ok;
+			return false;
 		}
 
 		// Check for the same labels in UFBs
@@ -3179,7 +3339,8 @@ namespace Builder
 
 		// Check for the same inputs and outputs in UFBs
 		//
-		if (ok = checkSameInputsAndOutputs(ufbs); ok == false)
+		if (ok = checkSameInputsAndOutputs(ufbs); //
+			ok == false)
 		{
 			// Continuing with this error will lead us to the error like
 			// ERR INT1001: Internal exception: Please, report to developers: Checking items relations consistency error: .....
@@ -3189,31 +3350,19 @@ namespace Builder
 			return result;
 		}
 
-		// Check UFBs SchemaItemAfb.afbElement versions
+		// Checks...
 		//
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
 			result &= checkAfbItemsVersion(schema.get());
-		}
-
-		// Check UFBs Busses versions
-		//
-		Q_ASSERT(m_busSet);
-		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
-		{
 			result &= checkBusItemsVersion(schema.get(), *m_busSet);
-		}
-
-		// Check UFBs LoopbackSource.loopbackId for uniqueness
-		//
-		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
-		{
 			result &= checkForUniqueLoopbackId(schema.get());
+			result &= checkActuatorItemsVersion(*schema);
 		}
 
 		if (ok == false)
 		{
-			return ok;
+			return false;
 		}
 
 		// Parse User Functional Blocks (UFBs)
@@ -3247,24 +3396,184 @@ namespace Builder
 		LOG_MESSAGE_REF(m_log, tr("Ordering User Functional Blocks items..."));
 
 		ok = m_applicationData->orderUfbItems();
-
 		if (ok == false)
 		{
-			result = false;
+			return false;
 		}
 
+		// --
 		//
-		//
-		// Application Logic
-		//
-		//
-		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemas;
+		m_ufbs = std::move(ufbs);
 
-		ok = loadAppLogicFiles(db(), &schemas);
+		return result;
+	}
+
+	bool Parser::parseActuatorLogic()
+	{
+		// Find all actuator headers with their schemas.
+		//
+		if (auto actuators = loadActuators(); //
+			actuators.has_value() == false)
+		{
+			return false;
+		}
+		else
+		{
+			m_actuators = std::move(actuators.value());
+		}
+
+		// Check if some LmDescriptionFiles were not loaded
+		//
+		bool ok = true;
+		for (const auto& actuator : m_actuators)
+		{
+			for (const auto& schema : actuator.schemas)
+			{
+				if (m_lmDescriptions->has(schema->lmDescriptionFile()) == false)
+				{
+					// LmDescripion file was not loaded, try to load it.
+					//
+					ok &= m_lmDescriptions->loadFile(&m_log, db(), schema->schemaId(), schema->lmDescriptionFile());
+				}
+			}
+		}
 
 		if (ok == false)
 		{
-			return ok;
+			return false;
+		}
+
+		// Check for the same labels
+		//
+		for (const auto& actuator : m_actuators)
+		{
+			ok &= checkSameLabelsAndGuids(actuator.schemas);
+
+			for (const auto& schema : actuator.schemas)
+			{
+				ok &= checkAfbItemsVersion(schema.get());
+				ok &= checkUfbItemsVersion(schema.get(), m_ufbs);
+				ok &= checkBusItemsVersion(schema.get(), *m_busSet);
+				ok &= checkForUniqueLoopbackId(schema.get());
+				ok &= checkSupportedSchemaItems(*schema);
+			}
+		}
+
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Parse schemas for each Actuator type
+		//
+		bool parseResult = true;
+		for (const auto& bat : m_actuators)
+		{
+			if (bat.schemas.empty() == true)
+			{
+				continue;
+			}
+
+			LOG_MESSAGE_REF(
+				m_log,
+				QString{"Parsing %1 schemas for actuator type %2"}.arg(bat.schemas.size()).arg(bat.actuatorHeader.actuatorTypeId()));
+
+			for (auto schema : bat.schemas)
+			{
+				if (QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					return false;
+				}
+
+				LOG_MESSAGE_REF(m_log, tr("Parsing ") + schema->schemaId());
+
+				parseResult &= parseActuatorSchema(schema, bat);
+			}
+		}
+
+		if (parseResult == false)
+		{
+			return false;
+		}
+
+		// Expand User Functional Block on places of SchemaItemUfb
+		//
+		ok = m_applicationData->expandUfbsForActuatorLogic();
+		if (ok == false)
+		{
+			// Return here to avoid further internal errors.
+			//
+			return false;
+		}
+
+		// Check for supported schema items one more time, after expanding UFBs, because some UFBs can have unsupported items.
+		//
+		for (const auto& actuator : m_actuators)
+		{
+			for (const auto& schema : actuator.schemas)
+			{
+				ok &= checkSupportedSchemaItems(*schema);
+			}
+		}
+
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Do it here, before creating graph and cycle detection.
+		//
+		ok = m_applicationData->setInputOutputsElementsConnectionActuatorLogic();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
+		// Order items in all modules
+		//
+		LOG_MESSAGE_REF(m_log, "");
+		LOG_MESSAGE_REF(m_log, tr("Ordering SchemaItems in Actuator schemas..."));
+
+		bool orderItemsResult = m_applicationData->orderActuatorSchemaItems();
+		if (orderItemsResult == false)
+		{
+			return false;
+		}
+
+		// Check inputs and outputs
+		//
+		ok = checkActuatorLogicInputsOutputs();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Dump actuator logic data for debug
+#if 0
+		for (const auto& actuator : *actuators)
+		{
+			if (auto appLogicData = m_applicationData->actuator(actuator.actuatorHeader.actuatorTypeId()); //
+				appLogicData != nullptr)
+			{
+				appLogicData->dump();
+			}
+		}
+#endif
+
+		return true;
+	}
+
+	bool Parser::parseApplicationLogic()
+	{
+		bool result = true;
+
+		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemas;
+
+		bool ok = loadAppLogicFiles(schemas);
+		if (ok == false)
+		{
+			return false;
 		}
 
 		// Filter out application logic schemas by schema tags or schemaId.
@@ -3337,41 +3646,16 @@ namespace Builder
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
 			ok &= checkEquipmentIds(schema.get());
-		}
-
-		// Check LmDescriptionFile must be as in LogicModule
-		//
-		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
-		{
 			ok &= checkLmDescription(schema.get());
-		}
-
-		// Check SchemaItemAfb.afbElement versions
-		//
-		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
-		{
 			ok &= checkAfbItemsVersion(schema.get());
-		}
-
-		// Check SchemaItemBus bus versions
-		//
-		Q_ASSERT(m_busSet);
-		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
-		{
 			ok &= checkBusItemsVersion(schema.get(), *m_busSet);
-		}
-
-		// Check SchemaItemUfb versions
-		//
-		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
-		{
-			ok &= checkUfbItemsVersion(schema.get(), ufbs);
+			ok &= checkUfbItemsVersion(schema.get(), m_ufbs);
+			ok &= checkActuatorItemsVersion(*schema);
 		}
 
 		if (ok == false)
 		{
-			result = false;
-			return result;
+			return false;
 		}
 
 		// Save schemas to context
@@ -3462,7 +3746,7 @@ namespace Builder
 
 		// Expand User Functional Block on places of SchemaItemUfb
 		//
-		ok = m_applicationData->expandUfbs();
+		ok = m_applicationData->expandUfbsForAppLogic();
 		if (ok == false)
 		{
 			// Return here to avoid further internal errors.
@@ -3491,7 +3775,7 @@ namespace Builder
 
 		// Do it here, before creating graph and cycle detection.
 		//
-		ok = m_applicationData->setInputOutputsElementsConnection();
+		ok = m_applicationData->setInputOutputsElementsConnectionAppLogic();
 		if (ok == false)
 		{
 			return false;
@@ -3576,45 +3860,191 @@ namespace Builder
 		return result;
 	}
 
-	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
+	bool Parser::loadUfbFiles(std::vector<std::shared_ptr<VFrame30::UfbSchema>>& out)
 	{
 		int ufblFileId = m_db->systemFileId(DbDir::UfblDir);
 
-		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, ufblFileId, QLatin1String(".") + File::UfbFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(out, ufblFileId, QLatin1String(".") + File::UfbFileExtension);
 
-		m_log.writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
+		m_log.writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out.size()));
 		m_log.writeMessage("");
 		return ok;
 	}
 
-	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
+	bool Parser::loadAppLogicFiles(std::vector<std::shared_ptr<VFrame30::LogicSchema>>& out)
 	{
 		int alFileId = m_db->systemFileId(DbDir::AppLogicDir);
 
-		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, alFileId, QLatin1String(".") + File::AlFileExtension);
-		m_log.writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(out, alFileId, QLatin1String(".") + File::AlFileExtension);
+		m_log.writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out.size()));
 		m_log.writeMessage("");
 		return ok;
 	}
 
-	template<typename SchemaType>
-	bool Parser::loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString endsWithFilter)
+	std::optional<std::vector<BuildActuatorType>> Parser::loadActuators()
 	{
-		if (out == nullptr)
+		std::optional<std::vector<BuildActuatorType>> result;
+
+		m_log.writeMessage("");
+		int actuatorDirFileId = m_db->systemFileId(DbDir::ActuatorsDir);
+
+		std::vector<std::pair<DbFileInfo, std::shared_ptr<VFrame30::ActuatorHeader>>> loadedActuatorHeaders;
+
+		bool ok = loadFiles<VFrame30::ActuatorHeader>(loadedActuatorHeaders,
+													  actuatorDirFileId,
+													  QLatin1String(".") + File::ActuatorHeaderFileExtension);
+		if (ok == false)
 		{
-			Q_ASSERT(out);
-			m_log.errINT1000(QString(__FUNCTION__) + QString(", out is nullptr."));
-			return false;
+			return result;
 		}
 
-		out->clear();
+		// Load schemas for each actuator header
+		//
+		std::vector<BuildActuatorType> actuators;
+
+		for (auto& [fileInfo, actuatorHeader] : loadedActuatorHeaders)
+		{
+			std::vector<std::shared_ptr<VFrame30::ActuatorSchema>> schemas;
+
+			bool loadSchemasOk = loadSchemaFiles(schemas, fileInfo.fileId(), QLatin1String(".") + File::ActuatorFileExtension);
+			if (loadSchemasOk == false)
+			{
+				return result;
+			}
+
+			m_log.writeMessage(tr("For actuator type %1 loaded %2 schemas.").arg(fileInfo.fileName()).arg(schemas.size()));
+
+			actuators.push_back(BuildActuatorType{.actuatorHeader = *actuatorHeader, .schemas = std::move(schemas)});
+		}
+
+		// Get ACM presets.
+		//
+		{
+			std::shared_ptr<Hardware::DeviceObject> presetRoot = std::make_shared<Hardware::DeviceRoot>();
+
+			auto fileInfo = std::make_shared<DbFileInfo>();
+			fileInfo->setFileId(m_db->systemFileId(DbDir::HardwarePresetsDir));
+			presetRoot->setData(fileInfo);
+
+			bool getPresetOk = m_db->getDeviceTreeLatestVersion(*fileInfo, &presetRoot, nullptr);
+			if (getPresetOk == false)
+			{
+				m_log.writeError(tr("Cannot get ACM presets from the database, database message: %1.").arg(m_db->lastError()));
+				return result;
+			}
+
+			// Filter presets
+			//
+			std::vector<std::shared_ptr<Hardware::DeviceModule>> acmPresets;
+			for (auto preset : presetRoot->children())
+			{
+				assert(preset);
+
+				if (preset->isModule() == false || preset->isExcludedFromBuild() == true || preset->isPreset() == false)
+				{
+					continue;
+				}
+
+				auto presetModule = std::dynamic_pointer_cast<Hardware::DeviceModule>(preset);
+				if (presetModule->isAcm() == false)
+				{
+					continue;
+				}
+
+				acmPresets.push_back(presetModule);
+			}
+
+			// Assign presets to actuators
+			//
+			for (auto& bat : actuators)
+			{
+				QString presetName = bat.actuatorHeader.acmPresetName();
+
+				auto presetIt = std::find_if(acmPresets.begin(),
+											 acmPresets.end(),
+											 [&presetName](const std::shared_ptr<Hardware::DeviceModule>& preset)
+											 {
+												 return preset->presetName().compare(presetName, Qt::CaseInsensitive) == 0;
+											 });
+				if (presetIt == acmPresets.end())
+				{
+					m_log.errALP4104(presetName, bat.actuatorHeader.actuatorTypeId());
+					return result;
+				}
+
+				bat.acmPreset = *presetIt;
+			}
+		}
+
+		// Get AcmPreset inputs/outputs.
+		//
+		for (auto& bat : actuators)
+		{
+			assert(bat.acmPreset != nullptr);
+
+			const QString presetEquipmentId = bat.acmPreset->equipmentId();
+			auto funcPresetEquipmentIdToSignalId = [&presetEquipmentId](QString equipmentId) -> QString
+			{
+				// Input: _MD-1_CTRLOUT_OUT01VALID
+				// Output: CTRLOUT_OUT01VALID
+				// presetEquipmentId is _MD-1
+				//
+				if (equipmentId.startsWith(presetEquipmentId) == true)
+				{
+					equipmentId.remove(0, presetEquipmentId.length());
+				}
+
+				// Remove leading underscores
+				//
+				while (equipmentId.startsWith("_") == true)
+				{
+					equipmentId.remove(0, 1);
+				}
+
+				return equipmentId;
+			};
+
+			for (auto presetSignals = bat.acmPreset->getAllAppSignals();
+				 std::shared_ptr<Hardware::DeviceAppSignal> presetSignal : presetSignals)
+			{
+				assert(presetSignal != nullptr);
+
+				if (presetSignal->isInputSignal() == true || presetSignal->isValiditySignal() == true)
+				{
+					QString signalId = funcPresetEquipmentIdToSignalId(presetSignal->equipmentId());
+					bat.acmInputs[signalId] = presetSignal;
+					continue;
+				}
+
+				if (presetSignal->isOutputSignal() == true)
+				{
+					QString signalId = funcPresetEquipmentIdToSignalId(presetSignal->equipmentId());
+					bat.acmOutputs[signalId] = presetSignal;
+					continue;
+				}
+			}
+		}
+
+		// --
+		//
+		result = std::move(actuators);
+
+		m_log.writeMessage(tr("Loaded %1 Actuator Header file(s).").arg(loadedActuatorHeaders.size()));
+		m_log.writeMessage("");
+		return result;
+	}
+
+	template<typename Type>
+	bool Parser::loadFiles(std::vector<std::pair<DbFileInfo, std::shared_ptr<Type>>>& out, int parentFileId, QString endsWithFilter)
+	{
+		out.clear();
 
 		// Get application logic file list from the DB
 		//
 		bool ok = false;
 		DbFileTree filesTree;
 
-		ok = db->getFileListTree(&filesTree, parentFileId, "%", true, nullptr);
+		ok = m_db->getFileListTree(&filesTree, parentFileId, "%", true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -3654,7 +4084,7 @@ namespace Builder
 		{
 			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
 			//
-			m_log.errPDB2001(parentFileId, endsWithFilter, db->lastError());
+			m_log.errPDB2001(parentFileId, endsWithFilter, m_db->lastError());
 			return false;
 		}
 
@@ -3674,9 +4104,7 @@ namespace Builder
 
 		// Get file data and read it
 		//
-		out->reserve(fileList.size());
-
-		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
+		std::vector<QFuture<std::pair<DbFileInfo, std::shared_ptr<Type>>>> loadSchemaTasks;
 		loadSchemaTasks.reserve(fileList.size());
 
 		bool result = true;
@@ -3694,13 +4122,13 @@ namespace Builder
 			LOG_MESSAGE_REF(m_log, tr("Loading %1").arg(fi.fileName()));
 
 			std::shared_ptr<DbFile> file;
-			ok = db->getLatestVersion(fi, &file, nullptr);
+			ok = m_db->getLatestVersion(fi, &file, nullptr);
 
 			if (ok == false || file == nullptr)
 			{
 				// Getting file instance error, file ID %1, file name '%2', database message '%3'.
 				//
-				m_log.errPDB2002(fi.fileId(), fi.fileName(), db->lastError());
+				m_log.errPDB2002(fi.fileId(), fi.fileName(), m_db->lastError());
 
 				result = false;
 				continue;
@@ -3709,18 +4137,19 @@ namespace Builder
 			// Read schema files
 			//
 			auto task = QtConcurrent::run(
-				[file, &log = m_log]() -> std::shared_ptr<VFrame30::Schema>
+				[file, &log = m_log]() -> std::pair<DbFileInfo, std::shared_ptr<Type>>
 				{
-					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file.get()->data());
+					auto o1 = Type::Create(file.get()->data());
+					std::shared_ptr<Type> o2 = std::dynamic_pointer_cast<Type>(o1);
 
-					if (result == nullptr)
+					if (o2 == nullptr)
 					{
 						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
 						//
 						log.errCMN0010(file->fileName());
 					}
 
-					return result;
+					return std::make_pair(file->fileInfo(), o2);
 				});
 
 			loadSchemaTasks.push_back(task);
@@ -3747,13 +4176,42 @@ namespace Builder
 				// Set interruptRequest, so work threads can get it and exit
 				//
 				interruptRequest = QThread::currentThread()->isInterruptionRequested();
-				QThread::msleep(30);
+				QThread::msleep(100);
 			}
 		} while (true);
 
+		// Save result
+		//
+		out.reserve(loadSchemaTasks.size());
+
 		for (auto& task : loadSchemaTasks)
 		{
-			std::shared_ptr<VFrame30::Schema> schema = task.result();
+			out.push_back(task.result());
+
+			if (out.back().second == nullptr)
+			{
+				// The Schema file is damaged or has incompatible format, file name '%1'.
+				//
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	template<typename SchemaType>
+	bool Parser::loadSchemaFiles(std::vector<std::shared_ptr<SchemaType>>& out, int parentFileId, QString endsWithFilter)
+	{
+		std::vector<std::pair<DbFileInfo, std::shared_ptr<SchemaType>>> loadedSchemas;
+
+		bool result = loadFiles<SchemaType>(loadedSchemas, parentFileId, endsWithFilter);
+		if (result == false)
+		{
+			return false;
+		}
+
+		for (auto& [_, schema] : loadedSchemas)
+		{
 			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
@@ -3807,7 +4265,7 @@ namespace Builder
 
 			// Add to schema list
 			//
-			out->push_back(ls);
+			out.push_back(ls);
 		}
 
 		return result;
@@ -4148,7 +4606,7 @@ namespace Builder
 			Q_ASSERT(schema);
 			Q_ASSERT(m_lmDescriptions);
 
-			m_log.errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_lmDescriptions %2.")
+			m_log.errINT1000(QString(__FUNCTION__) + QString(", schema %1, Parser::m_lmDescriptions %2.")
 														 .arg(schema ? "ok" : "nullptr")
 														 .arg(m_lmDescriptions ? "ok" : "nullptr"));
 			return false;
@@ -4158,18 +4616,14 @@ namespace Builder
 
 		// Get Description File
 		//
-		QString lmDescriptionFile;
-
-		if (schema->isLogicSchema() == true)
+		auto lmDescriptionFileProp = schema->propertyByCaption(VFrame30::PropertyNames::lmDescriptionFile);
+		if (lmDescriptionFileProp == nullptr)
 		{
-			lmDescriptionFile = schema->toLogicSchema()->lmDescriptionFile();
+			m_log.errALP4001(schema->schemaId(), VFrame30::PropertyNames::lmDescriptionFile);
+			return false;
 		}
 
-		if (schema->isUfbSchema() == true)
-		{
-			lmDescriptionFile = schema->toUfbSchema()->lmDescriptionFile();
-		}
-
+		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
 		if (lmDescriptionFile.isEmpty() == true)
 		{
 			m_log.errALP4001(schema->schemaId(), VFrame30::PropertyNames::lmDescriptionFile);
@@ -4291,7 +4745,7 @@ namespace Builder
 		return ok;
 	}
 
-	bool Parser::checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema, const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs)
+	bool Parser::checkUfbItemsVersion(VFrame30::Schema* logicSchema, const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs)
 	{
 		if (logicSchema == nullptr)
 		{
@@ -4354,6 +4808,106 @@ namespace Builder
 
 		return ok;
 	}
+
+	bool Parser::checkActuatorItemsVersion(const VFrame30::Schema& schema)
+	{
+		std::map<QString, VFrame30::ActuatorHeader> actuatorsMap; // ActuatorTypeID -> ActuatorHeader
+
+		for (const auto& ah : m_actuators)
+		{
+			assert(actuatorsMap.contains(ah.actuatorHeader.actuatorTypeId()) == false);
+			actuatorsMap.emplace(ah.actuatorHeader.actuatorTypeId(), ah.actuatorHeader);
+		}
+
+		auto lit = std::find_if(schema.begin(),
+								schema.end(),
+								[](auto& l)
+								{
+									return l->compile();
+								});
+
+		if (lit == schema.end())
+		{
+			return true; // No compiled layers, nothing to check
+		}
+
+		bool ok = true;
+		for (const auto& si : **lit | std::views::filter(
+										  [](const SchemaItemPtr& si)
+										  {
+											  return si->isType<VFrame30::SchemaItemActuator>();
+										  }))
+		{
+			auto* actuatorItem = si->toType<VFrame30::SchemaItemActuator>();
+			Q_ASSERT(actuatorItem);
+
+			auto actuatorsIt = actuatorsMap.find(actuatorItem->actuatorTypeId());
+
+			if (actuatorsIt == actuatorsMap.end())
+			{
+				// Actuator '%1' is not found for schema item '%2' (Logic Schema '%3').
+				//
+				m_log.errALP4100(schema.schemaId(), actuatorItem->buildName(), actuatorItem->actuatorTypeId(), si->guid());
+				ok = false;
+				continue;
+			}
+
+			const auto& actuatorHeader = actuatorsIt->second;
+
+			if (actuatorItem->actuatorHeaderVersion() != actuatorHeader.version())
+			{
+				m_log.errALP4101(schema.schemaId(),
+								 actuatorItem->buildName(),
+								 actuatorItem->actuatorHeaderVersion(),
+								 actuatorHeader.version(),
+								 actuatorItem->guid());
+				ok = false;
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkSupportedSchemaItems(const VFrame30::Schema& schema)
+	{
+		const auto& schemaTraits = schema.traits();
+
+		auto compileLayerIt = std::find_if(schema.begin(),
+										   schema.end(),
+										   [](const auto& l)
+										   {
+											   return l->compile();
+										   });
+		if (compileLayerIt == schema.end())
+		{
+			return true;                     // No compiled layers, nothing to check
+		}
+
+		bool result = true;
+
+
+		for (auto& layer = **compileLayerIt; //
+			 const auto& item : layer)
+		{
+			if (item->IsStatic() == true || item->isCommented() == true)
+			{
+				continue;
+			}
+
+			if (schemaTraits.isItemSupported(item) == false)
+			{
+				QString itemType = QString::fromLatin1(item->metaObject()->className());
+				itemType.remove("VFrame30::SchemaItem");
+
+				m_log.errALP4102(schema.schemaId(), item->label(), itemType, item->guid());
+				result = false;
+				continue;
+			}
+		}
+
+		return result;
+	}
+
 
 	bool Parser::checkForUniqueLoopbackId(VFrame30::Schema* schema)
 	{
@@ -4516,38 +5070,139 @@ namespace Builder
 		return ok;
 	}
 
+	bool Parser::checkActuatorLogicInputsOutputs()
+	{
+		assert(m_applicationData != nullptr);
+
+		bool result = true;
+		for (const auto& [actuatorTypeId, buildActuatorType] : m_applicationData->actuators())
+		{
+			LOG_MESSAGE_REF(m_log, tr("Checking actuator '%1' logic inputs/outputs...").arg(actuatorTypeId));
+
+			if (buildActuatorType.parseResult == nullptr)
+			{
+				assert(buildActuatorType.parseResult);
+				m_log.errINT1000(QString(__FUNCTION__) +
+								 QString(", actuatorLogic is nullptr for actuatorTypeId '%1'.").arg(actuatorTypeId));
+				result = false;
+				continue;
+			}
+
+			if (buildActuatorType.acmPreset == nullptr)
+			{
+				assert(buildActuatorType.acmPreset);
+				m_log.errINT1000(QString(__FUNCTION__) + QString(", acmPreset is nullptr for actuatorTypeId '%1'.").arg(actuatorTypeId));
+				return false;
+			}
+
+			// Get all possible inputs and outputs for this actuator type.
+			//
+			std::unordered_set<QString> possibleInputs;
+			std::unordered_set<QString> possibleOutputs;
+
+			possibleInputs.reserve(256);
+			possibleOutputs.reserve(256);
+
+			for (auto actuatorInput : buildActuatorType.actuatorHeader.inputs())
+			{
+				possibleInputs.insert(actuatorInput->signalIdChannel1());
+				possibleInputs.insert(actuatorInput->signalIdChannel2());
+			}
+
+			for (auto actuatorOutput : buildActuatorType.actuatorHeader.outputs())
+			{
+				possibleOutputs.insert(actuatorOutput->signalIdChannel1());
+				possibleOutputs.insert(actuatorOutput->signalIdChannel2());
+			}
+
+			// Check all items in the actuator logic schema
+			//
+			for (const auto& item : buildActuatorType.parseResult->items())
+			{
+				if (item.m_fblItem == nullptr)
+				{
+					assert(item.m_fblItem);
+					m_log.errINT1000(QString(__FUNCTION__) +
+									 QString(", item.m_fblItem is nullptr for actuatorTypeId '%1'.").arg(actuatorTypeId));
+					result = false;
+					continue;
+				}
+
+				if (item.m_fblItem->isInputSignalElement() == true && item.m_fblItem->inputsCount() == 0)
+				{
+					auto signalElement = item.m_fblItem->toSignalElement();
+					assert(signalElement);
+
+					QString signalId = signalElement->appSignalIds().trimmed();
+
+					if (possibleInputs.contains(signalId) == false && buildActuatorType.acmInputs.contains(signalId) == false)
+					{
+						if (buildActuatorType.acmOutputs.contains(signalId) == true)
+						{
+							// Cannot use output signal as input, SchemaItem %1 (ActuatorType '%2').
+							//
+							m_log.errALP4105(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
+						}
+						else
+						{
+							// Unknown signal
+							//
+							m_log.errALP4103(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
+						}
+
+						result = false;
+					}
+				}
+
+				if (item.m_fblItem->isOutputSignalElement() == true && item.m_fblItem->outputsCount() == 0)
+				{
+					auto signalElement = item.m_fblItem->toSignalElement();
+					assert(signalElement);
+
+					QString signalId = signalElement->appSignalIds().trimmed();
+
+					if (possibleOutputs.contains(signalId) == false && buildActuatorType.acmOutputs.contains(signalId) == false)
+					{
+						if (buildActuatorType.acmInputs.contains(signalId) == true)
+						{
+							// Cannot use input signal as output, SchemaItem %1 (ActuatorType '%2').
+							//
+							m_log.errALP4106(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
+						}
+						else
+						{
+							// Unknwown signal
+							//
+							m_log.errALP4103(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
+						}
+
+						result = false;
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	bool Parser::parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema)
 	{
 		if (ufbSchema.get() == nullptr)
 		{
 			Q_ASSERT(false);
+			m_log.errINT1000(QString(__FUNCTION__) + QString(", ufbSchema is nullptr."));
 			return false;
 		}
 
 		// Find layer for compilation
 		//
-		bool layerFound = false;
-		bool ok = false;
-
-		for (const auto& l : ufbSchema->layers())
-		{
-			if (l->compile() == true)
-			{
-				layerFound = true;
-				ok = parseUfbLayer(ufbSchema, l);
-
-				if (ok == false)
-				{
-					return false;
-				}
-
-				// We can parse only one layer
-				//
-				break;
-			}
-		}
-
-		if (layerFound == false)
+		auto compileLayerIt = std::find_if(ufbSchema->begin(),
+										   ufbSchema->end(),
+										   [](const auto& l)
+										   {
+											   return l->compile();
+										   });
+		if (compileLayerIt == ufbSchema->end())
 		{
 			// Schema does not have logic layer (Schema '%1').
 			//
@@ -4555,7 +5210,7 @@ namespace Builder
 			return false;
 		}
 
-		return true;
+		return parseUfbLayer(ufbSchema, *compileLayerIt);
 	}
 
 	bool Parser::parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema, std::shared_ptr<VFrame30::SchemaLayer> layer)
@@ -4564,6 +5219,8 @@ namespace Builder
 		{
 			Q_ASSERT(ufbSchema);
 			Q_ASSERT(layer);
+			m_log.errINT1000(QString{__FUNCTION__} +
+							 QString{", ufbSchema %1, layer %2."}.arg(ufbSchema ? "ok" : "nullptr").arg(layer ? "ok" : "nullptr"));
 			return false;
 		}
 
@@ -4664,6 +5321,125 @@ namespace Builder
 		// Generate afb list, and set it to some container
 		//
 		applicationData()->addUfbData(bushContainer, ufbSchema);
+
+		return true;
+	}
+
+	bool Parser::parseActuatorSchema(std::shared_ptr<VFrame30::ActuatorSchema> actuatorSchema, const BuildActuatorType& bat)
+	{
+		if (actuatorSchema.get() == nullptr)
+		{
+			m_log.errINT1000("actuatorSchema is nullptr");
+			return false;
+		}
+
+		assert(actuatorSchema->actuatorTypeId() == bat.actuatorHeader.actuatorTypeId());
+
+		// Find layer for compilation
+		//
+		auto compileLayerIt = std::find_if(actuatorSchema->begin(),
+										   actuatorSchema->end(),
+										   [](const auto& layer)
+										   {
+											   return layer->compile();
+										   });
+
+		if (compileLayerIt == actuatorSchema->end())
+		{
+			// Schema does not contain Logic layer (Actuator Schema '%1').
+			//
+			m_log.errALP4022(actuatorSchema->schemaId());
+			return false;
+		}
+
+		return parseActuatorLayer(actuatorSchema, *compileLayerIt, bat);
+	}
+
+	bool Parser::parseActuatorLayer(std::shared_ptr<VFrame30::ActuatorSchema> actuatorSchema,
+									std::shared_ptr<VFrame30::SchemaLayer> layer,
+									const BuildActuatorType& bat)
+	{
+		if (actuatorSchema == nullptr || layer == nullptr)
+		{
+			Q_ASSERT(actuatorSchema);
+			Q_ASSERT(layer);
+			m_log.errINT1000(
+				QString{__FUNCTION__} +
+				QString{", actuatorSchema %1, layer %2."}.arg(actuatorSchema ? "ok" : "nullptr").arg(layer ? "ok" : "nullptr"));
+			return false;
+		}
+
+		// Check that used only allowed items
+		//
+		bool result = true;
+		const auto& schemaTraits = actuatorSchema->traits();
+
+		for (const auto& item : layer->items())
+		{
+			if (item->IsStatic() == true || item->isCommented() == true)
+			{
+				continue;
+			}
+
+			if (schemaTraits.isItemSupported(item) == false)
+			{
+				assert(schemaTraits.isItemSupported(item)); // We should check this before, but just in case, we check it again
+				continue;
+			}
+
+			// Check if Input/Output has particularly ONE assigned AppSignalID
+			//
+			if (item->isType<VFrame30::SchemaItemSignal>() == true)
+			{
+				const VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
+
+				if (signalItem->appSignalIdList().size() != 1)
+				{
+					m_log.errALP4015(actuatorSchema->schemaId(), item->label(), item->guid());
+					result = false;
+					continue;
+				}
+			}
+		}
+
+		if (result == false)
+		{
+			return result;
+		}
+
+		// Find all branches - connected links
+		//
+		BushContainer bushContainer;
+
+		result = findBushes(actuatorSchema, layer, &bushContainer);
+		if (result == false)
+		{
+			LOG_ERROR_OBSOLETE_REF(m_log, Builder::IssueType::NotDefined, tr("Finding bushes error."));
+			return false;
+		}
+
+		// bushContainer.debugInfo();
+
+		// Set pins' guids to bushes
+		// All log errors should be reported in setBranchConnectionToPin
+		//
+		result = setBranchConnectionToPin(actuatorSchema, layer, &bushContainer);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Associates input/outputs
+		//
+		result = setPinConnections(actuatorSchema, layer, &bushContainer);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Generate afb list, and set it to some container
+		//
+		applicationData()->addActuatorData(bushContainer, actuatorSchema, bat);
 
 		return true;
 	}
@@ -5497,23 +6273,24 @@ namespace Builder
 			bushContainer->bushes.push_back(std::move(newBush));
 		}
 
-		//		// DEBUG
-		//		for (Bush& eb : bushContainer->bushes)
-		//		{
-		//			qDebug() << "-----";
-		//			for (auto& bl : eb.links)
-		//			{
-		//				qDebug() << bl.first << "--" <<
-		//							bl.second.pt1.X <<
-		//							"-" <<
-		//							bl.second.pt1.Y <<
-		//							"    " <<
-		//							bl.second.pt2.X <<
-		//							"-" <<
-		//							bl.second.pt2.Y;
-		//			}
-		//		}
-		//		// END OF DEBUG
+
+#if 0 // DEBUG
+		for (Bush& eb : bushContainer->bushes)
+		{
+			qDebug() << "-----";
+			for (auto& bl : eb.links)
+			{
+				qDebug() << bl.first << "--" <<
+							bl.second.pt1.X <<
+							"-" <<
+							bl.second.pt1.Y <<
+							"    " <<
+							bl.second.pt2.X <<
+							"-" <<
+							bl.second.pt2.Y;
+			}
+		}
+#endif
 
 		return true;
 	}

@@ -2071,14 +2071,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property %1 for Schema is not set (LogicSchema %2).
+	/// Title: Property %1 for schema %2 is not set.
 	///
 	/// Parameters:
-	///		%1 Logic schema StrID
+	///		%1 Property name
+	///		%2 SchemaID
 	///
 	/// Description:
-	///		Some property for an application logic or user functional block schema is empty.
-	///		to the Logic Module EquipmentID.
+	///		Some property for schema is not present or empty.
 	///
 	void IssueLogger::errALP4001(QString schema, QString propertyName)
 	{
@@ -2086,7 +2086,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4001,
-				  tr("Property %1 for Schema is not set (LogicSchema %2).")
+				  tr("Property %1 for schema %2 is not set.")
 				  .arg(propertyName)
 				  .arg(schema));
 	}
@@ -2256,12 +2256,12 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema %4).
+	/// Title: SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (Schema %4).
 	///
 	/// Parameters:
 	///		%1 Application functional block StrID
 	///		%2 Schema item description
-	///		%3 Logic schema StrID
+	///		%3 SchemaID
 	///
 	/// Description:
 	///		To proccess logic block it is required AFB description which in not found. Open schema to update AFBs.
@@ -2275,7 +2275,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4008,
-				  tr("SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema %4).")
+				  tr("SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (Schema %4).")
 				  .arg(schemaItem)
 				  .arg(schemaItemAfbVersion)
 				  .arg(latestAfbVersion)
@@ -2460,14 +2460,16 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema %2).
+	/// Title: Input, Output, and InOut items must have exactly one assigned AppSignalID (property AppSignalIDs) for this schema type. Schema item: %1 (Schema: %2).
 	///
 	/// Parameters:
-	///		%1 UFB SchemaItem
-	///		%2 UFB SchemaID
+	///		%1 SchemaItem
+	///		%2 SchemaID
 	///
 	/// Description:
-	///		UFB Input or Output item must have ONE assigned AppSignalIDs which are used as pins on SchemaItem UFB
+	///     An Input or Output item must have exactly one assigned AppSignal ID, which is used as a pin on
+	/// SchemaItemUfb or SchemaItemActuator. Assigning more than one AppSignal ID to an Input or
+	/// Output item is an error.
 	///
 	void IssueLogger::errALP4015(QString schema, QString schemaItem, QUuid itemUuid)
 	{
@@ -2478,7 +2480,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4015,
-				  tr("UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema %2).")
+				  tr("Input, Output, and InOut items must have exactly one assigned AppSignalID (property AppSignalIDs) for this schema type. Schema item: %1 (Schema: %2).")
 				  .arg(schemaItem)
 				  .arg(schema));
 	}
@@ -2960,6 +2962,183 @@ namespace Builder
 				  tr("Join schemas with different units, schemas %1 and %2 must have the same unit.")
 						.arg(schema)
 						.arg(panelSchemaId));
+	}
+
+	/// IssueCode: ALP4100
+	///
+	/// IssueType: Error
+	///
+	/// Title: ActuatorTypeID %1 is not found for schema item %2 (Schema %3).
+	///
+	/// Parameters:
+	///		%1 ActuatorTypeID
+	///		%2 Schema item description
+	///		%3 SchemaID
+	///
+	/// Description:
+	///		ActuatorTypeID is not found for schema item, check ActuatorTypeID property of the schema item. Maybe such actuator type is not
+	/// defined in the project.
+	///
+	void IssueLogger::errALP4100(QString schema, QString schemaItem, QString actuatorTypeId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4100, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4100,
+				  tr("ActuatorTypeID %1 is not found for schema item %2 (Schema %3).").arg(actuatorTypeId).arg(schemaItem).arg(schema));
+	}
+
+	/// IssueCode: ALP4101
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItem %1 has outdated Actuator version, item's Actuator.version %2, the latest is %3 (Schema %4).
+	///
+	/// Parameters:
+	///		%1 ActuatorTypeID
+	///		%2 Schema item description
+	///		%3 Schema ID
+	///
+	/// Description:
+	///		SchemaItem %1 has outdated Actuator version, item's Actuator.version %2, the latest is %3 (Schema %4). Open schema to update Actuators.
+	///
+	void IssueLogger::errALP4101(QString schema,
+								 QString schemaItem,
+								 int schemaItemActuatorVersion,
+								 int latestActuatorVersion,
+								 QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4101, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4101,
+				  tr("SchemaItem %1 has outdated Actuator version, item's Actuator.version %2, the latest is %3 (Schema %4).")
+					  .arg(schemaItem)
+					  .arg(schemaItemActuatorVersion)
+					  .arg(latestActuatorVersion)
+					  .arg(schema));
+	}
+
+	/// IssueCode: ALP4102
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema cannot contain item type '%1', SchemaItem %2 (Schema %3).
+	///
+	/// Parameters:
+	///		%1 SchemaItem type
+	///		%2 SchemaItem label
+	///		%3 SchemaID
+	///
+	/// Description:
+	///		Schema can contain only allowed types of items.
+	///
+	void IssueLogger::errALP4102(QString schema, QString schemaItem, QString itemType, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4102, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4102,
+				  tr("Schema cannot contain item type '%1', SchemaItem %2 (Schema %3).").arg(itemType).arg(schemaItem).arg(schema));
+	}
+
+
+	/// IssueCode: ALP4103
+	///
+	/// IssueType: Error
+	///
+	/// Title: Unknown signal %1, SchemaItem %2 (Schema %3). Interconnection input/output signals require a matching opposite schema item
+	/// with the same SignalID.
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 SchemaItem label
+	///		%3 Actuator SchemaID
+	///
+	/// Description:
+	///		Schema item has unknown signal, check SignalID property of the schema item.
+	///
+	void IssueLogger::errALP4103(QString schema, QString schemaItem, QString signalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4103, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4103,
+				  tr("Unknown signal %1, SchemaItem %2 (Schema %3). Interconnection input/output signals require a matching opposite "
+					 "schema item with the same SignalID.")
+					  .arg(signalId)
+					  .arg(schemaItem)
+					  .arg(schema));
+	}
+
+	/// IssueCode: ALP4104
+	///
+	/// IssueType: Error
+	///
+	/// Title: Cannot find ACM preset '%1' for actuator type '%2'.
+	///
+	/// Parameters:
+	///		%1 ACM preset name
+	///		%2 ActuatorTypeID
+	///
+	/// Description:
+	///		Cannot find ACM preset for actuator type. Project must contain ACM preset for each actuator type used in the project.
+	///
+	void IssueLogger::errALP4104(QString presetName, QString actuatorTypeId)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4104,
+				  tr("Cannot find ACM preset '%1' for actuator type '%2'.").arg(presetName).arg(actuatorTypeId));
+	}
+
+	/// IssueCode: ALP4105
+	///
+	/// IssueType: Error
+	///
+	/// Title: Output signal %1 cannot be used as an input in SchemaItem %2 (Schema %3).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 SchemaItem label
+	///		%3 Actuator SchemaID
+	///
+	/// Description:
+	///		Output signal cannot be used as an input in SchemaItemInput.
+	///
+	void IssueLogger::errALP4105(QString schema, QString schemaItem, QString signalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4105, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4105,
+				  tr("Output signal %1 cannot be used as an input in SchemaItem %2 (Schema %3).")
+					  .arg(signalId)
+					  .arg(schemaItem)
+					  .arg(schema));
+	}
+
+	/// IssueCode: ALP4106
+	///
+	/// IssueType: Error
+	///
+	/// Title: Input signal %1 cannot be used as an output in SchemaItem %2 (Schema %3).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 SchemaItem label
+	///		%3 Actuator SchemaID
+	///
+	/// Description:
+	///		Input signal cannot be used as an output in SchemaItemOutput.
+	///
+	void IssueLogger::errALP4106(QString schema, QString schemaItem, QString signalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4106, itemUuid, schema);
+
+		LOG_ERROR(
+			IssueType::AlParsing,
+			4106,
+			tr("Input signal %1 cannot be used as an output in SchemaItem %2 (Schema %3).").arg(signalId).arg(schemaItem).arg(schema));
 	}
 
 	/// IssueCode: ALP4130

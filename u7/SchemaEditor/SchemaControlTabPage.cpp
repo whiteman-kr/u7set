@@ -3129,7 +3129,7 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 	DbFileInfo fi(*out);
 
 	if (fi.isFolder() == false && //
-		(File::isSchemaFileExtension(fi.fileName()) == true || File::isSchemaTemplateFileExtension(fi.fileName()) == true))
+		(File::isSchemaFileExtension(fi.ext()) == true || File::isSchemaTemplateFileExtension(fi.ext()) == true))
 	{
 		viewSchemaFile(*out);
 	}

@@ -2,6 +2,7 @@
 
 #include "UuidGenerator.h"
 
+#include <VFrame30/ActuatorHeader.h>
 #include <VFrame30/FblItem.h>
 #include <VFrame30/HorzVertLinks.h>
 
@@ -43,6 +44,9 @@ namespace VFrame30
 	class SchemaItemLoopback;
 	class SchemaItemBus;
 	class SchemaLayer;
+
+	class ActuatorHeader;
+	class ActuatorSchema;
 } // namespace VFrame30
 
 namespace Builder
@@ -245,6 +249,19 @@ namespace Builder
 		QHash<QString, bool> m_signaledItems;
 	};
 
+	// Here we store actuator type and all its logic schemas
+	//
+	struct BuildActuatorType
+	{
+		VFrame30::ActuatorHeader actuatorHeader;                                  // ActuatorHeader for this actuator type
+		std::shared_ptr<Hardware::DeviceModule> acmPreset;                        // ACM Preset
+		std::map<QString, std::shared_ptr<Hardware::DeviceAppSignal>> acmInputs;  // ACM inputs
+		std::map<QString, std::shared_ptr<Hardware::DeviceAppSignal>> acmOutputs; // ACM outputs
+		std::vector<std::shared_ptr<VFrame30::ActuatorSchema>> schemas;           // Actuator logic schemas for this actuator type
+		std::shared_ptr<AppLogicModule> parseResult;                              // Actuator module for this actuator type,
+																				  // created after parsing all schemas
+	};
+
 
 	// ------------------------------------------------------------------------
 	//
@@ -260,13 +277,18 @@ namespace Builder
 		//
 	public:
 		bool addLogicModuleData(QString equipmentId, const BushContainer& bushContainer, std::shared_ptr<VFrame30::LogicSchema> schema);
-
 		bool addUfbData(const BushContainer& bushContainer, std::shared_ptr<VFrame30::UfbSchema> schema);
+		bool addActuatorData(const BushContainer& bushContainer,
+							 std::shared_ptr<VFrame30::ActuatorSchema> schema,
+							 const BuildActuatorType& bat);
 
 		bool orderLogicModuleItems();
 		bool orderUfbItems();
+		bool orderActuatorSchemaItems();
 
-		bool expandUfbs();
+		bool expandUfbsForAppLogic();
+		bool expandUfbsForActuatorLogic();
+		bool expandUfbs(std::vector<std::shared_ptr<AppLogicModule>> modules);
 
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
@@ -274,7 +296,9 @@ namespace Builder
 
 		bool resolvePackedLogicAfbs();
 
-		bool setInputOutputsElementsConnection();
+		bool setInputOutputsElementsConnectionAppLogic();
+		bool setInputOutputsElementsConnectionActuatorLogic();
+
 		bool createGraphs();
 
 		/// @brief Write fully parsed AppLogicData to the output for further analysis by third-party tools.
@@ -290,9 +314,14 @@ namespace Builder
 		const std::map<QString, std::shared_ptr<AppLogicModule>>& ufbs() const;
 		std::shared_ptr<AppLogicModule> ufb(const QString& ufbId) const;
 
+		const std::map<QString, BuildActuatorType>& actuators() const;
+		BuildActuatorType actuator(const QString& actuatorTypeId) const;
+
 	private:
 		std::list<std::shared_ptr<AppLogicModule>> m_modules;
 		std::map<QString, std::shared_ptr<AppLogicModule>> m_ufbs;
+
+		std::map<QString, BuildActuatorType> m_actuators; // Key is ActuatorHeader::actuatorTypeId()
 
 		SignalSet& m_signalSet;
 		LmDescriptionSet& m_lmDescriptions;
@@ -324,7 +353,6 @@ namespace Builder
 		std::set<AppData> m_appData;
 	};
 
-
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBuilder
@@ -341,12 +369,22 @@ namespace Builder
 	public:
 		bool parse();
 
+	private:
+		bool parseUfbs();             // UFB Schemas
+		bool parseActuatorLogic();    // Actuator Schemas
+		bool parseApplicationLogic(); // Application Logic Schemas
+
 	protected:
-		bool loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
-		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out);
+		bool loadUfbFiles(std::vector<std::shared_ptr<VFrame30::UfbSchema>>& out);
+		bool loadAppLogicFiles(std::vector<std::shared_ptr<VFrame30::LogicSchema>>& out);
+
+		std::optional<std::vector<BuildActuatorType>> loadActuators();
+
+		template<typename Type>
+		bool loadFiles(std::vector<std::pair<DbFileInfo, std::shared_ptr<Type>>>& out, int parentFileId, QString filter);
 
 		template<typename SchemaType>
-		bool loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString filter);
+		bool loadSchemaFiles(std::vector<std::shared_ptr<SchemaType>>& out, int parentFileId, QString filter);
 
 		template<typename SchemaType>
 		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType>>& schemas) const;
@@ -360,17 +398,26 @@ namespace Builder
 
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
 		bool checkBusItemsVersion(VFrame30::Schema* schema, const AppSignalLib::BusSet& busSet);
-		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema, const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
+		bool checkUfbItemsVersion(VFrame30::Schema* schema, const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
+		bool checkActuatorItemsVersion(const VFrame30::Schema& schema);
+		bool checkSupportedSchemaItems(const VFrame30::Schema& schema);
+
 		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
 		bool checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module);
 
 		bool checkForResolvedReferences(std::shared_ptr<AppLogicModule> module);
 
+		bool checkActuatorLogicInputsOutputs();
+
 		bool parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema);
 		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer);
+		bool parseActuatorSchema(std::shared_ptr<VFrame30::ActuatorSchema> actuatorSchema, const BuildActuatorType& bat);
+		bool parseActuatorLayer(std::shared_ptr<VFrame30::ActuatorSchema> actuatorSchema,
+								std::shared_ptr<VFrame30::SchemaLayer> layer,
+								const BuildActuatorType& bat);
 
+		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer);
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 								std::shared_ptr<VFrame30::SchemaLayer> layer,
 								ReadyParseDataContainer* readyParseDataContainer);
@@ -408,7 +455,10 @@ namespace Builder
 		IssueLogger& m_log;
 		int m_changesetId = 0;
 
-		QStringList m_buildSchemaTags; // If empty, then build all schemas, otherwise only schemas with these tags
+		QStringList m_buildSchemaTags;              // If empty, then build all schemas, otherwise only schemas with these tags
+
+		std::vector<std::shared_ptr<VFrame30::UfbSchema>> m_ufbs;
+		std::vector<BuildActuatorType> m_actuators; // Key is ActuatorHeader::actuatorTypeId()
 
 		std::shared_ptr<AppLogicData> m_applicationData;
 		LmDescriptionSet* m_lmDescriptions = nullptr;

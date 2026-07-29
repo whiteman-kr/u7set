@@ -218,7 +218,6 @@ namespace Builder
 		// clang-format on
 
 	private:
-		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object,
 								 std::vector<Hardware::DeviceModule*>* out,
 								 Hardware::DeviceModule::FamilyType family) const;
@@ -229,7 +228,7 @@ namespace Builder
 
 		// Load Application Functional Block Library
 		//
-		bool loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
+		bool loadLogicModuleDescription(Hardware::DeviceModule& logicModule, LmDescriptionSet& lmDescriptions);
 
 		// Load Sim Profiles
 		//

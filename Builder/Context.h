@@ -95,6 +95,8 @@ namespace Builder
 
 		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM, BVB, VDU modules
 
+		std::map<QString, std::shared_ptr<Hardware::DeviceModule>> m_acmModules; // includes ACM modules, key is Module EquipmentID
+
 		std::map<QString, std::map<Hash, int>> m_vduSignals; // VDU EquipmentID => (Hash(appSignalID) => VDU signal index)
 		std::map<QString, quint64> m_vduConfigIDs;           // VDU EquipmentID => VDU Configuration ID
 

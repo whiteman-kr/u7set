@@ -713,23 +713,61 @@ namespace Builder
 
 	bool BuildWorkerThread::taskLoadLmDescriptions()
 	{
+		bool result = true;
+
 		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
 
 		// find LM and BVB modules and load their descriptions
 		//
 		LOG_MESSAGE(m_context->m_log, tr("Loading to m_fscModules..."))
-
-		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
-
-		bool result = true;
-
-		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
 		{
-			result &= loadLogicModuleDescription(lm, m_context->m_lmDescriptions.get());
+			auto fscDevices = m_context->m_equipmentSet->devices(
+				[](const std::shared_ptr<Hardware::DeviceObject>& device)
+				{
+					return device->isModule() && device->toModule()->isFSCConfigurationModule();
+				});
 
-			if (lm->isLogicModule() == true)
+			m_context->m_fscModules.clear();
+			m_context->m_fscModules.reserve(fscDevices.size());
+			for (auto module : fscDevices)
 			{
-				m_context->m_lmModules.push_back(lm);
+				m_context->m_fscModules.push_back(module->toModule().get());
+			}
+
+			for (Hardware::DeviceModule* lm : m_context->m_fscModules)
+			{
+				result &= loadLogicModuleDescription(*lm, *m_context->m_lmDescriptions);
+
+				if (lm->isLogicModule() == true)
+				{
+					m_context->m_lmModules.push_back(lm);
+				}
+			}
+		}
+
+		// Find all ACM modules and load their descriptions
+		//
+		LOG_MESSAGE(m_context->m_log, tr("Loading to m_acmModules..."))
+
+		{
+			auto acmDevices = m_context->m_equipmentSet->devices(
+				[](const std::shared_ptr<Hardware::DeviceObject>& device)
+				{
+					return device->isModule() && device->toModule()->isAcm();
+				});
+
+			m_context->m_acmModules.clear();
+			for (auto acm : acmDevices)
+			{
+				// acm->equipmentIdTemplate() is already expanded to the full EquipmentID.
+				//
+				m_context->m_acmModules.emplace(acm->equipmentIdTemplate(), acm->toModule());
+			}
+
+			for (auto& [_, acm] : m_context->m_acmModules)
+			{
+				assert(acm->isAcm());
+				result &= loadLogicModuleDescription(*acm, *m_context->m_lmDescriptions);
 			}
 		}
 
@@ -1541,38 +1579,6 @@ namespace Builder
 		return ok;
 	}
 
-	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
-	{
-		if (object == nullptr || out == nullptr)
-		{
-			assert(object);
-			assert(out);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i).get();
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->isFSCConfigurationModule() == true)
-				{
-					out->push_back(module);
-				}
-			}
-
-			if (child->deviceType() < Hardware::DeviceType::Module)
-			{
-				findFSCConfigurationModules(child, out);
-			}
-		}
-
-		return;
-	}
-
 	void BuildWorkerThread::findModulesByFamily(Hardware::DeviceObject* object,
 												std::vector<Hardware::DeviceModule*>* out,
 												Hardware::DeviceModule::FamilyType family) const
@@ -1649,22 +1655,15 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions)
+	bool BuildWorkerThread::loadLogicModuleDescription(Hardware::DeviceModule& logicModule, LmDescriptionSet& lmDescriptions)
 	{
-		if (logicModule == nullptr || lmDescriptions == nullptr)
-		{
-			assert(logicModule);
-			assert(lmDescriptions);
-			return false;
-		}
-
 		// Get LmDescriptionFile property value
 		//
-		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+		auto lmDescriptionFileProp = logicModule.propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
 
 		if (lmDescriptionFileProp == nullptr)
 		{
-			m_context->m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, logicModule->equipmentIdTemplate());
+			m_context->m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, logicModule.equipmentIdTemplate());
 			return false;
 		}
 
@@ -1672,20 +1671,20 @@ namespace Builder
 
 		if (lmDescriptionFile.isEmpty() == true)
 		{
-			m_context->m_log->errEQP6020(logicModule->equipmentIdTemplate(), logicModule->uuid());
+			m_context->m_log->errEQP6020(logicModule.equipmentIdTemplate(), logicModule.uuid());
 			return false;
 		}
 
 		// Has file already been loaded?
 		//
-		if (lmDescriptions->has(lmDescriptionFile) == true)
+		if (lmDescriptions.has(lmDescriptionFile) == true)
 		{
 			return true;
 		}
 
 		// Load file
 		//
-		bool ok = lmDescriptions->loadFile(m_context->m_log, &m_context->m_db, logicModule->equipmentIdTemplate(), lmDescriptionFile);
+		bool ok = lmDescriptions.loadFile(m_context->m_log, &m_context->m_db, logicModule.equipmentIdTemplate(), lmDescriptionFile);
 
 		if (ok == true)
 		{

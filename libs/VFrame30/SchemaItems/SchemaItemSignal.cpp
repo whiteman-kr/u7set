@@ -2128,7 +2128,7 @@ namespace VFrame30
 
 	QString SchemaItemInput::buildName() const
 	{
-		return QString("Input (%1)").arg(appSignalIds());
+		return QString("Input (ID: %1) - %2").arg(appSignalIds()).arg(label());
 	}
 
 	// Serialization

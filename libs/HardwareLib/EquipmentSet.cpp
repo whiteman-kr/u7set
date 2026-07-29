@@ -16,7 +16,7 @@ namespace Hardware
 	{
 		// Release m_root in separate thread, if it is possible
 		//
-		m_deviceTable.clear();	// Clear it first because it also holds m_root
+		m_deviceTable.clear(); // Clear it first because it also holds m_root
 
 		if (m_root.use_count() == 1)
 		{
@@ -93,7 +93,7 @@ namespace Hardware
 		return m_root;
 	}
 
-	[[nodiscard]] std::vector<std::shared_ptr<DeviceObject>> EquipmentSet::devices()
+	std::vector<std::shared_ptr<DeviceObject>> EquipmentSet::devices() const
 	{
 		std::vector<std::shared_ptr<DeviceObject>> result;
 		result.reserve(m_deviceTable.size());
@@ -101,6 +101,30 @@ namespace Hardware
 		for (auto& d : m_deviceTable)
 		{
 			result.push_back(d.second);
+		}
+
+		return result;
+	}
+
+	std::vector<std::shared_ptr<DeviceObject>> EquipmentSet::devices(
+		const std::function<bool(const std::shared_ptr<DeviceObject>&)>& filter) const
+	{
+		std::vector<std::shared_ptr<DeviceObject>> result;
+
+		if (!filter) 
+		{
+			assert(filter);
+			return result;
+		}
+
+		result.reserve(m_deviceTable.size());
+
+		for (auto& d : m_deviceTable)
+		{
+			if (filter(d.second) == true)
+			{
+				result.push_back(d.second);
+			}
 		}
 
 		return result;

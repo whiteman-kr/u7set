@@ -120,17 +120,13 @@ namespace VFrame30
 				return false;
 			}
 
-			QString clearClassName = mo->className();
-
-			auto findResult = clearClassName.lastIndexOf("::");
-			if (findResult != -1)
-			{
-				Q_ASSERT(findResult + 2 < clearClassName.size());
-				clearClassName = clearClassName.mid(findResult + 2);
-			}
-
-			return isItemSupported(clearClassName);
+			return isItemSupported(mo);
 		}
+
+		bool isItemSupported(const SchemaItem& item) const;
+		bool isItemSupported(const std::shared_ptr<SchemaItem>& item) const;
+		bool isItemSupported(const SchemaItem* item) const;
+		bool isItemSupported(const QMetaObject* mo) const;
 
 		virtual bool isItemSupported(const QString& clearClassName) const = 0;
 	};

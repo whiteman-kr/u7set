@@ -260,6 +260,16 @@ namespace Builder
 		void errALP4081(QString schema);															// SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distinctive from SchemaID.
 		void errALP4082(QString schema, QString pannelSchemaId);									// Join schemas with different unit, schemas %1 and %2 must have the same unit.
 
+		// Actuator parsing errors
+		//
+		void errALP4100(QString schema, QString schemaItem, QString actuatorTypeId, QUuid itemUuid);
+		void errALP4101(QString schema, QString schemaItem, int schemaItemActuatorVersion, int latestActuatorVersion, QUuid itemUuid);
+		void errALP4102(QString schema, QString schemaItem, QString itemType, QUuid itemUuid);
+		void errALP4103(QString schema, QString schemaItem, QString signalId, QUuid itemUuid);
+		void errALP4104(QString presetName, QString actuatorTypeId);
+		void errALP4105(QString schema, QString schemaItem, QString signalId, QUuid itemUuid);
+		void errALP4106(QString schema, QString schemaItem, QString signalId, QUuid itemUuid);
+
 		// Multichannel parsing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
