@@ -15,6 +15,7 @@ namespace ArchV3
 		ArchWriter(	const QString& archDir, 
 					const QString& projectName, 
 					const QString& clientID,
+					const DbConnectionInfo& dbConnInfo,
 					const std::vector<ArchSignal>& archSignals, 
 					CircularLoggerShared logger);
 		~ArchWriter();
@@ -32,6 +33,8 @@ namespace ArchV3
 
 		bool init();
 		void shutdown();
+
+		void processArchData();
 
 		void writeSignalInGropsFile(const std::unordered_map<quint8, QStringList>& signlsInGroups);
 
@@ -57,8 +60,6 @@ namespace ArchV3
 		std::atomic<bool> m_quitRequested {false};
 
 		QString m_archPath;
-
-		std::vector<std::unique_ptr<ArchFileBase>> m_archFiles;
 	};
 
 	using ArchWriterShared = std::shared_ptr<ArchWriter>;

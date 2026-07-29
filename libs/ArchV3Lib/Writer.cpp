@@ -17,12 +17,12 @@ namespace ArchV3
 	ArchWriter::ArchWriter(const QString& archDir, 
 						   const QString& projectName, 
 						   const QString& clientID,
+						   const DbConnectionInfo& dbConnInfo,
 						   const std::vector<ArchSignal>& archSignals, 
 						   CircularLoggerShared logger) :
 		LogWrapper(logger, QString("ArchWriter(%1)").arg(clientID)),
-		m_storage(archDir, projectName, clientID, archSignals, logger)
+		m_storage(archDir, projectName, clientID, dbConnInfo, archSignals, logger)
 	{ 
-	//	for (const )
 	}
 
 	ArchWriter::~ArchWriter()
@@ -98,7 +98,7 @@ namespace ArchV3
 			bool signaled = m_cv.wait_for(lock,	std::chrono::milliseconds(5),
 				[this]
 				{
-					return m_quitRequested.load(std::memory_order::relaxed);
+					return m_quitRequested.load(std::memory_order::relaxed) || !m_queue.empty();
 				});
 
 			if (m_quitRequested.load(std::memory_order::relaxed) == true)
@@ -111,7 +111,7 @@ namespace ArchV3
 
 			if (signaled)
 			{
-				// real processing
+				processArchData();
 			}
 			else
 			{
@@ -133,6 +133,23 @@ namespace ArchV3
 
 	void ArchWriter::shutdown()
 	{
+	}
+
+	void ArchWriter::processArchData()
+	{
+		std::deque<ArchData> queue;
+
+		{
+			std::lock_guard<std::mutex> lock(m_queueMutex);
+			queue.swap(m_queue);
+		}
+
+		while (!queue.empty())
+		{
+			const ArchData& archData = queue.front();
+			m_storage.processArchData(archData.data(), archData.size());
+			queue.pop_front();
+		}
 	}
 
 	void ArchWriter::writeSignalInGropsFile(const std::unordered_map<quint8, QStringList>& signlsInGroups)

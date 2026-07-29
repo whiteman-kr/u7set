@@ -41,27 +41,25 @@ namespace ArchV3
 		return true;
 	}
 
+	void ArchFileBase::setActiveFile(const ArchFileInfo& afi)
+	{ 
+		m_archFileID = afi.archFileID;
+		m_filename = afi.fileName;
+		m_fileSize = afi.fileSize;
+		m_recordCount = afi.recordCount;
+	}
+
+	bool ArchFileBase::hasActiveFile() const
+	{ 
+		return (m_filename.isEmpty() == false);
+	}
+
 	bool ArchFileBase::isOpen() const
 	{
 		return m_file.isOpen(); 
 	}
 
-	qint64 ArchFileBase::fileSize() const
-	{
-		return m_fileSize; 
-	}
-
-	qint64 ArchFileBase::lastWriteTime() const
-	{
-		return m_lastWriteTime; 
-	}
-
-	qint64 ArchFileBase::lastFlushTime() const
-	{
-		return m_lastFlushTime; 
-	}
-
-	bool ArchFileBase::openFile()
+		bool ArchFileBase::openFile()
 	{
 		if (m_file.isOpen() == true)
 		{
@@ -85,21 +83,30 @@ namespace ArchV3
 		}
 	}
 
-	bool ArchFileBase::flush(qint64 timeUTC)
+	bool ArchFileBase::flushBuffer(const char* data, size_t recordsCount, qint64 timeUTC)
 	{
-		bool result = true;
+		m_lastFlushTime = timeUTC;
+		return false;
+	}
 
-		if (m_file.isOpen() == true)
-		{
-			result = m_file.flush();
+	bool ArchFileBase::write(qint64 timeUTC)
+	{ 
+		return true;
+	}
 
-			if (result == true)
-			{
-				m_lastFlushTime = timeUTC;
-			}
-		}
+	qint64 ArchFileBase::fileSize() const
+	{
+		return m_fileSize; 
+	}
 
-		return result;
+	qint64 ArchFileBase::lastWriteTime() const
+	{
+		return m_lastWriteTime; 
+	}
+
+	qint64 ArchFileBase::lastFlushTime() const
+	{
+		return m_lastFlushTime; 
 	}
 
 	bool ArchFileBase::writeRaw(const char* data, qint64 dataSize, qint64 timeUTC)

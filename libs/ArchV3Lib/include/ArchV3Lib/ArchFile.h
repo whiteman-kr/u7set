@@ -6,8 +6,33 @@
 #include <QtGlobal>
 #include <QFile>
 
+#include <AppSignal.pb.h>
+
 namespace ArchV3
 {
+	struct ArchFileInfo
+	{
+		qint64 archFileID = 0;
+		qint64 signalID = 0;
+
+		Hash hash = 0;
+		quint8 bucket = 0;
+		E::SignalType signalType = E::SignalType::Analog;
+
+		QString fileName;
+
+		qint64 createdUTC = 0;
+		qint64 timeFromUTC = 0;
+		qint64 timeToUTC = 0;
+		
+		qint64 recordCount = 0;
+		qint64 fileSize = 0;
+
+		bool completed = false;
+		bool compressed = false;
+		bool deleted = false;
+	};
+
 	inline constexpr quint32 FLAG_PLANT_TIME_VALID = 0x20000000;
 
 	class ArchWriter;
@@ -50,21 +75,25 @@ namespace ArchV3
 		bool setFilePath(const QString& path);
 		bool setFileName(const QString& filename);
 
+		void setActiveFile(const ArchFileInfo& afi);
+		bool hasActiveFile() const;
+
 		// Getters
 
 		bool isOpen() const;
+		bool openFile();
+		void closeFile();
+		bool flushBuffer(const char* data, size_t recordsCount, qint64 timeUTC);
+		bool write(qint64 timeUTC);
+
 		qint64 fileSize() const;
 		qint64 lastWriteTime() const;
 		qint64 lastFlushTime() const;
-		virtual size_t bufferedRecordsCount() const = 0;
 
-		//
-
-		bool openFile();
-		void closeFile();
-
-		virtual bool write(qint64 timeUTC) = 0;
-		virtual bool flush(qint64 timeUTC);
+		virtual bool pushState(const Proto::AppSignalState& state, qint64 timeUTC) = 0;
+		virtual size_t bufferSize() const = 0;
+		virtual size_t recordSize() const = 0;
+		virtual bool bufferIsFull() const = 0;
 
 	protected:
 		bool writeRaw(const char* data, qint64 dataSize, qint64 timeUTC);
@@ -73,72 +102,14 @@ namespace ArchV3
 		QString m_path;
 		QString m_filename;
 
-		QFile m_file;
-
+		qint64 m_archFileID = 0;
 		qint64 m_fileSize = 0;
+		qint64 m_recordCount = 0;
 		qint64 m_lastWriteTime = 0;
 		qint64 m_lastFlushTime = 0;
+
+		QFile m_file;
 	};
-
-	template<typename RecordTypeT>
-	class ArchFile : public ArchFileBase
-	{
-	public:
-		ArchFile()
-		{
-		}
-
-		~ArchFile()
-		{
-		}
-
-		bool isDiscreteFile() const { return (sizeof(RecordTypeT) == DISCRETE_FILE_RECORD_SIZE); }
-		bool isAnalogFile() const { return (sizeof(RecordTypeT) == ANALOG_FILE_RECORD_SIZE); }
-
-		void append(const RecordTypeT& record) { m_records.push_back(record); }
-
-		bool write(qint64 timeUTC) override
-		{
-			qint64 recordsSize = static_cast<qint64>(m_records.size() * sizeof(RecordTypeT));
-
-			if (recordsSize == 0)
-			{
-				return true;
-			}
-
-			bool result = writeRaw(reinterpret_cast<const char*>(m_records.data()), recordsSize, timeUTC);
-
-			if (result == true)
-			{
-				m_records.clear();
-			}
-
-			return result;
-		}
-
-		bool flush(qint64 timeUTC) override
-		{
-			bool result = write(timeUTC);
-
-			if (result == true)
-			{
-				result = ArchFileBase::flush(timeUTC);
-			}
-
-			return result;
-		}
-
-		size_t bufferedRecordsCount() const override
-		{ 
-			return m_records.size();
-		}
-
-		private:
-			std::vector<RecordTypeT> m_records;
-	};
-
-	using AnalogArchFile = ArchFile<AnalogFileRecord>;
-	using DiscreteArchFile = ArchFile<DiscreteFileRecord>;
 
 	inline bool makePlantTimeDelta(qint64 serverTimeUTC, qint64 plantTime, qint32& plantTimeDelta)
 	{
@@ -158,5 +129,90 @@ namespace ArchV3
 	{ 
 		return serverTimeUTC + plantTimeDelta; 
 	}
+
+	template<typename RecordTypeT>
+	class ArchFile : public ArchFileBase
+	{
+	public:
+		ArchFile()
+		{
+		}
+
+		~ArchFile()
+		{
+		}
+
+		bool isDiscreteFile() const { return (sizeof(RecordTypeT) == DISCRETE_FILE_RECORD_SIZE); }
+		bool isAnalogFile() const { return (sizeof(RecordTypeT) == ANALOG_FILE_RECORD_SIZE); }
+
+		bool pushState(const Proto::AppSignalState& state, qint64 timeUTC) override
+		{
+			RecordTypeT record;
+
+			record.serverTimeUTC = state.systemtime();
+
+			bool plantTimeValid = makePlantTimeDelta(state.systemtime(), state.planttime(), record.plantTimeDelta);
+
+			record.flags = state.flags();
+
+			if (plantTimeValid == false)
+			{
+
+			}
+
+			if constexpr (std::is_same_v<RecordTypeT, AnalogFileRecord>)
+			{
+				record.value = state.value();
+			}
+			else if constexpr (std::is_same_v<RecordTypeT, DiscreteFileRecord>)
+			{
+				record.state = state.value() == 0 ? 0 : 1;
+			}
+
+			return pushToBuffer(record, timeUTC);
+		}
+
+		bool pushToBuffer(const RecordTypeT& record, qint64 timeUTC)
+		{
+			bool flushed = false;
+
+			if (bufferIsFull())
+			{
+				// Defensive check. The buffer should never be full at this point.
+				//
+				flushed |= flushBuffer(reinterpret_cast<const char*>(m_buffer.data()), m_buffer.size(), timeUTC);
+			}
+
+			m_buffer.emplace_back(record);
+
+			if (bufferIsFull())
+			{
+				flushed |= flushBuffer(reinterpret_cast<const char*>(m_buffer.data()), m_buffer.size(), timeUTC);
+			}
+
+			return flushed;
+		}
+
+		size_t bufferSize() const override
+		{ 
+			return m_buffer.size();
+		}
+
+		size_t recordSize() const override
+		{ 
+			return sizeof(RecordTypeT);
+		}
+
+		bool bufferIsFull() const override
+		{ 
+			return (m_buffer.size() == m_buffer.capacity());
+		}
+
+		private:
+			std::vector<RecordTypeT> m_buffer;
+	};
+
+	using AnalogArchFile = ArchFile<AnalogFileRecord>;
+	using DiscreteArchFile = ArchFile<DiscreteFileRecord>;
 
 } // namespace ArchV3Lib

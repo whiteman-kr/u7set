@@ -139,6 +139,78 @@ namespace ArchV3
 		return result;
 	}
 
+		bool Db::getActiveArchiveFiles(std::unordered_map<Hash, ArchFileInfo>* activeFiles) const
+	{
+		TEST_PTR_RETURN_FALSE(activeFiles);
+
+		activeFiles->clear();
+
+		static constexpr int COL_ARCH_FILE_ID = 0;
+		static constexpr int COL_SIGNAL_ID = 1;
+		static constexpr int COL_SIGNAL_TYPE = 2;
+		static constexpr int COL_HASH = 3;
+		static constexpr int COL_BUCKET = 4;
+		static constexpr int COL_FILE_NAME = 5;
+		static constexpr int COL_TIME_FROM_UTC = 6;
+		static constexpr int COL_TIME_TO_UTC = 7;
+		static constexpr int COL_RECORD_COUNT = 8;
+		static constexpr int COL_FILE_SIZE = 9;
+		static constexpr int COL_CREATED_UTC = 10;
+
+		auto query = m_db->execQuery(QStringLiteral(R"(
+			SELECT
+				arch_file_id,
+				signal_id,
+				signal_type,
+				hash,
+				bucket,
+				file_name,
+				time_from_utc,
+				time_to_utc,
+				record_count,
+				file_size,
+				created_utc
+			FROM fn_get_active_archive_files();
+		)"));
+
+		if (!query)
+		{
+			return false;
+		}
+
+		if (query->size() > 0)
+		{
+			activeFiles->reserve(query->size());
+		}
+
+		ArchFileInfo afi;
+
+		while (query->next())
+		{
+			afi.archFileID = query->value(COL_ARCH_FILE_ID).toLongLong();
+			afi.signalID = query->value(COL_SIGNAL_ID).toLongLong();
+
+			afi.hash = static_cast<Hash>(query->value(COL_HASH).toULongLong());
+			afi.bucket = static_cast<quint8>(query->value(COL_BUCKET).toInt());
+			afi.signalType = static_cast<E::SignalType>(query->value(COL_SIGNAL_TYPE).toInt());
+
+			afi.fileName = query->value(COL_FILE_NAME).toString();
+
+			afi.createdUTC = query->value(COL_CREATED_UTC).toLongLong();
+			afi.timeFromUTC = query->value(COL_TIME_FROM_UTC).toLongLong();
+			afi.timeToUTC = query->value(COL_TIME_TO_UTC).toLongLong();
+
+			afi.recordCount = query->value(COL_RECORD_COUNT).toLongLong();
+			afi.fileSize = query->value(COL_FILE_SIZE).toLongLong();
+
+			auto [it, inserted] = activeFiles->emplace(afi.hash, afi);
+
+			Q_ASSERT(inserted);
+		}
+
+		return true;
+	}
+
 	bool Db::schemaCheckAndCreate()
 	{
 		if (isOpen() == false)
@@ -218,6 +290,7 @@ namespace ArchV3
 		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_delete_signals_by_hash.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_create_archive_file.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_get_last_archive_files.sql");
 
 		return result;
 	}
@@ -226,12 +299,7 @@ namespace ArchV3
 	{ 
 		TEST_PTR_RETURN_FALSE(registeredSignals);	
 
-		auto query = m_db->execQuery("SELECT * FROM fn_get_registered_signals()");
-
-		if (!query)
-		{
-			return false;
-		}
+		registeredSignals->clear();
 
 		static constexpr int COL_SIGNAL_ID = 0;
 		static constexpr int COL_SIGNAL_TYPE = 1;
@@ -240,20 +308,41 @@ namespace ArchV3
 		static constexpr int COL_BUCKET = 4;
 		static constexpr int COL_CREATED_UTC = 5;
 
-		registeredSignals->clear();
-		registeredSignals->reserve(query->size());
+		auto query = m_db->execQuery(QStringLiteral(R"(
+		   SELECT
+			    signal_id,
+				signal_type,
+				app_signal_id,
+				hash,
+				bucket,
+				created_utc
+			FROM fn_get_registered_signals();
+		)"));
+
+		if (!query)
+		{
+			return false;
+		}
+
+		if (query->size() > 0)
+		{
+			registeredSignals->reserve(query->size());
+		}
 
 		RegisteredSignalInfo rsi;
 
 		while (query->next())
 		{
-			rsi.signalID = query->value(COL_SIGNAL_ID).toULongLong();
+			rsi.signalID = query->value(COL_SIGNAL_ID).toLongLong();
 			rsi.signalType = static_cast<E::SignalType>(query->value(COL_SIGNAL_TYPE).toInt());
 			rsi.appSignalID = query->value(COL_APP_SIGNAL_ID).toString();
 			rsi.hash = static_cast<Hash>(query->value(COL_HASH).toULongLong());
 			rsi.bucket = static_cast<quint8>(query->value(COL_BUCKET).toInt());
+			rsi.createdUTC = query->value(COL_CREATED_UTC).toLongLong();
 
-			registeredSignals->emplace(rsi.hash, rsi);
+			auto [it, inserted] = registeredSignals->emplace(rsi.hash, rsi);
+
+			Q_ASSERT(inserted);
 		}
 
 		return true;

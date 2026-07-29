@@ -4,6 +4,7 @@
 
 #include "Postgres.h"
 #include "ArchSignal.h"
+#include "ArchFile.h"
 
 namespace ArchV3
 {
@@ -12,12 +13,12 @@ namespace ArchV3
 	private:
 		struct RegisteredSignalInfo
 		{
-			quint64 signalID;
+			qint64 signalID;
 			E::SignalType signalType;
 			QString appSignalID;
 			Hash hash;
 			quint8 bucket;
-			qint64 createdUtc;
+			qint64 createdUTC;
 		};
 
 	public:
@@ -35,7 +36,8 @@ namespace ArchV3
 		bool isOpen() const;
 
 		bool registerSignals(const std::vector<ArchSignal>& archSignals, std::vector<QString>* filesToDelete);
-
+		bool getActiveArchiveFiles(std::unordered_map<Hash, ArchFileInfo>* activeFiles) const;
+		
 	private:
 		bool schemaCheckAndCreate();
 

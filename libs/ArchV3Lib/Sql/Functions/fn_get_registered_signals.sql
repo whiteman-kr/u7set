@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION fn_get_registered_signals()
 RETURNS TABLE
 (
     signal_id BIGINT,
-	signal_type SMALLINT,
+    signal_type SMALLINT,
     app_signal_id TEXT,
     hash BIGINT,
     bucket SMALLINT,

@@ -7,21 +7,26 @@
 #include <QDir.h>
 #include <QRegularExpression.h>
 
+#include "../../UtilsLib/WUtils.h"
+
 namespace ArchV3
 {
 	Storage::Storage(const QString& archDir,
 					 const QString& projectName,
 					 const QString& clientID,
+					 const DbConnectionInfo& dbConnInfo,
 					 const std::vector<ArchSignal>& archSignals,
 					 CircularLoggerShared logger) :
 		LogWrapper(logger, QString("Storage(%1)").arg(clientID)),
 		m_archDir(archDir),
 		m_projectName(sanitizeString(projectName)),
-		m_clientID(sanitizeString(clientID))
+		m_clientID(sanitizeString(clientID)),
+		m_db(projectName, clientID, dbConnInfo, logger),
+		m_stdClientID(m_clientID.toStdString())
 	{ 
 		m_archPath = m_archDir + QDir::separator() + m_projectName + QDir::separator() + m_clientID;
 
-		initArchFiles(archSignals);
+		createArchFiles(archSignals);
 	}
 
 	Storage::~Storage()
@@ -32,9 +37,48 @@ namespace ArchV3
 	{ 
 		bool result = true;
 
-		result = checkAndInitDirs();
+		result = m_db.open();
+
+		RETURN_IF_FALSE(result);
+
+		result &= checkAndInitDirs();
+		result &= initArchFiles();
 
 		return result;
+	}
+
+	void Storage::processArchData(const char* archData, size_t archDataSize)
+	{ 
+		static Network::SaveAppSignalsStatesToArchiveRequest request;
+
+		bool result = request.ParseFromArray(archData, TO_INT(archDataSize));
+
+		if (result == false)
+		{
+			return;
+		}
+
+		if (request.clientequipmentid() != m_stdClientID)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for (const Proto::AppSignalState& state : request.appsignalstates())
+		{
+			Hash h = state.hash();
+
+			auto it = m_archFiles.find(h);
+
+			if (it == m_archFiles.end())
+			{
+				continue;
+			}
+
+			
+		}
+
+
 	}
 
 	void Storage::deleteFiles(const QString& archDir,
@@ -75,7 +119,7 @@ namespace ArchV3
 		static const QString shortTermExtension = "sta";
 		static const QString longTermExtension = "lta";
 
-		const QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(timeFromUtc, Qt::UTC);
+		const QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(timeFromUtc, QTimeZone::utc());
 
 		QString fileName = QString("%1/%2/%3.%4").
 								arg(makeBucketStr(bucket)).
@@ -95,7 +139,7 @@ namespace ArchV3
 		return QString("%1/%2").arg(m_archPath).arg(makeBucketStr(bucket));
 	}
 
-	void Storage::initArchFiles(const std::vector<ArchSignal>& archSignals)
+	void Storage::createArchFiles(const std::vector<ArchSignal>& archSignals)
 	{
 		size_t analogsCount = 0;
 		size_t discretesCount = 0;
@@ -166,6 +210,33 @@ namespace ArchV3
 		}
 
 //		writeSignalInGropsFile(signlsInGroups);
+	}
+
+	bool Storage::initArchFiles()
+	{ 
+		std::unordered_map<Hash, ArchFileInfo> activeFiles;
+
+		bool result = m_db.getActiveArchiveFiles(&activeFiles);
+
+		for (const auto& [hash, afi] : activeFiles)
+		{
+			auto it = m_archFiles.find(hash);
+
+			if (it == m_archFiles.end())
+			{
+				continue;
+			}
+
+			std::unique_ptr<ArchFileBase>& archFile = it->second;
+
+			TEST_PTR_CONTINUE(archFile);
+
+			Q_ASSERT(archFile->hasActiveFile() == false);
+
+			archFile->setActiveFile(afi);
+		}
+
+		return result;
 	}
 
 	bool Storage::checkAndInitDirs()

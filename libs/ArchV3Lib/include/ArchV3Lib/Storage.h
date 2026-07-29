@@ -6,6 +6,7 @@
 
 #include "ArchSignal.h"
 #include "ArchFile.h"
+#include "Db.h"
 
 namespace ArchV3
 {
@@ -15,12 +16,15 @@ namespace ArchV3
 		Storage(const QString& archDir,
 				const QString& projectName,
 				const QString& clientID,
+				const DbConnectionInfo& dbConnInfo,
 				const std::vector<ArchSignal>& archSignals,
 				CircularLoggerShared logger);
 			
 		virtual ~Storage();
 
 		bool init();
+
+		void processArchData(const char* archData, size_t archDataSize);
 
 		static void deleteFiles(const QString& archDir,
 								const QString& projectName,
@@ -34,7 +38,8 @@ namespace ArchV3
 	private:
 		QString makeArchiveBucketPath(quint8 bucket) const;
 
-		void initArchFiles(const std::vector<ArchSignal>& archSignals);
+		void createArchFiles(const std::vector<ArchSignal>& archSignals);
+		bool initArchFiles();
 
 		bool checkAndInitDirs();
 
@@ -42,8 +47,11 @@ namespace ArchV3
 		const QString m_archDir;
 		const QString m_projectName;
 		const QString m_clientID;
+		const std::string m_stdClientID;
 
 		QString m_archPath;
+
+		Db m_db;
 
 		static constexpr size_t BUCKET_COUNT = 256;
 

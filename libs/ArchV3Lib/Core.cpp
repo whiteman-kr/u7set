@@ -132,7 +132,7 @@ namespace ArchV3
 				return nullptr;
 			}
 
-			archWriter = std::make_shared<ArchWriter>(m_archDir, m_projectName, clientID, it2->second, m_logger);
+			archWriter = std::make_shared<ArchWriter>(m_archDir, m_projectName, clientID, m_dbConnInfo, it2->second, m_logger);
 
 			m_archWriters.emplace(clientID, archWriter);
 		}
