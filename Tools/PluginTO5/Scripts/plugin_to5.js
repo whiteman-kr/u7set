@@ -131,7 +131,7 @@ function cmpByOutput(comparators, outputAppSignalId)
 	return undefined;	
 }
 
-function processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, id)
+function processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, id)
 {
 	let comparators = ctrl.setpointsByInput(inputAppSignalID);
 		
@@ -148,7 +148,8 @@ function processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, out
 		return;
 	}
 		
-	let setpointValue = cmp.compare.constValue;
+	let setpointValue = Number(cmp.compare.constValue);
+	setpointValue = Number(setpointValue.toPrecision(precision));	
 
 	if (Math.abs(setpointValue - criteria) > tolerance)
 	{
@@ -176,7 +177,7 @@ function processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, out
 	 
 } 
 
-function processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, id)
+function processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, id)
 {
 	let comparators = ctrl.setpointsByInput(inputAppSignalID);
 		
@@ -199,7 +200,8 @@ function processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, ou
 		return;
 	}
 
-	let setpointValue = ctrl.signalValue(setpointAppSignalId);	
+	let setpointValue = ctrl.signalValue(setpointAppSignalId);
+	setpointValue = Number(setpointValue.toPrecision(precision));	
 	if (isNaN(setpointValue) === true)
 	{
 		setpointValue = "???";
@@ -287,9 +289,9 @@ function testTO5BySchemaID(ctrl)
 			const inputAppSignalID = data[2 /*InputAppSignalID*/];
 			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
 			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/];
-			let criteria = data[9 /*Criteria*/];
-			const round = data[14 /*Precision*/];
-			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
+			let criteria = Number(data[9 /*Criteria*/]);
+			const precision = data[14 /*Precision*/];
+			criteria = Number(criteria.toPrecision(precision));
 
 			if (outputAppSignalID === "")
 			{
@@ -307,12 +309,12 @@ function testTO5BySchemaID(ctrl)
 			
 			if (data[10 /*Type*/] === "S")
 			{
-				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
 			}
 			else if (data[10 /*Type*/] === "D")
 			{
 				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
-				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
 			}
 			else
 			{
@@ -391,9 +393,9 @@ function testTO5ByCaseID(ctrl)
 			const inputAppSignalID = data[2 /*InputAppSignalID*/];
 			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
 			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/]
-			let criteria = data[9 /*Criteria*/];
-			const round = data[14 /*Precision*/];
-			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
+			let criteria = Number(data[9 /*Criteria*/]);
+			const precision = data[14 /*Precision*/];
+			criteria = Number(criteria.toPrecision(precision));
 
 			let correct = "";
 
@@ -411,12 +413,12 @@ function testTO5ByCaseID(ctrl)
 			
 			if (data[10 /*Type*/] === "S")
 			{
-				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
 			}
 			else if (data[10 /*Type*/] === "D")
 			{
 				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
-				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
 			}
 			else
 			{
