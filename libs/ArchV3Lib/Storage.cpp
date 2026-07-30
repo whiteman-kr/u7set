@@ -9,6 +9,8 @@
 
 #include "../../UtilsLib/WUtils.h"
 
+#include <CommonStdLib/TimesStd.h>
+
 namespace ArchV3
 {
 	Storage::Storage(const QString& archDir,
@@ -24,6 +26,12 @@ namespace ArchV3
 		m_db(projectName, clientID, dbConnInfo, logger),
 		m_stdClientID(m_clientID.toStdString())
 	{ 
+		if (ArchFileBase::clusterSize() == 0)
+		{
+			ArchFileBase::readClusterSize(archDir);
+			logMsg(QString("disk cluster size %1 bytes").arg(ArchFileBase::clusterSize()));
+		}
+
 		m_archPath = m_archDir + QDir::separator() + m_projectName + QDir::separator() + m_clientID;
 
 		createArchFiles(archSignals);
@@ -64,21 +72,91 @@ namespace ArchV3
 			return;
 		}
 
+		ArchFileInfo afi;
+
+		qint64 nowUTC = currentMSecsUTC();
+
 		for (const Proto::AppSignalState& state : request.appsignalstates())
 		{
-			Hash h = state.hash();
+			Hash hash = state.hash();
 
-			auto it = m_archFiles.find(h);
+			auto it = m_archFiles.find(hash);
 
 			if (it == m_archFiles.end())
 			{
 				continue;
 			}
 
-			
+			std::unique_ptr<ArchFileBase>& archFile = it->second;
+
+			if (archFile->hasActiveFile() == false)
+			{
+				auto it2 = m_activeFiles.find(hash);
+
+				if (it2 == m_activeFiles.end())
+				{
+					bool res = createActiveArchFile(hash, state.systemtime(), &afi);
+
+					if (res == false)
+					{
+						continue;
+					}
+
+					archFile->setActiveFile(afi);
+				}
+				else
+				{
+					const ArchFileInfo& registeredAfi = it2->second;
+					ArchFileInfo checkedAfi;
+
+					bool res = ArchFileBase::checkFile(registeredAfi, &checkedAfi);
+
+					if (res == true)
+					{
+						archFile->setActiveFile(registeredAfi);
+					}
+					else
+					{
+						res = updateActiveArchFile(checkedAfi);
+
+						if (res == true)
+						{
+							archFile->setActiveFile(checkedAfi);
+						}
+						else
+						{
+							continue;
+						}
+					}
+				}
+			}
+
+			bool res2 = archFile->prepareForNextState(&afi);		// check cluster margin here
+
+			if (res2 == false)
+			{
+				bool res3 = updateActiveArchFile(afi);
+
+				if (res3 == false)
+				{
+					continue;
+				}
+
+				res3 = createNextActiveArchFile(hash, state.systemtime(), &afi);
+
+				if (res3 == true)
+				{
+					archFile->setActiveFile(afi);
+				}
+			}
+
+			bool writtenToDisk = archFile->pushState(state, nowUTC, &afi);
+
+			if (writtenToDisk == true)
+			{
+				updateActiveArchFile(afi);
+			}
 		}
-
-
 	}
 
 	void Storage::deleteFiles(const QString& archDir,
@@ -181,18 +259,13 @@ namespace ArchV3
 		//	signlsInGroups[static_cast<quint8>(n)] = QStringList();
 		//}
 
-		QString path;
-		
 		for (const ArchSignal& s : archSignals)
 		{
-			path = QString("%1/%2").arg(makeBucketStr(s.bucket)).arg(sanitizeString(s.appSignalID));
-
 			switch (s.signalType)
 			{
 			case E::SignalType::Analog:
 				{
 					std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>();
-					file->setFilePath(path);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
@@ -201,7 +274,6 @@ namespace ArchV3
 			case E::SignalType::Discrete:
 				{
 					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>();
-					file->setFilePath(path);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
@@ -214,29 +286,45 @@ namespace ArchV3
 
 	bool Storage::initArchFiles()
 	{ 
-		std::unordered_map<Hash, ArchFileInfo> activeFiles;
+		bool result = m_db.getActiveArchiveFiles(&m_activeFiles);
 
-		bool result = m_db.getActiveArchiveFiles(&activeFiles);
+		//for (const auto& [hash, afi] : activeFiles)
+		//{
+		//	auto it = m_archFiles.find(hash);
 
-		for (const auto& [hash, afi] : activeFiles)
-		{
-			auto it = m_archFiles.find(hash);
+		//	if (it == m_archFiles.end())
+		//	{
+		//		continue;
+		//	}
 
-			if (it == m_archFiles.end())
-			{
-				continue;
-			}
+		//	std::unique_ptr<ArchFileBase>& archFile = it->second;
 
-			std::unique_ptr<ArchFileBase>& archFile = it->second;
+		//	TEST_PTR_CONTINUE(archFile);
 
-			TEST_PTR_CONTINUE(archFile);
+		//	Q_ASSERT(archFile->hasActiveFile() == false);
 
-			Q_ASSERT(archFile->hasActiveFile() == false);
-
-			archFile->setActiveFile(afi);
-		}
+		//	archFile->setActiveFile(afi);
+		//}
 
 		return result;
+	}
+
+	bool Storage::createActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi)
+	{ 
+		Q_ASSERT(false);	// TO DO
+		return true;
+	}
+
+	bool Storage::createNextActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi)
+	{
+		Q_ASSERT(false);    // TO DO
+		return true;
+	}
+
+	bool Storage::updateActiveArchFile(const ArchFileInfo& afi)
+	{
+		Q_ASSERT(false);    // TO DO
+		return true;
 	}
 
 	bool Storage::checkAndInitDirs()

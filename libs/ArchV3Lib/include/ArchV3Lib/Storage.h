@@ -41,6 +41,10 @@ namespace ArchV3
 		void createArchFiles(const std::vector<ArchSignal>& archSignals);
 		bool initArchFiles();
 
+		bool createActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi);
+		bool createNextActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi);
+		bool updateActiveArchFile(const ArchFileInfo& afi);
+
 		bool checkAndInitDirs();
 
 	private:
@@ -55,6 +59,7 @@ namespace ArchV3
 
 		static constexpr size_t BUCKET_COUNT = 256;
 
+		std::unordered_map<Hash, ArchFileInfo> m_activeFiles;
 		std::unordered_map<Hash, std::unique_ptr<ArchFileBase>> m_archFiles;
 		std::vector<std::vector<Hash>> m_bucketSignals;
 		

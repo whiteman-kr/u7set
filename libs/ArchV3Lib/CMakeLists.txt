@@ -75,7 +75,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE ARCH_V3_LIB_DOMAIN)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Sql)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib CommonStdLib ProtobufEx UtilsLib AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

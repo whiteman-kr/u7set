@@ -7,6 +7,15 @@
 #include <ArchV3Lib/ArchFile.h>
 #include <ArchV3Lib/Writer.h>
 
+#include "../../UtilsLib/WUtils.h"
+
+
+#ifdef Q_OS_WIN
+	#include <windows.h>
+#elif defined(Q_OS_LINUX)
+	#include <sys/statvfs.h>
+#endif
+
 namespace ArchV3
 {
 	ArchFileBase::ArchFileBase()
@@ -51,7 +60,28 @@ namespace ArchV3
 
 	bool ArchFileBase::hasActiveFile() const
 	{ 
-		return (m_filename.isEmpty() == false);
+		return (m_archFileID > 0);
+	}
+
+	bool ArchFileBase::isChecked() const
+	{ 
+		return m_checked;
+	}
+
+	bool ArchFileBase::checkFile(const ArchFileInfo& afi, ArchFileInfo* checkedAfi)
+	{ 
+		TEST_PTR_RETURN_FALSE(checkedAfi);
+
+		*checkedAfi = afi;
+
+		Q_ASSERT(false); // TO DO
+
+		return true;
+	}
+
+	void ArchFileBase::setChecked(bool checked)
+	{ 
+		m_checked = checked;
 	}
 
 	bool ArchFileBase::isOpen() const
@@ -107,6 +137,49 @@ namespace ArchV3
 	qint64 ArchFileBase::lastFlushTime() const
 	{
 		return m_lastFlushTime; 
+	}
+
+	bool ArchFileBase::prepareForNextState(ArchFileInfo* afi)
+	{ 
+		TEST_PTR_RETURN_FALSE(afi);
+
+		Q_ASSERT(false);		// TO DO
+		return true;
+	}
+
+	void ArchFileBase::readClusterSize(const QString& archDir)
+	{
+		QString root = QDir(archDir).rootPath();	// "D:/"
+
+		#ifdef Q_OS_WIN
+		{
+			DWORD sectorsPerCluster = 0;
+			DWORD bytesPerSector = 0;
+			DWORD freeClusters = 0;
+			DWORD totalClusters = 0;
+
+			GetDiskFreeSpaceW(reinterpret_cast<LPCWSTR>(root.utf16()), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters);
+
+			m_clusterSize = sectorsPerCluster * bytesPerSector;
+		}
+		#elif defined(Q_OS_LINUX)
+		{
+			struct statvfs s;
+
+			statvfs(path, &s);
+
+			quint64 clusterSize = s.f_frsize;
+		}
+		#else
+		{
+			m_clusterSize = 4096;
+		}
+		#endif
+	}
+
+	quint32 ArchFileBase::clusterSize()
+	{ 
+		return m_clusterSize;
 	}
 
 	bool ArchFileBase::writeRaw(const char* data, qint64 dataSize, qint64 timeUTC)

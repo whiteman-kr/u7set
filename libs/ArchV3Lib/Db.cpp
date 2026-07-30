@@ -159,7 +159,7 @@ namespace ArchV3
 
 		auto query = m_db->execQuery(QStringLiteral(R"(
 			SELECT
-				arch_file_id,
+				archive_file_id,
 				signal_id,
 				signal_type,
 				hash,
@@ -290,7 +290,7 @@ namespace ArchV3
 		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_delete_signals_by_hash.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_create_archive_file.sql");
-		result &= m_db->loadAndExecuteScript("Functions/fn_get_last_archive_files.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_get_active_archive_files.sql");
 
 		return result;
 	}
