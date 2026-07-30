@@ -3,7 +3,6 @@
 #include <QDialog>
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include <SchemaClientLib/DragDropHelper.h>
 
 class QLineEdit;
 class QTableView;

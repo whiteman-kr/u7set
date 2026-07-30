@@ -1,5 +1,7 @@
 #include <SchemaClientLib/DialogSignalSearch.h>
 
+#include <SchemaClientLib/DragDropHelper.h>
+
 namespace
 {
 	class SignalSearchSorter // later move this class to some library file, it can be used in other cases
@@ -414,6 +416,9 @@ namespace SchemaClientLib
 		hl->addWidget(l);
 		hl->addWidget(m_editSignalID);
 
+		QLabel* labelHint = new QLabel(tr("Hint: Type a SignalID, or prefix it with '#' for AppSignalID and '@' for EquipmentID"));
+		labelHint->setWordWrap(true);
+
 		m_tableView = new SignalSearchTableView();
 		m_tableView->horizontalHeader()->setHighlightSections(false);
 		m_tableView->horizontalHeader()->setStretchLastSection(true);
@@ -431,6 +436,7 @@ namespace SchemaClientLib
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 		mainLayout->addLayout(hl);
+		mainLayout->addWidget(labelHint);
 		mainLayout->addWidget(m_tableView);
 		mainLayout->addLayout(bl);
 
@@ -565,7 +571,29 @@ namespace SchemaClientLib
 	{
 		std::vector<AppSignalParam> foundSignals;
 
-		if (m_signalId.isEmpty() == true)
+		enum class SearchMode
+		{
+			CustomSignalID,
+			AppSignalID,
+			EquipmentID
+		};
+
+		SearchMode searchMode = SearchMode::CustomSignalID;
+		QString searchString = m_signalId;
+
+		if (m_signalId.startsWith('#') == true)
+		{
+			searchMode = SearchMode::AppSignalID;
+			searchString = m_signalId.mid(1).trimmed();
+		}
+
+		if (m_signalId.startsWith('@') == true)
+		{
+			searchMode = SearchMode::EquipmentID;
+			searchString = m_signalId.mid(1).trimmed();
+		}
+
+		if (searchString.isEmpty() == true)
 		{
 			foundSignals = m_signals;
 		}
@@ -573,10 +601,28 @@ namespace SchemaClientLib
 		{
 			for (const AppSignalParam& s : m_signals)
 			{
-				if (s.customSignalId().contains(m_signalId, Qt::CaseInsensitive) == false)
+				switch (searchMode)
 				{
-					continue;
+				case SearchMode::CustomSignalID:
+					if (s.customSignalId().contains(searchString, Qt::CaseInsensitive) == false)
+					{
+						continue;
+					}
+					break;
+				case SearchMode::AppSignalID:
+					if (s.appSignalId().contains(searchString, Qt::CaseInsensitive) == false)
+					{
+						continue;
+					}
+					break;
+				case SearchMode::EquipmentID:
+					if (s.equipmentId().contains(searchString, Qt::CaseInsensitive) == false)
+					{
+						continue;
+					}
+					break;
 				}
+
 				foundSignals.push_back(s);
 			}
 		}
