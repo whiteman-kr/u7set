@@ -8650,13 +8650,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property Place must be 0 (Equipment object %1).
+	/// Title: Property Place must be 0 or 15 (Equipment object %1).
 	///
 	/// Parameters:
 	///		%1 Equipment object StrID
 	///
 	/// Description:
-	///		Property Place for Logic Module must be set to 0.
+	///		Property Place for Logic Module must be set to 0 or 15.
 	///
 	void IssueLogger::errEQP6009(QString equipmentId, QUuid equpmentUuid)
 	{

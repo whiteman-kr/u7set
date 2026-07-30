@@ -14,13 +14,14 @@ class DeviceHelper : public QObject
 {
 	Q_OBJECT
 public:
-	static const int LM_PLACE1 = 0;
+	static constexpr int LM_PLACE1 = 0;
+	static constexpr int LM_PLACE2 = 15;
 
-	static const int BVB_PLACE1 = 0;
-	static const int BVB_PLACE2 = 13;
+	static constexpr int BVB_PLACE1 = 0;
+	static constexpr int BVB_PLACE2 = 13;
 
-	static const int MSO_PLACE1 = 0;
-	static const int MSO_PLACE2 = 73;		// MSO can query up to 72 I/O modules
+	static constexpr int MSO_PLACE1 = 0;
+	static constexpr int MSO_PLACE2 = 73;		// MSO can query up to 72 I/O modules
 
 
 public:

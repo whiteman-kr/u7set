@@ -6,6 +6,7 @@
 #include <HardwareLib/ScriptEquipment.h>
 
 #include "Context.h"
+#include "DeviceHelper.h"
 #include "version.h"
 
 namespace Builder
@@ -346,7 +347,8 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = (Hardware::DeviceModule*)device;
 
-			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != 0)
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != DeviceHelper::LM_PLACE1 &&
+				module->place() != DeviceHelper::LM_PLACE2)
 			{
 				m_log.errEQP6009(module->equipmentIdTemplate(), module->uuid());
 				ok = false;
