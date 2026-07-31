@@ -37,6 +37,7 @@ namespace ArchV3
 
 		bool registerSignals(const std::vector<ArchSignal>& archSignals, std::vector<QString>* filesToDelete);
 		bool getActiveArchiveFiles(std::unordered_map<Hash, ArchFileInfo>* activeFiles) const;
+		bool createActiveArchFile(Hash hash, const QString& fileName, qint64 timeFromUtc, qint64 createdUtc, ArchFileInfo* afi);
 		
 	private:
 		bool schemaCheckAndCreate();
@@ -50,7 +51,7 @@ namespace ArchV3
 		bool getRegisteredSignals(std::unordered_map<Hash, RegisteredSignalInfo>* registeredSignals) const;
 		bool deleteSignals(const std::vector<QString>& ids, std::vector<QString>* filesToDelete) const;
 		bool registerSignals(const std::vector<ArchSignal>& archSignals, const std::unordered_set<Hash>& signalsToRegister);
-		qint64 createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const;
+//		qint64 createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const;
 
 		QString makeDatabaseName(const QString& projectId, const QString& appDataSrvId) const;
 

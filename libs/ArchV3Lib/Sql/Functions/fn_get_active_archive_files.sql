@@ -1,34 +1,29 @@
 CREATE OR REPLACE FUNCTION fn_get_active_archive_files()
-RETURNS TABLE
-(
-    archive_file_id BIGINT,
-    signal_id BIGINT,
-    signal_type SMALLINT,
-    hash BIGINT,
-    bucket SMALLINT,
-    file_name TEXT,
-    time_from_utc BIGINT,
-    time_to_utc BIGINT,
-    record_count BIGINT,
-    file_size BIGINT,
-    created_utc BIGINT
-)
+RETURNS SETOF arch_file_info
 LANGUAGE sql
 STABLE
 AS
 $$
     SELECT
-        af.archive_file_id,
+        af.arch_file_id,
         af.signal_id,
-        s.signal_type,
+
         s.hash,
         af.bucket,
+        s.signal_type,
+
         af.file_name,
+
+        af.created_utc,
         af.time_from_utc,
         af.time_to_utc,
+
         af.record_count,
         af.file_size,
-        af.created_utc
+
+        af.completed,
+        af.compressed,
+        af.deleted
     FROM archive_files AS af
     INNER JOIN signals AS s
         ON s.signal_id = af.signal_id

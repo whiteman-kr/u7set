@@ -10,31 +10,10 @@
 
 #include "../../../../UtilsLib/WUtils.h"
 
+#include "DbTypes.h"
+
 namespace ArchV3
 {
-	struct ArchFileInfo
-	{
-		qint64 archFileID = 0;
-		qint64 signalID = 0;
-
-		Hash hash = 0;
-		quint8 bucket = 0;
-		E::SignalType signalType = E::SignalType::Analog;
-
-		QString fileName;
-
-		qint64 createdUTC = 0;
-		qint64 timeFromUTC = 0;
-		qint64 timeToUTC = 0;
-		
-		qint64 recordCount = 0;
-		qint64 fileSize = 0;
-
-		bool completed = false;
-		bool compressed = false;
-		bool deleted = false;
-	};
-
 	inline constexpr quint32 FLAG_PLANT_TIME_VALID = 0x20000000;
 
 	class ArchWriter;
@@ -71,9 +50,10 @@ namespace ArchV3
 	class ArchFileBase
 	{
 	public:
-		ArchFileBase();
+		ArchFileBase(const QString& appSignalID);
 		virtual ~ArchFileBase();
 
+		QString appSignalID() const;
 		bool setFilePath(const QString& path);
 		bool setFileName(const QString& filename);
 
@@ -110,6 +90,7 @@ namespace ArchV3
 		bool writeRaw(const char* data, qint64 dataSize, qint64 timeUTC);
 
 	private:
+		QString m_appSignalID;
 		QString m_path;
 		QString m_filename;
 
@@ -149,7 +130,8 @@ namespace ArchV3
 	class ArchFile : public ArchFileBase
 	{
 	public:
-		ArchFile()
+		ArchFile(const QString& appSignalID) :
+			ArchFileBase(appSignalID)
 		{
 		}
 

@@ -139,39 +139,13 @@ namespace ArchV3
 		return result;
 	}
 
-		bool Db::getActiveArchiveFiles(std::unordered_map<Hash, ArchFileInfo>* activeFiles) const
+	bool Db::getActiveArchiveFiles(std::unordered_map<Hash, ArchFileInfo>* activeFiles) const
 	{
 		TEST_PTR_RETURN_FALSE(activeFiles);
 
 		activeFiles->clear();
 
-		static constexpr int COL_ARCH_FILE_ID = 0;
-		static constexpr int COL_SIGNAL_ID = 1;
-		static constexpr int COL_SIGNAL_TYPE = 2;
-		static constexpr int COL_HASH = 3;
-		static constexpr int COL_BUCKET = 4;
-		static constexpr int COL_FILE_NAME = 5;
-		static constexpr int COL_TIME_FROM_UTC = 6;
-		static constexpr int COL_TIME_TO_UTC = 7;
-		static constexpr int COL_RECORD_COUNT = 8;
-		static constexpr int COL_FILE_SIZE = 9;
-		static constexpr int COL_CREATED_UTC = 10;
-
-		auto query = m_db->execQuery(QStringLiteral(R"(
-			SELECT
-				archive_file_id,
-				signal_id,
-				signal_type,
-				hash,
-				bucket,
-				file_name,
-				time_from_utc,
-				time_to_utc,
-				record_count,
-				file_size,
-				created_utc
-			FROM fn_get_active_archive_files();
-		)"));
+		auto query = m_db->execQuery(QStringLiteral("SELECT * FROM fn_get_active_archive_files()"));
 
 		if (!query)
 		{
@@ -187,27 +161,30 @@ namespace ArchV3
 
 		while (query->next())
 		{
-			afi.archFileID = query->value(COL_ARCH_FILE_ID).toLongLong();
-			afi.signalID = query->value(COL_SIGNAL_ID).toLongLong();
+			bool res = afi.fromQuery(*query);
 
-			afi.hash = static_cast<Hash>(query->value(COL_HASH).toULongLong());
-			afi.bucket = static_cast<quint8>(query->value(COL_BUCKET).toInt());
-			afi.signalType = static_cast<E::SignalType>(query->value(COL_SIGNAL_TYPE).toInt());
-
-			afi.fileName = query->value(COL_FILE_NAME).toString();
-
-			afi.createdUTC = query->value(COL_CREATED_UTC).toLongLong();
-			afi.timeFromUTC = query->value(COL_TIME_FROM_UTC).toLongLong();
-			afi.timeToUTC = query->value(COL_TIME_TO_UTC).toLongLong();
-
-			afi.recordCount = query->value(COL_RECORD_COUNT).toLongLong();
-			afi.fileSize = query->value(COL_FILE_SIZE).toLongLong();
+			if (res == false)
+			{
+				return false;
+			}
 
 			auto [it, inserted] = activeFiles->emplace(afi.hash, afi);
 
-			Q_ASSERT(inserted);
+			if (inserted == false)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
 		}
 
+		return true;
+	}
+
+	bool Db::createActiveArchFile(Hash hash, const QString& fileName, qint64 timeFromUtc, qint64 createdUtc, ArchFileInfo* afi)
+	{
+		TEST_PTR_RETURN_FALSE(afi);
+
+		Q_ASSERT(false);
 		return true;
 	}
 
@@ -452,23 +429,23 @@ namespace ArchV3
 		return result;
 	}
 
-	qint64 Db::createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const
-	{
-		quint8 bucket = static_cast<quint8>(calcHash(appSignalID) & 0xFF);
+	//qint64 Db::createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const
+	//{
+	//	quint8 bucket = static_cast<quint8>(calcHash(appSignalID) & 0xFF);
 
-		const QString fileName = Storage::makeArchiveFileName(bucket, appSignalID, timeFromUtc, true);
-		const QString sql = QString("SELECT fn_create_archive_file(%1, %2, '%3', %4, %5)").
-							arg(signalID).arg(bucket).arg(timeFromUtc).arg(createdUtc);
+	//	const QString fileName = Storage::makeArchiveFileName(bucket, appSignalID, timeFromUtc, true);
+	//	const QString sql = QString("SELECT fn_create_archive_file(%1, %2, '%3', %4, %5)").
+	//						arg(signalID).arg(bucket).arg(timeFromUtc).arg(createdUtc);
 
-		auto query = m_db->execQuery(sql);
+	//	auto query = m_db->execQuery(sql);
 
-		if (!query || query->next() == false)
-		{
-			return BAD_ARCHIVE_FILE_ID;
-		}
+	//	if (!query || query->next() == false)
+	//	{
+	//		return BAD_ARCHIVE_FILE_ID;
+	//	}
 
-		return query->value(0).toLongLong();
-	}
+	//	return query->value(0).toLongLong();
+	//}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const
 	{ 

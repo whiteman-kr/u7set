@@ -13,6 +13,9 @@ namespace ArchV3
 	class Storage : public LogWrapper
 	{
 	public:
+		static constexpr size_t BUCKET_COUNT = 256;
+
+	public:
 		Storage(const QString& archDir,
 				const QString& projectName,
 				const QString& clientID,
@@ -41,7 +44,7 @@ namespace ArchV3
 		void createArchFiles(const std::vector<ArchSignal>& archSignals);
 		bool initArchFiles();
 
-		bool createActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi);
+		bool createActiveArchFile(std::unique_ptr<ArchFileBase>& archFile, qint64 timeFromUTC, ArchFileInfo* afi);
 		bool createNextActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi);
 		bool updateActiveArchFile(const ArchFileInfo& afi);
 
@@ -56,8 +59,6 @@ namespace ArchV3
 		QString m_archPath;
 
 		Db m_db;
-
-		static constexpr size_t BUCKET_COUNT = 256;
 
 		std::unordered_map<Hash, ArchFileInfo> m_activeFiles;
 		std::unordered_map<Hash, std::unique_ptr<ArchFileBase>> m_archFiles;

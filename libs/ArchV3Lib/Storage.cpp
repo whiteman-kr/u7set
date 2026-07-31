@@ -95,7 +95,7 @@ namespace ArchV3
 
 				if (it2 == m_activeFiles.end())
 				{
-					bool res = createActiveArchFile(hash, state.systemtime(), &afi);
+					bool res = createActiveArchFile(archFile, state.systemtime(), &afi);
 
 					if (res == false)
 					{
@@ -199,7 +199,7 @@ namespace ArchV3
 
 		const QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(timeFromUtc, QTimeZone::utc());
 
-		QString fileName = QString("%1/%2/%3.%4").
+		QString fileName = QString("/%1/%2/%3.%4").
 								arg(makeBucketStr(bucket)).
 								arg(sanitizeString(appSignalID)).
 								arg(dateTime.toString(QStringLiteral("yyyyMMdd_HHmmss_zzz.arch"))).
@@ -265,7 +265,7 @@ namespace ArchV3
 			{
 			case E::SignalType::Analog:
 				{
-					std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>();
+					std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>(s.appSignalID);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
@@ -273,7 +273,7 @@ namespace ArchV3
 
 			case E::SignalType::Discrete:
 				{
-					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>();
+					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>(s.appSignalID);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
@@ -309,10 +309,19 @@ namespace ArchV3
 		return result;
 	}
 
-	bool Storage::createActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi)
+	bool Storage::createActiveArchFile(std::unique_ptr<ArchFileBase>& archFile, qint64 timeFromUTC, ArchFileInfo* afi)
 	{ 
-		Q_ASSERT(false);	// TO DO
-		return true;
+		TEST_PTR_RETURN_FALSE(archFile);
+
+		qint64 createdUTC = currentMSecsUTC();
+
+		Hash hash = calcHash(archFile->appSignalID());
+		
+		QString fileName = makeArchiveFileName(static_cast<quint8>(hash & 0xFF), archFile->appSignalID(), timeFromUTC, true);
+
+		bool result = m_db.createActiveArchFile(hash, fileName, timeFromUTC, createdUTC, afi);
+
+		return result;
 	}
 
 	bool Storage::createNextActiveArchFile(Hash hash, qint64 timeFromUTC, ArchFileInfo* afi)

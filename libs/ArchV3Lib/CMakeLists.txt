@@ -14,6 +14,7 @@ qt_add_library(${TARGET} STATIC
 	./include/ArchV3Lib/ArchFile.h
 	./include/ArchV3Lib/Core.h
 	./include/ArchV3Lib/Db.h
+	./include/ArchV3Lib/DbTypes.h
 	./include/ArchV3Lib/Postgres.h
 	./include/ArchV3Lib/Storage.h
 	./include/ArchV3Lib/Utils.h
@@ -22,6 +23,7 @@ qt_add_library(${TARGET} STATIC
 	ArchFile.cpp
 	Core.cpp
 	Db.cpp
+	DbTypes.cpp
 	Postgres.cpp
 	Storage.cpp
 	Writer.cpp

@@ -9,7 +9,6 @@
 
 #include "../../UtilsLib/WUtils.h"
 
-
 #ifdef Q_OS_WIN
 	#include <windows.h>
 #elif defined(Q_OS_LINUX)
@@ -18,7 +17,8 @@
 
 namespace ArchV3
 {
-	ArchFileBase::ArchFileBase()
+	ArchFileBase::ArchFileBase(const QString& appSignalID) :
+		m_appSignalID(appSignalID)
 	{
 	}
 
@@ -28,6 +28,11 @@ namespace ArchV3
 		{
 			m_file.close();
 		}
+	}
+
+	QString ArchFileBase::appSignalID() const
+	{ 
+		return m_appSignalID;
 	}
 
 	bool ArchFileBase::setFilePath(const QString& path)

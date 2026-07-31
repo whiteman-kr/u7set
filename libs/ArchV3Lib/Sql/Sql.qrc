@@ -1,16 +1,18 @@
 <RCC>
 	<qresource prefix="/ArchV3Lib/Sql">
+
 		<file>Schema/create.sql</file>
 		<file>Schema/cleanup.sql</file>
 		<file>Schema/create_partitions.sql</file>
 
 		<file>Types/signal_register_info.sql</file>
+		<file>Types/arch_file_info.sql</file>
 
 		<file>Functions/fn_register_signals.sql</file>
 		<file>Functions/fn_get_registered_signals.sql</file>
 		<file>Functions/fn_delete_signals_by_hash.sql</file>
-		<file>Functions/fn_create_archive_file.sql</file>
 		<file>Functions/fn_get_active_archive_files.sql</file>
+		<file>Functions/fn_create_active_archive_file.sql</file>
 
 	</qresource>
 </RCC>
