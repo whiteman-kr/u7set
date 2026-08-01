@@ -35,6 +35,8 @@ namespace ArchV3
 		bool deleted = false;
 
 		bool fromQuery(const QSqlQuery& q);
+
+		bool operator==(const ArchFileInfo& other) const;
 	};
 
 } // namespace ArchV3

@@ -24,78 +24,78 @@
 #define ASSERT_FALSE_CONTINUE		Q_ASSERT(false); \
 									continue;
 
-#define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
+#define TEST_PTR_CONTINUE(ptr)		if ((ptr) == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
 										continue; \
 									}
 
-#define TEST_PTR_BREAK(ptr)		if (ptr == nullptr) \
+#define TEST_PTR_BREAK(ptr)		if ((ptr) == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
 										break; \
 									}
 
 
-#define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
+#define TEST_PTR_RETURN(ptr)		if ((ptr) == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
 										return; \
 									}
 
-#define TEST_PTR_RETURN_FALSE(ptr)	if (ptr == nullptr) \
+#define TEST_PTR_RETURN_FALSE(ptr)	if ((ptr) == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
 										return false; \
 									}
 
-#define TEST_PTR_RETURN_NULLPTR(ptr)	if (ptr == nullptr) \
+#define TEST_PTR_RETURN_NULLPTR(ptr)	if ((ptr) == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
 										return nullptr; \
 									}
 
-#define TEST_PTR_RETURN_VALUE(ptr, value)	if (ptr == nullptr) \
+#define TEST_PTR_RETURN_VALUE(ptr, value)	if ((ptr) == nullptr) \
 											{	\
 												Q_ASSERT(false);	\
 												return value; \
 											}
 
-#define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if (ptr == nullptr) \
+#define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if ((ptr) == nullptr) \
 											{	\
 												Q_ASSERT(false);	\
 												LOG_NULLPTR_ERROR(log); \
 												return false; \
 											}
 
-#define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if (ptr == nullptr) \
+#define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if ((ptr) == nullptr) \
 											{	\
 												Q_ASSERT(false);	\
 												LOG_NULLPTR_ERROR(log); \
 												return nullptr; \
 											}
 
-#define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if (ptr == nullptr) \
+#define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if ((ptr) == nullptr) \
 												{	\
 													Q_ASSERT(false);	\
 													LOG_NULLPTR_ERROR(log); \
 													return nullptr; \
 												}
 
-#define TEST_PTR_LOG_RETURN(ptr, log)		if (ptr == nullptr) \
+#define TEST_PTR_LOG_RETURN(ptr, log)		if ((ptr) == nullptr) \
 											{	\
 												Q_ASSERT(false);	\
 												LOG_NULLPTR_ERROR(log); \
 												return; \
 											}
 
-#define DELETE_IF_NOT_NULL(ptr)		if (ptr != nullptr) \
+#define DELETE_IF_NOT_NULL(ptr)		if ((ptr) != nullptr) \
 									{	\
 										delete ptr; \
 										ptr = nullptr; \
 									}
 
-#define DELETE_ARRAY_IF_NOT_NULL(ptr)		if (ptr != nullptr) \
+#define DELETE_ARRAY_IF_NOT_NULL(ptr)		if ((ptr) != nullptr) \
 											{	\
 												delete [] ptr; \
 												ptr = nullptr; \

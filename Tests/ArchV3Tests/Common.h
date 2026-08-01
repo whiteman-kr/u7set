@@ -24,6 +24,7 @@ extern std::unique_ptr<QByteArray> achInfoV3Data;
 
 inline const QString TEST_PROJECT = "TEST_PROJECT";
 inline const QString TEST_PROJECT_DB_PATTERN = "u7arch_TEST_PROJECT_%";
+inline const QString COMPILER_TESTS_PROJECT_DB_PATTERN = "u7arch_compiler_tests_%";
 
 inline ArchV3::DbConnectionInfo dbConnInfo = {.host = "127.0.0.1", .port = 5433, .user = "u7arch", .password = "P2ssw0rd"};
 

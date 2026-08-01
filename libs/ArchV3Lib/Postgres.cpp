@@ -103,6 +103,11 @@ namespace ArchV3
 		return m_db.isOpen(); 
 	}
 
+	QSqlDatabase& Postgres::db()
+	{
+		return m_db;
+	}
+
 	bool Postgres::execSql(const QString& sql) const
 	{
 		if (isOpen() == false)
@@ -139,6 +144,24 @@ namespace ArchV3
 		}
 
 		return query;
+	}
+
+	bool Postgres::execQuery(QSqlQuery& query) const
+	{
+		if (isOpen() == false)
+		{
+			logErr("database not open!");
+			return false;
+		}
+
+		if (query.exec() == false)
+		{
+			logErr(QString("failed to execute query %1: %2").arg(query.lastQuery()).arg(query.lastError().text()));
+			return false;
+		}
+
+		return true;
+
 	}
 
 	bool Postgres::tableExists(const QString& schemaName, const QString& tableName) const

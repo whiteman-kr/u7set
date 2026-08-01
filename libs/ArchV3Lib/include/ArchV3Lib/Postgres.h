@@ -4,6 +4,7 @@
 
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 #include "../../OnlineLib/CircularLogger.h"
 
@@ -37,8 +38,11 @@ namespace ArchV3
 
 		bool isOpen() const;
 
+		QSqlDatabase& db();
+
 		bool execSql(const QString& sql) const;
 		std::optional<QSqlQuery> execQuery(const QString& sql) const;
+		bool execQuery(QSqlQuery& query) const;
 
 		bool tableExists(const QString& schemaName, const QString& tableName) const;
 		bool tableExists(const QString& tableName) const;

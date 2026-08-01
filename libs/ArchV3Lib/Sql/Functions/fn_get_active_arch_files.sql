@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION fn_get_active_archive_files()
+CREATE OR REPLACE FUNCTION fn_get_active_arch_files()
 RETURNS SETOF arch_file_info
 LANGUAGE sql
 STABLE
@@ -24,7 +24,7 @@ $$
         af.completed,
         af.compressed,
         af.deleted
-    FROM archive_files AS af
+    FROM arch_files AS af
     INNER JOIN signals AS s
         ON s.signal_id = af.signal_id
        AND s.bucket = af.bucket

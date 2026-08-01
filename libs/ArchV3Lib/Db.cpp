@@ -145,7 +145,7 @@ namespace ArchV3
 
 		activeFiles->clear();
 
-		auto query = m_db->execQuery(QStringLiteral("SELECT * FROM fn_get_active_archive_files()"));
+		auto query = m_db->execQuery(QStringLiteral("SELECT * FROM fn_get_active_arch_files()"));
 
 		if (!query)
 		{
@@ -184,7 +184,49 @@ namespace ArchV3
 	{
 		TEST_PTR_RETURN_FALSE(afi);
 
-		Q_ASSERT(false);
+		QSqlQuery query(m_db->db());
+
+		bool res = query.prepare(QStringLiteral(R"(
+					SELECT *
+					FROM fn_create_active_arch_file
+					(
+						CAST(:hash AS BIGINT),
+						CAST(:file_name AS TEXT),
+						CAST(:time_from_utc AS BIGINT),
+						CAST(:created_utc AS BIGINT)
+					);		
+				)"));
+
+		if (res == false)
+		{
+			logErr(query.lastError().text());
+			return false;
+		}
+
+		query.bindValue(":hash", QVariant::fromValue<qlonglong>(static_cast<qlonglong>(hash)));
+		query.bindValue(":file_name", fileName);
+		query.bindValue(":time_from_utc", timeFromUtc);
+		query.bindValue(":created_utc", createdUtc);
+
+		res = m_db->execQuery(query);
+
+		if (!res)
+		{
+			return false;
+		}
+
+		if (!query.next())
+		{
+			logErr("fn_create_active_arch_file() returned no data");
+			return false;
+		}
+
+		if (!afi->fromQuery(query))
+		{
+			logErr("Failed to parse arch_file_info");
+			return false;
+		}
+
 		return true;
 	}
 
@@ -253,6 +295,7 @@ namespace ArchV3
 		bool result = true;
 
 		result &= m_db->loadAndExecuteScript("Types/signal_register_info.sql");
+		result &= m_db->loadAndExecuteScript("Types/arch_file_info.sql");
 
 		return result;
 	}
@@ -266,8 +309,8 @@ namespace ArchV3
 		result &= m_db->loadAndExecuteScript("Functions/fn_register_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_get_registered_signals.sql");
 		result &= m_db->loadAndExecuteScript("Functions/fn_delete_signals_by_hash.sql");
-		result &= m_db->loadAndExecuteScript("Functions/fn_create_archive_file.sql");
-		result &= m_db->loadAndExecuteScript("Functions/fn_get_active_archive_files.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_get_active_arch_files.sql");
+		result &= m_db->loadAndExecuteScript("Functions/fn_create_active_arch_file.sql");
 
 		return result;
 	}
@@ -428,24 +471,6 @@ namespace ArchV3
 
 		return result;
 	}
-
-	//qint64 Db::createArchiveFile(qint64 signalID, const QString& appSignalID, qint64 timeFromUtc, qint64 createdUtc) const
-	//{
-	//	quint8 bucket = static_cast<quint8>(calcHash(appSignalID) & 0xFF);
-
-	//	const QString fileName = Storage::makeArchiveFileName(bucket, appSignalID, timeFromUtc, true);
-	//	const QString sql = QString("SELECT fn_create_archive_file(%1, %2, '%3', %4, %5)").
-	//						arg(signalID).arg(bucket).arg(timeFromUtc).arg(createdUtc);
-
-	//	auto query = m_db->execQuery(sql);
-
-	//	if (!query || query->next() == false)
-	//	{
-	//		return BAD_ARCHIVE_FILE_ID;
-	//	}
-
-	//	return query->value(0).toLongLong();
-	//}
 
 	QString Db::makeDatabaseName(const QString& projectID, const QString& appDataSrvID) const
 	{ 

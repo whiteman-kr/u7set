@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION fn_create_active_archive_file
+CREATE OR REPLACE FUNCTION fn_create_active_arch_file
 (
     p_hash           BIGINT,
     p_file_name      TEXT,
@@ -34,7 +34,7 @@ BEGIN
             USING ERRCODE = 'foreign_key_violation';
     END IF;
 
-    INSERT INTO archive_files
+    INSERT INTO arch_files
     (
         signal_id,
         bucket,
@@ -63,20 +63,25 @@ BEGIN
         FALSE
     )
     RETURNING
-        archive_files.arch_file_id,
-        archive_files.signal_id,
-        v_signal_type,
+        arch_files.arch_file_id,
+        arch_files.signal_id,
+
         p_hash,
-        archive_files.bucket,
-        archive_files.file_name,
-        archive_files.time_from_utc,
-        archive_files.time_to_utc,
-        archive_files.record_count,
-        archive_files.file_size,
-        archive_files.created_utc,
-        archive_files.completed,
-        archive_files.compressed,
-        archive_files.deleted
+        arch_files.bucket,
+        v_signal_type,
+
+        arch_files.file_name,
+
+        arch_files.created_utc,
+        arch_files.time_from_utc,
+        arch_files.time_to_utc,
+
+        arch_files.record_count,
+        arch_files.file_size,
+
+        arch_files.completed,
+        arch_files.compressed,
+        arch_files.deleted
     INTO v_result;
 
     RETURN v_result;

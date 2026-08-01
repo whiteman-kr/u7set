@@ -12,7 +12,7 @@ BEGIN
     RETURN QUERY
     WITH deleted_files AS
     (
-        DELETE FROM archive_files AS af
+        DELETE FROM arch_files AS af
         USING signals AS s
         WHERE af.signal_id = s.signal_id
           AND s.hash = ANY(p_hashes)

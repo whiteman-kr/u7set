@@ -35,9 +35,9 @@ CREATE TABLE signals
         CHECK (bucket >= 0 AND bucket <= 255)
 );
 
-CREATE TABLE archive_files
+CREATE TABLE arch_files
 (
-    archive_file_id BIGINT GENERATED ALWAYS AS IDENTITY,
+    arch_file_id BIGINT GENERATED ALWAYS AS IDENTITY,
 
     signal_id BIGINT NOT NULL,
     bucket SMALLINT NOT NULL,
@@ -56,42 +56,42 @@ CREATE TABLE archive_files
 
     created_utc BIGINT NOT NULL,
 
-    CONSTRAINT archive_files_pk
-        PRIMARY KEY (bucket, archive_file_id),
+    CONSTRAINT arch_files_pk
+        PRIMARY KEY (bucket, arch_file_id),
 
-    CONSTRAINT archive_files_signal_fk
+    CONSTRAINT arch_files_signal_fk
         FOREIGN KEY (signal_id, bucket)
         REFERENCES signals(signal_id, bucket),
 
-    CONSTRAINT archive_files_bucket_check
+    CONSTRAINT arch_files_bucket_check
         CHECK (bucket >= 0 AND bucket <= 255),
     
-    CONSTRAINT archive_files_time_check
+    CONSTRAINT arch_files_time_check
         CHECK (time_to_utc = 0 OR time_to_utc >= time_from_utc),
    
-    CONSTRAINT archive_files_record_count_check
+    CONSTRAINT arch_files_record_count_check
         CHECK (record_count >= 0),
 
-    CONSTRAINT archive_files_file_size_check
+    CONSTRAINT arch_files_file_size_check
        CHECK (file_size >= 0),
 
-    CONSTRAINT archive_files_completed_time_check
+    CONSTRAINT arch_files_completed_time_check
        CHECK (NOT completed OR time_to_utc > 0),
 
-    CONSTRAINT archive_files_compressed_check
+    CONSTRAINT arch_files_compressed_check
         CHECK (NOT compressed OR completed)
 )
 PARTITION BY LIST (bucket);
 
-CREATE INDEX archive_files_signal_time_idx
-ON archive_files
+CREATE INDEX arch_files_signal_time_idx
+ON arch_files
 (
     signal_id,
     time_from_utc
 );
 
-CREATE UNIQUE INDEX archive_files_signal_active_idx
-ON archive_files
+CREATE UNIQUE INDEX arch_files_signal_active_idx
+ON arch_files
 (
     signal_id,
     bucket

@@ -52,7 +52,7 @@ TEST_F(CoreTests, Init)
 
 TEST_F(CoreTests, PushArchData)
 {
-	dropDatabases(TEST_PROJECT_DB_PATTERN);
+	dropDatabases(COMPILER_TESTS_PROJECT_DB_PATTERN);
 
 	ArchV3::Core core("D:/Archive", *achInfoV3Data.get(), dbConnInfo, logger);
 

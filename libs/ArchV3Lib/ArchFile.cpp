@@ -17,7 +17,8 @@
 
 namespace ArchV3
 {
-	ArchFileBase::ArchFileBase(const QString& appSignalID) :
+	ArchFileBase::ArchFileBase(const QString& archPath, const QString& appSignalID) :
+		m_archPath(archPath),
 		m_appSignalID(appSignalID)
 	{
 	}
@@ -33,20 +34,6 @@ namespace ArchV3
 	QString ArchFileBase::appSignalID() const
 	{ 
 		return m_appSignalID;
-	}
-
-	bool ArchFileBase::setFilePath(const QString& path)
-	{
-		m_path = path;
-		
-		//bool result = QDir().mkpath(m_path);
-
-		//if (result == false)
-		//{
-		//	m_archWriter.logErr(QString("Failed to create directory: %1").arg(m_path));
-		//}
-
-		return true;
 	}
 
 	bool ArchFileBase::setFileName(const QString& filename)
@@ -68,25 +55,191 @@ namespace ArchV3
 		return (m_archFileID > 0);
 	}
 
-	bool ArchFileBase::isChecked() const
-	{ 
-		return m_checked;
+	size_t ArchFileBase::recordSize(E::SignalType st)
+	{
+		switch (st)
+		{
+		case E::SignalType::Analog:
+			return sizeof(ArchV3::AnalogFileRecord);
+
+		case E::SignalType::Discrete:
+			return sizeof(ArchV3::DiscreteFileRecord);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
 	}
 
-	bool ArchFileBase::checkFile(const ArchFileInfo& afi, ArchFileInfo* checkedAfi)
+	CheckFileResult ArchFileBase::checkFile(const QString& archPath, const ArchFileInfo& afi, ArchFileInfo* checkedAfi)
 	{ 
-		TEST_PTR_RETURN_FALSE(checkedAfi);
+		TEST_PTR_RETURN_VALUE(checkedAfi, CheckFileResult::CheckError);
+
+		QString filePathName = archPath + afi.fileName;
 
 		*checkedAfi = afi;
 
-		Q_ASSERT(false); // TO DO
+		// 1. Check if file exists.
+		//    If not:
+		//      - create empty file;
+		//      - checkedAfi->recordCount = 0;
+		//      - checkedAfi->fileSize = 0;
+		//      - checkedAfi->timeToUtc = 0;
+		//      - return false (DB must be updated).
 
-		return true;
-	}
+		QFile file(filePathName);
 
-	void ArchFileBase::setChecked(bool checked)
-	{ 
-		m_checked = checked;
+		if (file.exists() == false)
+		{
+			if (file.open(QIODevice::WriteOnly) == false)
+			{
+				// log error
+				return CheckFileResult::CheckError;
+			}
+
+			file.close();
+
+			checkedAfi->recordCount = 0;
+			checkedAfi->fileSize = 0;
+			checkedAfi->timeToUTC = 0;
+			return CheckFileResult::Changed;
+		}
+
+		// 2. Open file.
+
+		if (file.open(QIODevice::ReadWrite) == false)
+		{
+			return CheckFileResult::CheckError;
+		}
+
+		// 3. Get actual file size.
+
+		qint64 fileSize = file.size();
+
+		qint64 recSize = static_cast<qint64>(recordSize(afi.signalType));
+
+		if (recSize == 0)
+		{
+			return CheckFileResult::CheckError;
+		}
+
+		const qint64 alignedFileSize = (fileSize / recSize) * recSize;
+
+		if (alignedFileSize != fileSize)
+		{
+			if (!file.resize(alignedFileSize))
+			{
+				return CheckFileResult::CheckError;
+			}
+
+			fileSize = alignedFileSize;
+		}
+
+		checkedAfi->fileSize = fileSize;
+		checkedAfi->recordCount = fileSize / recSize;
+
+		// 4. If file size differs from DB:
+		//      - truncate file to whole record boundary;
+		//      - update checkedAfi->fileSize;
+		//      - update checkedAfi->recordCount;
+		//      - read last record (if any);
+		//      - update checkedAfi->timeToUtc;
+		//      - return false.
+
+		if (fileSize > 0)
+		{
+			switch (afi.signalType)
+			{
+			case E::SignalType::Analog:
+				{
+					AnalogFileRecord firstRecord;
+					AnalogFileRecord lastRecord;
+
+					bool res = file.seek(0);
+
+					if (res == false)
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					qint64 readSize = file.read(reinterpret_cast<char*>(&firstRecord), sizeof(firstRecord));
+
+					if (readSize != sizeof(firstRecord))
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					res = file.seek(fileSize - sizeof(lastRecord));
+
+					if (res == false)
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					readSize = file.read(reinterpret_cast<char*>(&lastRecord), sizeof(lastRecord));
+
+					if (readSize != sizeof(lastRecord))
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					checkedAfi->timeFromUTC = firstRecord.serverTimeUTC;
+					checkedAfi->timeToUTC = lastRecord.serverTimeUTC;
+				}
+				break;
+
+			case E::SignalType::Discrete:
+				{
+					DiscreteFileRecord firstRecord;
+					DiscreteFileRecord lastRecord;
+
+					bool res = file.seek(0);
+
+					if (res == false)
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					qint64 readSize = file.read(reinterpret_cast<char*>(&firstRecord), sizeof(firstRecord));
+
+					if (readSize != sizeof(firstRecord))
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					res = file.seek(fileSize - sizeof(lastRecord));
+
+					if (res == false)
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					readSize = file.read(reinterpret_cast<char*>(&lastRecord), sizeof(lastRecord));
+
+					if (readSize != sizeof(lastRecord))
+					{
+						return CheckFileResult::CheckError;
+					}
+
+					checkedAfi->timeFromUTC = firstRecord.serverTimeUTC;
+					checkedAfi->timeToUTC = lastRecord.serverTimeUTC;
+				}
+				break;
+
+			default: 
+				return CheckFileResult::CheckError;
+			}
+		}
+		else
+		{
+			checkedAfi->recordCount = 0;
+			checkedAfi->fileSize = 0;
+			checkedAfi->timeFromUTC = 0;
+			checkedAfi->timeToUTC = 0;	
+		}
+		
+		return (afi == (*checkedAfi) ? CheckFileResult::Matched : CheckFileResult::Changed);
 	}
 
 	bool ArchFileBase::isOpen() const

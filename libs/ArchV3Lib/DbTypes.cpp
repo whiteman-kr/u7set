@@ -84,4 +84,23 @@ namespace ArchV3
 
 		return true;
 	}
+
+	bool ArchFileInfo::operator==(const ArchFileInfo& other) const
+	{
+		return	archFileID == other.archFileID && 
+				signalID == other.signalID && 
+				hash == other.hash && 
+				bucket == other.bucket &&
+				signalType == other.signalType && 
+				fileName == other.fileName && 
+				createdUTC == other.createdUTC &&
+				timeFromUTC == other.timeFromUTC && 
+				timeToUTC == other.timeToUTC && 
+				recordCount == other.recordCount &&
+				fileSize == other.fileSize && 
+				completed == other.completed && 
+				compressed == other.compressed && 
+				deleted == other.deleted;
+	}
+
 } // namespace ArchV3

@@ -24,16 +24,24 @@ namespace ArchV3
 	{
 		qint64 serverTimeUTC;
 		qint32 plantTimeDelta;
+		qint16 localTimeOffsetMinutes;
+
 		quint32 flags;
 		double value;
+
+		quint8 crc8;
 	};
 
 	struct DiscreteFileRecord
 	{
 		qint64 serverTimeUTC;
 		qint32 plantTimeDelta;
+		qint16 localTimeOffsetMinutes;
+
 		quint32 flags;
 		quint8 state;
+
+		quint8 crc8;
 	};
 
 #pragma pack(pop)
@@ -41,16 +49,23 @@ namespace ArchV3
 	static_assert(std::is_trivially_copyable_v<AnalogFileRecord>);
 	static_assert(std::is_trivially_copyable_v<DiscreteFileRecord>);
 
-	inline constexpr size_t ANALOG_FILE_RECORD_SIZE = 24;
+	inline constexpr size_t ANALOG_FILE_RECORD_SIZE = 27;
 	static_assert(sizeof(AnalogFileRecord) == ANALOG_FILE_RECORD_SIZE);
 
-	inline constexpr size_t DISCRETE_FILE_RECORD_SIZE = 17;
+	inline constexpr size_t DISCRETE_FILE_RECORD_SIZE = 20;
 	static_assert(sizeof(DiscreteFileRecord) == DISCRETE_FILE_RECORD_SIZE);
+
+	enum class CheckFileResult
+	{
+		Matched,
+		Changed,
+		CheckError
+	};
 
 	class ArchFileBase
 	{
 	public:
-		ArchFileBase(const QString& appSignalID);
+		ArchFileBase(const QString& archPath, const QString& appSignalID);
 		virtual ~ArchFileBase();
 
 		QString appSignalID() const;
@@ -60,9 +75,8 @@ namespace ArchV3
 		void setActiveFile(const ArchFileInfo& afi);
 		bool hasActiveFile() const;
 
-		bool isChecked() const;
-		void setChecked(bool checked);
-		static bool checkFile(const ArchFileInfo& afi, ArchFileInfo* checkedAfi);
+		static size_t recordSize(E::SignalType st);
+		static CheckFileResult checkFile(const QString& archPath, const ArchFileInfo& afi, ArchFileInfo* checkedAfi);
 
 		// Getters
 
@@ -90,8 +104,8 @@ namespace ArchV3
 		bool writeRaw(const char* data, qint64 dataSize, qint64 timeUTC);
 
 	private:
+		const QString& m_archPath;
 		QString m_appSignalID;
-		QString m_path;
 		QString m_filename;
 
 		qint64 m_archFileID = 0;
@@ -99,8 +113,6 @@ namespace ArchV3
 		qint64 m_recordCount = 0;
 		qint64 m_lastWriteTime = 0;
 		qint64 m_lastFlushTime = 0;
-
-		bool m_checked = false;
 
 		QFile m_file;
 
@@ -130,8 +142,8 @@ namespace ArchV3
 	class ArchFile : public ArchFileBase
 	{
 	public:
-		ArchFile(const QString& appSignalID) :
-			ArchFileBase(appSignalID)
+		ArchFile(const QString& archPath, const QString& appSignalID) :
+			ArchFileBase(archPath, appSignalID)
 		{
 		}
 

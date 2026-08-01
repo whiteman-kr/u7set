@@ -109,24 +109,44 @@ namespace ArchV3
 					const ArchFileInfo& registeredAfi = it2->second;
 					ArchFileInfo checkedAfi;
 
-					bool res = ArchFileBase::checkFile(registeredAfi, &checkedAfi);
+					CheckFileResult checkResult = ArchFileBase::checkFile(m_archPath, registeredAfi, &checkedAfi);
 
-					if (res == true)
+					bool checkOk = true;
+
+					switch (checkResult)
 					{
+					case CheckFileResult::Matched:
 						archFile->setActiveFile(registeredAfi);
-					}
-					else
-					{
-						res = updateActiveArchFile(checkedAfi);
+						break;
+					
+					case CheckFileResult::Changed:
+						{
+							bool res = updateActiveArchFile(checkedAfi);
 
-						if (res == true)
-						{
-							archFile->setActiveFile(checkedAfi);
+							if (res == true)
+							{
+								archFile->setActiveFile(checkedAfi);
+							}
+							else
+							{
+								checkOk = false;
+							}
 						}
-						else
-						{
-							continue;
-						}
+						break;
+
+					case CheckFileResult::CheckError:
+						logErr(QString("file %1 check ERROR!").arg(registeredAfi.fileName));
+						checkOk = false;
+						break;
+
+					default:
+						Q_ASSERT(false);
+						checkOk = false;
+					}
+
+					if (checkOk == false)
+					{
+						continue;
 					}
 				}
 			}
@@ -202,7 +222,7 @@ namespace ArchV3
 		QString fileName = QString("/%1/%2/%3.%4").
 								arg(makeBucketStr(bucket)).
 								arg(sanitizeString(appSignalID)).
-								arg(dateTime.toString(QStringLiteral("yyyyMMdd_HHmmss_zzz.arch"))).
+								arg(dateTime.toString(QStringLiteral("yyyyMMdd_HHmmss_zzz"))).
 								arg(shortTermArchive ? shortTermExtension : longTermExtension);
 		return fileName;
 	}
@@ -265,7 +285,7 @@ namespace ArchV3
 			{
 			case E::SignalType::Analog:
 				{
-					std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>(s.appSignalID);
+					std::unique_ptr<AnalogArchFile> file = std::make_unique<AnalogArchFile>(m_archPath, s.appSignalID);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
@@ -273,7 +293,7 @@ namespace ArchV3
 
 			case E::SignalType::Discrete:
 				{
-					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>(s.appSignalID);
+					std::unique_ptr<DiscreteArchFile> file = std::make_unique<DiscreteArchFile>(m_archPath, s.appSignalID);
 					m_archFiles.emplace(s.hash, std::move(file));
 					m_bucketSignals[s.bucket].push_back(s.hash);
 				}
