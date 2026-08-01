@@ -53,7 +53,7 @@ BEGIN
         v_signal_id,
         v_bucket,
         p_file_name,
-        p_time_from_utc,
+        0,
         0,
         0,
         0,
