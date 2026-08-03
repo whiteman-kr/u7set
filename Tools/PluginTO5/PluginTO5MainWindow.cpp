@@ -197,6 +197,8 @@ PluginTO5MainWindow::~PluginTO5MainWindow()
 	QSettings().setValue("MainWindow/tableState", m_tableWidget->horizontalHeader()->saveState());
 
 	QSettings().setValue("MainWindow/filterType", static_cast<int>(m_filterType));
+
+	QSettings().setValue("MainWindow/comboBoxIndex", m_comboBox->currentIndex());
 }
 
 void PluginTO5MainWindow::showAppLog()
@@ -558,7 +560,23 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 					}
 				}
 
-				if (m_comparatorsStorage.saveToFile(destinationFile) == false) 
+				// Get all visible hashes from the table
+				//
+				std::vector<Hash> filteredComparators;
+				int count = m_tableWidget->rowCount();
+				for (int i = 0; i < count; i++)
+				{
+					QTableWidgetItem* criteriaItem = m_tableWidget->item(i, m_criteriaColumn);
+					if (criteriaItem != nullptr)
+					{
+						Hash cmpHash = criteriaItem->data(Qt::UserRole).toULongLong();
+						filteredComparators.push_back(cmpHash);
+					}
+				}
+
+				// Save the comparators to the CSV file as input data for the report
+				//
+				if (m_comparatorsStorage.saveToFile(destinationFile, filteredComparators) == false) 
 				{
 					QMessageBox::critical(&dialog, qAppName(), tr("Failed to save comparators file to %1!").arg(destinationFile));
 					return;

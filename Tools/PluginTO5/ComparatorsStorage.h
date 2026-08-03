@@ -72,6 +72,7 @@ public:
 	//
 	bool loadFromFile(const QString& fileName, QString* errorMsg);
 	bool saveToFile(const QString& fileName);
+	bool saveToFile(const QString& fileName, const std::vector<Hash>& comparators);
 
 	// Import
 	//

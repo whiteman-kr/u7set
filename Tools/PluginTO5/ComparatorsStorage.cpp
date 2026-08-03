@@ -126,6 +126,11 @@ static QStringList getComparatorDataAsStringList(const ComparatorData& data)
 }
 
 bool ComparatorsStorage::saveToFile(const QString& fileName)
+{ 
+	return saveToFile(fileName, m_comparatorData);
+}
+
+bool ComparatorsStorage::saveToFile(const QString& fileName, const std::vector<Hash>& comparators) 
 {
 	QFile file(fileName);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
@@ -137,15 +142,15 @@ bool ComparatorsStorage::saveToFile(const QString& fileName)
 
 	CsvFile toCsv;
 	out << toCsv.stringsToCSV(m_csvHeaders, false);
-	
-	for (const Hash hash : m_comparatorData)
+
+	for (const Hash hash : comparators)
 	{
 		const auto& cmp = m_comparatorDataMap.at(hash);
 
 		out << "\n" << toCsv.stringsToCSV(getComparatorDataAsStringList(cmp), false);
 	}
 	file.close();
-	
+
 	return true;
 }
 
