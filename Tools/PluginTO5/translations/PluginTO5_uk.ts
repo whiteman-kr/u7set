@@ -100,86 +100,85 @@
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="166"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="829"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
         <source>InputAppSignalCaption</source>
         <translation>Найменування вхідного сигналу</translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="167"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="830"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="168"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="830"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
         <source>SetpointAppSignalID</source>
         <translation>ІД Сигналу значення уставки</translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="169"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="831"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="849"/>
         <source>SetpointAppSignalCaption</source>
         <translation>Найменування сигналу значень уставки</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="215"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="217"/>
         <source> provides the online operator-support system.</source>
         <translation> забезпечує роботу онлайн-системи підтримки операторів.</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="232"/>
         <source>TestSuite Id:</source>
-        <translation>Ідентифікатор TestSuite:</translation>
+        <translation type="vanished">Ідентифікатор TestSuite:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="235"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="237"/>
         <source>Configurator IP Address 1:</source>
         <translation>IP-адреса конфігуратора 1:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="238"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="240"/>
         <source>Configurator Port 1:</source>
         <translation>Порт конфігуратора 1:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="241"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="243"/>
         <source>Configurator IP Address 2:</source>
         <translation>IP-адреса конфігуратора 2:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="243"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="245"/>
         <source>Configurator Port 2:</source>
         <translation>Порт конфігуратора 2:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="253"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="255"/>
         <source>Language:</source>
         <translation>Мова:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="266"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="268"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="303"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="305"/>
         <source>Open Comparators CSV</source>
         <translation>Відкрити CSV-файл компараторів</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="303"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="331"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="305"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="333"/>
         <source>CSV Files (*.csv)</source>
         <translation>Файл CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="331"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="333"/>
         <source>Save Comparators CSV</source>
         <translation>Зберегти CSV-файл компараторів</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="364"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="366"/>
         <source>Import data failed: %1</source>
         <translation>Помилка під час імпорту даних: %1</translation>
     </message>
@@ -188,57 +187,57 @@
         <translation type="vanished">Переглянути</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="488"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="490"/>
         <source>Path to save report:</source>
         <translation>Шлях для збереження звіту:</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="496"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="498"/>
         <source>Create</source>
         <translation>Створити</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="508"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="510"/>
         <source>Select Report File</source>
         <translation>Вибрати файл звіту</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="508"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="510"/>
         <source>PDF Files (*.pdf)</source>
         <translation>Файли PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="545"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="547"/>
         <source>%1%2PluginTO5.csv</source>
         <translation>%1%2PluginTO5.csv</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="556"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="558"/>
         <source>Failed to delete file %1!</source>
         <translation>Не вдалося видалити файл %1!</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="563"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="581"/>
         <source>Failed to save comparators file to %1!</source>
         <translation>Не вдалося зберегти файл компараторів у %1!</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="572"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="590"/>
         <source>Report generating failed, invalid configuration parameters!</source>
         <translation>Створення звіту не вдалося, неправильні параметри конфігурації!</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="623"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="641"/>
         <source>Report generating failed.</source>
         <translation>Створення звіту не вдалося.</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="683"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="701"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="687"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="705"/>
         <source>New</source>
         <translation>Нове</translation>
     </message>
@@ -247,22 +246,22 @@
         <translation type="vanished">Відкрити</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="695"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="713"/>
         <source>Save</source>
         <translation>Зберегти</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="699"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="717"/>
         <source>Save As...</source>
         <translation>Зберегти як...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="703"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="721"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="708"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="726"/>
         <source>&amp;Reports</source>
         <translation>&amp;Звіти</translation>
     </message>
@@ -275,7 +274,7 @@
         <translation type="vanished">Створити звіт за Схемою</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="729"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="747"/>
         <source>&amp;Tools</source>
         <translation>&amp;Інструменти</translation>
     </message>
@@ -284,185 +283,190 @@
         <translation type="vanished">Імпорувати компаратори</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="735"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="753"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="739"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="757"/>
         <source>&amp;?</source>
         <translation>&amp;?</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="741"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="759"/>
         <source>Application Log...</source>
         <translation>Журнал...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="742"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="760"/>
         <source>Show application log</source>
         <translation>Показати журнал програми</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="746"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="764"/>
         <source>About...</source>
         <translation>Про PluginTO-5...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="806"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="824"/>
         <source>SchemaID/CaseID Mask</source>
         <translation>Маска для ІД Схеми/Шафи</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="814"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="832"/>
         <source>Enter mask (&quot;*,?&quot;) here</source>
         <translation>Введіть маску (\&quot;*,?\&quot;)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="829"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
         <source>CaseID</source>
         <translation>Ідентифікатор Шафи</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="829"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
         <source>SchemaID</source>
         <translation>Ідентифікатор Схеми</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="829"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
         <source>InputAppSignalID</source>
         <translation>Вхідний ІД сигнал</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="829"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
         <source>OutputAppSignalID</source>
         <translation>Вихідний ІД сигнал</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="830"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
         <source>OutputAppSignalCaption</source>
         <translation>Найменування вихідного сигналу</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="830"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
         <source>Default</source>
         <translation>За замовчуванням</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="830"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="833"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="851"/>
         <source>Criteria</source>
         <translation>Критерії</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="883"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="901"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Лічильники помилок і попереджень у журналі (натисніть, щоб переглянути журнал)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="911"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="929"/>
         <source> ConfigService: </source>
         <translation> ConfigService: </translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="915"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="933"/>
         <source> no connection</source>
         <translation> немає з&apos;єднання</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="919"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="937"/>
         <source>%1</source>
         <translation>%1</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="929"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="947"/>
         <source>Address: %1</source>
         <translation>Адреса: %1</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="965"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="983"/>
         <source> Log E: %1 W: %2 </source>
         <translation> Журнал E: %1 W: %2 </translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="709"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1006"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="727"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1024"/>
         <source>Report by CaseID</source>
         <translation>Звіт за Шафою</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="462"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="464"/>
         <source>Browse...</source>
         <translation>Переглянути...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="267"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="497"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="269"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="499"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="691"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="234"/>
+        <source>Instance StrID:</source>
+        <translation>ІД екземпляра:</translation>
+    </message>
+    <message>
+        <location filename="../PluginTO5MainWindow.cpp" line="709"/>
         <source>Open...</source>
         <translation>Відкрити...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="719"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1016"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="737"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1034"/>
         <source>Report by SchemaID</source>
         <translation>Звіт за Схемою</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="731"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="749"/>
         <source>Import...</source>
         <translation>Імпорувати...</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1078"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1096"/>
         <source>File %1 load error: %2</source>
         <translation>Помилка завантаження файлу %1: %2</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1224"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1242"/>
         <source>%1:
 </source>
         <translation>%1:
 </translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1228"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1246"/>
         <source>Not configured</source>
         <translation>Не налаштовано</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1254"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1265"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1272"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
         <source>ok</source>
         <translation>ок</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1254"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1265"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1272"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
         <source>down</source>
         <translation>низхідне</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1265"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1269"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1287"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1296"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1314"/>
         <source>Unsaved Changes</source>
         <translation>Незбережені зміни</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1297"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1315"/>
         <source>You have unsaved changes.
 Do you want to save them?</source>
         <translation>У вас є незбережені зміни.
@@ -514,22 +518,22 @@ Do you want to save them?</source>
         <translation type="vanished">/translations/qt_%1.qm</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="227"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="229"/>
         <source>Settings</source>
         <translation>Налаштування</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="371"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="373"/>
         <source>New Comparators found</source>
         <translation>Знайдено нові компаратори</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="372"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="374"/>
         <source>%1 new comparators have been found, %2 comparators were removed, %3 comparators have overridden value.</source>
         <translation>Знайдено %1 нових компараторів, %2 компараторів було видалено, у %3 компараторів значення перезаписано.</translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="455"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="457"/>
         <source>Report</source>
         <translation>Звіт</translation>
     </message>
@@ -556,32 +560,32 @@ Duplicated output signal %1 in the file, record number: %2.</source>
 У файлі виявлено дублікат вихідного сигналу %1, номер запису: %2.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="171"/>
+        <location filename="../ComparatorsStorage.cpp" line="176"/>
         <source>Input signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation>Вхідний сигнал %1 компаратора не знайдено у файлі AppSignals. Перевірте, чи файли належать до однієї й тієї ж збірки.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="197"/>
+        <location filename="../ComparatorsStorage.cpp" line="202"/>
         <source>Output signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation>Вихідний сигнал %1 компаратора не знайдено у файлі AppSignals. Перевірте, чи файли належать до однієї й тієї ж збірки.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="228"/>
+        <location filename="../ComparatorsStorage.cpp" line="233"/>
         <source>Setpoint signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation>Сигнал заданого значення %1 компаратора не знайдено у файлі AppSignals. Перевірте, чи файли належать до однієї й тієї ж збірки.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="243"/>
+        <location filename="../ComparatorsStorage.cpp" line="248"/>
         <source>Comparators file and AppSignals file must be in the same directory.</source>
         <translation>Файл Comparators та файл AppSignals повинні знаходитися в одному каталозі.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="255"/>
+        <location filename="../ComparatorsStorage.cpp" line="260"/>
         <source>Failed to load comparators from file: %1</source>
         <translation>Не вдалося завантажити компаратори з файлу: %1</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="263"/>
+        <location filename="../ComparatorsStorage.cpp" line="268"/>
         <source>Failed to load app signals from file: %1</source>
         <translation>Не вдалося завантажити сигнали з файлу: %1</translation>
     </message>
@@ -591,12 +595,12 @@ Duplicated output signal %1 in the file, record number: %2.</source>
         <translation>Журнал тестування збережено у файлі: &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.h" line="94"/>
+        <location filename="../ComparatorsStorage.h" line="95"/>
         <source>Schema ID</source>
         <translation>ІД Схеми</translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.h" line="94"/>
+        <location filename="../ComparatorsStorage.h" line="95"/>
         <source>Case ID</source>
         <translation>ІД Шафи</translation>
     </message>

@@ -231,7 +231,7 @@ void PluginTO5MainWindow::onSettings()
 	QFormLayout* layout = new QFormLayout(&dialog);
 
 	QLineEdit* testSuiteId = new QLineEdit(&dialog);
-	layout->addRow(tr("TestSuite Id:"), testSuiteId);
+	layout->addRow(tr("Instance StrID:"), testSuiteId);
 
 	QLineEdit* ipAddress1 = new QLineEdit(&dialog);
 	layout->addRow(tr("Configurator IP Address 1:"), ipAddress1);
