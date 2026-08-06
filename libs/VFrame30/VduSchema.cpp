@@ -9,8 +9,8 @@ namespace VFrame30
 	{
 		setUnit(SchemaUnit::Display);
 
-		setDocWidth(mm2in(1280));
-		setDocHeight(mm2in(1024));
+		setDocWidth(1280);
+		setDocHeight(720);
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 

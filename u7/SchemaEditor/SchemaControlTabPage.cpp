@@ -3437,8 +3437,16 @@ void SchemaControlTabPage::addFile()
 	//
 	if (schema->unit() == SchemaUnit::Display)
 	{
-		schema->setDocWidth(1280);
-		schema->setDocHeight(1024);
+		if (schema->isVduSchema() == true)
+		{
+			schema->setDocWidth(1280);
+			schema->setDocHeight(720);
+		}
+		else
+		{
+			schema->setDocWidth(1280);
+			schema->setDocHeight(1024);
+		}
 	}
 	else
 	{

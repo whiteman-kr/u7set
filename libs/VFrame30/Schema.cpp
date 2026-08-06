@@ -222,17 +222,27 @@ namespace VFrame30
 	{
 		auto schemaIdProp = ADD_PROPERTY_GETTER_SETTER(QString, "SchemaID", true, Schema::schemaId, Schema::setSchemaId);
 		schemaIdProp->setValidator("^[A-Za-z\\d_]{1,64}$");
+		schemaIdProp->setViewOrder(10);
 
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
-		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption) //
+			->setViewOrder(11);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, Schema::tagsAsString, Schema::setTags)
-			->setSpecificEditor(E::PropertySpecificEditor::Tags);
+			->setSpecificEditor(E::PropertySpecificEditor::Tags)
+			.setViewOrder(12);
 
-		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
-		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
-		ADD_PROPERTY_GETTER_SETTER(double, "SchemaHeight", true, Schema::docHeightRegional, Schema::setDocHeightRegional);
-		ADD_PROPERTY_GETTER_SETTER(QColor, "BackgroundColor", true, Schema::backgroundColor, Schema::setBackgroundColor);
+		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild) //
+			->setViewOrder(13);
+
+		ADD_PROPERTY_GETTER_SETTER(QColor, "BackgroundColor", true, Schema::backgroundColor, Schema::setBackgroundColor)  //
+			->setViewOrder(14);
+
+		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional)    //
+			->setViewOrder(15);
+
+		ADD_PROPERTY_GETTER_SETTER(double, "SchemaHeight", true, Schema::docHeightRegional, Schema::setDocHeightRegional) //
+			->setViewOrder(16);
 
 		// Monitor properties
 		//
