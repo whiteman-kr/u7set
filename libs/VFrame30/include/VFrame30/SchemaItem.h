@@ -265,8 +265,8 @@ namespace VFrame30
 
 		const std::shared_ptr<Context> context() const;
 
-
 		bool IsStatic() const noexcept;
+		void setStatic(bool value);
 		bool IsDynamic() const noexcept;
 
 		QString type() const;

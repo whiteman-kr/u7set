@@ -91,6 +91,7 @@ namespace VFrame30
 		inline static const QString userCaption{"UserCaption"};
 		inline static const QString maxLength{"MaxLength"};
 		inline static const QString multiLine{"MultiLine"};
+		inline static const QString isStatic{"Static"};
 
 		inline static const QString allowScale{"AllowScale"};
 		inline static const QString keepAspectRatio{"KeepAspectRatio"};
