@@ -1545,9 +1545,14 @@ void EquipmentView::createInternalAppSignal()
 	}
 
 	auto module = device->toModule();
-	if (module == nullptr || module->isLogicModule() == false)
+	if (module == nullptr)
 	{
 		Q_ASSERT(module);
+		return;
+	}
+
+	if (module->isLogicModule() == false && module->isVdu() == false) 
+	{
 		return;
 	}
 
