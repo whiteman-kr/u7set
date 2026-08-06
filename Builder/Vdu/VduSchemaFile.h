@@ -139,7 +139,7 @@ const uint16_t VduFileSchemaItemTrendId = 0x5254;      // TR
 //
 struct VduSchemaFileSchemaItem1
 {
-	uint16_t version;       // 1
+	uint16_t version;       // 2
 	uint16_t size;          // sizeof(VduSchemaFileSchemaItem1)
 	uint16_t itemType;      // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
 	uint16_t reserve0;
@@ -149,6 +149,7 @@ struct VduSchemaFileSchemaItem1
 	bool acceptClick;       // If true, the item can accept click events.
 
 	vdu_cstr objectName;
+	vdu_cstr label;			// added in version 2
 
 	vdu_cstr clickScript;
 	vdu_scriptbc clickScriptBytecode;
@@ -182,7 +183,7 @@ struct VduSchemaFileSchemaItemLine1
 
 struct VduSchemaFileSchemaItemRect1
 {
-	uint16_t version;  // 1
+	uint16_t version;  // 2
 	uint16_t itemType; // VduFileSchemaItemRectId = 0x4352
 	uint32_t reserve0;
 
@@ -204,7 +205,8 @@ struct VduSchemaFileSchemaItemRect1
 	uint16_t fontIndex; // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
 	bool wordWrap;
 	bool reserverBool1;
-	vdu_cstr text;
+
+	char text[128];		// in version 2, changed from vdu_cstr to char[]
 	uint32_t reserve4;
 
 	int32_t align;      // HorzAlign | VertAlign
