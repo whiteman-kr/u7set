@@ -171,12 +171,12 @@ namespace
 
 		static VduFileString createUtf8(const QString& string, uint32_t stringRefOffset)
 		{
-			return VduFileString{.string = string.trimmed(), .stringRefOffset = stringRefOffset};
+			return VduFileString{.string = string, .stringRefOffset = stringRefOffset};
 		}
 
 		static VduFileString createUtf8(const QString& string, size_t stringRefOffset)
 		{
-			return VduFileString{.string = string.trimmed(), .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
+			return VduFileString{.string = string, .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
 		}
 	};
 
