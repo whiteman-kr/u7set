@@ -1,7 +1,8 @@
-#include <HardwareLib/LmDescription.h>
-
 #include "SimAfb.h"
-#include "SimException.h"
+
+#include "../SimException.h"
+
+#include <HardwareLib/LmDescription.h>
 
 namespace Sim
 {

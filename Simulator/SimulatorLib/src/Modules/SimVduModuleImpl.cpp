@@ -32,16 +32,6 @@ namespace Sim
 
 		bool ok = true;
 
-		// if (m_lmDescription.flashMemory().m_tuningWriteBitstream == true)
-		//{
-		//	bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_tuningUartId, &m_tuningEeprom);
-		//	if (loadEepromOk == false)
-		//	{
-		//		m_log.writeError(tr("LogicModule: Loading Tuning EEPROM error"));
-		//		ok = false;
-		//	}
-		// }
-
 		if (m_lmDescription.flashMemory().m_configWriteBitstream == true)
 		{
 			bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_configUartId, &m_confEeprom);
@@ -52,16 +42,6 @@ namespace Sim
 			}
 		}
 
-		// if (m_lmDescription.flashMemory().m_appLogicWriteBitstream == true)
-		//{
-		//	bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
-		//	if (loadEepromOk == false)
-		//	{
-		//		m_log.writeError(tr("LogicModule: Loading Application Logic EEPROM error"));
-		//		ok = false;
-		//	}
-		// }
-
 		if (ok == false)
 		{
 			return false;
@@ -69,7 +49,7 @@ namespace Sim
 
 		// Init DeviceEmulator
 		//
-		// DeviceError de = m_device.init(m_logicModuleInfo,
+		//DeviceError de = m_device.init(m_logicModuleInfo,
 		//							   m_lmDescription,
 		//							   m_tuningEeprom,
 		//							   m_confEeprom,

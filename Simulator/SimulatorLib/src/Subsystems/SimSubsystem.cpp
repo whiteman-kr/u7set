@@ -2,7 +2,7 @@
 
 #include <SimulatorLib/SimLogicModule.h>
 
-#include "./Modules/SimLogicModuleImpl.h"
+#include "../Modules/SimLogicModuleImpl.h"
 #include "SimLmSubsystemImpl.h"
 #include "SimSubsystemImpl.h"
 

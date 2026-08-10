@@ -1,12 +1,12 @@
 #include "SimulatorPrivate.h"
 
-#include "SimLmSubsystemImpl.h"
+#include "./Subsystems/SimLmSubsystemImpl.h"
+#include "./Subsystems/SimVduSubsystemImpl.h"
 #include "SimScopedLog.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptSignal.h"
-#include "SimVduSubsystemImpl.h"
 
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/LogicModulesInfo.h>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../SimDeviceEmulator.h"
 #include "../SimEeprom.h"
 #include "SimBaseModuleImpl.h"
+#include "SimDeviceEmulator.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>

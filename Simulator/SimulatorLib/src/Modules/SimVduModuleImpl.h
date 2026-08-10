@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../SimDeviceEmulator.h"
 #include "../SimEeprom.h"
+#include "SimDeviceEmulator.h"
 #include "SimBaseModuleImpl.h"
 
 #include <HardwareLib/LmDescription.h>
@@ -91,18 +91,15 @@ namespace Sim
 	private:
 		// Loaded LM data
 		//
-		// Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
-		// Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
 		// Running Emulation
 		//
-		// DeviceEmulator m_device{m_simulator};
+		//VduDeviceEmulator m_device{m_simulator};
 
 		// --
 		//
 		// std::vector<DeviceCommand> m_commands;
-
 		// std::unordered_map<int, size_t> m_offsetToCommand; // key: command offset, value: index in m_commands
 	};
 

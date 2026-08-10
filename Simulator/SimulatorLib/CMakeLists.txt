@@ -19,8 +19,6 @@ endif (MSVC)
 set(TARGET SimulatorLib)
 
 qt_add_library(${TARGET} STATIC
-	./src/SimAfb.cpp
-	./src/SimAfb.h
 	./src/SimAppDataLanInterface.cpp
 	./src/SimAppDataLanInterface.h
 	./src/SimAppDataTransmitter.cpp
@@ -28,10 +26,6 @@ qt_add_library(${TARGET} STATIC
 	./src/SimAppSignalManager.cpp
 	./src/SimAppSignalManagerImpl.cpp
 	./src/SimAppSignalManagerImpl.h
-	./src/SimCommandProcessor.cpp
-	./src/SimCommandProcessor.h
-	./src/SimCommandProcessor_LM5_LM6.cpp
-	./src/SimCommandProcessor_LM5_LM6.h
 	./src/SimConnections.cpp
 	./src/SimConnectionsImpl.cpp
 	./src/SimConnectionsImpl.h
@@ -40,9 +34,6 @@ qt_add_library(${TARGET} STATIC
 	./src/SimControlImpl.cpp
 	./src/SimControlImpl.h
 	./src/SimControlStatus.cpp
-	./src/SimDeviceEmulator.cpp
-	./src/SimDeviceEmulator.h
-	./src/SimDeviceState.cpp
 	./src/SimDiagDataLanInterface.cpp
 	./src/SimDiagDataLanInterface.h
 	./src/SimEeprom.cpp
@@ -53,8 +44,6 @@ qt_add_library(${TARGET} STATIC
 	./src/SimLanInterface.h
 	./src/SimLans.cpp
 	./src/SimLans.h
-	./src/SimLmSubsystemImpl.cpp
-	./src/SimLmSubsystemImpl.h
 	./src/SimOverrideSignals.cpp
 	./src/SimOverrideSignalsImpl.cpp
 	./src/SimOverrideSignalsImpl.h
@@ -82,9 +71,6 @@ qt_add_library(${TARGET} STATIC
 	./src/SimSoftware.cpp
 	./src/SimSoftwareImpl.cpp
 	./src/SimSoftwareImpl.h
-	./src/SimSubsystem.cpp
-	./src/SimSubsystemImpl.cpp
-	./src/SimSubsystemImpl.h
 	./src/SimTestObserver.cpp
 	./src/SimTestObserver.h
 	./src/SimTuningLanInterface.cpp
@@ -98,19 +84,33 @@ qt_add_library(${TARGET} STATIC
 	./src/Simulator.cpp
 	./src/SimulatorPrivate.cpp
 	./src/SimulatorPrivate.h
-
-	./src/SimVduSubsystemImpl.cpp
-	./src/SimVduSubsystemImpl.h
 	./src/SoftwareXmlReader.cpp
 	./src/SoftwareXmlReader.h
 
+	./src/Modules/SimAfb.cpp
+	./src/Modules/SimAfb.h
 	./src/Modules/SimBaseModuleImpl.cpp
 	./src/Modules/SimBaseModuleImpl.h
+	./src/Modules/SimCommandProcessor.cpp
+	./src/Modules/SimCommandProcessor.h
+	./src/Modules/SimCommandProcessor_LM5_LM6.cpp
+	./src/Modules/SimCommandProcessor_LM5_LM6.h
+	./src/Modules/SimDeviceEmulator.cpp
+	./src/Modules/SimDeviceEmulator.h
+	./src/Modules/SimDeviceState.cpp
 	./src/Modules/SimLogicModule.cpp
 	./src/Modules/SimLogicModuleImpl.cpp
 	./src/Modules/SimLogicModuleImpl.h
 	./src/Modules/SimVduModuleImpl.cpp
 	./src/Modules/SimVduModuleImpl.h
+
+	./src/Subsystems/SimLmSubsystemImpl.cpp
+	./src/Subsystems/SimLmSubsystemImpl.h
+	./src/Subsystems/SimSubsystem.cpp
+	./src/Subsystems/SimSubsystemImpl.cpp
+	./src/Subsystems/SimSubsystemImpl.h
+	./src/Subsystems/SimVduSubsystemImpl.cpp
+	./src/Subsystems/SimVduSubsystemImpl.h
 
 	./include/SimulatorLib/SimAppSignalManager.h
 	./include/SimulatorLib/SimConnections.h

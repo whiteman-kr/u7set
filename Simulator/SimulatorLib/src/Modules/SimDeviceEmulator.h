@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SimEeprom.h"
-#include "SimConnectionsImpl.h"
+#include "../SimEeprom.h"
+#include "../SimConnectionsImpl.h"
+#include "../SimLans.h"
 #include "SimAfb.h"
-#include "SimLans.h"
 
 #include <SimulatorLib/SimDeviceState.h>
 #include <SimulatorLib/SimDeviceCommand.h>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./Modules/SimLogicModuleImpl.h"
-#include "SimScopedLog.h"
+#include "../Modules/SimBaseModuleImpl.h"
+#include "../SimScopedLog.h"
 
 namespace Hardware
 {
@@ -14,6 +14,8 @@ namespace Sim
 	class ConnectionsImpl;
 	class LmSubsystemImpl;
 	class SimulatorPrivate;
+	class VduSubsystemImpl;
+
 
 	class SubsystemImpl
 	{
@@ -25,6 +27,10 @@ namespace Sim
 		SubsystemImpl& operator=(const SubsystemImpl&) = delete;
 
 		explicit SubsystemImpl(QString subsystemId, SimulatorPrivate* simulator);
+
+	protected:
+		bool addDevice(std::shared_ptr<BaseModuleImpl> module);
+		bool removeDevice(QString equipmentId);
 
 	private:
 		std::vector<Hardware::LogicModuleInfo> modulesInfo() const;
@@ -38,6 +44,9 @@ namespace Sim
 		LmSubsystemImpl* toLmSubsystem();
 		const LmSubsystemImpl* toLmSubsystem() const;
 
+		VduSubsystemImpl* toVduSubsystem();
+		const VduSubsystemImpl* toVduSubsystem() const;
+
 		std::vector<std::shared_ptr<BaseModuleImpl>> modules();
 		std::shared_ptr<BaseModuleImpl> module(QString equipmentId);
 
@@ -47,7 +56,6 @@ namespace Sim
 
 		QString m_subsystemId;
 
-		std::map<int, std::shared_ptr<BaseModuleImpl>> m_devicesByLmNumber;        // key is LmNumber
 		std::map<QString, std::shared_ptr<BaseModuleImpl>> m_devicesByEquipmentId; // key is EquipmentID
 	};
 } // namespace Sim

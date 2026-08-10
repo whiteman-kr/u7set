@@ -1,8 +1,8 @@
 #pragma once
-
-#include "./Modules/SimVduModuleImpl.h"
-#include "SimScopedLog.h"
 #include "SimSubsystemImpl.h"
+
+#include "../Modules/SimVduModuleImpl.h"
+#include "../SimScopedLog.h"
 
 
 namespace Hardware
@@ -39,5 +39,8 @@ namespace Sim
 	public:
 		std::vector<std::shared_ptr<VduModuleImpl>> vduModules();
 		std::shared_ptr<VduModuleImpl> vduModules(QString equipmentId);
+
+	private:
+		std::map<int, std::shared_ptr<BaseModuleImpl>> m_devicesByLmNumber; // key is LmNumber
 	};
 } // namespace Sim

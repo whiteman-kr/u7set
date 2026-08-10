@@ -1,7 +1,8 @@
 #include "SimDeviceEmulator.h"
-#include "SimException.h"
+
+#include "../SimException.h"
+#include "../SimulatorPrivate.h"
 #include "SimCommandProcessor.h"
-#include "SimulatorPrivate.h"
 
 
 namespace Sim
@@ -14,45 +15,35 @@ namespace Sim
 	void EmulatorCommand::dump() const
 	{
 		QString str0 = QString("code = %1 (0x%2), codeMask = %3 (0x%4)")
-						.arg(m_command.code)
-						.arg(m_command.code, 4, 16, QChar('0'))
-						.arg(m_command.codeMask)
-						.arg(m_command.codeMask, 4, 16, QChar('0'));
+						   .arg(m_command.code)
+						   .arg(m_command.code, 4, 16, QChar('0'))
+						   .arg(m_command.codeMask)
+						   .arg(m_command.codeMask, 4, 16, QChar('0'));
 
 		QString str1 = QString("caption = %1").arg(m_command.caption);
-		QString str2 = QString("simFunct = %1, parseFunc = %2")
-						.arg(m_command.simulationFunc)
-						.arg(m_command.parseFunc);
+		QString str2 = QString("simFunct = %1, parseFunc = %2").arg(m_command.simulationFunc).arg(m_command.parseFunc);
 
-		QString str3 = QString("offest = %1 (0x%2), size = %3")
-						.arg(m_offset)
-						.arg(m_offset, 4, 16, QChar('0'))
-						.arg(m_size);
+		QString str3 = QString("offest = %1 (0x%2), size = %3").arg(m_offset).arg(m_offset, 4, 16, QChar('0')).arg(m_size);
 
 		QString str4 = QString("string = %1").arg(m_string);
 
-		QString str5 = QString("afbOpCode = %1, instance = %2, pinOpCode = %3")
-						.arg(m_afbOpCode)
-						.arg(m_afbInstance)
-						.arg(m_afbPinOpCode);
+		QString str5 = QString("afbOpCode = %1, instance = %2, pinOpCode = %3").arg(m_afbOpCode).arg(m_afbInstance).arg(m_afbPinOpCode);
 
-		QString str6 = QString("bitNo0 = %1, bitNo1 = %2")
-						.arg(m_bitNo0)
-						.arg(m_bitNo1);
+		QString str6 = QString("bitNo0 = %1, bitNo1 = %2").arg(m_bitNo0).arg(m_bitNo1);
 
 		QString str7 = QString("word0 = %1 (0x%2), word1 = %3 (0x%4), word2 = %5 (0x%6)")
-						.arg(m_word0)
-						.arg(m_word0, 4, 16, QChar('0'))
-						.arg(m_word1)
-						.arg(m_word1, 4, 16, QChar('0'))
-						.arg(m_word2)
-						.arg(m_word2, 4, 16, QChar('0'));
+						   .arg(m_word0)
+						   .arg(m_word0, 4, 16, QChar('0'))
+						   .arg(m_word1)
+						   .arg(m_word1, 4, 16, QChar('0'))
+						   .arg(m_word2)
+						   .arg(m_word2, 4, 16, QChar('0'));
 
 		QString str8 = QString("dword0 = %1 (0x%2), dword1 = %3 (0x%4)")
-						.arg(m_dword0)
-						.arg(m_dword0, 8, 16, QChar('0'))
-						.arg(m_dword1)
-						.arg(m_dword1, 8, 16, QChar('0'));
+						   .arg(m_dword0)
+						   .arg(m_dword0, 8, 16, QChar('0'))
+						   .arg(m_dword1)
+						   .arg(m_dword1, 8, 16, QChar('0'));
 
 		qDebug() << "EmulatorCommand: " << m_string;
 		qDebug() << "\t" << str0;
@@ -154,23 +145,21 @@ namespace Sim
 		if (m_commandProcessor == nullptr)
 		{
 			m_log.writeWarning(QString("There is no simulation for %1, LmDescription.name = %2")
-							   .arg(logicModuleInfo.equipmentId)
-							   .arg(lmDescription.name()));
+								   .arg(logicModuleInfo.equipmentId)
+								   .arg(lmDescription.name()));
 			return DeviceError::NoCommandProcessor;
 		}
 
 		// --
 		//
-		if (bool ok = m_afbComponents.init(m_lmDescription);
-			ok == false)
+		if (bool ok = m_afbComponents.init(m_lmDescription); ok == false)
 		{
 			return DeviceError::AfbComponentNotFound;
 		}
 
 		// --
 		//
-		if (bool ok = initEeprom();
-			ok == false)
+		if (bool ok = initEeprom(); ok == false)
 		{
 			return DeviceError::InitEepromError;
 		}
@@ -186,15 +175,14 @@ namespace Sim
 
 		// Set LogicModuleExtraInfo and get LAN Connections
 		//
-		if (std::optional<::LogicModuleInfo> extraInfo = logicModulesExtraInfo.get(equipmentId());
-			extraInfo.has_value() == false)
+		if (std::optional<::LogicModuleInfo> extraInfo = logicModulesExtraInfo.get(equipmentId()); extraInfo.has_value() == false)
 		{
 			setLogicModuleExtraInfo({});
 
 			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
-							 .arg(equipmentId())
-							 .arg(Directory::COMMON)
-							 .arg(File::LOGIC_MODULES_XML));
+								 .arg(equipmentId())
+								 .arg(Directory::COMMON)
+								 .arg(File::LOGIC_MODULES_XML));
 
 			return DeviceError::ModuleExtraInfoNotFound;
 		}
@@ -205,16 +193,14 @@ namespace Sim
 
 		// Init Module LAN  Intefaces
 		//
-		if (bool ok = m_lans.init(logicModuleExtraInfo());
-			ok == false)
+		if (bool ok = m_lans.init(logicModuleExtraInfo()); ok == false)
 		{
 			return DeviceError::LanControllerError;
 		}
 
 		// --
 		//
-		if (bool ok = parseAppLogicCode();
-			ok == false)
+		if (bool ok = parseAppLogicCode(); ok == false)
 		{
 			return DeviceError::ParsingAppLogicError;
 		}
@@ -249,8 +235,7 @@ namespace Sim
 			}
 		}
 
-		if (auto currentDeviceState = deviceState();
-			currentDeviceState == DeviceState::Fault)
+		if (auto currentDeviceState = deviceState(); currentDeviceState == DeviceState::Fault)
 		{
 			ok = processFaultMode();
 		}
@@ -272,7 +257,8 @@ namespace Sim
 		//
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 
-		// qDebug() << "DeviceEmulator::runWorkcycle " << ms.count() << ", Diff: " << QDateTime::currentDateTime().toMSecsSinceEpoch() - ms.count();
+		// qDebug() << "DeviceEmulator::runWorkcycle " << ms.count() << ", Diff: " << QDateTime::currentDateTime().toMSecsSinceEpoch() -
+		// ms.count();
 
 		TimeStamp plantTime{ms.count() + currentDateTime.offsetFromUtc() * 1000};
 		TimeStamp localTime{plantTime};
@@ -294,10 +280,10 @@ namespace Sim
 			if (regDataSizeW > m_lmDescription.memory().m_appLogicWordDataSize)
 			{
 				m_log.writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
-								 .arg(equipmentId())
-								 .arg(regDataOffsetW)
-								 .arg(regDataSizeW)
-								 .arg(m_lmDescription.memory().m_appLogicWordDataSize));
+									 .arg(equipmentId())
+									 .arg(regDataOffsetW)
+									 .arg(regDataSizeW)
+									 .arg(m_lmDescription.memory().m_appLogicWordDataSize));
 
 				setDeviceState(DeviceState::Fault);
 				return false;
@@ -307,9 +293,9 @@ namespace Sim
 			if (readRegBufferOk == false)
 			{
 				m_log.writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
-								 .arg(equipmentId())
-								 .arg(regDataOffsetW)
-								 .arg(regDataSizeW));
+									 .arg(equipmentId())
+									 .arg(regDataOffsetW)
+									 .arg(regDataSizeW));
 
 				setDeviceState(DeviceState::Fault);
 				return false;
@@ -320,9 +306,7 @@ namespace Sim
 
 		// Update tuning data
 		//
-		if (deviceState() == DeviceState::Operate &&
-			runtimeMode() == RuntimeMode::TuningMode &&
-			m_lans.isTuningEnabled() == true)
+		if (deviceState() == DeviceState::Operate && runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
 		{
 			m_lans.updateTuningRam(tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 		}
@@ -385,7 +369,7 @@ namespace Sim
 	{
 		return m_logicUnit.acc;
 	}
-	
+
 	void DeviceEmulator::setAcc(quint16 value)
 	{
 		m_logicUnit.acc = value;
@@ -402,10 +386,8 @@ namespace Sim
 
 		if (result == nullptr)
 		{
-			fault(QString("Attempt to get not existing AFB (opcode %1) instance (%2)")
-							.arg(opCode)
-							.arg(instanceNo),
-							"ScriptDeviceEmulator::afbComponentInstance");
+			fault(QString("Attempt to get not existing AFB (opcode %1) instance (%2)").arg(opCode).arg(instanceNo),
+				  "ScriptDeviceEmulator::afbComponentInstance");
 		}
 
 		return result;
@@ -428,11 +410,11 @@ namespace Sim
 	//
 	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 sizeW)
 	{
-//		while (size-- > 0)
-//		{
-//			quint16 w = readRamWord(src++);
-//			writeRamWord(dst++, w);
-//		}
+		//		while (size-- > 0)
+		//		{
+		//			quint16 w = readRamWord(src++);
+		//			writeRamWord(dst++, w);
+		//		}
 
 		switch (sizeW)
 		{
@@ -453,10 +435,7 @@ namespace Sim
 				bool result = m_ram.movMem(src, dst, sizeW);
 				if (result == false)
 				{
-					SIM_FAULT(QString("move ram mem error, srcW %1, dstW %2, sizeW %3")
-								.arg(src)
-								.arg(dst)
-								.arg(sizeW));
+					SIM_FAULT(QString("move ram mem error, srcW %1, dstW %2, sizeW %3").arg(src).arg(dst).arg(sizeW));
 				}
 
 				return result;
@@ -464,7 +443,11 @@ namespace Sim
 		}
 	}
 
-	bool DeviceEmulator::movRamMem(Ram::Handle memoryAreaHandleSrc, quint32 src, Ram::Handle memoryAreaHandleDst, quint32 dst, quint32 sizeW)
+	bool DeviceEmulator::movRamMem(Ram::Handle memoryAreaHandleSrc,
+								   quint32 src,
+								   Ram::Handle memoryAreaHandleDst,
+								   quint32 dst,
+								   quint32 sizeW)
 	{
 		RamArea* ramAreaSrc = m_ram.memoryArea(memoryAreaHandleSrc);
 		if (ramAreaSrc == nullptr)
@@ -486,18 +469,18 @@ namespace Sim
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Command movmem error, read buffer error, handle %1, offset %2, sizeW %3")
-						.arg(memoryAreaHandleSrc)
-						.arg(src)
-						.arg(sizeW));
+						  .arg(memoryAreaHandleSrc)
+						  .arg(src)
+						  .arg(sizeW));
 		}
 
 		ok = ramAreaDst->writeBuffer(dst, buffer);
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Command movmem error, write data error, handle %1, offset %2, sizeW %3")
-					  .arg(memoryAreaHandleDst)
-					  .arg(dst)
-					  .arg(sizeW));
+						  .arg(memoryAreaHandleDst)
+						  .arg(dst)
+						  .arg(sizeW));
 		}
 
 		return ok;
@@ -523,10 +506,7 @@ namespace Sim
 				bool ok = m_ram.setMem(address, size, data);
 				if (ok == false)
 				{
-					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
-								.arg(address)
-								.arg(size)
-								.arg(data));
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3").arg(address).arg(size).arg(data));
 				}
 
 				return ok;
@@ -561,10 +541,7 @@ namespace Sim
 				bool ok = ramArea->setMem(address, size, data);
 				if (ok == false)
 				{
-					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
-								.arg(address)
-								.arg(size)
-								.arg(data));
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3").arg(address).arg(size).arg(data));
 				}
 
 				return ok;
@@ -640,9 +617,9 @@ namespace Sim
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, access %3")
-					  .arg(offsetW)
-					  .arg(bitNo)
-					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+						  .arg(offsetW)
+						  .arg(bitNo)
+						  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return ok;
@@ -656,9 +633,9 @@ namespace Sim
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Read RAM error, offsetW %1, bitNo %2, access %3")
-					  .arg(offsetW)
-					  .arg(bitNo)
-					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+						  .arg(offsetW)
+						  .arg(bitNo)
+						  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -734,9 +711,8 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write RAM error, offsetW %1, access %2")
-			          .arg(offsetW)
-			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+			SIM_FAULT(
+				QString("Write RAM error, offsetW %1, access %2").arg(offsetW).arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return ok;
@@ -748,9 +724,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2")
-			          .arg(offsetW)
-			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2").arg(offsetW).arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -826,9 +800,8 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write RAM error, offsetW %1, access %2")
-			          .arg(offsetW)
-			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+			SIM_FAULT(
+				QString("Write RAM error, offsetW %1, access %2").arg(offsetW).arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return ok;
@@ -841,9 +814,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2")
-			          .arg(offsetW)
-			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2").arg(offsetW).arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -871,8 +842,8 @@ namespace Sim
 		if (tuningRamHandle == Ram::InvalidHandle)
 		{
 			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-							 .arg(equipmentId())
-							 .arg(tuningDataOffsetW));
+								 .arg(equipmentId())
+								 .arg(tuningDataOffsetW));
 			return result;
 		}
 
@@ -882,8 +853,8 @@ namespace Sim
 			Q_ASSERT(ramArea);
 
 			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-							 .arg(equipmentId())
-							 .arg(tuningDataOffsetW));
+								 .arg(equipmentId())
+								 .arg(tuningDataOffsetW));
 			return result;
 		}
 
@@ -968,7 +939,7 @@ namespace Sim
 
 			for (int offsetW = 0; offsetW < m_plainTuningData.size() / 2; offsetW++)
 			{
-				quint16 data =  dataPtr[offsetW];
+				quint16 data = dataPtr[offsetW];
 				m_ram.writeWord(tuningDataOffset + offsetW, data, E::ByteOrder::NoEndian, E::LogicModuleRamAccess::Read);
 			}
 		}
@@ -1009,7 +980,7 @@ namespace Sim
 		return ok;
 	}
 
-	// Write 1 to all validity of input signals 
+	// Write 1 to all validity of input signals
 	//
 	bool DeviceEmulator::initValiditySignals()
 	{
@@ -1067,26 +1038,25 @@ namespace Sim
 			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
 		{
 			QString str = tr("EEPROMs have different subsystemKeys: \n"
-						  "\ttuningEeprom.subsystemKey: %1\n"
-						  "\tconfEeprom.subsystemKey: %2\n"
-						  "\tappLogicEeprom.subsystemKey: %3")
-							.arg(m_tuningEeprom.subsystemKey())
-							.arg(m_confEeprom.subsystemKey())
-							.arg(m_appLogicEeprom.subsystemKey());
+							 "\ttuningEeprom.subsystemKey: %1\n"
+							 "\tconfEeprom.subsystemKey: %2\n"
+							 "\tappLogicEeprom.subsystemKey: %3")
+							  .arg(m_tuningEeprom.subsystemKey())
+							  .arg(m_confEeprom.subsystemKey())
+							  .arg(m_appLogicEeprom.subsystemKey());
 			m_log.writeError(str);
 			result = false;
 		}
 
-		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
-			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
+		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() || m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
 		{
 			QString str = tr("EEPROMs have different buildNo: \n"
-						  "\ttuningEeprom.buildNo: %1\n"
-						  "\tconfEeprom.buildNo: %2\n"
-						  "\tappLogicEeprom.buildNo: %3")
-							.arg(m_tuningEeprom.buildNo())
-							.arg(m_confEeprom.buildNo())
-							.arg(m_appLogicEeprom.buildNo());
+							 "\ttuningEeprom.buildNo: %1\n"
+							 "\tconfEeprom.buildNo: %2\n"
+							 "\tappLogicEeprom.buildNo: %3")
+							  .arg(m_tuningEeprom.buildNo())
+							  .arg(m_confEeprom.buildNo())
+							  .arg(m_appLogicEeprom.buildNo());
 			m_log.writeError(str);
 			result = false;
 		}
@@ -1126,8 +1096,7 @@ namespace Sim
 			int frameCount = m_appLogicEeprom.configFramesCount(m_logicModuleInfo.lmNumber);
 			Q_ASSERT(startFrame + frameCount < m_appLogicEeprom.frameCount());
 
-			for (int frameIndex = startFrame;
-				 frameIndex < startFrame + frameCount && frameIndex < m_appLogicEeprom.frameCount();
+			for (int frameIndex = startFrame; frameIndex < startFrame + frameCount && frameIndex < m_appLogicEeprom.frameCount();
 				 frameIndex++)
 			{
 				for (int offset = 0; offset < m_appLogicEeprom.framePayloadSize(); offset++)
@@ -1223,29 +1192,27 @@ namespace Sim
 					if (commandSize == 0)
 					{
 						QString str = tr("Parse command %1 error, ProgramCounter %2, returned command size is 0.\n")
-											.arg(c.caption)
-											.arg(programCounter);
+										  .arg(c.caption)
+										  .arg(programCounter);
 						m_log.writeError(str);
 						return false;
 					}
 
 					programCounter += commandSize;
 
-					//qDebug() << m_commands.back().m_string;
+					// qDebug() << m_commands.back().m_string;
 					break;
 				}
 			}
 
 			if (commandFound == false)
 			{
-				QString str = tr("Parse command error, command cannot be found for word 0x%1\n")
-							  .arg(commandWord, 4, 16, QChar('0'));
+				QString str = tr("Parse command error, command cannot be found for word 0x%1\n").arg(commandWord, 4, 16, QChar('0'));
 				m_log.writeError(str);
 				return false;
 			}
 
-		}
-		while (programCounter < m_plainAppLogic.size());
+		} while (programCounter < m_plainAppLogic.size());
 
 		// Let command processor to make its' cache optimizations
 		//
@@ -1278,7 +1245,7 @@ namespace Sim
 		if (m_commandProcessor == nullptr)
 		{
 			Q_ASSERT(m_commandProcessor);
-			return  false;
+			return false;
 		}
 
 		quint16 commandWord = getWord(programCounter);
@@ -1296,26 +1263,25 @@ namespace Sim
 
 		try
 		{
-			if (bool ok = m_commandProcessor->parseFunc(deviceCommand.m_command.parseFunc, &deviceCommand);
-				ok == false)
+			if (bool ok = m_commandProcessor->parseFunc(deviceCommand.m_command.parseFunc, &deviceCommand); ok == false)
 			{
-				 SimException::raise("m_commandProcessor->parseFunc error.", "DeviceEmulator::parseCommand");
+				SimException::raise("m_commandProcessor->parseFunc error.", "DeviceEmulator::parseCommand");
 			}
 		}
 		catch (SimException& e)
 		{
 			m_log.writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3 (0x%4), ParseFunction = %5")
-							 .arg(e.message())
-							 .arg(e.where())
-							 .arg(programCounter)
-							 .arg(programCounter, 0, 16, QChar('0'))
-							 .arg(deviceCommand.m_command.parseFunc));
+								 .arg(e.message())
+								 .arg(e.where())
+								 .arg(programCounter)
+								 .arg(programCounter, 0, 16, QChar('0'))
+								 .arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}
 
 		// Debug
 		//
-		//deviceCommand.dump();
+		// deviceCommand.dump();
 
 		// Add command to offsetToCommand map
 		//
@@ -1331,7 +1297,7 @@ namespace Sim
 
 	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 /*workcycle*/)
 	{
-		//qDebug() << "DeviceEmulator::processOperate " << equipmentId();
+		// qDebug() << "DeviceEmulator::processOperate " << equipmentId();
 
 		// One LogicModule Cycle
 		//
@@ -1354,7 +1320,7 @@ namespace Sim
 
 			while (q.empty() == false)
 			{
-				const TuningRecord& record =  q.front();
+				const TuningRecord& record = q.front();
 
 				if (record.type == TuningRecord::RecordType::ApplyChanges)
 				{
@@ -1370,7 +1336,11 @@ namespace Sim
 
 				// Send confirmations to tuning subsystem
 				//
-				m_lans.sendTuningWriteConfirmation(record.portEquipmentId, record.recordIndex, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
+				m_lans.sendTuningWriteConfirmation(record.portEquipmentId,
+												   record.recordIndex,
+												   tuningRamArea(),
+												   m_commandProcessor->signalSetSorChassis(),
+												   plantTime);
 
 				q.pop();
 			}
@@ -1383,7 +1353,8 @@ namespace Sim
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
-		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some memory areas before start work cycle (like memory area for write i/o modules)
+		// m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some memory areas before start work cycle (like memory area
+		// for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		// !!! receiveConnectionsData !!! was moved to Sim::Control,
@@ -1398,7 +1369,7 @@ namespace Sim
 		// Run work cycle
 		//
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
+			   (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
 		{
 			if (m_logicUnit.programCounter >= static_cast<int>(m_offsetToCommand.size()))
 			{
@@ -1418,8 +1389,7 @@ namespace Sim
 			EmulatorCommand& command = m_commands[commandIndex];
 			Q_ASSERT(m_logicUnit.programCounter == command.m_offset);
 
-			if (bool ok = runCommand(command);
-				ok == false && deviceState() != DeviceState::Fault)
+			if (bool ok = runCommand(command); ok == false && deviceState() != DeviceState::Fault)
 			{
 				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
@@ -1453,22 +1423,29 @@ namespace Sim
 		QString phase;
 		switch (m_logicUnit.phase)
 		{
-		case CyclePhase::IdrPhase:	phase = "IDR";	break;
-		case CyclePhase::AlpPhase:	phase = "ALP";	break;
-		case CyclePhase::ODT:		phase = "ODT";	break;
-		case CyclePhase::ST:		phase = "ST";	break;
+		case CyclePhase::IdrPhase:
+			phase = "IDR";
+			break;
+		case CyclePhase::AlpPhase:
+			phase = "ALP";
+			break;
+		case CyclePhase::ODT:
+			phase = "ODT";
+			break;
+		case CyclePhase::ST:
+			phase = "ST";
+			break;
 		default:
 			Q_ASSERT(false);
 		}
 
 		QString str1 = QString("Fault");
 		QString str2 = QString("\tPhase: %1, ProgramCounter: %2 (0x%3), function: %4")
-						.arg(phase)
-						.arg(m_logicUnit.programCounter)
-						.arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
-						.arg(func);
-		QString str3 = QString("\tReason: %1")
-						.arg(reasone);
+						   .arg(phase)
+						   .arg(m_logicUnit.programCounter)
+						   .arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
+						   .arg(func);
+		QString str3 = QString("\tReason: %1").arg(reasone);
 
 		m_log.writeError(str1);
 		m_log.writeError(str2);
@@ -1498,7 +1475,7 @@ namespace Sim
 			return false;
 		}
 
-		m_afbComponents.resetState();	// It will clear all AFBs' params
+		m_afbComponents.resetState(); // It will clear all AFBs' params
 
 		setDeviceState(DeviceState::Operate);
 		setRuntimeMode(RuntimeMode::RunMode);
@@ -1519,27 +1496,25 @@ namespace Sim
 		//
 		try
 		{
-			if (bool ok = m_commandProcessor->runCommand(deviceCommand);
-				ok == false)
+			if (bool ok = m_commandProcessor->runCommand(deviceCommand); ok == false)
 			{
-				SimException::raise(QString("Cannot call %1 function").arg(deviceCommand.m_command.simulationFunc), "DeviceEmulator::runCommand");
+				SimException::raise(QString("Cannot call %1 function").arg(deviceCommand.m_command.simulationFunc),
+									"DeviceEmulator::runCommand");
 			}
-
 		}
 		catch (SimException& e)
 		{
 			m_log.writeError(QString("Command run error: %1, %2. Offset = %3 (%4), SimFunction = %5")
-							 .arg(e.message())
-							 .arg(e.where())
-							 .arg(deviceCommand.m_offset)
-							 .arg(deviceCommand.m_offset, 0, 16)
-							 .arg(deviceCommand.m_command.simulationFunc));
+								 .arg(e.message())
+								 .arg(e.where())
+								 .arg(deviceCommand.m_offset)
+								 .arg(deviceCommand.m_offset, 0, 16)
+								 .arg(deviceCommand.m_command.simulationFunc));
 			return false;
 		}
 		catch (...)
 		{
-			m_log.writeError(QString("Call function %1 unknown exception")
-							 .arg(deviceCommand.m_command.simulationFunc));
+			m_log.writeError(QString("Call function %1 unknown exception").arg(deviceCommand.m_command.simulationFunc));
 			return false;
 		}
 
@@ -1548,20 +1523,19 @@ namespace Sim
 
 	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (auto ds = deviceState();
-			ds == DeviceState::Off || ds == DeviceState::Fault)
+		if (auto ds = deviceState(); ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
 		}
 
 		for (ConnectionImplPtr& c : m_connections)
 		{
-			//if (c->enabled() == false)
+			// if (c->enabled() == false)
 			//{
-				// Even though the connection is disabled we should procced it to zero
-				// memory and to set validity flag. If connection is disabled nothing will be send and
-				// then nothing can be received, it will cause timeout
-				//
+			//  Even though the connection is disabled we should procced it to zero
+			//  memory and to set validity flag. If connection is disabled nothing will be send and
+			//  then nothing can be received, it will cause timeout
+			//
 			//}
 
 			// Get port for this connection for this LM
@@ -1570,9 +1544,7 @@ namespace Sim
 			if (port == nullptr)
 			{
 				Q_ASSERT(port);
-				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
-						  .arg(c->connectionId())
-						  .arg(equipmentId()));
+				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.").arg(c->connectionId()).arg(equipmentId()));
 				return false;
 			}
 
@@ -1582,15 +1554,15 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-			//std::vector<char> rb;
-			//std::vector<char>* receiveBuffer = &rb;
+			// std::vector<char> rb;
+			// std::vector<char>* receiveBuffer = &rb;
 			std::vector<char>* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
 			if (receiveBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port receive buffer error, connection %1, port %2 (%3).")
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
 				return false;
 			}
 
@@ -1600,15 +1572,15 @@ namespace Sim
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},	// timeout
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2}, // timeout
 									 &timeout);
 
 			if (ok == false)
 			{
 				SIM_FAULT(QString("Receive data error, connection %1, port %2 (%3).")
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
 				return false;
 			}
 
@@ -1645,11 +1617,11 @@ namespace Sim
 					if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
 					{
 						SIM_FAULT(QString("Receive data error, expected %1 words but received %2 words, connection %3, port %4 (%5).")
-								  .arg(portInfo.rxDataSizeW)
-								  .arg(receiveBuffer->size() / 2)
-								  .arg(c->connectionId())
-								  .arg(portInfo.portNo)
-								  .arg(portInfo.equipmentID));
+									  .arg(portInfo.rxDataSizeW)
+									  .arg(receiveBuffer->size() / 2)
+									  .arg(c->connectionId())
+									  .arg(portInfo.portNo)
+									  .arg(portInfo.equipmentID));
 						return false;
 					}
 
@@ -1657,10 +1629,10 @@ namespace Sim
 					if (ok == false)
 					{
 						SIM_FAULT(QString("Received buffer write memory error, %1 words, connection %2, port %3 (%4).")
-								  .arg(portInfo.rxDataSizeW)
-								  .arg(c->connectionId())
-								  .arg(portInfo.portNo)
-								  .arg(portInfo.equipmentID));
+									  .arg(portInfo.rxDataSizeW)
+									  .arg(c->connectionId())
+									  .arg(portInfo.portNo)
+									  .arg(portInfo.equipmentID));
 						return false;
 					}
 
@@ -1673,11 +1645,11 @@ namespace Sim
 						if (port->portInfo().rxDataID != receivedDataId)
 						{
 							SIM_FAULT(QString("Received DataID mismatch, received 0x%1, expected 0x%2, connection %3, port %4 (%5).")
-									  .arg(receivedDataId, 8, 16, QChar('0'))
-									  .arg(port->portInfo().rxDataID, 8, 16, QChar('0'))
-									  .arg(c->connectionId())
-									  .arg(portInfo.portNo)
-									  .arg(portInfo.equipmentID));
+										  .arg(receivedDataId, 8, 16, QChar('0'))
+										  .arg(port->portInfo().rxDataID, 8, 16, QChar('0'))
+										  .arg(c->connectionId())
+										  .arg(portInfo.portNo)
+										  .arg(portInfo.equipmentID));
 							return false;
 						}
 					}
@@ -1689,25 +1661,24 @@ namespace Sim
 
 			// Commented: For perfomamce reason it was moved to port, where memory area can be cached.
 			//
-//			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
-//								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
-//								timeout ? 0x0000 : 0x0001,
-//								E::ByteOrder::BigEndian,
-//								E::LogicModuleRamAccess::Read);
+			//			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
+			//								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
+			//								timeout ? 0x0000 : 0x0001,
+			//								E::ByteOrder::BigEndian,
+			//								E::LogicModuleRamAccess::Read);
 
 			ok = port->writeValidityBit(m_ram, timeout ? 0x0000 : 0x0001);
 
 			if (ok == false)
 			{
 				SIM_FAULT(QString("Write receive validity signal error, signal %1 (%2), connection %3, port %4 (%5).")
-						  .arg(portInfo.rxValiditySignalEquipmentID)
-						  .arg(portInfo.rxValiditySignalAbsAddr.toString())
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+							  .arg(portInfo.rxValiditySignalEquipmentID)
+							  .arg(portInfo.rxValiditySignalAbsAddr.toString())
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
 				return false;
 			}
-
 		}
 
 		return true;
@@ -1715,8 +1686,7 @@ namespace Sim
 
 	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (auto ds = deviceState();
-			ds == DeviceState::Off || ds == DeviceState::Fault)
+		if (auto ds = deviceState(); ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
 		}
@@ -1736,9 +1706,7 @@ namespace Sim
 			if (port == nullptr)
 			{
 				Q_ASSERT(port);
-				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
-						  .arg(c->connectionId())
-						  .arg(equipmentId()));
+				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.").arg(c->connectionId()).arg(equipmentId()));
 				return false;
 			}
 
@@ -1748,15 +1716,15 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-			//std::vector<char> sb;
-			//std::vector<char>* sendBuffer = &sb;
+			// std::vector<char> sb;
+			// std::vector<char>* sendBuffer = &sb;
 			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
 				return false;
 			}
 
@@ -1765,12 +1733,13 @@ namespace Sim
 			bool ok = m_ram.readToBuffer(portInfo.txBufferAbsAddr, E::LogicModuleRamAccess::Write, portInfo.txDataSizeW, sendBuffer);
 			if (ok == false)
 			{
-				SIM_FAULT(QString("Send data error, read data from memory (address %1, count %2) returned error, connection %3, port %4 (%5).")
-						  .arg(portInfo.txBufferAbsAddr)
-						  .arg(portInfo.txDataSizeW)
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+				SIM_FAULT(
+					QString("Send data error, read data from memory (address %1, count %2) returned error, connection %3, port %4 (%5).")
+						.arg(portInfo.txBufferAbsAddr)
+						.arg(portInfo.txDataSizeW)
+						.arg(c->connectionId())
+						.arg(portInfo.portNo)
+						.arg(portInfo.equipmentID));
 				return false;
 			}
 
@@ -1781,12 +1750,11 @@ namespace Sim
 			if (ok == false)
 			{
 				SIM_FAULT(QString("Send data error, connection %1, port %2 (%3).")
-						  .arg(c->connectionId())
-						  .arg(portInfo.portNo)
-						  .arg(portInfo.equipmentID));
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
 				return false;
 			}
-
 		}
 
 		return true;
@@ -1804,8 +1772,7 @@ namespace Sim
 
 		if (tuningRamArea == nullptr)
 		{
-			fault(QString("Getting tuning ram area error, offset 0x%1")
-					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+			fault(QString("Getting tuning ram area error, offset 0x%1").arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
 				  "DeviceEmulator::tuningEnterTuningMode");
 			return false;
 		}
@@ -1836,8 +1803,7 @@ namespace Sim
 
 		if (tuningRamArea == nullptr)
 		{
-			fault(QString("Getting tuning ram area error, offset 0x%1")
-					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+			fault(QString("Getting tuning ram area error, offset 0x%1").arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
 				  "DeviceEmulator::tuningLeaveTuningMode");
 			return false;
 		}
@@ -1867,8 +1833,7 @@ namespace Sim
 
 		if (tuningRamArea == nullptr)
 		{
-			fault(QString("Getting tuning ram area error, offset 0x%1")
-					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+			fault(QString("Getting tuning ram area error, offset 0x%1").arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
 				  "DeviceEmulator::tuningApplyCommand");
 			return false;
 		}
@@ -1881,15 +1846,14 @@ namespace Sim
 
 	// Getting data from m_plainAppLogic
 	//
-	template <typename TYPE>
+	template<typename TYPE>
 	TYPE DeviceEmulator::getData(int eepromOffset) const
 	{
 		// eepromOffset - in bytes
 		//
 		if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_plainAppLogic.size() - sizeof(TYPE)))
 		{
-			Q_ASSERT(eepromOffset >= 0 &&
-					 static_cast<int>(eepromOffset - sizeof(TYPE)) <= m_plainAppLogic.size());
+			Q_ASSERT(eepromOffset >= 0 && static_cast<int>(eepromOffset - sizeof(TYPE)) <= m_plainAppLogic.size());
 			return 0;
 		}
 
@@ -1966,7 +1930,7 @@ namespace Sim
 
 		for (const EmulatorCommand& c : m_cachedCommands)
 		{
-			result.push_back(c);	// Slicing is ok here!
+			result.push_back(c); // Slicing is ok here!
 		}
 
 		return result;
@@ -2105,4 +2069,4 @@ namespace Sim
 		return m_sorResetSwitch.exchange(newValue);
 	}
 
-}
+} // namespace Sim

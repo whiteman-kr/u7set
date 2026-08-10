@@ -1,7 +1,7 @@
 #include "SimLmSubsystemImpl.h"
 
-#include "SimConnectionsImpl.h"
-#include "SimulatorPrivate.h"
+#include "../SimConnectionsImpl.h"
+#include "../SimulatorPrivate.h"
 
 #include <HardwareLib/ModuleFirmware.h>
 
@@ -71,7 +71,6 @@ namespace Sim
 		return true;
 	}
 
-	// TODO: Move to base class?
 	std::shared_ptr<LogicModuleImpl> LmSubsystemImpl::addDevice(const Hardware::LogicModuleInfo& lm)
 	{
 		std::shared_ptr<LogicModuleImpl> result = std::make_shared<LogicModuleImpl>(m_simulator);
@@ -80,24 +79,25 @@ namespace Sim
 			p.second == false)
 		{
 			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
-			return std::shared_ptr<LogicModuleImpl>();
+			return {};
 		}
 
-		if (auto p = m_devicesByEquipmentId.try_emplace(lm.equipmentId, result); //
-			p.second == false)
+		bool added = SubsystemImpl::addDevice(result);
+		if (added == false)
 		{
-			m_log.writeError(QObject::tr("Cannot add device, device with EquipmentID %1 already exists.").arg(lm.equipmentId));
 			m_devicesByLmNumber.erase(lm.lmNumber); // Device to m_devicesByLmNumber already was added, remove it
-			return std::shared_ptr<LogicModuleImpl>();
+			assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
+			return {};
 		}
 
 		assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
 		return result;
 	}
 
-	// TODO: Move to base class?
 	bool LmSubsystemImpl::removeDevice(QString equipmentId)
 	{
+		assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
+
 		auto it = m_devicesByEquipmentId.find(equipmentId);
 		if (it == m_devicesByEquipmentId.end())
 		{
@@ -107,7 +107,7 @@ namespace Sim
 
 		std::shared_ptr<BaseModuleImpl> device = it->second;
 
-		m_devicesByEquipmentId.erase(equipmentId);
+		SubsystemImpl::removeDevice(equipmentId);
 		size_t removed = m_devicesByLmNumber.erase(device->logicModuleInfo().lmNumber);
 
 		if (removed == 0)

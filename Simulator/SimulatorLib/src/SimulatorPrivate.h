@@ -12,6 +12,7 @@
 #include <SimulatorLib/SimService.h>
 #include <SimulatorLib/SimSoftware.h>
 
+#include "./Subsystems/SimSubsystemImpl.h"
 #include "SimAppSignalManagerImpl.h"
 #include "SimConnectionsImpl.h"
 #include "SimControlImpl.h"
@@ -19,7 +20,6 @@
 #include "SimScopedLog.h"
 #include "SimScriptSimulator.h"
 #include "SimSoftwareImpl.h"
-#include "SimSubsystemImpl.h"
 #include "SimTuningSignalManager.h"
 
 

@@ -2,6 +2,7 @@
 #include "SimCommandProcessor.h"
 #include "SimDeviceEmulator.h"
 
+
 class SimCommandTest_LM5_LM6;
 
 namespace Sim

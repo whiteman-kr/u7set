@@ -2,8 +2,8 @@
 
 #include <SimulatorLib/SimConsoleLogFile.h>
 
-#include "../SimulatorLib/src/SimCommandProcessor_LM5_LM6.h"
-#include "../SimulatorLib/src/SimDeviceEmulator.h"
+#include "../SimulatorLib/src/Modules/SimCommandProcessor_LM5_LM6.h"
+#include "../SimulatorLib/src/Modules/SimDeviceEmulator.h"
 #include "../SimulatorLib/src/SimException.h"
 #include "../SimulatorLib/src/SimulatorPrivate.h"
 
