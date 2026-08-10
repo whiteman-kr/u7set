@@ -1,8 +1,8 @@
 #pragma once
 
+#include "./Modules/SimVduModuleImpl.h"
 #include "SimScopedLog.h"
 #include "SimSubsystemImpl.h"
-#include "SimVduModuleImpl.h"
 
 
 namespace Hardware

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SimEeprom.h"
-#include "SimScopedLog.h"
+#include "../SimEeprom.h"
+#include "../SimScopedLog.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/ModuleFirmware.h>

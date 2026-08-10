@@ -1,5 +1,7 @@
 #include "SimLogicModuleImpl.h"
-#include "SimulatorPrivate.h"
+
+#include "../SimulatorPrivate.h"
+
 #include <HardwareLib/ModuleFirmware.h>
 
 

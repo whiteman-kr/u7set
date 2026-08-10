@@ -1,5 +1,6 @@
 #include "SimSnapshot.h"
-#include "SimLogicModuleImpl.h"
+
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimulatorPrivate.h"
 
 #include <Simulator.pb.h>

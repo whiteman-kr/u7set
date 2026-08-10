@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SimLogicModuleImpl.h"
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimScopedLog.h"
 
 namespace Hardware

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <HardwareLib/LmDescription.h>
-
-#include "SimLogicModuleImpl.h"
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimScriptRamAddress.h"
+
+#include <HardwareLib/LmDescription.h>
 
 namespace Sim
 {

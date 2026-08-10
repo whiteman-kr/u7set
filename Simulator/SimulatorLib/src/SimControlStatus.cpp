@@ -1,6 +1,7 @@
 #include <SimulatorLib/SimControlStatus.h>
+
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimControlImpl.h"
-#include "SimLogicModuleImpl.h"
 
 namespace Sim
 {
