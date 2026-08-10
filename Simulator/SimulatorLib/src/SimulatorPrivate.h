@@ -102,7 +102,7 @@ namespace Sim
 		[[nodiscard]] const Sim::Connections& connectionsPublic() const;
 		[[nodiscard]] Sim::Connections& connectionsPublic();
 
-		[[nodiscard]] std::vector<std::shared_ptr<SubsystemImpl>> subsystems() const;
+		[[nodiscard]] std::vector<std::shared_ptr<LmSubsystemImpl>> lmSubsystems() const;
 		[[nodiscard]] std::shared_ptr<LogicModuleImpl> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<std::shared_ptr<LogicModuleImpl>> logicModules() const;
 

@@ -184,9 +184,9 @@ namespace SimUi
 		return m_simulator->connections();
 	}
 
-	std::vector<Sim::Subsystem> SimIdeSimulator::subsystems() const
+	std::vector<Sim::LmSubsystem> SimIdeSimulator::lmSubsystems() const
 	{
-		return m_simulator->subsystems();
+		return m_simulator->lmSubsystems();
 	}
 
 	std::optional<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
@@ -239,11 +239,11 @@ namespace SimUi
 		return m_simulator->software();
 	}
 
-	Sim::Service& SimIdeSimulator::service() 
+	Sim::Service& SimIdeSimulator::service()
 	{
 		return m_simulator->service();
 	}
-	const Sim::Service& SimIdeSimulator::service() const 
+	const Sim::Service& SimIdeSimulator::service() const
 	{
 		return m_simulator->service();
 	}

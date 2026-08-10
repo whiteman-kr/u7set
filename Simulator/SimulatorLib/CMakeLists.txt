@@ -28,6 +28,8 @@ qt_add_library(${TARGET} STATIC
 	./src/SimAppSignalManager.cpp
 	./src/SimAppSignalManagerImpl.cpp
 	./src/SimAppSignalManagerImpl.h
+	./src/SimBaseModuleImpl.cpp
+	./src/SimBaseModuleImpl.h
 	./src/SimCommandProcessor.cpp
 	./src/SimCommandProcessor.h
 	./src/SimCommandProcessor_LM5_LM6.cpp
@@ -53,6 +55,8 @@ qt_add_library(${TARGET} STATIC
 	./src/SimLanInterface.h
 	./src/SimLans.cpp
 	./src/SimLans.h
+	./src/SimLmSubsystemImpl.cpp
+	./src/SimLmSubsystemImpl.h
 	./src/SimLogicModule.cpp
 	./src/SimLogicModuleImpl.cpp
 	./src/SimLogicModuleImpl.h
@@ -99,6 +103,10 @@ qt_add_library(${TARGET} STATIC
 	./src/Simulator.cpp
 	./src/SimulatorPrivate.cpp
 	./src/SimulatorPrivate.h
+	./src/SimVduModuleImpl.cpp
+	./src/SimVduModuleImpl.h
+	./src/SimVduSubsystemImpl.cpp
+	./src/SimVduSubsystemImpl.h
 	./src/SoftwareXmlReader.cpp
 	./src/SoftwareXmlReader.h
 

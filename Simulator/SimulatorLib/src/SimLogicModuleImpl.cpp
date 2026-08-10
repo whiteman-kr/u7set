@@ -5,17 +5,16 @@
 
 namespace Sim
 {
-
+	//
+	// class LogicModuleImpl
+	//
 	LogicModuleImpl::LogicModuleImpl(SimulatorPrivate* simulator) :
-		m_simulator(simulator),
-		m_log(simulator->log(), "LogicModule")
+		BaseModuleImpl{simulator}
 	{
+		m_log.setOutputScope("LogicModule");
 	}
 
-	LogicModuleImpl::~LogicModuleImpl()
-	{
-		return;
-	}
+	LogicModuleImpl::~LogicModuleImpl() = default;
 
 	bool LogicModuleImpl::load(const Hardware::LogicModuleInfo& lmInfo,
 							   const LmDescription& lmDescription,
@@ -34,17 +33,37 @@ namespace Sim
 
 		if (m_lmDescription.flashMemory().m_tuningWriteBitstream == true)
 		{
-			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_tuningUartId, &m_tuningEeprom);
+			bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_tuningUartId, &m_tuningEeprom);
+			if (loadEepromOk == false)
+			{
+				m_log.writeError(tr("LogicModule: Loading Tuning EEPROM error"));
+				ok = false;
+			}
 		}
 
 		if (m_lmDescription.flashMemory().m_configWriteBitstream == true)
 		{
-			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_configUartId, &m_confEeprom);
+			bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_configUartId, &m_confEeprom);
+			if (loadEepromOk == false)
+			{
+				m_log.writeError(tr("LogicModule: Loading Configuration EEPROM error"));
+				ok = false;
+			}
 		}
 
 		if (m_lmDescription.flashMemory().m_appLogicWriteBitstream == true)
 		{
-			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
+			bool loadEepromOk = loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
+			if (loadEepromOk == false)
+			{
+				m_log.writeError(tr("LogicModule: Loading Application Logic EEPROM error"));
+				ok = false;
+			}
+		}
+
+		if (ok == false)
+		{
+			return false;
 		}
 
 		// Init DeviceEmulator
@@ -113,33 +132,6 @@ namespace Sim
 		return m_device.receiveConnectionsData(currentTime);
 	}
 
-	bool LogicModuleImpl::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)
-	{
-		if (eeprom == nullptr)
-		{
-			assert(eeprom);
-			return false;
-		}
-
-		bool ok = true;
-
-		const Hardware::ModuleFirmwareData& data = firmware.firmwareData(uartId, &ok);
-		if (ok == false)
-		{
-			m_log.writeError(tr("Loading eeprom data error, UartID = %1").arg(uartId));
-			return false;
-		}
-
-		ok = eeprom->init(data);
-		if (ok == false)
-		{
-			m_log.writeError(tr("LogicModule: Loading EEPROM error"));
-			return false;
-		}
-
-		return true;
-	}
-
 	void LogicModuleImpl::setAppCommands(bool set)
 	{
 		if (set == true)
@@ -154,36 +146,6 @@ namespace Sim
 		}
 
 		return;
-	}
-
-	const QString& LogicModuleImpl::equipmentId() const
-	{
-		return m_logicModuleInfo.equipmentId;
-	}
-
-	int LogicModuleImpl::lmNumber() const
-	{
-		return m_logicModuleInfo.lmNumber;
-	}
-
-	E::Channel LogicModuleImpl::channel() const
-	{
-		return m_logicModuleInfo.channel;
-	}
-
-	const Hardware::LogicModuleInfo& LogicModuleImpl::logicModuleInfo() const
-	{
-		return m_logicModuleInfo;
-	}
-
-	LmDescription& LogicModuleImpl::lmDescription()
-	{
-		return m_lmDescription;
-	}
-
-	const LmDescription& LogicModuleImpl::lmDescription() const
-	{
-		return m_lmDescription;
 	}
 
 	const ::LogicModuleInfo& LogicModuleImpl::logicModuleExtraInfo() const

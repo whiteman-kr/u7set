@@ -1,4 +1,5 @@
 #include <SimulatorLib/Simulator.h>
+
 #include "SimulatorPrivate.h"
 
 
@@ -116,16 +117,16 @@ namespace Sim
 		return m_impl->connectionsPublic();
 	}
 
-	std::vector<Subsystem> Simulator::subsystems() const
+	std::vector<LmSubsystem> Simulator::lmSubsystems() const
 	{
-		auto subsystems = m_impl->subsystems();
+		auto subsystems = m_impl->lmSubsystems();
 
-		std::vector<Subsystem> result;
+		std::vector<LmSubsystem> result;
 		result.reserve(subsystems.size());
 
 		for (auto& subsystem : subsystems)
 		{
-			result.push_back(Subsystem{subsystem});
+			result.push_back(LmSubsystem{subsystem});
 		}
 
 		return result;

@@ -1,55 +1,53 @@
 #pragma once
 
-#include "SimScopedLog.h"
 #include "SimLogicModuleImpl.h"
+#include "SimScopedLog.h"
 
 namespace Hardware
 {
 	class ModuleFirmware;
 	struct LogicModuleInfo;
-}
+} // namespace Hardware
 
 namespace Sim
 {
-	class SimulatorPrivate;
 	class ConnectionsImpl;
+	class LmSubsystemImpl;
+	class SimulatorPrivate;
 
 	class SubsystemImpl
 	{
 	public:
 		SubsystemImpl() = delete;
 		SubsystemImpl(const SubsystemImpl&) = delete;
+		virtual ~SubsystemImpl() = default;
+
 		SubsystemImpl& operator=(const SubsystemImpl&) = delete;
 
 		explicit SubsystemImpl(QString subsystemId, SimulatorPrivate* simulator);
 
-	public:
-		bool load(const Hardware::ModuleFirmware& firmware,
-				  const LmDescription& lmDescription,
-				  const ConnectionsImpl& connections,
-				  const LogicModulesInfo& logicModulesExtraInfo);
-
 	private:
-		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;
-
-		std::shared_ptr<LogicModuleImpl> addDevice(const Hardware::LogicModuleInfo& lm);
-		bool removeDevice(QString equipmentId);
+		std::vector<Hardware::LogicModuleInfo> modulesInfo() const;
 
 	public:
 		QString subsystemId() const;
 
-		std::vector<std::shared_ptr<LogicModuleImpl>> logicModules();
-		std::shared_ptr<LogicModuleImpl> logicModule(QString equipmentId);
+		bool isLmSubsystem() const;
+		bool isVduSubsystem() const;
 
-	private:
+		LmSubsystemImpl* toLmSubsystem();
+		const LmSubsystemImpl* toLmSubsystem() const;
+
+		std::vector<std::shared_ptr<BaseModuleImpl>> modules();
+		std::shared_ptr<BaseModuleImpl> module(QString equipmentId);
+
+	protected:
 		SimulatorPrivate* m_simulator = nullptr;
 		mutable ScopedLog m_log;
 
 		QString m_subsystemId;
-		LmDescription m_lmDescription;
 
-		std::map<int, std::shared_ptr<LogicModuleImpl>> m_devicesByLmNumber;			// key is LmNumber
-		std::map<QString, std::shared_ptr<LogicModuleImpl>> m_devicesByEquipmentId;		// key is EquipmentID
+		std::map<int, std::shared_ptr<BaseModuleImpl>> m_devicesByLmNumber;        // key is LmNumber
+		std::map<QString, std::shared_ptr<BaseModuleImpl>> m_devicesByEquipmentId; // key is EquipmentID
 	};
-}
-
+} // namespace Sim

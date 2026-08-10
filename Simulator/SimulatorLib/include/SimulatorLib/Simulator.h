@@ -83,7 +83,7 @@ namespace Sim
 		[[nodiscard]] const Sim::Connections& connections() const;
 		[[nodiscard]] Sim::Connections& connections();
 
-		[[nodiscard]] std::vector<Sim::Subsystem> subsystems() const;
+		[[nodiscard]] std::vector<Sim::LmSubsystem> lmSubsystems() const;
 
 		[[nodiscard]] std::optional<Sim::LogicModule> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<Sim::LogicModule> logicModules() const;

@@ -1,6 +1,7 @@
 #include "SimProjectWidget.h"
 
 #include <SimulatorLib/SimControl.h>
+#include <SimulatorLib/SimLogicModule.h>
 #include <SimulatorLib/SimSubsystem.h>
 
 #include <QGridLayout>
@@ -193,9 +194,9 @@ namespace SimUi
 
 		// Fill subsystems and modules
 		//
-		auto subsystems = m_simulator->subsystems();
+		auto lmSubsystems = m_simulator->lmSubsystems();
 
-		for (Sim::Subsystem& ss : subsystems)
+		for (auto& ss : lmSubsystems)
 		{
 			QStringList sl;
 			sl << ss.subsystemId();

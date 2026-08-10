@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SimBaseModuleImpl.h"
 #include "SimDeviceEmulator.h"
 #include "SimEeprom.h"
 
@@ -7,20 +8,20 @@
 #include <HardwareLib/LogicModulesInfo.h>
 #include <HardwareLib/ModuleFirmware.h>
 
+
 namespace Sim
 {
 	class SimulatorPrivate;
 	class ConnectionsImpl;
 
-
-	class LogicModuleImpl : public QObject
+	class LogicModuleImpl : public BaseModuleImpl
 	{
 		Q_OBJECT
 
 		friend class Snapshot;
 
 	public:
-		LogicModuleImpl(SimulatorPrivate* simulator);
+		explicit LogicModuleImpl(SimulatorPrivate* simulator);
 		virtual ~LogicModuleImpl();
 
 	public:
@@ -42,24 +43,10 @@ namespace Sim
 
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);
 
-		// --
-		//
-	protected:
-		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);
-
 	protected slots:
 		void setAppCommands(bool ok);
 
 	public:
-		const QString& equipmentId() const;
-		int lmNumber() const;
-		E::Channel channel() const;
-
-		const Hardware::LogicModuleInfo& logicModuleInfo() const;
-
-		LmDescription& lmDescription();
-		const LmDescription& lmDescription() const;
-
 		const ::LogicModuleInfo& logicModuleExtraInfo() const;
 		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
 
@@ -105,14 +92,8 @@ namespace Sim
 		bool testSorResetSwitch(bool newValue);
 
 	private:
-		SimulatorPrivate* m_simulator = nullptr;
-		mutable ScopedLog m_log;
-
 		// Loaded LM data
 		//
-		Hardware::LogicModuleInfo m_logicModuleInfo;
-		LmDescription m_lmDescription;
-
 		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);

@@ -1,6 +1,11 @@
 #include <SimulatorLib/SimSubsystem.h>
+
+#include <SimulatorLib/SimLogicModule.h>
+
+#include "SimLmSubsystemImpl.h"
 #include "SimLogicModuleImpl.h"
 #include "SimSubsystemImpl.h"
+
 
 namespace Sim
 {
@@ -20,24 +25,61 @@ namespace Sim
 		return m_pimpl->subsystemId();
 	}
 
-	std::vector<LogicModule> Subsystem::logicModules()
+	bool Subsystem::isLmSubsystem() const
 	{
-		auto lmImpl = m_pimpl->logicModules();
+		return m_pimpl->isLmSubsystem();
+	}
 
+	bool Subsystem::isVduSubsystem() const
+	{
+		return m_pimpl->isVduSubsystem();
+	}
+
+	const LmSubsystem& Subsystem::toLmSubsystem() const
+	{
+		assert(isLmSubsystem() == true);
+		return dynamic_cast<const LmSubsystem&>(*this);
+	}
+
+	//
+	// LmSubsystem
+	//
+	LmSubsystem::LmSubsystem(std::shared_ptr<LmSubsystemImpl> pimpl) :
+		Subsystem{pimpl}
+	{
+		Q_ASSERT(m_pimpl);
+		Q_ASSERT(m_pimpl->isLmSubsystem() == true);
+	}
+
+	std::vector<LogicModule> LmSubsystem::logicModules()
+	{
 		std::vector<LogicModule> result;
-		result.reserve(lmImpl.size());
 
-		for (auto& lm : lmImpl)
+		if (m_pimpl->isLmSubsystem() == false)
 		{
-			result.push_back(LogicModule{lm});
+			return result;
 		}
+
+		auto lms = m_pimpl->toLmSubsystem()->logicModules();
+
+		result.reserve(lms.size());
+		std::transform(lms.begin(),
+					   lms.end(),
+					   std::back_inserter(result),
+					   [](const std::shared_ptr<LogicModuleImpl>& lmImpl)
+					   {
+						   return Sim::LogicModule{lmImpl};
+					   });
 
 		return result;
 	}
 
-	LogicModule Subsystem::logicModule(QString equipmentId)
+	Sim::LogicModule LmSubsystem::logicModule(QString equipmentId)
 	{
-		return LogicModule{m_pimpl->logicModule(equipmentId)};
+		std::shared_ptr<LogicModuleImpl> lm =
+			m_pimpl->isLmSubsystem() == true ? m_pimpl->toLmSubsystem()->logicModule(equipmentId) : nullptr;
+
+		return Sim::LogicModule{lm};
 	}
 
 } // namespace Sim

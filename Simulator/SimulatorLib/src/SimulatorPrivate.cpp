@@ -1,10 +1,14 @@
 #include "SimulatorPrivate.h"
+
+#include "SimLmSubsystemImpl.h"
 #include "SimScopedLog.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptSignal.h"
+#include "SimVduSubsystemImpl.h"
 
+#include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/LogicModulesInfo.h>
 #include <HardwareLib/ModuleFirmware.h>
 
@@ -304,61 +308,122 @@ namespace Sim
 				return false;
 			}
 
-			// There are cases when subsystem does not have some UARTs (like BVB), then we cannot simulate such
-			// subsystems, but still want to simulate other LM's
-			//
-			if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
+			if (firmware.logicModulesInfo().empty() == true)
 			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no modules, skipping it.").arg(subsystemId));
 				continue;
 			}
 
-			if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
-			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
-				continue;
-			}
+			auto moduleFamily = static_cast<Hardware::DeviceModule::FamilyType>(firmware.logicModulesInfo().front().moduleFamily);
 
-			if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
-			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
-				continue;
-			}
-
-			// Create subsystem
+			// LogicModule subsystem.
 			//
-			if (m_subsystems.count(subsystemId) > 0)
+			if (moduleFamily == Hardware::DeviceModule::LM)
 			{
-				m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
-				return false;
-			}
-
-			auto subsystem = std::make_shared<Sim::SubsystemImpl>(subsystemId, this);
-			m_subsystems[subsystemId] = subsystem;
-
-			SubsystemImpl& ss = *subsystem.get();
-
-			// Get LogicModuleDescription
-			//
-			QString lmDescriptionFile = firmware.lmDescriptionFile();
-
-			auto lmit = m_lmDescriptions.find(lmDescriptionFile);
-			if (lmit == m_lmDescriptions.end())
-			{
-				m_log.writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
-				return false;
-			}
-
-			const LmDescription& lmDescription = *(lmit->second.get());
-
-			// Upload data to subsystem
-			//
-			ok = ss.load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
-			if (ok == false)
-			{
-				// Error must be reported in Subsystem::load
+				// There are cases when subsystem does not have some UARTs (like BVB), then we cannot simulate such
+				// subsystems, but still want to simulate other LM's
 				//
-				return false;
+				if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				// Create subsystem
+				//
+				if (m_subsystems.contains(subsystemId) == true)
+				{
+					m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+					return false;
+				}
+
+				auto subsystem = std::make_shared<Sim::LmSubsystemImpl>(subsystemId, this);
+				m_subsystems.emplace(subsystemId, subsystem);
+
+				// Get LogicModuleDescription
+				//
+				QString lmDescriptionFile = firmware.lmDescriptionFile();
+
+				auto lmit = m_lmDescriptions.find(lmDescriptionFile);
+				if (lmit == m_lmDescriptions.end())
+				{
+					m_log.writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
+					return false;
+				}
+
+				const LmDescription& lmDescription = *(lmit->second.get());
+
+				// Upload data to subsystem
+				//
+				ok = subsystem->load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
+				if (ok == false)
+				{
+					// Error must be reported in Subsystem::load
+					//
+					return false;
+				}
+
+				continue;
+			}
+
+			// VDUs
+			//
+			if (moduleFamily == Hardware::DeviceModule::VDU)
+			{
+				if (firmware.uartExists(static_cast<int>(UartId::VduConfiguration)) == false)
+				{
+					m_log.writeError(QObject::tr("VDU Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				// Create subsystem
+				//
+				if (m_subsystems.contains(subsystemId) == true)
+				{
+					m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+					return false;
+				}
+
+				auto subsystem = std::make_shared<Sim::VduSubsystemImpl>(subsystemId, this);
+				m_subsystems[subsystemId] = subsystem;
+
+				// Get LogicModuleDescription
+				//
+				QString lmDescriptionFile = firmware.lmDescriptionFile();
+
+				auto lmit = m_lmDescriptions.find(lmDescriptionFile);
+				if (lmit == m_lmDescriptions.end())
+				{
+					m_log.writeError(
+						QObject::tr("Cannot find description file %1 for VDU subsystem %2").arg(lmDescriptionFile).arg(subsystemId));
+					return false;
+				}
+
+				const LmDescription& lmDescription = *(lmit->second.get());
+
+				// Upload data to subsystem
+				//
+				ok = subsystem->load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
+				if (ok == false)
+				{
+					// Error must be reported in Subsystem::load
+					//
+					return false;
+				}
+
+				continue;
 			}
 		}
 
@@ -596,15 +661,19 @@ namespace Sim
 		return m_connectionsPublic;
 	}
 
-	std::vector<std::shared_ptr<SubsystemImpl>> SimulatorPrivate::subsystems() const
+	std::vector<std::shared_ptr<LmSubsystemImpl>> SimulatorPrivate::lmSubsystems() const
 	{
-		std::vector<std::shared_ptr<SubsystemImpl>> result;
+		std::vector<std::shared_ptr<LmSubsystemImpl>> result;
 		result.reserve(m_subsystems.size());
 
-		for (const auto& [key, ss] : m_subsystems)
+		for (const auto& [_, ss] : m_subsystems)
 		{
-			Q_UNUSED(key)
-			result.push_back(ss);
+			if (ss->isLmSubsystem() == false)
+			{
+				continue;
+			}
+
+			result.push_back(std::static_pointer_cast<LmSubsystemImpl>(ss));
 		}
 
 		return result;
@@ -612,11 +681,14 @@ namespace Sim
 
 	std::shared_ptr<LogicModuleImpl> SimulatorPrivate::logicModule(QString equipmentId) const
 	{
-		for (const auto& [key, ss] : m_subsystems)
+		for (const auto& [_, ss] : m_subsystems)
 		{
-			Q_UNUSED(key);
+			if (ss->isLmSubsystem() == false)
+			{
+				continue;
+			}
 
-			std::shared_ptr<LogicModuleImpl> lm = ss->logicModule(equipmentId);
+			auto lm = ss->toLmSubsystem()->logicModule(equipmentId);
 			if (lm != nullptr)
 			{
 				return lm;
@@ -629,13 +701,16 @@ namespace Sim
 	std::vector<std::shared_ptr<LogicModuleImpl>> SimulatorPrivate::logicModules() const
 	{
 		std::vector<std::shared_ptr<LogicModuleImpl>> result;
-		result.reserve(m_subsystems.size() * 10); // Just some number
+		result.reserve(m_subsystems.size() * 10); // Just some random number
 
-		for (const auto& [key, ss] : m_subsystems)
+		for (const auto& [_, ss] : m_subsystems)
 		{
-			Q_UNUSED(key);
+			if (ss->isLmSubsystem() == false)
+			{
+				continue;
+			}
 
-			std::vector<std::shared_ptr<LogicModuleImpl>> subsystemModules = ss->logicModules();
+			auto subsystemModules = ss->toLmSubsystem()->logicModules();
 			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
 		}
 
