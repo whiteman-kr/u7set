@@ -29,7 +29,7 @@ namespace Builder
 		Hardware::EquipmentSet* equipmentSet();
 		SignalSet* signalSet();
 		LmDescriptionSet* lmDescriptions();
-		AppLogicData* appLogicData();
+		std::shared_ptr<AppLogicData> appLogicData();
 		Tuning::TuningDataStorage* tuningDataStorage();
 		ComparatorSet* comparatorSet();
 		BuildResultWriter* buildResultWriter();
@@ -45,8 +45,11 @@ namespace Builder
 	private:
 		bool isBuildCancelled();
 
-		bool prepareOptoConnectionsProcessing();
+		bool compileActuatorsLogicsPass1();
+		bool compileActuatorsLogicsPass2();
+
 		bool checkLmIpAddresses();
+
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
 

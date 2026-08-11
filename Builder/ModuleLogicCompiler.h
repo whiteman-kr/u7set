@@ -173,7 +173,13 @@ namespace Builder
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const QString& actuatorTypeID);
 		~ModuleLogicCompiler();
+
+		bool init();
+		bool isWorkable() const;
+		bool isActuatorCompiler() const;
+		bool isLmCompiler() const;
 
 		SignalSet* signalSet() { return m_signals; }
 		AppSignal* getSignal(const QString& appSignalID);
@@ -260,6 +266,14 @@ namespace Builder
 		bool writeVduAppSignalsInfoFile();
 
 	private:
+		bool lmPass1();
+		bool lmPass2();
+
+		bool actuatorPass1();
+		bool actuatorPass2();
+
+		const BuildActuatorType& getBuildActuatorType(const QString& actuatorTypeID);
+
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
 		// pass #1 compilation functions
@@ -953,6 +967,9 @@ namespace Builder
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Context* m_context = nullptr;
 		const Hardware::DeviceModule* m_lm = nullptr;
+		const QString m_actuatorTypeID;
+		bool m_isWorkable = false;
+
 		DeviceModuleShared m_lmShared;
 
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
@@ -964,8 +981,8 @@ namespace Builder
 		ComparatorSet* m_cmpSet = nullptr;
 
 		LmDescriptionConstShared m_lmDescription;
-		AppLogicData* m_appLogicData = nullptr;
-		AppLogicModule* m_moduleLogic = nullptr;
+		std::shared_ptr<AppLogicData> m_appLogicData;
+		std::shared_ptr<AppLogicModule> m_moduleLogic;
 		BuildResultWriter* m_resultWriter = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 
@@ -1116,6 +1133,8 @@ namespace Builder
 		Tuning::TuningDataShared m_tuningData;
 
 		static const QString EMPTY_STR;
+
+		inline static const BuildActuatorType EMPTY_ACTUATOR_TYPE;
 	};
 
 	using ModuleLogicCompilerShared = std::shared_ptr<ModuleLogicCompiler>;

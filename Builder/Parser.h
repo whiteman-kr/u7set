@@ -260,6 +260,8 @@ namespace Builder
 		std::vector<std::shared_ptr<VFrame30::ActuatorSchema>> schemas;           // Actuator logic schemas for this actuator type
 		std::shared_ptr<AppLogicModule> parseResult;                              // Actuator module for this actuator type,
 																				  // created after parsing all schemas
+
+		bool isValid() const { return (acmPreset != nullptr); }
 	};
 
 

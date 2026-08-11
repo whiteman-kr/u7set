@@ -142,36 +142,125 @@ namespace Builder
 		m_optiIdrCode(AppLogicCode::Type::IDR_Code, true),
 		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true),
 		m_vduAppSignalsGenerator(this)
-	{
-		m_equipmentSet = appLogicCompiler.equipmentSet();
-		m_deviceRoot = m_equipmentSet->root().get();
-		m_signals = appLogicCompiler.signalSet();
+	{ 
+		m_isWorkable = init();
+	}
 
-		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
-
-		Q_ASSERT(m_lmDescription != nullptr);
-
-		m_afbComponents.init(m_lmDescription);
-
-		m_lmShared = getLmSharedPtr();
-
-		Q_ASSERT(m_lm == m_lmShared.get());
-
-		m_appLogicData = appLogicCompiler.appLogicData();
-		m_resultWriter = appLogicCompiler.buildResultWriter();
-		m_log = appLogicCompiler.log();
-
-		m_connections = appLogicCompiler.connectionStorage();
-		m_optoModuleStorage = appLogicCompiler.opticModuleStorage();
-		m_tuningDataStorage = appLogicCompiler.tuningDataStorage();
-		m_cmpSet = appLogicCompiler.comparatorSet();
-
-		m_bitAccAvailable = m_lmDescription->isBitAccAvailable();
+	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const QString& actuatorTypeID) :
+		m_appLogicCompiler(appLogicCompiler),
+		m_context(appLogicCompiler.context()),
+		m_lm(nullptr),
+		m_memoryMap(appLogicCompiler.log()),
+		m_ualSignals(*this, appLogicCompiler.log()),
+		m_loopbacks(*this),
+		m_appLogicCode(AppLogicCode::Type::AllCode, false),
+		m_idrCode(AppLogicCode::Type::IDR_Code, false),
+		m_alpCode(AppLogicCode::Type::ALP_Code, false),
+		m_optiAppLogicCode(AppLogicCode::Type::AllCode, true),
+		m_optiIdrCode(AppLogicCode::Type::IDR_Code, true),
+		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true),
+		m_vduAppSignalsGenerator(this),
+		m_actuatorTypeID(actuatorTypeID)
+	{ 
+		m_isWorkable = init();
 	}
 
 	ModuleLogicCompiler::~ModuleLogicCompiler()
 	{
 		cleanup();
+	}
+
+	bool ModuleLogicCompiler::init()
+	{
+		// Check that either LM is defined in the project or actuator type is defined, but not both
+		//
+		if ((m_lm == nullptr && m_actuatorTypeID.isEmpty()) || 
+			(m_lm != nullptr && !m_actuatorTypeID.isEmpty()))
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		m_equipmentSet = m_appLogicCompiler.equipmentSet();
+		m_deviceRoot = m_equipmentSet->root().get();
+		m_signals = m_appLogicCompiler.signalSet();
+
+		m_appLogicData = m_appLogicCompiler.appLogicData();
+
+		if (m_lm != nullptr)
+		{
+			// LM is defined in the project
+			//
+			m_lmDescription = m_appLogicCompiler.lmDescriptions()->get(m_lm);
+
+			if (m_lmDescription == nullptr)
+			{
+				return false;
+			}
+
+			m_afbComponents.init(m_lmDescription);
+
+			m_lmShared = getLmSharedPtr();
+
+			if (m_lm != m_lmShared.get())
+			{
+				return false;
+			}
+		}
+		else
+		{
+			// LM is not defined in the project, but we need to compile its logic for actuator type
+			//
+			const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
+
+			if (actuatorType.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Actuator type %1 is not found in the project").arg(m_actuatorTypeID));
+				return false;
+			}
+
+			m_lmDescription = m_appLogicCompiler.lmDescriptions()->get(actuatorType.actuatorHeader.descriptionFile());
+
+			if (m_lmDescription == nullptr)
+			{
+				return false;
+			}
+
+			m_afbComponents.init(m_lmDescription);
+
+			m_lmShared = std::make_shared<Hardware::DeviceModule>(false);
+			
+			m_lmShared->setModuleFamily(Hardware::DeviceModule::FamilyType::ACM);
+
+			m_lm = m_lmShared.get();
+		}
+
+		m_resultWriter = m_appLogicCompiler.buildResultWriter();
+		m_log = m_appLogicCompiler.log();
+
+		m_connections = m_appLogicCompiler.connectionStorage();
+		m_optoModuleStorage = m_appLogicCompiler.opticModuleStorage();
+		m_tuningDataStorage = m_appLogicCompiler.tuningDataStorage();
+		m_cmpSet = m_appLogicCompiler.comparatorSet();
+
+		m_bitAccAvailable = m_lmDescription->isBitAccAvailable();
+
+		return true;
+	}
+	
+	bool ModuleLogicCompiler::isWorkable() const
+	{ 
+		return m_isWorkable;
+	}
+
+	bool ModuleLogicCompiler::isActuatorCompiler() const
+	{ 
+		return (!m_actuatorTypeID.isEmpty());
+	}
+
+	bool ModuleLogicCompiler::isLmCompiler() const
+	{ 
+		return m_actuatorTypeID.isEmpty(); 
 	}
 
 	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
@@ -187,63 +276,16 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::pass1()
-	{
-		LOG_EMPTY_LINE(m_log)
+	{ 
+		bool result = true;
 
-		LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was started...")).arg(lmEquipmentID()));
-
-		m_chassis = m_lm->getParentChassis();
-
-		if (m_chassis == nullptr)
+		if (isLmCompiler())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID()));
-			return false;
-		}
-
-		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(lmEquipmentID());
-
-		m_moduleLogic = appLogicModule.get();
-
-		if (m_moduleLogic == nullptr)
-		{
-			//	Application logic for module '%1' is not found.
-			//
-			m_log->wrnALC5001(lmEquipmentID());
-		}
-
-		std::vector<ProcToCall> procs =
-		{
-			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
-			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
-			PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
-			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
-			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
-			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
-			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
-			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
-			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
-//			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
-			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
-			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
-			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
-			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
-			PROC_TO_CALL(ModuleLogicCompiler::findEndpointSignals),
-		};
-
-		bool result = runProcs(procs);
-
-		if (result == true)
-		{
-			LOG_SUCCESS(m_log, QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
+			result = lmPass1();
 		}
 		else
 		{
-			LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(lmEquipmentID()));
+			result = actuatorPass1();
 		}
 
 		return result;
@@ -251,74 +293,16 @@ namespace Builder
 
 	bool ModuleLogicCompiler::pass2()
 	{
-		LOG_EMPTY_LINE(m_log)
+		bool result = true;
 
-		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
-
-		std::vector<ProcToCall> procs =
+		if (isLmCompiler())
 		{
-			PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
-
-			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
-			PROC_TO_CALL(ModuleLogicCompiler::prepareVduStructures),
-			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
-			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
-
-			// code generation functions
-
-			PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
-
-			// Some UalAfb items dynamically creating in time of generateAlpPhaseCode processing.
-			// Therefore generateIdrPhaseCode, that produce UalAfb params initialization code,
-			// called AFTER generateAlpPhaseCode!
-			//
-			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
-			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
-
-			PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeLmInfoFiles),
-			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
-
-			PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeInfoLmFilesAfterOptimization),
-			PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
-
-			//
-
-			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
-			PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
-
-			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
-
-			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
-			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
-
-			PROC_TO_CALL(ModuleLogicCompiler::writeResult),
-			PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)
-		};
-
-		bool result = runProcs(procs);
-
-		if (result == true)
-		{
-			result &= displayResourcesUsageInfo();
-		}
-
-		if (result == true)
-		{
-			LOG_SUCCESS(m_log, QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
+			result = lmPass2();
 		}
 		else
 		{
-			LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(lmEquipmentID()));
+			result = actuatorPass2();
 		}
-
-		calcOptoDiscretesStatistics();
-
-		cleanup();
 
 		return result;
 	}
@@ -611,6 +595,227 @@ namespace Builder
 		return m_ualAfbs.getUalAfbParamValue(itemLabel, paramName);
 	}
 
+	bool ModuleLogicCompiler::lmPass1()
+	{
+		LOG_EMPTY_LINE(m_log)
+
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was started...")).arg(lmEquipmentID()));
+
+		m_chassis = m_lm->getParentChassis();
+
+		if (m_chassis == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log,
+							   Builder::IssueType::NotDefined,
+							   QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID()));
+			return false;
+		}
+
+		m_moduleLogic = m_appLogicData->module(lmEquipmentID());
+
+		if (m_moduleLogic == nullptr)
+		{
+			//	Application logic for module '%1' is not found.
+			//
+			m_log->wrnALC5001(lmEquipmentID());
+		}
+
+		std::vector<ProcToCall> procs = {
+			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
+			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
+			PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
+			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
+			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+			//			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
+			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
+			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
+			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
+			PROC_TO_CALL(ModuleLogicCompiler::findEndpointSignals),
+		};
+
+		bool result = runProcs(procs);
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(lmEquipmentID()));
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::lmPass2()
+	{
+		LOG_EMPTY_LINE(m_log)
+
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
+
+		std::vector<ProcToCall> procs = {PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
+										 PROC_TO_CALL(ModuleLogicCompiler::prepareVduStructures),
+										 PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
+										 // PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
+
+										 // code generation functions
+
+										 PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
+
+										 // Some UalAfb items dynamically creating in time of generateAlpPhaseCode processing.
+										 // Therefore generateIdrPhaseCode, that produce UalAfb params initialization code,
+										 // called AFTER generateAlpPhaseCode!
+										 //
+										 PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeLmInfoFiles),
+										 PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeInfoLmFilesAfterOptimization),
+										 PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
+
+										 //
+
+										 PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
+										 PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+										 PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
+										 PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
+										 PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::writeResult),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)};
+
+		bool result = runProcs(procs);
+
+		if (result == true)
+		{
+			result &= displayResourcesUsageInfo();
+		}
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(lmEquipmentID()));
+		}
+
+		calcOptoDiscretesStatistics();
+
+		cleanup();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::actuatorPass1()
+	{ 
+		LOG_EMPTY_LINE(m_log)
+
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for Actuator type %1 was started...")).arg(m_actuatorTypeID));
+
+		//m_chassis = m_lm->getParentChassis();
+
+		//if (m_chassis == nullptr)
+		//{
+		//	LOG_ERROR_OBSOLETE(m_log,
+		//					   Builder::IssueType::NotDefined,
+		//					   QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID()));
+		//	return false;
+		//}
+
+		const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
+
+		if (actuatorType.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Actuator type %1 is not found in the project").arg(m_actuatorTypeID));
+			return false;
+		}
+
+		m_moduleLogic = actuatorType.parseResult;
+
+		if (m_moduleLogic == nullptr)
+		{
+			//	Application logic for actuator type '%1' is not found.
+			//
+			m_log->wrnALC5208(m_actuatorTypeID);
+		}
+
+		std::vector<ProcToCall> procs = {
+			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
+			//PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
+			//PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
+			//PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
+			//PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
+			//PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
+			//PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
+			//PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
+			//PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
+			//PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
+			//PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
+			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
+			//PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+			////			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
+			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
+			//PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
+			//PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
+			//PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
+			//PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
+			//PROC_TO_CALL(ModuleLogicCompiler::findEndpointSignals),
+		};
+
+		bool result = runProcs(procs);
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #1 for Actuator type %1 was successfully finished.")).arg(m_actuatorTypeID));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for Actuator type %1 was finished with errors")).arg(m_actuatorTypeID));
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::actuatorPass2()
+	{ 
+		return true;
+	}
+
+
+	const BuildActuatorType& ModuleLogicCompiler::getBuildActuatorType(const QString& actuatorTypeID)
+	{
+		const auto& actuators = m_appLogicData->actuators();
+		auto it = actuators.find(actuatorTypeID);
+		if (it == actuators.end())
+		{
+			return EMPTY_ACTUATOR_TYPE;
+		}
+
+		return it->second;
+	}
+
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
@@ -758,9 +963,30 @@ namespace Builder
 		m_lmAppLogicFramePayload = m_lmDescription->flashMemory().m_appLogicFramePayload;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
-		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
-		result &= getLMIntProperty("LMNumber", &m_lmNumber);
-		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+		if (isLmCompiler())
+		{
+			result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
+			result &= getLMIntProperty("LMNumber", &m_lmNumber);
+			result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+		}
+		else
+		{
+			const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
+
+			if (actuatorType.isValid() == false)
+			{ 
+				// Actuator type %1 is not found in the project
+				//
+				m_log->errALC5209(m_actuatorTypeID);
+				result = false;
+			}
+			else
+			{
+				m_lmSubsystemID = actuatorType.actuatorHeader.subsystemId();
+				m_lmNumber = actuatorType.actuatorHeader.lmNumber();
+				m_lmChannel = 0;
+			}
+		}
 
 		// check LM subsystem ID
 		//

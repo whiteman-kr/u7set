@@ -312,7 +312,7 @@ namespace Builder
 		// ALC			Application logic compiler				5000-5999
 		//
 		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier %1 is not found (Logic schema %2).
-		void wrnALC5001(QString logicModuleID);									// Application logic for module %1 is not found.
+		void wrnALC5001(QString logicModuleID);										// Application logic for module %1 is not found.
 		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal %1 is undefined (Logic schema %2).
 		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output %1.%2 is connected to discrete signal %3.
 		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID);		// Output %1.%2 is connected to signal %3 with incompatible data format.
@@ -527,6 +527,8 @@ namespace Builder
 		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 cannot be used in user application logic (schema %2).
 		void errALC5206(QString optoPortID, int txRawDataSize);							// OptoPort %1 tx raw data out of range (%2 words)
 		void wrnALC5207(QString signalID);												// Tuning signal %1 is unused.
+		void wrnALC5208(QString actuatorTypeID);                                        // Application logic for actuator type %1 is not found.
+		void errALC5209(QString actuatorTypeID);										// Actuator type %1 is not found in the project
 
 		// firmware writing errors
 
