@@ -10,7 +10,7 @@ BasedOnStyle: Microsoft
 
 # MaxEmptyLinesToKeep: 2 -- does not work for VS 17.9
 
-ColumnLimit: 140
+ColumnLimit: 200
 
 # Ok
 AlignAfterOpenBracket: Align	
@@ -61,7 +61,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: 'false'
 AlwaysBreakTemplateDeclarations: 'Yes'
 
-AllowShortBlocksOnASingleLine: 'true'
+AllowShortBlocksOnASingleLine: Never
 
 BinPackArguments: 'false'
 BinPackParameters: 'false'

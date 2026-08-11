@@ -131,7 +131,6 @@ namespace Builder
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
 		m_context(appLogicCompiler.context()),
-		m_lm(lm),
 		m_memoryMap(appLogicCompiler.log()),
 		m_ualSignals(*this, appLogicCompiler.log()),
 		m_loopbacks(*this),
@@ -143,13 +142,30 @@ namespace Builder
 		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true),
 		m_vduAppSignalsGenerator(this)
 	{ 
+		m_isWorkable = false;
+
+		if (lm == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		std::shared_ptr<Hardware::DeviceObject> deviceObject = m_appLogicCompiler.equipmentSet()->deviceObject(lm->equipmentIdTemplate());
+
+		m_lm = std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObject);
+
+		if (m_lm == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
 		m_isWorkable = init();
 	}
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const QString& actuatorTypeID) :
 		m_appLogicCompiler(appLogicCompiler),
 		m_context(appLogicCompiler.context()),
-		m_lm(nullptr),
 		m_memoryMap(appLogicCompiler.log()),
 		m_ualSignals(*this, appLogicCompiler.log()),
 		m_loopbacks(*this),
@@ -183,7 +199,6 @@ namespace Builder
 
 		m_equipmentSet = m_appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root().get();
-		m_signals = m_appLogicCompiler.signalSet();
 
 		m_appLogicData = m_appLogicCompiler.appLogicData();
 
@@ -191,6 +206,8 @@ namespace Builder
 		{
 			// LM is defined in the project
 			//
+			m_signals = m_appLogicCompiler.signalSet();
+
 			m_lmDescription = m_appLogicCompiler.lmDescriptions()->get(m_lm);
 
 			if (m_lmDescription == nullptr)
@@ -200,17 +217,16 @@ namespace Builder
 
 			m_afbComponents.init(m_lmDescription);
 
-			m_lmShared = getLmSharedPtr();
-
-			if (m_lm != m_lmShared.get())
-			{
-				return false;
-			}
+			m_lm = getLmSharedPtr();
 		}
 		else
 		{
 			// LM is not defined in the project, but we need to compile its logic for actuator type
 			//
+
+			m_actuatorSignals = std::make_unique<SignalSet>(m_context->m_busSet.get(), m_context->m_buildResultWriter, m_context->m_log);
+			m_signals = m_actuatorSignals.get();
+
 			const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
 
 			if (actuatorType.isValid() == false)
@@ -228,11 +244,9 @@ namespace Builder
 
 			m_afbComponents.init(m_lmDescription);
 
-			m_lmShared = std::make_shared<Hardware::DeviceModule>(false);
+			m_lm = std::make_shared<Hardware::DeviceModule>(false);
 			
-			m_lmShared->setModuleFamily(Hardware::DeviceModule::FamilyType::ACM);
-
-			m_lm = m_lmShared.get();
+			m_lm->setModuleFamily(Hardware::DeviceModule::FamilyType::ACM);
 		}
 
 		m_resultWriter = m_appLogicCompiler.buildResultWriter();
@@ -383,12 +397,12 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
 
-		if (m_lmShared == nullptr)
+		if (m_lm == nullptr)
 		{
-			m_lmShared = std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
+			m_lm = std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
 		}
 
-		return 	m_lmShared;
+		return 	m_lm;
 	}
 
 	std::shared_ptr<const LmDescription> ModuleLogicCompiler::getLmDescription() const
@@ -734,16 +748,6 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for Actuator type %1 was started...")).arg(m_actuatorTypeID));
 
-		//m_chassis = m_lm->getParentChassis();
-
-		//if (m_chassis == nullptr)
-		//{
-		//	LOG_ERROR_OBSOLETE(m_log,
-		//					   Builder::IssueType::NotDefined,
-		//					   QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID()));
-		//	return false;
-		//}
-
 		const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
 
 		if (actuatorType.isValid() == false)
@@ -765,17 +769,16 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
 			//PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
 			//PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
-			//PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
-			//PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
-			//PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createActuatorSignalSet),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
 			//PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
-			//PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
 			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
 			//PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
-			////			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
 			//PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
 			//PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
@@ -1004,38 +1007,38 @@ namespace Builder
 
 		Module m;
 
-		m.device = m_lmShared;
-		m.place = m_lmShared->place();
+		m.device = m_lm;
+		m.place = m_lm->place();
 
-		if (m_lmShared->isLogicModule())
+		if (m_lm->isLogicModule())
 		{
 			if (m.place != DeviceHelper::LM_PLACE1)
 			{
 				// Module %1 should be installed on place %2.
 				//
-				m_log->errEQP6012(m_lmShared->equipmentIdTemplate(), DeviceHelper::LM_PLACE1);
+				m_log->errEQP6012(m_lm->equipmentIdTemplate(), DeviceHelper::LM_PLACE1);
 				return false;
 			}
 		}
 
-		if	(m_lmShared->isBvb())
+		if	(m_lm->isBvb())
 		{
 			if (m.place != DeviceHelper::BVB_PLACE1 && m.place != DeviceHelper::BVB_PLACE2)
 			{
 				// Module %1 should be installed on place %2 or %3.
 				//
-				m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::BVB_PLACE1, DeviceHelper::BVB_PLACE2);
+				m_log->errEQP6013(m_lm->equipmentIdTemplate(), DeviceHelper::BVB_PLACE1, DeviceHelper::BVB_PLACE2);
 				return false;
 			}
 		}
 
-		if (m_lmShared->isMso())
+		if (m_lm->isMso())
 		{
 			if (m.place != DeviceHelper::MSO_PLACE1 && m.place != DeviceHelper::MSO_PLACE2)
 			{
 				// Module %1 should be installed on place %2 or %3.
 				//
-				m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::MSO_PLACE1, DeviceHelper::MSO_PLACE2);
+				m_log->errEQP6013(m_lm->equipmentIdTemplate(), DeviceHelper::MSO_PLACE1, DeviceHelper::MSO_PLACE2);
 				return false;
 			}
 		}
@@ -1115,7 +1118,7 @@ namespace Builder
 					continue;
 				}
 
-				if (module != m_lmShared)
+				if (module != m_lm)
 				{
 					Q_ASSERT(false);
 					LOG_INTERNAL_ERROR(m_log);
@@ -2893,7 +2896,7 @@ namespace Builder
 				}
 				else
 				{
-					m_signals->append(validitySignal, m_lmShared);
+					m_signals->append(validitySignal, m_lm);
 
 					m_moduleSignals.emplace(calcHash(validitySignal->appSignalID()), validitySignal);
 					m_ioSignals.emplace_back(validitySignal);
@@ -3492,6 +3495,7 @@ namespace Builder
 
 		if (result == false)
 		{
+			bool res = srcUalSignal->isCompatible(s, log());
 			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
@@ -5436,10 +5440,8 @@ namespace Builder
 		m_tuningData = tuningData;
 		m_tuningDataStorage->appendTuningData(lmEquipmentID(), tuningData);
 
-		result &= DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::TUNING_LAN_DATA_UID,
-											m_rupTuningDataUID,
-											m_log);
+		result &= DeviceHelper::setUIntProperty(m_lm, EquipmentPropNames::TUNING_LAN_DATA_UID, m_rupTuningDataUID, m_log);
+
 		return result;
 	}
 
@@ -17561,10 +17563,7 @@ namespace Builder
 
 		int regBufSizeW = m_memoryMap.regBufSizeW();
 
-		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::APP_LAN_DATA_SIZE,
-											regBufSizeW,
-											m_log);
+		return DeviceHelper::setIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_SIZE, regBufSizeW, m_log);
 	}
 
 	bool ModuleLogicCompiler::setLmDiagLanDataSize()
@@ -17576,10 +17575,7 @@ namespace Builder
 			diagDataSize += module.txDiagDataSize;
 		}
 
-		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::DIAG_LAN_DATA_SIZE,
-											diagDataSize,
-											m_log);
+		return DeviceHelper::setIntProperty(m_lm, EquipmentPropNames::DIAG_LAN_DATA_SIZE, diagDataSize, m_log);
 	}
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
@@ -18428,10 +18424,7 @@ namespace Builder
 
 		m_rupAppDataUID = crc.result32();
 
-		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::APP_LAN_DATA_UID,
-											m_rupAppDataUID,
-											m_log);
+		return DeviceHelper::setUIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_UID, m_rupAppDataUID, m_log);
 	}
 
 	bool ModuleLogicCompiler::calcDiagDataUID()
@@ -18444,10 +18437,7 @@ namespace Builder
 
 		m_rupDiagDataUID = crc.result32();
 
-		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::DIAG_LAN_DATA_UID,
-											m_rupDiagDataUID,
-											m_log);
+		return DeviceHelper::setUIntProperty(m_lm, EquipmentPropNames::DIAG_LAN_DATA_UID, m_rupDiagDataUID, m_log);
 	}
 
 
@@ -20305,6 +20295,282 @@ namespace Builder
 
 			guidsMap->insert(ualAfb->guid());
 		}
+	}
+
+	bool ModuleLogicCompiler::createActuatorSignalSet()
+	{
+		const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
+
+		if (actuatorType.isValid() == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool result = true;
+
+		m_actuatorSignals->enableIdGeneration();
+
+		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmInputs)
+		{
+			result &= createActuatorInOutSignal(signalID, deviceAppSignal);
+		}
+
+		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmOutputs)
+		{
+			result &= createActuatorInOutSignal(signalID, deviceAppSignal);
+		}
+
+		result &= createActuatorInternalSignals();
+
+		for (AppSignal* appSignal : *m_signals)
+		{
+			m_moduleSignals.emplace(calcHash(appSignal->appSignalID()), appSignal);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createActuatorInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal)
+	{
+		TEST_PTR_RETURN_FALSE(deviceAppSignal);
+
+		AppSignal* appSignal = new AppSignal;
+
+		QString errMsg = appSignal->initFromDeviceSignal(deviceAppSignal->equipmentIdTemplate(),
+										deviceAppSignal->signalType(),
+										deviceAppSignal->function(),
+										signalID,
+										signalID,
+										QString("Signal %1").arg(signalID),
+										deviceAppSignal->appSignalBusTypeId(),
+										deviceAppSignal->appSignalDataFormat(),
+										deviceAppSignal->signalSpecPropsStruct(),
+										false, 0, 0, 0);
+
+		if (errMsg.isEmpty() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Error createActuatorInOutSignal: %1").arg(errMsg));
+			delete appSignal;
+			return false;
+		}
+
+		m_actuatorSignals->append(appSignal, m_lm);
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createActuatorInternalSignals()
+	{
+		for (const UalItem* item : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(item);
+
+			if (item->isSignal() == false)
+			{
+				continue;
+			}
+
+			QString appSignalID = item->strID();
+
+			if (m_actuatorSignals->contains(appSignalID))
+			{
+				continue;
+			}
+			
+			AppSignal* appSignal = new AppSignal;
+
+			appSignal->setInOutType(E::SignalInOutType::Internal);
+			appSignal->setAppSignalID(appSignalID);
+			appSignal->setCustomAppSignalID(appSignalID);
+			appSignal->setCaption(QString("Signal %1").arg(appSignalID));
+
+			PinSignalType pinSignalType;
+
+			bool res = detectInternalSignalType(item, &pinSignalType);
+
+			if (res == false)
+			{
+				Q_ASSERT(false);
+				delete appSignal;
+				continue;
+			}
+
+			appSignal->setSignalType(pinSignalType.signalType);
+			appSignal->setAnalogSignalFormat(pinSignalType.analogFormat);
+			appSignal->setBusTypeID(pinSignalType.busType);
+			appSignal->setByteOrder(pinSignalType.byteOrder);
+			appSignal->setDataSize(pinSignalType.dataSize);
+
+			m_actuatorSignals->append(appSignal, m_lm);
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType)
+	{
+		TEST_PTR_RETURN_FALSE(itemSignal);
+		TEST_PTR_RETURN_FALSE(pinSignalType);
+
+		if (itemSignal->isSignal() == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		QString id = itemSignal->strID();
+		QString label = itemSignal->label();
+
+		const std::vector<SchemaPin>& inputs = itemSignal->inputs();
+
+		if (inputs.size() == 0 || inputs.size() > 1)
+		{
+//			Q_ASSERT(false);
+			return true;		// TO DO check outputs
+		}
+
+		QUuid outPinUuid;
+
+		UalItem* outPinParent = getAssociatedOutputPinParent(inputs[0], &outPinUuid);
+
+		if (outPinParent == nullptr)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool result = false;
+
+		switch (outPinParent->type())
+		{
+		case E::UalItemType::Unknown:
+		case E::UalItemType::Transmitter:
+		case E::UalItemType::Receiver:
+		case E::UalItemType::Terminator:
+		case E::UalItemType::Const:
+		case E::UalItemType::BusComposer:
+		case E::UalItemType::BusExtractor:
+		case E::UalItemType::LoopbackSource:
+		case E::UalItemType::LoopbackTarget:
+			Q_ASSERT(false);					// TO DO
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+
+		case E::UalItemType::Signal:
+			{
+				QString srcSignalID = outPinParent->strID();
+
+				const AppSignal* as = m_actuatorSignals->getSignal(srcSignalID);
+
+				if (as == nullptr)
+				{
+					Q_ASSERT(false);
+					result = false;
+				}
+				else
+				{
+					pinSignalType->signalType = as->signalType();
+					pinSignalType->analogFormat = as->analogSignalFormat();
+					pinSignalType->busType = as->busTypeID();
+					pinSignalType->byteOrder = as->byteOrder();
+					pinSignalType->dataSize = as->dataSize();
+					result = true;
+				}
+			}
+			break;
+
+		case E::UalItemType::Afb:
+			result = detectAfbOutSignalType(outPinParent, outPinUuid, pinSignalType);
+			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::detectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType)
+	{
+		TEST_PTR_RETURN_FALSE(item);
+		TEST_PTR_RETURN_FALSE(pinSignalType);
+
+		if (item->isAfb() == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		int afbOperandIndex = -1;
+
+		for (const SchemaPin& out : item->outputs())
+		{
+			if (out.guid() == pinUuid)
+			{
+				afbOperandIndex = out.afbOperandIndex();
+				break;
+			}
+		}
+
+		if (afbOperandIndex == -1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		const Afb::AfbElement& afbElement = item->afb();
+
+		for (const AfbSignal& afbSignal : afbElement.outputSignals())
+		{
+			if (afbSignal.operandIndex() == afbOperandIndex)
+			{
+				pinSignalType->signalType = afbSignal.type();
+
+				switch (afbSignal.type())
+				{
+				case E::SignalType::Discrete:
+					Q_ASSERT(afbSignal.size() == 1);
+					pinSignalType->dataSize = 1;
+					break;
+
+				case E::SignalType::Analog:
+					{
+						E::DataFormat dataFormat = afbSignal.dataFormat();
+						int dataSize = afbSignal.size();
+
+						Q_ASSERT(dataSize == 32);
+
+						switch (dataFormat)
+						{
+						case E::DataFormat::Float:
+							pinSignalType->analogFormat = E::AnalogAppSignalFormat::Float32;
+							break;
+
+						case E::DataFormat::SignedInt:
+							pinSignalType->analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+							break;
+
+						case E::DataFormat::UnsignedInt:
+						default:
+							Q_ASSERT(false);
+						}
+					}
+					break;
+
+				case E::SignalType::Bus:
+				default:
+					Q_ASSERT(false);
+				}
+
+				pinSignalType->byteOrder = afbSignal.byteOrder();
+				pinSignalType->busType.clear();
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	// ---------------------------------------------------------------------------------------

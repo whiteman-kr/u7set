@@ -663,6 +663,11 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 	return true;
 }
 
+QString LmDescription::lmDescriptionFile(std::shared_ptr<Hardware::DeviceModule> logicModule)
+{
+	return lmDescriptionFile(logicModule.get());
+}
+
 QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||

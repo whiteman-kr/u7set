@@ -10,6 +10,14 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/WUtils.h"
 
+bool DeviceHelper::getIntProperty(std::shared_ptr<Hardware::DeviceObject> device,
+								const QString& name,
+								qint32* value,
+								Builder::IssueLogger* log)
+{ 
+	return getIntProperty(device.get(), name, value, log); 
+}
+	
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
@@ -43,6 +51,11 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 	return true;
 }
 
+bool DeviceHelper::getUIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, quint32* value, Builder::IssueLogger* log)
+{
+	return getUIntProperty(device.get(), name, value, log);
+}
+
 bool DeviceHelper::getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
@@ -74,6 +87,11 @@ bool DeviceHelper::getUIntProperty(const Hardware::DeviceObject* device, const Q
 	}
 
 	return true;
+}
+
+bool DeviceHelper::getStrProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, QString* value, Builder::IssueLogger* log)
+{
+	return getStrProperty(device.get(), name, value, log);
 }
 
 bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
@@ -383,6 +401,11 @@ bool DeviceHelper::isPropertyExists(const Hardware::DeviceObject* device, const 
 	return device->propertyExists(name);
 }
 
+bool DeviceHelper::setIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, qint32 value, Builder::IssueLogger* log)
+{
+	return setIntProperty(device.get(), name, value, log);
+}
+
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, qint32 value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||
@@ -408,6 +431,11 @@ bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString&
 	}
 
 	return result;
+}
+
+bool DeviceHelper::setUIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, quint32 value, Builder::IssueLogger* log)
+{
+	return setUIntProperty(device.get(), name, value, log);
 }
 
 bool DeviceHelper::setUIntProperty(Hardware::DeviceObject* device, const QString& name, quint32 value, Builder::IssueLogger* log)
@@ -483,6 +511,11 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 	return getChildControllerBySuffix(device, suffix, nullptr);
 }
 
+Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(std::shared_ptr<Hardware::DeviceObject> device, const QString& suffix, Builder::IssueLogger* log)
+{
+	return getChildControllerBySuffix(device.get(), suffix, log);
+}
+
 Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
 {
 	if (device == nullptr)
@@ -524,7 +557,12 @@ Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const H
 	return getChildControllerBySuffix(module, EquipmentPropNames::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX, log);
 }
 
-const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
+const Hardware::DeviceModule* DeviceHelper::getModuleOnPlace(std::shared_ptr<Hardware::DeviceModule> lm, int place)
+{
+	return getModuleOnPlace(lm.get(), place);
+}
+
+const Hardware::DeviceModule* DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
 {
 	if (lm == nullptr)
 	{

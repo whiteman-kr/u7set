@@ -176,6 +176,11 @@ std::shared_ptr<LmDescription> LogicModuleSet::get(const Hardware::DeviceModule*
 	return get(lmDescriptionFile);
 }
 
+std::shared_ptr<LmDescription> LogicModuleSet::get(std::shared_ptr<Hardware::DeviceModule> logicModule)
+{
+	return get(logicModule.get());
+}
+
 std::shared_ptr<LmDescription> LogicModuleSet::get(Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||

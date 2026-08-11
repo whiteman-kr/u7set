@@ -207,6 +207,13 @@ namespace Builder
 
 			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, actuatorTypeID);
 
+			if (moduleLogicCompiler->isWorkable() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("ModuleLogicCompiler for Actuator %1 is not workable").arg(actuatorTypeID));
+				result = false;
+				break;
+			}
+
 			m_context->appendActuatorLogicCompiler(actuatorTypeID, moduleLogicCompiler);
 
 			result &= moduleLogicCompiler->pass1();
@@ -391,6 +398,13 @@ namespace Builder
 			}
 
 			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, lm);
+
+			if (moduleLogicCompiler->isWorkable() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("ModuleLogicCompiler for LM %1 is not workable").arg(lm->equipmentIdTemplate()));
+				result = false;
+				break;
+			}
 
 			m_context->appendModuleLogicCompiler(moduleLogicCompiler);
 

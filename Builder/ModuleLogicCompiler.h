@@ -171,6 +171,15 @@ namespace Builder
 			std::vector<quint16> m_busArea;
 		};
 
+		struct PinSignalType
+		{
+			E::SignalType signalType = E::SignalType::Discrete;
+			E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
+			QString busType;
+			E::ByteOrder byteOrder = E::ByteOrder::NoEndian;
+			int dataSize = 0;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const QString& actuatorTypeID);
@@ -957,6 +966,15 @@ namespace Builder
 
 		void findLogicAfbsForBitAccReplacing(const QString& afbCaption, int logicConf, std::set<QUuid>* guidsMap);
 
+		// Actuator processing
+
+		bool createActuatorSignalSet();
+		bool createActuatorInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
+		bool createActuatorInternalSignals();
+
+		bool detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
+		bool detectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
+
 	public:
 		static const int MIN_AFB_OPCODE = 1;
 		static const int MAX_AFB_OPCODE = 63;
@@ -966,17 +984,17 @@ namespace Builder
 		//
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Context* m_context = nullptr;
-		const Hardware::DeviceModule* m_lm = nullptr;
 		const QString m_actuatorTypeID;
 		bool m_isWorkable = false;
 
-		DeviceModuleShared m_lmShared;
+		DeviceModuleShared m_lm;
 
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Builder::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
+		std::unique_ptr<SignalSet> m_actuatorSignals;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorSet* m_cmpSet = nullptr;
 
