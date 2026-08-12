@@ -34,16 +34,18 @@ namespace Sim
 
 		for (const Hardware::LogicModuleInfo& lmInfo : lms)
 		{
-			std::shared_ptr<VduModuleImpl> vduModule = addDevice(lmInfo);
-			if (vduModule == nullptr)
+			m_log.writeMessage(QObject::tr("Load firmware for VDU %1").arg(lmInfo.equipmentId));
+
+			auto vduModule = std::make_shared<VduModuleImpl>(m_simulator);
+
+			if (bool loadOk = vduModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo); //
+				loadOk == false)
 			{
 				return false;
 			}
 
-			m_log.writeMessage(QObject::tr("Load firmware for VDU %1").arg(lmInfo.equipmentId));
-
-			bool loadOk = vduModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo);
-			if (loadOk == false)
+			if (bool added = addDevice(vduModule);                                                                  //
+				added == false)
 			{
 				return false;
 			}
@@ -52,27 +54,27 @@ namespace Sim
 		return true;
 	}
 
-	std::shared_ptr<VduModuleImpl> VduSubsystemImpl::addDevice(const Hardware::LogicModuleInfo& lm)
+	bool VduSubsystemImpl::addDevice(std::shared_ptr<VduModuleImpl> module)
 	{
-		auto result = std::make_shared<VduModuleImpl>(m_simulator);
+		assert(module);
 
-		if (auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result); //
+		if (auto p = m_devicesByLmNumber.try_emplace(module->lmNumber(), module); //
 			p.second == false)
 		{
-			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
-			return {};
+			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(module->lmNumber()));
+			return false;
 		}
 
-		bool added = SubsystemImpl::addDevice(result);
+		bool added = SubsystemImpl::addDevice(module);
 		if (added == false)
 		{
-			m_devicesByLmNumber.erase(lm.lmNumber); // Device to m_devicesByLmNumber already was added, remove it
+			m_devicesByLmNumber.erase(module->lmNumber()); // Device to m_devicesByLmNumber already was added, remove it
 			assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
-			return {};
+			return false;
 		}
 
 		assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
-		return result;
+		return true;
 	}
 
 	bool VduSubsystemImpl::removeDevice(QString equipmentId)

@@ -46,52 +46,52 @@ namespace Sim
 
 		for (const Hardware::LogicModuleInfo& lmInfo : lms)
 		{
-			std::shared_ptr<LogicModuleImpl> logicModule = addDevice(lmInfo);
-			if (logicModule == nullptr)
-			{
-				return false;
-			}
-
 			m_log.writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo);
-			if (loadOk == false)
+			std::shared_ptr<LogicModuleImpl> logicModule = std::make_shared<LogicModuleImpl>(m_simulator);
+
+			if (bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo); //
+				loadOk == false)
 			{
 				return false;
 			}
 
 			if (logicModule->appCommands().empty() == true)
 			{
-				// There is no simulation for this file
-				//
-				removeDevice(lmInfo.equipmentId);
+				continue;
+			}
+
+			if (bool deviceAdded = addDevice(logicModule); //
+				deviceAdded == false)
+			{
+				return false;
 			}
 		}
 
 		return true;
 	}
 
-	std::shared_ptr<LogicModuleImpl> LmSubsystemImpl::addDevice(const Hardware::LogicModuleInfo& lm)
+	bool LmSubsystemImpl::addDevice(std::shared_ptr<LogicModuleImpl> module)
 	{
-		std::shared_ptr<LogicModuleImpl> result = std::make_shared<LogicModuleImpl>(m_simulator);
+		assert(module);
 
-		if (auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result); //
+		if (auto p = m_devicesByLmNumber.try_emplace(module->lmNumber(), module); //
 			p.second == false)
 		{
-			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
-			return {};
+			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(module->lmNumber()));
+			return false;
 		}
 
-		bool added = SubsystemImpl::addDevice(result);
+		bool added = SubsystemImpl::addDevice(module);
 		if (added == false)
 		{
-			m_devicesByLmNumber.erase(lm.lmNumber); // Device to m_devicesByLmNumber already was added, remove it
+			m_devicesByLmNumber.erase(module->lmNumber()); // Device to m_devicesByLmNumber already was added, remove it
 			assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
-			return {};
+			return false;
 		}
 
 		assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
-		return result;
+		return true;
 	}
 
 	bool LmSubsystemImpl::removeDevice(QString equipmentId)

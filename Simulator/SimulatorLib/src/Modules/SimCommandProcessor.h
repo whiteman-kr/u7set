@@ -1,5 +1,5 @@
 #pragma once
-#include "SimDeviceEmulator.h"
+#include "SimLmDeviceEmulator.h"
 
 class SimCommandTest_LM5_LM6;
 
@@ -10,7 +10,7 @@ namespace Sim
 	template<typename classT, typename memberT>
 	union u_ptm_cast
 	{
-		memberT classT::*pmember;
+		memberT classT::* pmember;
 		std::array<std::byte, 16> pvoid;
 	};
 
@@ -77,7 +77,7 @@ namespace Sim
 		QString strCommand(QString command) const;
 		QString strAfbInst(const EmulatorCommand* command) const;
 		QString strAfbInstPin(const EmulatorCommand* command) const;
-		
+
 		QString strAcc() const;
 
 		QString strAddr(quint32 address) const;
@@ -85,7 +85,7 @@ namespace Sim
 
 		QString strBitConst(quint16 data) const;
 		QString strWordConst(quint16 data) const;
-		QString strDwordConst(quint32 data)const;
+		QString strDwordConst(quint32 data) const;
 
 	private:
 		static const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> m_lmToFactory;
@@ -93,10 +93,9 @@ namespace Sim
 	protected:
 		DeviceEmulator* m_device = nullptr;
 
-		std::set<quint32> m_parseMemorySanitizer;	// This set is used only during parsing app logic code
-													// It contains already written addresses or addresses wich are
-													// written by platform logic (like IO module, receiving data from optic channel, ...)
-													// m_parseMemorySanitizer is used to detect reading uninitialized memory
+		std::set<quint32> m_parseMemorySanitizer; // This set is used only during parsing app logic code
+												  // It contains already written addresses or addresses wich are
+												  // written by platform logic (like IO module, receiving data from optic channel, ...)
+												  // m_parseMemorySanitizer is used to detect reading uninitialized memory
 	};
-}
-
+} // namespace Sim

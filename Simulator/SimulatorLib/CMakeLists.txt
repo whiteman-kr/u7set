@@ -95,12 +95,15 @@ qt_add_library(${TARGET} STATIC
 	./src/Modules/SimCommandProcessor.h
 	./src/Modules/SimCommandProcessor_LM5_LM6.cpp
 	./src/Modules/SimCommandProcessor_LM5_LM6.h
-	./src/Modules/SimDeviceEmulator.cpp
-	./src/Modules/SimDeviceEmulator.h
+	./src/Modules/SimDeviceEmulatorCommon.h
+	./src/Modules/SimLmDeviceEmulator.cpp
+	./src/Modules/SimLmDeviceEmulator.h
 	./src/Modules/SimDeviceState.cpp
 	./src/Modules/SimLogicModule.cpp
 	./src/Modules/SimLogicModuleImpl.cpp
 	./src/Modules/SimLogicModuleImpl.h
+	./src/Modules/SimVduDeviceEmulator.cpp
+	./src/Modules/SimVduDeviceEmulator.h
 	./src/Modules/SimVduModuleImpl.cpp
 	./src/Modules/SimVduModuleImpl.h
 

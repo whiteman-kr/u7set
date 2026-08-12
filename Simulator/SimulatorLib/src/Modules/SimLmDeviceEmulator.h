@@ -1,32 +1,19 @@
 #pragma once
 
-#include "../SimEeprom.h"
 #include "../SimConnectionsImpl.h"
+#include "../SimEeprom.h"
 #include "../SimLans.h"
 #include "SimAfb.h"
+#include "SimDeviceEmulatorCommon.h"
 
-#include <SimulatorLib/SimDeviceState.h>
 #include <SimulatorLib/SimDeviceCommand.h>
+#include <SimulatorLib/SimDeviceState.h>
 #include <SimulatorLib/SimRam.h>
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
 #include <HardwareLib/ModuleFirmware.h>
 
-
-#ifndef __FUNCTION_NAME__
-	#ifdef WIN32   //WINDOWS
-		#define __FUNCTION_NAME__ __FUNCTION__
-	#else          //*NIX
-		#define __FUNCTION_NAME__ __FUNCTION__
-	#endif
-#endif
-
-
-// class DeviceEmulator has function DeviceEmulator::fault
-// this is convenient call of this func
-//
-#define SIM_FAULT(message) fault(message, QLatin1String(__FUNCTION_NAME__));
 
 namespace Sim
 {
@@ -41,7 +28,7 @@ namespace Sim
 		ODT,
 		ST
 	};
-}
+} // namespace Sim
 
 Q_DECLARE_METATYPE(Sim::CyclePhase)
 
@@ -52,7 +39,7 @@ namespace Sim
 
 	struct LogicUnitData
 	{
-		int programCounter = 0;					// current offset of program memory, in words
+		int programCounter = 0; // current offset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
 
@@ -66,18 +53,7 @@ namespace Sim
 			quint32 value = 0;
 		} flags;
 
-		quint16 acc{};							// Device accumulator
-	};
-
-	enum class DeviceError
-	{
-		Ok,
-		NoCommandProcessor,
-		AfbComponentNotFound,
-		InitEepromError,
-		ParsingAppLogicError,
-		ModuleExtraInfoNotFound,
-		LanControllerError
+		quint16 acc{}; // Device accumulator
 	};
 
 
@@ -89,8 +65,8 @@ namespace Sim
 
 		// Specific data for specific CommandController
 		//
-		std::array<std::byte, 16> m_commandFuncPtr{};	// This function can be called ONLY in in class and instance where it was initialized
-		std::array<std::byte, 16> m_afbFuncPtr{};		// This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_commandFuncPtr{}; // This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_afbFuncPtr{};     // This function can be called ONLY in in class and instance where it was initialized
 
 		Ram::Handle m_memoryAreaFrom = std::numeric_limits<Ram::Handle>::max();
 		Ram::Handle m_memoryAreaTo = std::numeric_limits<Ram::Handle>::max();
@@ -122,7 +98,7 @@ namespace Sim
 
 	public:
 		bool clear();
-		DeviceError init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
+		DeviceError init(const Hardware::LogicModuleInfo& logicModuleInfo, // Run from UI thread
 						 const LmDescription& lmDescription,
 						 const Eeprom& tuningEeprom,
 						 const Eeprom& confEeprom,
@@ -200,9 +176,9 @@ namespace Sim
 		quint32 getDword(int wordOffset) const;
 
 	private:
-		RamArea tuningRamArea() const;		// Returns copy of Tuning RAM area
+		RamArea tuningRamArea() const; // Returns copy of Tuning RAM area
 
-		// --
+									   // --
 		//
 	private:
 		bool initMemory();
@@ -225,8 +201,8 @@ namespace Sim
 		bool runCommand(EmulatorCommand& deviceCommand);
 
 	public:
-		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
-		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
+		bool receiveConnectionsData(std::chrono::microseconds currentTime); // This one is public to be called from Sim::Control
+		bool sendConnectionsData(std::chrono::microseconds currentTime);    // Actually this one is private
 
 		bool tuningEnterTuningMode(TimeStamp timeStamp);
 		bool tuningLeaveTuningMode();
@@ -235,7 +211,7 @@ namespace Sim
 	private:
 		// Getting data from m_plainAppLogic
 		//
-		template <typename TYPE>
+		template<typename TYPE>
 		TYPE getData(int eepromOffset) const;
 
 		// Props
@@ -268,6 +244,7 @@ namespace Sim
 		void setRuntimeMode(RuntimeMode value);
 
 		[[nodiscard]] DeviceState deviceState() const;
+
 	private:
 		void setDeviceState(DeviceState value);
 
@@ -301,7 +278,7 @@ namespace Sim
 		mutable ScopedLog m_log;
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
-		Hash m_logicModuleIdHash = UNDEFINED_HASH;		// hash from m_logicModuleInfo.equipmentId.
+		Hash m_logicModuleIdHash = UNDEFINED_HASH; // hash from m_logicModuleInfo.equipmentId.
 
 		LmDescription m_lmDescription;
 		::LogicModuleInfo m_logicModuleExtraInfo;
@@ -312,14 +289,14 @@ namespace Sim
 		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
-		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
-		QByteArray m_plainTuningData;		// Just Tuning data for specific m_logicModuleNumber and cleaned CRCs
+		QByteArray m_plainAppLogic;   // Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
+		QByteArray m_plainTuningData; // Just Tuning data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state
 		//
 		std::atomic<RuntimeMode> m_runtimeMode = RuntimeMode::PoweredOffMode;
-		std::atomic<DeviceState> m_deviceState2 = DeviceState::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
-																	// powerOff can be called while simulation is running
+		std::atomic<DeviceState> m_deviceState2 = DeviceState::Off; // The only place where it can be accessed in concurrent mode is
+																	// powerOff/reset powerOff can be called while simulation is running
 																	// reset can be called to restart module after powerOff
 
 		Ram m_ram;
@@ -327,31 +304,31 @@ namespace Sim
 		std::vector<ConnectionImplPtr> m_connections;
 
 		std::vector<EmulatorCommand> m_commands;
-		std::vector<int> m_offsetToCommand;				// index: command offset, value: index in m_commands
-														// empty offsets is -1
-														// Program memory is not so big, max
+		std::vector<int> m_offsetToCommand; // index: command offset, value: index in m_commands
+											// empty offsets is -1
+											// Program memory is not so big, max
 		AfbComponentSet m_afbComponents;
 
-		Lans m_lans{this, m_simulator};					// Device LAN Interfaces, based on m_logicModuleExtraInfo
+		Lans m_lans{this, m_simulator};     // Device LAN Interfaces, based on m_logicModuleExtraInfo
 
 		// Tuning
 		//
-		std::atomic<bool> m_armingKey{false};			// External Key
-		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
+		std::atomic<bool> m_armingKey{false}; // External Key
+		std::atomic<bool> m_tuningKey{false}; // Extrenal Key
 
-		RamArea	m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
-											// On command 'Apply' RAM memory is copied into this area
-											// On leaving tuning mode this area is copied back to RAM
+		RamArea m_tuningRamArea{false};       // The copy of tuning ram area at the momemt device entered the TuningMode,
+											  // On command 'Apply' RAM memory is copied into this area
+											  // On leaving tuning mode this area is copied back to RAM
 
 		// External SOR Set Keys
 		//
-		std::atomic<bool> m_sorIsSet{false};			// Cached value of signal SOR is Set from module RAM
+		std::atomic<bool> m_sorIsSet{false};       // Cached value of signal SOR is Set from module RAM
 
-		std::atomic<bool> m_sorSetSwitch1{false};		// External Key
-		std::atomic<bool> m_sorSetSwitch2{false};		// External Key
-		std::atomic<bool> m_sorSetSwitch3{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch1{false};  // External Key
+		std::atomic<bool> m_sorSetSwitch2{false};  // External Key
+		std::atomic<bool> m_sorSetSwitch3{false};  // External Key
 
-		std::atomic<bool> m_sorResetSwitch{false};		// External Key
+		std::atomic<bool> m_sorResetSwitch{false}; // External Key
 
 		// Cached state
 		//
@@ -360,6 +337,6 @@ namespace Sim
 		Hardware::LogicModuleInfo m_cachedLogicModuleInfo;
 
 		std::vector<EmulatorCommand> m_cachedCommands;
-		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
+		std::unordered_map<int, size_t> m_cachedOffsetToCommand; // key: command offset, value: index in m_commands
 	};
-}
+} // namespace Sim

@@ -33,7 +33,7 @@ namespace Sim
 				  const LogicModulesInfo& logicModulesExtraInfo);
 
 	private:
-		std::shared_ptr<VduModuleImpl> addDevice(const Hardware::LogicModuleInfo& lm);
+		bool addDevice(std::shared_ptr<VduModuleImpl> module);
 		bool removeDevice(QString equipmentId);
 
 	public:

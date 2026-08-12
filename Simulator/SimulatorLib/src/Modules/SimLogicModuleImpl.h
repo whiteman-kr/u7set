@@ -2,7 +2,7 @@
 
 #include "../SimEeprom.h"
 #include "SimBaseModuleImpl.h"
-#include "SimDeviceEmulator.h"
+#include "SimLmDeviceEmulator.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>

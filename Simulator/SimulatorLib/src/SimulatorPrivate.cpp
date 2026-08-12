@@ -53,6 +53,11 @@ namespace Sim
 	{
 		clear(); // Clear must be run in this thread
 
+		{
+			std::lock_guard locker{m_buildPathMutex};
+			m_buildPath = buildPath;
+		}
+
 		// Run load in separated thread, it'll allow to process messages, like timer events
 		// for displaying output log
 		//
@@ -70,12 +75,7 @@ namespace Sim
 
 		bool result = future.result();
 
-		if (result == true)
-		{
-			std::lock_guard locker{m_buildPathMutex};
-			m_buildPath = buildPath;
-		}
-		else
+		if (result == false)
 		{
 			clearImpl();
 		}

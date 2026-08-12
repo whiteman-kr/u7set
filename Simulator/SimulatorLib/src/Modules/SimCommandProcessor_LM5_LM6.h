@@ -1,6 +1,6 @@
 #pragma once
 #include "SimCommandProcessor.h"
-#include "SimDeviceEmulator.h"
+#include "SimLmDeviceEmulator.h"
 
 
 class SimCommandTest_LM5_LM6;

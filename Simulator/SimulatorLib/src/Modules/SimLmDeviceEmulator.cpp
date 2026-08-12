@@ -1,4 +1,4 @@
-#include "SimDeviceEmulator.h"
+#include "SimLmDeviceEmulator.h"
 
 #include "../SimException.h"
 #include "../SimulatorPrivate.h"

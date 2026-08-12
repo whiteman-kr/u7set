@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../SimEeprom.h"
-#include "SimDeviceEmulator.h"
 #include "SimBaseModuleImpl.h"
+#include "SimVduDeviceEmulator.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
@@ -49,9 +49,7 @@ namespace Sim
 
 		std::chrono::microseconds cycleDuration() const;
 
-		//		const Eeprom& tuningEeprom() const;
 		const Eeprom& confEeprom() const;
-		//		const Eeprom& appLogicEeprom() const;
 
 		// const std::vector<DeviceCommand>& appCommands() const;
 
@@ -95,7 +93,7 @@ namespace Sim
 
 		// Running Emulation
 		//
-		//VduDeviceEmulator m_device{m_simulator};
+		VduDeviceEmulator m_device{m_simulator};
 
 		// --
 		//

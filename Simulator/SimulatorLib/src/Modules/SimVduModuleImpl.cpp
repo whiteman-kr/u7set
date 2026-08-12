@@ -49,23 +49,13 @@ namespace Sim
 
 		// Init DeviceEmulator
 		//
-		//DeviceError de = m_device.init(m_logicModuleInfo,
-		//							   m_lmDescription,
-		//							   m_tuningEeprom,
-		//							   m_confEeprom,
-		//							   m_appLogicEeprom,
-		//							   connections,
-		//							   logicModulesExtraInfo);
+		QString subsystemPath = m_simulator->buildPath() + "Subsytems/" + m_logicModuleInfo.subsystemId;
+		DeviceError de = m_device.init(m_logicModuleInfo, m_lmDescription, m_confEeprom, subsystemPath, connections, logicModulesExtraInfo);
 
-		// if (de == DeviceError::Ok || de == DeviceError::NoCommandProcessor)
-		//{
-		//	// DeviceError::NoCommandProcessor is ok, as there are a lot of LM's which are not simulated
-		//	//
-		// }
-		// else
-		//{
-		//	ok = false;
-		// }
+		if (de != DeviceError::Ok)
+		{
+			ok = false;
+		}
 
 		return ok;
 	}
