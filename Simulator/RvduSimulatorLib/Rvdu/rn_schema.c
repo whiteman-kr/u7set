@@ -1,0 +1,811 @@
+/*
+Module title: Schemas Processing.
+(C) 2026 RPC "Radiy".
+All rights reserved.
+The information presented here is confidential
+and is the intellectual property of PJSC "RPC "Radiy".
+Any use of this information is strictly
+prohibited without the written consent of PJSC "RPC "Radiy".
+Module description: Provides the main functionality for displaying RVDU schemas.
+
+-- *************************************************************
+-- Version v1.00
+-- Date:	31,03,2026.
+-- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-3966, rn_schema initial update
+
+-- *************************************************************
+
+-- Version v1.01
+-- Date:	13,04,2026.
+-- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-3966, rn_schema module refactoring
+-- Change logic of schemaProc function
+-- Add GlobalScript support
+-- Add log error for schemaProc and logScriptError
+-- Optimization logic of schemaProc function
+-- Add keyboard support
+-- Added performance counters support to display FPS and scripts executing time
+-- And schemas transparency control
+-- By default, schema's background is not cleared before redraw, this saves time. But if Lua functons that move items are called, this schema is redrawed fully.
+-- Now, predrawScripts and clickScripts are compiled to bytecode on startup.
+
+-- Changes: RADIX-3969, add logging and debugging support
+-- Add log errors and messages
+
+-- *************************************************************
+
+-- Version v1.02
+-- Date:	19,06,2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-3966, schema switching improvement: it is scheduled and actually changed at the next schemaProc loop to prevent scripts data corruption
+-- RADIX-3973: add real-time blink phase functions
+
+-- *************************************************************
+
+-- Version v1.03
+-- Date:	28,07,2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.04
+-- Date:	06.08.2026.
+-- Designed by: Vintenko B.U.
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: 
+RADIX-4110, red frame on error is displayed on both errors and warnings counter change
+RADIX-4111, schema item labels are displayed in the log on errors
+RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
+
+-- *************************************************************
+*/
+
+#include <string.h>
+#include <stdbool.h>
+
+
+#ifndef RVDU_SIM // Microsoft Visual Studio-specific
+
+#include <system.h>
+
+#else
+
+#include <windows.h>
+#include "msvc_alt_types.h"
+
+#endif // End of Microsoft Visual Studio-specific
+
+#include <lualib.h>
+#include <lauxlib.h>
+
+#include "rn_cfg.h"
+#include "rn_schema.h"
+#include "rn_diag.h"
+#include "rn_vbuf.h"
+#include "rn_prim.h"
+#include "rn_kbd.h"
+#include "rn_ts.h"
+#include "rn_utils.h"
+#include "rn_scfp.h"
+#include "rn_opto.h"
+#include "rn_lapi.h"
+
+#include "rn_ainput.h"
+#include "rn_msgbox.h"
+#include "rn_pin.h"
+#include "rn_logview.h"
+#include "rn_signalsview.h"
+#include "rn_trendview.h"
+#include "rn_trendproc.h"
+
+#include "defs.h"
+
+#define SCRIPT_OK 0u
+#define SCRIPT_ERROR 1u
+
+// Private module data
+//
+static bool m_terminateFlag = false;
+static struct VduSchemaFileSchemaItem1* m_scriptRunSchemaItem = NULL;
+static alt_u16 m_blinkPhase = 0;
+
+#ifdef RVDU_SIM        
+static bool m_popUpTerminateFlag = false;
+#endif
+//
+// End of Private data
+
+static void logScriptWarning(lua_State* const luaState, enum WarningCode code, const char* const objectName, const char* const label)
+{
+	static char msg[STRING_MAX_LEN * 4u];
+
+	const char* err = lua_tostring(luaState, -1);
+
+	lua_pop(luaState, 1); // pop original error + traceback
+
+	if ((objectName != NULL) && (strlen(objectName) != 0u))
+	{
+		(void)snprintf(msg, STRING_MAX_LEN * 4u, "%s, ObjectName = '%s': %s.", label, objectName, err);
+	}
+	else
+	{
+		(void)snprintf(msg, STRING_MAX_LEN * 4u, "%s: %s.", label, err);
+	}
+
+	logWarning(code, msg);
+}
+
+static void processSchemaKeys(void)
+{
+	if (isPressedKey() == false)
+	{
+		return;
+	}
+
+	alt_u16 key = pressedKey();
+
+	if ((key == VK_LEFT) || (key == VK_RIGHT))
+	{
+		// Switch to previous/Next schema
+		//
+
+		// Get the index of current schema
+		//
+		alt_u16 currentSchemaIndex = INVALID_INDEX;
+
+		const struct VduConfigFile1* const cfg = vduConfig();
+		if ((cfg == NULL) || (cfg->schemaCount == 0u))
+		{
+			return;
+		}
+
+		const struct VduSchemaFile* const currentSchema = vduCurrentSchema();
+		if (currentSchema == NULL)
+		{
+			RN_ASSERT(currentSchema != NULL);
+			return;
+		}
+
+		for (alt_u16 i = 0; i < cfg->schemaCount; i++)
+		{
+			const struct VduSchemaFile* const schema = vduSchemaByIndex(i);
+			if (schema == NULL)
+			{
+				continue;
+			}
+
+			if (currentSchema->schemaProperties.schemaId == schema->schemaProperties.schemaId)
+			{
+				currentSchemaIndex = i;
+				break;
+			}
+		}
+
+		if (currentSchemaIndex == INVALID_INDEX)
+		{
+			// Error
+			return;
+		}
+
+		// Get new schema index
+		//
+		if (key == VK_LEFT)
+		{
+			if (currentSchemaIndex == 0u)
+			{
+				currentSchemaIndex = cfg->schemaCount - 1u;
+			}
+			else
+			{
+				currentSchemaIndex--;
+			}
+		}
+		else
+		{
+			currentSchemaIndex++;
+			if (currentSchemaIndex >= cfg->schemaCount)
+			{
+				currentSchemaIndex -= cfg->schemaCount;
+			}
+		}
+
+		// Switch to the new schema
+		//
+		const struct VduSchemaFile* newSchema = vduSchemaByIndex(currentSchemaIndex);
+		if (newSchema == NULL)
+		{
+			return;
+		}
+
+		(void)vduScheduleSchemaChange(vduSchemaString(newSchema, newSchema->schemaProperties.schemaId));
+
+		return;
+	}
+
+	struct PopUpSchemaParams schema = { 0 };
+
+	switch (key)
+	{
+	case VK_TILDA:
+	{
+		popUpSchema(SCENE_LOG, &schema);
+	}
+	break;
+	case VK_TAB:
+	{
+		popUpSchema(SCENE_SIGNALS, &schema);
+	}
+	break;
+	default:
+	{
+		return;
+	}
+	}
+	return;
+}
+
+static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchemaItem1* item, vdu_ref scriptRef, vdu_ref scriptRefByteCode, enum WarningCode warningCode)
+{
+	alt_u16 scriptLength = vduCurrentSchemaStringLength(scriptRef);
+	if (scriptLength == INVALID_LENGTH)
+	{
+		RN_ASSERT(false);
+		return false;
+	}
+
+	if (scriptLength == 0u)
+	{
+		return true;
+	}
+
+	m_scriptRunSchemaItem = item;
+
+	alt_u32 prevWarningCount = logWarningCount();
+
+	static bool m_useByteCode = true;
+
+	// Use LUA bytecode
+	//
+	if (m_useByteCode == true)
+	{
+		alt_u32 byteCodeLen = vduCurrentSchemaScriptLength(scriptRefByteCode);
+		const char* const bytecode = vduCurrentSchemaScript(scriptRefByteCode);
+
+		// Call the bytecode
+		//
+		int status = luaL_loadbuffer(rvduLuaState, bytecode, byteCodeLen, NULL);
+
+		if (status != LUA_OK)
+		{
+			if (item != NULL)
+			{
+				logScriptWarning(rvduLuaState, warningCode, vduCurrentSchemaString(item->objectName), vduCurrentSchemaString(item->label));
+			}
+			else
+			{
+				logScriptWarning(rvduLuaState, warningCode, NULL, "SchemaScript");
+			}
+
+			if ((bytecode != NULL) && (byteCodeLen > 4u))
+			{
+				alt_u8 bytecodeVersion = (alt_u8)bytecode[4];
+
+				static char msg[STRING_MAX_LEN];
+				(void)snprintf(msg, STRING_MAX_LEN, "Scripts bytecode compatibility error, using strings instead. Used Lua version is %s, bytecode version code is %x.",
+					(const char*)LUA_RELEASE,
+					bytecodeVersion);
+				logWarning(warningCode, msg);
+			}
+
+			// Switch to using strings
+			//
+			m_useByteCode = false;
+		}
+
+		// Call the bytecode
+		//
+		if (m_useByteCode == true)
+		{
+			status = lua_pcall(rvduLuaState, 0, LUA_MULTRET, 0);
+
+			if (status != LUA_OK)
+			{
+				if (item != NULL)
+				{
+					logScriptWarning(rvduLuaState, warningCode, vduCurrentSchemaString(item->objectName), vduCurrentSchemaString(item->label));
+				}
+				else
+				{
+					logScriptWarning(rvduLuaState, warningCode, NULL, "SchemaScript");
+				}
+				return false;
+			}
+		}
+	}
+
+	// Use LUA strings
+	//
+	if (m_useByteCode == false)
+	{
+		if (luaL_dostring(rvduLuaState, vduCurrentSchemaString(scriptRef)) != LUA_OK)
+		{
+			if (item != NULL)
+			{
+				logScriptWarning(rvduLuaState, warningCode, vduCurrentSchemaString(item->objectName), vduCurrentSchemaString(item->label));
+			}
+			else
+			{
+				logScriptWarning(rvduLuaState, warningCode, NULL, "SchemaScript");
+			}
+			return false;
+		}
+	}
+
+	if (logWarningCount() > prevWarningCount)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+static bool calculateDrawingPhase(void)
+{
+	bool drawingPhase = true;
+
+	// Calculate the blink phase
+	//
+	static alt_u16 m_prevBlinkPhase = 65535u;
+	static alt_u16 m_prevSecs = 65535u;
+
+	m_blinkPhase = currentMSecs() / 250u;
+	alt_u16 m_secs = currentSecs();
+
+	if (m_prevBlinkPhase == m_blinkPhase)
+	{
+		if (m_prevSecs == m_secs)
+		{
+			drawingPhase = false;
+		}
+	}
+
+	m_prevBlinkPhase = m_blinkPhase;
+	m_prevSecs = m_secs;
+
+	return drawingPhase;
+}
+
+void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
+{
+	if ((rvduLuaState == NULL) || (schemaWasRepainted == NULL))
+	{
+		RN_ASSERT(rvduLuaState != NULL);
+		RN_ASSERT(schemaWasRepainted != NULL);
+		return;
+	}
+
+	// Perform drawing only if blink phase or second has been changed
+	//
+	bool drawingPhase = calculateDrawingPhase();
+	*schemaWasRepainted = drawingPhase;
+
+	// Process schema switching by keyboard
+	//
+	processSchemaKeys();
+
+	// If there is a schema switch pending - switch it
+	//
+	const struct VduSchemaFile* const scheduledSchema = vduGetScheduledSchema();
+	if (scheduledSchema != NULL)
+	{
+		(void)vduSetCurrentSchema(vduSchemaString(scheduledSchema, scheduledSchema->schemaProperties.schemaId));
+		drawingPhase = true;	// Draw the just switched schema immediately
+	}
+
+#ifndef RVDU_SIM    
+	// Invert the output PIN that allows to control schema processing time (RS485-pin is used as free pin)
+	//
+	resetRs485SignalPin();
+#endif
+
+	const struct VduSchemaFile* const pSchemaFile = vduCurrentSchema();
+	if (pSchemaFile == NULL)
+	{
+		RN_ASSERT(pSchemaFile != NULL);
+		return;
+	}
+
+	if (drawingPhase == true)
+	{
+		// Erase the screen
+		//
+		if (writeVideoBuffer(pSchemaFile->schemaProperties.backgroundColor) == false)
+		{
+			RN_ASSERT(false);
+			return;
+		}
+	}
+
+	// Lock the input buffers (optical and input signals) to prevent signals data change
+	// while rendering the schema
+	//
+	externalBusBridgeReadLock();
+
+	// First pass - clickScripts processing
+	//
+	if (isTouchEvent() == true)
+	{
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		{
+			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
+			if (item == NULL)
+			{
+				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			item->scriptResult = SCRIPT_OK;
+
+			if (item->acceptClick == true)
+			{
+				alt_u16 scriptLength = vduCurrentSchemaStringLength(item->clickScript);
+				if (scriptLength == INVALID_LENGTH)
+				{
+					RN_ASSERT(false);
+					continue;
+				}
+
+				if (scriptLength > 0u)
+				{
+					if (checkTouchZone(
+						item->rect.left,
+						item->rect.top,
+						item->rect.width,
+						item->rect.height) == true)
+					{
+						if (runScript(rvduLuaState,
+							item,
+							item->clickScript,
+							item->clickScriptBytecode,
+							LuaClickScript) == false)
+						{
+							item->scriptResult = SCRIPT_ERROR;
+						}
+					}
+				}
+
+				if (m_terminateFlag == true)
+				{
+					lua_settop(rvduLuaState, 0);
+
+					m_terminateFlag = false;
+					return;
+				}
+			}
+		}
+	}
+
+	// Second pass - preDrawScripts processing
+	//
+	if (drawingPhase == true)
+	{
+		startMeasuringTimer(TIMER_PREDRAW);
+
+		// OnShowScript
+		
+		static const struct VduSchemaFile* prevSchemaFile = NULL;
+		if (prevSchemaFile != pSchemaFile)
+		{
+			prevSchemaFile = pSchemaFile;		// Schema has been changed
+
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchemaFile->schemaProperties.onShowScript);
+			if (scriptLength == INVALID_LENGTH)
+			{
+				RN_ASSERT(false);
+				return;
+			}
+
+			if (scriptLength > 0u)
+			{
+				(void)runScript(rvduLuaState,
+					NULL,
+					pSchemaFile->schemaProperties.onShowScript,
+					pSchemaFile->schemaProperties.onShowScriptBytecode,
+					LuaOnShowScript);
+			}
+		}
+
+		// PredrawScript
+
+		{
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchemaFile->schemaProperties.preDrawScript);
+			if (scriptLength == INVALID_LENGTH)
+			{
+				RN_ASSERT(false);
+				return;
+			}
+
+			if (scriptLength > 0u)
+			{
+				(void)runScript(rvduLuaState,
+					NULL,
+					pSchemaFile->schemaProperties.preDrawScript,
+					pSchemaFile->schemaProperties.preDrawScriptBytecode,
+					LuaPreDrawScript);
+			}
+		}
+
+		if (m_terminateFlag == true)
+		{
+			lua_settop(rvduLuaState, 0);
+
+			m_terminateFlag = false;
+			return;
+		}
+
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		{
+			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
+			if (item == NULL)
+			{
+				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(item->preDrawScript);
+			if (scriptLength == INVALID_LENGTH)
+			{
+				RN_ASSERT(false);
+				continue;
+			}
+
+			if (scriptLength > 0u)
+			{
+				if (runScript(rvduLuaState,
+					item,
+					item->preDrawScript,
+					item->preDrawScriptBytecode,
+					LuaPreDrawScript) == false)
+				{
+					item->scriptResult = SCRIPT_ERROR;
+				}
+			}
+
+			if (m_terminateFlag == true)
+			{
+				lua_settop(rvduLuaState, 0);
+
+				m_terminateFlag = false;
+
+				stopMeasuringTimer(TIMER_PREDRAW);
+				return;
+			}
+		}
+
+		stopMeasuringTimer(TIMER_PREDRAW);
+	
+		// Third pass - items rendering
+		//
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		{
+			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
+			if (item == NULL)
+			{
+				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			alt_u32 prevErrorCount = logErrorCount();
+			alt_u32 prevWarningCount = logWarningCount();
+
+			switch (item->itemType)
+			{
+			case TYPE_LINE:
+			{
+				drawItemLine(item);
+			}
+			break;
+			case TYPE_RECT:
+			{
+				drawItemRect(item);
+			}
+			break;
+			case TYPE_VALUE:
+			{
+				drawItemValue(item);
+			}
+			break;
+			case TYPE_IMAGE:
+			case TYPE_IMAGEVALUE:
+			{
+				drawImage(item);
+			}
+			break;
+			case TYPE_TREND:
+			{
+				drawTrend(&item->trend);
+			}
+			break;
+			default:
+			{
+				// Unknown item - does not require any action
+				//
+			}
+			break;
+			}
+
+			if ((logErrorCount() > prevErrorCount) || (logWarningCount() > prevWarningCount))
+			{
+				item->scriptResult = SCRIPT_ERROR;
+			}
+		}
+
+		// Fouth pass - displaying errors
+		//
+		bool blink = blinkPhase();
+
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		{
+			const struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
+			if (item == NULL)
+			{
+				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			if (item->scriptResult == SCRIPT_ERROR)
+			{
+				drawErrorRect(item->rect.left, item->rect.top, item->rect.width, item->rect.height, 1u,
+					blink ? 0xff0000u : 0xffffffu);
+			}
+		}
+	}
+
+	// Unlock the input buffers (allow optical and input signals to be modified)
+	//
+	externalBusBridgeReadUnlock();
+
+	lua_settop(rvduLuaState, 0);
+
+	if (drawingPhase == true)
+	{
+		(void)pushVideoBuffer();
+	}
+
+	return;
+}
+
+// Performs processing of pop-up schemas: messageBox, pinCode, etc.
+//
+void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
+{
+	//
+	// Here the external bus shall be UNLOCKED (externalBusBridgeReadUnlock was called in schemaProc())
+	//
+
+	// Stop measuring timer
+	//
+	stopMeasuringTimer(TIMER_MAINLOOP);
+
+	// Erase the screen
+	//
+	alt_u32 backColorArea = 0xf8f8f8;
+	if (writeVideoBuffer(backColorArea) == false)
+	{
+		RN_ASSERT(false);
+		return;
+	}
+
+	while (schema->retPermission == false)
+	{
+		startMeasuringTimer(TIMER_MAINLOOP);
+
+		trendsProc();
+
+		switch (type)
+		{
+		case SCENE_EDIT_MODE:
+		{
+			externalBusBridgeReadLock();
+
+			modeEditShow(schema);
+			modeEditProc(schema);
+
+			externalBusBridgeReadUnlock();
+		}
+		break;
+		case SCENE_PINCODE_MODE:
+		{
+			modePinShow(schema);
+			modePinProc(schema);
+		}
+		break;
+		case SCENE_QUESTION_MODE:
+		{
+			externalBusBridgeReadLock();
+
+			modeQuestionShow(schema);
+
+			externalBusBridgeReadUnlock();
+
+			modeQuestionProc(schema);
+		}
+		break;
+		case SCENE_LOG:
+		{
+			logSchemaShow();
+			logSchemaProc(schema);
+		}
+		break;
+		case SCENE_SIGNALS:
+		{
+			externalBusBridgeReadLock();
+
+			signalsViewShow();
+
+			externalBusBridgeReadUnlock();
+
+			signalsViewProc(schema);
+		}
+		break;
+		default:
+		{
+		}
+		break;
+		}
+
+		optoTxProc();
+
+#ifdef RVDU_SIM        
+		if (m_popUpTerminateFlag == true)
+		{
+			return;
+		}
+		Sleep(100);
+#endif
+
+		// Update time measuring timer
+		//
+		stopMeasuringTimer(TIMER_MAINLOOP);
+		setTimerValue(TIMER_MAINLOOP, measuringTimerValue(TIMER_MAINLOOP));
+	}
+
+	// Start measuring timer
+	//
+	startMeasuringTimer(TIMER_MAINLOOP);
+}
+
+void schemaSetTerminate(void)
+{
+	externalBusBridgeReadUnlock();
+
+	m_terminateFlag = true;
+}
+
+#ifdef RVDU_SIM        
+void popUpSchemaSetTerminate(void)
+{
+	m_popUpTerminateFlag = true;
+}
+#endif // #ifndef RVDU_SIM        
+
+struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void)
+{
+	return m_scriptRunSchemaItem;
+}
+
+bool blinkPhase(void)
+{
+	return ((m_blinkPhase & 1u) == 1u) ? true : false;
+}
