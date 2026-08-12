@@ -49,7 +49,7 @@ namespace VFrame30
 	private:
 		struct Data
 		{
-			QString signalId = "";
+			QString signalId;
 			E::SignalType signalType = E::SignalType::Discrete;
 			E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
 			QString busTypeId;

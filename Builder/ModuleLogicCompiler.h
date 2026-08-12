@@ -5,6 +5,7 @@
 #include <HardwareLib/Connection.h>
 
 #include <CommonLib/HashedVector.h>
+#include <VFrame30/ActuatorHeader.h>
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/TuningDataStorage.h"
 
@@ -969,7 +970,8 @@ namespace Builder
 		// Actuator processing
 
 		bool createActuatorSignalSet();
-		bool createActuatorInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
+		bool createActuatorHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
+		bool createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
 		bool createActuatorInternalSignals();
 
 		bool detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);

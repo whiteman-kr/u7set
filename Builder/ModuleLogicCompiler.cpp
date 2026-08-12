@@ -777,9 +777,9 @@ namespace Builder
 			//PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
-			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
 			//PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
-			//PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
 			//PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
 			//PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			//PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
@@ -803,9 +803,71 @@ namespace Builder
 
 	bool ModuleLogicCompiler::actuatorPass2()
 	{ 
-		return true;
-	}
+		LOG_EMPTY_LINE(m_log)
 
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for Actuator %1 was started...")).arg(m_actuatorTypeID));
+
+		std::vector<ProcToCall> procs = {PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
+
+										 // PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
+
+										 // code generation functions
+
+										 PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
+
+										 // Some UalAfb items dynamically creating in time of generateAlpPhaseCode processing.
+										 // Therefore generateIdrPhaseCode, that produce UalAfb params initialization code,
+										 // called AFTER generateAlpPhaseCode!
+										 //
+										 PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeLmInfoFiles),
+										 PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeInfoLmFilesAfterOptimization),
+										 PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
+
+										 //
+
+										 PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
+										 PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+										 PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
+										 PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
+										 PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
+
+										 PROC_TO_CALL(ModuleLogicCompiler::writeResult),
+										 PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)};
+
+		bool result = runProcs(procs);
+
+		if (result == true)
+		{
+			result &= displayResourcesUsageInfo();
+		}
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #2 for Actuator %1 was successfully finished.")).arg(m_actuatorTypeID));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for Actuator %1 was finished with errors")).arg(m_actuatorTypeID));
+		}
+
+		calcOptoDiscretesStatistics();
+
+		cleanup();
+
+		return result;
+	}
 
 	const BuildActuatorType& ModuleLogicCompiler::getBuildActuatorType(const QString& actuatorTypeID)
 	{
@@ -3495,7 +3557,6 @@ namespace Builder
 
 		if (result == false)
 		{
-			bool res = srcUalSignal->isCompatible(s, log());
 			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
@@ -6853,6 +6914,30 @@ namespace Builder
 				break;
 			}
 
+			if (m_lm->isAcm() == true)
+			{
+				// actuators processing
+				//
+				if (calculateIoSignalsAddresses() == false) break;
+
+				if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
+
+				if (disposeDiscreteSignalsInBitMemory() == false) break;
+
+//				if (disposeDiscreteSignalsHeap() == false) break;
+
+				if (disposeNonAcquiredAnalogSignals() == false) break;
+
+				if (disposeNonAcquiredBuses() == false) break;
+
+				if (disposeNonAcquiredDiscreteInvertedInputSignals() == false) break;
+
+				if (disposeAnalogAndBusSignalsHeap() == false) break;
+
+				result = true;
+				break;
+			}
+
 			Q_ASSERT(false);
 		}
 		while(false);
@@ -9004,33 +9089,68 @@ namespace Builder
 
 		//
 
-		std::vector<CodeGenProcToCall> procs =
+		bool result = true;
+
+		if (isLmCompiler())
 		{
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
+			std::vector<CodeGenProcToCall> procs = {
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
+				PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
+				PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
 
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
 
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
-			PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
-		};
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
+				PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
+			};
 
-		bool result = runCodeGenProcs(procs, &m_alpCode);
+			result = runCodeGenProcs(procs, &m_alpCode);
+		}
+
+		if (isActuatorCompiler())
+		{
+			std::vector<CodeGenProcToCall> procs = {
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
+				PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
+				PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
+
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
+
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
+
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
+			};
+
+			result = runCodeGenProcs(procs, &m_alpCode);
+		}
+
 
 		//
 
@@ -20299,6 +20419,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createActuatorSignalSet()
 	{
+		m_actuatorSignals->prepareBusses();
+
 		const BuildActuatorType& actuatorType = getBuildActuatorType(m_actuatorTypeID);
 
 		if (actuatorType.isValid() == false)
@@ -20313,12 +20435,28 @@ namespace Builder
 
 		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmInputs)
 		{
-			result &= createActuatorInOutSignal(signalID, deviceAppSignal);
+			qDebug() << signalID;
+			result &= createActuatorHardwareInOutSignal(signalID, deviceAppSignal);
 		}
 
 		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmOutputs)
 		{
-			result &= createActuatorInOutSignal(signalID, deviceAppSignal);
+			qDebug() << signalID;
+			result &= createActuatorHardwareInOutSignal(signalID, deviceAppSignal);
+		}
+
+		PropertyVector<VFrame30::ActuatorSignal> swInputs = actuatorType.actuatorHeader.inputs();
+
+		for (const auto& swInput : swInputs)
+		{
+			result &= createActuatorSoftwareInOutSignal(*swInput, E::SignalInOutType::Input);
+		}
+
+		PropertyVector<VFrame30::ActuatorSignal> swOutputs = actuatorType.actuatorHeader.outputs();
+
+		for (const auto& swOutput : swOutputs)
+		{
+			result &= createActuatorSoftwareInOutSignal(*swOutput, E::SignalInOutType::Output);
 		}
 
 		result &= createActuatorInternalSignals();
@@ -20331,7 +20469,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createActuatorInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal)
+	bool ModuleLogicCompiler::createActuatorHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal)
 	{
 		TEST_PTR_RETURN_FALSE(deviceAppSignal);
 
@@ -20356,6 +20494,76 @@ namespace Builder
 		}
 
 		m_actuatorSignals->append(appSignal, m_lm);
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut)
+	{
+		for (int ch = 1; ch <= 2; ch++)
+		{
+			AppSignal* appSignal = new AppSignal;
+
+			QString signalID = as.signalIdChannel1();
+			
+			if (ch == 2)
+			{
+				signalID = as.signalIdChannel2();
+			}
+
+			appSignal->setInOutType(inOut);
+			appSignal->setAppSignalID(signalID);
+			appSignal->setCustomAppSignalID(signalID);
+			appSignal->setCaption(QString("Signal %1").arg(signalID));
+
+			appSignal->setSignalType(as.signalType());
+			appSignal->setAnalogSignalFormat(as.analogFormat());
+			appSignal->setBusTypeID(as.busTypeId());
+			appSignal->setByteOrder(E::ByteOrder::BigEndian);
+
+			int dataSize = 0;
+
+			switch (as.signalType()) 
+			{
+			case E::SignalType::Discrete:
+				dataSize = DISCRETE_SIZE;
+				break;
+
+			case E::SignalType::Analog:
+				{
+					switch (as.analogFormat()) 
+					{
+					case E::AnalogAppSignalFormat::Float32:
+						dataSize = FLOAT32_SIZE;
+						break;
+
+					case E::AnalogAppSignalFormat::SignedInt32:
+						dataSize = SIGNED_INT32_SIZE;
+						break;
+
+					default:
+						Q_ASSERT(false);
+						dataSize = 0;
+					}
+				}
+				
+				break;
+
+			case E::SignalType::Bus:
+				Q_ASSERT(false);		// TO DO detect Bus Size
+				dataSize = 32;	
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			Q_ASSERT(dataSize != 0);
+
+			appSignal->setDataSize(dataSize);
+
+			m_actuatorSignals->append(appSignal, m_lm);
+		}
+
 		return true;
 	}
 
