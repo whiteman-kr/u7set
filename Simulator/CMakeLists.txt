@@ -6,6 +6,7 @@ add_subdirectory(SimServiceClientLib)
 add_subdirectory(SimulatorConsole)
 add_subdirectory(SimulatorLib)
 add_subdirectory(RvduSimulatorLib)
+add_subdirectory(RvduSimulatorApp)
 add_subdirectory(SimulatorTests)
 
 # Add the SimulatorUi project only if code coverage is not enabled
