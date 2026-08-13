@@ -47,8 +47,10 @@ static lua_State* m_rvduLuaState = NULL; // LUA state object
 
 bool rnLibInit()
 {
+#ifdef _MSC_VER
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+#endif
 
 	m_memory = (alt_u8*)malloc(m_memorySize);
 	if (m_memory == NULL)

@@ -66,6 +66,9 @@ Module description: Provides support functions for other modules (hash calculati
 
 #include "msvc_alt_types.h"
 
+extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ;
+extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE;
+
 #else
 
 #include <alt_types.h>

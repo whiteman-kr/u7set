@@ -2,8 +2,11 @@
 #define MSVC_ALT_TYPES
 
 #include <stdio.h>
-#include <crtdbg.h>
 #include <stdarg.h>
+
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#endif
 
 typedef unsigned long long alt_u64;
 typedef long long alt_64;
@@ -28,8 +31,11 @@ inline void alt_printf(const char* format, ...)
 
     va_end(args);
 
-    _RPT1(_CRT_WARN, "%s", buffer);
     printf("%s", buffer);
+
+#ifdef _MSC_VER
+    _RPT1(_CRT_WARN, "%s", buffer);
+#endif
 }
 
 #define fl_fopen fopen
@@ -38,8 +44,5 @@ inline void alt_printf(const char* format, ...)
 #define fl_fclose fclose
 #define fl_fseek fseek
 #define fl_ftell ftell
-
-extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ;
-extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE;
 
 #endif
