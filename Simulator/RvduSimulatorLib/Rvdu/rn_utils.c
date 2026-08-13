@@ -72,10 +72,6 @@ Module description: Provides support functions for other modules (hash calculati
 #include "../rvdu_bsp/system.h"
 #include <altera_avalon_performance_counter.h>
 
-#else
-
-#include <windows.h>
-
 #endif
 // Microsoft Visual Studio-specific
 
@@ -241,8 +237,7 @@ alt_u64 calcCrc64(const alt_u8* src, alt_u32 size)
 }
 
 #ifdef RVDU_SIM // Windows-specific
-static LARGE_INTEGER  m_counterStart[TIMER_COUNT] = {0};
-static LARGE_INTEGER  m_counterFreq[TIMER_COUNT] = { 0 };
+static struct timespec m_counter[TIMER_COUNT] = { 0 };
 static alt_u32  m_tickCount[TIMER_COUNT] = { 0 };
 #endif
 
@@ -264,8 +259,7 @@ void startMeasuringTimer(alt_u8 timerIndex)
 #ifndef RVDU_SIM // Nios-specific
 	PERF_BEGIN(PERFORMANCE_COUNTER_0_BASE, timerIndex);
 #else
-	QueryPerformanceFrequency(&m_counterFreq[timerIndex]);
-	QueryPerformanceCounter(&m_counterStart[timerIndex]);
+	(void)timespec_get(&m_counter[timerIndex], TIME_UTC);
 #endif
 }
 
@@ -280,10 +274,13 @@ void stopMeasuringTimer(alt_u8 timerIndex)
 #ifndef RVDU_SIM // Nios-specific
 	PERF_END(PERFORMANCE_COUNTER_0_BASE, timerIndex);
 #else
-	LARGE_INTEGER m_counterEnd = { 0 };
-	QueryPerformanceCounter(&m_counterEnd);
-	double elapsed = (((double)m_counterEnd.QuadPart - (double)m_counterStart[timerIndex].QuadPart) / (double)m_counterFreq[timerIndex].QuadPart);
-	elapsed *= 1000.0;
+	struct timespec ts;
+	(void)timespec_get(&ts, TIME_UTC);
+
+	long long seconds = ts.tv_sec - m_counter[timerIndex].tv_sec;
+	long long nanoseconds = ts.tv_nsec - m_counter[timerIndex].tv_nsec;
+
+	alt_u32 elapsed = (alt_u32)((seconds * 1000) + (nanoseconds / 1000000));
 	m_tickCount[timerIndex] = (alt_u32)elapsed;
 #endif
 }
@@ -315,13 +312,13 @@ LocalTime currentTime(void)
 
 	struct tm* t = localtime(&ts.tv_sec);
 
-	tm.wYear = t->tm_year + 1900u;
-	tm.wMonth = t->tm_mon + 1u;
-	tm.wDay = t->tm_mday;
+	tm.wYear = (alt_u16)(t->tm_year + 1900u);
+	tm.wMonth = (alt_u16)(t->tm_mon + 1u);
+	tm.wDay = (alt_u16)(t->tm_mday);
 
-	tm.wHour = t->tm_hour;
-	tm.wMinute = t->tm_min;
-	tm.wSecond = t->tm_sec;
+	tm.wHour = (alt_u16)(t->tm_hour);
+	tm.wMinute = (alt_u16)(t->tm_min);
+	tm.wSecond = (alt_u16)(t->tm_sec);
 	tm.wMilliseconds = (alt_u16)(ts.tv_nsec / 1000000u);
 #else
 	tm.wYear = readEBB16(ADDR_RTU_YEAR);
@@ -344,7 +341,7 @@ alt_u16 currentSecs(void)
 	(void)timespec_get(&ts, TIME_UTC);
 
 	struct tm* t = localtime(&ts.tv_sec);
-	return t->tm_sec;
+	return (alt_u16)t->tm_sec;
 #else
 	return readEBB16(ADDR_RTU_SECOND);
 #endif
