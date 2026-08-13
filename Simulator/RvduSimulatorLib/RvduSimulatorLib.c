@@ -883,3 +883,20 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 	return result;
 }
 
+void alt_printf(const char* format, ...)
+{
+    char buffer[4096];
+
+    va_list args;
+    va_start(args, format);
+
+    vsnprintf(buffer, sizeof(buffer), format, args);
+
+    va_end(args);
+
+    printf("%s", buffer);
+
+#ifdef _MSC_VER
+    _RPT1(_CRT_WARN, "%s", buffer);
+#endif
+}

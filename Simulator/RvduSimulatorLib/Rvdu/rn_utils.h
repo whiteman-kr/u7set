@@ -352,6 +352,10 @@ LocalTime localTime(alt_u64 timeCode);
 void alt_printf(const char* fmt, ... );
 #endif // ALT_STDOUT_PRESENT
 
+#else
+
+void alt_printf(const char* fmt, ... );
+
 #endif // RVDU_SIM        
 
 #endif  // RN_UTILS_H
