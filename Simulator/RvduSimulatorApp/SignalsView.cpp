@@ -94,9 +94,9 @@ void SignalsView::setupUi()
 	layout->addWidget(m_tableWidget);
 
 	connect(m_tableWidget,
-			&QTableWidget::itemSelectionChanged,
+			&QTableWidget::itemDoubleClicked,
 			this,
-			[this]()
+			[this](QTableWidgetItem* /*item*/)
 			{
 				auto rows = m_tableWidget->selectionModel()->selectedRows();
 				if (rows.isEmpty() == true)
@@ -254,6 +254,9 @@ void SignalsView::fillSignalsList()
 			}
 			m_tableWidget->setItem(i, c++, createTableItem(optoPort));
 		}
+
+		// Value
+		m_tableWidget->setItem(i, c++, createTableItem(""));
 	}
 
 	updateSignalValues();
@@ -261,7 +264,14 @@ void SignalsView::fillSignalsList()
 
 void SignalsView::updateSignalValues()
 {
-	for (alt_u16 i = 0; i < rnLibAppSignalsCount(); i++)
+	alt_u16 count = m_tableWidget->rowCount();
+
+	if (count != rnLibAppSignalsCount() || count == 0) 
+	{
+		return;
+	}
+		
+	for (alt_u16 i = 0; i < count; i++)
 	{
 		const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
 		if (param == NULL)
@@ -297,7 +307,15 @@ void SignalsView::updateSignalValues()
 				;
 			}
 		}
-		m_tableWidget->setItem(i, m_tableHeaders.size() - 1, createTableItem(value));
+
+		QTableWidgetItem* item = m_tableWidget->item(i, m_tableHeaders.size() - 1);
+		if (item == nullptr) 
+		{
+			Q_ASSERT(item);
+			continue;
+		}
+		item->setText(value);
+
 	}
 }
 

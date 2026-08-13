@@ -283,8 +283,7 @@ bool rnLibStartSim(const char* buildFolder,
 		if (m_rvduLuaState == NULL)
 		{
 			setStartupStage(STAGE_LUA_INIT_ERR);
-			alt_printf("scriptApiRegistration failed.");
-			return 0;
+			return false;
 		}
 	}
 
