@@ -20,6 +20,8 @@ set (TC_SOURCES
     RvduSimThread.h
     RvduWidget.cpp
     RvduWidget.h
+	SignalsView.cpp
+	SignalsView.h
 )
 
 set (TC_RESOURCES
@@ -67,6 +69,9 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	
 )
+
+target_compile_definitions(${TARGET} PRIVATE RVDU_SIM)
+
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 

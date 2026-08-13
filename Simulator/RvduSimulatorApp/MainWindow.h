@@ -20,7 +20,6 @@ private slots:
 	void onShowAbout();
 
 private:
-	bool parseCommandLine();
 	void setupUi();
 	
 	void createMenu();

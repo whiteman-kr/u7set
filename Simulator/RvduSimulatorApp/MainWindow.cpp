@@ -2,6 +2,7 @@
 #include <RvduSimulatorLib.h>
 #include "RvduSimThread.h"
 #include "RvduWidget.h"
+#include "SignalsView.h"
 
 #include <QTimer>
 #include <QSettings>
@@ -136,7 +137,7 @@ void MainWindow::onTimer()
 
 void MainWindow::onSignals()
 {
-	// TODO: Signals edit dialog here
+	SignalsView* dialogView = SignalsView::create(this);
 }
 
 void MainWindow::onShowAbout()
@@ -174,11 +175,11 @@ void MainWindow::createMenu()
 	connect(a, &QAction::triggered, this, &QMainWindow::close);
 	fileMenu->addAction(a);
 
-	auto signalsMenu = menuBar()->addMenu(tr("&Tools"));
+	auto signalsMenu = menuBar()->addMenu(tr("&Signals"));
 
-	QAction* import = new QAction(tr("Import..."), this);
-	connect(import, &QAction::triggered, this, &MainWindow::onSignals);
-	signalsMenu->addAction(import);
+	QAction* signalsView = new QAction(tr("Signals View"), this);
+	connect(signalsView, &QAction::triggered, this, &MainWindow::onSignals);
+	signalsMenu->addAction(signalsView);
 
 	auto helpMenu = menuBar()->addMenu(tr("&?"));
 
