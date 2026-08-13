@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "RvduSimulatorLib.h"
+
 #include "defs.h"
 #include "rn_cfg.h"
 #include "rn_desc.h"
@@ -42,66 +44,6 @@ static alt_u16 m_subsystemKey = 0;
 
 static lua_State* m_rvduLuaState = NULL; // LUA state object
 
-static const int m_logFileCount = 9999;
-static const int m_logFileMaxSize = 1048576;
-static int m_logFileIndex = 0;
-
-static void writeLogFileMessage(const char* message)
-{
-	FILE* logFile = NULL;
-
-	do
-	{
-		char logFileName[STRING_MAX_LEN];
-		sprintf(logFileName, "RnSoftwareSim_%04d.log", m_logFileIndex);
-
-		logFile = fopen(logFileName, "a");
-		if (logFile == NULL)
-		{
-			return;
-		}
-
-		long size = ftell(logFile); // Get current position (size in bytes)
-		if (size < m_logFileMaxSize)
-		{
-			break;
-		}
-
-		// Open next file
-		//
-		fclose(logFile);
-		logFile = NULL;
-
-		m_logFileIndex++;
-	} while (m_logFileIndex < m_logFileCount);
-
-
-	if (logFile != NULL)
-	{
-		// Get current time with nanosecond precision
-		struct timespec ts;
-		(void)timespec_get(&ts, TIME_UTC);
-
-		struct tm* t = localtime(&ts.tv_sec);
-
-		char text[STRING_MAX_LEN];
-		snprintf(text,
-				 STRING_MAX_LEN,
-				 "%02d.%02d.%04d %02d.%02d.%02d.%03d\t%s\n",
-				 t->tm_mday,
-				 t->tm_mon + 1u,
-				 t->tm_year + 1900u,
-				 t->tm_hour,
-				 t->tm_min,
-				 t->tm_sec,
-				 ts.tv_nsec / 1000000u,
-				 message);
-
-		fputs(text, logFile);
-
-		fclose(logFile);
-	}
-}
 
 bool rnLibInit()
 {
@@ -137,8 +79,6 @@ bool rnLibInit()
 
 	TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE = (alt_u16*)m_externalBusBridgeWrite;
 
-	setLogRecordHandler(writeLogFileMessage);
-
 	return true;
 }
 
@@ -164,14 +104,14 @@ void rnLibShutdown()
 }
 
 bool rnLibStartSim(const char* buildFolder,
-				   alt_u16 subsystemKey,
-				   alt_u32* pVideoBuffer,
-				   alt_u32* pHdmiBuffer,
+				   unsigned int subsystemKey,
+				   char* pVideoBuffer,
+				   char* pHdmiBuffer,
 				   int screenWidth,
 				   int screenHeight)
 {
 	m_buildFolder = buildFolder;
-	m_subsystemKey = subsystemKey;
+	m_subsystemKey = (alt_u16)subsystemKey;
 
 	// Memory initialization
 	//
@@ -293,8 +233,8 @@ bool rnLibStartSim(const char* buildFolder,
 
 	// Initialize video memory
 	//
-	moduleRnVbufInitialize(pVideoBuffer, pHdmiBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
-	moduleRnPrimInitialize(pVideoBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
+	moduleRnVbufInitialize((alt_u32*)pVideoBuffer, (alt_u32*)pHdmiBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
+	moduleRnPrimInitialize((alt_u32*)pVideoBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
 
 	// Show the logo
 	//
@@ -487,8 +427,6 @@ bool rnLibStartSim(const char* buildFolder,
 
 	setStartupStage(STAGE_RUNNING);
 
-	writeLogFileMessage("Simulator started.");
-
 	return true;
 }
 
@@ -498,15 +436,18 @@ void rnLibStopSim()
 	moduleRnKbdUninitialize();
 	moduleRnVbufUninitialize();
 	moduleRnSignalsUninitialize();
-
-	writeLogFileMessage("Simulator terminated.");
 }
 
-void rnLibClickEvent(alt_u16 x, alt_u16 y)
-{ setTouchEvent(x, y); }
+void rnLibClickEvent(unsigned int x, unsigned int y)
+{ 
+	setTouchEvent((alt_u16)x, (alt_u16)y)
+	;
+}
 
-void rnLibKeyPressEvent(alt_u8 code)
-{ setPressedKey(code); }
+void rnLibKeyPressEvent(unsigned int code)
+{ 
+	setPressedKey((alt_u16)code); 
+}
 
 void rnLibVideoBufferLock()
 {
@@ -569,44 +510,67 @@ bool rnLibLoop()
 }
 
 void rnLibLoopShutdown() // Used to break the pop-up loop
-{ popUpSchemaSetTerminate(); }
+{ 
+	popUpSchemaSetTerminate(); 
+}
 
-alt_u16 rnLibAppSignalsCount(void)
-{ return appSignalsCount(); }
+void rnLibSetLogRecordHandler(RnLibLogRecordHandler handler) 
+{ 
+	setLogRecordHandler(handler); 
+}
 
-const struct VduAppSignalParam* const rnLibAppSignalParam(alt_u16 index)
-{ return appSignalParamByIndex(index); }
+unsigned int rnLibAppSignalsCount(void)
+{ 
+	return appSignalsCount(); 
+}
 
-const char* const rnLibAppSignalID(alt_u16 index)
-{ return appSignalID(index); }
+const struct VduAppSignalParam* const rnLibAppSignalParam(unsigned int index)
+{ 
+	return appSignalParamByIndex((alt_u16)index); 
+}
 
-const char* const rnLibAppSignalCustomID(alt_u16 index)
-{ return customAppSignalID(index); }
+const char* const rnLibAppSignalID(unsigned int index)
+{ 
+	return appSignalID((alt_u16)index); 
+}
 
-const char* const rnLibAppSignalCaption(alt_u16 index)
-{ return signalCaption(index); }
+const char* const rnLibAppSignalCustomID(unsigned int index)
+{
+	return customAppSignalID((alt_u16)index); 
+}
 
-const char* const rnLibAppSignalUnit(alt_u16 index)
-{ return signalUnit(index); }
+const char* const rnLibAppSignalCaption(unsigned int index)
+{ 
+	return signalCaption((alt_u16)index); 
+}
 
-alt_u16 rnLibTxAppSignalsCount(void)
-{ return txAppSignalsCount(); }
+const char* const rnLibAppSignalUnit(unsigned int index)
+{ 
+	return signalUnit((alt_u16)index); 
+}
 
-const struct VduTxRxAppSignal* const rnLibTxAppSignal(alt_u16 index)
-{ return txRxAppSignal(index); }
+unsigned int rnLibTxAppSignalsCount(void)
+{ 
+	return txAppSignalsCount(); 
+}
 
-bool rnLibSignalValueInt(alt_u16 signalIndex, alt_32* res)
+const struct VduTxRxAppSignal* const rnLibTxAppSignal(unsigned int index)
+{ 
+	return txRxAppSignal((alt_u16)index); 
+}
+
+bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 {
 	*res = 0;
 
-	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(param);
 		return false;
 	}
 
-	const struct VduAppSignalState* const state = appSignalStateByIndex(signalIndex);
+	const struct VduAppSignalState* const state = appSignalStateByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(state);
@@ -702,18 +666,18 @@ bool rnLibSignalValueInt(alt_u16 signalIndex, alt_32* res)
 	return result;
 }
 
-bool rnLibSignalValueFloat(alt_u16 signalIndex, float* res)
+bool rnLibSignalValueFloat(unsigned int signalIndex, float* res)
 {
 	*res = 0;
 
-	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(param);
 		return false;
 	}
 
-	const struct VduAppSignalState* const state = appSignalStateByIndex(signalIndex);
+	const struct VduAppSignalState* const state = appSignalStateByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(state);
@@ -747,16 +711,16 @@ bool rnLibSignalValueFloat(alt_u16 signalIndex, float* res)
 	return result;
 }
 
-bool rnLibWriteSignalValueInt(alt_u16 signalIndex, alt_32 value)
+bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 {
-	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(param);
 		return false;
 	}
 
-	struct VduAppSignalState* state = appSignalStateMutableByIndex(signalIndex);
+	struct VduAppSignalState* state = appSignalStateMutableByIndex((alt_u16)signalIndex);
 	if (state == NULL)
 	{
 		RN_ASSERT(state);
@@ -872,16 +836,16 @@ bool rnLibWriteSignalValueInt(alt_u16 signalIndex, alt_32 value)
 	return result;
 }
 
-bool rnLibWriteSignalValueFloat(alt_u16 signalIndex, float value)
+bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 {
-	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)signalIndex);
 	if (param == NULL)
 	{
 		RN_ASSERT(param);
 		return false;
 	}
 
-	struct VduAppSignalState* state = appSignalStateMutableByIndex(signalIndex);
+	struct VduAppSignalState* state = appSignalStateMutableByIndex((alt_u16)signalIndex);
 	if (state == NULL)
 	{
 		RN_ASSERT(state);

@@ -60,7 +60,6 @@ Module description: Provides the functionality for PIN code dialog.
 #else
 
 #include "msvc_alt_types.h"
-#include "windows.h"
 
 #endif
 // Microsoft Visual Studio-specific
@@ -71,12 +70,12 @@ Module description: Provides the functionality for PIN code dialog.
 #include "rn_vbuf.h"
 #include "rn_prim.h"
 #include "rn_ts.h"
-#include "rn_kbd.h"
 #include "rn_utils.h"
 #include "rn_sifp.h"
 #include "rn_schema.h"
 #include "rn_fofp.h"
 #include "rn_diag.h"
+#include "rn_kbd.h"
 
 #include "defs.h"
 
@@ -489,20 +488,20 @@ void modePinProc(struct PopUpSchemaParams* const schema)
 		{
 			switch (code)
 			{
-			case VK_RETURN: m_pressedButton = KEY_OK;		break;
-			case VK_ESCAPE:	m_pressedButton = KEY_CANCEL;	break;
-			case VK_DELETE:	m_pressedButton = KEY_ERASE;	break;
-			case '1': case VK_NUMPAD1: m_pressedButton = KEY_CHAR_BASE;		break;
-			case '2': case VK_NUMPAD2: m_pressedButton = KEY_CHAR_BASE + 1u;	break;
-			case '3': case VK_NUMPAD3: m_pressedButton = KEY_CHAR_BASE + 2u;	break;
-			case '4': case VK_NUMPAD4: m_pressedButton = KEY_CHAR_BASE + 3u; break;
-			case '5': case VK_NUMPAD5: m_pressedButton = KEY_CHAR_BASE + 4u;	break;
-			case '6': case VK_NUMPAD6: m_pressedButton = KEY_CHAR_BASE + 5u;	break;
-			case '7': case VK_NUMPAD7: m_pressedButton = KEY_CHAR_BASE + 6u;	break;
-			case '8': case VK_NUMPAD8: m_pressedButton = KEY_CHAR_BASE + 7u;	break;
-			case '9': case VK_NUMPAD9: m_pressedButton = KEY_CHAR_BASE + 8u;	break;
-			case '0': case VK_NUMPAD0: m_pressedButton = KEY_CHAR_BASE + 9u;	break;
-			case VK_BACKSPACE: m_pressedButton = KEY_ERASE;			break;
+			case RK_RETURN: m_pressedButton = KEY_OK;		break;
+			case RK_ESCAPE:	m_pressedButton = KEY_CANCEL;	break;
+			case RK_DELETE:	m_pressedButton = KEY_ERASE;	break;
+			case '1': case RK_NUMPAD1: m_pressedButton = KEY_CHAR_BASE;		break;
+			case '2': case RK_NUMPAD2: m_pressedButton = KEY_CHAR_BASE + 1u;	break;
+			case '3': case RK_NUMPAD3: m_pressedButton = KEY_CHAR_BASE + 2u;	break;
+			case '4': case RK_NUMPAD4: m_pressedButton = KEY_CHAR_BASE + 3u; break;
+			case '5': case RK_NUMPAD5: m_pressedButton = KEY_CHAR_BASE + 4u;	break;
+			case '6': case RK_NUMPAD6: m_pressedButton = KEY_CHAR_BASE + 5u;	break;
+			case '7': case RK_NUMPAD7: m_pressedButton = KEY_CHAR_BASE + 6u;	break;
+			case '8': case RK_NUMPAD8: m_pressedButton = KEY_CHAR_BASE + 7u;	break;
+			case '9': case RK_NUMPAD9: m_pressedButton = KEY_CHAR_BASE + 8u;	break;
+			case '0': case RK_NUMPAD0: m_pressedButton = KEY_CHAR_BASE + 9u;	break;
+			case RK_BACKSPACE: m_pressedButton = KEY_ERASE;			break;
 			default:
 			{
 				// Other key
@@ -512,7 +511,7 @@ void modePinProc(struct PopUpSchemaParams* const schema)
 		}
 		else
 		{
-			if (code == VK_RETURN)
+			if (code == RK_RETURN)
 			{
 				m_pressedButton = KEY_ERROR;
 			}

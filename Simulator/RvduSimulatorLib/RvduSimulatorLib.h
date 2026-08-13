@@ -1,7 +1,7 @@
 #ifndef RNSW_LIB_H
 #define RNSW_LIB_H
 
-#include "msvc_alt_types.h"
+//#include "msvc_alt_types.h"
 
 #include <stdbool.h>
 
@@ -10,6 +10,15 @@
 #else
 	#define RNSW_INLINE static inline // C
 #endif
+
+enum RnLibLogRecordType
+{
+	RnLibError,
+	RnLibWarning,
+	RnLibMessage
+};
+
+typedef void (*RnLibLogRecordHandler)(int /*RnLibLogRecordType*/, const char*);
 
 #ifdef __cplusplus
 extern "C"
@@ -20,13 +29,13 @@ extern "C"
 	bool rnLibInit();
 	void rnLibShutdown();
 
-	bool rnLibStartSim(const char* buildFolder, alt_u16 subsystemKey, alt_u32* pVideoBuffer, alt_u32* pHdmiBuffer, int screenWidth, int screenHeight);
+	bool rnLibStartSim(const char* buildFolder, unsigned int subsystemKey, char* pVideoBuffer, char* pHdmiBuffer, int screenWidth, int screenHeight);
 	void rnLibStopSim();
 
 	// HMI interaction
 	//
-	void rnLibClickEvent(alt_u16 x, alt_u16 y);
-	void rnLibKeyPressEvent(alt_u8 code);
+	void rnLibClickEvent(unsigned int x, unsigned int y);
+	void rnLibKeyPressEvent(unsigned int code);
 
 	void rnLibVideoBufferLock();
 	void rnLibVideoBufferUnlock();
@@ -36,24 +45,26 @@ extern "C"
 	bool rnLibLoop();
 	void rnLibLoopShutdown();	// Used to break the pop-up loop
 
+	void rnLibSetLogRecordHandler(RnLibLogRecordHandler handler);
+
 	// Signals processing
 	//
-	alt_u16 rnLibAppSignalsCount(void);
-	const struct VduAppSignalParam* const rnLibAppSignalParam(alt_u16 index);
+	unsigned int rnLibAppSignalsCount(void);
+	const struct VduAppSignalParam* const rnLibAppSignalParam(unsigned int index);
 
-	const char* const rnLibAppSignalID(alt_u16 index);
-	const char* const rnLibAppSignalCustomID(alt_u16 index);
-	const char* const rnLibAppSignalCaption(alt_u16 index);
-	const char* const rnLibAppSignalUnit(alt_u16 index);
+	const char* const rnLibAppSignalID(unsigned int index);
+	const char* const rnLibAppSignalCustomID(unsigned int index);
+	const char* const rnLibAppSignalCaption(unsigned int index);
+	const char* const rnLibAppSignalUnit(unsigned int index);
 
-	alt_u16 rnLibTxAppSignalsCount(void);
-	const struct VduTxRxAppSignal* const rnLibTxAppSignal(alt_u16 index);
+	unsigned int rnLibTxAppSignalsCount(void);
+	const struct VduTxRxAppSignal* const rnLibTxAppSignal(unsigned int index);
 
-	bool rnLibSignalValueInt(alt_u16 signalIndex, alt_32* res);
-	bool rnLibSignalValueFloat(alt_u16 signalIndex, float* res);
+	bool rnLibSignalValueInt(unsigned int signalIndex, int* res);
+	bool rnLibSignalValueFloat(unsigned int signalIndex, float* res);
 
-	bool rnLibWriteSignalValueInt(alt_u16 signalIndex, alt_32 value);
-	bool rnLibWriteSignalValueFloat(alt_u16 signalIndex, float value);
+	bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value);
+	bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value);
 
 #ifdef __cplusplus
 }

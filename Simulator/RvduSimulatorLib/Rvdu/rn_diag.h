@@ -255,7 +255,7 @@ void writeExternalDiagPacket(void);
 // Function that can be write log messages into log file
 //
 #ifdef RVDU_SIM // Simulator-specific
-typedef void (*LogRecordHandler)(const char*);
+typedef void (*LogRecordHandler)(int, const char*);
 void setLogRecordHandler(LogRecordHandler handler);
 #endif
 

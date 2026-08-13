@@ -56,50 +56,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 #include <stdbool.h>
 
-// Key codes
-//
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#define VK_RETURN		0x5Au
-#define VK_ESCAPE		0x76u
-#define VK_DELETE		0xDCu
-
-#define VK_NUMPAD1		0x69u
-#define VK_NUMPAD2		0x72u
-#define VK_NUMPAD3		0x7Au
-#define VK_NUMPAD4		0x6Bu
-#define VK_NUMPAD5		0x73u
-#define VK_NUMPAD6		0x74u
-#define VK_NUMPAD7		0x6Cu
-#define VK_NUMPAD8		0x75u
-#define VK_NUMPAD9		0x7Du
-#define VK_NUMPAD0		0x70u
-#define VK_DECIMAL		0x71u
-#define VK_SUBTRACT		0x7Bu
-#define VK_ADD			0x79u
-
-#define VK_UP			0x75u
-#define VK_DOWN			0x72u
-#define VK_LEFT			0x6Bu
-#define VK_RIGHT		0x74u
-#define VK_TAB			0x0Du
-#define VK_PRIOR		0x7Du
-#define VK_NEXT			0x7Au
-
-#define VK_BACKSPACE 	0x66u
-#define VK_E			0x24u
-#define	VK_TILDA 		0x0Eu
-
-#else
-
-#define VK_BACKSPACE 	'\b'
-#define VK_E			'E'
-#define	VK_TILDA 		192
-#endif
-
-
-//
-// Key codes
+#include "keycodes.h"
 
 // Function that initialize keyboard with ps/2
 //

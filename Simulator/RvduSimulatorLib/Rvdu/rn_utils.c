@@ -59,6 +59,7 @@ Module description: Provides support functions for other modules (hash calculati
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <time.h>
 
 #include "rn_utils.h"
 #include "rn_diag.h"
@@ -307,17 +308,21 @@ LocalTime currentTime(void)
 	LocalTime tm = { 0 };
 
 #ifdef RVDU_SIM
-	SYSTEMTIME st;
-	GetLocalTime(&st);
 
-	tm.wYear = st.wYear;
-	tm.wMonth = st.wMonth;
-	tm.wDay = st.wDay;
+	// Get current time with nanosecond precision
+	struct timespec ts;
+	(void)timespec_get(&ts, TIME_UTC);
 
-	tm.wHour = st.wHour;
-	tm.wMinute = st.wMinute;
-	tm.wSecond = st.wSecond;
-	tm.wMilliseconds = st.wMilliseconds;
+	struct tm* t = localtime(&ts.tv_sec);
+
+	tm.wYear = t->tm_year + 1900u;
+	tm.wMonth = t->tm_mon + 1u;
+	tm.wDay = t->tm_mday;
+
+	tm.wHour = t->tm_hour;
+	tm.wMinute = t->tm_min;
+	tm.wSecond = t->tm_sec;
+	tm.wMilliseconds = (alt_u16)(ts.tv_nsec / 1000000u);
 #else
 	tm.wYear = readEBB16(ADDR_RTU_YEAR);
 	tm.wMonth = readEBB16(ADDR_RTU_MONTH);
@@ -335,9 +340,11 @@ LocalTime currentTime(void)
 alt_u16 currentSecs(void)
 {
 #ifdef RVDU_SIM
-	SYSTEMTIME tm = { 0 };
-	GetLocalTime(&tm);
-	return tm.wSecond;
+	struct timespec ts;
+	(void)timespec_get(&ts, TIME_UTC);
+
+	struct tm* t = localtime(&ts.tv_sec);
+	return t->tm_sec;
 #else
 	return readEBB16(ADDR_RTU_SECOND);
 #endif
@@ -346,9 +353,9 @@ alt_u16 currentSecs(void)
 alt_u16 currentMSecs(void)
 {
 #ifdef RVDU_SIM
-	SYSTEMTIME tm = { 0 };
-	GetLocalTime(&tm);
-	return tm.wMilliseconds;
+	struct timespec ts;
+	(void)timespec_get(&ts, TIME_UTC);
+	return (alt_u16)(ts.tv_nsec / 1000000u);
 #else
 	return readEBB16(ADDR_RTU_MILLISECOND);
 #endif

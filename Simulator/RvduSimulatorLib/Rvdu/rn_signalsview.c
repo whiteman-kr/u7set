@@ -57,10 +57,6 @@ Module description: Provides signal list view.
 
 #include "sys/alt_stdio.h"
 
-#else
-
-#include <windows.h>
-
 #endif
 
 #include "rn_signalsview.h"
@@ -70,10 +66,10 @@ Module description: Provides signal list view.
 #include "rn_prim.h"
 #include "rn_vbuf.h"
 #include "rn_ts.h"
-#include "rn_kbd.h"
 #include "rn_schema.h"
 #include "rn_sifp.h"
 #include "rn_utils.h"
+#include "rn_kbd.h"
 
 #include "defs.h"
 
@@ -385,27 +381,27 @@ void signalsViewProc(struct PopUpSchemaParams* const schema)
 
 		switch (code)
 		{
-		case VK_ESCAPE:
+		case RK_ESCAPE:
 		{
 			schema->retPermission = true;
 			return;
 		}
-		case VK_UP:
+		case RK_UP:
 		{
 			signalsScrollUp();
 		}
 		break;
-		case VK_DOWN:
+		case RK_DOWN:
 		{
 			signalsScrollDown();
 		}
 		break;
-		case VK_PRIOR:
+		case RK_PRIOR:
 		{
 			signalsScrollPgUp();
 		}
 		break;
-		case VK_NEXT:
+		case RK_NEXT:
 		{
 			signalsScrollPgDown();
 		}

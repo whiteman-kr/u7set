@@ -47,7 +47,6 @@ Module description: Provides the functionality for displaying confirmation messa
 #else
 
 #include "msvc_alt_types.h"
-#include <windows.h>
 
 #endif
 // Microsoft Visual Studio-specific
@@ -59,12 +58,12 @@ Module description: Provides the functionality for displaying confirmation messa
 #include "rn_vbuf.h"
 #include "rn_prim.h"
 #include "rn_ts.h"
-#include "rn_kbd.h"
 #include "rn_utils.h"
 #include "rn_schema.h"
 #include "rn_fofp.h"
 #include "rn_diag.h"
 #include "rn_cfg.h"
+#include "rn_kbd.h"
 
 #include "defs.h"
 
@@ -318,7 +317,7 @@ void modeQuestionProc(struct PopUpSchemaParams* const schema)
 
 		switch (code)
 		{
-		case VK_RETURN:
+		case RK_RETURN:
 		{
 			schema->retPermission = true;
 			schema->boolResult = true;
@@ -326,7 +325,7 @@ void modeQuestionProc(struct PopUpSchemaParams* const schema)
 			m_textInitialized = false;
 		}
 		break;
-		case VK_ESCAPE:
+		case RK_ESCAPE:
 		{
 			schema->retPermission = true;
 

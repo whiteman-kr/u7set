@@ -207,7 +207,7 @@ static inline void addLogRecord(enum LogRecordType type, int code, const char* m
 #ifdef RVDU_SIM // Simulator-specific
 	if (m_logRecordHandler != NULL)
 	{
-		m_logRecordHandler(message);
+		m_logRecordHandler((int)type, message);
 	}
 #endif
 	

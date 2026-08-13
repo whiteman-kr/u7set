@@ -50,10 +50,6 @@ Module description: Provides log view.
 
 #include "sys/alt_stdio.h"
 
-#else
-
-#include <windows.h>
-
 #endif
 
 #include "rn_logview.h"
@@ -63,9 +59,9 @@ Module description: Provides log view.
 #include "rn_prim.h"
 #include "rn_vbuf.h"
 #include "rn_ts.h"
-#include "rn_kbd.h"
 #include "rn_schema.h"
 #include "rn_utils.h"
+#include "rn_kbd.h"
 
 #include "defs.h"
 
@@ -410,27 +406,27 @@ void logSchemaProc(struct PopUpSchemaParams* const schema)
 
 		switch (code)
 		{
-		case VK_ESCAPE:
+		case RK_ESCAPE:
 		{
 			schema->retPermission = true;
 			return;
 		}
-		case VK_UP:
+		case RK_UP:
 		{
 			logScrollUp();
 		}
 		break;
-		case VK_DOWN:
+		case RK_DOWN:
 		{
 			logScrollDown();
 		}
 		break;
-		case VK_PRIOR:
+		case RK_PRIOR:
 		{
 			logScrollPgUp();
 		}
 		break;
-		case VK_NEXT:
+		case RK_NEXT:
 		{
 			logScrollPgDown();
 		}

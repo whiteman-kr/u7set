@@ -25,6 +25,7 @@ set(TARGET RvduSimulatorLib)
 
 qt_add_library(${TARGET} STATIC
 	./Rvdu/defs.h            
+	./Rvdu/keycodes.h
 	./Rvdu/msvc_alt_types.h  
 	./Rvdu/rn_ainput.c       
 	./Rvdu/rn_ainput.h       
@@ -81,17 +82,18 @@ target_compile_definitions(${TARGET} PRIVATE RVDU_SIM _CRT_SECURE_NO_WARNINGS)
 target_include_directories(${TARGET} PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(${TARGET} PRIVATE ${LUA_LIBRARIES})
 
-#target_precompile_headers(${TARGET} PRIVATE
-#)
+target_precompile_headers(${TARGET} PRIVATE
+)
 
-#target_link_libraries(${TARGET} PUBLIC Qt6::Core)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core)
 #target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView SimulatorGrpc)
 
 #target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 
-#target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR})
-#target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Rvdu)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 #add_code_coverage_options(${TARGET} CODE_COVERAGE)

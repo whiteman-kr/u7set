@@ -81,7 +81,6 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 
 #else
 
-#include <windows.h>
 #include "msvc_alt_types.h"
 
 #endif // End of Microsoft Visual Studio-specific
@@ -94,7 +93,6 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #include "rn_diag.h"
 #include "rn_vbuf.h"
 #include "rn_prim.h"
-#include "rn_kbd.h"
 #include "rn_ts.h"
 #include "rn_utils.h"
 #include "rn_scfp.h"
@@ -108,6 +106,7 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #include "rn_signalsview.h"
 #include "rn_trendview.h"
 #include "rn_trendproc.h"
+#include "rn_kbd.h"
 
 #include "defs.h"
 
@@ -155,7 +154,7 @@ static void processSchemaKeys(void)
 
 	alt_u16 key = pressedKey();
 
-	if ((key == VK_LEFT) || (key == VK_RIGHT))
+	if ((key == RK_LEFT) || (key == RK_RIGHT))
 	{
 		// Switch to previous/Next schema
 		//
@@ -200,7 +199,7 @@ static void processSchemaKeys(void)
 
 		// Get new schema index
 		//
-		if (key == VK_LEFT)
+		if (key == RK_LEFT)
 		{
 			if (currentSchemaIndex == 0u)
 			{
@@ -237,12 +236,12 @@ static void processSchemaKeys(void)
 
 	switch (key)
 	{
-	case VK_TILDA:
+	case RK_TILDA:
 	{
 		popUpSchema(SCENE_LOG, &schema);
 	}
 	break;
-	case VK_TAB:
+	case RK_TAB:
 	{
 		popUpSchema(SCENE_SIGNALS, &schema);
 	}
@@ -772,7 +771,10 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		{
 			return;
 		}
-		Sleep(100);
+		
+		// Sleep for 100 ms
+		static struct timespec ts = {.tv_sec = 0, .tv_nsec = 100 * 1000000};
+		thrd_sleep(&ts, NULL);
 #endif
 
 		// Update time measuring timer
