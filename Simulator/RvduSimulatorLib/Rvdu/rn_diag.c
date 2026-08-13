@@ -54,6 +54,7 @@ Module description: Provides diagnostics functions.
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <stddef.h>
 
 #ifndef RVDU_SIM // Microsoft Visual Studio-specific
 

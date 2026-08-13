@@ -71,6 +71,7 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 
 #include <string.h>
 #include <assert.h>
+#include <stddef.h>
 
 #include "rn_scfp.h"
 #include "rn_cfg.h"
