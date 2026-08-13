@@ -66,6 +66,7 @@ Module description: Provides the functionality for entering the analog value.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #ifndef RVDU_SIM // Microsoft Visual Studio-specific
 

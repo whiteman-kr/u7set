@@ -60,6 +60,7 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 #include <string.h>
 #include <stdlib.h>
 #include <io.h>
+#include <errno.h>
 
 bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, char* const equipmentId, alt_u16 bufferSize)
 {

@@ -60,6 +60,7 @@ Module description: Provides support functions for other modules (hash calculati
 #include <stdint.h>
 #include <assert.h>
 #include <time.h>
+#include <errno.h>
 
 #include "rn_utils.h"
 #include "rn_diag.h"

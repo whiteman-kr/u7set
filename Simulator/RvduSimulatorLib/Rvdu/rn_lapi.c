@@ -81,6 +81,8 @@ RADIX-4109, add itemRectSetText function
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <errno.h>
+
 
 #ifndef RVDU_SIM // Microsoft Visual Studio-specific
 
