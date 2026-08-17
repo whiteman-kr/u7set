@@ -3,6 +3,8 @@
 #include "../SimEeprom.h"
 #include "../SimScopedLog.h"
 
+#include <SimulatorLib/SimDeviceState.h>
+
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/ModuleFirmware.h>
 
@@ -21,6 +23,24 @@ namespace Sim
 	public:
 		explicit BaseModuleImpl(SimulatorPrivate* simulator);
 		virtual ~BaseModuleImpl();
+
+	public:
+		// Running LM/VDU/ACM..., start running one cycle.
+		//
+		virtual QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime,
+											const QDateTime& currentDateTime,
+											qint64 workcycle,
+											bool reset,
+											std::condition_variable& cvFinished);
+
+		virtual bool receiveConnectionsData(std::chrono::microseconds currentTime);
+
+		virtual std::chrono::microseconds cycleDuration() const;
+
+		[[nodiscard]] virtual bool isPowerOff() const;
+		virtual void setPowerOff(bool value);
+
+		[[nodiscard]] virtual DeviceState deviceState() const;
 
 	protected:
 		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);

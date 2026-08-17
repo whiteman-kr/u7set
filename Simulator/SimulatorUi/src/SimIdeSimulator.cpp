@@ -199,6 +199,16 @@ namespace SimUi
 		return m_simulator->logicModules();
 	}
 
+	std::optional<Sim::Module> SimIdeSimulator::module(QString equipmentId) const
+	{
+		return m_simulator->module(equipmentId);
+	}
+
+	std::vector<Sim::Module> SimIdeSimulator::modules() const
+	{
+		return m_simulator->modules();
+	}
+
 	Sim::AppSignalManager& SimIdeSimulator::appSignalManager()
 	{
 		return m_simulator->appSignalManager();

@@ -35,13 +35,13 @@ namespace Sim
 
 		// Running LM, start running one cycle.
 		//
-		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime,
-									const QDateTime& currentDateTime,
-									qint64 workcycle,
-									bool reset,
-									std::condition_variable& cvFinished);
+		virtual QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime,
+											const QDateTime& currentDateTime,
+											qint64 workcycle,
+											bool reset,
+											std::condition_variable& cvFinished) override;
 
-		bool receiveConnectionsData(std::chrono::microseconds currentTime);
+		virtual bool receiveConnectionsData(std::chrono::microseconds currentTime) override;
 
 	protected slots:
 		void setAppCommands(bool ok);
@@ -50,7 +50,7 @@ namespace Sim
 		const ::LogicModuleInfo& logicModuleExtraInfo() const;
 		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
 
-		std::chrono::microseconds cycleDuration() const;
+		virtual std::chrono::microseconds cycleDuration() const override;
 
 		const Eeprom& tuningEeprom() const;
 		const Eeprom& confEeprom() const;
@@ -67,10 +67,10 @@ namespace Sim
 											  // accessing it!
 
 		[[nodiscard]] RuntimeMode runtimeMode() const;
-		[[nodiscard]] DeviceState deviceState() const;
+		[[nodiscard]] virtual DeviceState deviceState() const override;
 
-		[[nodiscard]] bool isPowerOff() const;
-		void setPowerOff(bool value);
+		[[nodiscard]] virtual bool isPowerOff() const override;
+		virtual void setPowerOff(bool value) override;
 
 		[[nodiscard]] bool armingKey() const;
 		void setArmingKey(bool value);

@@ -96,12 +96,13 @@ qt_add_library(${TARGET} STATIC
 	./src/Modules/SimCommandProcessor_LM5_LM6.cpp
 	./src/Modules/SimCommandProcessor_LM5_LM6.h
 	./src/Modules/SimDeviceEmulatorCommon.h
+	./src/Modules/SimDeviceState.cpp
 	./src/Modules/SimLmDeviceEmulator.cpp
 	./src/Modules/SimLmDeviceEmulator.h
-	./src/Modules/SimDeviceState.cpp
 	./src/Modules/SimLogicModule.cpp
 	./src/Modules/SimLogicModuleImpl.cpp
 	./src/Modules/SimLogicModuleImpl.h
+	./src/Modules/SimModule.cpp
 	./src/Modules/SimVduDeviceEmulator.cpp
 	./src/Modules/SimVduDeviceEmulator.h
 	./src/Modules/SimVduModuleImpl.cpp
@@ -123,6 +124,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SimulatorLib/SimDeviceCommand.h
 	./include/SimulatorLib/SimDeviceState.h
 	./include/SimulatorLib/SimLogicModule.h
+	./include/SimulatorLib/SimModule.h
 	./include/SimulatorLib/SimOverrideRamRecord.h
 	./include/SimulatorLib/SimOverrideSignals.h
 	./include/SimulatorLib/SimProfiles.h

@@ -35,13 +35,14 @@ namespace Sim
 
 		// m_lans.clear();
 
-		// m_commands.clear();
-
 		{
 			m_cacheMutex.lock();
 			m_cachedLogicModuleInfo = Hardware::LogicModuleInfo();
 			m_cacheMutex.unlock();
 		}
+
+		m_shared.memoryKey.clear();
+		m_shared.clientSharedMemory.reset();
 
 		return true;
 	}
@@ -64,32 +65,15 @@ namespace Sim
 
 		m_lmDescription = lmDescription;
 
-		m_confEeprom = confEeprom;
-
-		// Create specific CommnadProcessor
-		//
-		// m_commandProcessor = std::unique_ptr<CommandProcessor>(CommandProcessor::createInstance(this));
-
-		// if (m_commandProcessor == nullptr)
-		//{
-		//	m_log.writeWarning(QString("There is no simulation for %1, LmDescription.name = %2")
-		//						   .arg(logicModuleInfo.equipmentId)
-		//						   .arg(lmDescription.name()));
-		//	return DeviceError::NoCommandProcessor;
-		// }
-
 		// --
 		//
+		m_confEeprom = confEeprom;
+
 		if (bool ok = initEeprom(); //
 			ok == false)
 		{
 			return DeviceError::InitEepromError;
 		}
-
-		// Init RAM
-		// Command processor needs initialized memory areas, so it can cache them to EmulatorCommand
-		//
-		initMemory();
 
 		// Get LMs connections
 		//
@@ -97,16 +81,30 @@ namespace Sim
 
 		// Set LogicModuleExtraInfo and get LAN Connections
 		//
-		if (std::optional<::LogicModuleInfo> extraInfo = logicModulesExtraInfo.get(equipmentId()); extraInfo.has_value() == false)
+		if (std::optional<::LogicModuleInfo> extraInfo = logicModulesExtraInfo.get(equipmentId()); //
+			extraInfo.has_value() == false)
 		{
-			setLogicModuleExtraInfo({});
+			// Now for VDU ::LogicModuleInfo is not stored in file Commin/LogicModules.xml, maybe it will be in future, so for now we just
+			// log this error and continue.
+			//
+			::LogicModuleInfo ei{};
+			ei.equipmentID = equipmentId();
+			ei.caption = logicModuleInfo.equipmentId;
+			ei.subsystemID = logicModuleInfo.subsystemId;
+			ei.subsystemKey = 0;
+			ei.lmNumber = logicModuleInfo.lmNumber;
+			ei.subsystemChannel = QString{"%1"}.arg(QChar('A' + static_cast<int>(logicModuleInfo.channel)));
 
-			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
-								 .arg(equipmentId())
-								 .arg(Directory::COMMON)
-								 .arg(File::LOGIC_MODULES_XML));
+			setLogicModuleExtraInfo(ei);
 
-			return DeviceError::ModuleExtraInfoNotFound;
+			m_log.writeWarning(tr("Information for VDU %1 is not found (file %2/%3)")
+								   .arg(equipmentId())
+								   .arg(Directory::COMMON)
+								   .arg(File::LOGIC_MODULES_XML));
+
+			// Uncomment the next line when VDU ::LogicModuleInfo will be stored in file Commin/LogicModules.xml
+			//
+			// return DeviceError::ModuleExtraInfoNotFound;
 		}
 		else
 		{
@@ -118,13 +116,6 @@ namespace Sim
 		// if (bool ok = m_lans.init(logicModuleExtraInfo()); ok == false)
 		//{
 		//	return DeviceError::LanControllerError;
-		//}
-
-		// --
-		//
-		// if (bool ok = parseAppLogicCode(); ok == false)
-		//{
-		//	return DeviceError::ParsingAppLogicError;
 		//}
 
 		return DeviceError::Ok;
@@ -139,286 +130,132 @@ namespace Sim
 
 	bool VduDeviceEmulator::reset()
 	{
-		assert(false); // TODO
-		// m_log.writeDebug(tr("Reset"));
-		// setDeviceState(DeviceState::Start);
+		m_log.writeDebug(tr("Reset"));
+		setDeviceState(DeviceState::Start);
 		return true;
 	}
 
 	bool VduDeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle)
 	{
-		assert(false);
-		return false;
+		if (m_shared.clientSharedMemory.has_value() == false)
+		{
+			// Create shared memory for VDU simulator
+			//
+			m_shared.memoryKey = QString{"VduSimulator.pid:%1.eid:%2"}.arg(qApp->applicationPid()).arg(equipmentId());
+			m_shared.clientSharedMemory.emplace(m_shared.memoryKey);
 
-		// bool ok = false;
+			bool created = m_shared.clientSharedMemory->create(sizeof(SimVduSharedData::SharedData), QSharedMemory::ReadWrite);
+			if (created == false)
+			{
+				if (m_shared.clientSharedMemory->error() != QSharedMemory::AlreadyExists)
+				{
+					m_log.writeError(tr("Create shared memory error: %1").arg(m_shared.clientSharedMemory->errorString()));
+					m_shared.clientSharedMemory.reset();
 
-		// if (deviceState() == DeviceState::Start)
-		//{
-		//	bool processStartOk = processStartMode();
-		//	if (processStartOk == false)
-		//	{
-		//		return false;
-		//	}
-		// }
+					setDeviceState(DeviceState::Fault);
+					return false;
+				}
 
-		// if (auto currentDeviceState = deviceState(); //
-		//  currentDeviceState == DeviceState::Fault)
-		//{
-		//	ok = processFaultMode();
-		// }
-		// else
-		//{
-		//	if (currentDeviceState == DeviceState::Off)
-		//	{
-		//		ok = processOffMode();
-		//	}
-		//	else
-		//	{
-		//		Q_ASSERT(currentDeviceState == DeviceState::Operate);
+				// If shared memory already exists, try to attach to it
+				//
+				bool attached = m_shared.clientSharedMemory->attach(QSharedMemory::ReadWrite);
+				if (attached == false)
+				{
+					m_log.writeError(tr("Attach to existing shared memory error: %1").arg(m_shared.clientSharedMemory->errorString()));
+					m_shared.clientSharedMemory.reset();
+					setDeviceState(DeviceState::Fault);
+					return false;
+				}
+			}
+			else
+			{
+				// Just created shared memory, initialize it
+				//
+				assert(m_shared.clientSharedMemory->isAttached() == true);
 
-		//		ok = processOperate(currentTime, currentDateTime, workcycle);
-		//	}
-		//}
+				auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+				if (sharedData == nullptr)
+				{
+					m_log.writeError(tr("Shared memory data pointer is null."));
+					m_shared.clientSharedMemory.reset();
+					setDeviceState(DeviceState::Fault);
+					return false;
+				}
 
-		//// Perform post run cycle actions
-		////
-		// auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+				std::scoped_lock lock{*m_shared.clientSharedMemory};
+				*sharedData = SimVduSharedData::SharedData{};
+				sharedData->size = sizeof(SimVduSharedData::SharedData);
+			}
+		}
 
-		//// qDebug() << "DeviceEmulator::runWorkcycle " << ms.count() << ", Diff: " << QDateTime::currentDateTime().toMSecsSinceEpoch() -
-		//// ms.count();
+		auto postCycleVduEmulatorUpdateFunc = [this, currentTime]()
+		{
+			if (m_shared.clientSharedMemory.has_value() == false)
+			{
+				m_log.writeError(tr("VduDeviceEmulator::runWorkcycle: Shared memory is not initialized."));
+				setDeviceState(DeviceState::Fault);
+				return;
+			}
 
-		// TimeStamp plantTime{ms.count() + currentDateTime.offsetFromUtc() * 1000};
-		// TimeStamp localTime{plantTime};
-		// TimeStamp systemTime{ms.count()};
+			if (m_shared.clientSharedMemory->isAttached() == false)
+			{
+				m_log.writeError(
+					tr("VduDeviceEmulator::runWorkcycle: Shared memory attach error %1.").arg(m_shared.clientSharedMemory->errorString()));
+				setDeviceState(DeviceState::Fault);
+				return;
+			}
 
-		//// Set LogicModule's RAM to Sim::AppSignalManager
-		////
-		// m_simulator->appSignalManager().setData(equipmentId(), ram(), plantTime, localTime, systemTime);
+			std::scoped_lock lock{*m_shared.clientSharedMemory};
 
-		//// Send reg data to AppDataSrv
-		////
-		// if (deviceState() == DeviceState::Operate && m_lans.isAppDataEnabled() == true)
-		//{
-		//	QByteArray regData;
+			auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+			sharedData->simulatorState.updateCounter++;
+			sharedData->simulatorState.deviceState = static_cast<int32_t>(deviceState());
+			sharedData->simulatorState.plantTime = currentTime.count();
 
-		//	quint32 regDataOffsetW = m_lmDescription.memory().m_appLogicWordDataOffset;
-		//	quint32 regDataSizeW = m_logicModuleExtraInfo.appDataSizeBytes / 2;
+			return;
+		};
 
-		//	if (regDataSizeW > m_lmDescription.memory().m_appLogicWordDataSize)
-		//	{
-		//		m_log.writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
-		//							 .arg(equipmentId())
-		//							 .arg(regDataOffsetW)
-		//							 .arg(regDataSizeW)
-		//							 .arg(m_lmDescription.memory().m_appLogicWordDataSize));
+		struct ScopeExit
+		{
+			std::function<void()> fn;
+			~ScopeExit()
+			{
+				assert(fn);
+				fn();
+			}
+		} guard{.fn = postCycleVduEmulatorUpdateFunc};
 
-		//		setDeviceState(DeviceState::Fault);
-		//		return false;
-		//	}
+		if (deviceState() == DeviceState::Start)
+		{
+			bool processStartOk = processStartMode();
+			if (processStartOk == false)
+			{
+				return false;
+			}
+		}
 
-		//	bool readRegBufferOk = m_ram.readToBuffer(regDataOffsetW, E::LogicModuleRamAccess::Write, regDataSizeW, &regData, true);
-		//	if (readRegBufferOk == false)
-		//	{
-		//		m_log.writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
-		//							 .arg(equipmentId())
-		//							 .arg(regDataOffsetW)
-		//							 .arg(regDataSizeW));
+		bool ok = false;
 
-		//		setDeviceState(DeviceState::Fault);
-		//		return false;
-		//	}
+		if (auto currentDeviceState = deviceState(); //
+			currentDeviceState == DeviceState::Fault)
+		{
+			ok = processFaultMode();
+		}
+		else
+		{
+			if (currentDeviceState == DeviceState::Off)
+			{
+				ok = processOffMode();
+			}
+			else
+			{
+				Q_ASSERT(currentDeviceState == DeviceState::Operate);
+				ok = processOperate(currentTime, currentDateTime, workcycle);
+			}
+		}
 
-		//	m_lans.sendAppData(regData, plantTime);
-		//}
-
-		// return ok;
+		return ok;
 	}
-
-	// Sim::CyclePhase VduDeviceEmulator::phase() const
-	//{
-	//	return m_logicUnit.phase;
-	// }
-
-	// void VduDeviceEmulator::setPhase(Sim::CyclePhase value)
-	//{
-	//	m_logicUnit.phase = value;
-	// }
-
-	// quint32 VduDeviceEmulator::programCounter() const
-	//{
-	//	return m_logicUnit.programCounter;
-	// }
-
-	// void VduDeviceEmulator::setProgramCounter(quint32 value)
-	//{
-	//	m_logicUnit.programCounter = value;
-	// }
-
-	// quint32 VduDeviceEmulator::flagCmp() const
-	//{
-	//	return m_logicUnit.flags.cmp;
-	// }
-
-	// void VduDeviceEmulator::setFlagCmp(quint32 value)
-	//{
-	//	m_logicUnit.flags.cmp = value;
-	// }
-
-	// quint16 VduDeviceEmulator::acc() const
-	//{
-	//	return m_logicUnit.acc;
-	// }
-
-	// void VduDeviceEmulator::setAcc(quint16 value)
-	//{
-	//	m_logicUnit.acc = value;
-	// }
-
-	bool VduDeviceEmulator::initMemory()
-	{
-		assert(false);
-		return false;
-
-		// bool ok = true;
-
-		// m_ram.reset();
-
-		//// RAM - I/O modules
-		////
-		// const LmDescription::Memory& memory = m_lmDescription.memory();
-
-		// for (quint32 i = 0; i < memory.m_moduleCount; i++)
-		//{
-		//	ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
-		//							  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
-		//							  memory.m_moduleDataSize,
-		//							  false,
-		//							  QString("Input I/O Module %1").arg(i + 1));
-
-		//	ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
-		//							  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
-		//							  memory.m_moduleDataSize,
-		//							  true,
-		//							  QString("Output I/O Module %1").arg(i + 1));
-		//}
-
-		//// RAM - TX/RX Opto Interfaces
-		////
-		// const LmDescription::OptoInterface& optoInterface = m_lmDescription.optoInterface();
-
-		// for (quint32 i = 0; i < optoInterface.m_optoPortCount; i++)
-		//{
-		//	ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
-		//							  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
-		//							  optoInterface.m_optoPortDataSize,
-		//							  false,
-		//							  QString("Rx Opto Port  %1").arg(i + 1));
-
-		//	ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
-		//							  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
-		//							  optoInterface.m_optoPortDataSize,
-		//							  false,
-		//							  QString("Tx Opto Port  %1").arg(i + 1));
-		//}
-
-		//// RAM - ApplicationLogic Block, bit/word access
-		////
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
-		//						  memory.m_appLogicBitDataOffset,
-		//						  memory.m_appLogicBitDataSize,
-		//						  false,
-		//						  QLatin1String("Application Logic Block (bit access)"));
-
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
-		//						  memory.m_appLogicWordDataOffset,
-		//						  memory.m_appLogicWordDataSize,
-		//						  false,
-		//						  QLatin1String("Application Logic Block (word access)"));
-
-		//// RAM - Tuninng Block
-		////
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
-		//						  memory.m_tuningDataOffset,
-		//						  memory.m_tuningDataSize,
-		//						  false,
-		//						  QLatin1String("Tuning Block"));
-
-		//// Copy EEPROM tuning data to memory
-		////
-		//{
-		//	Q_ASSERT(m_plainTuningData.size() % 2 == 0);
-
-		//	const quint16* dataPtr = reinterpret_cast<const quint16*>(m_plainTuningData.constData());
-		//	quint32 tuningDataOffset = lmDescription().memory().m_tuningDataOffset;
-
-		//	for (int offsetW = 0; offsetW < m_plainTuningData.size() / 2; offsetW++)
-		//	{
-		//		quint16 data = dataPtr[offsetW];
-		//		m_ram.writeWord(tuningDataOffset + offsetW, data, E::ByteOrder::NoEndian, E::LogicModuleRamAccess::Read);
-		//	}
-		//}
-
-		//// RAM - Diag Data
-		////
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
-		//						  memory.m_txDiagDataOffset,
-		//						  memory.m_txDiagDataSize,
-		//						  false,
-		//						  QLatin1String("Input Diag Data"));
-
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
-		//						  memory.m_txDiagDataOffset,
-		//						  memory.m_txDiagDataSize,
-		//						  false,
-		//						  QLatin1String("Output Diag Data"));
-
-
-		//// RAM - App Data
-		////
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
-		//						  memory.m_appDataOffset,
-		//						  memory.m_appDataSize,
-		//						  false,
-		//						  QLatin1String("Input App Data"));
-
-		// ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
-		//						  memory.m_appDataOffset,
-		//						  memory.m_appDataSize,
-		//						  false,
-		//						  QLatin1String("Output App Data"));
-
-		// Init memory for validity signals (set to 1).
-		//
-		// ok &= initValiditySignals();
-
-		// return ok;
-	}
-
-	// Write 1 to all validity of input signals
-	//
-	// bool VduDeviceEmulator::initValiditySignals()
-	//{
-	//	bool result = true;
-	//	const Sim::AppSignalManagerImpl& appSignalManager = m_simulator->appSignalManager();
-
-	//	auto validityOffsets = appSignalManager.validityInputSignals(equipmentId());
-
-	//	for (const auto& offset : validityOffsets)
-	//	{
-	//		bool ok = m_ram.writeBit(offset.address.offset(), offset.address.bit(), 1, E::ByteOrder::BigEndian, offset.ramAccess);
-
-	//		if (ok == false)
-	//		{
-	//			m_log.writeError(QString("Error writing validity signal, offset %1, bit %2, RamAccess %2")
-	//								 .arg(offset.address.offset())
-	//								 .arg(offset.address.bit())
-	//								 .arg(E::valueToString(offset.ramAccess)));
-	//			result = false;
-	//		}
-	//	}
-
-	//	return result;
-	//}
 
 	bool VduDeviceEmulator::initEeprom()
 	{
@@ -434,47 +271,6 @@ namespace Sim
 			result = false;
 		}
 
-		// if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
-		//	m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
-		//{
-		//	QString str = tr("EEPROMs have different subsystemKeys: \n"
-		//					 "\ttuningEeprom.subsystemKey: %1\n"
-		//					 "\tconfEeprom.subsystemKey: %2\n"
-		//					 "\tappLogicEeprom.subsystemKey: %3")
-		//					  .arg(m_tuningEeprom.subsystemKey())
-		//					  .arg(m_confEeprom.subsystemKey())
-		//					  .arg(m_appLogicEeprom.subsystemKey());
-		//	m_log.writeError(str);
-		//	result = false;
-		// }
-
-		// if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() || m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
-		//{
-		//	QString str = tr("EEPROMs have different buildNo: \n"
-		//					 "\ttuningEeprom.buildNo: %1\n"
-		//					 "\tconfEeprom.buildNo: %2\n"
-		//					 "\tappLogicEeprom.buildNo: %3")
-		//					  .arg(m_tuningEeprom.buildNo())
-		//					  .arg(m_confEeprom.buildNo())
-		//					  .arg(m_appLogicEeprom.buildNo());
-		//	m_log.writeError(str);
-		//	result = false;
-		// }
-
-		// if (m_tuningEeprom.configurationCount() != m_confEeprom.configurationCount() ||
-		//	m_tuningEeprom.configurationCount() != m_appLogicEeprom.configurationCount())
-		//{
-		//	QString str = tr("EEPROMs EEPROMs have different configurationCount: \n"
-		//					 "\ttuningEeprom.configurationCount: %1\n"
-		//					 "\tconfEeprom.configurationCount: %2\n"
-		//					 "\tappLogicEeprom.configurationCount: %3")
-		//					  .arg(m_tuningEeprom.configurationCount())
-		//					  .arg(m_confEeprom.configurationCount())
-		//					  .arg(m_appLogicEeprom.configurationCount());
-		//	m_log.writeError(str);
-		//	result = false;
-		// }
-
 		if (result == false)
 		{
 			return false;
@@ -483,177 +279,56 @@ namespace Sim
 		return result;
 	}
 
-#if 0
 	bool VduDeviceEmulator::processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 /*workcycle*/)
 	{
 		// qDebug() << "DeviceEmulator::processOperate " << equipmentId();
 
-		// One LogicModule Cycle
+		// Send data to fiber optic channels (LM, OCM, ...)
 		//
-
-		// Initialization before work cycle
-		//
-		m_logicUnit = LogicUnitData{};
-
-		bool result = m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
-		if (result == false)
-		{
-			return false;
-		}
-
-		// --
-		//
-		m_simulator->overrideSignals().updateRamOverrideData(equipmentId(), m_ram);
-
-		// COMMENTED as for now there is no need to zero IO modules memory
-		// as there is no control of reading uninitialized memory.
-		//
-		// m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some memory areas before start work cycle (like memory area
-		// for write i/o modules)
-
-		// Get data from fiber optic channels (LM, OCM)
-		// !!! receiveConnectionsData !!! was moved to Sim::Control,
-		// as it is must be called before ALL LMs started to avoid gaps in communication
-		//
-		//		result = receiveConnectionsData(currentTime);
-		//		if (result == false)
-		//		{
-		//			return false;
-		//		}
-
-		// Run work cycle
-		//
-		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			   (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
-		{
-			if (m_logicUnit.programCounter >= static_cast<int>(m_offsetToCommand.size()))
-			{
-				Q_ASSERT(false);
-				SIM_FAULT("Command not found in current ProgramCounter.");
-				break;
-			}
-
-			int commandIndex = m_offsetToCommand[m_logicUnit.programCounter];
-
-			if (commandIndex == -1 || commandIndex > static_cast<int>(m_commands.size()))
-			{
-				SIM_FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
-				break;
-			}
-
-			EmulatorCommand& command = m_commands[commandIndex];
-			Q_ASSERT(m_logicUnit.programCounter == command.m_offset);
-
-			if (bool ok = runCommand(command); //
-				ok == false && deviceState() != DeviceState::Fault)
-			{
-				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
-				result = false;
-				break;
-			}
-
-			if (deviceState() == DeviceState::Fault)
-			{
-				result = true;
-				break;
-			}
-
-			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
-			// increment ProgramCounter to command size
-			//
-			if (m_logicUnit.programCounter == command.m_offset)
-			{
-				m_logicUnit.programCounter += command.m_size;
-			}
-		}
-
-		// Send data to fiber optic channels (LM, OCM)
-		//
-		result &= sendConnectionsData(currentTime);
-
-		return result;
+		bool ok = sendConnectionsData(currentTime);
+		return ok;
 	}
-#endif
 
 	void VduDeviceEmulator::fault(QString reasone, QString func)
 	{
-		// QString phase;
-		// switch (m_logicUnit.phase)
-		//{
-		// case CyclePhase::IdrPhase:
-		//	phase = "IDR";
-		//	break;
-		// case CyclePhase::AlpPhase:
-		//	phase = "ALP";
-		//	break;
-		// case CyclePhase::ODT:
-		//	phase = "ODT";
-		//	break;
-		// case CyclePhase::ST:
-		//	phase = "ST";
-		//	break;
-		// default:
-		//	Q_ASSERT(false);
-		// }
-
-		// QString str1 = QString("Fault");
-		// QString str2 = QString("\tPhase: %1, ProgramCounter: %2 (0x%3), function: %4")
-		//				   .arg(phase)
-		//				   .arg(m_logicUnit.programCounter)
-		//				   .arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
-		//				   .arg(func);
-		// QString str3 = QString("\tReason: %1").arg(reasone);
-
-		// m_log.writeError(str1);
-		// m_log.writeError(str2);
-		// m_log.writeError(str3);
-
-		// setDeviceState(DeviceState::Fault);
-
+		m_log.writeError(QString{"FAULT: %1, func: %2"}.arg(reasone).arg(func));
+		setDeviceState(DeviceState::Fault);
 		return;
 	}
 
-	// bool VduDeviceEmulator::processOffMode()
-	//{
-	//	Q_ASSERT(deviceState() == DeviceState::Off);
-	//	return true;
-	// }
+	bool VduDeviceEmulator::processOffMode()
+	{
+		Q_ASSERT(deviceState() == DeviceState::Off);
+		return true;
+	}
 
-	// bool VduDeviceEmulator::processStartMode()
-	//{
-	//	Q_ASSERT(deviceState() == DeviceState::Start);
-	//	m_log.writeDebug(tr("Start mode"));
+	bool VduDeviceEmulator::processStartMode()
+	{
+		Q_ASSERT(deviceState() == DeviceState::Start);
+		m_log.writeDebug(tr("Start mode"));
 
-	//	bool ok = initMemory();
-	//	if (ok == false)
-	//	{
-	//		m_log.writeError(tr("Init memory error."));
-	//		setDeviceState(DeviceState::Fault);
-	//		return false;
-	//	}
+		setDeviceState(DeviceState::Operate);
+		setRuntimeMode(RuntimeMode::RunMode);
 
-	//	m_afbComponents.resetState(); // It will clear all AFBs' params
+		return true;
+	}
 
-	//	setDeviceState(DeviceState::Operate);
-	//	setRuntimeMode(RuntimeMode::RunMode);
+	bool VduDeviceEmulator::processFaultMode()
+	{
+		// Relax, you can do nothing
+		//
+		return true;
+	}
 
-	//	return true;
-	//}
-
-	// bool VduDeviceEmulator::processFaultMode()
-	//{
-	//	// Relax, you can do nothing
-	//	//
-	//	return true;
-	// }
-
-#if 0
 	bool VduDeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (auto ds = deviceState(); ds == DeviceState::Off || ds == DeviceState::Fault)
+		if (auto ds = deviceState(); //
+			ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
 		}
+
+		auto receivedPortsData = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
 
 		for (ConnectionImplPtr& c : m_connections)
 		{
@@ -671,15 +346,23 @@ namespace Sim
 			if (port == nullptr)
 			{
 				Q_ASSERT(port);
-				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.").arg(c->connectionId()).arg(equipmentId()));
+				SIM_FAULT(QString("Communication port not found for connection %1 in VDU %2.").arg(c->connectionId()).arg(equipmentId()));
 				return false;
 			}
 
 			// Get receive buffer for port
 			//
 			const ::ConnectionPortInfo& portInfo = port->portInfo();
-
 			Q_ASSERT(portInfo.lmID == equipmentId());
+
+			if (portInfo.portNo < 0 || portInfo.portNo > SimVduSharedData::OptoPortCount - 1)
+			{
+				SIM_FAULT(QString("Invalid port number %1 for connection %2 in VDU %3.")
+							  .arg(portInfo.portNo)
+							  .arg(c->connectionId())
+							  .arg(equipmentId()));
+				return false;
+			}
 
 			// std::vector<char> rb;
 			// std::vector<char>* receiveBuffer = &rb;
@@ -695,12 +378,13 @@ namespace Sim
 
 			// Get data (actually swap) to receive buffer
 			//
-			bool timeout = false;
+			bool wasTimeout = false;
+
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2}, // timeout
-									 &timeout);
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
+									 &wasTimeout);
 
 			if (ok == false)
 			{
@@ -711,20 +395,11 @@ namespace Sim
 				return false;
 			}
 
-			if (timeout == true)
+			if (wasTimeout == true)
 			{
 				// If receive buffer is empty then it is timeout
+				// Clear memory in dedicated memory area, receivedPortsData is already filled with 0s.
 				//
-				// NO: Clear memory in dedicated memory area
-				//	   Don't do it:	m_ram.clearMemoryArea(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read);
-				//
-				// YES: Cannot clear whole memory area, because it can be applied only for LM,
-				//		where each opto port has its own memery area
-				//		BUT OCM has shared memory area for several connections,
-				//		thats why we need to clear just some data.
-				//		Use: m_ram.setMem(...)
-				//
-				m_ram.setMem(portInfo.rxBufferAbsAddr, portInfo.rxDataSizeW, 0, E::LogicModuleRamAccess::Read);
 			}
 			else
 			{
@@ -740,6 +415,9 @@ namespace Sim
 					// Write data to memory
 					//
 					Q_ASSERT(receiveBuffer->size() % 2 == 0);
+					Q_ASSERT_X(receiveBuffer->size() >= 4,
+							   "VduDeviceEmulator::receiveConnectionsData",
+							   "First 4 bytes is DataID, so we need at least 4 bytes to check it");
 
 					if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
 					{
@@ -752,22 +430,26 @@ namespace Sim
 						return false;
 					}
 
-					ok = m_ram.writeBuffer(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read, *receiveBuffer);
-					if (ok == false)
+					if (receiveBuffer->size() > sizeof(SimVduSharedData::OptoBuffer::data))
 					{
-						SIM_FAULT(QString("Received buffer write memory error, %1 words, connection %2, port %3 (%4).")
-									  .arg(portInfo.rxDataSizeW)
+						SIM_FAULT(QString("Receive data error, received buffer size %1 is too big, connection %2, port %3 (%4).")
+									  .arg(receiveBuffer->size())
 									  .arg(c->connectionId())
 									  .arg(portInfo.portNo)
 									  .arg(portInfo.equipmentID));
 						return false;
 					}
 
-					// Check the DataID which is the part of the payload (first 4 bytes)
+					std::memcpy(receivedPortsData->portData[portInfo.portNo].data, receiveBuffer->data(), receiveBuffer->size());
+					receivedPortsData->portData[portInfo.portNo].occupied = receiveBuffer->size();
+
+					// Check the DataID which is the part of the payload (first 4 bytes).
 					//
 					if (c->connectionInfo().disableDataIDControl == false)
 					{
-						quint32 receivedDataId = readRamDword(portInfo.rxBufferAbsAddr);
+						// Get uint32 in big endian on offest receiveBuffer->data()
+						//
+						const quint32 receivedDataId = qFromBigEndian<quint32>(receiveBuffer->data());
 
 						if (port->portInfo().rxDataID != receivedDataId)
 						{
@@ -785,40 +467,88 @@ namespace Sim
 
 			// Set port receive validity flag to 0 or 1
 			//
+			receivedPortsData->portData[portInfo.portNo].timeout = wasTimeout ? 1 : 0;
+		}
 
-			// Commented: For perfomamce reason it was moved to port, where memory area can be cached.
-			//
-			//			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
-			//								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
-			//								timeout ? 0x0000 : 0x0001,
-			//								E::ByteOrder::BigEndian,
-			//								E::LogicModuleRamAccess::Read);
+		// Write received data to shared memory
+		//
+		if (m_shared.clientSharedMemory.has_value() == false)
+		{
+			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory is not initialized."));
+			setDeviceState(DeviceState::Fault);
+			return false;
+		}
 
-			ok = port->writeValidityBit(m_ram, timeout ? 0x0000 : 0x0001);
+		if (m_shared.clientSharedMemory->isAttached() == false)
+		{
+			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory attach error %1.")
+								 .arg(m_shared.clientSharedMemory->errorString()));
+			setDeviceState(DeviceState::Fault);
+			return false;
+		}
 
-			if (ok == false)
-			{
-				SIM_FAULT(QString("Write receive validity signal error, signal %1 (%2), connection %3, port %4 (%5).")
-							  .arg(portInfo.rxValiditySignalEquipmentID)
-							  .arg(portInfo.rxValiditySignalAbsAddr.toString())
-							  .arg(c->connectionId())
-							  .arg(portInfo.portNo)
-							  .arg(portInfo.equipmentID));
-				return false;
-			}
+		{
+			std::scoped_lock guar{*m_shared.clientSharedMemory};
+
+			SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+
+			auto counter = sharedData->toVdu.updateCounter;
+			sharedData->toVdu = *receivedPortsData;
+			sharedData->toVdu.updateCounter = counter + 1;
 		}
 
 		return true;
 	}
-#endif
 
-#if 0
 	bool VduDeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
 		if (auto ds = deviceState(); //
 			ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
+		}
+
+		// Fetch data from shared memory to send to connections
+		//
+		auto fromVduPortsData = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
+
+		{
+			// m_shared.lastOptoFromVduCounter
+
+			if (m_shared.clientSharedMemory.has_value() == false)
+			{
+				m_log.writeError(tr("VduDeviceEmulator::sendConnectionsData: Shared memory is not initialized."));
+				setDeviceState(DeviceState::Fault);
+				return false;
+			}
+
+			if (m_shared.clientSharedMemory->isAttached() == false)
+			{
+				m_log.writeError(tr("VduDeviceEmulator::sendConnectionsData: Shared memory attach error %1.")
+									 .arg(m_shared.clientSharedMemory->errorString()));
+				setDeviceState(DeviceState::Fault);
+				return false;
+			}
+
+			{
+				std::scoped_lock guar{*m_shared.clientSharedMemory};
+
+				auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+				*fromVduPortsData = sharedData->fromVdu;
+			}
+		}
+
+		if (fromVduPortsData->updateCounter == m_shared.lastOptoFromVduCounter)
+		{
+			// No new data to send
+			//
+			return true;
+		}
+		else
+		{
+			// Update lastOptoFromVduCounter to the new value, so next time we will know if new data is available
+			//
+			m_shared.lastOptoFromVduCounter = fromVduPortsData->updateCounter;
 		}
 
 		for (ConnectionImplPtr& c : m_connections)
@@ -846,8 +576,28 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-			// std::vector<char> sb;
-			// std::vector<char>* sendBuffer = &sb;
+			if (portInfo.portNo < 0 || portInfo.portNo > SimVduSharedData::OptoPortCount - 1)
+			{
+				SIM_FAULT(QString("Invalid port number %1 for connection %2 in LM %3.")
+							  .arg(portInfo.portNo)
+							  .arg(c->connectionId())
+							  .arg(equipmentId()));
+				return false;
+			}
+
+			if ((portInfo.txDataSizeW * 2) != fromVduPortsData->portData[portInfo.portNo].occupied)
+			{
+				SIM_FAULT(QString("Send data error, expected %1 bytes but received %2 bytes, connection %3, port %4 (%5).")
+							  .arg(portInfo.txDataSizeW * 2)
+							  .arg(fromVduPortsData->portData[portInfo.portNo].occupied)
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+			//std::vector<char> sb;
+			//std::vector<char>* sendBuffer = &sb;
 			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
@@ -858,26 +608,13 @@ namespace Sim
 				return false;
 			}
 
-			// Write data from RAM to send buffer
-			//
-			bool ok = m_ram.readToBuffer(portInfo.txBufferAbsAddr, E::LogicModuleRamAccess::Write, portInfo.txDataSizeW, sendBuffer);
-			if (ok == false)
-			{
-				SIM_FAULT(
-					QString("Send data error, read data from memory (address %1, count %2) returned error, connection %3, port %4 (%5).")
-						.arg(portInfo.txBufferAbsAddr)
-						.arg(portInfo.txDataSizeW)
-						.arg(c->connectionId())
-						.arg(portInfo.portNo)
-						.arg(portInfo.equipmentID));
-				return false;
-			}
+			sendBuffer->resize(portInfo.txDataSizeW * 2);
+			std::memcpy(sendBuffer->data(), fromVduPortsData->portData[portInfo.portNo].data, sendBuffer->size());
 
 			// Send data (actually swap) to send buffer
 			//
-			ok = c->sendData(portInfo.portNo, sendBuffer, currentTime);
-
-			if (ok == false)
+			if (bool sendOk = c->sendData(portInfo.portNo, sendBuffer, currentTime); //
+				sendOk == false)
 			{
 				SIM_FAULT(QString("Send data error, connection %1, port %2 (%3).")
 							  .arg(c->connectionId())
@@ -889,25 +626,6 @@ namespace Sim
 
 		return true;
 	}
-#endif
-
-
-	//// Getting data from m_plainAppLogic
-	////
-	// template<typename TYPE>
-	// TYPE VduDeviceEmulator::getData(int eepromOffset) const
-	//{
-	//	// eepromOffset - in bytes
-	//	//
-	//	if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_plainAppLogic.size() - sizeof(TYPE)))
-	//	{
-	//		Q_ASSERT(eepromOffset >= 0 && static_cast<int>(eepromOffset - sizeof(TYPE)) <= m_plainAppLogic.size());
-	//		return 0;
-	//	}
-
-	//	TYPE result = qFromBigEndian<TYPE>(m_plainAppLogic.constData() + eepromOffset);
-	//	return result;
-	//}
 
 	ScopedLog& VduDeviceEmulator::log()
 	{
@@ -967,63 +685,45 @@ namespace Sim
 		return m_lmDescription;
 	}
 
-	// const Ram& VduDeviceEmulator::ram() const
-	//{
-	//	return m_ram;
-	// }
-
-	// Ram& VduDeviceEmulator::mutableRam()
-	//{
-	//	return m_ram;
-	// }
-
 	// const Lans& VduDeviceEmulator::lans() const
 	//{
 	//	return m_lans;
 	// }
 
-	// RuntimeMode VduDeviceEmulator::runtimeMode() const
-	//{
-	//	return m_runtimeMode.load();
-	// }
+	RuntimeMode VduDeviceEmulator::runtimeMode() const
+	{
+		return m_runtimeMode.load();
+	}
 
-	// void VduDeviceEmulator::setRuntimeMode(RuntimeMode value)
-	//{
-	//	RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
+	void VduDeviceEmulator::setRuntimeMode(RuntimeMode value)
+	{
+		m_runtimeMode.store(value);
+		return;
+	}
 
-	//	if (currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode)
-	//	{
-	//		// Module leaves TuningMode, LAN must be notified
-	//		//
-	//		m_lans.tuningModeLeft();
-	//	}
-
-	//	return;
-	//}
-
-	// DeviceState VduDeviceEmulator::deviceState() const
-	//{
-	//	return m_deviceState2.load();
-	// }
+	DeviceState VduDeviceEmulator::deviceState() const
+	{
+		return m_deviceState2.load();
+	}
 
 	void VduDeviceEmulator::setDeviceState(DeviceState value)
 	{
 		m_deviceState2.store(value);
 
-		//	switch (value)
-		//	{
-		//	case DeviceState::Fault:
-		//		setRuntimeMode(RuntimeMode::FaultedMode);
-		//		break;
-		//	case DeviceState::Off:
-		//		setRuntimeMode(RuntimeMode::PoweredOffMode);
-		//		break;
-		//	case DeviceState::Start:
-		//		setRuntimeMode(RuntimeMode::StartupMode);
-		//		break;
-		//	default:
-		//		break;
-		//	}
+		switch (value)
+		{
+		case DeviceState::Fault:
+			setRuntimeMode(RuntimeMode::FaultedMode);
+			break;
+		case DeviceState::Off:
+			setRuntimeMode(RuntimeMode::PoweredOffMode);
+			break;
+		case DeviceState::Start:
+			setRuntimeMode(RuntimeMode::StartupMode);
+			break;
+		default:
+			break;
+		}
 
 		return;
 	}
@@ -1047,50 +747,4 @@ namespace Sim
 	//{
 	//	m_tuningKey = value;
 	// }
-
-	// bool VduDeviceEmulator::sorIsSet() const
-	//{
-	//	return m_sorIsSet.load();
-	// }
-
-	// void VduDeviceEmulator::setSorIsSet(bool value)
-	//{
-	//	m_sorIsSet = value;
-	// }
-
-	// bool VduDeviceEmulator::sorSetSwitch1() const
-	//{
-	//	return m_sorSetSwitch1.load();
-	// }
-
-	// void VduDeviceEmulator::setSorSetSwitch1(bool value)
-	//{
-	//	m_sorSetSwitch1 = value;
-	// }
-
-	// bool VduDeviceEmulator::sorSetSwitch2() const
-	//{
-	//	return m_sorSetSwitch2.load();
-	// }
-
-	// void VduDeviceEmulator::setSorSetSwitch2(bool value)
-	//{
-	//	m_sorSetSwitch2 = value;
-	// }
-
-	// bool VduDeviceEmulator::sorSetSwitch3() const
-	//{
-	//	return m_sorSetSwitch3.load();
-	// }
-
-	// void VduDeviceEmulator::setSorSetSwitch3(bool value)
-	//{
-	//	m_sorSetSwitch3 = value;
-	// }
-
-	// bool VduDeviceEmulator::testSorResetSwitch(bool newValue)
-	//{
-	//	return m_sorResetSwitch.exchange(newValue);
-	// }
-
 } // namespace Sim

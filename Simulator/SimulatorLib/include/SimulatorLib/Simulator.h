@@ -11,6 +11,7 @@
 #include "SimConnections.h"
 #include "SimControl.h"
 #include "SimLogicModule.h"
+#include "SimModule.h"
 #include "SimOverrideSignals.h"
 #include "SimProfiles.h"
 #include "SimScriptItem.h"
@@ -87,6 +88,9 @@ namespace Sim
 
 		[[nodiscard]] std::optional<Sim::LogicModule> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<Sim::LogicModule> logicModules() const;
+
+		[[nodiscard]] std::optional<Sim::Module> module(QString equipmentId) const;
+		[[nodiscard]] std::vector<Sim::Module> modules() const;
 
 		[[nodiscard]] Sim::AppSignalManager& appSignalManager();
 		[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;

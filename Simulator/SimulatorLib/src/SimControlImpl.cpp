@@ -1,6 +1,7 @@
 #include "SimControlImpl.h"
 
 #include "./Modules/SimLogicModuleImpl.h"
+#include "./Modules/SimVduModuleImpl.h"
 #include "SimSnapshot.h"
 #include "SimulatorPrivate.h"
 
@@ -75,8 +76,8 @@ namespace
 
 namespace Sim
 {
-	SimControlRunStruct::SimControlRunStruct(std::shared_ptr<LogicModuleImpl> lm) :
-		m_lm(std::move(lm))
+	SimControlRunStruct::SimControlRunStruct(std::shared_ptr<BaseModuleImpl> module) :
+		m_module(module)
 	{
 	}
 
@@ -89,22 +90,56 @@ namespace Sim
 		m_lastStartTime = time;
 		m_possibleToAdvanceTo = time;
 		m_cyclesCounter++;
-		return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset, cvFinished);
+		return m_module->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset, cvFinished);
 	}
 
 	const QString& SimControlRunStruct::equipmentId() const
 	{
-		return m_lm->equipmentId();
+		return m_module->equipmentId();
 	}
 
-	LogicModuleImpl* SimControlRunStruct::operator->()
+	BaseModuleImpl* SimControlRunStruct::operator->()
 	{
-		return m_lm.get();
+		return m_module.get();
 	}
 
-	const LogicModuleImpl* SimControlRunStruct::operator->() const
+	const BaseModuleImpl* SimControlRunStruct::operator->() const
 	{
-		return m_lm.get();
+		return m_module.get();
+	}
+
+	bool SimControlRunStruct::isLm() const
+	{
+		return qobject_cast<LogicModuleImpl*>(m_module.get()) != nullptr;
+	}
+
+	bool SimControlRunStruct::isVdu() const
+	{
+		return qobject_cast<VduModuleImpl*>(m_module.get()) != nullptr;
+	}
+
+	LogicModuleImpl& SimControlRunStruct::toLm()
+	{
+		assert(isLm());
+		return *qobject_cast<LogicModuleImpl*>(m_module.get());
+	}
+
+	const LogicModuleImpl& SimControlRunStruct::toLm() const
+	{
+		assert(isLm());
+		return *qobject_cast<const LogicModuleImpl*>(m_module.get());
+	}
+
+	VduModuleImpl& SimControlRunStruct::toVdu()
+	{
+		assert(isVdu());
+		return *qobject_cast<VduModuleImpl*>(m_module.get());
+	}
+
+	const VduModuleImpl& SimControlRunStruct::toVdu() const
+	{
+		assert(isVdu());
+		return *qobject_cast<const VduModuleImpl*>(m_module.get());
 	}
 
 	//
@@ -169,19 +204,20 @@ namespace Sim
 	{
 		// if equipmentIds is empty then add all modules to simulation
 		//
+		if (equipmentIds.isEmpty() == true)
 		{
-			auto lms = m_simulator->logicModules();
+			auto modules = m_simulator->modules();
 
-			for (const auto& lm : lms)
+			for (const auto& lm : modules)
 			{
 				equipmentIds << lm->equipmentId();
 			}
+		}
 
-			if (equipmentIds.isEmpty() == true)
-			{
-				m_log.writeWarning(tr("Nothing to simulate, no LogicModules are found."));
-				return 0;
-			}
+		if (equipmentIds.isEmpty() == true)
+		{
+			m_log.writeWarning(tr("Nothing to simulate, no Modules are found."));
+			return 0;
 		}
 
 		// --
@@ -195,19 +231,19 @@ namespace Sim
 		}
 
 		int addedModuleCount = 0;
-		std::vector<SimControlRunStruct> lms;
-		lms.reserve(equipmentIds.size());
+		std::vector<SimControlRunStruct> modules;
+		modules.reserve(equipmentIds.size());
 
 		for (QString id : equipmentIds)
 		{
-			std::shared_ptr<LogicModuleImpl> lm = m_simulator->logicModule(id);
-			if (lm == nullptr)
+			auto m = m_simulator->module(id);
+			if (m == nullptr)
 			{
 				m_log.writeError(QString("Module %1 not found or it does not have simulation ability.").arg(id));
 				continue;
 			}
 
-			lms.emplace_back(lm);
+			modules.emplace_back(m);
 			addedModuleCount++;
 		}
 
@@ -218,42 +254,39 @@ namespace Sim
 
 			// Add new LMs, keep old
 			//
-			for (SimControlRunStruct& scrs : lms)
+			for (SimControlRunStruct& scrs : modules)
 			{
 				// Check if such lm already present in simulation list
 				//
-				auto presentIt = std::find_if(m_controlData.m_lms.begin(),
-											  m_controlData.m_lms.end(),
-											  [&scrs](auto& lm)
+				auto presentIt = std::find_if(m_controlData.m_modules.begin(),
+											  m_controlData.m_modules.end(),
+											  [&scrs](auto& m)
 											  {
-												  return lm.m_lm->equipmentId() == scrs.m_lm->equipmentId();
+												  return m.equipmentId() == scrs.equipmentId();
 											  });
 
-				if (presentIt == m_controlData.m_lms.end())
+				if (presentIt == m_controlData.m_modules.end())
 				{
-					m_controlData.m_lms.push_back(scrs);
+					m_controlData.m_modules.push_back(scrs);
 				}
 			}
 
 			// Remove LMs
 			//
-			m_controlData.m_lms.erase(std::remove_if(m_controlData.m_lms.begin(),
-													 m_controlData.m_lms.end(),
-													 [&lms](SimControlRunStruct& lm) -> bool
-													 {
-														 QString id = lm.equipmentId();
-														 return find_if(lms.begin(),
-																		lms.end(),
-																		[&id](SimControlRunStruct& lm)
-																		{
-																			return lm.equipmentId() == id;
-																		}) == lms.end();
-													 }),
-									  m_controlData.m_lms.end());
+			std::erase_if(m_controlData.m_modules,
+						  [&modules](SimControlRunStruct& lm)
+						  {
+							  QString id = lm.equipmentId();
+							  return find_if(modules.begin(),
+											 modules.end(),
+											 [&id](SimControlRunStruct& lm)
+											 {
+												 return lm.equipmentId() == id;
+											 }) == modules.end();
+						  });
 		}
 
 		m_controlDataConditionVariable.notify_one();
-
 		return addedModuleCount;
 	}
 
@@ -269,21 +302,20 @@ namespace Sim
 	{
 		m_log.writeDebug(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
-		std::lock_guard locker(m_controlDataMutex);
-
-		for (QString id : equipmentIds)
 		{
-			m_controlData.m_lms.erase(std::remove_if(m_controlData.m_lms.begin(),
-													 m_controlData.m_lms.end(),
-													 [&id](auto& lm)
-													 {
-														 return lm.equipmentId() == id;
-													 }),
-									  m_controlData.m_lms.end());
+			std::lock_guard locker(m_controlDataMutex);
+
+			for (QString id : equipmentIds)
+			{
+				std::erase_if(m_controlData.m_modules,
+							  [&id](const auto& lm)
+							  {
+								  return lm.equipmentId() == id;
+							  });
+			}
 		}
 
 		m_controlDataConditionVariable.notify_one();
-
 		return;
 	}
 
@@ -304,7 +336,7 @@ namespace Sim
 			return false;
 		}
 
-		if (m_controlData.m_lms.empty() == true)
+		if (m_controlData.m_modules.empty() == true)
 		{
 			// Nothing to run
 			//
@@ -343,7 +375,7 @@ namespace Sim
 
 				int offsetFromUtcMs = QDateTime::currentDateTime().offsetFromUtc() * 1000;
 
-				for (SimControlRunStruct& cs : m_controlData.m_lms)
+				for (SimControlRunStruct& cs : m_controlData.m_modules)
 				{
 					cs.m_lastStartTime = 0us; // it will make LM to reset() before running cycle
 					m_simulator->overrideSignals().requestToResetOverrideScripts(
@@ -562,9 +594,9 @@ namespace Sim
 
 		m_controlData.m_currentTime = cd.m_currentTime;
 
-		for (SimControlRunStruct& rs : m_controlData.m_lms)
+		for (SimControlRunStruct& rs : m_controlData.m_modules)
 		{
-			for (const SimControlRunStruct& cdrs : cd.m_lms)
+			for (const SimControlRunStruct& cdrs : cd.m_modules)
 			{
 				if (cdrs.equipmentId() == rs.equipmentId())
 				{
@@ -690,9 +722,9 @@ namespace Sim
 		bool result = true;
 		ControlData cd = controlData(); // Initialize local data with actual simulation ControlData
 
-		// Get simulation LogicModules
+		// Get simulation Modules
 		//
-		std::vector<SimControlRunStruct>& lms = cd.m_lms; // Reference to the !local! variable cd
+		std::vector<SimControlRunStruct>& lms = cd.m_modules; // Reference to the !local! variable cd
 
 		if (lms.empty() == true)
 		{
@@ -705,18 +737,18 @@ namespace Sim
 
 		for (const SimControlRunStruct& lm : lms)
 		{
-			auto simLm = m_simulator->logicModule(lm.equipmentId());
+			auto simModule = m_simulator->module(lm.equipmentId());
 
-			if (simLm == nullptr)
+			if (simModule == nullptr)
 			{
-				Q_ASSERT(simLm);
-				m_log.writeError(tr("processRun, LogicModule %1 not found").arg(lm.equipmentId()));
+				Q_ASSERT(simModule);
+				m_log.writeError(tr("processRun, Module %1 not found").arg(lm.equipmentId()));
 				result = false;
 				continue;
 			}
 
 			minimumLmWorkcycle =
-				std::min(minimumLmWorkcycle, std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
+				std::min(minimumLmWorkcycle, std::chrono::microseconds{simModule->lmDescription().logicUnit().m_cycleDuration});
 		}
 
 		if (result == false)
@@ -815,7 +847,7 @@ namespace Sim
 			microseconds minPossibleTime{0};
 			for (const SimControlRunStruct& lm : lms)
 			{
-				if (lm.m_lm->isPowerOff() == true)
+				if (lm->isPowerOff() == true)
 				{
 					continue;
 				}

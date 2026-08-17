@@ -18,6 +18,56 @@ namespace Sim
 
 	BaseModuleImpl::~BaseModuleImpl() = default;
 
+	QFuture<bool> BaseModuleImpl::asyncRunCycle(std::chrono::microseconds currentTime,
+												const QDateTime& currentDateTime,
+												qint64 workcycle,
+												bool reset,
+												std::condition_variable& cvFinished)
+	{
+		Q_UNUSED(currentTime);
+		Q_UNUSED(currentDateTime);
+		Q_UNUSED(workcycle);
+		Q_UNUSED(reset);
+		Q_UNUSED(cvFinished);
+
+		assert(false); // This method should be overridden in derived classes
+		return {};
+	}
+
+	bool BaseModuleImpl::receiveConnectionsData(std::chrono::microseconds currentTime)
+	{
+		Q_UNUSED(currentTime);
+
+		assert(false); // This method should be overridden in derived classes
+		return {};
+	}
+
+	std::chrono::microseconds BaseModuleImpl::cycleDuration() const
+	{
+		assert(false); // This method should be overridden in derived classes
+		return {};
+	}
+
+	bool BaseModuleImpl::isPowerOff() const
+	{
+		assert(false); // This method should be overridden in derived classes
+		return {};
+	}
+
+	void BaseModuleImpl::setPowerOff(bool value)
+	{
+		Q_UNUSED(value);
+
+		assert(false); // This method should be overridden in derived classes
+		return;
+	}
+
+	DeviceState BaseModuleImpl::deviceState() const
+	{
+		assert(false); // This method should be overridden in derived classes
+		return {};
+	}
+
 	bool BaseModuleImpl::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)
 	{
 		if (eeprom == nullptr)

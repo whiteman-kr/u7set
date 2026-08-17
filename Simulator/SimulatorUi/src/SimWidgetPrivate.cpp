@@ -880,9 +880,8 @@ namespace SimUi
 		//        0d 00:20:03.580
 		// 05/17/2020 15:18:59.335
 
-		QString dateText = QString("%6 %7")
-							   .arg(DateTimeToString::date(currentTime.date()))
-							   .arg(DateTimeToString::timeMs(currentTime.time()));
+		QString dateText =
+			QString("%6 %7").arg(DateTimeToString::date(currentTime.date())).arg(DateTimeToString::timeMs(currentTime.time()));
 
 		QString text = tr("%1d %2:%3:%4.%5\n%6")
 						   .arg(days, static_cast<int>(dateText.size() - 14), 10, QChar(' '))
@@ -895,9 +894,8 @@ namespace SimUi
 		//        0d 00:20:03
 		// 05/17/2020 15:18:59
 
-		QString dateText = QString("%6 %7")
-							   .arg(DateTimeToString::date(currentTime.date()))
-							   .arg(DateTimeToString::timeSec(currentTime.time()));
+		QString dateText =
+			QString("%6 %7").arg(DateTimeToString::date(currentTime.date())).arg(DateTimeToString::timeSec(currentTime.time()));
 
 		QString text = tr("%1d %2:%3:%4\n%6")
 						   .arg(days, static_cast<int>(dateText.size()) - 10, 10, QChar(' '))
@@ -1119,16 +1117,14 @@ namespace SimUi
 			// Get all modules to simulation
 			//
 			QStringList equipmentIds;
-			auto lms = m_simulator->logicModules();
-
-			for (const auto& lm : lms)
+			for (const auto& m : m_simulator->modules())
 			{
-				equipmentIds << lm.equipmentId();
+				equipmentIds << m.equipmentId();
 			}
 
 			if (equipmentIds.isEmpty() == true)
 			{
-				m_simulator->log()->writeWarning(tr("Nothing to simulate, no LogicModules are found."));
+				m_simulator->log()->writeWarning(tr("Nothing to simulate, no Modules are found."));
 				// Nothing to simulate
 				//
 				return;

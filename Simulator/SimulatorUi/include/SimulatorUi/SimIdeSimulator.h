@@ -16,6 +16,7 @@ namespace Sim
 	class Control;
 	class LmSubsystem;
 	class LogicModule;
+	class Module;
 	class OverrideSignals;
 	class Profiles;
 	class Service;
@@ -94,6 +95,9 @@ namespace SimUi
 
 		[[nodiscard]] std::optional<Sim::LogicModule> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<Sim::LogicModule> logicModules() const;
+
+		[[nodiscard]] std::optional<Sim::Module> module(QString equipmentId) const;
+		[[nodiscard]] std::vector<Sim::Module> modules() const;
 
 		[[nodiscard]] Sim::AppSignalManager& appSignalManager();
 		[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;

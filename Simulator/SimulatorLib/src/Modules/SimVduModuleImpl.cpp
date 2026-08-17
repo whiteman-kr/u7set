@@ -65,12 +65,8 @@ namespace Sim
 		m_log.writeDebug("Clear");
 
 		m_lmDescription.clear();
-
-		// m_tuningEeprom.clear();
 		m_confEeprom.clear();
-		// m_appLogicEeprom.clear();
-
-		// m_device.clear();
+		m_device.clear();
 
 		return;
 	}
@@ -81,43 +77,34 @@ namespace Sim
 											   bool reset,
 											   std::condition_variable& cvFinished)
 	{
-		// if (reset == true)
-		//{
-		//	m_device.reset();
-		// }
+		if (reset == true)
+		{
+			m_device.reset();
+		}
 
-		// auto f = [this, &cvFinished](std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle) -> bool
-		//{
-		//	bool result = this->m_device.runWorkcycle(currentTime, currentDateTime, workcycle);
-		//	cvFinished.notify_one();
-		//	return result;
-		// };
+		auto f = [this, &cvFinished](std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle) -> bool
+		{
+			bool result = this->m_device.runWorkcycle(currentTime, currentDateTime, workcycle);
+			cvFinished.notify_one();
+			return result;
+		};
 
-		// return QtConcurrent::run(f, currentTime, currentDateTime, workcycle);
-
-		return {};
+		return QtConcurrent::run(f, currentTime, currentDateTime, workcycle);
 	}
 
 	bool VduModuleImpl::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
-		// TODO!!!!
-		assert(false);
-		return {};
-		// return m_device.receiveConnectionsData(currentTime);
+		return m_device.receiveConnectionsData(currentTime);
 	}
 
 	const ::LogicModuleInfo& VduModuleImpl::logicModuleExtraInfo() const
 	{
-		// TODO!!!!
-		assert(false);
-		return {};
-		// return m_device.logicModuleExtraInfo();
+		return m_device.logicModuleExtraInfo();
 	}
 
 	void VduModuleImpl::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
 	{
-		// TODO!!!!
-		// m_device.setLogicModuleExtraInfo(value);
+		m_device.setLogicModuleExtraInfo(value);
 	}
 
 	std::chrono::microseconds VduModuleImpl::cycleDuration() const
@@ -125,95 +112,39 @@ namespace Sim
 		return std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration};
 	}
 
-	// const Eeprom& VduModuleImpl::tuningEeprom() const
-	//{
-	//	return m_tuningEeprom;
-	// }
-
 	const Eeprom& VduModuleImpl::confEeprom() const
 	{
 		return m_confEeprom;
 	}
 
-	// const Eeprom& VduModuleImpl::appLogicEeprom() const
-	//{
-	//	return m_appLogicEeprom;
-	// }
-
-	// const std::vector<DeviceCommand>& VduModuleImpl::appCommands() const
-	//{
-	//	return m_commands;
-	// }
-
-	// std::unordered_map<int, size_t> VduModuleImpl::offsetToCommand() const
-	//{
-	//	return m_offsetToCommand;
-	// }
-
-	// const DeviceCommand& VduModuleImpl::offsetToCommand(int offset) const
-	//{
-	//	auto it = m_offsetToCommand.find(offset);
-
-	//	if (it == m_offsetToCommand.end())
-	//	{
-	//		static DeviceCommand fakeCommand;
-	//		return fakeCommand;
-	//	}
-
-	//	size_t index = it->second;
-	//	return m_commands[index];
-	//}
-
-	// const Ram& VduModuleImpl::ram() const
-	//{
-	//	return m_device.ram();
-	// }
-
-	// Ram& VduModuleImpl::mutableRam()
-	//{
-	//	return m_device.mutableRam();
-	// }
-
 	RuntimeMode VduModuleImpl::runtimeMode() const
 	{
-		// TODO!!!!
-		// return m_device.runtimeMode();
-		assert(false);
-		return {};
+		return m_device.runtimeMode();
 	}
 
 	DeviceState VduModuleImpl::deviceState() const
 	{
-		// TODO!!!!
-		// return m_device.deviceState();
-		assert(false);
-		return {};
+		return m_device.deviceState();
 	}
 
 	bool VduModuleImpl::isPowerOff() const
 	{
-		// TODO!!!!
-		// return deviceState() == DeviceState::Off;
-		assert(false);
-		return {};
+		return deviceState() == DeviceState::Off;
 	}
 
 	void VduModuleImpl::setPowerOff(bool value)
 	{
-		// TODO!!!!
-		assert(false);
-
-		// if (value == true)
-		//{
-		//	if (isPowerOff() == false)
-		//	{
-		//		m_device.powerOff();
-		//	}
-		// }
-		// else
-		//{
-		//	m_device.reset();
-		// }
+		if (value == true)
+		{
+			if (isPowerOff() == false)
+			{
+				m_device.powerOff();
+			}
+		}
+		else
+		{
+			m_device.reset();
+		}
 	}
 
 	// bool VduModuleImpl::armingKey() const
@@ -234,45 +165,5 @@ namespace Sim
 	// void VduModuleImpl::setTuningKey(bool value)
 	//{
 	//	return m_device.setTuningKey(value);
-	// }
-
-	// bool VduModuleImpl::sorIsSet() const
-	//{
-	//	return m_device.sorIsSet();
-	// }
-
-	// bool VduModuleImpl::sorSetSwitch1() const
-	//{
-	//	return m_device.sorSetSwitch1();
-	// }
-
-	// void VduModuleImpl::setSorSetSwitch1(bool value)
-	//{
-	//	m_device.setSorSetSwitch1(value);
-	// }
-
-	// bool VduModuleImpl::sorSetSwitch2() const
-	//{
-	//	return m_device.sorSetSwitch2();
-	// }
-
-	// void VduModuleImpl::setSorSetSwitch2(bool value)
-	//{
-	//	m_device.setSorSetSwitch2(value);
-	// }
-
-	// bool VduModuleImpl::sorSetSwitch3() const
-	//{
-	//	return m_device.sorSetSwitch3();
-	// }
-
-	// void VduModuleImpl::setSorSetSwitch3(bool value)
-	//{
-	//	m_device.setSorSetSwitch3(value);
-	// }
-
-	// bool VduModuleImpl::testSorResetSwitch(bool newValue)
-	//{
-	//	return m_device.testSorResetSwitch(newValue);
 	// }
 } // namespace Sim

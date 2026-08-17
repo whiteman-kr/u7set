@@ -717,6 +717,34 @@ namespace Sim
 		return result;
 	}
 
+	std::shared_ptr<BaseModuleImpl> SimulatorPrivate::module(QString equipmentId) const
+	{
+		for (const auto& [_, ss] : m_subsystems)
+		{
+			auto module = ss->module(equipmentId); // This will log error if module not found in subsystem
+			if (module != nullptr)
+			{
+				return module;
+			}
+		}
+
+		return {};
+	}
+
+	std::vector<std::shared_ptr<BaseModuleImpl>> SimulatorPrivate::modules() const
+	{
+		std::vector<std::shared_ptr<BaseModuleImpl>> result;
+		result.reserve(m_subsystems.size() * 10); // Just some random number
+
+		for (const auto& [_, ss] : m_subsystems)
+		{
+			auto subsystemModules = ss->modules();
+			std::ranges::move(subsystemModules, std::back_inserter(result));
+		}
+
+		return result;
+	}
+
 	Sim::AppSignalManagerImpl& SimulatorPrivate::appSignalManager()
 	{
 		return m_appSignalManager;

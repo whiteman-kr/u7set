@@ -103,8 +103,12 @@ namespace Sim
 		[[nodiscard]] Sim::Connections& connectionsPublic();
 
 		[[nodiscard]] std::vector<std::shared_ptr<LmSubsystemImpl>> lmSubsystems() const;
+
 		[[nodiscard]] std::shared_ptr<LogicModuleImpl> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<std::shared_ptr<LogicModuleImpl>> logicModules() const;
+
+		[[nodiscard]] std::shared_ptr<BaseModuleImpl> module(QString equipmentId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<BaseModuleImpl>> modules() const;
 
 		[[nodiscard]] Sim::AppSignalManagerImpl& appSignalManager();
 		[[nodiscard]] const Sim::AppSignalManagerImpl& appSignalManager() const;

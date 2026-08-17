@@ -16,9 +16,6 @@ namespace Sim
 		~LogicModule();
 
 	public:
-		// bool receiveConnectionsData(std::chrono::microseconds currentTime);
-
-	public:
 		QString equipmentId() const;
 		int lmNumber() const;
 		E::Channel channel() const;

@@ -152,11 +152,44 @@ namespace Sim
 		std::vector<LogicModule> result;
 		result.reserve(lms.size());
 
-		for (auto& lm : lms)
+		std::transform(lms.begin(),
+					   lms.end(),
+					   std::back_inserter(result),
+					   [](const auto& lmImpl)
+					   {
+						   return LogicModule{lmImpl};
+					   });
+
+		return result;
+	}
+
+	std::optional<Sim::Module> Simulator::module(QString equipmentId) const
+	{
+		std::optional<Module> result;
+
+		auto lm = m_impl->module(equipmentId);
+		if (lm != nullptr)
 		{
-			Q_ASSERT(lm);
-			result.push_back(LogicModule{lm});
+			result = Module{lm};
 		}
+
+		return result;
+	}
+
+	std::vector<Sim::Module> Simulator::modules() const
+	{
+		auto modules = m_impl->modules();
+
+		std::vector<Module> result;
+		result.reserve(modules.size());
+
+		std::transform(modules.begin(),
+					   modules.end(),
+					   std::back_inserter(result),
+					   [](const auto& moduleImpl)
+					   {
+						   return Module{moduleImpl};
+					   });
 
 		return result;
 	}

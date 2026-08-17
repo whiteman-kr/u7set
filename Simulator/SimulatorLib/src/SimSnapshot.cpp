@@ -42,9 +42,13 @@ namespace Sim
 
 		// Save LMs.
 		//
-		protoSnapshot.mutable_logicmodules()->Reserve(static_cast<int>(cd.m_lms.size()));
+		protoSnapshot.mutable_logicmodules()->Reserve(static_cast<int>(cd.m_modules.size()));
 
-		for (SimControlRunStruct& lm : cd.m_lms)
+		for (SimControlRunStruct& lm : cd.m_modules | std::views::filter(
+														  [](const auto& lm)
+														  {
+															  return lm.isLm();
+														  }))
 		{
 			auto protoLm = protoSnapshot.add_logicmodules();
 			bool ok = saveLogicModule(*protoLm, lm);
@@ -238,30 +242,31 @@ namespace Sim
 
 	bool Snapshot::saveLogicModule(::ProtoSim::SnapshotLogicModule& protoLm, const Sim::SimControlRunStruct& sclm)
 	{
-		assert(sclm.m_lm != nullptr);
+		assert(sclm.m_module != nullptr);
+		assert(sclm.isLm() == true);
 
 		protoLm.set_laststarttime(sclm.m_lastStartTime.count());
 		protoLm.set_possibletoadvanceto(sclm.m_possibleToAdvanceTo.count());
 		protoLm.set_cyclescounter(sclm.m_cyclesCounter);
 
-		const LogicModuleImpl* lm = sclm.m_lm.get();
+		const LogicModuleImpl& lm = sclm.toLm();
 
-		protoLm.set_equipmentid(lm->equipmentId().toStdString());
+		protoLm.set_equipmentid(lm.equipmentId().toStdString());
 
-		protoLm.set_tuningeepromcrc(lm->tuningEeprom().crc32(true));
-		protoLm.set_confeepromcrc(lm->confEeprom().crc32(true));
-		protoLm.set_applogiceepromcrc(lm->appLogicEeprom().crc32(true));
+		protoLm.set_tuningeepromcrc(lm.tuningEeprom().crc32(true));
+		protoLm.set_confeepromcrc(lm.confEeprom().crc32(true));
+		protoLm.set_applogiceepromcrc(lm.appLogicEeprom().crc32(true));
 
-		protoLm.set_runtimemode(static_cast<int32_t>(lm->runtimeMode()));
-		protoLm.set_devicestate2(static_cast<int32_t>(lm->deviceState()));
+		protoLm.set_runtimemode(static_cast<int32_t>(lm.runtimeMode()));
+		protoLm.set_devicestate2(static_cast<int32_t>(lm.deviceState()));
 
-		bool ok = saveLogicModuleRam(*protoLm.mutable_ram(), lm->ram());
+		bool ok = saveLogicModuleRam(*protoLm.mutable_ram(), lm.ram());
 		if (ok == false)
 		{
 			return false;
 		}
 
-		ok = saveLogicModuleAfbs(*protoLm.mutable_afbset(), lm->m_device.m_afbComponents);
+		ok = saveLogicModuleAfbs(*protoLm.mutable_afbset(), lm.m_device.m_afbComponents);
 		if (ok == false)
 		{
 			return false;
@@ -272,16 +277,16 @@ namespace Sim
 
 		// Tuning
 		//
-		protoLm.set_armingkey(lm->armingKey());
-		protoLm.set_tuningkey(lm->tuningKey());
+		protoLm.set_armingkey(lm.armingKey());
+		protoLm.set_tuningkey(lm.tuningKey());
 
 		// optional SnapshotLmRamArea m_tuningRamArea = 60;
 
-		protoLm.set_sorisset(lm->sorIsSet());
+		protoLm.set_sorisset(lm.sorIsSet());
 
-		protoLm.set_sorsetswitch1(lm->sorSetSwitch1());
-		protoLm.set_sorsetswitch2(lm->sorSetSwitch2());
-		protoLm.set_sorsetswitch3(lm->sorSetSwitch3());
+		protoLm.set_sorsetswitch1(lm.sorSetSwitch1());
+		protoLm.set_sorsetswitch2(lm.sorSetSwitch2());
+		protoLm.set_sorsetswitch3(lm.sorSetSwitch3());
 
 		return true;
 	}
@@ -300,7 +305,8 @@ namespace Sim
 			protoConn->set_id(conn->connectionId().toStdString());
 
 			protoConn->set_enable(conn->enabled());
-			protoConn->set_timeout(conn->timeout());
+			protoConn->set_timeout0(conn->m_timeouts[0]);
+			protoConn->set_timeout1(conn->m_timeouts[1]);
 
 			for (const auto& port : conn->ports())
 			{
@@ -354,16 +360,26 @@ namespace Sim
 
 		// Restore LMs' states.
 		//
-		if (control.m_controlData.m_lms.size() != protoSnapshot.logicmodules_size())
+		auto lmCount = std::count_if(control.m_controlData.m_modules.cbegin(),
+									 control.m_controlData.m_modules.cend(),
+									 [](const auto& lm)
+									 {
+										 return lm.isLm();
+									 });
+
+		if (lmCount != protoSnapshot.logicmodules_size())
 		{
-			m_log.writeError(QString{"LogicModule count mismatch. Project has %1 LMs, snapshot has %2 LMs."}
-								 .arg(control.m_controlData.m_lms.size())
-								 .arg(protoSnapshot.logicmodules_size()));
+			m_log.writeError(QString{"LogicModule count mismatch. Project has %1 LMs, snapshot has %2 LMs."}.arg(lmCount).arg(
+				protoSnapshot.logicmodules_size()));
 			return false;
 		}
 
 		bool ok = true;
-		for (auto& lm : control.m_controlData.m_lms)
+		for (auto& lm : control.m_controlData.m_modules | std::views::filter(
+															  [](const auto& lm)
+															  {
+																  return lm.isLm();
+															  }))
 		{
 			auto it = std::find_if(protoSnapshot.logicmodules().cbegin(),
 								   protoSnapshot.logicmodules().cend(),
@@ -539,7 +555,8 @@ namespace Sim
 
 	bool Snapshot::restoreLogicModule(const ::ProtoSim::SnapshotLogicModule& protoLm, Sim::SimControlRunStruct& sclm)
 	{
-		assert(sclm.m_lm != nullptr);
+		assert(sclm.m_module != nullptr);
+		assert(sclm.isLm() == true);
 
 		m_log.writeMessage(QString{"Restoring LogicModule %1..."}.arg(sclm->equipmentId()));
 
@@ -547,67 +564,67 @@ namespace Sim
 		sclm.m_possibleToAdvanceTo = std::chrono::microseconds{protoLm.possibletoadvanceto()};
 		sclm.m_cyclesCounter = protoLm.cyclescounter();
 
-		LogicModuleImpl* lm = sclm.m_lm.get();
+		LogicModuleImpl& lm = sclm.toLm();
 
 		auto equipmentId = QString::fromStdString(protoLm.equipmentid());
-		if (lm->equipmentId() != equipmentId)
+		if (lm.equipmentId() != equipmentId)
 		{
-			m_log.writeError(QString{"Wrong LM EquipmentID, actual: %1, expected: %2."}.arg(lm->equipmentId(), equipmentId));
+			m_log.writeError(QString{"Wrong LM EquipmentID, actual: %1, expected: %2."}.arg(lm.equipmentId(), equipmentId));
 			return false;
 		}
 
-		if (lm->tuningEeprom().crc32(true) != protoLm.tuningeepromcrc())
+		if (lm.tuningEeprom().crc32(true) != protoLm.tuningeepromcrc())
 		{
 			m_log.writeError(QString{"Wrong tuning EEPROM CRC, actual: %1, expected: %2."}
-								 .arg(lm->tuningEeprom().crc32(true))
+								 .arg(lm.tuningEeprom().crc32(true))
 								 .arg(protoLm.tuningeepromcrc()));
 			return false;
 		}
 
-		if (lm->confEeprom().crc32(true) != protoLm.confeepromcrc())
+		if (lm.confEeprom().crc32(true) != protoLm.confeepromcrc())
 		{
 			m_log.writeError(QString{"Wrong config EEPROM CRC, actual: %1, expected: %2."}
-								 .arg(lm->confEeprom().crc32(true))
+								 .arg(lm.confEeprom().crc32(true))
 								 .arg(protoLm.confeepromcrc()));
 			return false;
 		}
 
-		if (lm->appLogicEeprom().crc32(true) != protoLm.applogiceepromcrc())
+		if (lm.appLogicEeprom().crc32(true) != protoLm.applogiceepromcrc())
 		{
 			m_log.writeError(QString{"Wrong AppLogic EEPROM CRC, actual: %1, expected: %2."}
-								 .arg(lm->appLogicEeprom().crc32(true))
+								 .arg(lm.appLogicEeprom().crc32(true))
 								 .arg(protoLm.applogiceepromcrc()));
 			return false;
 		}
 
 		// Restore LM state.
 		//
-		lm->m_device.setRuntimeMode(static_cast<RuntimeMode>(protoLm.runtimemode()));
-		lm->m_device.m_deviceState2.store(static_cast<DeviceState>(protoLm.devicestate2()));
+		lm.m_device.setRuntimeMode(static_cast<RuntimeMode>(protoLm.runtimemode()));
+		lm.m_device.m_deviceState2.store(static_cast<DeviceState>(protoLm.devicestate2()));
 
-		bool ok = restoreLogicModuleRam(protoLm.ram(), lm->mutableRam());
+		bool ok = restoreLogicModuleRam(protoLm.ram(), lm.mutableRam());
 		if (ok == false)
 		{
-			m_log.writeError(QString{"Restoring LogicModule RAM failed, LM: %1"}.arg(lm->equipmentId()));
+			m_log.writeError(QString{"Restoring LogicModule RAM failed, LM: %1"}.arg(lm.equipmentId()));
 			return false;
 		}
 
-		ok = restoreLogicModuleAfbs(protoLm.afbset(), lm->m_device.m_afbComponents);
+		ok = restoreLogicModuleAfbs(protoLm.afbset(), lm.m_device.m_afbComponents);
 		if (ok == false)
 		{
-			m_log.writeError(QString{"Restoring LogicModule AfbComponentSet failed, LM: %1"}.arg(lm->equipmentId()));
+			m_log.writeError(QString{"Restoring LogicModule AfbComponentSet failed, LM: %1"}.arg(lm.equipmentId()));
 			return false;
 		}
 
 		// Restore external keys.
 		//
-		lm->setArmingKey(protoLm.armingkey());
-		lm->setTuningKey(protoLm.tuningkey());
+		lm.setArmingKey(protoLm.armingkey());
+		lm.setTuningKey(protoLm.tuningkey());
 
-		lm->m_device.setSorIsSet(protoLm.sorisset());
-		lm->m_device.setSorSetSwitch1(protoLm.sorsetswitch1());
-		lm->m_device.setSorSetSwitch2(protoLm.sorsetswitch2());
-		lm->m_device.setSorSetSwitch3(protoLm.sorsetswitch3());
+		lm.m_device.setSorIsSet(protoLm.sorisset());
+		lm.m_device.setSorSetSwitch1(protoLm.sorsetswitch1());
+		lm.m_device.setSorSetSwitch2(protoLm.sorsetswitch2());
+		lm.m_device.setSorSetSwitch3(protoLm.sorsetswitch3());
 
 		return true;
 	}
@@ -625,9 +642,13 @@ namespace Sim
 		TimeStamp localTime{plantTime};
 		TimeStamp systemTime{ms.count()};
 
-		for (auto& lm : control.m_controlData.m_lms)
+		for (auto& lm : control.m_controlData.m_modules | std::views::filter(
+															  [](const auto& module)
+															  {
+																  return module.isLm();
+															  }))
 		{
-			simulator.appSignalManager().setData(lm.equipmentId(), lm->ram(), plantTime, localTime, systemTime);
+			simulator.appSignalManager().setData(lm.equipmentId(), lm.toLm().ram(), plantTime, localTime, systemTime);
 		}
 
 		return true;
@@ -649,7 +670,8 @@ namespace Sim
 			}
 
 			conn->setEnabled(protoConn.enable());
-			conn->m_timeout.store(protoConn.timeout());
+			conn->m_timeouts[0].store(protoConn.timeout0());
+			conn->m_timeouts[1].store(protoConn.timeout1());
 
 			// Check ports.
 			//

@@ -129,7 +129,7 @@ namespace Sim
 		std::optional<Sim::ConnectionPort> m_port2;
 
 		std::atomic<bool> m_enable = true;
-		std::atomic<bool> m_timeout = false;
+		std::atomic<bool> m_timeouts[2] = {false, false};
 
 		// Data sent by port 1, protected with a mutex
 		//
