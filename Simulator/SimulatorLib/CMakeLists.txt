@@ -105,6 +105,7 @@ qt_add_library(${TARGET} STATIC
 	./src/Modules/SimModule.cpp
 	./src/Modules/SimVduDeviceEmulator.cpp
 	./src/Modules/SimVduDeviceEmulator.h
+	./src/Modules/SimVduModule.cpp
 	./src/Modules/SimVduModuleImpl.cpp
 	./src/Modules/SimVduModuleImpl.h
 
@@ -134,6 +135,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SimulatorLib/SimSoftware.h
 	./include/SimulatorLib/SimSubsystem.h
 	./include/SimulatorLib/Simulator.h
+	./include/SimulatorLib/SimVduModule.h
 
 	SimulatorLib.qrc
 )

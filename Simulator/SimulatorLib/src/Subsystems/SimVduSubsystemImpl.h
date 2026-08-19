@@ -38,7 +38,7 @@ namespace Sim
 
 	public:
 		std::vector<std::shared_ptr<VduModuleImpl>> vduModules();
-		std::shared_ptr<VduModuleImpl> vduModules(QString equipmentId);
+		std::shared_ptr<VduModuleImpl> vduModule(QString equipmentId);
 
 	private:
 		std::map<int, std::shared_ptr<BaseModuleImpl>> m_devicesByLmNumber; // key is LmNumber

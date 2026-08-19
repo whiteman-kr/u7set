@@ -97,7 +97,7 @@ namespace SimUi
 		void takeSnapshot();
 		void applySnapshot();
 
-		void openLogicModuleTabPage(QString lmEquipmentId);
+		void openModuleTabPage(QString lmEquipmentId);
 		void openCodeTabPage(QString lmEquipmentId);
 		void openConnectionTabPage(QString connectionId);
 		void openAppSchemasTabPage();

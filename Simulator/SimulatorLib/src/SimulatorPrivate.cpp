@@ -661,6 +661,22 @@ namespace Sim
 		return m_connectionsPublic;
 	}
 
+	std::vector<std::shared_ptr<SubsystemImpl>> SimulatorPrivate::subsystems() const
+	{
+		std::vector<std::shared_ptr<SubsystemImpl>> result;
+		result.reserve(m_subsystems.size());
+
+		std::transform(m_subsystems.begin(),
+					   m_subsystems.end(),
+					   std::back_inserter(result),
+					   [](const auto& item)
+					   {
+						   return item.second;
+					   });
+
+		return result;
+	}
+
 	std::vector<std::shared_ptr<LmSubsystemImpl>> SimulatorPrivate::lmSubsystems() const
 	{
 		std::vector<std::shared_ptr<LmSubsystemImpl>> result;
@@ -679,39 +695,19 @@ namespace Sim
 		return result;
 	}
 
-	std::shared_ptr<LogicModuleImpl> SimulatorPrivate::logicModule(QString equipmentId) const
+	std::vector<std::shared_ptr<VduSubsystemImpl>> SimulatorPrivate::vduSubsystems() const
 	{
+		std::vector<std::shared_ptr<VduSubsystemImpl>> result;
+		result.reserve(m_subsystems.size());
+
 		for (const auto& [_, ss] : m_subsystems)
 		{
-			if (ss->isLmSubsystem() == false)
+			if (ss->isVduSubsystem() == false)
 			{
 				continue;
 			}
 
-			auto lm = ss->toLmSubsystem()->logicModule(equipmentId);
-			if (lm != nullptr)
-			{
-				return lm;
-			}
-		}
-
-		return {};
-	}
-
-	std::vector<std::shared_ptr<LogicModuleImpl>> SimulatorPrivate::logicModules() const
-	{
-		std::vector<std::shared_ptr<LogicModuleImpl>> result;
-		result.reserve(m_subsystems.size() * 10); // Just some random number
-
-		for (const auto& [_, ss] : m_subsystems)
-		{
-			if (ss->isLmSubsystem() == false)
-			{
-				continue;
-			}
-
-			auto subsystemModules = ss->toLmSubsystem()->logicModules();
-			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
+			result.push_back(std::static_pointer_cast<VduSubsystemImpl>(ss));
 		}
 
 		return result;
@@ -740,6 +736,62 @@ namespace Sim
 		{
 			auto subsystemModules = ss->modules();
 			std::ranges::move(subsystemModules, std::back_inserter(result));
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<LogicModuleImpl> SimulatorPrivate::logicModule(QString equipmentId) const
+	{
+		for (const auto& ss : lmSubsystems())
+		{
+			auto lm = ss->logicModule(equipmentId);
+			if (lm != nullptr)
+			{
+				return lm;
+			}
+		}
+
+		return {};
+	}
+
+	std::vector<std::shared_ptr<LogicModuleImpl>> SimulatorPrivate::logicModules() const
+	{
+		std::vector<std::shared_ptr<LogicModuleImpl>> result;
+		result.reserve(m_subsystems.size() * 10); // Just some random number
+
+		for (const auto& ss : lmSubsystems())
+		{
+			auto subsystemModules = ss->logicModules();
+			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<VduModuleImpl> SimulatorPrivate::vduModule(QString equipmentId) const
+	{
+		for (const auto& ss : vduSubsystems())
+		{
+			auto vdu = ss->vduModule(equipmentId);
+			if (vdu != nullptr)
+			{
+				return vdu;
+			}
+		}
+
+		return {};
+	}
+
+	std::vector<std::shared_ptr<VduModuleImpl>> SimulatorPrivate::vduModules() const
+	{
+		std::vector<std::shared_ptr<VduModuleImpl>> result;
+		result.reserve(m_subsystems.size() * 10); // Just some random number
+
+		for (const auto& ss : vduSubsystems())
+		{
+			auto subsystemModules = ss->vduModules();
+			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
 		}
 
 		return result;

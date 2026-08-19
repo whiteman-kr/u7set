@@ -117,6 +117,21 @@ namespace Sim
 		return m_impl->connectionsPublic();
 	}
 
+	std::vector<Subsystem> Simulator::subsystems() const
+	{
+		auto subsystems = m_impl->subsystems();
+
+		std::vector<Subsystem> result;
+		result.reserve(subsystems.size());
+
+		for (auto& subsystem : subsystems)
+		{
+			result.push_back(Subsystem{subsystem});
+		}
+
+		return result;
+	}
+
 	std::vector<LmSubsystem> Simulator::lmSubsystems() const
 	{
 		auto subsystems = m_impl->lmSubsystems();
@@ -128,6 +143,49 @@ namespace Sim
 		{
 			result.push_back(LmSubsystem{subsystem});
 		}
+
+		return result;
+	}
+
+	std::vector<VduSubsystem> Simulator::vduSubsystems() const
+	{
+		auto subsystems = m_impl->vduSubsystems();
+		std::vector<VduSubsystem> result;
+		result.reserve(subsystems.size());
+		for (auto& subsystem : subsystems)
+		{
+			result.push_back(VduSubsystem{subsystem});
+		}
+		return result;
+	}
+
+	std::optional<Sim::Module> Simulator::module(QString equipmentId) const
+	{
+		std::optional<Module> result;
+
+		auto lm = m_impl->module(equipmentId);
+		if (lm != nullptr)
+		{
+			result = Module{lm};
+		}
+
+		return result;
+	}
+
+	std::vector<Sim::Module> Simulator::modules() const
+	{
+		auto modules = m_impl->modules();
+
+		std::vector<Module> result;
+		result.reserve(modules.size());
+
+		std::transform(modules.begin(),
+					   modules.end(),
+					   std::back_inserter(result),
+					   [](const auto& moduleImpl)
+					   {
+						   return Module{moduleImpl};
+					   });
 
 		return result;
 	}
@@ -163,32 +221,32 @@ namespace Sim
 		return result;
 	}
 
-	std::optional<Sim::Module> Simulator::module(QString equipmentId) const
+	std::optional<VduModule> Simulator::vduModule(QString equipmentId) const
 	{
-		std::optional<Module> result;
+		std::optional<VduModule> result;
 
-		auto lm = m_impl->module(equipmentId);
-		if (lm != nullptr)
+		auto vdu = m_impl->vduModule(equipmentId);
+		if (vdu != nullptr)
 		{
-			result = Module{lm};
+			result = VduModule{vdu};
 		}
 
 		return result;
 	}
 
-	std::vector<Sim::Module> Simulator::modules() const
+	std::vector<VduModule> Simulator::vduModules() const
 	{
-		auto modules = m_impl->modules();
+		auto vdus = m_impl->vduModules();
 
-		std::vector<Module> result;
-		result.reserve(modules.size());
+		std::vector<VduModule> result;
+		result.reserve(vdus.size());
 
-		std::transform(modules.begin(),
-					   modules.end(),
+		std::transform(vdus.begin(),
+					   vdus.end(),
 					   std::back_inserter(result),
-					   [](const auto& moduleImpl)
+					   [](const auto& vduImpl)
 					   {
-						   return Module{moduleImpl};
+						   return VduModule{vduImpl};
 					   });
 
 		return result;

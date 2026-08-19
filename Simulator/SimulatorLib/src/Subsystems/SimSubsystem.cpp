@@ -1,10 +1,12 @@
 #include <SimulatorLib/SimSubsystem.h>
 
 #include <SimulatorLib/SimLogicModule.h>
+#include <SimulatorLib/SimVduModule.h>
 
 #include "../Modules/SimLogicModuleImpl.h"
 #include "SimLmSubsystemImpl.h"
 #include "SimSubsystemImpl.h"
+#include "SimVduSubsystemImpl.h"
 
 
 namespace Sim
@@ -35,10 +37,22 @@ namespace Sim
 		return m_pimpl->isVduSubsystem();
 	}
 
-	const LmSubsystem& Subsystem::toLmSubsystem() const
+	LmSubsystem Subsystem::toLmSubsystem() const
 	{
 		assert(isLmSubsystem() == true);
-		return dynamic_cast<const LmSubsystem&>(*this);
+
+		auto lmss = std::dynamic_pointer_cast<LmSubsystemImpl>(m_pimpl);
+		assert(lmss);
+		return LmSubsystem{lmss};
+	}
+
+	VduSubsystem Subsystem::toVduSubsystem() const
+	{
+		assert(isVduSubsystem() == true);
+
+		auto vduss = std::dynamic_pointer_cast<VduSubsystemImpl>(m_pimpl);
+		assert(vduss);
+		return VduSubsystem{vduss};
 	}
 
 	//
@@ -74,12 +88,52 @@ namespace Sim
 		return result;
 	}
 
-	Sim::LogicModule LmSubsystem::logicModule(QString equipmentId)
+	std::optional<Sim::LogicModule> LmSubsystem::logicModule(QString equipmentId)
 	{
 		std::shared_ptr<LogicModuleImpl> lm =
 			m_pimpl->isLmSubsystem() == true ? m_pimpl->toLmSubsystem()->logicModule(equipmentId) : nullptr;
 
-		return Sim::LogicModule{lm};
+		return lm ? std::optional<Sim::LogicModule>{std::in_place, lm} : std::nullopt;
 	}
 
+	//
+	// VduSubsystem
+	//
+	VduSubsystem::VduSubsystem(std::shared_ptr<VduSubsystemImpl> pimpl) :
+		Subsystem{pimpl}
+	{
+		Q_ASSERT(m_pimpl);
+		Q_ASSERT(m_pimpl->isVduSubsystem() == true);
+	}
+
+	std::vector<VduModule> VduSubsystem::vduModules()
+	{
+		std::vector<VduModule> result;
+
+		if (m_pimpl->isVduSubsystem() == false)
+		{
+			return result;
+		}
+
+		auto vdus = m_pimpl->toVduSubsystem()->vduModules();
+
+		result.reserve(vdus.size());
+		std::transform(vdus.begin(),
+					   vdus.end(),
+					   std::back_inserter(result),
+					   [](const std::shared_ptr<VduModuleImpl>& vduImpl)
+					   {
+						   return Sim::VduModule{vduImpl};
+					   });
+
+		return result;
+	}
+
+	std::optional<Sim::VduModule> VduSubsystem::vduModule(QString equipmentId)
+	{
+		std::shared_ptr<VduModuleImpl> vdu =
+			m_pimpl->isVduSubsystem() == true ? m_pimpl->toVduSubsystem()->vduModule(equipmentId) : nullptr;
+
+		return vdu ? std::optional<Sim::VduModule>{std::in_place, vdu} : std::nullopt;
+	}
 } // namespace Sim

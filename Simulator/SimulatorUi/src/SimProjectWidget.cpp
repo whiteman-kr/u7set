@@ -3,6 +3,7 @@
 #include <SimulatorLib/SimControl.h>
 #include <SimulatorLib/SimLogicModule.h>
 #include <SimulatorLib/SimSubsystem.h>
+#include <SimulatorLib/SimVduModule.h>
 
 #include <QGridLayout>
 #include <QHeaderView>
@@ -192,11 +193,9 @@ namespace SimUi
 		AppLogicSchemasTreeItem* appLogicSchemasTreeItem = new AppLogicSchemasTreeItem{nullptr};
 		m_treeWidget->addTopLevelItem(appLogicSchemasTreeItem);
 
-		// Fill subsystems and modules
+		// Fill Subsystems and modules
 		//
-		auto lmSubsystems = m_simulator->lmSubsystems();
-
-		for (auto& ss : lmSubsystems)
+		for (auto& ss : m_simulator->subsystems())
 		{
 			QStringList sl;
 			sl << ss.subsystemId();
@@ -204,13 +203,22 @@ namespace SimUi
 			QTreeWidgetItem* ssItem = new QTreeWidgetItem(m_treeWidget, sl);
 			m_treeWidget->addTopLevelItem(ssItem);
 
-			// Add LogicModules
-			//
-			auto logicModules = ss.logicModules();
-			for (const Sim::LogicModule& lm : logicModules)
+			if (ss.isLmSubsystem() == true)
 			{
-				LogicModuleTreeItem* lmItem = new LogicModuleTreeItem{ssItem, lm};
-				Q_UNUSED(lmItem);
+				auto lmSubsystem = ss.toLmSubsystem();
+				for (const auto& lm : lmSubsystem.logicModules())
+				{
+					std::ignore = new LogicModuleTreeItem{ssItem, lm};
+				}
+			}
+
+			if (ss.isVduSubsystem() == true)
+			{
+				auto vduSubsystem = ss.toVduSubsystem();
+				for (const auto& vdu : vduSubsystem.vduModules())
+				{
+					std::ignore = new VduModuleTreeItem{ssItem, vdu};
+				}
 			}
 
 			m_treeWidget->expandItem(ssItem);
@@ -282,7 +290,9 @@ namespace SimUi
 			return;
 		}
 
-
+		//
+		// LogicModuleTreeItem
+		//
 		LogicModuleTreeItem::LogicModuleTreeItem(QTreeWidgetItem* parent, const Sim::LogicModule& lm) :
 			BaseTreeItem(parent,
 						 QStringList{} << lm.equipmentId()
@@ -351,7 +361,7 @@ namespace SimUi
 
 		void LogicModuleTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
 		{
-			emit simProjectWidget->signal_openLogicModuleTabPage(m_equipmentId);
+			emit simProjectWidget->signal_openModuleTabPage(m_equipmentId);
 			return;
 		}
 
@@ -369,7 +379,7 @@ namespace SimUi
 			menu.addAction(QObject::tr("Open..."),
 						   [simProjectWidget, this]()
 						   {
-							   emit simProjectWidget->signal_openLogicModuleTabPage(m_equipmentId);
+							   emit simProjectWidget->signal_openModuleTabPage(m_equipmentId);
 						   });
 
 			menu.addAction(QObject::tr("Module Code..."),
@@ -395,7 +405,125 @@ namespace SimUi
 			return;
 		}
 
+		//
+		// VduModuleTreeItem
+		//
+		VduModuleTreeItem::VduModuleTreeItem(QTreeWidgetItem* parent, const Sim::VduModule& vdu) :
+			BaseTreeItem(parent,
+						 QStringList{} << vdu.equipmentId()
+									   << QString("n: %1, ch: %2").arg(vdu.lmNumber()).arg(QChar('A' + static_cast<char>(vdu.channel())))),
+			m_equipmentId(vdu.equipmentId())
+		{
+			setData(0, Qt::UserRole, QVariant(m_equipmentId));
+			return;
+		}
 
+		void VduModuleTreeItem::updateState(SimProjectWidget* /*simProjectWidget*/, Sim::ControlStatus state)
+		{
+			auto it = std::find_if(std::begin(state.m_lmDeviceModes),
+								   std::end(state.m_lmDeviceModes),
+								   [this](const Sim::ControlStatus::LmMode& p)
+								   {
+									   return p.lmEquipmentId == this->m_equipmentId;
+								   });
+
+			if (it == std::end(state.m_lmDeviceModes))
+			{
+				return;
+			}
+
+			const Sim::ControlStatus::LmMode& lmState = *it;
+
+			QColor color{Qt::black};
+
+			QString text;
+			text.reserve(64);
+
+			if (state.m_state == Sim::SimControlState::Pause)
+			{
+				text = QObject::tr("Pause - ");
+			}
+
+			if (state.m_state != Sim::SimControlState::Stop)
+			{
+				switch (lmState.deviceState)
+				{
+				case Sim::DeviceState::Off:
+					text += QStringLiteral("Off");
+					break;
+				case Sim::DeviceState::Start:
+					text += QStringLiteral("Start");
+					break;
+				case Sim::DeviceState::Fault:
+					text += QStringLiteral("Fault");
+					color = qRgb(0xD0, 0x00, 0x00);
+					break;
+				case Sim::DeviceState::Operate:
+					text += QStringLiteral("Operate");
+					break;
+				default:
+					Q_ASSERT(false);
+					text += QStringLiteral("Unknown");
+					color = qRgb(0xD0, 0x00, 0x00);
+				}
+			}
+
+			this->setText(EquipmentTreeColumns::State, text);
+			this->setForeground(EquipmentTreeColumns::State, color);
+
+			return;
+		}
+
+		void VduModuleTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
+		{
+			emit simProjectWidget->signal_openModuleTabPage(m_equipmentId);
+			return;
+		}
+
+		void VduModuleTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
+		{
+			auto lm = simProjectWidget->simulator()->vduModule(m_equipmentId);
+			if (lm.has_value() == false)
+			{
+				Q_ASSERT(lm.has_value());
+				return;
+			}
+
+			QMenu menu(this->treeWidget());
+
+			menu.addAction(QObject::tr("Open..."),
+						   [simProjectWidget, this]()
+						   {
+							   emit simProjectWidget->signal_openModuleTabPage(m_equipmentId);
+						   });
+
+			// menu.addAction(QObject::tr("Module Code..."),
+			//			   [simProjectWidget, this]()
+			//			   {
+			//				   emit simProjectWidget->signal_openCodeTabPage(m_equipmentId);
+			//			   });
+
+			QAction* powerOffAction = menu.addAction(QObject::tr("Disable"),
+													 [simProjectWidget, equipmentId = m_equipmentId](bool checked)
+													 {
+														 auto vdu = simProjectWidget->simulator()->vduModule(equipmentId);
+														 if (vdu.has_value() == true)
+														 {
+															 vdu->setPowerOff(checked);
+														 }
+													 });
+
+			powerOffAction->setCheckable(true);
+			powerOffAction->setChecked(lm->isPowerOff());
+
+			menu.exec(globalMousePos);
+			return;
+		}
+
+
+		//
+		// ConnectionTreeItem
+		//
 		ConnectionTreeItem::ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::Connection& connection) :
 			BaseTreeItem(parent, QStringList{} << connection.connectionId() << connection.typeStr()),
 			m_connectionId(connection.connectionId())

@@ -126,7 +126,7 @@ namespace Sim
 		return result;
 	}
 
-	std::shared_ptr<VduModuleImpl> VduSubsystemImpl::vduModules(QString equipmentId)
+	std::shared_ptr<VduModuleImpl> VduSubsystemImpl::vduModule(QString equipmentId)
 	{
 		auto it = m_devicesByEquipmentId.find(equipmentId);
 		if (it == m_devicesByEquipmentId.end())

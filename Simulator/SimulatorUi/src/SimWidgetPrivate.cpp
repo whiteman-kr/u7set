@@ -11,6 +11,7 @@
 #include "SimSignalInfo.h"
 #include "SimSignalSnapshot.h"
 #include "SimTrends.h"
+#include "SimVduModulePage.h"
 
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SimulatorLib/SimControl.h>
@@ -135,7 +136,7 @@ namespace SimUi
 		connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidgetPrivate::controlStateChanged);
 		connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidgetPrivate::updateTimeIndicator);
 
-		connect(m_projectWidget, &SimProjectWidget::signal_openLogicModuleTabPage, this, &SimWidgetPrivate::openLogicModuleTabPage);
+		connect(m_projectWidget, &SimProjectWidget::signal_openModuleTabPage, this, &SimWidgetPrivate::openModuleTabPage);
 		connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidgetPrivate::openCodeTabPage);
 		connect(m_projectWidget, &SimProjectWidget::signal_openConnectionTabPage, this, &SimWidgetPrivate::openConnectionTabPage);
 		connect(m_projectWidget, &SimProjectWidget::signal_openAppSchemasTabPage, this, &SimWidgetPrivate::openAppSchemasTabPage);
@@ -1432,7 +1433,7 @@ namespace SimUi
 		return;
 	}
 
-	void SimWidgetPrivate::openLogicModuleTabPage(QString lmEquipmentId)
+	void SimWidgetPrivate::openModuleTabPage(QString lmEquipmentId)
 	{
 		if (m_simulator->isLoaded() == false)
 		{
@@ -1441,9 +1442,8 @@ namespace SimUi
 
 		// Check if such SimulatorControlPage already exists
 		//
-		SimLogicModulePage* cp = SimBasePage::logicModulePage(lmEquipmentId, m_tabWidget);
-
-		if (cp != nullptr)
+		if (auto cp = SimBasePage::logicModulePage(lmEquipmentId, m_tabWidget); //
+			cp != nullptr)
 		{
 			int tabIndex = m_tabWidget->indexOf(cp);
 			if (tabIndex != -1)
@@ -1459,25 +1459,57 @@ namespace SimUi
 			return;
 		}
 
-		// Create new SimLogicModulePage
-		//
-		auto logicModule = m_simulator->logicModule(lmEquipmentId);
-		if (logicModule.has_value() == false)
+		if (auto cp = SimBasePage::vduModulePage(lmEquipmentId, m_tabWidget); //
+			cp != nullptr)
 		{
-			assert(logicModule);
+			int tabIndex = m_tabWidget->indexOf(cp);
+			if (tabIndex != -1)
+			{
+				m_tabWidget->setCurrentIndex(tabIndex);
+			}
+			else
+			{
+				cp->show();
+				cp->activateWindow();
+			}
+
 			return;
 		}
-		assert(lmEquipmentId == logicModule->equipmentId());
 
-		SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
+		// Create new SimLogicModulePage or SimVduModulePage
+		//
+		SimBasePage* newPage = nullptr;
 
-		int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
-		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/SimulatorUi/Images/SimLogicModuleIcon.svg"}});
+		if (auto logicModule = m_simulator->logicModule(lmEquipmentId); //
+			logicModule.has_value() == true)
+		{
+			assert(lmEquipmentId == logicModule->equipmentId());
+			SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
 
-		m_tabWidget->setCurrentIndex(tabIndex);
+			connect(controlPage, &SimLogicModulePage::openSchemaRequest, this, &SimWidgetPrivate::openSchemaTabPage);
+			connect(controlPage, &SimLogicModulePage::openCodePageRequest, this, &SimWidgetPrivate::openCodeTabPage);
 
-		connect(controlPage, &SimLogicModulePage::openSchemaRequest, this, &SimWidgetPrivate::openSchemaTabPage);
-		connect(controlPage, &SimLogicModulePage::openCodePageRequest, this, &SimWidgetPrivate::openCodeTabPage);
+			newPage = controlPage;
+		}
+
+		if (auto vduModule = m_simulator->vduModule(lmEquipmentId); //
+			vduModule.has_value() == true)
+		{
+			assert(lmEquipmentId == vduModule->equipmentId());
+			SimVduModulePage* controlPage = new SimVduModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+
+			// connect(controlPage, &SimVduModulePage::openSchemaRequest, this, &SimWidgetPrivate::openSchemaTabPage);
+			// connect(controlPage, &SimVduModulePage::openCodePageRequest, this, &SimWidgetPrivate::openCodeTabPage);
+			newPage = controlPage;
+		}
+
+		if (newPage != nullptr)
+		{
+			int tabIndex = m_tabWidget->addTab(newPage, lmEquipmentId);
+			m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/SimulatorUi/Images/SimLogicModuleIcon.svg"}});
+			m_tabWidget->setCurrentIndex(tabIndex);
+			return;
+		}
 
 		return;
 	}

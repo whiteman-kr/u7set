@@ -184,9 +184,29 @@ namespace SimUi
 		return m_simulator->connections();
 	}
 
+	std::vector<Sim::Subsystem> SimIdeSimulator::subsystems() const
+	{
+		return m_simulator->subsystems();
+	}
+
 	std::vector<Sim::LmSubsystem> SimIdeSimulator::lmSubsystems() const
 	{
 		return m_simulator->lmSubsystems();
+	}
+
+	std::vector<Sim::VduSubsystem> SimIdeSimulator::vduSubsystems() const
+	{
+		return m_simulator->vduSubsystems();
+	}
+
+	std::optional<Sim::Module> SimIdeSimulator::module(QString equipmentId) const
+	{
+		return m_simulator->module(equipmentId);
+	}
+
+	std::vector<Sim::Module> SimIdeSimulator::modules() const
+	{
+		return m_simulator->modules();
 	}
 
 	std::optional<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
@@ -199,14 +219,14 @@ namespace SimUi
 		return m_simulator->logicModules();
 	}
 
-	std::optional<Sim::Module> SimIdeSimulator::module(QString equipmentId) const
+	std::optional<Sim::VduModule> SimIdeSimulator::vduModule(QString equipmentId) const
 	{
-		return m_simulator->module(equipmentId);
+		return m_simulator->vduModule(equipmentId);
 	}
 
-	std::vector<Sim::Module> SimIdeSimulator::modules() const
+	std::vector<Sim::VduModule> SimIdeSimulator::vduModules() const
 	{
-		return m_simulator->modules();
+		return m_simulator->vduModules();
 	}
 
 	Sim::AppSignalManager& SimIdeSimulator::appSignalManager()
