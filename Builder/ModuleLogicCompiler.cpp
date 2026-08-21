@@ -774,14 +774,14 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createActuatorSignalSet),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
-			//PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
-			//PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+			PROC_TO_CALL(ModuleLogicCompiler::createActuatorSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
-			//PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
-			//PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
+			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			//PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
 			//PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
 			//PROC_TO_CALL(ModuleLogicCompiler::findEndpointSignals),
@@ -5761,6 +5761,113 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::createActuatorSignalLists()
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
+		bool result = true;
+
+		//result &= createAcquiredDiscreteInputSignalsList();
+		//result &= createAcquiredDiscreteStrictOutputSignalsList();
+		//result &= createAcquiredDiscreteInternalSignalsList();
+		//result &= createAcquiredDiscreteOptoSignalsList();
+		//result &= createAcquiredDiscreteBusChildSignalsList();
+		//result &= createAcquiredDiscreteTuningSignalsList();
+		//result &= createAcquiredDiscreteConstSignalsList();
+
+		result &= createNonAcquiredDiscreteInputSignalsList();
+		//result &= createNonAcquiredDiscreteStrictOutputSignalsList();
+		result &= createNonAcquiredDiscreteInternalSignalsList();
+
+		//result &= createAcquiredAnalogInputSignalsList();
+		//result &= createAcquiredAnalogStrictOutputSignalsList();
+		//result &= createAcquiredAnalogInternalSignalsList();
+		//result &= createAcquiredAnalogOptoSignalsList();
+		//result &= createAcquiredAnalogBusChildSignalsList();
+		//result &= createAcquiredAnalogTuninglSignalsList();
+		//result &= createAcquiredAnalogConstSignalsList();
+
+		result &= createNonAcquiredAnalogInputSignalsList();
+		//result &= createNonAcquiredAnalogStrictOutputSignalsList();
+		result &= createNonAcquiredAnalogInternalSignalsList();
+
+		result &= createAnalogOutputSignalsToConversionList();
+
+		//result &= createAcquiredInputBusesList();
+		//result &= createAcquiredOutputBusesList();
+		//result &= createAcquiredInternalBusesList();
+		//result &= createAcquiredBusBusChildSignalsList();
+		//result &= createAcquiredOptoBusesList();
+
+		result &= createNonAcquiredOutputBusesList();
+		result &= createNonAcquiredInternalBusesList();
+
+		result &= createDiscreteInvertedOutputSignalsList();
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		RETURN_IF_FALSE(listsUniquenessCheck());
+
+		result &= setSignalsCalculatedAttributes();
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// Discretes
+		//
+		//sortSignalList(m_acquiredDiscreteInputSignals);
+		//sortSignalList(m_acquiredDiscreteInvertedInputSignals);
+		//sortSignalList(m_acquiredDiscreteStrictOutputSignals);
+		//sortSignalList(m_acquiredDiscreteInternalSignals);
+		//sortSignalList(m_acquiredDiscreteOptoSignals);
+		//sortSignalList(m_acquiredDiscreteBusChildSignals);
+		//sortSignalList(m_acquiredDiscreteConstSignals);
+		//	m_acquiredDiscreteTuningSignals;		sorting not required
+
+		// Analogs
+		//
+		sortSignalList(m_nonAcquiredDiscreteInputSignals);
+		sortSignalList(m_nonAcquiredDiscreteInvertedInputSignals);
+		//sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
+		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
+
+		//sortSignalList(m_acquiredAnalogInputSignals);
+		//sortSignalList(m_acquiredAnalogStrictOutputSignals);
+		//sortSignalList(m_acquiredAnalogInternalSignals);
+		//sortSignalList(m_acquiredAnalogOptoSignals);
+		//sortSignalList(m_acquiredAnalogBusChildSignals);
+		//	m_acquiredAnalogTuningSignals;			sorting not required
+
+		sortSignalList(m_nonAcquiredAnalogInputSignals);
+		//sortSignalList(m_nonAcquiredAnalogStrictOutputSignals);
+		sortSignalList(m_nonAcquiredAnalogInternalSignals);
+
+		// Buses
+		//
+		//sortSignalList(m_acquiredInputBuses);
+		//sortSignalList(m_acquiredOutputBuses);
+		//sortSignalList(m_acquiredInternalBuses);
+
+		//sortSignalList(m_acquiredOptoBuses); // To DO sorting - group by OptoPortID, and next by addr in port buf for sequential move optimization
+
+		//sortSignalList(m_acquiredBusChildBuses);
+
+		sortSignalList(m_nonAcquiredOutputBuses);
+		sortSignalList(m_nonAcquiredInternalBuses);
+
+		sortSignalList(m_discreteInvertedOutputSignals);
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::createAcquiredDiscreteInputSignalsList()
 	{
 		m_acquiredDiscreteInputSignals.clear();
@@ -7663,7 +7770,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::findFbsForInOutSignalsConversion()
 	{
-		Q_ASSERT(m_lm->isLogicModule() == true);
+		Q_ASSERT(m_lm->isLogicModule() == true ||
+				m_lm->isAcm() == true);
 
 		bool result = true;
 

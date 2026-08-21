@@ -3518,6 +3518,7 @@ namespace Builder
 	{
 		if (ualSignal.isHeapPlaced() == false)
 		{
+			qDebug() << ualSignal.signal()->appSignalID();
 			Q_ASSERT(ualSignal.ualAddrIsValid() == true);
 			return ualSignal.ualAddr();
 		}

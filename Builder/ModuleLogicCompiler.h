@@ -417,6 +417,7 @@ namespace Builder
 		bool disposeSignalsInHeap();
 
 		bool createSignalLists();
+		bool createActuatorSignalLists();
 
 		bool createAcquiredDiscreteInputSignalsList();
 		bool createAcquiredDiscreteStrictOutputSignalsList();
@@ -997,6 +998,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		std::unique_ptr<SignalSet> m_actuatorSignals;
+
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorSet* m_cmpSet = nullptr;
 

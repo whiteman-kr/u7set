@@ -253,8 +253,8 @@ namespace Builder
 
 		if (heapItem->address == BAD_ADDRESS)
 		{
-			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined heap item %1 address").arg(appSignalID));
+			Q_ASSERT(false);
 			return addrForRead;
 		}
 
