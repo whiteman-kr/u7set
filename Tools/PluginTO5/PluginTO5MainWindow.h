@@ -20,6 +20,7 @@ enum class ReportType
 {
 	BySchemaID,
 	ByCaseID,
+	ByAlgorithm
 };
 
 class NumericDelegate;
@@ -115,9 +116,9 @@ private:
 	QStringList m_tableHeaders;
 	QString m_comparatorsCSV;
 
+	int m_algorithmColumn = -1;
 	int m_criteriaColumn = -1;
 	
-	//QString m_listType;
 	FilterType m_filterType = FilterType::BySchemaID;
 
 	bool m_hasUnsavedChanges = false;

@@ -309,8 +309,8 @@ function testTO5BySchemaID(ctrl)
 	
 	const schemaIDList = [];
 	for (const row of setpointsData) {
-		if (!schemaIDList.includes(row[1 /*SchemaID*/])) {
-			schemaIDList.push(row[1 /*SchemaID*/]);
+		if (!schemaIDList.includes(row[2 /*SchemaID*/])) {
+			schemaIDList.push(row[2 /*SchemaID*/]);
 		}
 	}
 	
@@ -327,18 +327,18 @@ function testTO5BySchemaID(ctrl)
 	{
 		for (const data of setpointsData)
 		{
-			if (schemaIDList[i] !== data[1 /*SchemaID*/])
+			if (schemaIDList[i] !== data[2 /*SchemaID*/])
 			{
 				continue;
 			}
 			
-			const caseId = data[0 /*CaseID*/];
-			const schemaID = data[1 /*SchemaID*/];
-			const inputAppSignalID = data[2 /*InputAppSignalID*/];
-			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
-			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/];
-			let criteria = Number(data[9 /*Criteria*/]);
-			const precision = data[14 /*Precision*/];
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/];
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
 			criteria = Number(criteria.toPrecision(precision));
 
 			if (outputAppSignalID === "")
@@ -356,15 +356,15 @@ function testTO5BySchemaID(ctrl)
 				currentSchemaID = schemaIDList[i];
 			}
 			
-			if (data[10 /*Type*/] === "S")
+			if (data[11 /*Type*/] === "S")
 			{
 				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
 				setpointMismatch += setpointMismatch0;
 				outputMismatch += outputMismatch0;
 			}
-			else if (data[10 /*Type*/] === "D")
+			else if (data[11 /*Type*/] === "D")
 			{
-				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
 				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
 				setpointMismatch += setpointMismatch0;
 				outputMismatch += outputMismatch0;
@@ -428,8 +428,8 @@ function testTO5ByCaseID(ctrl)
 	
 	const caseIDList = [];
 	for (const row of setpointsData) {
-		if (!caseIDList.includes(row[0 /*CaseID*/])) {
-			caseIDList.push(row[0 /*CaseID*/]);
+		if (!caseIDList.includes(row[1 /*CaseID*/])) {
+			caseIDList.push(row[1 /*CaseID*/]);
 		}
 	}
 	
@@ -446,20 +446,20 @@ function testTO5ByCaseID(ctrl)
 	{
 		for (const data of setpointsData)
 		{
-			if (caseIDList[i] !== data[0 /*CaseID*/])
+			if (caseIDList[i] !== data[1 /*CaseID*/])
 			{
 				continue;
 			}
 			
 			index++;
 			
-			const caseId = data[0 /*CaseID*/];
-			const schemaID = data[1 /*SchemaID*/];
-			const inputAppSignalID = data[2 /*InputAppSignalID*/];
-			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
-			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/]
-			let criteria = Number(data[9 /*Criteria*/]);
-			const precision = data[14 /*Precision*/];
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
 			criteria = Number(criteria.toPrecision(precision));
 
 			let correct = "";
@@ -477,15 +477,15 @@ function testTO5ByCaseID(ctrl)
 				currentCaseID = caseIDList[i];
 			}
 			
-			if (data[10 /*Type*/] === "S")
+			if (data[11 /*Type*/] === "S")
 			{
 				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
 				setpointMismatch += setpointMismatch0;
 				outputMismatch += outputMismatch0;
 			}
-			else if (data[10 /*Type*/] === "D")
+			else if (data[11 /*Type*/] === "D")
 			{
-				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
 				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
 				setpointMismatch += setpointMismatch0;
 				outputMismatch += outputMismatch0;
@@ -526,3 +526,107 @@ function testTO5ByCaseID(ctrl)
 		}
 	}
 }
+
+
+// TO5 Report by Algorithm
+//
+function testTO5ByAlgorithm(ctrl)
+{
+	// Read the contents of setpoints file
+	//
+    let csvFile = "%TEMP%\\PluginTO5.csv";
+    
+	let result = ctrl.loadTextFile(csvFile);
+
+	if (result.ok === false) 
+	{
+		assert(false, "Failed to read file " + csvFile + "!");
+		return;
+	}
+
+	let csvStrings = result.strings;
+	log.writeMessage("Lines read: " + csvStrings.length);
+	
+	const setpointsData = csvStrings.map(row => row.split(";").slice(1));
+	setpointsData.shift();
+	
+	
+	const algorithmList = [];
+	for (const row of setpointsData) {
+		if (!algorithmList.includes(row[0 /*Algorithm*/])) {
+			algorithmList.push(row[0 /*Algorithm*/]);
+		}
+	}
+	
+	const tolerance = 0.000001;
+	
+	log.writeMessage(`${algorithmList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
+
+	let setpointMismatch = 0;
+	let currentAlgorithm = "";
+	let errorReadData = false;
+	for (let i = 0; i < algorithmList.length; i++)
+	{
+		for (const data of setpointsData)
+		{
+			if (algorithmList[i] !== data[0 /*Algorithm*/])
+			{
+				continue;
+			}
+			const algorithm = data[0 /*Algorithm*/];
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
+			const criteria = data[10 /*Criteria*/];
+
+			let correct = "";
+
+			if (outputAppSignalID === "")
+			{
+				errorReadData = true;
+				continue;
+			}
+			
+			if (currentAlgorithm !== algorithmList[i])
+			{
+				log.writeMessage(`Алгоритм: ${algorithm}`, `TO_ALG_${i}`);
+				currentAlgorithm = algorithmList[i];
+			}
+			
+			if (data[11 /*Type*/] === "S")
+			{
+				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+			}
+			else if (data[11 /*Type*/] === "D")
+			{
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
+				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+			}
+			else
+			{
+				// CSV ERROR DATA
+			}
+		}
+	}
+	
+	if (errorReadData === true)
+	{
+		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
+	}
+	else
+	{
+		if (setpointMismatch === 0)
+		{
+			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+		}
+	
+		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+	}
+}
+

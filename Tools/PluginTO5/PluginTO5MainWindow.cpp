@@ -400,7 +400,7 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 	const QString value = item->text();
 	const int column = item->column();
 
-	if (column != m_criteriaColumn)
+	if ((column != m_criteriaColumn) && (column != m_algorithmColumn))
 	{
 		return;
 	}
@@ -418,28 +418,40 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 			Hash cmpHash = changedItem->data(Qt::UserRole)
 							   .toULongLong();
 
-			bool ok = false;
-			double v = value.toDouble(&ok);
-			Q_ASSERT(ok);
-
-			if (ok == true)
+			if (column == m_criteriaColumn)
 			{
-				const auto& cd = m_comparatorsStorage.comparator(cmpHash, &ok);
+				bool ok = false;
+				double v = value.toDouble(&ok);
+				Q_ASSERT(ok);
+
 				if (ok == true)
 				{
-					v = QString::number(value.toDouble(), 'f', cd.precision).toDouble();
-					m_comparatorsStorage.setComparatorCriteria(cmpHash, v);
+					const auto& cd = m_comparatorsStorage.comparator(cmpHash, &ok);
+					if (ok == true)
+					{
+						v = QString::number(value.toDouble(), 'f', cd.precision).toDouble();
+						m_comparatorsStorage.setComparatorCriteria(cmpHash, v);
 
-					if (cd.isValueOverriden() == true)
-					{
-						changedItem->setBackground(Qt::yellow);
-					}
-					else
-					{
-						changedItem->setBackground(Qt::white);
+						if (cd.isValueOverriden() == true)
+						{
+							changedItem->setBackground(Qt::yellow);
+						}
+						else
+						{
+							changedItem->setBackground(Qt::white);
+						}
 					}
 				}
 			}
+			else if (column == m_algorithmColumn)
+			{
+				m_comparatorsStorage.setComparatorAlgorithm(cmpHash, value);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			
 		}
 	}
 
@@ -473,16 +485,28 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 	switch (reportType)
 	{
 	case ReportType::BySchemaID:
-		defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_BySchemaID.pdf";
-		reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/BySchemaID", defaultReportFile).toString());
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_BySchemaID.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/BySchemaID", defaultReportFile).toString());
+		}
 		break;
 	case ReportType::ByCaseID:
-		defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByCaseID.pdf";
-		reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByCaseID", defaultReportFile).toString());
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByCaseID.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByCaseID", defaultReportFile).toString());
+		}
+		break;
+	case ReportType::ByAlgorithm:
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByAlgorithm.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByAlgorithm", defaultReportFile).toString());
+		}
 		break;
 	default:
-		Q_ASSERT(false);
-		return;
+		{
+			Q_ASSERT(false);
+			return;
+		}
 	}
 
 	reportFileEdit->setText(reportFile);
@@ -534,14 +558,25 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 				switch (reportType)
 				{
 				case ReportType::BySchemaID:
-					reportFilter = "testTO5BySchemaID";
+					{
+						reportFilter = "testTO5BySchemaID";
+					}
 					break;
 				case ReportType::ByCaseID:
-					reportFilter = "testTO5ByCaseID";
+					{
+						reportFilter = "testTO5ByCaseID";
+					}
+					break;
+				case ReportType::ByAlgorithm:
+					{
+						reportFilter = "testTO5ByAlgorithm";
+					}
 					break;
 				default:
-					Q_ASSERT(false);
-					return;
+					{
+						Q_ASSERT(false);
+						return;
+					}
 				}
 
 				QString destinationFile = tr("%1%2PluginTO5.csv")
@@ -744,6 +779,16 @@ void PluginTO5MainWindow::createMenu()
 			});
 	reportsMenu->addAction(reportBySchema);
 
+	QAction* reportByAlgorithm = new QAction(tr("Report by Algorithm"), this);
+	connect(reportByAlgorithm,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				onReport(ReportType::ByAlgorithm);
+			});
+	reportsMenu->addAction(reportByAlgorithm);
+
 	auto toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	QAction* import = new QAction(tr("Import..."), this);
@@ -844,12 +889,14 @@ void PluginTO5MainWindow::createFilterListWidget()
 void PluginTO5MainWindow::createTableWidget()
 {
 	m_tableHeaders.clear();
-	m_tableHeaders << tr("CaseID") << tr("SchemaID") << tr("InputAppSignalID") << tr("InputAppSignalCaption") << tr("OutputAppSignalID")
+	m_tableHeaders << tr("Algorithm") << tr("CaseID") << tr("SchemaID") << tr("InputAppSignalID") << tr("InputAppSignalCaption")
+				   << tr("OutputAppSignalID")
 				   << tr("OutputAppSignalCaption") << tr("Default") << tr("Criteria") << tr("Type") << tr("SetpointAppSignalID")
 				   << tr("SetpointAppSignalCaption");
 
+	m_algorithmColumn = m_tableHeaders.indexOf(tr("Algorithm"));
 	m_criteriaColumn = m_tableHeaders.indexOf(tr("Criteria"));
-	if (m_criteriaColumn == -1) 
+	if ((m_criteriaColumn == -1) || (m_algorithmColumn == -1))
 	{
 		Q_ASSERT(false);
 	}
@@ -1041,6 +1088,16 @@ void PluginTO5MainWindow::createUi()
 			});
 	layout->addWidget(btnReportBySchema);
 
+	QPushButton* btnReportByAlg = new QPushButton(tr("Report by Algorithm"), this);
+	connect(btnReportByAlg,
+			&QPushButton::pressed,
+			this,
+			[this]()
+			{
+				onReport(ReportType::ByAlgorithm);
+			});
+	layout->addWidget(btnReportByAlg);
+
 	createStatusBar();
 
 	mainLayout->addLayout(layout);
@@ -1189,6 +1246,9 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 		}
 
 		int c = 0;
+		QTableWidgetItem* algorithmItem = createTableItem(data.algorithm, true);
+		algorithmItem->setData(Qt::UserRole, static_cast<qulonglong>(data.hash));
+		m_tableWidget->setItem(row, c++, algorithmItem);
 
 		m_tableWidget->setItem(row, c++, createTableItem(data.caseID, false));
 		m_tableWidget->setItem(row, c++, createTableItem(data.schemaID, false));
@@ -1203,7 +1263,7 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 
 		QTableWidgetItem* criteriaItem = createTableItem(QString::number(data.currentValue), true);
 		criteriaItem->setData(Qt::UserRole, static_cast<qulonglong>(data.hash));
-		if (data.isValueOverriden())
+		if (data.isValueOverriden() == true)
 		{
 			criteriaItem->setBackground(Qt::yellow);
 		}

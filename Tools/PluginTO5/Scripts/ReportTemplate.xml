@@ -6,7 +6,7 @@
 			<Text Tag="$FIRST(PLANT)" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="$FIRST(UNIT)" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="$FIRST(SYSTEM)" FontName="Arial" FontSize="12" Alignment="Right"/>
-			<Text Text="\n\nПротокол № ________ ТО-5\n\n" FontName="Arial" FontSize="16" Alignment="Center"/>
+			<Text Text="\n\nПротокол №: ________ ТО-5; НЗ ЦТАВ: ________\n\n" FontName="Arial" FontSize="16" Alignment="Center"/>
 			<Text Tag="$FIRST(START_TIME)" FontName="Arial" FontSize="12" Alignment="Center"/>
 		</Header>
 		<Section Caption="Main" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1" Tag="to5">
@@ -16,10 +16,10 @@
 				<Column Caption="Найменування" Alignment="Left" Width = "40"/>
 				<Column Caption="ІД" Alignment="Left" Width = "20"/>
 				<Column Caption="Шафа" Alignment="Left" Width = "5"/>
-				<Column Caption="Значення сигнала" Alignment="Center" Width = "10"/>
-				<Column Caption="Еталон уставки" Alignment="Center" Width = "10"/>
-				<Column Caption="Значення уставки" Alignment="Center" Width = "10"/>
-				<Column Caption="Відповідність" Alignment="Center" Width = "5"/>
+				<Column Caption="Значення сигнала" Alignment="Left" Width = "10"/>
+				<Column Caption="Еталон уставки" Alignment="Left" Width = "10"/>
+				<Column Caption="Значення уставки" Alignment="Left" Width = "10"/>
+				<Column Caption="Відповідність" Alignment="Left" Width = "5"/>
 			</Table>
 		</Section>
 		<Footer Caption="Footer" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1">

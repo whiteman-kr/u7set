@@ -22,6 +22,8 @@ struct ComparatorData
 {
 	Hash hash = UNDEFINED_HASH;
 
+	QString algorithm;
+
 	QString schemaID;
 
 	QString inputAppSignalID;
@@ -91,6 +93,7 @@ public:
 	// Update comparator
 	//
 	void setComparatorCriteria(Hash hash, double criteria);
+	void setComparatorAlgorithm(Hash hash, const QString& algorithm);
 
 	QString FilterTypeStr[static_cast<int>(FilterType::Count)] = {QObject::tr("Schema ID"), QObject::tr("Case ID")};
 

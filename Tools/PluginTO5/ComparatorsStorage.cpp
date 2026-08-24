@@ -11,7 +11,7 @@
 
 ComparatorsStorage::ComparatorsStorage()
 {
-	m_csvHeaders << "Version" << "CaseID" << "SchemaID"
+	m_csvHeaders << "Version" << "Algorithm" << "CaseID" << "SchemaID"
 				 << "InputAppSignalID" << "InputCustomAppSignalID" << "InputAppSignalCaption"
 				 << "OutputAppSignalID" << "OutputCustomAppSignalID" << "OutputAppSignalCaption"
 				 << "DefaultCriteria" << "Criteria" << "Type"
@@ -81,6 +81,7 @@ bool ComparatorsStorage::loadFromFile(const QString& fileName, QString* errorMsg
 		}
 
 		ComparatorData data;
+		data.algorithm = fields[c++];
 		data.caseID = fields[c++];
 		data.schemaID = fields[c++];
 		data.inputAppSignalID = fields[c++];
@@ -117,7 +118,7 @@ bool ComparatorsStorage::loadFromFile(const QString& fileName, QString* errorMsg
 static QStringList getComparatorDataAsStringList(const ComparatorData& data)
 {
 	QStringList fields;
-	fields << "1" << data.caseID << data.schemaID
+	fields << "1" << data.algorithm <<data.caseID << data.schemaID
 		<< data.inputAppSignalID << data.inputCustomAppSignalID << data.inputSignalCaption
 		<< data.outputAppSignalID << data.outputCustomAppSignalID << data.outputSignalCaption
 		<< QString::number(data.defaultValue) << QString::number(data.currentValue) << data.type
@@ -455,6 +456,17 @@ void ComparatorsStorage::setComparatorCriteria(Hash hash, double criteria)
 		return;
 	}
 	it->second.currentValue = criteria;
+}
+
+void ComparatorsStorage::setComparatorAlgorithm(Hash hash, const QString& algorithm)
+{
+	auto it = m_comparatorDataMap.find(hash);
+	if (it == m_comparatorDataMap.end())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+	it->second.algorithm = algorithm;
 }
 
 bool ComparatorsStorage::loadComparators(const QString& comparatorsFile, ComparatorSet& comparatorSet) const

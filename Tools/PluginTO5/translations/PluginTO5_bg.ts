@@ -71,25 +71,25 @@
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="166"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="892"/>
         <source>InputAppSignalCaption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="167"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="894"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="168"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="894"/>
         <source>SetpointAppSignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="169"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="849"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="895"/>
         <source>SetpointAppSignalCaption</source>
         <translation type="unfinished"></translation>
     </message>
@@ -150,200 +150,212 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="490"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="514"/>
         <source>Path to save report:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="498"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="522"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="510"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="534"/>
         <source>Select Report File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="510"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="534"/>
         <source>PDF Files (*.pdf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="547"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="582"/>
         <source>%1%2PluginTO5.csv</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="558"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="593"/>
         <source>Failed to delete file %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="581"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="616"/>
         <source>Failed to save comparators file to %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="590"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="625"/>
         <source>Report generating failed, invalid configuration parameters!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="641"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="676"/>
         <source>Report generating failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="701"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="736"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="705"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="740"/>
         <source>New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="713"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="748"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="717"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="752"/>
         <source>Save As...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="721"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="756"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="726"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="761"/>
         <source>&amp;Reports</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="747"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="782"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1091"/>
+        <source>Report by Algorithm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PluginTO5MainWindow.cpp" line="792"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="753"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="798"/>
         <source>Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="757"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="802"/>
         <source>&amp;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="759"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="804"/>
         <source>Application Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="760"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="805"/>
         <source>Show application log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="764"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="809"/>
         <source>About...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="824"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="869"/>
         <source>SchemaID/CaseID Mask</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="832"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="877"/>
         <source>Enter mask (&quot;*,?&quot;) here</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="892"/>
         <source>CaseID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="892"/>
         <source>SchemaID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="892"/>
         <source>InputAppSignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="847"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="892"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="897"/>
+        <source>Algorithm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PluginTO5MainWindow.cpp" line="893"/>
         <source>OutputAppSignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="894"/>
         <source>OutputAppSignalCaption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="894"/>
         <source>Default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="848"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="851"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="894"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="898"/>
         <source>Criteria</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="901"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="948"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="929"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="976"/>
         <source> ConfigService: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="933"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="980"/>
         <source> no connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="937"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="984"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="947"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="994"/>
         <source>Address: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="983"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1030"/>
         <source> Log E: %1 W: %2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="727"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1024"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="762"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1071"/>
         <source>Report by CaseID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="464"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="476"/>
         <source>Browse...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PluginTO5MainWindow.cpp" line="269"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="499"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="523"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -353,66 +365,66 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="709"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="744"/>
         <source>Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="737"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1034"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="772"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1081"/>
         <source>Report by SchemaID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="749"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="794"/>
         <source>Import...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1096"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1153"/>
         <source>File %1 load error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1242"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1302"/>
         <source>%1:
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1246"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1306"/>
         <source>Not configured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1272"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1332"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1343"/>
         <source>ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1272"/>
-        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1332"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1343"/>
         <source>down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1283"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1343"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1287"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1347"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1314"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1374"/>
         <source>Unsaved Changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="1315"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="1375"/>
         <source>You have unsaved changes.
 Do you want to save them?</source>
         <translation type="unfinished"></translation>
@@ -466,7 +478,7 @@ Do you want to save them?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PluginTO5MainWindow.cpp" line="457"/>
+        <location filename="../PluginTO5MainWindow.cpp" line="469"/>
         <source>Report</source>
         <translation type="unfinished"></translation>
     </message>
@@ -486,38 +498,38 @@ Do you want to save them?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="105"/>
+        <location filename="../ComparatorsStorage.cpp" line="106"/>
         <source>
 Duplicated output signal %1 in the file, record number: %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="176"/>
+        <location filename="../ComparatorsStorage.cpp" line="177"/>
         <source>Input signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="202"/>
+        <location filename="../ComparatorsStorage.cpp" line="203"/>
         <source>Output signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="233"/>
+        <location filename="../ComparatorsStorage.cpp" line="234"/>
         <source>Setpoint signal %1 of the comparator was not found in AppSignals file. Check if files are from the same build.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="248"/>
+        <location filename="../ComparatorsStorage.cpp" line="249"/>
         <source>Comparators file and AppSignals file must be in the same directory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="260"/>
+        <location filename="../ComparatorsStorage.cpp" line="261"/>
         <source>Failed to load comparators from file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.cpp" line="268"/>
+        <location filename="../ComparatorsStorage.cpp" line="269"/>
         <source>Failed to load app signals from file: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -527,12 +539,12 @@ Duplicated output signal %1 in the file, record number: %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.h" line="95"/>
+        <location filename="../ComparatorsStorage.h" line="98"/>
         <source>Schema ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ComparatorsStorage.h" line="95"/>
+        <location filename="../ComparatorsStorage.h" line="98"/>
         <source>Case ID</source>
         <translation type="unfinished"></translation>
     </message>
