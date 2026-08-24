@@ -547,9 +547,8 @@ function testTO5ByAlgorithm(ctrl)
 	let csvStrings = result.strings;
 	log.writeMessage("Lines read: " + csvStrings.length);
 	
-	const setpointsData = csvStrings.map(row => row.split(";").slice(1));
+	let setpointsData = csvStrings.map(row => parseCsvLine(row).slice(1));
 	setpointsData.shift();
-	
 	
 	const algorithmList = [];
 	for (const row of setpointsData) {
