@@ -563,8 +563,10 @@ function testTO5ByAlgorithm(ctrl)
 	log.writeMessage(`${algorithmList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
 
 	let setpointMismatch = 0;
+	let outputMismatch = 0;
 	let currentAlgorithm = "";
 	let errorReadData = false;
+	let index = 0;
 	for (let i = 0; i < algorithmList.length; i++)
 	{
 		for (const data of setpointsData)
@@ -573,18 +575,24 @@ function testTO5ByAlgorithm(ctrl)
 			{
 				continue;
 			}
+
+			index++;
+
 			const algorithm = data[0 /*Algorithm*/];
 			const caseId = data[1 /*CaseID*/];
 			const schemaID = data[2 /*SchemaID*/];
 			const inputAppSignalID = data[3 /*InputAppSignalID*/];
 			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
 			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
-			const criteria = data[10 /*Criteria*/];
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
+			criteria = Number(criteria.toPrecision(precision));
 
 			let correct = "";
 
 			if (outputAppSignalID === "")
 			{
+				log.writeError(`CSV outputAppSignalID is empty, index : ${index}`);
 				errorReadData = true;
 				continue;
 			}
@@ -597,36 +605,51 @@ function testTO5ByAlgorithm(ctrl)
 			
 			if (data[11 /*Type*/] === "S")
 			{
-				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
 			else if (data[11 /*Type*/] === "D")
 			{
 				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
-				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
 			else
 			{
 				// CSV ERROR DATA
+				log.writeError(`CSV setpoint type unknown, index : ${index}`);
+				errorReadData = true;
 			}
 		}
 	}
 	
+	log.writeMessage(`CSV total indexes : ${index}`);
+	
 	if (errorReadData === true)
 	{
-		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
+		log.writeMessage("Помилка при читанні файлу уставок.", "TO_RESULT");
 	}
 	else
 	{
 		if (setpointMismatch === 0)
 		{
-			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+			log.writeMessage("Усі величини уставок відповідають карті уставок.", "TO_RESULT");
 		}
 		else
 		{
-			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+			log.writeMessage(`Уставок, що не відповідають карті уставок: ${setpointMismatch}.`, "TO_RESULT");
 		}
-	
-		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+		
+		if (outputMismatch === 0)
+		{
+			log.writeMessage("Поточні значення спрацювання уставок отримано.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Помилок отримання значень спрацювання уставок: ${outputMismatch}.`, "TO_RESULT");
+		}
 	}
 }
 
