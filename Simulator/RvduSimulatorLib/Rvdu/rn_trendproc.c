@@ -28,14 +28,11 @@ Module description: Processes trends data.
 -- *************************************************************
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#endif // End of Microsoft Visual Studio-specific
 
 #include "rn_trendproc.h"
 #include "rn_trendview.h"

@@ -60,20 +60,9 @@ Module description: Loads, parses, and manages font files for text rendering.
 #ifndef RN_FOFP_H
 #define RN_FOFP_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
 
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
 #include <stdbool.h>
-#include "types.h"
 
 #define MAX_FONTS_COUNT 32u
 
@@ -84,7 +73,7 @@ struct VduSymbolHeader
 	alt_u32 code;
 	alt_u16 width;
 	alt_u16 height;
-	vdu_ref offset;
+	alt_u32 offset;
 };
 
 /*

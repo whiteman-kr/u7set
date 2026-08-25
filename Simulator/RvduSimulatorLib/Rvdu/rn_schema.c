@@ -74,17 +74,6 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include <system.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif // End of Microsoft Visual Studio-specific
-
 #include <lualib.h>
 #include <lauxlib.h>
 
@@ -98,7 +87,6 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #include "rn_scfp.h"
 #include "rn_opto.h"
 #include "rn_lapi.h"
-
 #include "rn_ainput.h"
 #include "rn_msgbox.h"
 #include "rn_pin.h"
@@ -108,6 +96,8 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #include "rn_trendproc.h"
 #include "rn_kbd.h"
 
+#include <alt_types.h>
+
 #include "defs.h"
 
 #define SCRIPT_OK 0u
@@ -116,12 +106,10 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 // Private module data
 //
 static bool m_terminateFlag = false;
+static bool m_popUpTerminateFlag = false;
+
 static struct VduSchemaFileSchemaItem1* m_scriptRunSchemaItem = NULL;
 static alt_u16 m_blinkPhase = 0;
-
-#ifdef RVDU_SIM        
-static bool m_popUpTerminateFlag = false;
-#endif
 //
 // End of Private data
 
@@ -254,7 +242,10 @@ static void processSchemaKeys(void)
 	return;
 }
 
-static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchemaItem1* item, vdu_ref scriptRef, vdu_ref scriptRefByteCode, enum WarningCode warningCode)
+static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchemaItem1* item, 
+	alt_u32 scriptRef, alt_u32 scriptRefByteCode, 
+	enum WarningCode warningCode,
+	const char* scriptName)
 {
 	alt_u16 scriptLength = vduCurrentSchemaStringLength(scriptRef);
 	if (scriptLength == INVALID_LENGTH)
@@ -293,7 +284,7 @@ static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchema
 			}
 			else
 			{
-				logScriptWarning(rvduLuaState, warningCode, NULL, "SchemaScript");
+				logScriptWarning(rvduLuaState, warningCode, NULL, scriptName);
 			}
 
 			if ((bytecode != NULL) && (byteCodeLen > 4u))
@@ -412,12 +403,6 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 		drawingPhase = true;	// Draw the just switched schema immediately
 	}
 
-#ifndef RVDU_SIM    
-	// Invert the output PIN that allows to control schema processing time (RS485-pin is used as free pin)
-	//
-	resetRs485SignalPin();
-#endif
-
 	const struct VduSchemaFile* const pSchemaFile = vduCurrentSchema();
 	if (pSchemaFile == NULL)
 	{
@@ -477,7 +462,8 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 							item,
 							item->clickScript,
 							item->clickScriptBytecode,
-							LuaClickScript) == false)
+							LuaClickScript,
+							"ClickScript") == false)
 						{
 							item->scriptResult = SCRIPT_ERROR;
 						}
@@ -521,7 +507,8 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 					NULL,
 					pSchemaFile->schemaProperties.onShowScript,
 					pSchemaFile->schemaProperties.onShowScriptBytecode,
-					LuaOnShowScript);
+					LuaPreDrawScript,
+					"SchemaOnShowScript");
 			}
 		}
 
@@ -541,12 +528,15 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 					NULL,
 					pSchemaFile->schemaProperties.preDrawScript,
 					pSchemaFile->schemaProperties.preDrawScriptBytecode,
-					LuaPreDrawScript);
+					LuaPreDrawScript,
+					"SchemaPredrawScript");
 			}
 		}
 
 		if (m_terminateFlag == true)
 		{
+			stopMeasuringTimer(TIMER_PREDRAW);
+
 			lua_settop(rvduLuaState, 0);
 
 			m_terminateFlag = false;
@@ -575,7 +565,8 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 					item,
 					item->preDrawScript,
 					item->preDrawScriptBytecode,
-					LuaPreDrawScript) == false)
+					LuaPreDrawScript,
+					"PredrawScript") == false)
 				{
 					item->scriptResult = SCRIPT_ERROR;
 				}
@@ -583,11 +574,11 @@ void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
 
 			if (m_terminateFlag == true)
 			{
+				stopMeasuringTimer(TIMER_PREDRAW);
+
 				lua_settop(rvduLuaState, 0);
 
 				m_terminateFlag = false;
-
-				stopMeasuringTimer(TIMER_PREDRAW);
 				return;
 			}
 		}
@@ -706,7 +697,9 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		return;
 	}
 
-	while (schema->retPermission == false)
+	m_popUpTerminateFlag = false;
+
+	while (m_popUpTerminateFlag == false)
 	{
 		startMeasuringTimer(TIMER_MAINLOOP);
 
@@ -719,6 +712,13 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 			externalBusBridgeReadLock();
 
 			modeEditShow(schema);
+
+			externalBusBridgeReadUnlock();
+
+			(void)pushVideoBuffer();
+
+			externalBusBridgeReadLock();
+
 			modeEditProc(schema);
 
 			externalBusBridgeReadUnlock();
@@ -727,6 +727,9 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		case SCENE_PINCODE_MODE:
 		{
 			modePinShow(schema);
+			
+			(void)pushVideoBuffer();
+			
 			modePinProc(schema);
 		}
 		break;
@@ -738,12 +741,17 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 
 			externalBusBridgeReadUnlock();
 
+			(void)pushVideoBuffer();
+
 			modeQuestionProc(schema);
 		}
 		break;
 		case SCENE_LOG:
 		{
 			logSchemaShow();
+			
+			(void)pushVideoBuffer();
+			
 			logSchemaProc(schema);
 		}
 		break;
@@ -755,6 +763,8 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 
 			externalBusBridgeReadUnlock();
 
+			(void)pushVideoBuffer();
+
 			signalsViewProc(schema);
 		}
 		break;
@@ -765,17 +775,6 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		}
 
 		optoTxProc();
-
-#ifdef RVDU_SIM        
-		if (m_popUpTerminateFlag == true)
-		{
-			return;
-		}
-		
-		// Sleep for 100 ms
-		static struct timespec ts = {.tv_sec = 0, .tv_nsec = 100 * 1000000};
-		thrd_sleep(&ts, NULL);
-#endif
 
 		// Update time measuring timer
 		//
@@ -795,12 +794,10 @@ void schemaSetTerminate(void)
 	m_terminateFlag = true;
 }
 
-#ifdef RVDU_SIM        
 void popUpSchemaSetTerminate(void)
 {
 	m_popUpTerminateFlag = true;
 }
-#endif // #ifndef RVDU_SIM        
 
 struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void)
 {

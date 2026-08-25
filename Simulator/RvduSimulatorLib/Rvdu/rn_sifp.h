@@ -61,21 +61,7 @@ Module description: Block loads and stores the file that contains the descriptio
 
 #include <stdbool.h>
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#include <threads.h>
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include "types.h"
 
 enum VduSignalType
 {
@@ -131,10 +117,10 @@ struct VduAppSignalParam
 		alt_u16 value;						// boolean properties of signal
 	} props;
 
-	vdu_ref refAppSignalID;					//vdu_string_ref
-	vdu_ref refCustomAppSignalID;			//vdu_string_ref
-	vdu_ref refCaption;						//vdu_string_ref
-	vdu_ref refUnit;						//vdu_string_ref
+	alt_u32 refAppSignalID;					//vdu_string_ref
+	alt_u32 refCustomAppSignalID;			//vdu_string_ref
+	alt_u32 refCaption;						//vdu_string_ref
+	alt_u32 refUnit;						//vdu_string_ref
 
 	// real type of next values depends from vduSignalType
 	//
@@ -185,20 +171,18 @@ struct AppSignalsFile
 
 	alt_u8 vduConfigID[8];
 
-	vdu_ref refAppSignals;				// ref to array of VduAppSignalParam structures,
+	alt_u32 refAppSignals;				// ref to array of VduAppSignalParam structures,
 											// sorted by VduAppSignalParam.signalIndex ascending
 
-	vdu_ref refHash32ToIndex;			// ref to array of VduHashToIndex structures,
+	alt_u32 refHash32ToIndex;			// ref to array of VduHashToIndex structures,
 											// sorted by VduHash32ToIndex.hash32 ascending
 
-	vdu_ref refOptoPorts;				// ref to array of VduOptoPort structures,
+	alt_u32 refOptoPorts;				// ref to array of VduOptoPort structures,
 											// sorted by VduOptoPort.portIndex ascending
 
-	vdu_ref refTxAppSignals;			// ref to array of VduTxRxAppSignal structures
+	alt_u32 refTxAppSignals;			// ref to array of VduTxRxAppSignal structures
 
-	vdu_ref refStrings;
-
-	//struct VduAppSignalParam SignalEntry[];	// Array of signal parameters structures
+	alt_u32 refStrings;
 };
 
 struct VduAppSignalState
@@ -210,18 +194,11 @@ struct VduAppSignalState
 	} value;
 };
 
-
-/* Initialization function, shall be called once before cacheSignalsFile
-Parameters:
-*/
-void moduleRnSignalsInitialize(void);
-
-#ifdef RVDU_SIM
-void moduleRnSignalsUninitialize(void);
-
-mtx_t* rnSignalsMutex(void);
-
-#endif
+struct VduHash32ToIndex
+{
+	alt_32 hash32;				// calcHash32(appSignalID.toUtf8())
+	alt_32 signalIndex;			// 32-bit! signal index
+};
 
 /*
 Copies the contents of the VduAppSignals.bin file to memory at the address specified in the parameter.
@@ -258,12 +235,10 @@ alt_u16 txAppSignalsCount(void);
 
 // Function returns VduAppSignalParam by index
 //
-const struct VduAppSignalParam* const appSignalParam(const char* const appSignalId);
 const struct VduAppSignalParam* const appSignalParamByIndex(alt_u16 index);
 
 // Function returns VduAppSignalState by index
 //
-const struct VduAppSignalState* const appSignalState(const char* const appSignalId);
 const struct VduAppSignalState* const appSignalStateByIndex(alt_u16 index);
 
 // Function returns mutable VduAppSignalState by index
@@ -298,6 +273,10 @@ const struct VduOptoPort* const vduOptoPort(alt_u16 index);
 //
 const struct VduTxRxAppSignal* const txRxAppSignal(alt_u16 index);
 
+// At the beginning of the work loop, the states of output signals must be saved to perform their writing during the loop
+//
+void outputSignalsPreproc(void);
+
 //
 // Warning: read/write signals functions DO LOCK the critical section for Simulator mode
 // because the Simulator can also read and write the signals memory
@@ -317,14 +296,12 @@ bool signalAvailableByIndex(alt_u16 signalIndex);
 	-	Internal Discrete
 	-	Internal AnalogSignedInt32
 */
-bool readSignalValueInt(const char* const appSignalId, alt_32* res);
 bool readSignalValueIntByIndex(alt_u16 signalIndex, alt_32* res);
 
 /* Signals allowed to be read :
 	-	RxSignal AnalogFloat32
 	-	Internal AnalogFloat32
 */
-bool readSignalValueFloat(const char* const appSignalId, float* res);
 bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res);
 
 /* Signals allowed to be written :
@@ -332,13 +309,11 @@ bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res);
 	-	Internal AnalogSignedInt32
 	-	Output Discrete
 */
-bool writeSignalValueInt(const char* const appSignalId, alt_32 value);
 bool writeSignalValueIntByIndex(alt_u16 signalIndex, alt_32 value);
 
 /* Signals allowed to be written :
 	-	Internal AnalogFloat32
 */
-bool writeSignalValueFloat(const char* const appSignalId, float value);
 bool writeSignalValueFloatByIndex(alt_u16 signalIndex, float value);
 
 #endif

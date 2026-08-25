@@ -66,14 +66,8 @@ Module description: Provides the functionality for entering the analog value.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "../rvdu_bsp/HAL/inc/sys/alt_errno.h"
-
-#endif // End of Microsoft Visual Studio-specific
-
+#include <alt_errno.h>
 
 #include "rn_ainput.h"
 #include "rn_vbuf.h"
@@ -276,7 +270,7 @@ void modeEditShow(struct PopUpSchemaParams* const schema)
 		logWarning(SignalWasNotFound, msg);
 
 		// Abort the dialog
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->boolResult = false;
 		return;
 	}
@@ -289,7 +283,7 @@ void modeEditShow(struct PopUpSchemaParams* const schema)
 		logWarning(SignalWasNotFound, msg);
 
 		// Abort the dialog
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->boolResult = false;
 		return;
 	}
@@ -303,7 +297,7 @@ void modeEditShow(struct PopUpSchemaParams* const schema)
 		logWarning(SignalWriteTypeWrong, msg);
 
 		// Abort the dialog
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->boolResult = false;
 		return;
 	}
@@ -460,8 +454,6 @@ void modeEditShow(struct PopUpSchemaParams* const schema)
 			RVDU_SYSTEM_FONT, keysColor, backColorStr, ALIGN_V_CENTER + ALIGN_H_CENTER, putStr);
 	}
 
-	(void)pushVideoBuffer();
-
 	return;
 }
 
@@ -475,7 +467,7 @@ static void onWritePressed(struct PopUpSchemaParams* const schema)
 		logWarning(SignalWasNotFound, msg);
 
 		// Abort the dialog
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->boolResult = false;
 		return;
 	}
@@ -505,7 +497,7 @@ static void onWritePressed(struct PopUpSchemaParams* const schema)
 		{
 			// Close the dialog
 			//
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			m_pressedButton = 0;
 
 			schema->boolResult = true;
@@ -555,7 +547,7 @@ static void onWritePressed(struct PopUpSchemaParams* const schema)
 		{
 			// Close the dialog
 			//
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			m_pressedButton = 0;
 
 			schema->boolResult = true;
@@ -621,7 +613,7 @@ static void onOKInErrorModePressed(struct PopUpSchemaParams* const schema)
 	//
 	if (schema->InputBoxData.state == NoPermission)
 	{
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 	}
 	else
 	{
@@ -655,7 +647,7 @@ static void onButtonPressed(struct PopUpSchemaParams* const schema)
 	{
 		schema->InputBoxData.editText[0] = '\0';
 		schema->boolResult = false;
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		m_pressedButton = 0;
 	}
 	break;
@@ -693,7 +685,7 @@ void modeEditProc(struct PopUpSchemaParams* const schema)
 			logWarning(SignalWasNotFound, msg);
 
 			// Abort the dialog
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			schema->boolResult = false;
 			return;
 		}

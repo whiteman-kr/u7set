@@ -43,29 +43,15 @@ Module description: Detects and processes key press events from the keyboard.
 #include "rn_diag.h"
 #include "rn_utils.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
 #include <system.h>
 #include <altera_up_avalon_ps2_regs.h>
 #include <altera_up_avalon_ps2.h>
 #include <altera_up_ps2_keyboard.h>
 #include "sys/alt_stdio.h"
 
-#else
-
-#include <threads.h>
-
-static mtx_t m_cs;
-
-#endif // End of Microsoft Visual Studio-specific
-
 // Private module data
 //
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-
 static alt_up_ps2_dev* m_ps2 = NULL;
-
-#endif
 
 static bool m_moduleInitialized = false;
 static bool m_keyboardConnected = false;
@@ -82,12 +68,6 @@ void moduleRnKbdInitialize(void)
 		return;
 	}
 	m_moduleInitialized = true;
-
-#ifdef RVDU_SIM
-	// Initialize critical section
-	mtx_init(&m_cs, mtx_plain);
-	m_keyboardConnected = true;
-#else
 
 	m_ps2 = alt_up_ps2_open_dev("/dev/ps2_0");
 	if (m_ps2 == NULL)
@@ -119,41 +99,20 @@ void moduleRnKbdInitialize(void)
 	{
 		logMessage("PS/2 Device is not connected.");
 	}*/
-
-#endif
 }
 
-#ifdef RVDU_SIM
 void moduleRnKbdUninitialize(void)
 {
 	m_moduleInitialized = false;
 	m_keyboardConnected = false;
-	mtx_destroy(&m_cs);
 }
-#endif
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-void setPressedKey(alt_u16 code)
-#else
 static void setPressedKey(alt_u16 code)
-#endif
 {
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	m_code = code;
 	m_keyPressed = true;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 }
 
-#ifndef RVDU_SIM // NIOS specific
 static alt_u16 scan_kb(void)
 {
 	if (m_ps2 == NULL)
@@ -180,13 +139,11 @@ static alt_u16 scan_kb(void)
 
 	return last_kb_code;
 }
-#endif
 
 // This function checks the hardware for touch events.
 //
 static bool checkPressedKey(void)
 {
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
 	alt_u16 code = scan_kb();
 	if (m_code != code)
 	{
@@ -197,11 +154,7 @@ static bool checkPressedKey(void)
 	{
 		return false;
 	}
-#else
-	return true;
-#endif
 }
-
 
 bool isPressedKey(void)
 {
@@ -216,25 +169,13 @@ bool isPressedKey(void)
 		return false;
 	}
 
-#ifndef RVDU_SIM // Nios-specific
 	if (checkPressedKey() == false)
 	{
 		return false;
 	}
-#endif
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
 
 	bool result = m_keyPressed == true;
 	m_keyPressed = false;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 
 	return result;
 }
@@ -252,16 +193,7 @@ alt_u16 pressedKey(void)
 		return 0xffu;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	alt_u16 result = m_code;
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 	return result;
 }

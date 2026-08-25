@@ -44,52 +44,9 @@ Module description: Manages video buffers for rendering and display output.
 #ifndef RN_VBUF_H
 #define RN_VBUF_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
 
-#else
-
-#include "msvc_alt_types.h"
-#include <threads.h>
-
-#endif
-// Microsoft Visual Studio-specific
-
 #include <stdbool.h>
-
-#pragma pack(push, 1)
-
-struct BMPFileHeader
-{
-    // BITMAPFILEHEADER (14 bytes)
-
-    unsigned short bfType;      // Must be 'BM' = 0x4D42
-    unsigned int   bfSize;      // Size of the BMP file in bytes
-    unsigned short bfReserved1; // Must be 0
-    unsigned short bfReserved2; // Must be 0
-    unsigned int   bfOffBits;   // Offset to pixel data
-};
-
-struct BMPInfoHeader
-{
-    // BITMAPINFOHEADER (40 bytes)
-
-    unsigned int   biSize;          // Size of this header = 40
-    int            biWidth;         // Image width
-    int            biHeight;        // Image height
-    unsigned short biPlanes;        // Must be 1
-    unsigned short biBitCount;      // Bits per pixel (24 for RGB)
-    unsigned int   biCompression;   // 0 = BI_RGB (no compression)
-    unsigned int   biSizeImage;     // Image size including padding
-    int            biXPelsPerMeter; // Horizontal resolution
-    int            biYPelsPerMeter; // Vertical resolution
-    unsigned int   biClrUsed;       // Number of colors used
-    unsigned int   biClrImportant;  // Important colors
-};
-
-#pragma pack(pop)
 
 // Functions for working with video frame memory (array)
 
@@ -102,13 +59,7 @@ Parameters:
 */
 void moduleRnVbufInitialize(alt_u32* const pVideoBuffer, alt_u32* const pHdmiBuffer, alt_u16 screenWidth, alt_u16 screenHeight);
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-
 void moduleRnVbufUninitialize(void);
-
-mtx_t* rnVbufMutex(void);
-
-#endif
 
 /*
 Function of clearing video frame memory.
@@ -123,13 +74,5 @@ Function of recording a video memory page with a video frame array
 Returns true on success, false when module is not initialized.
 */
 bool pushVideoBuffer(void);
-
-/*
-Logo display function.
-Parameters:
-    workFolder - full path to configuration files.
-Returns true on success, false on failure.
-*/
-bool showLogo(const char* logoFile);
 
 #endif

@@ -72,17 +72,7 @@ RADIX-4109, add itemRectSetText function
 #ifndef RN_LAPI_H
 #define RN_LAPI_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
 
 #include <lua.h>
 

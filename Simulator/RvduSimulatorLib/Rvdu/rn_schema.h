@@ -75,20 +75,10 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #define RN_SCHEMA_H
 
 #include <stdbool.h>
-
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
+#include <lua.h>
 
 #include <alt_types.h>
 
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include <lua.h>
 #include "defs.h"
 
 #define SCENE_CURR_SH 0u
@@ -118,7 +108,6 @@ enum PinState
 
 struct PopUpSchemaParams
 {
-	bool retPermission;
 	bool boolResult;
 
 	alt_u16 tuningSignalIndex;
@@ -164,9 +153,7 @@ void schemaSetTerminate(void);
 
 // Sets the flag for stopping the processing of the popup schema.
 //
-#ifdef RVDU_SIM        
 void popUpSchemaSetTerminate(void);
-#endif
 
 // Returns the address of the schema element whose script is currently being processed.
 //

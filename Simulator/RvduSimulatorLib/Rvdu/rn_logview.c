@@ -46,12 +46,6 @@ Module description: Provides log view.
 #include <stdio.h>
 #include <stdint.h>
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "sys/alt_stdio.h"
-
-#endif
-
 #include "rn_logview.h"
 #include "rn_diag.h"
 #include "rn_cfg.h"
@@ -387,8 +381,6 @@ void logSchemaShow(void)
 		}
 	}
 
-	(void)pushVideoBuffer();
-
 	return;
 }
 
@@ -408,7 +400,7 @@ void logSchemaProc(struct PopUpSchemaParams* const schema)
 		{
 		case RK_ESCAPE:
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			return;
 		}
 		case RK_UP:
@@ -443,7 +435,7 @@ void logSchemaProc(struct PopUpSchemaParams* const schema)
 	{
 		if (checkTouchZone(m_closeButton.x, m_closeButton.y, m_closeButton.w, m_closeButton.h))
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 		}
 		else if (checkTouchZone(m_clearButton.x, m_clearButton.y, m_clearButton.w, m_clearButton.h))
 		{

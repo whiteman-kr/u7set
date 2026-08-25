@@ -46,13 +46,7 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 #ifndef RN_DESC_H
 #define RN_DESC_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
 #include <alt_types.h>
-#else
-#include "msvc_alt_types.h"
-#endif
-// Microsoft Visual Studio-specific
 
 #include <stdbool.h>
 

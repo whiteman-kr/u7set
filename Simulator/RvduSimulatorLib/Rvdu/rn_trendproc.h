@@ -31,19 +31,9 @@ Module description: Processes trends data.
 #ifndef RN_TRENDPROC_H
 #define RN_TRENDPROC_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
+#include <stdbool.h>
 
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include <stdbool.h>
 
 #include "defs.h"
 

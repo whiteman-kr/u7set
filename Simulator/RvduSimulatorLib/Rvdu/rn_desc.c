@@ -49,23 +49,18 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 
 #include "defs.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include <system.h>
-#include "../fat_io_lib/fat_filelib.h"
-#include "../rvdu_bsp/HAL/inc/sys/alt_errno.h"
-
-#endif // End of Microsoft Visual Studio-specific
+#include "fat_filelib.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
+
+#include <alt_errno.h>
 
 bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, char* const equipmentId, alt_u16 bufferSize)
 {
 	if ((descriptionFile == NULL) ||
 		(equipmentId == NULL) || 
-		(bufferSize < MAX_KEY_LEN))
+		(bufferSize < STRING_MAX_LEN))
 	{
 		RN_ASSERT(false);
 		return false;
@@ -98,8 +93,8 @@ bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, ch
 	bool expectColon = false;
 	bool haveEquipmentId = false;
 
-	char keyValue[MAX_KEY_LEN] = { 0 };
-	char equipmentIdValue[MAX_KEY_LEN] = { 0 };
+	char keyValue[STRING_MAX_LEN] = { 0 };
+	char equipmentIdValue[STRING_MAX_LEN] = { 0 };
 
 	alt_32 dataRead = fl_fgetc(f);
 	while ((dataRead != EOF) && (fileMalformed == false) && (keyFound == false))
@@ -145,7 +140,7 @@ bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, ch
 
 				// Check if key is too long
 				//
-				if ((keyPos >= MAX_KEY_LEN) || (keyPos >= bufferSize))
+				if ((keyPos >= STRING_MAX_LEN) || (keyPos >= bufferSize))
 				{
 					logError(StringTooLong, "findEquipmentId: a key in the file is too long.");
 					fileMalformed = true;
@@ -177,7 +172,7 @@ bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, ch
 					{
 						// Key next to EquipmentId
 						//
-						(void)strncpy(equipmentIdValue, keyValue, MAX_KEY_LEN);
+						(void)strncpy(equipmentIdValue, keyValue, STRING_MAX_LEN);
 						haveEquipmentId = true;
 					}
 					else

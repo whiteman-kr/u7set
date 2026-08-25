@@ -1,8 +1,6 @@
 #ifndef RNSW_LIB_H
 #define RNSW_LIB_H
 
-//#include "msvc_alt_types.h"
-
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -49,6 +47,9 @@ extern "C"
 
 	// Signals processing
 	//
+
+	// Signals properties
+	
 	unsigned int rnLibAppSignalsCount(void);
 	const struct VduAppSignalParam* const rnLibAppSignalParam(unsigned int index);
 
@@ -57,8 +58,29 @@ extern "C"
 	const char* const rnLibAppSignalCaption(unsigned int index);
 	const char* const rnLibAppSignalUnit(unsigned int index);
 
-	unsigned int rnLibTxAppSignalsCount(void);
-	const struct VduTxRxAppSignal* const rnLibTxAppSignal(unsigned int index);
+	bool rnLibIsDiscrete(unsigned int index);
+	bool rnLibIsFloat(unsigned int index);
+	bool rnLibIsInt32(unsigned int index);
+
+	bool rnLibIsInternal(unsigned int index);
+	bool rnLibIsInput(unsigned int index);
+	bool rnLibIsOutput(unsigned int index);
+	bool rnLibIsRxSignal(unsigned int index);
+	bool rnLibIsTxSignal(unsigned int index);
+
+	int rnLibRxPortIndex(unsigned int index);
+
+	int rnLibSignalOffset(unsigned int index);
+	int rnLibSignalBit(unsigned int index);
+	bool rnLibSignalTunable(unsigned int index);
+
+	float rnLibSignalHighLimitFloat(unsigned int index);
+	float rnLibSignalLowLimitFloat(unsigned int index);
+
+	int rnLibSignalHighLimitInt(unsigned int index);
+	int rnLibSignalLowLimitInt(unsigned int index);
+
+	// Signals read/write
 
 	bool rnLibSignalValueInt(unsigned int signalIndex, int* res);
 	bool rnLibSignalValueFloat(unsigned int signalIndex, float* res);

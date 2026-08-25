@@ -60,26 +60,23 @@ Module description: Provides support functions for other modules (hash calculati
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
-// Microsoft Visual Studio-specific
-#ifdef RVDU_SIM
-
-#include "msvc_alt_types.h"
-
-extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ;
-extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE;
-
-#else
+#include <system.h>
 
 #include <alt_types.h>
-#include <system.h>
-#include <stddef.h>
+
+#ifdef TO_EXTERNAL_BUS_BRIDGE_1_BASE
 
 #define TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ TO_EXTERNAL_BUS_BRIDGE_1_BASE
 #define TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE TO_EXTERNAL_BUS_BRIDGE_1_BASE
 
-#endif
+#else
 
+extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ;
+extern alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE;
+
+#endif
 
 #define WRONG_FILE_SIZE (alt_u32)-1
 
@@ -92,7 +89,6 @@ typedef struct LocalTime {
     alt_u16 wSecond;
     alt_u16 wMilliseconds;
 } LocalTime;
-
 
 // Logging assert function
 //
@@ -175,10 +171,6 @@ inline alt_u32* hwBaseToU32ptr(const alt_u32 base)
     return (alt_u32*)(uintptr_t)base;
 }
 
-// This functions writes comparsion ID to the RVDU memory
-//
-void writeComparsionID(const alt_u8 vduConfigID[]);
-
 // This function returns file size in bytes. File shall be opened.
 // Sets the file pointer to the beginning of the fils
 // On error, returns WRONG_FILE_SIZE
@@ -219,68 +211,25 @@ bool freadBigData(alt_u8* buffer, alt_u32 size, void* file);
 //
 // External bus specific addresses
 
-// Lock the output buffers (TX-optical and output signals)
+// Reverse byte order (e.g. big endian to little endian)
 //
-static inline void externalBusBridgeWriteLock(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-    __builtin_stwio(hwBaseToU32ptr(EBB1_WR_ACTIVE_N_BASE), 0);
-#endif
-}
+alt_u64 reverseBytes64(alt_u64 val);
 
-// Unlock the output buffers (TX-optical and output signals)
+// Calculate CRC-64
 //
-static inline void externalBusBridgeWriteUnlock(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-    __builtin_stwio(hwBaseToU32ptr(EBB1_WR_ACTIVE_N_BASE), 1);
-#endif 
-}
+alt_u64 calcCrc64(const alt_u8* src, alt_u32 size);
 
-#ifdef RVDU_SIM // Simulator-specific
-extern bool m_ebbLocked;
-#endif
-
-
-// Lock the input buffers (RX-optical and input signals)
+// Returns number of seconds passed since 01.01.1970 00:00:00
 //
-static inline void externalBusBridgeReadLock(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-    __builtin_stwio(hwBaseToU32ptr(EBB1_RD_ACTIVE_N_BASE), 0);
-#else
-    if (m_ebbLocked == true)
-    {
-        RN_ASSERT(false);
-    }
-    m_ebbLocked = true;
-#endif
-}
+alt_u64 currentTimeInSecs(void);
 
-// Unlock the input buffers (RX-optical and input signals)
+// Returns the time structure from the time code
 //
-static inline void externalBusBridgeReadUnlock(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-    __builtin_stwio(hwBaseToU32ptr(EBB1_RD_ACTIVE_N_BASE), 1);
-#else
-    if (m_ebbLocked == false)
-    {
-        RN_ASSERT(false);
-    }
-    m_ebbLocked = false;
-#endif
-}
+LocalTime localTime(alt_u64 timeCode);
 
-// Invert the output PIN that allows to control schema processing time (RS485-pin is used as free pin)
+// This functions writes comparsion ID to the RVDU memory
 //
-static inline void resetRs485SignalPin(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-    __builtin_stwio((void*)hwBaseToU32ptr((alt_u32)PIO_0_RS485_DE_BASE),
-    		~((unsigned int)__builtin_ldwio((void*)hwBaseToU32ptr((alt_u32)PIO_0_RS485_DE_BASE))));
-#endif
-}
+void writeComparsionID(const alt_u8 vduConfigID[]);
 
 // Read the 16-bit value from the external bus bridge
 //
@@ -294,19 +243,25 @@ static inline alt_u16 readEBB16(alt_u16 wOffset)
 //
 void writeEBB16(alt_u16 wOffset, alt_u16 data);
 
-#ifdef RVDU_SIM // Simulator-specific
-// Write the 16-bit value to the external bus bridge (read area)
+// Lock the input buffers (RX-optical and input signals)
 //
-void writeReadEBB16(alt_u16 wOffset, alt_u16 data);
-#endif
+void externalBusBridgeReadLock(void);
 
-// Reverse byte order (e.g. big endian to little endian)
+// Unlock the input buffers (RX-optical and input signals)
 //
-alt_u64 reverseBytes64(alt_u64 val);
+void externalBusBridgeReadUnlock(void);
 
-// Calculate CRC-64
+// Lock the output buffers (TX-optical and output signals)
 //
-alt_u64 calcCrc64(const alt_u8* src, alt_u32 size);
+void externalBusBridgeWriteLock(void);
+
+// Unlock the output buffers (TX-optical and output signals)
+//
+void externalBusBridgeWriteUnlock(void);
+
+// Invert the output PIN that allows to control schema processing time (RS485-pin is used as free pin)
+//
+void invertRs485SignalPin(void);
 
 // Measuring timer control functions
 //
@@ -335,27 +290,11 @@ alt_u16 currentSecs(void);
 // Returns current milliseconds value
 //
 alt_u16 currentMSecs(void);
-
-// Returns number of seconds passed since 01.01.1970 00:00:00
-//
-alt_u64 currentTimeInSecs(void);
-
-// Returns the time structure from the time code
-//
-LocalTime localTime(alt_u64 timeCode);
     
 // Overriding the function for systems without std-out device
 //
-#ifndef RVDU_SIM        
-
 #ifndef ALT_STDOUT_PRESENT
 void alt_printf(const char* fmt, ... );
 #endif // ALT_STDOUT_PRESENT
-
-#else
-
-void alt_printf(const char* fmt, ... );
-
-#endif // RVDU_SIM        
 
 #endif  // RN_UTILS_H

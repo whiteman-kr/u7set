@@ -60,25 +60,15 @@ Module description: Provides support functions for other modules (hash calculati
 #include <stdint.h>
 #include <assert.h>
 #include <time.h>
-#include <errno.h>
 
 #include "rn_utils.h"
 #include "rn_diag.h"
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
+#include "fat_filelib.h"
 
-#include "../rvdu_bsp/HAL/inc/sys/alt_errno.h"
-#include "../fat_io_lib/fat_filelib.h"
-#include "../rvdu_bsp/system.h"
-#include <altera_avalon_performance_counter.h>
+#include <alt_errno.h>
 
-#endif
-// Microsoft Visual Studio-specific
-
-#ifdef RVDU_SIM // Simulator-specific
-bool m_ebbLocked = false;
-#endif
+void do_assert(bool condition);
 
 void rnAssertImpl(bool condition, const char* expr, const char* file, int line, const char* msg)
 {
@@ -94,41 +84,9 @@ void rnAssertImpl(bool condition, const char* expr, const char* file, int line, 
 			(void)snprintf(buf, STRING_MAX_LEN, "Assertion failed: %s (%s:%d)", expr, file, line);
 		}
 		logError(InternalError, buf);
-#ifdef RVDU_SIM
-		assert(false);
-#endif
+
+		do_assert(false);
 	}
-}
-
-void writeComparsionID(const alt_u8 vduConfigID[])
-{
-	if (vduConfigID == NULL)
-	{
-		RN_ASSERT(vduConfigID != NULL);
-		return;
-	}
-
-
-#ifndef RVDU_SIM        
-	externalBusBridgeWriteLock();
-
-	writeEBB16(ADDR_COMPARSION_ID_WORD0, vduConfigID[6] | ((alt_u16)vduConfigID[7] << 8));
-	writeEBB16(ADDR_COMPARSION_ID_WORD1, vduConfigID[4] | ((alt_u16)vduConfigID[5] << 8));
-	writeEBB16(ADDR_COMPARSION_ID_WORD2, vduConfigID[2] | ((alt_u16)vduConfigID[3] << 8));
-	writeEBB16(ADDR_COMPARSION_ID_WORD3, vduConfigID[0] | ((alt_u16)vduConfigID[1] << 8));
-
-	__builtin_stwio(hwBaseToU32ptr(EBB1_COMP_ID_RDY_BASE), 1);
-
-	externalBusBridgeWriteUnlock();
-#else
-	(void)printf("writeComparsionID: id = 0x");
-	for (int i = 0; i < 8; i++)
-	{
-		(void)printf("%02x", vduConfigID[i]);
-	}
-	(void)printf("\n");
-#endif
-
 }
 
 alt_u32 fileSize(void* f)
@@ -194,23 +152,6 @@ bool freadBigData(alt_u8* buffer, alt_u32 size, void* file)
 	return true;
 }
 
-void writeEBB16(alt_u16 wOffset, alt_u16 data)
-{
-	volatile alt_u16* p16 = (alt_u16*)TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE + wOffset;
-	*p16 = data;
-	return;
-}
-
-#ifdef RVDU_SIM // Simulator-specific
-void writeReadEBB16(alt_u16 wOffset, alt_u16 data)
-{
-	volatile alt_u16* p16 = (alt_u16*)TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ + wOffset;
-	*p16 = data;
-	return;
-}
-#endif
-
-
 alt_u64 reverseBytes64(alt_u64 val)
 {
 	val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
@@ -225,7 +166,7 @@ alt_u64 calcCrc64(const alt_u8* src, alt_u32 size)
 
 	for (alt_u32 i = 0u; i < size; i++)
 	{
-		crc ^= (alt_u64) * p << 56;
+		crc ^= (alt_u64)*p << 56;
 		p++;
 
 		for (alt_u8 j = 0; j < 8u; j++)
@@ -235,128 +176,6 @@ alt_u64 calcCrc64(const alt_u8* src, alt_u32 size)
 	}
 
 	return crc;
-}
-
-#ifdef RVDU_SIM // Windows-specific
-static struct timespec m_counter[TIMER_COUNT] = { 0 };
-static alt_u32  m_tickCount[TIMER_COUNT] = { 0 };
-#endif
-
-void resetBaseMeasuringTimer(void)
-{
-#ifndef RVDU_SIM // Nios-specific
-	PERF_RESET (PERFORMANCE_COUNTER_0_BASE);
-	PERF_START_MEASURING (PERFORMANCE_COUNTER_0_BASE);	
-#endif
-}
-// Start measuring timer
-//
-void startMeasuringTimer(alt_u8 timerIndex)
-{
-	if ((timerIndex == 0u) || (timerIndex >= TIMER_COUNT))
-	{
-		return;
-	}
-#ifndef RVDU_SIM // Nios-specific
-	PERF_BEGIN(PERFORMANCE_COUNTER_0_BASE, timerIndex);
-#else
-	(void)timespec_get(&m_counter[timerIndex], TIME_UTC);
-#endif
-}
-
-// Stop measuring timer
-//
-void stopMeasuringTimer(alt_u8 timerIndex)
-{
-	if ((timerIndex == 0u) || (timerIndex >= TIMER_COUNT))
-	{
-		return;
-	}
-#ifndef RVDU_SIM // Nios-specific
-	PERF_END(PERFORMANCE_COUNTER_0_BASE, timerIndex);
-#else
-	struct timespec ts;
-	(void)timespec_get(&ts, TIME_UTC);
-
-	long long seconds = ts.tv_sec - m_counter[timerIndex].tv_sec;
-	long long nanoseconds = ts.tv_nsec - m_counter[timerIndex].tv_nsec;
-
-	alt_u32 elapsed = (alt_u32)((seconds * 1000) + (nanoseconds / 1000000));
-	m_tickCount[timerIndex] = (alt_u32)elapsed;
-#endif
-}
-
-alt_u32 measuringTimerValue(alt_u8 timerIndex)
-{
-	if ((timerIndex == 0u) || (timerIndex >= TIMER_COUNT))
-	{
-		return 0;
-	}
-#ifndef RVDU_SIM // Nios-specific
-	static alt_u32 CPU_FREQ_MS = ALT_CPU_FREQ / 1000;
-	alt_u32 t = (alt_u32)((alt_u64)perf_get_section_time((void*)PERFORMANCE_COUNTER_0_BASE, (int)timerIndex) / (alt_u64)CPU_FREQ_MS);
-	return t;
-#else
-	return m_tickCount[timerIndex];
-#endif
-}
-
-LocalTime currentTime(void)
-{
-	LocalTime tm = { 0 };
-
-#ifdef RVDU_SIM
-
-	// Get current time with nanosecond precision
-	struct timespec ts;
-	(void)timespec_get(&ts, TIME_UTC);
-
-	struct tm* t = localtime(&ts.tv_sec);
-
-	tm.wYear = (alt_u16)(t->tm_year + 1900u);
-	tm.wMonth = (alt_u16)(t->tm_mon + 1u);
-	tm.wDay = (alt_u16)(t->tm_mday);
-
-	tm.wHour = (alt_u16)(t->tm_hour);
-	tm.wMinute = (alt_u16)(t->tm_min);
-	tm.wSecond = (alt_u16)(t->tm_sec);
-	tm.wMilliseconds = (alt_u16)(ts.tv_nsec / 1000000u);
-#else
-	tm.wYear = readEBB16(ADDR_RTU_YEAR);
-	tm.wMonth = readEBB16(ADDR_RTU_MONTH);
-	tm.wDay = readEBB16(ADDR_RTU_DAY);
-
-	tm.wHour = readEBB16(ADDR_RTU_HOUR);
-	tm.wMinute = readEBB16(ADDR_RTU_MINUTE);
-	tm.wSecond = readEBB16(ADDR_RTU_SECOND);
-	tm.wMilliseconds = readEBB16(ADDR_RTU_MILLISECOND);
-#endif
-
-	return tm;
-}
-
-alt_u16 currentSecs(void)
-{
-#ifdef RVDU_SIM
-	struct timespec ts;
-	(void)timespec_get(&ts, TIME_UTC);
-
-	struct tm* t = localtime(&ts.tv_sec);
-	return (alt_u16)t->tm_sec;
-#else
-	return readEBB16(ADDR_RTU_SECOND);
-#endif
-}
-
-alt_u16 currentMSecs(void)
-{
-#ifdef RVDU_SIM
-	struct timespec ts;
-	(void)timespec_get(&ts, TIME_UTC);
-	return (alt_u16)(ts.tv_nsec / 1000000u);
-#else
-	return readEBB16(ADDR_RTU_MILLISECOND);
-#endif
 }
 
 static bool isLeapYear(alt_u16 year)
@@ -475,13 +294,11 @@ LocalTime localTime(alt_u64 timeCode)
 	return result;
 }
 
-#ifndef RVDU_SIM        
-#ifndef ALT_STDOUT_PRESENT
-void alt_printf(const char* fmt, ...)
+void writeEBB16(alt_u16 wOffset, alt_u16 data)
 {
+	volatile alt_u16* p16 = (alt_u16*)TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE + wOffset;
+	*p16 = data;
 	return;
 }
-#endif // ALT_STDOUT_PRESENT
-#endif // RVDU_SIM        
 
 

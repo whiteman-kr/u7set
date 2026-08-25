@@ -51,17 +51,7 @@ Module description: Receives and sends application signals by the optical interf
 #ifndef RN_OPTO_H
 #define RN_OPTO_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
 
 #define WORDS_PER_OPTO_CHANEL 2560u
 

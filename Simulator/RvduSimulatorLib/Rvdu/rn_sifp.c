@@ -67,88 +67,22 @@ Module description: Block loads and stores the file that contains the descriptio
 
 #include "defs.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "../fat_io_lib/fat_filelib.h"
-#include <system.h>
-
-#else
-
-#include <threads.h>
-
-static mtx_t m_cs;
-
-#endif // End of Microsoft Visual Studio-specific
+#include "fat_filelib.h"
 
 // Private module data
 //
-static bool m_moduleInitialized = false;
-
-struct HashTableRecord
-{
-	alt_u64 hash;
-	alt_u16 index;
-	alt_u16 reserved;
-};
 
 static struct AppSignalsFile* m_pAppSignalsFile = NULL;
 static struct VduAppSignalParam* m_pSignalEntry = NULL;
 static struct VduAppSignalState* m_pSignalState = NULL;
-static struct HashTableRecord* m_pSignalHashTable = NULL;
+static struct VduHash32ToIndex* m_pSignalHashTable = NULL;
 
 static struct VduOptoPort* m_pVduOptoPorts = NULL;
 static struct VduTxRxAppSignal* m_pTxRxAppSignals = NULL;
 
+static alt_u16 m_outputDiscreteState = 0u;	// Keeps 4 bts of output discretes (OUT_CTRL_* signals)
 //
 // End of Private data
-
-void moduleRnSignalsInitialize(void)
-{
-	if (m_moduleInitialized == true)
-	{
-		RN_ASSERT(false);
-		return;
-	}
-	m_moduleInitialized = true;
-
-#ifdef RVDU_SIM
-	// Initialize critical section
-	mtx_init(&m_cs, mtx_plain);
-#endif
-}
-
-#ifdef RVDU_SIM
-void moduleRnSignalsUninitialize(void)
-{
-	mtx_destroy(&m_cs);
-	m_moduleInitialized = false;
-}
-
-mtx_t* rnSignalsMutex(void)
-{
-	RN_ASSERT(m_moduleInitialized == true);
-	return &m_cs;
-}
-#endif
-
-static int compareHashTableRecords(const void* a, const void* b)
-{
-	const struct HashTableRecord* ra = (const struct HashTableRecord*)a;
-	const struct HashTableRecord* rb = (const struct HashTableRecord*)b;
-
-	if (ra->hash < rb->hash)
-	{
-		return -1;
-	}
-
-	if (ra->hash > rb->hash)
-	{
-		return 1;
-	}
-
-	RN_ASSERT(false);
-	return 0;
-}
 
 bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, const alt_u32 maxFileSize, alt_u32* bytesRead)
 {
@@ -163,12 +97,6 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 	char msg[STRING_MAX_LEN];
 	(void)snprintf(msg, STRING_MAX_LEN, "cacheSignalsFile: loading from %s.", signalsFile);
 	logMessage(msg);
-
-	if (m_moduleInitialized == false)
-	{
-		RN_ASSERT_MSG(false, "cacheSignalsFile: module is not initialized, initSignalsModule shall be executed!.");
-		return false;
-	}
 
 	void* f = fl_fopen(signalsFile, "rb");
 	if (f == NULL)
@@ -245,8 +173,7 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 		// Check the size for run-time structures
 		//
 		alt_u32 requiredSize = size
-			+ sizeof(struct VduAppSignalState) * m_pAppSignalsFile->appSignalsCount
-			+ sizeof(struct HashTableRecord) * m_pAppSignalsFile->appSignalsCount;
+			+ sizeof(struct VduAppSignalState) * m_pAppSignalsFile->appSignalsCount;
 
 		if (requiredSize > maxFileSize)
 		{
@@ -300,26 +227,7 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 
 		// Create hash table for all signals
 		//
-		readbytescount = alignAddressToDword(readbytescount);
-
-		m_pSignalHashTable = (struct HashTableRecord*)(startAddr + readbytescount);
-		readbytescount += sizeof(struct HashTableRecord) * m_pAppSignalsFile->appSignalsCount;
-		
-		for (alt_u16 index = 0; index < m_pAppSignalsFile->appSignalsCount; index++)
-		{
-			m_pSignalHashTable[index].index = index;
-			
-			const char* const id = appSignalID(index);
-			m_pSignalHashTable[index].hash = calcHash64(id, strlen(id));
-		}
-
-		// Sort hash table by ascending hash
-		//
-		qsort(m_pSignalHashTable,
-			m_pAppSignalsFile->appSignalsCount,
-			sizeof(struct HashTableRecord),
-			&compareHashTableRecords);
-
+		m_pSignalHashTable = (struct VduHash32ToIndex*)((alt_u8*)m_pAppSignalsFile + m_pAppSignalsFile->refHash32ToIndex);
 	}
 
 	*bytesRead = readbytescount;
@@ -363,16 +271,6 @@ alt_u16 txAppSignalsCount(void)
 	return 	m_pAppSignalsFile->txAppSignalsCount;
 }
 
-const struct VduAppSignalParam* const appSignalParam(const char* const appSignalId)
-{
-	alt_u16 signalIndex = appSignalIndex(appSignalId);
-	if (signalIndex == INVALID_INDEX)
-	{
-		return NULL;
-	}
-	return appSignalParamByIndex(signalIndex);
-}
-
 const struct VduAppSignalParam* const appSignalParamByIndex(alt_u16 index)
 {
 	if ((m_pAppSignalsFile == NULL)
@@ -382,16 +280,6 @@ const struct VduAppSignalParam* const appSignalParamByIndex(alt_u16 index)
 		return NULL;
 	}
 	return &m_pSignalEntry[index];
-}
-
-const struct VduAppSignalState* const appSignalState(const char* const appSignalId)
-{
-	alt_u16 signalIndex = appSignalIndex(appSignalId);
-	if (signalIndex == INVALID_INDEX)
-	{
-		return NULL;
-	}
-	return appSignalStateByIndex(signalIndex);
 }
 
 const struct VduAppSignalState* const appSignalStateByIndex(alt_u16 index)
@@ -427,15 +315,15 @@ alt_u16 appSignalIndex(const char* const appSignalId)
 	}
 
 
-	alt_u64 hash = calcHash64(appSignalId, strlen(appSignalId));
+	alt_u32 hash = calcHash32((const alt_u8*)appSignalId, (alt_u8)strlen(appSignalId));
 
 	alt_u16 left = 0u;
-	alt_u16 right = m_pAppSignalsFile->appSignalsCount;
+	alt_u16 right = m_pAppSignalsFile->hash32ToIndexCount;
 
 	while (left < right)
 	{
 		const alt_u16 mid = left + (right - left) / 2u;
-		const alt_u64 midHash = m_pSignalHashTable[mid].hash;
+		const alt_u32 midHash = m_pSignalHashTable[mid].hash32;
 
 		if (midHash < hash)
 		{
@@ -447,7 +335,7 @@ alt_u16 appSignalIndex(const char* const appSignalId)
 		}
 		else
 		{
-			return m_pSignalHashTable[mid].index;
+			return (alt_u16)m_pSignalHashTable[mid].signalIndex;
 		}
 	}
 
@@ -515,6 +403,17 @@ const struct VduTxRxAppSignal* const txRxAppSignal(alt_u16 index)
 	return &m_pTxRxAppSignals[index];
 }
 
+void outputSignalsPreproc(void)
+{
+	externalBusBridgeReadLock();
+
+	// In RVDU the state of 6 output discretes are stored in corresponding Input signals.
+	// We need only 4 output discretes with numbers [3..6].
+	m_outputDiscreteState = (readEBB16(ADDR_DISCRETE_OUTPUTS_READ) >> ADDR_DISCRETE_OUTPUTS_RW_BITS_DELTA);
+	
+	externalBusBridgeReadUnlock();
+}
+
 bool signalAvailableByIndex(alt_u16 signalIndex)
 {
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
@@ -523,11 +422,6 @@ bool signalAvailableByIndex(alt_u16 signalIndex)
 		return false;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	bool res = true;
 
 	if (param->vduSignalInOutType == (alt_u16)RxSignal)
@@ -535,22 +429,7 @@ bool signalAvailableByIndex(alt_u16 signalIndex)
 		res = (readEBB16(ADDR_OPTO_VALIDITY) & (1u << param->rxPortIndex)) != 0u;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 	return res;
-}
-
-bool readSignalValueInt(const char* const appSignalId, alt_32* res)
-{
-	alt_u16 si = appSignalIndex(appSignalId);
-	if (si == INVALID_INDEX)
-	{
-		return false;
-	}
-	return readSignalValueIntByIndex(si, res);
 }
 
 bool readSignalValueIntByIndex(alt_u16 signalIndex, alt_32* res)
@@ -569,11 +448,6 @@ bool readSignalValueIntByIndex(alt_u16 signalIndex, alt_32* res)
 	}
 
 	bool result = false;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
 
 	if (param->vduSignalInOutType == (alt_u16)RxSignal)
 	{
@@ -644,22 +518,7 @@ bool readSignalValueIntByIndex(alt_u16 signalIndex, alt_32* res)
 	{
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 	return result;
-}
-
-bool readSignalValueFloat(const char* const appSignalId, float* res)
-{
-	alt_u16 si = appSignalIndex(appSignalId);
-	if (si == INVALID_INDEX)
-	{
-		return false;
-	}
-	return readSignalValueFloatByIndex(si, res);
 }
 
 bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res)
@@ -678,11 +537,6 @@ bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res)
 	}
 
 	bool result = false;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
 
 	if (param->vduSignalType == (alt_u16)AnalogFloat32)
 	{
@@ -706,22 +560,7 @@ bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res)
 		}
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 	return result;
-}
-
-bool writeSignalValueInt(const char* const appSignalId, alt_32 value)
-{
-	alt_u16 si = appSignalIndex(appSignalId);
-	if (si == INVALID_INDEX)
-	{
-		return false;
-	}
-	return writeSignalValueIntByIndex(si, value);
 }
 
 bool writeSignalValueIntByIndex(alt_u16 signalIndex, alt_32 value)
@@ -734,11 +573,6 @@ bool writeSignalValueIntByIndex(alt_u16 signalIndex, alt_32 value)
 
 	bool result = false;
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	if ((param->vduSignalInOutType == (alt_u16)Internal) &&
 		((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32)))
 	{
@@ -748,57 +582,37 @@ bool writeSignalValueIntByIndex(alt_u16 signalIndex, alt_32 value)
 	else if ((param->vduSignalInOutType == (alt_u16)Output) &&
 		(param->vduSignalType == (alt_u16)Discrete))
 	{
-#ifndef RVDU_SIM // Nios-specific
 		externalBusBridgeWriteLock();
-#endif
 			
-		alt_u16 outputsState = readEBB16(ADDR_DISCRETE_OUTPUTS_READ);
-
-		// in REAL RVDU State of 6 output discretes are stored in corresponding Input signals.
-		// We can control only 4 output discretes with numbers [3..6].
 		if (value != 0)
 		{
-			outputsState = outputsState | (1u << (param->optoAddr.bitNo + ADDR_DISCRETE_OUTPUTS_RW_BITS_DELTA));
+			m_outputDiscreteState = m_outputDiscreteState | (1u << (param->optoAddr.bitNo));
 		}
 		else
 		{
-			outputsState = outputsState & (~(1u << (param->optoAddr.bitNo + ADDR_DISCRETE_OUTPUTS_RW_BITS_DELTA)));
+			m_outputDiscreteState = m_outputDiscreteState & (~(1u << (param->optoAddr.bitNo)));
 		}
-		writeEBB16(param->optoAddr.offset, outputsState >> ADDR_DISCRETE_OUTPUTS_RW_BITS_DELTA);
 
-#ifdef RVDU_SIM
-		// Also, we write them to a READ memory
+		// Only output disretes address shall be written
+		//
+		if (param->optoAddr.offset == ADDR_DISCRETE_OUTPUTS_WRITE)
 		{
-			writeReadEBB16(ADDR_DISCRETE_OUTPUTS_READ, outputsState);
+			writeEBB16(param->optoAddr.offset, m_outputDiscreteState);
 		}
-#endif
+		else
+		{
+			RN_ASSERT(param->optoAddr.offset == ADDR_DISCRETE_OUTPUTS_WRITE);
+		}
+		
+		externalBusBridgeWriteUnlock();
 
 		result = true;
-
-#ifndef RVDU_SIM // Nios-specific
-		externalBusBridgeWriteUnlock();
-#endif
 	}
 	else
 	{
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 	return result;
-}
-
-bool writeSignalValueFloat(const char* const appSignalId, float value)
-{
-	alt_u16 si = appSignalIndex(appSignalId);
-	if (si == INVALID_INDEX)
-	{
-		return false;
-	}
-	return writeSignalValueFloatByIndex(si, value);
 }
 
 bool writeSignalValueFloatByIndex(alt_u16 signalIndex, float value)
@@ -809,11 +623,6 @@ bool writeSignalValueFloatByIndex(alt_u16 signalIndex, float value)
 		return false;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	bool result = false;
 
 	if ((param->vduSignalInOutType == (alt_u16)Internal) && 
@@ -822,11 +631,6 @@ bool writeSignalValueFloatByIndex(alt_u16 signalIndex, float value)
 		m_pSignalState[signalIndex].value.floatValue = value;
 		result = true;
 	}
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 
 	return result;
 }

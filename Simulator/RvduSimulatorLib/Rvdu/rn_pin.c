@@ -50,20 +50,6 @@ Module description: Provides the functionality for PIN code dialog.
 */
 
 #include <string.h>
-
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
-
-#include <alt_types.h>
-#include <system.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
 #include <stdio.h>
 
 #include "rn_pin.h"
@@ -76,6 +62,8 @@ Module description: Provides the functionality for PIN code dialog.
 #include "rn_fofp.h"
 #include "rn_diag.h"
 #include "rn_kbd.h"
+
+#include <alt_types.h>
 
 #include "defs.h"
 
@@ -149,11 +137,7 @@ static void createButtons(void)
 
 static alt_u32 pinCodeHash(void)
 {
-#ifndef RVDU_SIM
 	return (((alt_u32)readEBB16(ADDR_PIN_HI)) << 16) | readEBB16(ADDR_PIN_LO);
-#else
-	return calcHash32((const alt_u8*)("123456"), (alt_u8)strlen("123456"));
-#endif
 }
 
 void modePinShow(const struct PopUpSchemaParams* const schema)
@@ -312,8 +296,6 @@ void modePinShow(const struct PopUpSchemaParams* const schema)
 			RVDU_SYSTEM_FONT, keysColor, backColorStr, ALIGN_V_CENTER + ALIGN_H_CENTER, m_buttons[i].text);
 	}
 
-	(void)pushVideoBuffer();
-
 	return;
 
 }
@@ -330,7 +312,7 @@ static void onOKPressed(struct PopUpSchemaParams* const schema)
 	else if (pinCodeHash() == enteredPinHash)
 	{
 		schema->boolResult = true;
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->PinBoxData.editText[0] = '\0';
 		schema->PinBoxData.tryCount = 0;
 		schema->PinBoxData.state = PinCodeOk;
@@ -348,7 +330,7 @@ static void onOKInErrorModePressed(struct PopUpSchemaParams* const schema)
 {
 	if (schema->PinBoxData.state == PinNoPermission)
 	{
-		schema->retPermission = true;
+		popUpSchemaSetTerminate();
 		schema->boolResult = false;
 		(schema->PinBoxData.editText)[0] = '\0';
 	}
@@ -360,7 +342,7 @@ static void onOKInErrorModePressed(struct PopUpSchemaParams* const schema)
 		
 		if (schema->PinBoxData.tryCount >= 3)
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			schema->boolResult = false;
 		}
 	}
@@ -419,7 +401,7 @@ static void onButtonPressed(struct PopUpSchemaParams* const schema)
 	case KEY_CANCEL:
 	{
 		schema->boolResult = false; 
-		schema->retPermission = true; 
+		popUpSchemaSetTerminate();
 		schema->PinBoxData.editText[0] = '\0'; 
 		schema->PinBoxData.tryCount = 0;
 		schema->PinBoxData.state = PinCodeOk;
@@ -458,7 +440,7 @@ void modePinProc(struct PopUpSchemaParams* const schema)
 			logWarning(SignalWasNotFound, msg);
 
 			// Abort the dialog
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			schema->boolResult = false;
 			return;
 		}

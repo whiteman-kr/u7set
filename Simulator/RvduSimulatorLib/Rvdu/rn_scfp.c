@@ -82,13 +82,7 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 
 #include "defs.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "../rvdu_bsp/system.h"
-#include "../rvdu_bsp/HAL/inc/sys/alt_stdio.h"
-#include "../fat_io_lib/fat_filelib.h"
-
-#endif // End of Microsoft Visual Studio-specific
+#include "fat_filelib.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -758,7 +752,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 				alt_u32 bytesUsedByScript = 0;
 
 				if (compileScript(L, schema, schema->schemaProperties.onShowScript, 
-					LuaOnShowScript, bytecodeAddr, memoryAvailable, &bytesUsedByScript) == true)
+					LuaPreDrawScript, bytecodeAddr, memoryAvailable, &bytesUsedByScript) == true)
 				{
 					// Set item's pointer to the compiled [size + bytecode]
 					//
@@ -768,7 +762,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 						RN_ASSERT(false);
 						return false;
 					}
-					schema->schemaProperties.onShowScriptBytecode = (vdu_ref)offset;
+					schema->schemaProperties.onShowScriptBytecode = (alt_u32)offset;
 
 					bytesUsedByScript = alignAddressToDword(bytesUsedByScript);
 
@@ -812,7 +806,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 						RN_ASSERT(false);
 						return false;
 					}
-					schema->schemaProperties.preDrawScriptBytecode = (vdu_ref)offset;
+					schema->schemaProperties.preDrawScriptBytecode = (alt_u32)offset;
 
 					bytesUsedByScript = alignAddressToDword(bytesUsedByScript);
 
@@ -866,7 +860,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 						RN_ASSERT(false);
 						return false;
 					}
-					item->clickScriptBytecode = (vdu_ref)offset;
+					item->clickScriptBytecode = (alt_u32)offset;
 
 					bytesUsedByScript = alignAddressToDword(bytesUsedByScript);
 
@@ -908,7 +902,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 						RN_ASSERT(false);
 						return false;
 					}
-					item->preDrawScriptBytecode = (vdu_ref)offset;
+					item->preDrawScriptBytecode = (alt_u32)offset;
 
 					bytesUsedByScript = alignAddressToDword(bytesUsedByScript);
 
@@ -1097,7 +1091,7 @@ struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const
 	return (struct VduSchemaFileSchemaItem1* const)((alt_u8*)schema + itemOffsets[itemIndex]);
 }
 
-const char* const vduSchemaString(const struct VduSchemaFile* const schema, const vdu_ref offset)
+const char* const vduSchemaString(const struct VduSchemaFile* const schema, const alt_u32 offset)
 {
 	if (schema == NULL)
 	{
@@ -1110,7 +1104,7 @@ const char* const vduSchemaString(const struct VduSchemaFile* const schema, cons
 	return str;
 }
 
-const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const vdu_ref offset)
+const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const alt_u32 offset)
 {
 	if (schema == NULL)
 	{
@@ -1122,7 +1116,7 @@ const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, co
 	return result;
 }
 
-const char* const vduCurrentSchemaString(const vdu_ref offset)
+const char* const vduCurrentSchemaString(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{
@@ -1133,7 +1127,7 @@ const char* const vduCurrentSchemaString(const vdu_ref offset)
 	return str;
 }
 
-const alt_u16 vduCurrentSchemaStringLength(const vdu_ref offset)
+const alt_u16 vduCurrentSchemaStringLength(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{
@@ -1146,7 +1140,7 @@ const alt_u16 vduCurrentSchemaStringLength(const vdu_ref offset)
 
 // Returns a pointer to a current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
 //
-const char* const vduCurrentSchemaScript(const vdu_ref offset)
+const char* const vduCurrentSchemaScript(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{
@@ -1159,7 +1153,7 @@ const char* const vduCurrentSchemaScript(const vdu_ref offset)
 
 // Returns a length of current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
 //
-const alt_u32 vduCurrentSchemaScriptLength(const vdu_ref offset)
+const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{

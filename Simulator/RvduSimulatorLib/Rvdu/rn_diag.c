@@ -56,11 +56,7 @@ Module description: Provides diagnostics functions.
 #include <assert.h>
 #include <stddef.h>
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "sys/alt_stdio.h"
-
-#endif
+#include <alt_stdio.h>
 
 #include "rn_cfg.h"
 #include "rn_utils.h"
@@ -124,14 +120,11 @@ static const char* m_warningCodeMsg[] =
 
 	"LuaPreDrawScript",
 	"LuaClickScript",
-	"LuaOnShowScript",
 
 	"DrawError"
 };
 
-#ifdef RVDU_SIM // Simulator-specific
 LogRecordHandler m_logRecordHandler = NULL;
-#endif
 
 //
 // End of Private data
@@ -144,10 +137,8 @@ bool moduleRnDiagInitialize(alt_u8* logRecordsBuffer, alt_u16 logRecordsSize, al
 	}
 	m_moduleInitialized = true;
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
 	static_assert((unsigned long long)ErrorCodeCount == (sizeof(m_errorCodeMsg) / sizeof(const char*)), "ErrorCodeCount shall match the number of decsriptions");
 	static_assert((unsigned long long)WarningCodeCount == (sizeof(m_warningCodeMsg) / sizeof(const char*)), "WarningCodeCount shall match the number of decsriptions");
-#endif
 
 	if (memoryAvailable < (alt_u32)(logRecordsSize * sizeof(LogRecord)))
 	{
@@ -205,12 +196,10 @@ static inline void addLogRecord(enum LogRecordType type, int code, const char* m
 		return;
 	}
 
-#ifdef RVDU_SIM // Simulator-specific
 	if (m_logRecordHandler != NULL)
 	{
 		m_logRecordHandler((int)type, message);
 	}
-#endif
 	
 	if (m_logEnd == NO_LOG_POS)
 	{
@@ -396,9 +385,11 @@ void setStartupStage(alt_u16 value)
 {
 	m_startupStage = value;
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
+	externalBusBridgeWriteLock();
+	
 	writeEBB16(ADDR_DIAG_STAGE, value);
-#endif
+	
+	externalBusBridgeWriteUnlock();
 }
 
 void setTimerValue(alt_u8 timerIndex, alt_u32 time)
@@ -438,9 +429,7 @@ void writeExternalDiagPacket(void)
 	static_assert(ADDR_DIAG_ERRORS_SIZE >= (alt_u32)ErrorCodeCount, "ADDR_DIAG_ERRORS_SIZE is incorrect");
 	static_assert(ADDR_DIAG_WARNINGS_SIZE >= (alt_u32)WarningCodeCount, "ADDR_DIAG_WARNINGS_SIZE is incorrect");
 
-#ifndef RVDU_SIM // Nios-specific
 	externalBusBridgeWriteLock();
-#endif 
 
 	writeEBB16(ADDR_DIAG_BUS_BASE, m_startupStage);
 
@@ -462,15 +451,11 @@ void writeExternalDiagPacket(void)
 		writeEBB16(ADDR_DIAG_WARNINGS_BASE + i, warningCounter(i));
 	}
 
-#ifndef RVDU_SIM // Nios-specific
 	externalBusBridgeWriteUnlock();
-#endif 
 }
 
-#ifdef RVDU_SIM // Simulator-specific
 void setLogRecordHandler(LogRecordHandler handler)
 {
 	m_logRecordHandler = handler;
 }
-#endif
 

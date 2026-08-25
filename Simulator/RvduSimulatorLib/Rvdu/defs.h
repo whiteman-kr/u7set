@@ -1,11 +1,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
 #include <alt_types.h>
-#include <sys/alt_stdio.h>
-
-#endif // End of Microsoft Visual Studio-specific
 
 #define INVALID_INDEX (alt_u16)-1
 #define INVALID_LENGTH (alt_u16)-1
@@ -15,7 +11,6 @@
 #define STRING_MAX_LEN 256u
 #define FILE_NAME_MAX_LEN 256u
 #define BUTTON_TEXT_MAX_LEN 32u
-#define MAX_KEY_LEN FILE_NAME_MAX_LEN
 
 #define MAX_SCREEN_WIDTH  4096u
 #define MAX_SCREEN_HEIGHT  2048u

@@ -51,15 +51,10 @@ Module description: Provides diagnostics functions.
 #ifndef RN_DIAG_H
 #define RN_DIAG_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
 #include <alt_types.h>
-#else
-#include "msvc_alt_types.h"
-#endif
-// Microsoft Visual Studio-specific
 
 #include "defs.h" 
+
 #include <stdbool.h>
 
 enum ErrorCode
@@ -100,7 +95,6 @@ enum WarningCode
 
 	LuaPreDrawScript,
 	LuaClickScript,
-	LuaOnShowScript,
 
 	DrawError,
 
@@ -254,9 +248,7 @@ void writeExternalDiagPacket(void);
 
 // Function that can be write log messages into log file
 //
-#ifdef RVDU_SIM // Simulator-specific
 typedef void (*LogRecordHandler)(int, const char*);
 void setLogRecordHandler(LogRecordHandler handler);
-#endif
 
 #endif

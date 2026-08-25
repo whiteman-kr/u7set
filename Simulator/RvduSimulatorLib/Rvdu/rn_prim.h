@@ -68,19 +68,9 @@ Module description: Renders basic graphical primitives.
 #ifndef RN_PRIM_H
 #define RN_PRIM_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
+#include <stdbool.h>
 
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include <stdbool.h>
 
 #include "defs.h"
 
@@ -119,6 +109,14 @@ Parameters:
     screenWidth, screenHeight - size of the screen in pixels.
 */
 void moduleRnPrimInitialize(alt_u32* pVideoBuffer, alt_u16 screenWidth, alt_u16 screenHeight);
+
+/*
+Logo display function.
+Parameters:
+    workFolder - full path to configuration files.
+Returns true on success, false on failure.
+*/
+bool showLogo(const char* logoFile);
 
 //  ---------------------- Video frame primitive drawing functions ---------------------------------------
 

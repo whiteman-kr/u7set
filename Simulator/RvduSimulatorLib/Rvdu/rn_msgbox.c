@@ -39,17 +39,7 @@ Module description: Provides the functionality for displaying confirmation messa
 -- *************************************************************
 */
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
 
 #include <stdio.h>
 #include <string.h>
@@ -87,6 +77,7 @@ static struct Rect m_drawArea = { .x = 390, .y = 210, .w = 500, .h = 140 };
 static struct Rect m_textRect = { .x = 400, .y = 230, .w = 480, .h = 50 };
 
 static bool m_textInitialized = false;
+static bool m_textMaxLength = false;
 //
 // End of Private data
 
@@ -163,17 +154,28 @@ static void adjustLayout(const char* const messageText)
 	}
 
 	// Determine the size of the text
-
-	alt_u16 textHeight =
-		fontSymbolHeader(RVDU_SYSTEM_FONT, (alt_u32)' ')->height * lines;
-
+	//
 	m_textRect.w = maxWidth;
 	if (m_textRect.w < m_minAreaSize)
 	{
 		m_textRect.w = m_minAreaSize;
 	}
-	m_textRect.h = textHeight;
+	if ((m_textRect.w + (m_rectIdent * 6u)) > vduConfig()->display0.width)
+	{
+		m_textRect.w = vduConfig()->display0.width - (m_rectIdent * 6u);
+	}
 
+	alt_u16 textHeight =
+		fontSymbolHeader(RVDU_SYSTEM_FONT, (alt_u32)' ')->height * lines;
+	if ((textHeight + m_buttons[1].h + (m_rectIdent * 6u)) > vduConfig()->display0.height)
+	{
+		m_textRect.h = vduConfig()->display0.height - m_buttons[1].h - (m_rectIdent * 6u);
+	}
+	else
+	{
+		m_textRect.h = textHeight;
+	}
+	
 	// Draw area includes text and buttons
 
 	m_drawArea.w = m_textRect.w + (m_rectIdent * 2u);
@@ -238,6 +240,17 @@ void modeQuestionShow(const struct PopUpSchemaParams* const schema)
 	drawRect(m_drawArea.x, m_drawArea.y, m_drawArea.w, m_drawArea.h, 1u, backColorRect);
 
 	char outstr[STRING_MAX_LEN + 1u/*for ending zero*/] = {0};
+
+	size_t textLength = strlen(schema->MessageBoxParams.messageText);
+	if ((textLength >= STRING_MAX_LEN) && (m_textMaxLength == false))
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "modeQuestionShow: Message exsided text length (%u)", (alt_16)textLength);
+		logWarning(DrawError, msg);
+
+		m_textMaxLength = true;
+	}
+
 	prepareStr(schema->MessageBoxParams.messageText, (char*)outstr, STRING_MAX_LEN, INVALID_INDEX/*signalIndex*/);
 
 	printStr(m_textRect.x, m_textRect.y, m_textRect.w, m_textRect.h,
@@ -259,8 +272,6 @@ void modeQuestionShow(const struct PopUpSchemaParams* const schema)
 			RVDU_SYSTEM_FONT, blackColor, backColorStr, ALIGN_V_CENTER + ALIGN_H_CENTER, m_buttons[i].text);
 	}
 
-	(void)pushVideoBuffer();
-
 	return;
 }
 
@@ -277,15 +288,16 @@ static void checkPressedButton(struct PopUpSchemaParams* const schema)
 		if (checkTouchZone(m_buttons[i].x, m_buttons[i].y, m_buttons[i].w, m_buttons[i].h) == true)
 		{
 			m_textInitialized = false;
+			m_textMaxLength = false;
 
 			if (m_buttons[i].code == KEY_YES)
 			{
-				schema->retPermission = true;
+				popUpSchemaSetTerminate();
 				schema->boolResult = true;
 			}
 			else if (m_buttons[i].code == KEY_NO)
 			{
-				schema->retPermission = true;
+				popUpSchemaSetTerminate();
 				schema->boolResult = false;
 			}
 			else
@@ -319,17 +331,19 @@ void modeQuestionProc(struct PopUpSchemaParams* const schema)
 		{
 		case RK_RETURN:
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			schema->boolResult = true;
 
 			m_textInitialized = false;
+			m_textMaxLength = false;
 		}
 		break;
 		case RK_ESCAPE:
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 
 			m_textInitialized = false;
+			m_textMaxLength = false;
 		}
 		break;
 		default:

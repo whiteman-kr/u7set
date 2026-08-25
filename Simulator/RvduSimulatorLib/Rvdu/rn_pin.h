@@ -52,17 +52,7 @@ Module description: Provides the functionality for PIN code dialog.
 #ifndef RN_PIN_H
 #define RN_PIN_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
 
 struct PopUpSchemaParams;
 

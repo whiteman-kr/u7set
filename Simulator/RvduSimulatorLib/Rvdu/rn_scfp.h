@@ -73,20 +73,8 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 #ifndef RN_SCFP_H
 #define RN_SCFP_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM
-
 #include <alt_types.h>
-#include <stdio.h>
 
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include "types.h"
 #include "rn_diag.h"
 
 #include <stdbool.h>
@@ -112,6 +100,38 @@ RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
 
 #pragma pack(push, 1)
 
+struct BMPFileHeader
+{
+	// BITMAPFILEHEADER (14 bytes)
+
+	unsigned short bfType;      // Must be 'BM' = 0x4D42
+	unsigned int   bfSize;      // Size of the BMP file in bytes
+	unsigned short bfReserved1; // Must be 0
+	unsigned short bfReserved2; // Must be 0
+	unsigned int   bfOffBits;   // Offset to pixel data
+};
+
+struct BMPInfoHeader
+{
+	// BITMAPINFOHEADER (40 bytes)
+
+	unsigned int   biSize;          // Size of this header = 40
+	int            biWidth;         // Image width
+	int            biHeight;        // Image height
+	unsigned short biPlanes;        // Must be 1
+	unsigned short biBitCount;      // Bits per pixel (24 for RGB)
+	unsigned int   biCompression;   // 0 = BI_RGB (no compression)
+	unsigned int   biSizeImage;     // Image size including padding
+	int            biXPelsPerMeter; // Horizontal resolution
+	int            biYPelsPerMeter; // Vertical resolution
+	unsigned int   biClrUsed;       // Number of colors used
+	unsigned int   biClrImportant;  // Important colors
+};
+
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
 struct VduSchemaFileProperties1 {
 	alt_u16 version;    			// 1
 	alt_u16 headerSize; 			// This header size
@@ -119,12 +139,12 @@ struct VduSchemaFileProperties1 {
 	alt_u16 height;     			// In pixels
 	alt_u32 reserve0;
 	alt_u32 backgroundColor;
-	vdu_ref schemaId; 				// vdu_cstr
-	vdu_ref caption; 				// vdu_cstr
-	vdu_ref onShowScript;			// vdu_cstr
-	vdu_ref onShowScriptBytecode;	// vdu_cstr
-	vdu_ref preDrawScript;			// vdu_cstr
-	vdu_ref preDrawScriptBytecode;	// vdu_cstr
+	alt_u32 schemaId; 				// vdu_cstr
+	alt_u32 caption; 				// vdu_cstr
+	alt_u32 onShowScript;			// vdu_cstr
+	alt_u32 onShowScriptBytecode;	// vdu_cstr
+	alt_u32 preDrawScript;			// vdu_cstr
+	alt_u32 preDrawScriptBytecode;	// vdu_cstr
 	alt_u32 reserve1;
 	alt_u32 reserve2;
 };
@@ -280,7 +300,7 @@ struct ImageInternal
 	alt_u16 version;   // 1
 	alt_u16 reserve0;
 
-	vdu_ref imageId;
+	alt_u32 imageId;
 	alt_u32 reserve1;
 
 	alt_u32 imageHash; // Image hash, used to generate image file name: [VduSubsystemId]/[VduEquipmentId]/Images/[ImageHash].bmp
@@ -472,14 +492,14 @@ struct VduSchemaFileSchemaItem1
 	bool isStatic;          // If true, the item is static and can be cached.
 	bool acceptClick;       // If true, the item can accept click events.
 
-	vdu_ref objectName;
-	vdu_ref label;
+	alt_u32 objectName;
+	alt_u32 label;
 
-	vdu_ref clickScript;
-	vdu_ref clickScriptBytecode;
+	alt_u32 clickScript;
+	alt_u32 clickScriptBytecode;
 
-	vdu_ref preDrawScript;
-	vdu_ref preDrawScriptBytecode;
+	alt_u32 preDrawScript;
+	alt_u32 preDrawScriptBytecode;
 
 	alt_u32 reserve2;
 	
@@ -538,27 +558,27 @@ struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const
 
 // Returns a pointer to a schema string by its offset or the NULL if configuration is not loaded or the offset is out of range.
 //
-const char* const vduSchemaString(const struct VduSchemaFile* const schema, const vdu_ref offset);
+const char* const vduSchemaString(const struct VduSchemaFile* const schema, const alt_u32 offset);
 
 // Returns a length of schema string by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
 //
-const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const vdu_ref offset);
+const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const alt_u32 offset);
 
 // Returns a pointer to a current schema string by its offset or the NULL if configuration is not loaded or the offset is out of range.
 //
-const char* const vduCurrentSchemaString(const vdu_ref offset);
+const char* const vduCurrentSchemaString(const alt_u32 offset);
 
 // Returns a length of current schema string by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
 //
-const alt_u16 vduCurrentSchemaStringLength(const vdu_ref offset);
+const alt_u16 vduCurrentSchemaStringLength(const alt_u32 offset);
 
 // Returns a pointer to a current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
 //
-const char* const vduCurrentSchemaScript(const vdu_ref offset);
+const char* const vduCurrentSchemaScript(const alt_u32 offset);
 
 // Returns a length of current schema script by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
 //
-const alt_u32 vduCurrentSchemaScriptLength(const vdu_ref offset);
+const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset);
 
 // --------------- Current schema control functions -------------------
 

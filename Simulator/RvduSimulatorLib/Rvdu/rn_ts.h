@@ -43,31 +43,13 @@ Module description: Detects and processes touch input events from the touchscree
 #ifndef RN_TS_H
 #define RN_TS_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
 
 #include <stdbool.h>
 
 void moduleRnTsInitialize(void);
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
 void moduleRnTsUninitialize(void);
-#endif
-
-// This function sets the touch event.
-//
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-void setTouchEvent(alt_u16 x, alt_u16 y);
-#endif
 
 // This function checks if there is a pending screen click event.
 //

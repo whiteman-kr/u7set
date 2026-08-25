@@ -1,5 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <crtdbg.h>
+#include <assert.h>
 
 #include "RvduSimulatorLib.h"
 
@@ -23,6 +27,11 @@
 #include "rn_utils.h"
 #include "rn_vbuf.h"
 
+#include "rn_kbd_sim.h"
+#include "rn_ts_sim.h"
+#include "rn_utils_sim.h"
+#include "rn_vbuf_sim.h"
+
 #include <threads.h>
 
 // Memory pointers
@@ -44,6 +53,18 @@ static alt_u16 m_subsystemKey = 0;
 
 static lua_State* m_rvduLuaState = NULL; // LUA state object
 
+static alt_u16 readWriteEBB16(alt_u16 wOffset)
+{
+	volatile alt_u16* p16 = (alt_u16*)TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE + wOffset;
+	return *p16;
+}
+
+static void writeReadEBB16(alt_u16 wOffset, alt_u16 data)
+{
+	volatile alt_u16* p16 = (alt_u16*)TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ + wOffset;
+	*p16 = data;
+	return;
+}
 
 bool rnLibInit()
 {
@@ -80,6 +101,14 @@ bool rnLibInit()
 	memset(m_externalBusBridgeWrite, 0, TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE);
 
 	TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE = (alt_u16*)m_externalBusBridgeWrite;
+
+	// Simulate PIN code
+	{
+		alt_u32 pin123456 = calcHash32((const alt_u8*)("123456"), (alt_u8)strlen("123456"));
+
+		writeReadEBB16(ADDR_PIN_HI, (alt_u16)(pin123456 >> 16));
+		writeReadEBB16(ADDR_PIN_LO, (alt_u16)(pin123456 & 0xffff));
+	}
 
 	return true;
 }
@@ -145,6 +174,8 @@ bool rnLibStartSim(const char* buildFolder,
 
 		logMemoryUsage("moduleRnDiagInitialize", m_memory, memoryEnd, m_memorySize);
 	}
+
+	moduleRnUtilsInitialize();
 
 	// Initialize the input
 	//
@@ -246,7 +277,13 @@ bool rnLibStartSim(const char* buildFolder,
 		char logoFile[STRING_MAX_LEN] = {0};
 		(void)strcpy(logoFile, workFolder);
 		(void)strcat(logoFile, "\\StartupLogo.bmp");
-		showLogo(logoFile);
+
+		bool readOk = showLogo(logoFile);
+		if (readOk == true)
+		{
+			(void)pushVideoBuffer();
+		}
+
 	}
 
 	// Load globalScript file
@@ -303,8 +340,6 @@ bool rnLibStartSim(const char* buildFolder,
 	//
 	{
 		setStartupStage(STAGE_SIGNALS_INIT);
-
-		moduleRnSignalsInitialize();
 
 		char signalsFile[STRING_MAX_LEN] = {0};
 		(void)strcpy(signalsFile, workFolder);
@@ -436,13 +471,12 @@ void rnLibStopSim()
 	moduleRnTsUninitialize();
 	moduleRnKbdUninitialize();
 	moduleRnVbufUninitialize();
-	moduleRnSignalsUninitialize();
+	moduleRnUtilsUninitialize();
 }
 
 void rnLibClickEvent(unsigned int x, unsigned int y)
 { 
-	setTouchEvent((alt_u16)x, (alt_u16)y)
-	;
+	setTouchEvent((alt_u16)x, (alt_u16)y);
 }
 
 void rnLibKeyPressEvent(unsigned int code)
@@ -452,12 +486,32 @@ void rnLibKeyPressEvent(unsigned int code)
 
 void rnLibVideoBufferLock()
 {
-	mtx_lock(rnVbufMutex());
+	moduleRnVbufLock();
 }
 
 void rnLibVideoBufferUnlock()
 {
-	mtx_unlock(rnVbufMutex());
+	moduleRnVbufUnlock();
+}
+
+static void outputSignalsLoopback()
+{
+	externalBusBridgeWriteLock();
+	
+	alt_u16 outputControlState = readWriteEBB16(ADDR_DISCRETE_OUTPUTS_WRITE);		// Read control from the Write memory
+	
+	externalBusBridgeWriteUnlock();
+
+	externalBusBridgeReadLock();
+
+	alt_u16 outputsInputState = readEBB16(ADDR_DISCRETE_OUTPUTS_READ);				// Read input from the Read memory
+
+	outputsInputState &= 0x03;	// Keep bits 0 and 1 of outputs we do not control
+	outputsInputState |= (outputControlState << ADDR_DISCRETE_OUTPUTS_RW_BITS_DELTA); // Add the control bits to bits 5..2
+
+	writeReadEBB16(ADDR_DISCRETE_OUTPUTS_READ, outputsInputState);	// Write control to a READ memory
+
+	externalBusBridgeReadUnlock();
 }
 
 bool rnLibLoop()
@@ -489,10 +543,20 @@ bool rnLibLoop()
 
 		startMeasuringTimer(TIMER_MAINLOOP);
 
-		trendsProc();
+		{
+			externalBusBridgeReadLock();
+
+			trendsProc();
+
+			externalBusBridgeReadUnlock();
+		}
+
+		outputSignalsPreproc();
 
 		bool schemaWasRepainted = false;
 		schemaProc(m_rvduLuaState, &schemaWasRepainted);
+
+		outputSignalsLoopback();
 
 		optoTxProc();
 
@@ -550,14 +614,188 @@ const char* const rnLibAppSignalUnit(unsigned int index)
 	return signalUnit((alt_u16)index); 
 }
 
-unsigned int rnLibTxAppSignalsCount(void)
+bool rnLibIsDiscrete(unsigned int index)
 { 
-	return txAppSignalsCount(); 
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL) 
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalType == Discrete; 
 }
 
-const struct VduTxRxAppSignal* const rnLibTxAppSignal(unsigned int index)
-{ 
-	return txRxAppSignal((alt_u16)index); 
+bool rnLibIsFloat(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalType == AnalogFloat32;
+}
+
+bool rnLibIsInt32(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalType == AnalogSignedInt32;
+}
+
+bool rnLibIsInternal(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalInOutType == Internal;
+}
+
+bool rnLibIsInput(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalInOutType == Input;
+}
+
+bool rnLibIsOutput(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalInOutType == Output;
+}
+
+bool rnLibIsRxSignal(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return false;
+	}
+	return param->vduSignalInOutType == RxSignal;
+}
+
+bool rnLibIsTxSignal(unsigned int index)
+{
+	for (alt_u16 j = 0; j < txAppSignalsCount(); j++)
+	{
+		const struct VduTxRxAppSignal* const txRxSignal = txRxAppSignal(j);
+		if (txRxSignal == NULL)
+		{
+			assert(txRxSignal);
+			return false;
+		}
+
+		if (txRxSignal->signalIndex == index)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+int rnLibRxPortIndex(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->rxPortIndex;
+}
+
+int rnLibSignalOffset(unsigned int index) 
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->optoAddr.offset;
+}
+
+int rnLibSignalBit(unsigned int index) 
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->optoAddr.bitNo;
+}
+
+bool rnLibSignalTunable(unsigned int index) 
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->props.bits.tunable;
+}
+
+float rnLibSignalHighLimitFloat(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->highLimit.floatValue;
+}
+
+float rnLibSignalLowLimitFloat(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->lowLimit.floatValue;
+}
+
+int rnLibSignalHighLimitInt(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->highLimit.intValue;
+}
+
+int rnLibSignalLowLimitInt(unsigned int index)
+{
+	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
+	if (param == NULL)
+	{
+		assert(param);
+		return -1;
+	}
+	return param->lowLimit.intValue;
 }
 
 bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
@@ -580,8 +818,7 @@ bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 
 	bool result = false;
 
-	mtx_t* cs = rnSignalsMutex();
-	mtx_lock(cs);
+	externalBusBridgeReadLock();
 
 	if (param->vduSignalInOutType == Internal)
 	{
@@ -646,9 +883,13 @@ bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 		{
 			// For Output Discretes, we read a WRITE memory
 			//
-			alt_u8 outputState = *(alt_u8*)(TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE + ADDR_DISCRETE_OUTPUTS_WRITE);
+			externalBusBridgeWriteLock();
 
-			if ((outputState & (1 << param->optoAddr.bitNo)) != 0)
+			alt_u16 outputControlState = readWriteEBB16(ADDR_DISCRETE_OUTPUTS_WRITE);		// Read control from the Write memory
+
+			externalBusBridgeWriteUnlock();
+
+			if ((outputControlState & (1 << param->optoAddr.bitNo)) != 0)
 			{
 				*res = 1;
 			}
@@ -661,7 +902,7 @@ bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 		}
 	}
 
-	mtx_unlock(cs);
+	externalBusBridgeReadUnlock();
 
 	RN_ASSERT(result);
 	return result;
@@ -687,8 +928,7 @@ bool rnLibSignalValueFloat(unsigned int signalIndex, float* res)
 
 	bool result = false;
 
-	mtx_t* cs = rnSignalsMutex();
-	mtx_lock(cs);
+	externalBusBridgeReadLock();
 
 	if (param->vduSignalType == AnalogFloat32)
 	{
@@ -706,7 +946,7 @@ bool rnLibSignalValueFloat(unsigned int signalIndex, float* res)
 		}
 	}
 
-	mtx_unlock(cs);
+	externalBusBridgeReadUnlock();
 
 	RN_ASSERT(result);
 	return result;
@@ -730,8 +970,7 @@ bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 
 	bool result = false;
 
-	mtx_t* cs = rnSignalsMutex();
-	mtx_lock(cs);
+	externalBusBridgeReadLock();
 
 	if (param->vduSignalInOutType == Internal)
 	{
@@ -788,7 +1027,12 @@ bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 				if (param->optoAddr.offset == ADDR_DISCRETE_OUTPUTS_READ)
 				{
 					data >>= 2;
+					
+					externalBusBridgeWriteLock();
+					
 					writeEBB16(ADDR_DISCRETE_OUTPUTS_WRITE, data);
+					
+					externalBusBridgeWriteUnlock();
 				}
 			}
 
@@ -831,7 +1075,7 @@ bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 		}
 	}
 
-	mtx_unlock(cs);
+	externalBusBridgeReadUnlock();
 
 	RN_ASSERT(result);
 	return result;
@@ -855,8 +1099,7 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 
 	bool result = false;
 
-	mtx_t* cs = rnSignalsMutex();
-	mtx_lock(cs);
+	externalBusBridgeReadLock();
 
 	if (param->vduSignalType == AnalogFloat32)
 	{
@@ -877,7 +1120,7 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 		}
 	}
 
-	mtx_unlock(cs);
+	externalBusBridgeReadUnlock();
 
 	RN_ASSERT(result);
 	return result;

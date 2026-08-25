@@ -60,17 +60,7 @@ Module description: Loads and stores RVDU configuration settings.
 
 #include "defs.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#ifdef UNIT_TEST
-#include "json_mocks.h"
-#else
-#include "../fat_io_lib/fat_filelib.h"
-#endif
-
-#include <system.h>
-
-#endif // End of Microsoft Visual Studio-specific
+#include "fat_filelib.h"
 
 // Private module data
 //
@@ -289,7 +279,7 @@ const struct VduConfigSchema1* const vduConfigSchema(alt_u16 schemaIndex)
 	return result;
 }
 
-const char* const vduConfigString(const vdu_ref offset)
+const char* const vduConfigString(const alt_u32 offset)
 {
 	if ((m_pVduConfigFile == NULL) || (offset >= m_configurationSize))
 	{

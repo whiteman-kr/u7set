@@ -44,18 +44,8 @@ Module description: Detects and processes touch input events from the touchscree
 #include "rn_diag.h"
 #include "rn_utils.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
 #include <system.h>
 #include <altera_avalon_pio_regs.h>
-
-#else
-
-#include <threads.h>
-
-static mtx_t m_cs;
-
-#endif // End of Microsoft Visual Studio-specific
 
 static bool m_moduleInitialized = false;
 
@@ -84,29 +74,17 @@ void moduleRnTsInitialize(void)
 		return;
 	}
 	m_moduleInitialized = true;
-
-	// Initialize critical section
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	mtx_init(&m_cs, mtx_plain);
-#endif
 }
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
 void moduleRnTsUninitialize(void)
 {
 	m_moduleInitialized = false;
 	m_tchscrnEvent = false;
 	m_tchscrnPosX = 0u;
 	m_tchscrnPosY = 0u;
-	mtx_destroy(&m_cs);
 }
-#endif
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-void setTouchEvent(alt_u16 x, alt_u16 y)
-#else
 static void setTouchEvent(alt_u16 x, alt_u16 y)
-#endif
 {
 	if (m_moduleInitialized == false)
 	{
@@ -114,27 +92,15 @@ static void setTouchEvent(alt_u16 x, alt_u16 y)
 		return;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	m_tchscrnEvent = true;
 	m_tchscrnPosX = x;
 	m_tchscrnPosY = y;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 }
 
 // This function checks the hardware for touch events.
 //
 static void checkTouchEvent(void)
 {
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
 	if (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_READY_BASE) != 0u)
 	{
 		alt_u16 x = 0u;
@@ -180,9 +146,6 @@ static void checkTouchEvent(void)
 	{
 		return;
 	}
-#else
-	return;
-#endif
 }
 
 // This function resets the touch event.
@@ -195,20 +158,10 @@ static void resetTouchEvent(void)
 		return;
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	if (m_tchscrnEvent == true)
 	{
 		m_tchscrnEvent = false;
 	}
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 }
 
 bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h)
@@ -218,11 +171,6 @@ bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h)
 		RN_ASSERT(false);
 		return false;
 	}
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
 
 	bool result = false;
 
@@ -240,11 +188,6 @@ bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h)
 		}
 	}
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
-
 	return result;
 }
 
@@ -258,17 +201,7 @@ bool isTouchEvent(void)
 
 	checkTouchEvent();
 
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Enter critical section (lock)
-	mtx_lock(&m_cs);
-#endif
-
 	bool result = m_tchscrnEvent == true;
-
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific
-	// Leave critical section (unlock)
-	mtx_unlock(&m_cs);
-#endif
 
 	resetTouchEvent();
 

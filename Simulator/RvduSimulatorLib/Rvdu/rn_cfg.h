@@ -54,19 +54,7 @@ Module description: Loads and stores RVDU configuration settings.
 #ifndef RN_CFG_H
 #define RN_CFG_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
-
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
-
-#include "types.h"
 
 #include <stdbool.h>
 
@@ -84,8 +72,8 @@ struct VduConfigDisplay1
 	alt_u32 reserve1;
 	alt_u32 reserve2;
 
-	vdu_ref startSchemaId;	// vdu_string_ref
-	vdu_ref displayName;	// vdu_string_ref
+	alt_u32 startSchemaId;	// vdu_string_ref
+	alt_u32 displayName;	// vdu_string_ref
 
 	alt_u32 reserve3;
 	alt_u32 reserve4;
@@ -99,12 +87,12 @@ struct VduConfigFile1
 	alt_u16 size;    		// sizeof(VduConfigFile1)
 	alt_u32 reserve1;
 
-	vdu_ref project; 		// vdu_string_ref
+	alt_u32 project; 		// vdu_string_ref
 	alt_u32 buildNo;
 	alt_u32 reserve2;
 
-	vdu_ref equipmentId; 	// vdu_string_ref
-	vdu_ref caption; 		// vdu_string_ref
+	alt_u32 equipmentId; 	// vdu_string_ref
+	alt_u32 caption; 		// vdu_string_ref
 	alt_u32 reserve3;
 	alt_u32 reserve4;
 
@@ -136,8 +124,8 @@ struct VduConfigSchema1
 	alt_u16 size;    	// sizeof(VduConfigSchema1)
 	alt_u32 reserve0;
 
-	vdu_ref schemaId; 	//vdu_string_ref
-	vdu_ref caption; 	//vdu_string_ref
+	alt_u32 schemaId; 	//vdu_string_ref
+	alt_u32 caption; 	//vdu_string_ref
 
 	alt_u32 reserve1;
 	alt_u32 reserve2;
@@ -199,6 +187,6 @@ const struct VduConfigSchema1* const vduConfigSchema(alt_u16 schemaIndex);
 
 // Returns a pointer to a configuration string by its offset or the NULL if configuration is not loaded or the offset is out of range
 //
-const char* const vduConfigString(const vdu_ref offset);
+const char* const vduConfigString(const alt_u32 offset);
 
 #endif

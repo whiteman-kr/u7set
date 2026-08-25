@@ -81,16 +81,8 @@ RADIX-4109, add itemRectSetText function
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <errno.h>
 
-
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "../rvdu_bsp/HAL/inc/sys/alt_errno.h"
-
-#include "../rvdu_bsp/system.h"
-
-#endif // Microsoft Visual Studio-specific
+#include <alt_errno.h>
 
 #include "rn_lapi.h"
 #include "rn_scfp.h"
@@ -177,6 +169,10 @@ static int signalLowEngUnitsByIndexInt(lua_State* L);
 static int signalLowEngUnitsByIndexFloat(lua_State* L);
 static int signalHighEngUnitsByIndexInt(lua_State* L);
 static int signalHighEngUnitsByIndexFloat(lua_State* L);
+static int signalTuningLowEngUnitsByIndexInt(lua_State* L);
+static int signalTuningLowEngUnitsByIndexFloat(lua_State* L);
+static int signalTuningHighEngUnitsByIndexInt(lua_State* L);
+static int signalTuningHighEngUnitsByIndexFloat(lua_State* L);
 static int decimalPlacesByIndex(lua_State* L);
 
 //*************************************
@@ -189,6 +185,10 @@ static int signalLowEngUnitsInt(lua_State* L);
 static int signalLowEngUnitsFloat(lua_State* L);
 static int signalHighEngUnitsInt(lua_State* L);
 static int signalHighEngUnitsFloat(lua_State* L);
+static int signalTuningLowEngUnitsInt(lua_State* L);
+static int signalTuningLowEngUnitsFloat(lua_State* L);
+static int signalTuningHighEngUnitsInt(lua_State* L);
+static int signalTuningHighEngUnitsFloat(lua_State* L);
 static int decimalPlaces(lua_State* L);
 
 //*************************************
@@ -340,6 +340,16 @@ static int luaSetTrendSignalVisible(lua_State* L);
 // End of forward-declarations
 //*************************************
 
+// Custom check function for boolean arguments
+//
+int luaL_checkboolean(lua_State* L, int arg) 
+{
+	if (lua_isboolean(L, arg) == false) 
+	{
+		luaL_error(L, "argument %d must be a boolean", arg);
+	}
+	return lua_toboolean(L, arg); // returns 0 (false) or 1 (true)
+}
 //*************************************
 // Pointers and strings checking macros
 //*************************************
@@ -455,13 +465,13 @@ static lua_State* scriptApiRegistration(void)
 
 	lua_register(rvduLuaState, "signalLowEngUnitsByIndexInt", signalLowEngUnitsByIndexInt);
 	lua_register(rvduLuaState, "signalLowEngUnitsByIndexFloat", signalLowEngUnitsByIndexFloat);
-	lua_register(rvduLuaState, "signalTuningLowBoundByIndexInt", signalLowEngUnitsByIndexInt);
-	lua_register(rvduLuaState, "signalTuningLowBoundByIndexFloat", signalLowEngUnitsByIndexFloat);
+	lua_register(rvduLuaState, "signalTuningLowBoundByIndexInt", signalTuningLowEngUnitsByIndexInt);
+	lua_register(rvduLuaState, "signalTuningLowBoundByIndexFloat", signalTuningLowEngUnitsByIndexFloat);
 
 	lua_register(rvduLuaState, "signalHighEngUnitsByIndexInt", signalHighEngUnitsByIndexInt);
 	lua_register(rvduLuaState, "signalHighEngUnitsByIndexFloat", signalHighEngUnitsByIndexFloat);
-	lua_register(rvduLuaState, "signalTuningHighBoundByIndexInt", signalHighEngUnitsByIndexInt);
-	lua_register(rvduLuaState, "signalTuningHighBoundByIndexFloat", signalHighEngUnitsByIndexFloat);
+	lua_register(rvduLuaState, "signalTuningHighBoundByIndexInt", signalTuningHighEngUnitsByIndexInt);
+	lua_register(rvduLuaState, "signalTuningHighBoundByIndexFloat", signalTuningHighEngUnitsByIndexFloat);
 
 	lua_register(rvduLuaState, "decimalPlacesByIndex", decimalPlacesByIndex);
 
@@ -474,13 +484,13 @@ static lua_State* scriptApiRegistration(void)
 
 	lua_register(rvduLuaState, "signalLowEngUnitsInt", signalLowEngUnitsInt);
 	lua_register(rvduLuaState, "signalLowEngUnitsFloat", signalLowEngUnitsFloat);
-	lua_register(rvduLuaState, "signalTuningLowBoundInt", signalLowEngUnitsInt);
-	lua_register(rvduLuaState, "signalTuningLowBoundFloat", signalLowEngUnitsFloat);
+	lua_register(rvduLuaState, "signalTuningLowBoundInt", signalTuningLowEngUnitsInt);
+	lua_register(rvduLuaState, "signalTuningLowBoundFloat", signalTuningLowEngUnitsFloat);
 
 	lua_register(rvduLuaState, "signalHighEngUnitsInt", signalHighEngUnitsInt);
 	lua_register(rvduLuaState, "signalHighEngUnitsFloat", signalHighEngUnitsFloat);
-	lua_register(rvduLuaState, "signalTuningHighBoundInt", signalHighEngUnitsInt);
-	lua_register(rvduLuaState, "signalTuningHighBoundFloat", signalHighEngUnitsFloat);
+	lua_register(rvduLuaState, "signalTuningHighBoundInt", signalTuningHighEngUnitsInt);
+	lua_register(rvduLuaState, "signalTuningHighBoundFloat", signalTuningHighEngUnitsFloat);
 
 	lua_register(rvduLuaState, "decimalPlaces", decimalPlaces);
 
@@ -672,7 +682,7 @@ bool compileGlobalScript(lua_State* luaState, const char* globalScript)
 
 	if (luaL_loadstring(luaState, globalScript) != LUA_OK)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, compile error: %s", lua_tostring(luaState, -1));
+		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, compile error: %s", luaL_checkstring(luaState, -1));
 		logError(GlobalScriptError, msg);
 		
 		lua_pop(luaState, 1);
@@ -682,7 +692,7 @@ bool compileGlobalScript(lua_State* luaState, const char* globalScript)
 	int total = 0;
 	if (lua_dump(luaState, writer, &total, 0) != LUA_OK)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, dump error: %s", lua_tostring(luaState, -1));
+		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, dump error: %s", luaL_checkstring(luaState, -1));
 		logError(GlobalScriptError, msg);
 
 		lua_pop(luaState, 1);
@@ -695,7 +705,7 @@ bool compileGlobalScript(lua_State* luaState, const char* globalScript)
 	//
 	if (lua_pcall(luaState, 0, 0, 0) != LUA_OK)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, execution error: %s", lua_tostring(luaState, -1));
+		(void)snprintf(msg, STRING_MAX_LEN, "compileGlobalScript, execution error: %s", luaL_checkstring(luaState, -1));
 		logError(GlobalScriptError, msg);
 
 		lua_pop(luaState, 1);
@@ -760,7 +770,7 @@ static int schemaId(lua_State* L)
 static int schemaExists(lua_State* L)
 {
 	char id[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(id, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(id, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SchemaWasNotFound, "LUA schemaExists: schemaId = NULL.");
 		lua_pushboolean(L, false);
@@ -798,7 +808,7 @@ static int schemaCaption(lua_State* L)
 static int schemaCaptionById(lua_State* L)
 {
 	char id[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(id, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(id, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SchemaWasNotFound, "LUA schemaCaptionById: schemaId = NULL.");
 		lua_pushnil(L);
@@ -829,7 +839,7 @@ static int schemaCaptionById(lua_State* L)
 static int setSchema(lua_State* L)
 {
 	char id[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(id, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(id, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SchemaWasNotFound, "LUA setSchema: schemaId = NULL.");
 		return 0;
@@ -1090,7 +1100,7 @@ static int signalValueByIndexFloat( lua_State* L )
 static int signalExists(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalExists: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -1112,7 +1122,7 @@ static int signalExists(lua_State* L)
 static int signalIsAvailable(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalIsAvailable: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -1128,7 +1138,7 @@ static int signalIsAvailable(lua_State* L)
 	else
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalIsValid: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalIsValid: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushboolean(L, false);
@@ -1140,7 +1150,7 @@ static int signalIsAvailable(lua_State* L)
 static int luaSignalId(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalId: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1153,7 +1163,7 @@ static int luaSignalId(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalId: signal with index %u not found.", (unsigned int)signalIndex);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalId: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 		lua_pushnil(L);
 	}
@@ -1167,7 +1177,7 @@ static int luaSignalId(lua_State* L)
 static int luaSignalCaption(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalCaption: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1180,7 +1190,7 @@ static int luaSignalCaption(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalCaption: signal with index %u not found.", (unsigned int)signalIndex);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalIsValid: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 		lua_pushnil(L);
 	}
@@ -1194,7 +1204,7 @@ static int luaSignalCaption(lua_State* L)
 static int luaSignalUnits(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalUnits: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1207,7 +1217,7 @@ static int luaSignalUnits(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalUnits: signal with index %u not found.", (unsigned int)signalIndex);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalIsValid: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 		lua_pushnil(L);
 	}
@@ -1229,7 +1239,7 @@ static int luaSignalUnits(lua_State* L)
 static int isDiscrete(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA isDiscrete: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -1244,7 +1254,7 @@ static int isDiscrete(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA isDiscrete: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA isDiscrete: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushboolean(L, false);
@@ -1265,7 +1275,7 @@ static int isDiscrete(lua_State* L)
 static int isAnalog(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA isAnalog: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -1280,7 +1290,7 @@ static int isAnalog(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA isAnalog: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA isAnalog: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushboolean(L, false);
@@ -1301,7 +1311,7 @@ static int isAnalog(lua_State* L)
 static int isTuning(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA isTuning: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -1316,7 +1326,7 @@ static int isTuning(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA isTuning: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA isTuning: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushboolean(L, false);
@@ -1337,7 +1347,7 @@ static int isTuning(lua_State* L)
 static int signalType(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalType: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1350,7 +1360,7 @@ static int signalType(lua_State* L)
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalType: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalType: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1367,7 +1377,7 @@ static int signalType(lua_State* L)
 static int signalValueInt(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalValueInt: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1381,7 +1391,7 @@ static int signalValueInt(lua_State* L)
 	alt_32 res = 0;
 	if (signalIndex == INVALID_INDEX)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueInt: signal %s is not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueInt: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
 
 		lua_pushnil(L);
@@ -1390,7 +1400,7 @@ static int signalValueInt(lua_State* L)
 	{
 		if (readSignalValueIntByIndex(signalIndex, &res) == false)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueInt: can't get value of signal %s.", appSignalId);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueInt: can't get value of signal '%s'.", appSignalId);
 			logWarning(SignalReadTypeWrong, msg);
 
 			lua_pushnil(L);
@@ -1407,7 +1417,7 @@ static int signalValueInt(lua_State* L)
 static int signalValueFloat(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalValueFloat: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1421,7 +1431,7 @@ static int signalValueFloat(lua_State* L)
 
 	if (signalIndex == INVALID_INDEX)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueFloat: signal %s is not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueFloat: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
 
 		lua_pushnil(L);
@@ -1430,7 +1440,7 @@ static int signalValueFloat(lua_State* L)
 	{
 		if (readSignalValueFloatByIndex(signalIndex, &res) == false)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueFloat: can't get value of signal %s.", appSignalId);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueFloat: can't get value of signal '%s'.", appSignalId);
 			logWarning(SignalReadTypeWrong, msg);
 
 			lua_pushnil(L);
@@ -1452,7 +1462,6 @@ static int signalTuningDefaultValueByIndexInt( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
 
-	alt_32 res = 0;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1466,18 +1475,36 @@ static int signalTuningDefaultValueByIndexInt( lua_State* L )
 	}
 	else
 	{
-		res = param->defaultValue.intValue;
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueByIndexInt: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->defaultValue.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueByIndexInt: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
 	}
 
-	lua_pushinteger(L, res);
+	
 	return 1;
 }
 
 static int signalTuningDefaultValueByIndexFloat( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-
-	float res = 0.0f;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1491,17 +1518,35 @@ static int signalTuningDefaultValueByIndexFloat( lua_State* L )
 	}
 	else
 	{
-		res = param->defaultValue.floatValue;
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueByIndexFloat: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->defaultValue.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueByIndexFloat: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
 	}
 
-	lua_pushnumber(L, res);
 	return 1;
 }
 
 static int signalLowEngUnitsByIndexInt( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-	alt_32 res = 0;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1515,17 +1560,77 @@ static int signalLowEngUnitsByIndexInt( lua_State* L )
 	}
 	else
 	{
-		res = param->lowLimit.intValue;
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsByIndexInt: signal with index '%u' is tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->lowLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsByIndexInt: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
 	}
 
-	lua_pushinteger(L, res);
+	return 1;
+}
+
+static int signalTuningLowEngUnitsByIndexInt(lua_State* L)
+{
+	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexInt: signal with index %u not found.", (unsigned int)signalIndex);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexInt: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->lowLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexInt: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+
 	return 1;
 }
 
 static int signalLowEngUnitsByIndexFloat( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-	float res = 0.0f;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1539,17 +1644,75 @@ static int signalLowEngUnitsByIndexFloat( lua_State* L )
 	}
 	else
 	{
-		res = param->lowLimit.floatValue;
-	}
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsByIndexFloat: signal with index '%u' is tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
 
-	lua_pushnumber(L, res);
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->lowLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsByIndexFloat: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningLowEngUnitsByIndexFloat(lua_State* L)
+{
+	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexFloat: signal with index %u not found.", (unsigned int)signalIndex);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexFloat: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->lowLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsByIndexFloat: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalHighEngUnitsByIndexInt( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-	alt_32 res = 0;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1563,17 +1726,75 @@ static int signalHighEngUnitsByIndexInt( lua_State* L )
 	}
 	else
 	{
-		res = param->highLimit.intValue;
-	}
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsByIndexInt: signal with index '%u' is tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
 
-	lua_pushinteger( L, res );
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->highLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsByIndexInt: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningHighEngUnitsByIndexInt(lua_State* L)
+{
+	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexInt: signal with index %u not found.", (unsigned int)signalIndex);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexInt: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->highLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexInt: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalHighEngUnitsByIndexFloat( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-	float res = 0.0f;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1587,10 +1808,69 @@ static int signalHighEngUnitsByIndexFloat( lua_State* L )
 	}
 	else
 	{
-		res = param->highLimit.floatValue;
-	}
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsByIndexFloat: signal with index '%u' is tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
 
-	lua_pushnumber( L, res );
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->highLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsByIndexFloat: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningHighEngUnitsByIndexFloat(lua_State* L)
+{
+	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexFloat: signal with index %u not found.", (unsigned int)signalIndex);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexFloat: signal with index '%u' is not tunable.", (unsigned int)signalIndex);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->highLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsByIndexFloat: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 
 }
@@ -1598,7 +1878,6 @@ static int signalHighEngUnitsByIndexFloat( lua_State* L )
 static int decimalPlacesByIndex( lua_State* L )
 {
 	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
-	alt_u16 res = 0u;
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1612,10 +1891,19 @@ static int decimalPlacesByIndex( lua_State* L )
 	}
 	else
 	{
-		res = param->decimalPlaces;
-	}
+		if ((param->vduSignalType == (alt_u16)AnalogFloat32) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->decimalPlaces);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA decimalPlacesByIndex: signal with index '%u' is of the wrong type.", (unsigned int)signalIndex);
+			logWarning(SignalWasNotFound, msg);
 
-	lua_pushinteger(L, res);
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
@@ -1626,7 +1914,7 @@ static int decimalPlacesByIndex( lua_State* L )
 static int signalTuningDefaultValueInt(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalTuningDefaultValueInt: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1635,13 +1923,11 @@ static int signalTuningDefaultValueInt(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	alt_32 res = 0;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueInt: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueInt: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1649,17 +1935,35 @@ static int signalTuningDefaultValueInt(lua_State* L)
 	}
 	else
 	{
-		res = param->defaultValue.intValue;
-	}
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueInt: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
 
-	lua_pushinteger(L, res);
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->defaultValue.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueInt: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalTuningDefaultValueFloat(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalTuningDefaultValueFloat: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1668,13 +1972,11 @@ static int signalTuningDefaultValueFloat(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	float res = 0.0f;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueFloat: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueFloat: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1682,32 +1984,48 @@ static int signalTuningDefaultValueFloat(lua_State* L)
 	}
 	else
 	{
-		res = param->defaultValue.floatValue;
-	}
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueFloat: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
 
-	lua_pushnumber(L, res);
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->defaultValue.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningDefaultValueFloat: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalLowEngUnitsInt(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
-		logWarning(SignalWasNotFound, "LUA signalLowEngUnitInt: appSignalId = NULL.");
+		logWarning(SignalWasNotFound, "LUA signalLowEngUnitsInt: appSignalId = NULL.");
 		lua_pushnil(L);
 		return 1;
 	}
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	alt_32 res = 0;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitInt: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsInt: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1715,17 +2033,84 @@ static int signalLowEngUnitsInt(lua_State* L)
 	}
 	else
 	{
-		res = param->lowLimit.intValue;
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsInt: signal '%s' is tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->lowLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsInt: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningLowEngUnitsInt(lua_State* L)
+{
+	char appSignalId[STRING_MAX_LEN] = { 0 };
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
+	{
+		logWarning(SignalWasNotFound, "LUA signalLowEngUnitsInt: appSignalId = NULL.");
+		lua_pushnil(L);
+		return 1;
 	}
 
-	lua_pushinteger(L, res);
+	alt_u16 signalIndex = appSignalIndex(appSignalId);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsInt: signal '%s' not found.", appSignalId);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsInt: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->lowLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsInt: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalLowEngUnitsFloat(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalLowEngUnitsFloat: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1734,13 +2119,11 @@ static int signalLowEngUnitsFloat(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	float res = 0.0f;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsFloat: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsFloat: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1748,17 +2131,84 @@ static int signalLowEngUnitsFloat(lua_State* L)
 	}
 	else
 	{
-		res = param->lowLimit.floatValue;
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsFloat: signal '%s' is tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->lowLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalLowEngUnitsFloat: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningLowEngUnitsFloat(lua_State* L)
+{
+	char appSignalId[STRING_MAX_LEN] = { 0 };
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
+	{
+		logWarning(SignalWasNotFound, "LUA signalTuningLowEngUnitsFloat: appSignalId = NULL.");
+		lua_pushnil(L);
+		return 1;
 	}
 
-	lua_pushnumber(L, res);
+	alt_u16 signalIndex = appSignalIndex(appSignalId);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsFloat: signal '%s' not found.", appSignalId);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsFloat: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->lowLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningLowEngUnitsFloat: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalHighEngUnitsInt(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalHighEngUnitsInt: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1767,13 +2217,11 @@ static int signalHighEngUnitsInt(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	alt_32 res = 0;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsInt: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsInt: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1781,17 +2229,84 @@ static int signalHighEngUnitsInt(lua_State* L)
 	}
 	else
 	{
-		res = param->highLimit.intValue;
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsInt: signal '%s' is tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->highLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsInt: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningHighEngUnitsInt(lua_State* L)
+{
+	char appSignalId[STRING_MAX_LEN] = { 0 };
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
+	{
+		logWarning(SignalWasNotFound, "LUA signalTuningHighEngUnitsInt: appSignalId = NULL.");
+		lua_pushnil(L);
+		return 1;
 	}
 
-	lua_pushinteger(L, res);
+	alt_u16 signalIndex = appSignalIndex(appSignalId);
+
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsInt: signal '%s' not found.", appSignalId);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsInt: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if ((param->vduSignalType == (alt_u16)Discrete) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->highLimit.intValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsInt: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
 static int signalHighEngUnitsFloat(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA signalHighEngUnitsFloat: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1800,13 +2315,11 @@ static int signalHighEngUnitsFloat(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	float res = 0.0f;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsFloat: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsFloat: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1814,18 +2327,84 @@ static int signalHighEngUnitsFloat(lua_State* L)
 	}
 	else
 	{
-		res = param->highLimit.floatValue;
+		if (param->props.bits.tunable == true)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsFloat: signal '%s' is tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->highLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalHighEngUnitsFloat: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
+}
+
+static int signalTuningHighEngUnitsFloat(lua_State* L)
+{
+	char appSignalId[STRING_MAX_LEN] = { 0 };
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
+	{
+		logWarning(SignalWasNotFound, "LUA signalTuningHighEngUnitsFloat: appSignalId = NULL.");
+		lua_pushnil(L);
+		return 1;
 	}
 
-	lua_pushnumber(L, res);
-	return 1;
+	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
+	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
+	if (param == NULL)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsFloat: signal '%s' not found.", appSignalId);
+		logWarning(SignalWasNotFound, msg);
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+	{
+		if (param->props.bits.tunable == false)
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsFloat: signal '%s' is not tunable.", appSignalId);
+			logWarning(SignalReadTypeWrong, msg);
+			lua_pushnil(L);
+			return 1;
+		}
+
+		if (param->vduSignalType == (alt_u16)AnalogFloat32)
+		{
+			lua_pushnumber(L, param->highLimit.floatValue);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA signalTuningHighEngUnitsFloat: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
+
+			lua_pushnil(L);
+		}
+	}
+	return 1;
 }
 
 static int decimalPlaces(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA decimalPlaces: appSignalId = NULL.");
 		lua_pushnil(L);
@@ -1834,13 +2413,11 @@ static int decimalPlaces(lua_State* L)
 
 	alt_u16 signalIndex = appSignalIndex(appSignalId);
 
-	alt_u16 res = 0;
-
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA decimalPlaces: signal %s not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA decimalPlaces: signal '%s' not found.", appSignalId);
 		logWarning(SignalWasNotFound, msg);
 
 		lua_pushnil(L);
@@ -1848,10 +2425,19 @@ static int decimalPlaces(lua_State* L)
 	}
 	else
 	{
-		res = param->decimalPlaces;
-	}
+		if ((param->vduSignalType == (alt_u16)AnalogFloat32) || (param->vduSignalType == (alt_u16)AnalogSignedInt32))
+		{
+			lua_pushinteger(L, param->decimalPlaces);
+		}
+		else
+		{
+			char msg[STRING_MAX_LEN];
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA decimalPlaces: signal '%s' is of the wrong type.", appSignalId);
+			logWarning(SignalWasNotFound, msg);
 
-	lua_pushinteger(L, res);
+			lua_pushnil(L);
+		}
+	}
 	return 1;
 }
 
@@ -1883,7 +2469,7 @@ static int writeValueByIndexFloat( lua_State* L )
 	bool res = true;
 
 	alt_u16 signalIndex = luaL_checkinteger(L, 1);
-	float newValue = lua_tonumber(L, 2);
+	float newValue = luaL_checknumber(L, 2);
 
 	if (writeSignalValueFloatByIndex(signalIndex, newValue) == false)
 	{
@@ -1999,7 +2585,7 @@ static int copyValueByIndex(lua_State* L)
 static int writeValueInt(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA writeValueInt: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -2014,7 +2600,7 @@ static int writeValueInt(lua_State* L)
 
 	if (signalIndex == INVALID_INDEX)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: signal %s is not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
 
 		res = false;
@@ -2024,7 +2610,7 @@ static int writeValueInt(lua_State* L)
 		alt_32 newValue = luaL_checkinteger(L, 2);
 		if (writeSignalValueIntByIndex(signalIndex, newValue) == false)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: can't write value of signal %s.", appSignalId);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: can't write value of signal '%s'.", appSignalId);
 			logWarning(SignalWriteTypeWrong, msg);
 
 			res = false;
@@ -2038,7 +2624,7 @@ static int writeValueInt(lua_State* L)
 static int writeValueFloat(lua_State* L)
 {
 	char appSignalId[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalId, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA writeValueFloat: appSignalId = NULL.");
 		lua_pushboolean(L, false);
@@ -2053,18 +2639,18 @@ static int writeValueFloat(lua_State* L)
 
 	if (signalIndex == INVALID_INDEX)
 	{
-		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueFloat: signal %s is not found.", appSignalId);
+		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueFloat: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
 
 		res = false;
 	}
 	else
 	{
-		float newValue = lua_tonumber(L, 2);
+		float newValue = luaL_checknumber(L, 2);
 
 		if (writeSignalValueFloatByIndex(signalIndex, newValue) == false)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueFloat: can't write value of signal %s.", appSignalId);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueFloat: can't write value of signal '%s'.", appSignalId);
 			logWarning(SignalWriteTypeWrong, msg);
 
 			res = false;
@@ -2078,7 +2664,7 @@ static int writeValueFloat(lua_State* L)
 static int copyValue(lua_State* L)
 {
 	char appSignalIdSrc[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalIdSrc, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalIdSrc, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA copyValue: appSignalIdSrc = NULL.");
 		lua_pushboolean(L, false);
@@ -2086,7 +2672,7 @@ static int copyValue(lua_State* L)
 	}
 
 	char appSignalIdDst[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalIdDst, STRING_MAX_LEN, lua_tostring(L, 2)) == false)
+	if (SAFE_STR_COPY(appSignalIdDst, STRING_MAX_LEN, luaL_checkstring(L, 2)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA copyValue: appSignalIdDst = NULL.");
 		lua_pushboolean(L, false);
@@ -2458,7 +3044,7 @@ static int itemSetAcceptClick(lua_State* L )
 	}
 	else
 	{
-		schemaItem->acceptClick = lua_toboolean(L, 2);
+		schemaItem->acceptClick = luaL_checkboolean(L, 2);
 	}
 
 	return 0;
@@ -3045,7 +3631,7 @@ static int itemRectSetFill(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.fill = lua_toboolean(L, 2);
+			schemaItem->rect.fill = luaL_checkboolean(L, 2);
 		}
 	}
 
@@ -3094,7 +3680,7 @@ static int itemRectSetDrawRect(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.drawRect = lua_toboolean(L, 2);
+			schemaItem->rect.drawRect = luaL_checkboolean(L, 2);
 		}
 	}
 
@@ -3398,7 +3984,7 @@ static int itemValueSetDrawRect(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.drawRect = lua_toboolean(L, 2);
+			schemaItem->value.drawRect = luaL_checkboolean(L, 2);
 		}
 	}
 
@@ -3787,7 +4373,7 @@ static int editMode(lua_State* L)
 	struct PopUpSchemaParams schema = { 0 };
 
 	char appSignalIdTuning[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalIdTuning, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalIdTuning, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA editMode: appSignalIdTuning = NULL.");
 		lua_pushboolean(L, false);
@@ -3795,7 +4381,7 @@ static int editMode(lua_State* L)
 	}
 
 	char appSignalIdControl[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalIdControl, STRING_MAX_LEN, lua_tostring(L, 2)) == false)
+	if (SAFE_STR_COPY(appSignalIdControl, STRING_MAX_LEN, luaL_checkstring(L, 2)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA enterValueScreen: appSignalIdControl = NULL.");
 		lua_pushboolean(L, false);
@@ -3809,7 +4395,7 @@ static int editMode(lua_State* L)
 		const struct VduAppSignalParam* const param = appSignalParamByIndex(schema.tuningSignalIndex);
 		if (param == NULL)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal %s is not found.", appSignalIdTuning);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal '%s' is not found.", appSignalIdTuning);
 			logWarning(SignalReadTypeWrong, msg);
 			lua_pushboolean(L, false);
 			return 1;
@@ -3817,7 +4403,7 @@ static int editMode(lua_State* L)
 
 		if (param->props.bits.tunable == false)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal %s is not tunable.", appSignalIdTuning);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal '%s' is not tunable.", appSignalIdTuning);
 			logWarning(SignalReadTypeWrong, msg);
 			lua_pushboolean(L, false);
 			return 1;
@@ -3825,7 +4411,7 @@ static int editMode(lua_State* L)
 
 		if (param->vduSignalInOutType != (alt_u16)Internal)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal %s is not Internal.", appSignalIdTuning);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: tuning signal '%s' is not Internal.", appSignalIdTuning);
 			logWarning(SignalReadTypeWrong, msg);
 			lua_pushboolean(L, false);
 			return 1;
@@ -3836,7 +4422,7 @@ static int editMode(lua_State* L)
 		const struct VduAppSignalParam* const param = appSignalParamByIndex(schema.controlSignalIndex);
 		if (param == NULL)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: permission signal %s is not found.", appSignalIdControl);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: permission signal '%s' is not found.", appSignalIdControl);
 			logWarning(SignalReadTypeWrong, msg);
 
 			lua_pushboolean(L, false);
@@ -3845,7 +4431,7 @@ static int editMode(lua_State* L)
 
 		if (param->vduSignalType != (alt_u16)Discrete)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: permission signal %s is not discrete.", appSignalIdControl);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA enterValueScreen: permission signal '%s' is not discrete.", appSignalIdControl);
 			logWarning(SignalReadTypeWrong, msg);
 			lua_pushboolean(L, false);
 			return 1;
@@ -3937,7 +4523,7 @@ static int checkPinCode(lua_State* L)
 	struct PopUpSchemaParams schema = { 0 };
 
 	char appSignalIdControl[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(appSignalIdControl, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(appSignalIdControl, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(SignalWasNotFound, "LUA checkPinCode: appSignalIdControl = NULL.");
 		lua_pushboolean(L, false);
@@ -3950,16 +4536,15 @@ static int checkPinCode(lua_State* L)
 		const struct VduAppSignalParam* const param = appSignalParamByIndex(schema.controlSignalIndex);
 		if (param == NULL)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA checkPinCode: permission signal with index %u is not found.", schema.controlSignalIndex);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA checkPinCode: permission signal '%s' is not found.", appSignalIdControl);
 			logWarning(SignalReadTypeWrong, msg);
-
 			lua_pushboolean(L, false);
 			return 1;
 		}
 
 		if (param->vduSignalType != (alt_u16)Discrete)
 		{
-			(void)snprintf(msg, STRING_MAX_LEN, "LUA checkPinCode: permission signal with index %u is not discrete.", schema.controlSignalIndex);
+			(void)snprintf(msg, STRING_MAX_LEN, "LUA checkPinCode: permission signal '%s' is not discrete.", appSignalIdControl);
 			logWarning(SignalReadTypeWrong, msg);
 			lua_pushboolean(L, false);
 			return 1;
@@ -4073,7 +4658,7 @@ static int luaLogClearCounters(lua_State* L)
 static int luaLogWriteError(lua_State* L)
 {
 	char msg[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(InternalError, "LUA luaLogWriteError: msg = NULL.");
 		return 0;
@@ -4086,7 +4671,7 @@ static int luaLogWriteError(lua_State* L)
 static int luaLogWriteWarning(lua_State* L)
 {
 	char msg[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(InternalError, "LUA luaLogWriteWarning: msg = NULL.");
 		return 0;
@@ -4100,7 +4685,7 @@ static int luaLogWriteWarning(lua_State* L)
 static int luaLogWriteMessage(lua_State* L)
 {
 	char msg[STRING_MAX_LEN] = { 0 };
-	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, lua_tostring(L, 1)) == false)
+	if (SAFE_STR_COPY(msg, STRING_MAX_LEN, luaL_checkstring(L, 1)) == false)
 	{
 		logWarning(InternalError, "LUA luaLogWriteMessage: msg = NULL.");
 		return 0;
@@ -4264,7 +4849,7 @@ static int luaSetTrendSignalHighViewLimit(lua_State* L)
 
 	switch (schemaItem->trend.trendSignals[si].highViewLimit.type)
 	{
-	case f32:		schemaItem->trend.trendSignals[si].highViewLimit.data.f32 = lua_tonumber(L, 3);		break;
+	case f32:		schemaItem->trend.trendSignals[si].highViewLimit.data.f32 = luaL_checknumber(L, 3);		break;
 	case i32:		schemaItem->trend.trendSignals[si].highViewLimit.data.i32 = luaL_checkinteger(L, 3);	break;
 	default:		RN_ASSERT(false);	break;
 	}
@@ -4292,7 +4877,7 @@ static int luaSetTrendSignalLowViewLimit(lua_State* L)
 
 	switch (schemaItem->trend.trendSignals[si].lowViewLimit.type)
 	{
-	case f32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.f32 = lua_tonumber(L, 3);		break;
+	case f32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.f32 = luaL_checknumber(L, 3);		break;
 	case i32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.i32 = luaL_checkinteger(L, 3);		break;
 	default:		RN_ASSERT(false);	break;
 	}
@@ -4432,6 +5017,6 @@ static int luaSetTrendSignalVisible(lua_State* L)
 	}
 
 
-	schemaItem->trend.trendSignals[si].flags.bits.visible = lua_toboolean(L, 3);
+	schemaItem->trend.trendSignals[si].flags.bits.visible = luaL_checkboolean(L, 3);
 	return 0;
 }

@@ -42,35 +42,17 @@ Module description: Detects and processes key press events from the keyboard.
 #ifndef RN_KBD_H
 #define RN_KBD_H
 
-// Microsoft Visual Studio-specific
-#ifndef RVDU_SIM        
-
 #include <alt_types.h>
 
-#else
-
-#include "msvc_alt_types.h"
-
-#endif
-// Microsoft Visual Studio-specific
+#include "keycodes.h"
 
 #include <stdbool.h>
-
-#include "keycodes.h"
 
 // Function that initialize keyboard with ps/2
 //
 void moduleRnKbdInitialize(void);
 
-#ifdef RVDU_SIM
 void moduleRnKbdUninitialize(void);
-#endif
-
-// This function sets the touch event.
-//
-#ifdef RVDU_SIM // Microsoft Visual Studio-specific, exports for simulator only!
-void setPressedKey(alt_u16 code);
-#endif
 
 // This function checks if there is a pending screen click event.
 //

@@ -63,12 +63,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 #include "defs.h"
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "../fat_io_lib/fat_filelib.h"
-#include <system.h>
-
-#endif // End of Microsoft Visual Studio-specific
+#include "fat_filelib.h"
 
 // Private module data
 //

@@ -48,11 +48,6 @@ Module description: Receives and sends application signals by the optical interf
 -- *************************************************************
 */
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-#include <system.h>
-#include <altera_avalon_pio_regs.h>
-#endif // Microsoft Visual Studio-specific
-
 #include "rn_opto.h"
 #include "rn_sifp.h"
 #include "rn_utils.h"
@@ -215,13 +210,9 @@ static void optoTxProcImpl(void)
 
 void optoTxProc(void)
 {
-#ifndef RVDU_SIM // Nios-specific
 	externalBusBridgeWriteLock();
-#endif
 
 	optoTxProcImpl();
 
-#ifndef RVDU_SIM // Nios-specific
 	externalBusBridgeWriteUnlock();
-#endif
 }

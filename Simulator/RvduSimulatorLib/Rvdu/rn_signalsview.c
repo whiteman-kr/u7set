@@ -53,12 +53,6 @@ Module description: Provides signal list view.
 #include <stdio.h>
 #include <stdint.h>
 
-#ifndef RVDU_SIM // Microsoft Visual Studio-specific
-
-#include "sys/alt_stdio.h"
-
-#endif
-
 #include "rn_signalsview.h"
 #include "rn_diag.h"
 #include "rn_cfg.h"
@@ -362,8 +356,6 @@ void signalsViewShow(void)
 		}
 	}
 
-	(void)pushVideoBuffer();
-
 	return;
 }
 
@@ -383,7 +375,7 @@ void signalsViewProc(struct PopUpSchemaParams* const schema)
 		{
 		case RK_ESCAPE:
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 			return;
 		}
 		case RK_UP:
@@ -418,7 +410,7 @@ void signalsViewProc(struct PopUpSchemaParams* const schema)
 	{
 		if (checkTouchZone(m_closeButton.x, m_closeButton.y, m_closeButton.w, m_closeButton.h))
 		{
-			schema->retPermission = true;
+			popUpSchemaSetTerminate();
 		}
 		else if (checkTouchZone(m_upButton.x, m_upButton.y, m_upButton.w, m_upButton.h))
 		{
