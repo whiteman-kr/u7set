@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <crtdbg.h>
+#ifdef _MSC_VER 
+#include < crtdbg.h>
+#endif
+
 #include <assert.h>
 
 #include "RvduSimulatorLib.h"
