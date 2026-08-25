@@ -1,0 +1,3 @@
+AIM_4PH
+	01.08.2026	Version: 0	ACM_v0.u7devp		RPCT-4158:  	 Added
+	24.08.2026	Version: 1	ACM_v1.u7devp		RPCT-4158:  	 Added Input/Output controller signals
