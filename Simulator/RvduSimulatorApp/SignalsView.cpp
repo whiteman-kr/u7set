@@ -2,14 +2,204 @@
 
 #include <RvduSimulatorLib.h>
 
-#include <QMessageBox>
-#include <QTableWidget>
 #include <QHeaderView>
 #include <QInputDialog>
-#include <QTimer>
+#include <QMessageBox>
 #include <QSettings>
+#include <QTableWidget>
+#include <QTimer>
 
-SignalsView* SignalsView::create(QWidget* parent) 
+
+SignalsModel::SignalsModel()
+{
+	m_tableHeaders << tr("Index") << tr("AppSignalID") << tr("Caption") << tr("Type") << tr("I/O Type") << tr("Units") << tr("Address")
+				   << tr("Tunable") << tr("OptoPort") << tr("Value");
+}
+
+void SignalsModel::setSignalsCount(int count)
+{
+	m_signalsCount = count;
+
+	beginInsertRows(QModelIndex(), 0, static_cast<int>(m_signalsCount) - 1);
+
+	insertRows(0, static_cast<int>(m_signalsCount));
+
+	endInsertRows();
+}
+
+int SignalsModel::rowCount(const QModelIndex& parent) const
+{
+	Q_UNUSED(parent);
+	return m_signalsCount;
+}
+
+int SignalsModel::columnCount(const QModelIndex& parent) const
+{
+	Q_UNUSED(parent);
+	return m_tableHeaders.size();
+}
+
+// Returns cell content based on the view request role
+QVariant SignalsModel::data(const QModelIndex& index, int role) const
+{
+	if (!index.isValid() || role != Qt::DisplayRole)
+		return QVariant();
+
+	int i = index.row();
+
+	const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
+	if (param == NULL)
+	{
+		Q_ASSERT(param);
+		return QVariant();
+	}
+
+	switch (index.column())
+	{
+	case 0:
+		{
+			return QString("%1").arg(i, 4, 10, QChar('0'));
+		}
+	case 1:
+		{
+			const char* const appSignalId = rnLibAppSignalCustomID(i);
+			return QString::fromUtf8(appSignalId);
+		}
+	case 2:
+		{
+			const char* const caption = rnLibAppSignalCaption(i);
+			return QString::fromUtf8(caption);
+		}
+	case 3:
+		{
+			QString vduSignalType;
+			if (rnLibIsDiscrete(i) == true)
+			{
+				vduSignalType = "D";
+			}
+			else if (rnLibIsFloat(i) == true)
+			{
+				vduSignalType = "FP32";
+			}
+			else if (rnLibIsInt32(i) == true)
+			{
+				vduSignalType = "SI32";
+			}
+
+			return vduSignalType;
+		}
+
+	case 4:
+		{
+			QString vduSignalInOutType;
+
+			if (rnLibIsInternal(i) == true)
+			{
+				vduSignalInOutType = "Internal";
+			}
+			else if (rnLibIsInput(i) == true)
+			{
+				vduSignalInOutType = "Input";
+			}
+			else if (rnLibIsOutput(i) == true)
+			{
+				vduSignalInOutType = "Output";
+			}
+			else if (rnLibIsRxSignal(i) == true)
+			{
+				vduSignalInOutType = "RX";
+			}
+
+			if (rnLibIsTxSignal(i) == true)
+			{
+				vduSignalInOutType += ", TX";
+			}
+
+			return vduSignalInOutType;
+		}
+
+	case 5:
+		{
+			const char* const unit = rnLibAppSignalUnit(i);
+			return QString::fromUtf8(unit);
+		}
+
+	case 6:
+		{
+			QString address;
+			if (rnLibIsInternal(i) == true)
+			{
+				address = "";
+			}
+			else
+			{
+				address = tr("%1:%2").arg(rnLibSignalOffset(i)).arg(rnLibSignalBit(i));
+			}
+			return address;
+		}
+
+	case 7:
+		{
+			return (rnLibSignalTunable(i) ? tr("Tunable") : "");
+		}
+
+	case 8:
+		{
+			QString optoPort;
+			if (rnLibIsRxSignal(i) == true)
+			{
+				optoPort = tr("%1").arg(rnLibRxPortIndex(i));
+			}
+			else
+			{
+				optoPort = "";
+			}
+			return optoPort;
+		}
+
+	// Value
+	case 9:
+		{
+			int iRes = 0;
+			float fRes = 0;
+			QString value;
+
+			if (rnLibIsDiscrete(i) == true)
+			{
+				rnLibSignalValueInt(i, &iRes);
+				value = tr("%1").arg(iRes);
+			}
+			else if (rnLibIsFloat(i) == true)
+			{
+				rnLibSignalValueFloat(i, &fRes);
+				value = tr("%1").arg(fRes, 0, 'f', 3);
+			}
+			else if (rnLibIsInt32(i) == true)
+			{
+				rnLibSignalValueInt(i, &iRes);
+				value = tr("%1").arg(iRes);
+			}
+
+			return value;
+		}
+	}
+
+	return QVariant();
+}
+
+// Returns column header names
+QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+	{
+		if (section < m_tableHeaders.size())
+			return m_tableHeaders.at(section);
+	}
+	return QVariant();
+}
+
+
+SignalsView* SignalsView::create(QWidget* parent)
 {
 	if (m_instance == nullptr)
 	{
@@ -22,12 +212,12 @@ SignalsView* SignalsView::create(QWidget* parent)
 }
 
 
-SignalsView::SignalsView(QWidget* parent)
-	: QWidget(parent)
+SignalsView::SignalsView(QWidget* parent) :
+	QWidget(parent)
 {
 	setWindowTitle(tr("Signals View"));
 	setMinimumSize(1280, 720);
-	
+
 	setupUi();
 
 	fillSignalsList();
@@ -43,19 +233,19 @@ SignalsView::SignalsView(QWidget* parent)
 		restoreGeometry(ba);
 	}
 
-	if (QSettings().value("SignalsView/tableColumnsCount", 0) != m_tableHeaders.size()) 
+	if (QSettings().value("SignalsView/tableColumnsCount", 0) != m_model.columnCount())
 	{
-		m_tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+		m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	}
-	else	
+	else
 	{
 		ba = QSettings().value("SignalsView/tableState").toByteArray();
 		if (ba.isEmpty() == false)
 		{
-			m_tableWidget->horizontalHeader()->restoreState(ba);
+			m_tableView->horizontalHeader()->restoreState(ba);
 		}
 	}
-	
+
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &SignalsView::onTimer);
 	timer->start(250);
@@ -67,216 +257,74 @@ SignalsView::~SignalsView()
 	QSettings().setValue("SignalsView/geometry", saveGeometry());
 
 
-	QSettings().setValue("SignalsView/tableColumnsCount", m_tableHeaders.size());
-	QSettings().setValue("SignalsView/tableState", m_tableWidget->horizontalHeader()->saveState());
+	QSettings().setValue("SignalsView/tableColumnsCount", m_model.columnCount());
+	QSettings().setValue("SignalsView/tableState", m_tableView->horizontalHeader()->saveState());
 
 	m_instance = nullptr;
 }
 
 void SignalsView::setupUi()
 {
-	m_tableWidget = new QTableWidget(this);
+	m_tableView = new QTableView(this);
+	m_tableView->setModel(&m_model);
 
-	m_tableHeaders << tr("Index") << tr("AppSignalID") << tr("Caption") << tr("Type") << tr("I/O Type") << tr("Units") << tr("Address")
-				   << tr("Tunable") << tr("OptoPort") << tr("Value");
+	m_tableView->verticalHeader()->setVisible(false);
 
-	m_tableWidget->setColumnCount(m_tableHeaders.size());
-	m_tableWidget->setHorizontalHeaderLabels(m_tableHeaders);
-	m_tableWidget->verticalHeader()->setVisible(false);
-
-	m_tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	m_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	layout->addWidget(m_tableWidget);
+	layout->addWidget(m_tableView);
 
-	connect(m_tableWidget,
-			&QTableWidget::itemDoubleClicked,
+	
+	connect(m_tableView,
+			&QTableView::doubleClicked,
 			this,
-			[this](QTableWidgetItem* /*item*/)
+			[this](QModelIndex index)
 			{
-				auto rows = m_tableWidget->selectionModel()->selectedRows();
-				if (rows.isEmpty() == true)
+				if (!index.isValid())
 				{
 					return;
 				}
-				int row = rows.first().row();
+
+				int row = index.row();
+				if (row >= static_cast<int>(rnLibAppSignalsCount()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
 
 				onSignalClicked(static_cast<unsigned int>(row));
 			});
 }
 
-static QTableWidgetItem* createTableItem(const QString& text)
-{
-	QTableWidgetItem* item = new QTableWidgetItem(text);
-	item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-	return item;
-}
-
 void SignalsView::fillSignalsList()
-{
-	m_tableWidget->clearContents();
-
-	m_tableWidget->setRowCount(static_cast<int>(rnLibAppSignalsCount()));
-
-	for (unsigned int i = 0; i < rnLibAppSignalsCount(); i++)
-	{
-		const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
-		if (param == NULL)
-		{
-			return;
-		}
-		int c = 0;
-		
-		{
-			m_tableWidget->setItem(i, c++, createTableItem(QString("%1").arg(i, 4, 10, QChar('0'))));
-		}
-
-		{
-			const char* const appSignalId = rnLibAppSignalCustomID(i);
-			m_tableWidget->setItem(i, c++, createTableItem(QString::fromUtf8(appSignalId)));
-		}
-
-		{
-			const char* const caption = rnLibAppSignalCaption(i);
-			m_tableWidget->setItem(i, c++, createTableItem(QString::fromUtf8(caption)));
-		}
-
-		{
-			QString vduSignalType;
-			if (rnLibIsDiscrete(i) == true) 
-			{
-				vduSignalType = "D";
-			}
-			else if (rnLibIsFloat(i) == true) 
-			{
-				vduSignalType = "FP32";
-			}
-			else if (rnLibIsInt32(i) == true)
-			{
-				vduSignalType = "SI32";
-			}
-
-			m_tableWidget->setItem(i, c++, createTableItem(vduSignalType));
-		}
-
-		{
-			QString vduSignalInOutType;
-
-			if (rnLibIsInternal(i) == true) 
-			{
-				vduSignalInOutType = "Internal";
-			}
-			else if (rnLibIsInput(i) == true) 
-			{
-				vduSignalInOutType = "Input";
-			}
-			else if (rnLibIsOutput(i) == true)
-			{
-				vduSignalInOutType = "Output";
-			}
-			else if (rnLibIsRxSignal(i) == true)
-			{
-				vduSignalInOutType = "RX";
-			}
-
-			if (rnLibIsTxSignal(i) == true) 
-			{
-				vduSignalInOutType += ", TX";
-			}
-
-			m_tableWidget->setItem(i, c++, createTableItem(vduSignalInOutType));
-		}
-
-		{
-			const char* const unit = rnLibAppSignalUnit(i);
-			m_tableWidget->setItem(i, c++, createTableItem(QString::fromUtf8(unit)));
-		}
-
-		{
-			QString address;
-			if (rnLibIsInternal(i) == true)
-			{
-				address = "";
-			}
-			else
-			{
-				address = tr("%1:%2").arg(rnLibSignalOffset(i)).arg(rnLibSignalBit(i));
-			}
-			m_tableWidget->setItem(i, c++, createTableItem(address));
-		}
-
-		{
-			m_tableWidget->setItem(i, c++, createTableItem(rnLibSignalTunable(i) ? tr("Tunable") : ""));
-		}
-
-		{
-			QString optoPort;
-			if (rnLibIsRxSignal(i) == true)
-			{
-				optoPort = tr("%1").arg(rnLibRxPortIndex(i));
-			}
-			else
-			{
-				optoPort = "";
-			}
-			m_tableWidget->setItem(i, c++, createTableItem(optoPort));
-		}
-
-		// Value
-		m_tableWidget->setItem(i, c++, createTableItem(""));
-	}
-
-	updateSignalValues();
-}
+{ m_model.setSignalsCount(rnLibAppSignalsCount()); }
 
 void SignalsView::updateSignalValues()
 {
-	int count = m_tableWidget->rowCount();
+	int from = m_tableView->rowAt(0);
 
-	if (count != rnLibAppSignalsCount() || count == 0) 
+	int to = m_tableView->rowAt(m_tableView->height() - m_tableView->horizontalHeader()->height());
+
+	if (from == -1)
 	{
-		return;
+		from = 0;
 	}
-		
-	for (int i = 0; i < count; i++)
+
+	if (to == -1)
 	{
-		const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
-		if (param == NULL)
-		{
-			return;
-		}
+		to = m_model.rowCount() - 1;
+	}
 
-		int iRes = 0;
-		float fRes = 0;
-		QString value;
-
-		if (rnLibIsDiscrete(i) == true)
-		{
-			rnLibSignalValueInt(i, &iRes);
-			value = tr("%1").arg(iRes);
-		}
-		else if (rnLibIsFloat(i) == true)
-		{
-			rnLibSignalValueFloat(i, &fRes);
-			value = tr("%1").arg(fRes, 0, 'f', 3);
-		}
-		else if (rnLibIsInt32(i) == true)
-		{
-			rnLibSignalValueInt(i, &iRes);
-			value = tr("%1").arg(iRes);
-		}
-
-		QTableWidgetItem* item = m_tableWidget->item(i, m_tableHeaders.size() - 1);
-		if (item == nullptr) 
-		{
-			Q_ASSERT(item);
-			continue;
-		}
-		item->setText(value);
-
+	// Redraw visible table items
+	//
+	int col = m_model.columnCount() - 1;
+	for (int row = from; row <= to; row++)
+	{
+		m_tableView->update(m_model.index(row, col));
 	}
 }
 
@@ -310,8 +358,7 @@ void SignalsView::onSignalClicked(unsigned int index)
 		rnLibSignalValueFloat(index, &fRes);
 		value = tr("%1").arg(fRes, 0, 'f', 3);
 		label = tr("%1").arg(appSignalId);
-		textCaption = tr("%1 [%2..%3]").arg(caption)
-			.arg(rnLibSignalLowLimitFloat(index)).arg(rnLibSignalHighLimitFloat(index));
+		textCaption = tr("%1 [%2..%3]").arg(caption).arg(rnLibSignalLowLimitFloat(index)).arg(rnLibSignalHighLimitFloat(index));
 	}
 	else if (rnLibIsInt32(index) == true)
 	{
@@ -327,7 +374,7 @@ void SignalsView::onSignalClicked(unsigned int index)
 	dialog.setLabelText(textCaption + "\nEnter value:");
 	dialog.setTextValue(value);
 
-	dialog.resize(500, 200); 
+	dialog.resize(500, 200);
 	int result = dialog.exec();
 
 	if (result != QDialog::Accepted)
@@ -348,7 +395,6 @@ void SignalsView::onSignalClicked(unsigned int index)
 	}
 	else if (rnLibIsFloat(index) == true)
 	{
-		
 		float newValue = text.toFloat(&correct);
 		if (correct == true)
 		{
@@ -356,14 +402,13 @@ void SignalsView::onSignalClicked(unsigned int index)
 		}
 	}
 
-	if (correct == false) 
+	if (correct == false)
 	{
 		QMessageBox::critical(this, tr("RVDU"), tr("Invalid number format!"));
 	}
-
 }
 
 void SignalsView::onTimer()
-{
-	updateSignalValues();
+{ 
+	updateSignalValues(); 
 }
