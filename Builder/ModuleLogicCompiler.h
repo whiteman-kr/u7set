@@ -974,6 +974,8 @@ namespace Builder
 		bool createActuatorHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
 		bool createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
 		bool createActuatorInternalSignals();
+		bool disposeAcmSwInOuts();
+		bool disposeAcmSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes);
 
 		bool detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
 		bool detectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
@@ -997,7 +999,25 @@ namespace Builder
 		Builder::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
+
+		// Actuators processing
+		//
+		static constexpr int ACM_CHANNEL_1_INDEX = 0;
+		static constexpr int ACM_CHANNEL_2_INDEX = 1;
+
 		std::unique_ptr<SignalSet> m_actuatorSignals;
+
+		std::vector<QStringList> m_acmSwInAnalogs {2};
+		std::vector<QStringList> m_acmSwInBusses {2};
+		std::vector<QStringList> m_acmSwInDiscretes {2};
+
+		std::vector<QStringList> m_acmSwOutAnalogs {2};
+		std::vector<QStringList> m_acmSwOutBusses {2};
+		std::vector<QStringList> m_acmSwOutDiscretes {2};
+
+		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
+
+		//
 
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorSet* m_cmpSet = nullptr;
@@ -1132,7 +1152,7 @@ namespace Builder
 		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogInternalSignals;			// non acquired analog internal non tunigable signals, used in UAL
 
-		QVector<AppSignal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
+		QVector<AppSignal*> m_analogOutputSignalsToConversion;			// all analog output signals requires conversion
 
 		QVector<UalSignal*> m_acquiredInputBuses;						// acquired entirely Input Buses (in end of ALP phase should be copied from IO modules memory to regBuf)
 		QVector<UalSignal*> m_acquiredOutputBuses;						// acquired entirely Output Buses (in end of ALP phase should be copied from regBuf to IO modules memory)

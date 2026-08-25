@@ -3474,7 +3474,7 @@ namespace Builder
 
 	void UalSignals::initDiscreteSignalsHeap(int startAddrW, int sizeW)
 	{
-		m_discreteSignalsHeap.init(startAddrW, sizeW);
+		m_discreteSignalsHeap.initHeap(startAddrW, sizeW);
 	}
 
 	int UalSignals::getDiscreteSignalsHeapSizeW() const
@@ -3484,7 +3484,7 @@ namespace Builder
 
 	void UalSignals::initAnalogAndBusSignalsHeap(int startAddrW, int sizeW)
 	{
-		m_analogAndBusSignalsHeap.init(startAddrW, sizeW);
+		m_analogAndBusSignalsHeap.initHeap(startAddrW, sizeW);
 	}
 
 	int UalSignals::getAnalogAndBusSignalsHeapSizeW() const
@@ -3518,7 +3518,6 @@ namespace Builder
 	{
 		if (ualSignal.isHeapPlaced() == false)
 		{
-			qDebug() << ualSignal.signal()->appSignalID();
 			Q_ASSERT(ualSignal.ualAddrIsValid() == true);
 			return ualSignal.ualAddr();
 		}
@@ -3577,8 +3576,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= m_discreteSignalsHeap.finalize();
-		result &= m_analogAndBusSignalsHeap.finalize();
+		result &= m_discreteSignalsHeap.finalizeHeap();
+		result &= m_analogAndBusSignalsHeap.finalizeHeap();
 
 		return result;
 	}

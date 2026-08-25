@@ -777,6 +777,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			//PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeAcmSwInOuts),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
 			PROC_TO_CALL(ModuleLogicCompiler::createActuatorSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
@@ -6157,6 +6158,18 @@ namespace Builder
 
 		for(UalSignal* s : m_ualSignals)
 		{
+			if (s->refSignalIDs().contains("CLOSE") == true)
+			{
+				bool isConst = s->isConst();
+				bool isBusChild = s->isBusChild();
+				bool isAquired = s->isAcquired();
+				bool isDiscrete = s->isDiscrete();
+				bool isInternal = s->isInternal();
+				bool isTunable = s->isTunable();
+				bool isHeapPlaced = s->isHeapPlaced();
+				DEBUG_STOP;
+			}
+
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
@@ -7031,7 +7044,7 @@ namespace Builder
 
 				if (disposeDiscreteSignalsInBitMemory() == false) break;
 
-//				if (disposeDiscreteSignalsHeap() == false) break;
+				if (disposeDiscreteSignalsHeap() == false) break;
 
 				if (disposeNonAcquiredAnalogSignals() == false) break;
 
@@ -20607,6 +20620,12 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut)
 	{
+		if (inOut != E::SignalInOutType::Input && inOut != E::SignalInOutType::Output)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
 		for (int ch = 1; ch <= 2; ch++)
 		{
 			AppSignal* appSignal = new AppSignal;
@@ -20617,6 +20636,10 @@ namespace Builder
 			{
 				signalID = as.signalIdChannel2();
 			}
+
+			int chIndex = ch - 1;
+
+			Q_ASSERT(chIndex == 0 || chIndex == 1);
 
 			appSignal->setInOutType(inOut);
 			appSignal->setAppSignalID(signalID);
@@ -20634,6 +20657,16 @@ namespace Builder
 			{
 			case E::SignalType::Discrete:
 				dataSize = DISCRETE_SIZE;
+
+				if (inOut == E::SignalInOutType::Input)
+				{
+					m_acmSwInDiscretes[chIndex].append(signalID);
+				}
+				else
+				{
+					m_acmSwOutDiscretes[chIndex].append(signalID);
+				}
+
 				break;
 
 			case E::SignalType::Analog:
@@ -20652,13 +20685,43 @@ namespace Builder
 						Q_ASSERT(false);
 						dataSize = 0;
 					}
+
+					if (inOut == E::SignalInOutType::Input)
+					{
+						m_acmSwInAnalogs[chIndex].append(signalID);
+					}
+					else
+					{
+						m_acmSwOutAnalogs[chIndex].append(signalID);
+					}
 				}
 				
 				break;
 
 			case E::SignalType::Bus:
-				Q_ASSERT(false);		// TO DO detect Bus Size
-				dataSize = 32;	
+				{
+					BusShared bus = m_actuatorSignals->getBus(as.busTypeId());
+
+					if (bus == nullptr)
+					{
+						// Bus type ID %1 of signal %2 is undefined.
+						//
+						m_log->errALC5092(as.busTypeId(), signalID); 
+						Q_ASSERT(false);
+						return false;
+					}
+
+					dataSize = bus->sizeBit();
+
+					if (inOut == E::SignalInOutType::Input)
+					{
+						m_acmSwInBusses[chIndex].append(signalID);
+					}
+					else
+					{
+						m_acmSwOutBusses[chIndex].append(signalID);
+					} 
+				}
 				break;
 
 			default:
@@ -20699,6 +20762,7 @@ namespace Builder
 			appSignal->setAppSignalID(appSignalID);
 			appSignal->setCustomAppSignalID(appSignalID);
 			appSignal->setCaption(QString("Signal %1").arg(appSignalID));
+			appSignal->setAcquire(false);
 
 			PinSignalType pinSignalType;
 
@@ -20721,6 +20785,118 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::disposeAcmSwInOuts()
+	{
+		bool result = true;
+
+		for (int ch = ACM_CHANNEL_1_INDEX; ch <= ACM_CHANNEL_2_INDEX; ch++)
+		{
+			result &= disposeAcmSwInOutsChannel(ch, m_acmSwInAnalogs[ch], m_acmSwInBusses[ch], m_acmSwInDiscretes[ch]);
+			result &= disposeAcmSwInOutsChannel(ch, m_acmSwOutAnalogs[ch], m_acmSwOutBusses[ch], m_acmSwOutDiscretes[ch]);
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::disposeAcmSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes)
+	{
+		bool result = true;
+
+		analogs.sort();
+		busses.sort();
+		discretes.sort();
+
+		Address16 addr(m_lmDescription->memory().m_moduleDataOffset, 0);
+
+		if (chIndex == ACM_CHANNEL_2_INDEX)
+		{
+			addr.setOffset(m_lmDescription->memory().m_moduleDataOffset + m_lmDescription->memory().m_moduleDataSize);
+		}
+
+		QStringList analogsAndBusses;
+
+		analogsAndBusses.append(analogs);
+		analogsAndBusses.append(busses);
+
+		for (const QString& id : analogsAndBusses)
+		{
+			UalSignal* ualSignal = m_ualSignals.get(id);
+			const AppSignal* appSignal = m_actuatorSignals->getSignal(id);
+
+			if (ualSignal == nullptr || appSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+
+			if (ualSignal->ualAddr().isValid())
+			{
+				continue;
+			}
+
+			ualSignal->setUalAddr(addr);
+
+			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+
+			addr.addBit(appSignal->dataSize());
+
+			if (addr.bit() != 0)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+		}
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+		}
+
+		for (const QString& id : discretes)
+		{
+			UalSignal* ualSignal = m_ualSignals.get(id);
+			const AppSignal* appSignal = m_actuatorSignals->getSignal(id);
+
+			if (ualSignal == nullptr || appSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+
+			if (ualSignal->ualAddr().isValid())
+			{
+				continue;
+			}
+
+
+			ualSignal->setUalAddr(addr);
+
+			if (appSignal->dataSize() != DISCRETE_SIZE)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+
+			addr.addBit(appSignal->dataSize());
+		}
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType)
