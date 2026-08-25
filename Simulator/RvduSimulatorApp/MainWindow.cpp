@@ -113,6 +113,9 @@ MainWindow::~MainWindow()
 	QSettings settings;
 	settings.setValue("MainWindow/geometry", saveGeometry());
 
+	delete m_controller;
+
+	qDebug() << "delete hdmi buffer";
 	delete[] m_pHdmiBuffer;
 
 	writeLogFileMessage(RnLibMessage, "Simulator finished.");

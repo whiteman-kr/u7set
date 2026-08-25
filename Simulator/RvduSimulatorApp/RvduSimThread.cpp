@@ -94,4 +94,5 @@ bool RvduSimThreadController::isRunning() const
 
 bool RvduSimThreadController::isError() const 
 { 
-	return m_worker->isError(); }
+	return m_worker->isError(); 
+}

@@ -1,6 +1,5 @@
 #include "SignalsView.h"
 
-#include <Rvdu/rn_sifp.h>
 #include <RvduSimulatorLib.h>
 
 #include <QMessageBox>
@@ -122,7 +121,7 @@ void SignalsView::fillSignalsList()
 
 	m_tableWidget->setRowCount(static_cast<int>(rnLibAppSignalsCount()));
 
-	for (alt_u16 i = 0; i < rnLibAppSignalsCount(); i++)
+	for (unsigned int i = 0; i < rnLibAppSignalsCount(); i++)
 	{
 		const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
 		if (param == NULL)
@@ -147,76 +146,47 @@ void SignalsView::fillSignalsList()
 
 		{
 			QString vduSignalType;
-			switch (param->vduSignalType)
+			if (rnLibIsDiscrete(i) == true) 
 			{
-			case Discrete:
-				{
-					vduSignalType = "D";
-				}
-				break;
-			case AnalogSignedInt32:
-				{
-					vduSignalType = "SI32";
-				}
-				break;
-			case AnalogFloat32:
-				{
-					vduSignalType = "FP32";
-				}
-				break;
-			default:
-				{
-					;
-				}
+				vduSignalType = "D";
 			}
+			else if (rnLibIsFloat(i) == true) 
+			{
+				vduSignalType = "FP32";
+			}
+			else if (rnLibIsInt32(i) == true)
+			{
+				vduSignalType = "SI32";
+			}
+
 			m_tableWidget->setItem(i, c++, createTableItem(vduSignalType));
 		}
 
 		{
 			QString vduSignalInOutType;
-			switch (param->vduSignalInOutType)
+
+			if (rnLibIsInternal(i) == true) 
 			{
-			case Internal:
-				{
-					vduSignalInOutType = "Internal";
-				}
-				break;
-			case Input:
-				{
-					vduSignalInOutType = "Input";
-				}
-				break;
-			case Output:
-				{
-					vduSignalInOutType = "Output";
-				}
-				break;
-			case RxSignal:
-				{
-					vduSignalInOutType = "RX";
-				}
-				break;
-			default:
-				{
-					;
-				}
+				vduSignalInOutType = "Internal";
+			}
+			else if (rnLibIsInput(i) == true) 
+			{
+				vduSignalInOutType = "Input";
+			}
+			else if (rnLibIsOutput(i) == true)
+			{
+				vduSignalInOutType = "Output";
+			}
+			else if (rnLibIsRxSignal(i) == true)
+			{
+				vduSignalInOutType = "RX";
 			}
 
-			for (alt_u16 j = 0; j < rnLibTxAppSignalsCount(); j++)
+			if (rnLibIsTxSignal(i) == true) 
 			{
-				const struct VduTxRxAppSignal* const txRxSignal = rnLibTxAppSignal(j);
-				if (txRxSignal == NULL)
-				{
-					assert(txRxSignal);
-					return;
-				}
-
-				if (txRxSignal->signalIndex == i)
-				{
-					vduSignalInOutType += ", TX";
-					break;
-				}
+				vduSignalInOutType += ", TX";
 			}
+
 			m_tableWidget->setItem(i, c++, createTableItem(vduSignalInOutType));
 		}
 
@@ -227,26 +197,26 @@ void SignalsView::fillSignalsList()
 
 		{
 			QString address;
-			if (param->vduSignalInOutType == Internal)
+			if (rnLibIsInternal(i) == true)
 			{
 				address = "";
 			}
 			else
 			{
-				address = tr("%1:%2").arg(param->optoAddr.offset).arg(param->optoAddr.bitNo);
+				address = tr("%1:%2").arg(rnLibSignalOffset(i)).arg(rnLibSignalBit(i));
 			}
 			m_tableWidget->setItem(i, c++, createTableItem(address));
 		}
 
 		{
-			m_tableWidget->setItem(i, c++, createTableItem(param->props.bits.tunable ? tr("Tunable") : ""));
+			m_tableWidget->setItem(i, c++, createTableItem(rnLibSignalTunable(i) ? tr("Tunable") : ""));
 		}
 
 		{
 			QString optoPort;
-			if (param->vduSignalInOutType == RxSignal)
+			if (rnLibIsRxSignal(i) == true)
 			{
-				optoPort = tr("%1").arg(param->rxPortIndex);
+				optoPort = tr("%1").arg(rnLibRxPortIndex(i));
 			}
 			else
 			{
@@ -264,14 +234,14 @@ void SignalsView::fillSignalsList()
 
 void SignalsView::updateSignalValues()
 {
-	alt_u16 count = m_tableWidget->rowCount();
+	int count = m_tableWidget->rowCount();
 
 	if (count != rnLibAppSignalsCount() || count == 0) 
 	{
 		return;
 	}
 		
-	for (alt_u16 i = 0; i < count; i++)
+	for (int i = 0; i < count; i++)
 	{
 		const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
 		if (param == NULL)
@@ -282,30 +252,21 @@ void SignalsView::updateSignalValues()
 		int iRes = 0;
 		float fRes = 0;
 		QString value;
-		switch (param->vduSignalType)
+
+		if (rnLibIsDiscrete(i) == true)
 		{
-		case Discrete:
-			{
-				rnLibSignalValueInt(i, &iRes);
-				value = tr("%1").arg(iRes);
-			}
-			break;
-		case AnalogSignedInt32:
-			{
-				rnLibSignalValueInt(i, &iRes);
-				value = tr("%1").arg(iRes);
-			}
-			break;
-		case AnalogFloat32:
-			{
-				rnLibSignalValueFloat(i, &fRes);
-				value = tr("%1").arg(fRes, 0, 'f', 3);
-			}
-			break;
-		default:
-			{
-				;
-			}
+			rnLibSignalValueInt(i, &iRes);
+			value = tr("%1").arg(iRes);
+		}
+		else if (rnLibIsFloat(i) == true)
+		{
+			rnLibSignalValueFloat(i, &fRes);
+			value = tr("%1").arg(fRes, 0, 'f', 3);
+		}
+		else if (rnLibIsInt32(i) == true)
+		{
+			rnLibSignalValueInt(i, &iRes);
+			value = tr("%1").arg(iRes);
 		}
 
 		QTableWidgetItem* item = m_tableWidget->item(i, m_tableHeaders.size() - 1);
@@ -330,42 +291,34 @@ void SignalsView::onSignalClicked(unsigned int index)
 	QString appSignalId = QString::fromUtf8(rnLibAppSignalCustomID(index));
 	QString caption = QString::fromUtf8(rnLibAppSignalCaption(index));
 
-	alt_32 iRes = 0;
+	int iRes = 0;
 	float fRes = 0;
 
 	QString label;
 	QString textCaption;
 	QString value;
-	switch (param->vduSignalType)
+
+	if (rnLibIsDiscrete(index) == true)
 	{
-	case Discrete:
-		{
-			rnLibSignalValueInt(index, &iRes);
-			value = tr("%1").arg(iRes);
-			label = tr("%1").arg(appSignalId);
-			textCaption = tr("%1 [0..1]").arg(caption);
-		}
-		break;
-	case AnalogSignedInt32:
-		{
-			rnLibSignalValueInt(index, &iRes);
-			value = tr("%1").arg(iRes);
-			label = tr("%1").arg(appSignalId);
-			textCaption = tr("%1 [%2..%3]").arg(caption).arg(param->lowLimit.intValue).arg(param->highLimit.intValue);
-		}
-		break;
-	case AnalogFloat32:
-		{
-			rnLibSignalValueFloat(index, &fRes);
-			value = tr("%1").arg(fRes, 0, 'f', 3);
-			label = tr("%1").arg(appSignalId);
-			textCaption = tr("%1 [%2..%3]").arg(caption).arg(param->lowLimit.floatValue).arg(param->highLimit.floatValue);
-		}
-		break;
-	default:
-		{
-			;
-		}
+		rnLibSignalValueInt(index, &iRes);
+		value = tr("%1").arg(iRes);
+		label = tr("%1").arg(appSignalId);
+		textCaption = tr("%1 [0..1]").arg(caption);
+	}
+	else if (rnLibIsFloat(index) == true)
+	{
+		rnLibSignalValueFloat(index, &fRes);
+		value = tr("%1").arg(fRes, 0, 'f', 3);
+		label = tr("%1").arg(appSignalId);
+		textCaption = tr("%1 [%2..%3]").arg(caption)
+			.arg(rnLibSignalLowLimitFloat(index)).arg(rnLibSignalHighLimitFloat(index));
+	}
+	else if (rnLibIsInt32(index) == true)
+	{
+		rnLibSignalValueInt(index, &iRes);
+		value = tr("%1").arg(iRes);
+		label = tr("%1").arg(appSignalId);
+		textCaption = tr("%1 [%2..%3]").arg(caption).arg(rnLibSignalLowLimitInt(index)).arg(rnLibSignalHighLimitInt(index));
 	}
 
 	QInputDialog dialog(this);
@@ -385,7 +338,7 @@ void SignalsView::onSignalClicked(unsigned int index)
 	QString text = dialog.textValue();
 
 	bool correct = false;
-	if (param->vduSignalType == Discrete || param->vduSignalType == AnalogSignedInt32)
+	if (rnLibIsDiscrete(index) == true || rnLibIsInt32(index) == true)
 	{
 		int newValue = text.toInt(&correct);
 		if (correct == true)
@@ -393,7 +346,7 @@ void SignalsView::onSignalClicked(unsigned int index)
 			(void)rnLibWriteSignalValueInt(index, newValue);
 		}
 	}
-	else if (param->vduSignalType == AnalogFloat32)
+	else if (rnLibIsFloat(index) == true)
 	{
 		
 		float newValue = text.toFloat(&correct);
