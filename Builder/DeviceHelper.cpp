@@ -546,6 +546,76 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 	return nullptr;
 }
 
+std::vector<Hardware::DeviceController*> DeviceHelper::getChildControllers(const Hardware::DeviceObject* device)
+{
+	std::vector<Hardware::DeviceController*> controllers;
+
+	if (device == nullptr)
+	{
+		assert(false);
+		return controllers;
+	}
+
+	int childrenCount = device->childrenCount();
+
+	for (int i = 0; i < childrenCount; i++)
+	{
+		Hardware::DeviceObject* object = device->child(i).get();
+
+		if (object == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (object->isController())
+		{
+			std::shared_ptr<Hardware::DeviceController> controller = object->toController();
+
+			if (controller != nullptr)
+			{
+				controllers.push_back(controller.get());
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+		}
+	}
+
+	return controllers;
+}
+
+Hardware::DeviceAppSignal* DeviceHelper::getChildDeviceAppSignalBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
+{
+	if (device == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	Hardware::DeviceObject* deviceObject = getChildDeviceObjectBySuffix(device, suffix, log);
+
+	if (deviceObject == nullptr)
+	{
+		return nullptr;
+	}
+
+	Hardware::DeviceAppSignal* deviceAppSignal = deviceObject->toAppSignal().get();
+
+	if (deviceAppSignal != nullptr)
+	{
+		return deviceAppSignal;
+	}
+
+	if (log != nullptr)
+	{
+		log->errCFG3025(suffix, device->equipmentIdTemplate());
+	}
+
+	return nullptr;
+}
+
 Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
 {
 	if (module->isModule() == false)

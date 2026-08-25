@@ -1,6 +1,7 @@
 #pragma once
 
 #include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/DeviceAppSignal.h>
 #include <HardwareLib/EquipmentSet.h>
 
 #include "../UtilsLib/OutputLog.h"
@@ -89,6 +90,10 @@ public:
 	
 	static Hardware::DeviceController* getChildControllerBySuffix(std::shared_ptr<Hardware::DeviceObject> device, const QString& suffix, Builder::IssueLogger* log);
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
+
+	static std::vector<Hardware::DeviceController*> getChildControllers(const Hardware::DeviceObject* device);
+
+	static Hardware::DeviceAppSignal* getChildDeviceAppSignalBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
 
 	static Hardware::DeviceController* getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 

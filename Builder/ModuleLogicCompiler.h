@@ -974,6 +974,8 @@ namespace Builder
 		bool createActuatorHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
 		bool createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
 		bool createActuatorInternalSignals();
+		bool calculateAcmIoSignalsAddresses();
+		bool setInOutSignalsUalAddresses();
 		bool disposeAcmSwInOuts();
 		bool disposeAcmSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes);
 

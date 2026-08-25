@@ -244,9 +244,9 @@ namespace Builder
 
 			m_afbComponents.init(m_lmDescription);
 
-			m_lm = std::make_shared<Hardware::DeviceModule>(false);
+			m_lm = actuatorType.acmPreset;
 			
-			m_lm->setModuleFamily(Hardware::DeviceModule::FamilyType::ACM);
+//			m_lm->setModuleFamily(Hardware::DeviceModule::FamilyType::ACM);
 		}
 
 		m_resultWriter = m_appLogicCompiler.buildResultWriter();
@@ -6158,18 +6158,6 @@ namespace Builder
 
 		for(UalSignal* s : m_ualSignals)
 		{
-			if (s->refSignalIDs().contains("CLOSE") == true)
-			{
-				bool isConst = s->isConst();
-				bool isBusChild = s->isBusChild();
-				bool isAquired = s->isAcquired();
-				bool isDiscrete = s->isDiscrete();
-				bool isInternal = s->isInternal();
-				bool isTunable = s->isTunable();
-				bool isHeapPlaced = s->isHeapPlaced();
-				DEBUG_STOP;
-			}
-
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
@@ -7038,9 +7026,9 @@ namespace Builder
 			{
 				// actuators processing
 				//
-				if (calculateIoSignalsAddresses() == false) break;
+				if (calculateAcmIoSignalsAddresses() == false) break;
 
-				if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
+				if (setInOutSignalsUalAddresses() == false)	break;
 
 				if (disposeDiscreteSignalsInBitMemory() == false) break;
 
@@ -20556,13 +20544,11 @@ namespace Builder
 
 		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmInputs)
 		{
-			qDebug() << signalID;
 			result &= createActuatorHardwareInOutSignal(signalID, deviceAppSignal);
 		}
 
 		for (const auto& [signalID, deviceAppSignal] : actuatorType.acmOutputs)
 		{
-			qDebug() << signalID;
 			result &= createActuatorHardwareInOutSignal(signalID, deviceAppSignal);
 		}
 
@@ -20615,6 +20601,7 @@ namespace Builder
 		}
 
 		m_actuatorSignals->append(appSignal, m_lm);
+		m_ioSignals.push_back(appSignal);
 		return true;
 	}
 
@@ -20785,6 +20772,157 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::calculateAcmIoSignalsAddresses()
+	{
+		bool result = true;
+
+		int appDataOffset = m_lmDescription->memory().m_appDataOffset;
+		int diagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
+
+		std::vector<Hardware::DeviceController*> controllers = DeviceHelper::getChildControllers(m_lm.get());
+
+		for (AppSignal* ioSignal : m_ioSignals)
+		{
+			TEST_PTR_CONTINUE(ioSignal);
+
+			int pos = ioSignal->appSignalID().lastIndexOf('_');
+
+			if (pos == -1)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			QString suffix = ioSignal->appSignalID().mid(pos);
+
+			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
+			
+			for (const Hardware::DeviceController* ctrl : controllers)
+			{
+				deviceAppSignal = DeviceHelper::getChildDeviceAppSignalBySuffix(ctrl, suffix, nullptr);
+
+				if (deviceAppSignal != nullptr)
+				{
+					break;
+				}
+			}
+
+			if (deviceAppSignal == nullptr)
+			{
+				result = false;
+				continue;
+			}
+
+			Address16 ioBufAddr(deviceAppSignal->valueOffset(), deviceAppSignal->valueBit());
+
+			switch (deviceAppSignal->memoryArea())
+			{
+			case E::MemoryArea::ApplicationData:
+
+				switch (ioSignal->inOutType())
+				{
+				case E::SignalInOutType::Input:
+				case E::SignalInOutType::Output:
+					ioBufAddr.addWord(appDataOffset);
+					ioSignal->setIoBufAddr(ioBufAddr);
+					break;
+
+				case E::SignalInOutType::Internal:
+					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
+					//
+					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
+					result = false;
+					break;
+
+				case E::SignalInOutType::SoftwareCalculated:
+					ioBufAddr.clear();
+					break;
+
+				default:
+					assert(false);
+				}
+				break;
+
+			case E::MemoryArea::DiagnosticsData:
+
+				switch (ioSignal->inOutType())
+				{
+				case E::SignalInOutType::Input:
+				case E::SignalInOutType::Output:
+					ioBufAddr.addWord(diagDataOffset);
+					ioSignal->setIoBufAddr(ioBufAddr);
+					break;
+
+				case E::SignalInOutType::Internal:
+					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
+					//
+					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
+					result = false;
+					break;
+
+				case E::SignalInOutType::SoftwareCalculated:
+					break;
+
+				default:
+					assert(false);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::setInOutSignalsUalAddresses()
+	{
+		bool result = true;
+
+		// set ualAddress of InOut signals to ioBufAddr of input and output signal
+		//
+		for (const AppSignal* ioSignal : m_ioSignals)
+		{
+			if (ioSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ioSignal->isInput() == false && ioSignal->isOutput() == false)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(ioSignal->appSignalID());
+
+			if (ualSignal == nullptr)
+			{
+				continue;        // is not an error
+			}
+
+			//if (ualSignal->isInput() == false || (ualSignal->isDiscrete() == false && ioSignal->isBus() == false))
+			//{
+			//	Q_ASSERT(false); // ualSignal must be Discrete or Bus Input if reffered by ioSignal
+			//	LOG_INTERNAL_ERROR(m_log);
+			//	result = false;
+			//	continue;
+			//}
+
+			if (ualSignal->isDiscrete() && ualSignal->invertSignal())
+			{
+				continue; // UalAddr for inverted signals will be set later
+			}
+
+			ualSignal->setUalAddr(ioSignal->ioBufAddr());
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::disposeAcmSwInOuts()
