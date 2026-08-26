@@ -254,12 +254,16 @@ void trendsProc(void)
 
 	m_workTimeSecs = curTimeSecs - m_initTimeSecs;
 
+	externalBusBridgeReadLock();
+
 	// Process trend signal data
 	//
 	for (alt_u16 i = 0; i < m_trendSignalDataCount; i++)
 	{
 		processTrendData(i, curTimeSecs);
 	}
+
+	externalBusBridgeReadUnlock();
 
 	return;
 }

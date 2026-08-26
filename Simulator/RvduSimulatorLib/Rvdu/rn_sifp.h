@@ -12,7 +12,7 @@ Module description: Block loads and stores the file that contains the descriptio
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -20,7 +20,7 @@ Module description: Block loads and stores the file that contains the descriptio
 
 -- *************************************************************
 -- Version v1.01
--- Date:	27,04,2026.
+-- Date:	27.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -38,20 +38,30 @@ Module description: Block loads and stores the file that contains the descriptio
 -- *************************************************************
 
 -- Version v1.02
--- Date:	09,05,2026.
+-- Date:	09.05.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4009
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-4009, adding API support for working with signals by AppSignalIDs
+-- RADIX-3969, input floating-point signals reading (like temperature)
 
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.04
+-- Date:	26.08.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4116, rn_sifp сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -71,6 +81,9 @@ enum VduSignalType
 	AnalogSignedInt32 = 3
 };
 
+// Enum is an integer constant used as a reference.
+// It represents a 16-bit unsigned integer value.
+//
 enum VduSignalInOutType
 {
 	UnknownInOutType = 0,
@@ -159,7 +172,7 @@ struct VduAppSignalParam
 
 struct AppSignalsFile
 {
-	char magic[4];							// 'VAS\0'
+	char magic[4];							// 'VAS\0' has length of 4 bytes
 	alt_u16 fileVersion;					// == VAS_FILE_VERSION
 
 	alt_u16 appSignalsCount;
@@ -169,7 +182,7 @@ struct AppSignalsFile
 
 	alt_u16 reserv1;
 
-	alt_u8 vduConfigID[8];
+	alt_u8 vduConfigID[8];				// has length of 8 bytes (64-bits value)
 
 	alt_u32 refAppSignals;				// ref to array of VduAppSignalParam structures,
 											// sorted by VduAppSignalParam.signalIndex ascending
@@ -227,10 +240,16 @@ const alt_u8* const vduConfigID(void);
 // Object count functions
 //
 
+// Function return application signals count
+//
 alt_u16 appSignalsCount(void);
 
+// Function return opto port count
+//
 alt_u16 optoPortsCount(void);
 
+// Function return RX signals count
+//
 alt_u16 txAppSignalsCount(void);
 
 // Function returns VduAppSignalParam by index
@@ -240,10 +259,6 @@ const struct VduAppSignalParam* const appSignalParamByIndex(alt_u16 index);
 // Function returns VduAppSignalState by index
 //
 const struct VduAppSignalState* const appSignalStateByIndex(alt_u16 index);
-
-// Function returns mutable VduAppSignalState by index
-//
-struct VduAppSignalState* const appSignalStateMutableByIndex (alt_u16 index);
 
 // Function return signal index by appSignalId or INVALID_INDEX if signal is not found
 //
@@ -282,12 +297,24 @@ void outputSignalsPreproc(void);
 // because the Simulator can also read and write the signals memory
 //
 
+// Function returns signal is available by index
+// 
 bool signalAvailableByIndex(alt_u16 signalIndex);
 
 //
 // Signal states functions, return false on failure (index is incorrect, or wrong signal type)
 //
 
+/*
+Copies intiger signal value by signal index.
+Returns “true” if the copy is successful.
+Returns “false” if signal not found or if signal is the wrong type.
+Parameters:
+    signalIndex - signal index.
+	res - signal value.
+Return Value:
+	Returns "true" if successful, "false" on error.
+*/
 /* Signals allowed to be read :
 	-	RxSignal Discrete
 	-	RxSignal AnalogSignedInt32
@@ -298,12 +325,32 @@ bool signalAvailableByIndex(alt_u16 signalIndex);
 */
 bool readSignalValueIntByIndex(alt_u16 signalIndex, alt_32* res);
 
+/*
+Copies float signal value by signal index.
+Returns “true” if the copy is successful.
+Returns “false” if signal not found or if signal is the wrong type.
+Parameters:
+    signalIndex - signal index.
+	res - signal value.
+Return Value:
+	Returns "true" if successful, "false" on error.
+*/
 /* Signals allowed to be read :
 	-	RxSignal AnalogFloat32
 	-	Internal AnalogFloat32
 */
 bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res);
 
+/*
+Write intiger signal value by signal index.
+Returns “true” if the write is successful.
+Returns “false” if signal not found or if signal is the wrong type.
+Parameters:
+    signalIndex - signal index.
+	res - signal value.
+Return Value:
+	Returns "true" if successful, "false" on error.
+*/
 /* Signals allowed to be written :
 	-	Internal Discrete
 	-	Internal AnalogSignedInt32
@@ -311,6 +358,16 @@ bool readSignalValueFloatByIndex(alt_u16 signalIndex, float* res);
 */
 bool writeSignalValueIntByIndex(alt_u16 signalIndex, alt_32 value);
 
+/*
+Write float signal value by signal index.
+Returns “true” if the write is successful.
+Returns “false” if signal not found or if signal is the wrong type.
+Parameters:
+    signalIndex - signal index.
+	res - signal value.
+Return Value:
+	Returns "true" if successful, "false" on error.
+*/
 /* Signals allowed to be written :
 	-	Internal AnalogFloat32
 */

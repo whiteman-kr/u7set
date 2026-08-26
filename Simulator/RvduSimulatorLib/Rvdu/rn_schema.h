@@ -136,12 +136,17 @@ struct PopUpSchemaParams
 	};
 };
 
+// Calculates if it is time to redraw a schema when 250 ms has been elapsed since last redraw
+// Returns true if schema has to be redrawn, otherwise returns false
+bool calculateSchemaDrawingPhase(void);
+
 /*
 Performs sequential rendering of all schema elements and executes their scripts.
 Upon successful completion, it copies the frame to video memory. Upon failure,
 it terminates the operation.
+If drawingPhase parameter is false, no graphics is redrawn
 */
-void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted);
+void schemaProc(lua_State* rvduLuaState, bool drawingPhase);
 
 // Switches to processing a pop-up schema with specified type
 //

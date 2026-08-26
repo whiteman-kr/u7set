@@ -477,6 +477,16 @@ void rnLibStopSim()
 	moduleRnUtilsUninitialize();
 }
 
+int rnLibWidth()
+{
+	return RVDU_SCREEN_WIDTH;
+}
+
+int rnLibHeight()
+{
+	return RVDU_SCREEN_HEIGHT;
+}
+
 void rnLibClickEvent(unsigned int x, unsigned int y)
 { 
 	setTouchEvent((alt_u16)x, (alt_u16)y);
@@ -546,18 +556,13 @@ bool rnLibLoop()
 
 		startMeasuringTimer(TIMER_MAINLOOP);
 
-		{
-			externalBusBridgeReadLock();
-
-			trendsProc();
-
-			externalBusBridgeReadUnlock();
-		}
+		trendsProc();
 
 		outputSignalsPreproc();
 
-		bool schemaWasRepainted = false;
-		schemaProc(m_rvduLuaState, &schemaWasRepainted);
+		bool drawSchema = calculateSchemaDrawingPhase();
+		
+		schemaProc(m_rvduLuaState, drawSchema);
 
 		outputSignalsLoopback();
 
@@ -565,7 +570,7 @@ bool rnLibLoop()
 
 		stopMeasuringTimer(TIMER_MAINLOOP);
 
-		if (schemaWasRepainted == true)
+		if (drawSchema == true)
 		{
 			setTimerValue(TIMER_MAINLOOP, measuringTimerValue(TIMER_MAINLOOP));
 			setTimerValue(TIMER_PREDRAW, measuringTimerValue(TIMER_PREDRAW));
@@ -964,21 +969,13 @@ bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 		return false;
 	}
 
-	struct VduAppSignalState* state = appSignalStateMutableByIndex((alt_u16)signalIndex);
-	if (state == NULL)
-	{
-		RN_ASSERT(state);
-		return false;
-	}
-
 	bool result = false;
 
 	externalBusBridgeReadLock();
 
 	if (param->vduSignalInOutType == Internal)
 	{
-		state->value.intValue = value;
-		result = true;
+		result = writeSignalValueIntByIndex(signalIndex, value);
 	}
 	else if (param->vduSignalInOutType == RxSignal)
 	{
@@ -1093,13 +1090,6 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 		return false;
 	}
 
-	struct VduAppSignalState* state = appSignalStateMutableByIndex((alt_u16)signalIndex);
-	if (state == NULL)
-	{
-		RN_ASSERT(state);
-		return false;
-	}
-
 	bool result = false;
 
 	externalBusBridgeReadLock();
@@ -1108,8 +1098,7 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 	{
 		if ((param->vduSignalInOutType == Internal))
 		{
-			state->value.floatValue = value;
-			result = true;
+			writeSignalValueFloatByIndex(signalIndex, value);
 		}
 		else
 		{

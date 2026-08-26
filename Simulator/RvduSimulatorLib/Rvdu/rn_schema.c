@@ -350,7 +350,9 @@ static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchema
 	return true;
 }
 
-static bool calculateDrawingPhase(void)
+// Perform drawing only if blink phase or second has been changed
+//
+bool calculateSchemaDrawingPhase(void)
 {
 	bool drawingPhase = true;
 
@@ -376,19 +378,13 @@ static bool calculateDrawingPhase(void)
 	return drawingPhase;
 }
 
-void schemaProc(lua_State* rvduLuaState, bool* schemaWasRepainted)
+void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 {
-	if ((rvduLuaState == NULL) || (schemaWasRepainted == NULL))
+	if (rvduLuaState == NULL)
 	{
 		RN_ASSERT(rvduLuaState != NULL);
-		RN_ASSERT(schemaWasRepainted != NULL);
 		return;
 	}
-
-	// Perform drawing only if blink phase or second has been changed
-	//
-	bool drawingPhase = calculateDrawingPhase();
-	*schemaWasRepainted = drawingPhase;
 
 	// Process schema switching by keyboard
 	//

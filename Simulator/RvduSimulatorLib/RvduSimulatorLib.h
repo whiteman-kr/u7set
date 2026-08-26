@@ -30,6 +30,9 @@ extern "C"
 	bool rnLibStartSim(const char* buildFolder, unsigned int subsystemKey, char* pVideoBuffer, char* pHdmiBuffer, int screenWidth, int screenHeight);
 	void rnLibStopSim();
 
+	int rnLibWidth();
+	int rnLibHeight();
+
 	// HMI interaction
 	//
 	void rnLibClickEvent(unsigned int x, unsigned int y);

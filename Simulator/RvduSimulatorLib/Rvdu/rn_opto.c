@@ -210,9 +210,13 @@ static void optoTxProcImpl(void)
 
 void optoTxProc(void)
 {
+	externalBusBridgeReadLock();
+
 	externalBusBridgeWriteLock();
 
 	optoTxProcImpl();
 
 	externalBusBridgeWriteUnlock();
+
+	externalBusBridgeReadUnlock();
 }
