@@ -33,6 +33,8 @@ extern "C"
 	int rnLibWidth();
 	int rnLibHeight();
 
+	const char* rnLibEqipmentId();
+
 	// HMI interaction
 	//
 	void rnLibClickEvent(unsigned int x, unsigned int y);
@@ -40,7 +42,7 @@ extern "C"
 
 	void rnLibVideoBufferLock();
 	void rnLibVideoBufferUnlock();
-	
+
 	// Main loop
 	//
 	bool rnLibLoop();
@@ -84,6 +86,14 @@ extern "C"
 	int rnLibSignalLowLimitInt(unsigned int index);
 
 	// Signals read/write
+
+	void rnLibReadMemoryLock();
+	void rnLibReadMemoryUnlock();
+	bool rnLibWriteReadMemory(unsigned int offset, const unsigned char* const data, unsigned int count);
+
+	void rnLibWriteMemoryLock();
+	void rnLibWriteMemoryUnlock();
+	bool rnLibReadWriteMemory(unsigned int offset, unsigned char* const result, unsigned int count);
 
 	bool rnLibSignalValueInt(unsigned int signalIndex, int* res);
 	bool rnLibSignalValueFloat(unsigned int signalIndex, float* res);

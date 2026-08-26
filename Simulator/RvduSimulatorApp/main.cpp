@@ -8,6 +8,7 @@
 
 static QString m_buildFolder;
 static int m_subsystemKey = 0;
+static QString m_sharedMemoryKey;
 
 bool parseCommandLine()
 {
@@ -26,10 +27,15 @@ bool parseCommandLine()
 	idOptionKey.setValueName("key");
 	parser.addOption(idOptionKey);
 
+	QCommandLineOption idMemoryKey("memory", "Simulator shared memory key");
+	idMemoryKey.setValueName("memory");
+	parser.addOption(idMemoryKey);
+
 	parser.process(*qApp);
 
 	QString build = parser.isSet(idOptionBuild) ? parser.value(idOptionBuild) : "";
-	QString keyStr = parser.isSet(idOptionBuild) ? parser.value(idOptionKey) : "";
+	QString keyStr = parser.isSet(idOptionKey) ? parser.value(idOptionKey) : "";
+	QString memoryKey = parser.isSet(idMemoryKey) ? parser.value(idMemoryKey) : "";
 
 	bool keyOk = false;
 	int key = keyStr.toInt(&keyOk);
@@ -39,12 +45,13 @@ bool parseCommandLine()
 		QMessageBox::critical(
 			nullptr,
 			qAppName(),
-			QObject::tr("usage: RvduSimulatorApp --build=D:\\WORK\\Builds\\mad_3_rvdu\\build\\Subsystems\\RC01 --key=24897"));
+			QObject::tr("usage: RvduSimulatorApp --build=D:\\WORK\\Builds\\mad_3_rvdu\\build\\Subsystems\\RC01 --key=24897 [--memory=VduSimulator.pid:0000.eid:0000]"));
 		return false;
 	}
 
 	m_buildFolder = build;
 	m_subsystemKey = key;
+	m_sharedMemoryKey = memoryKey;
 
 	return true;
 }
@@ -66,7 +73,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	MainWindow w(m_buildFolder, m_subsystemKey);
+	MainWindow w(m_buildFolder, m_subsystemKey, m_sharedMemoryKey);
 	w.show();
 
 	return app.exec();

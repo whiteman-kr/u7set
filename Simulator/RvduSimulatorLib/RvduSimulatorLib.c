@@ -487,6 +487,11 @@ int rnLibHeight()
 	return RVDU_SCREEN_HEIGHT;
 }
 
+const char* rnLibEqipmentId() 
+{ 
+	return vduConfigString(vduConfig()->equipmentId);
+}
+
 void rnLibClickEvent(unsigned int x, unsigned int y)
 { 
 	setTouchEvent((alt_u16)x, (alt_u16)y);
@@ -806,6 +811,53 @@ int rnLibSignalLowLimitInt(unsigned int index)
 	return param->lowLimit.intValue;
 }
 
+void rnLibReadMemoryLock() 
+{ 
+	externalBusBridgeReadLock(); 
+}
+
+void rnLibReadMemoryUnlock() 
+{ 
+	externalBusBridgeReadUnlock(); 
+}
+
+bool rnLibWriteReadMemory(unsigned int offset, const unsigned char* const data, unsigned int count)
+{
+	if (offset + count >= TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	{
+		assert(false);
+		return false;
+	}
+
+	alt_u8* ptr = m_externalBusBridgeRead + offset;
+	memcpy(ptr, data, count);
+
+	return true;
+}
+
+void rnLibWriteMemoryLock()
+{ 
+	externalBusBridgeWriteLock(); 
+}
+
+void rnLibWriteMemoryUnlock()
+{ 
+	externalBusBridgeWriteUnlock(); 
+}
+
+bool rnLibReadWriteMemory(unsigned int offset, unsigned char* const result, unsigned int count)
+{
+	if (offset + count >= TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	{
+		assert(false);
+		return false;
+	}
+
+	const alt_u8* const ptr = m_externalBusBridgeWrite+ offset;
+	memcpy(result, ptr, count);
+
+	return true;
+}
 bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 {
 	*res = 0;
@@ -975,7 +1027,7 @@ bool rnLibWriteSignalValueInt(unsigned int signalIndex, int value)
 
 	if (param->vduSignalInOutType == Internal)
 	{
-		result = writeSignalValueIntByIndex(signalIndex, value);
+		result = writeSignalValueIntByIndex((alt_u16)signalIndex, value);
 	}
 	else if (param->vduSignalInOutType == RxSignal)
 	{
@@ -1098,7 +1150,7 @@ bool rnLibWriteSignalValueFloat(unsigned int signalIndex, float value)
 	{
 		if ((param->vduSignalInOutType == Internal))
 		{
-			writeSignalValueFloatByIndex(signalIndex, value);
+			result = writeSignalValueFloatByIndex((alt_u16)signalIndex, value);
 		}
 		else
 		{

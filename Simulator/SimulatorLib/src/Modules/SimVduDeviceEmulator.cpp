@@ -142,6 +142,7 @@ namespace Sim
 			// Create shared memory for VDU simulator
 			//
 			m_shared.memoryKey = QString{"VduSimulator.pid:%1.eid:%2"}.arg(qApp->applicationPid()).arg(equipmentId());
+			m_log.writeMessage(tr("Created shared memory with key: %1").arg(m_shared.memoryKey));
 			m_shared.clientSharedMemory.emplace(m_shared.memoryKey);
 
 			bool created = m_shared.clientSharedMemory->create(sizeof(SimVduSharedData::SharedData), QSharedMemory::ReadWrite);

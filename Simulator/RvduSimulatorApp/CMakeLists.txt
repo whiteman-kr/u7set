@@ -22,6 +22,8 @@ set (TC_SOURCES
     RvduWidget.h
 	SignalsView.cpp
 	SignalsView.h
+	SimulatorCommThread.cpp
+	SimulatorCommThread.h
 )
 
 set (TC_RESOURCES
