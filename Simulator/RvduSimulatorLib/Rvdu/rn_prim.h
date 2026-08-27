@@ -62,6 +62,7 @@ Module description: Renders basic graphical primitives.
 
 -- Changes: RADIX-3966
 -- areas, lines, rectangles, and text lines can be partially placed outside of the screen. If they are fully outside, an error is generated.
+-- Logo size can be smaller than screen size
 -- *************************************************************
 */
 

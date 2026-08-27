@@ -42,6 +42,8 @@ void moduleRnVbufInitialize(alt_u32* const pVideoBuffer, alt_u32* const pHdmiBuf
 
 	mtx_init(&m_cs, mtx_plain);
 
+	writeVideoBuffer(0x0);	// Fill color with black
+
 	return;
 }
 

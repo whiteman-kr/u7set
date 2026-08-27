@@ -62,6 +62,7 @@ Module description: Renders basic graphical primitives.
 
 -- Changes: RADIX-3966
 -- areas, lines, rectangles, and text lines can be partially placed outside of the screen. If they are fully outside, an error is generated.
+--- Logo size can be smaller than screen size
 -- *************************************************************
 */
 
@@ -167,13 +168,18 @@ bool showLogo(const char* logoFile)
 
 	if (readOk == true)
 	{
-		if (((alt_u16)bmpInfo.biWidth != m_screenWidth) ||
-			((alt_u16)bmpInfo.biHeight != m_screenHeight))
+		if (((alt_u16)bmpInfo.biWidth > m_screenWidth) ||
+			((alt_u16)bmpInfo.biHeight > m_screenHeight))
 		{
 			logError(FileFormatError, "showLogo: image size error.");
 			readOk = false;
 		}
 	}
+
+	alt_u16 left = (m_screenWidth - (alt_u16)bmpInfo.biWidth) / 2u;
+	alt_u16 top = (m_screenHeight - (alt_u16)bmpInfo.biHeight) / 2u;
+	alt_u16 width = (alt_u16)bmpInfo.biWidth;
+	alt_u16 height = (alt_u16)bmpInfo.biHeight;
 
 	// Read the BMP data
 	//
@@ -181,9 +187,9 @@ bool showLogo(const char* logoFile)
 	{
 		static alt_u8 row[MAX_LOGO_ROW_SIZE] = { 0 };
 
-		const alt_u16 rowSize = ((m_screenWidth * 3u) + 3u) & (~3u);
+		const alt_u16 rowSize = ((width * 3u) + 3u) & (~3u);
 
-		for (alt_u16 y = (m_screenHeight - 1u); y != 0u; y--)
+		for (alt_u16 y = (height - 1u); y != 0u; y--)
 		{
 			if (freadBigData(row, rowSize, file) == false)
 			{
@@ -195,7 +201,7 @@ bool showLogo(const char* logoFile)
 
 			const alt_u8* rowPtr = row;
 
-			for (alt_u16 x = 0; x < m_screenWidth; x++)
+			for (alt_u16 x = 0; x < width; x++)
 			{
 				alt_u8 b = *rowPtr;
 				rowPtr++;
@@ -205,7 +211,14 @@ bool showLogo(const char* logoFile)
 				rowPtr++;
 
 				alt_u32 data = 0xff000000u | ((alt_u32)r << 16u) | ((alt_u32)g << 8u) | (alt_u32)b;
-				*(m_pVideoBuffer + (y * m_screenWidth) + x) = data;
+
+				alt_u16 i = x + left;
+				alt_u16 j = y + top;
+
+				if ((i < m_screenWidth) && (j < m_screenHeight))
+				{
+					*(m_pVideoBuffer + i + (j * m_screenWidth)) = data;
+				}
 			}
 		}
 	}
