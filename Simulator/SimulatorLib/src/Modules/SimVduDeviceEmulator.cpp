@@ -344,7 +344,20 @@ namespace Sim
 			return false;
 		}
 
-		auto receivedPortsData = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
+
+		// Read from shared memory, make a copy, update copy, write back.
+		// No other process writes to this particular copied area of shared memory.
+		// We can release lock on shared memory while we process the data, and then re-lock to write back.
+		//
+		auto toVdu = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
+		bool toVduUpdated = false;
+
+		{
+			std::scoped_lock locker{*m_shared.clientSharedMemory}; // SharedMemory lock here
+
+			SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+			*toVdu = sharedData->toVdu;
+		}
 
 		for (ConnectionImplPtr& c : m_connections)
 		{
@@ -395,6 +408,7 @@ namespace Sim
 			// Get data (actually swap) to receive buffer
 			//
 			bool wasTimeout = false;
+			const size_t portIndex = portInfo.modulePortNo - 1;
 
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
@@ -414,8 +428,15 @@ namespace Sim
 			if (wasTimeout == true)
 			{
 				// If receive buffer is empty then it is timeout
-				// Clear memory in dedicated memory area, receivedPortsData is already filled with 0s.
+				// Clear memory in dedicated memory area.
 				//
+				if (toVdu->portData[portIndex].occupied != 0 || toVdu->portData[portIndex].timeout != 0)
+				{
+					std::memset(toVdu->portData[portIndex].data, 0, sizeof(toVdu->portData[portIndex].data));
+					toVdu->portData[portIndex].occupied = 0;
+
+					toVduUpdated = true;
+				}
 			}
 			else
 			{
@@ -456,8 +477,9 @@ namespace Sim
 						return false;
 					}
 
-					std::memcpy(receivedPortsData->portData[portInfo.modulePortNo - 1].data, receiveBuffer->data(), receiveBuffer->size());
-					receivedPortsData->portData[portInfo.modulePortNo - 1].occupied = receiveBuffer->size();
+					std::memcpy(toVdu->portData[portIndex].data, receiveBuffer->data(), receiveBuffer->size());
+					toVdu->portData[portIndex].occupied = receiveBuffer->size();
+					toVduUpdated = true;
 
 					// Check the DataID which is the part of the payload (first 4 bytes).
 					//
@@ -481,38 +503,23 @@ namespace Sim
 				}
 			}
 
-			if (std::scoped_lock locker{*m_shared.clientSharedMemory}; // SharedMemory lock here
-				receiveBuffer->empty() == false && wasTimeout == false)
+			// Set timeout
+			//
+			if ((toVdu->portData[portIndex].timeout ? true : false) != wasTimeout)
 			{
-				// Payload is received, write it to shared memory
-				//
-				receivedPortsData->portData[portInfo.modulePortNo - 1].timeout = wasTimeout ? 1 : 0;
-
-				SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
-
-				auto counter = sharedData->toVdu.updateCounter;
-				sharedData->toVdu = *receivedPortsData;
-
-				sharedData->toVdu.updateCounter = counter + 1;
+				toVdu->portData[portIndex].timeout = wasTimeout ? 1 : 0;
+				toVduUpdated = true;
 			}
-			else
-			{
-				// Payload is not received, just update timeout flag in shared memory, do not overwrite data
-				//
-				SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+		} // for (ConnectionImplPtr& c : m_connections)
 
-				// Update only if something changed, to avoid unnecessary updateCounter increment
-				//
-				if (auto currentTimeout = sharedData->toVdu.portData[portInfo.modulePortNo - 1].timeout; //
-					currentTimeout != (wasTimeout ? 1 : 0))
-				{
-					auto counter = sharedData->toVdu.updateCounter;
+		if (toVduUpdated == true)
+		{
+			toVdu->updateCounter++;
 
-					sharedData->toVdu.portData[portInfo.modulePortNo - 1].timeout = wasTimeout ? 1 : 0;
+			std::scoped_lock locker{*m_shared.clientSharedMemory}; // SharedMemory lock here
 
-					sharedData->toVdu.updateCounter = counter + 1;
-				}
-			}
+			SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+			sharedData->toVdu = *toVdu;
 		}
 
 		return true;
@@ -525,6 +532,10 @@ namespace Sim
 		{
 			return true;
 		}
+
+		// Review comment: DO NOT COMMIT!!!!!!!!!!!!!
+		// TEMPORARY RETURN TRUE, VDU is going to FAULT, we need to understand what is going on.
+		return true;
 
 		// Fetch data from shared memory to send to connections
 		//
