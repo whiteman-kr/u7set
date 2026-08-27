@@ -169,6 +169,9 @@ void SimCommThreadWorker::processSharedMemory()
 		rnLibReadMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
 		{
+
+			//qDebug() << sharedData->toVdu.portData[i].occupied;
+
 			// if (sharedData->toVdu.portData[i].timeout == false)
 			{
 				rnLibWriteReadMemory(i * OptoBufferMaxSize, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
@@ -183,7 +186,8 @@ void SimCommThreadWorker::processSharedMemory()
 		rnLibWriteMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
 		{
-			if (sharedData->fromVdu.portData[i].timeout == false)
+			sharedData->fromVdu.updateCounter++;
+			//if (sharedData->fromVdu.portData[i].timeout == false)
 			{
 				rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
 			}

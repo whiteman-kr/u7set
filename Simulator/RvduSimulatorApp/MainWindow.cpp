@@ -104,8 +104,11 @@ void MainWindow::onTimer()
 
 void MainWindow::onSignals()
 {
-	SignalsView* dialogView = SignalsView::create(this);
-	Q_UNUSED(dialogView);
+	if (m_rvduController->isRunning() == true)
+	{
+		SignalsView* dialogView = SignalsView::create(this);
+		Q_UNUSED(dialogView);
+	}
 }
 
 void MainWindow::onShowSharedMemory() 

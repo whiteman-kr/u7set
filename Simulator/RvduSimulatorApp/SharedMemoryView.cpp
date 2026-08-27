@@ -14,7 +14,7 @@ SharedMemoryModel::SharedMemoryModel(int dataSize, MemoryType memoryType):
 {
 	m_tableHeaders << tr("Offset") << tr("Value") << tr("Hex");
 	m_data = new unsigned char[m_dataSize];
-	memset(m_data, 0, sizeof(m_dataSize));
+	memset(m_data, 0, m_dataSize);
 }
 
 SharedMemoryModel::~SharedMemoryModel() 
@@ -86,7 +86,7 @@ QVariant SharedMemoryModel::data(const QModelIndex& index, int role) const
 			return QString::number(wData[offset], 16).rightJustified(4, '0');
 		}
 	}
-
+	
 	return QVariant();
 }
 
