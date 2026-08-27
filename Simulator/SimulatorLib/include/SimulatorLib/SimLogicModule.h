@@ -4,6 +4,7 @@
 #include "SimDeviceState.h"
 
 #include <HardwareLib/LogicModulesInfo.h>
+#include <SimulatorLib/SimModuleJumpers.h>
 
 namespace Sim
 {
@@ -16,9 +17,12 @@ namespace Sim
 		~LogicModule();
 
 	public:
-		QString equipmentId() const;
-		int lmNumber() const;
-		E::Channel channel() const;
+		[[nodiscard]] QString equipmentId() const;
+
+		[[nodiscard]] int lmNumber() const;
+		[[nodiscard]] E::Channel channel() const;
+
+		[[nodiscard]] ModuleJumpers moduleJumpers() const;
 
 		const ::LogicModuleInfo& logicModuleExtraInfo() const;
 		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);

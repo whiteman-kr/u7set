@@ -123,6 +123,16 @@ namespace Sim
 		return m_logicModuleInfo.channel;
 	}
 
+	ModuleJumpers BaseModuleImpl::moduleJumpers() const
+	{
+		return m_moduleJumpers;
+	}
+
+	void BaseModuleImpl::setModuleJumpers(ModuleJumpers jumpers)
+	{
+		m_moduleJumpers = std::move(jumpers);
+	}
+
 	const Hardware::LogicModuleInfo& BaseModuleImpl::logicModuleInfo() const
 	{
 		return m_logicModuleInfo;

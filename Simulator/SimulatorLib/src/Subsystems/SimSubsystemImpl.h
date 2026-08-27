@@ -32,11 +32,15 @@ namespace Sim
 		bool addDevice(std::shared_ptr<BaseModuleImpl> module);
 		bool removeDevice(QString equipmentId);
 
+		bool loadJumpers(); // Load jumpers values from Description.json
+
 	private:
 		std::vector<Hardware::LogicModuleInfo> modulesInfo() const;
 
 	public:
 		QString subsystemId() const;
+
+		QString subsystemDir() const;
 
 		bool isLmSubsystem() const;
 		bool isVduSubsystem() const;

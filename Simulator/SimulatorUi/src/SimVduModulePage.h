@@ -38,6 +38,7 @@ namespace SimUi
 		void projectUpdated();
 
 		void powerOff(bool toPowerOff);
+		void startSimApp();
 		// void armingKeyToggled(bool value);
 		// void tuningKeyToggled(bool value);
 
@@ -49,6 +50,8 @@ namespace SimUi
 
 	public:
 		QString equipmentId() const;
+
+		QString simAppArguments() const;
 
 	private:
 		std::optional<Sim::VduModule> vduModule();
@@ -74,14 +77,17 @@ namespace SimUi
 		QLabel* m_moduleValue = nullptr;
 
 		QFrame* m_stateLine = nullptr;
-
+		// ----------------------
 		QPushButton* m_disableButton = nullptr;
 		QLabel* m_stateLabel = nullptr;
 
 		QLabel* m_runtimeModeLabel = nullptr;
 		QLabel* m_runtimeModeValue = nullptr;
 
-		// QFrame* m_sorLine = nullptr;
+		QFrame* m_modeLine = nullptr;
+		// ----------------------
+		QLabel* m_simAppArguments = nullptr;
+		QPushButton* m_startSimAppButton = nullptr;
 
 		// QPushButton* m_armingKeyButton = nullptr;
 		// QLabel* m_armingKeyStateLabel = nullptr;

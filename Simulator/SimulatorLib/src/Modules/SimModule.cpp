@@ -28,6 +28,11 @@ namespace Sim
 		return m_impl->channel();
 	}
 
+	ModuleJumpers Module::moduleJumpers() const
+	{
+		return m_impl->moduleJumpers();
+	}
+
 	DeviceState Module::deviceState() const
 	{
 		return m_impl->deviceState();

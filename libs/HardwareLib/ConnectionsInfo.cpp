@@ -26,6 +26,7 @@ const QString ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL("DisableDataIDContro
 const QString ConnectionsInfo::ATTR_PORTS_COUNT("PortsCount");
 const QString ConnectionsInfo::ATTR_EQUIPMENT_ID("EquipmentID");
 const QString ConnectionsInfo::ATTR_MODULE_ID("ModuleID");
+const QString ConnectionsInfo::ATTR_MODULE_PORT_NO("ModulePortNo");
 const QString ConnectionsInfo::ATTR_LM_ID("LmID");
 const QString ConnectionsInfo::ATTR_RX_WORDS_QUANTITY("RxWordsQuantity");
 const QString ConnectionsInfo::ATTR_TX_START_ADDRESS("TxStartAddress");
@@ -222,6 +223,7 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 	}
 
 	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_EQUIPMENT_ID, &cpi->equipmentID, errMsg);
+	result &= DomXmlHelper::getIntAttribute(portElem, ConnectionsInfo::ATTR_MODULE_PORT_NO, &cpi->modulePortNo, errMsg);
 	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_MODULE_ID, &cpi->moduleID, errMsg);
 	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_LM_ID, &cpi->lmID, errMsg);
 

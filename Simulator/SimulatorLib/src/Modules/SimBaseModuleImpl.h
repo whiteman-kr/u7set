@@ -4,6 +4,7 @@
 #include "../SimScopedLog.h"
 
 #include <SimulatorLib/SimDeviceState.h>
+#include <SimulatorLib/SimModuleJumpers.h>
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/ModuleFirmware.h>
@@ -52,6 +53,9 @@ namespace Sim
 		int lmNumber() const;
 		E::Channel channel() const;
 
+		ModuleJumpers moduleJumpers() const;
+		void setModuleJumpers(ModuleJumpers jumpers);
+
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
 		LmDescription& lmDescription();
@@ -63,5 +67,7 @@ namespace Sim
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
+
+		ModuleJumpers m_moduleJumpers;
 	};
 } // namespace Sim

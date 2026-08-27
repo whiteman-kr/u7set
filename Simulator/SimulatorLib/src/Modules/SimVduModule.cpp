@@ -28,6 +28,11 @@ namespace Sim
 		return m_impl->channel();
 	}
 
+	ModuleJumpers VduModule::moduleJumpers() const
+	{
+		return m_impl->moduleJumpers();
+	}
+
 	const ::LogicModuleInfo& VduModule::logicModuleExtraInfo() const
 	{
 		return m_impl->logicModuleExtraInfo();
@@ -36,6 +41,11 @@ namespace Sim
 	void VduModule::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
 	{
 		return m_impl->setLogicModuleExtraInfo(value);
+	}
+
+	QString VduModule::sharedMemoryKey() const
+	{
+		return m_impl->sharedMemoryKey();
 	}
 
 	RuntimeMode VduModule::runtimeMode() const

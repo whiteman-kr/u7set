@@ -68,6 +68,11 @@ namespace Sim
 			}
 		}
 
+		if (loadJumpers() == false)
+		{
+			return false;
+		}
+
 		return true;
 	}
 

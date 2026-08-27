@@ -51,6 +51,8 @@ namespace Sim
 
 		const Eeprom& confEeprom() const;
 
+		[[nodiscard]] QString sharedMemoryKey() const;
+
 		[[nodiscard]] RuntimeMode runtimeMode() const;
 		[[nodiscard]] virtual DeviceState deviceState() const override;
 

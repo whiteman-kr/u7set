@@ -1,14 +1,17 @@
 #include "SimVduModulePage.h"
 
 #include "SimWidgetPrivate.h"
+#include <CommonLib/ConstStrings.h>
+#include <SimulatorLib/SimControl.h>
 #include <SimulatorUi/SimIdeSimulator.h>
 
-#include <SimulatorLib/SimControl.h>
-
+#include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
 #include <QGridLayout>
 #include <QLineEdit>
+#include <QMessageBox>
+#include <QProcess>
 #include <QSplitter>
 #include <QStringListModel>
 #include <QTemporaryFile>
@@ -48,6 +51,13 @@ namespace SimUi
 
 		m_runtimeModeLabel = new QLabel{tr("Runtime Mode:"), this};
 		m_runtimeModeValue = new QLabel{tr("{}"), this};
+
+		m_modeLine = new QFrame{this};
+
+		m_simAppArguments = new QLabel{this};
+		m_simAppArguments->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+
+		m_startSimAppButton = new QPushButton{tr("Start Sim App"), this};
 
 		// m_sorLine = new QFrame{this};
 
@@ -119,6 +129,9 @@ namespace SimUi
 		m_stateLine->setFrameShape(QFrame::HLine);
 		m_stateLine->setFrameShadow(QFrame::Sunken);
 
+		m_modeLine->setFrameShape(QFrame::HLine);
+		m_modeLine->setFrameShadow(QFrame::Sunken);
+
 		// m_tuningLine->setFrameShape(QFrame::HLine);
 		// m_tuningLine->setFrameShadow(QFrame::Sunken);
 
@@ -164,6 +177,9 @@ namespace SimUi
 			layout->addWidget(m_runtimeModeValue, row, 1, 1, 2);
 			row++;
 
+			layout->addWidget(m_modeLine, row, 0, 1, 3);
+			row++;
+
 			/*layout->addWidget(m_sorLine, row, 0, 1, 3);
 			row++;
 
@@ -199,6 +215,14 @@ namespace SimUi
 			// layout->addWidget(m_memoryButton, row, 1, 1, 1);
 			// layout->addWidget(m_codeButton, row, 2, 1, 1);
 
+			// Bottom section: Sim App Arguments and Start Button
+			//
+			layout->addWidget(m_simAppArguments, row, 0, 1, 6);
+			row++;
+
+			layout->addWidget(m_startSimAppButton, row, 0, 1, 3);
+			row++;
+
 			m_splitter->addWidget(leftWidget);
 			m_splitter->setStretchFactor(0, 1);
 		}
@@ -231,6 +255,7 @@ namespace SimUi
 		connect(&m_simulator->control(), &Sim::Control::stateChanged, this, &SimVduModulePage::simulatorStateChanged);
 
 		connect(m_disableButton, &QPushButton::toggled, this, &SimVduModulePage::powerOff);
+		connect(m_startSimAppButton, &QPushButton::clicked, this, &SimVduModulePage::startSimApp);
 		// connect(m_armingKeyButton, &QPushButton::toggled, this, &SimVduModulePage::armingKeyToggled);
 		// connect(m_tuningKeyButton, &QPushButton::toggled, this, &SimVduModulePage::tuningKeyToggled);
 
@@ -247,6 +272,10 @@ namespace SimUi
 		{
 			m_splitter->restoreState(ba);
 		}
+
+		// --
+		//
+		m_simAppArguments->setText(simAppArguments());
 
 		return;
 	}
@@ -307,6 +336,33 @@ namespace SimUi
 		}
 
 		return;
+	}
+
+	void SimVduModulePage::startSimApp()
+	{
+		auto vdu = vduModule();
+		if (vdu.has_value() == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Cannot start RvduSimulatorApp: VDU module is not available."));
+			return;
+		}
+
+#if defined(Q_OS_WIN)
+		const QString applicationName = QStringLiteral("RvduSimulatorApp.exe");
+#else
+		const QString applicationName = QStringLiteral("RvduSimulatorApp");
+#endif
+
+		const QString applicationPath = QDir{QCoreApplication::applicationDirPath()}.filePath(applicationName);
+		QDir buildDir{m_simulator->buildPath() + QDir::separator() + Directory::SUBSYSTEMS + QDir::separator() +
+					  vdu->logicModuleExtraInfo().subsystemID};
+
+		const QStringList arguments = simAppArguments().split(' ');
+
+		if (QProcess::startDetached(applicationPath, arguments) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Cannot start RvduSimulatorApp from %1.").arg(applicationPath));
+		}
 	}
 
 	// void SimVduModulePage::armingKeyToggled(bool value)
@@ -580,6 +636,25 @@ namespace SimUi
 	QString SimVduModulePage::equipmentId() const
 	{
 		return m_vduEquipmentId;
+	}
+
+	QString SimVduModulePage::simAppArguments() const
+	{
+		auto vdu = vduModule();
+		if (vdu.has_value() == false)
+		{
+			return "No VDU Module";
+		}
+
+		QStringList args;
+
+		QDir dir{m_simulator->buildPath() + QDir::separator() + Directory::SUBSYSTEMS + QDir::separator() +
+				 vdu->logicModuleExtraInfo().subsystemID};
+		args << QString("--build=") + dir.path();
+		args << QString("--key=%1").arg(vdu->moduleJumpers().jumpersValue);
+		args << QString("--memory=%1").arg(vdu->sharedMemoryKey());
+
+		return args.join(" ");
 	}
 
 	std::optional<Sim::VduModule> SimVduModulePage::vduModule()

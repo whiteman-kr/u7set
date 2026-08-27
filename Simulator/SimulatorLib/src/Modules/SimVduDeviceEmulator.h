@@ -124,6 +124,8 @@ namespace Sim
 
 		const LmDescription& lmDescription() const;
 
+		[[nodiscard]] QString sharedMemoryKey() const;
+
 		// const Lans& lans() const;
 
 		[[nodiscard]] RuntimeMode runtimeMode() const;

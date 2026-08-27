@@ -28,6 +28,11 @@ namespace Sim
 		return m_impl->channel();
 	}
 
+	ModuleJumpers LogicModule::moduleJumpers() const
+	{
+		return m_impl->moduleJumpers();
+	}
+
 	const ::LogicModuleInfo& LogicModule::logicModuleExtraInfo() const
 	{
 		return m_impl->logicModuleExtraInfo();

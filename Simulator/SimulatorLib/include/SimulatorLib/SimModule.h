@@ -3,6 +3,7 @@
 #include "SimDeviceState.h"
 
 #include <HardwareLib/LogicModulesInfo.h>
+#include <SimulatorLib/SimModuleJumpers.h>
 
 namespace Sim
 {
@@ -19,6 +20,8 @@ namespace Sim
 
 		[[nodiscard]] int lmNumber() const;
 		[[nodiscard]] E::Channel channel() const;
+
+		[[nodiscard]] ModuleJumpers moduleJumpers() const;
 
 		[[nodiscard]] DeviceState deviceState() const;
 

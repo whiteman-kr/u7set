@@ -141,7 +141,7 @@ namespace Sim
 		{
 			// Create shared memory for VDU simulator
 			//
-			m_shared.memoryKey = QString{"VduSimulator.pid:%1.eid:%2"}.arg(qApp->applicationPid()).arg(equipmentId());
+			m_shared.memoryKey = sharedMemoryKey();
 			m_log.writeMessage(tr("Created shared memory with key: %1").arg(m_shared.memoryKey));
 			m_shared.clientSharedMemory.emplace(m_shared.memoryKey);
 
@@ -329,6 +329,21 @@ namespace Sim
 			return true;
 		}
 
+		if (m_shared.clientSharedMemory.has_value() == false)
+		{
+			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory is not initialized."));
+			setDeviceState(DeviceState::Fault);
+			return false;
+		}
+
+		if (m_shared.clientSharedMemory->isAttached() == false)
+		{
+			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory attach error %1.")
+								 .arg(m_shared.clientSharedMemory->errorString()));
+			setDeviceState(DeviceState::Fault);
+			return false;
+		}
+
 		auto receivedPortsData = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
 
 		for (ConnectionImplPtr& c : m_connections)
@@ -356,10 +371,10 @@ namespace Sim
 			const ::ConnectionPortInfo& portInfo = port->portInfo();
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-			if (portInfo.portNo < 0 || portInfo.portNo > SimVduSharedData::OptoPortCount - 1)
+			if (portInfo.modulePortNo < 1 || portInfo.modulePortNo > SimVduSharedData::OptoPortCount)
 			{
 				SIM_FAULT(QString("Invalid port number %1 for connection %2 in VDU %3.")
-							  .arg(portInfo.portNo)
+							  .arg(portInfo.modulePortNo)
 							  .arg(c->connectionId())
 							  .arg(equipmentId()));
 				return false;
@@ -441,8 +456,8 @@ namespace Sim
 						return false;
 					}
 
-					std::memcpy(receivedPortsData->portData[portInfo.portNo].data, receiveBuffer->data(), receiveBuffer->size());
-					receivedPortsData->portData[portInfo.portNo].occupied = receiveBuffer->size();
+					std::memcpy(receivedPortsData->portData[portInfo.modulePortNo - 1].data, receiveBuffer->data(), receiveBuffer->size());
+					receivedPortsData->portData[portInfo.modulePortNo - 1].occupied = receiveBuffer->size();
 
 					// Check the DataID which is the part of the payload (first 4 bytes).
 					//
@@ -466,36 +481,38 @@ namespace Sim
 				}
 			}
 
-			// Set port receive validity flag to 0 or 1
-			//
-			receivedPortsData->portData[portInfo.portNo].timeout = wasTimeout ? 1 : 0;
-		}
+			if (std::scoped_lock locker{*m_shared.clientSharedMemory}; // SharedMemory lock here
+				receiveBuffer->empty() == false && wasTimeout == false)
+			{
+				// Payload is received, write it to shared memory
+				//
+				receivedPortsData->portData[portInfo.modulePortNo - 1].timeout = wasTimeout ? 1 : 0;
 
-		// Write received data to shared memory
-		//
-		if (m_shared.clientSharedMemory.has_value() == false)
-		{
-			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory is not initialized."));
-			setDeviceState(DeviceState::Fault);
-			return false;
-		}
+				SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
 
-		if (m_shared.clientSharedMemory->isAttached() == false)
-		{
-			m_log.writeError(tr("VduDeviceEmulator::receiveConnectionsData: Shared memory attach error %1.")
-								 .arg(m_shared.clientSharedMemory->errorString()));
-			setDeviceState(DeviceState::Fault);
-			return false;
-		}
+				auto counter = sharedData->toVdu.updateCounter;
+				sharedData->toVdu = *receivedPortsData;
 
-		{
-			std::scoped_lock guar{*m_shared.clientSharedMemory};
+				sharedData->toVdu.updateCounter = counter + 1;
+			}
+			else
+			{
+				// Payload is not received, just update timeout flag in shared memory, do not overwrite data
+				//
+				SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
 
-			SimVduSharedData::SharedData* sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+				// Update only if something changed, to avoid unnecessary updateCounter increment
+				//
+				if (auto currentTimeout = sharedData->toVdu.portData[portInfo.modulePortNo - 1].timeout; //
+					currentTimeout != (wasTimeout ? 1 : 0))
+				{
+					auto counter = sharedData->toVdu.updateCounter;
 
-			auto counter = sharedData->toVdu.updateCounter;
-			sharedData->toVdu = *receivedPortsData;
-			sharedData->toVdu.updateCounter = counter + 1;
+					sharedData->toVdu.portData[portInfo.modulePortNo - 1].timeout = wasTimeout ? 1 : 0;
+
+					sharedData->toVdu.updateCounter = counter + 1;
+				}
+			}
 		}
 
 		return true;
@@ -597,8 +614,8 @@ namespace Sim
 				return false;
 			}
 
-			//std::vector<char> sb;
-			//std::vector<char>* sendBuffer = &sb;
+			// std::vector<char> sb;
+			// std::vector<char>* sendBuffer = &sb;
 			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
@@ -690,6 +707,12 @@ namespace Sim
 	//{
 	//	return m_lans;
 	// }
+
+	QString VduDeviceEmulator::sharedMemoryKey() const
+	{
+		static const auto pid = qApp->applicationPid();
+		return QString{"VduSimulator.pid:%1.eid:%2"}.arg(pid).arg(equipmentId());
+	}
 
 	RuntimeMode VduDeviceEmulator::runtimeMode() const
 	{

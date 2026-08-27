@@ -126,6 +126,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SimulatorLib/SimDeviceState.h
 	./include/SimulatorLib/SimLogicModule.h
 	./include/SimulatorLib/SimModule.h
+	./include/SimulatorLib/SimModuleJumpers.h
 	./include/SimulatorLib/SimOverrideRamRecord.h
 	./include/SimulatorLib/SimOverrideSignals.h
 	./include/SimulatorLib/SimProfiles.h

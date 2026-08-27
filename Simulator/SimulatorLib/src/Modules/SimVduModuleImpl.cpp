@@ -117,6 +117,11 @@ namespace Sim
 		return m_confEeprom;
 	}
 
+	QString VduModuleImpl::sharedMemoryKey() const
+	{
+		return m_device.sharedMemoryKey();
+	}
+
 	RuntimeMode VduModuleImpl::runtimeMode() const
 	{
 		return m_device.runtimeMode();
