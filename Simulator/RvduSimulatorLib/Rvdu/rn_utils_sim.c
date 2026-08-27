@@ -112,6 +112,11 @@ void writeComparsionID(const alt_u8 vduConfigID[])
 		return;
 	}
 
+	writeEBB16(ADDR_COMPARSION_ID_WORD0, vduConfigID[6] | ((alt_u16)vduConfigID[7] << 8));
+	writeEBB16(ADDR_COMPARSION_ID_WORD1, vduConfigID[4] | ((alt_u16)vduConfigID[5] << 8));
+	writeEBB16(ADDR_COMPARSION_ID_WORD2, vduConfigID[2] | ((alt_u16)vduConfigID[3] << 8));
+	writeEBB16(ADDR_COMPARSION_ID_WORD3, vduConfigID[0] | ((alt_u16)vduConfigID[1] << 8));
+
 	(void)printf("writeComparsionID: id = 0x");
 	for (int i = 0; i < 8; i++)
 	{

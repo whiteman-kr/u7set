@@ -59,6 +59,9 @@ static bool m_moduleInitialized = false;
 
 // Private module data
 //
+static alt_u16 m_screenWidth = 0;
+static alt_u16 m_screenHeight = 0;
+
 static bool m_tchscrnEvent = false;
 static alt_u16 m_tchscrnPosX = 0;
 static alt_u16 m_tchscrnPosY = 0;
@@ -66,13 +69,17 @@ static alt_u16 m_tchscrnPosY = 0;
 // End of Private data
 
 
-void moduleRnTsInitialize(void)
+void moduleRnTsInitialize(alt_u16 screenWidth, alt_u16 screenHeight)
 {
 	if (m_moduleInitialized == true)
 	{
 		RN_ASSERT(false);
 		return;
 	}
+
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
 	m_moduleInitialized = true;
 }
 
@@ -108,10 +115,6 @@ static void checkTouchEvent(void)
 
 		IOWR_ALTERA_AVALON_PIO_DATA(DMC6000_RST_BASE, 1u);
 
-#ifndef TS_TYPE // Microsoft Visual Studio-specific
-#error "Touchscreen type is not set!"
-#endif
-
 #if TS_TYPE == PENMOUN6000
 		x = ( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= 0x66 ) ? (0) :
 				( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) >= 0x399 ) ? (1279) :
@@ -119,18 +122,18 @@ static void checkTouchEvent(void)
 		y = ( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= 0x60 ) ? (0) :
 				( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) >= 0x395 ) ? (719) :
 				( 719 * (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE)-0x60) / (0x395-0x60) );
-#endif
-#if TS_TYPE == DIVA
+#elif TS_TYPE == DIVA
 		x = ( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= 0xf70 ) ?
-				( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) * ( scr_w - 1 ) / 0xf70 ) :
-				( scr_w - 1 );
+				( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) * ( m_screenWidth - 1 ) / 0xf70 ) :
+				( m_screenWidth - 1 );
 		y = ( IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= 0xf70 ) ?
-				( ( scr_h - 1 ) - (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) * ( scr_h - 1 ) / 0xf70) ) :
+				( ( m_screenHeight - 1 ) - (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) * ( m_screenHeight - 1 ) / 0xf70) ) :
 				0;
-#endif
-#if TS_TYPE == NONPROC
+#elif TS_TYPE == NONPROC
 		x = IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE);
 		y = IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE);
+#else
+#error "Touchscreen type is not set or unknown!"
 #endif
 
 		setTouchEvent(x, y);

@@ -209,8 +209,8 @@ struct VduAppSignalState
 
 struct VduHash32ToIndex
 {
-	alt_32 hash32;				// calcHash32(appSignalID.toUtf8())
-	alt_32 signalIndex;			// 32-bit! signal index
+	alt_u32 hash32;				// calcHash32(appSignalID.toUtf8())
+	alt_u32 signalIndex;			// 32-bit! signal index
 };
 
 /*
@@ -226,11 +226,6 @@ Return Value:
 	Returns "true" if successful, "false" on error.
 */
 bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, const alt_u32 maxFileSize, alt_u32* bytesRead);
-
-//
-// Warning: information access functions DO NOT LOCK the critical section for Simulator mode
-// because they provide the cached data that is NOT modified.
-//
 
 // Function return VDU Config ID (8 bytes array)
 //
@@ -291,11 +286,6 @@ const struct VduTxRxAppSignal* const txRxAppSignal(alt_u16 index);
 // At the beginning of the work loop, the states of output signals must be saved to perform their writing during the loop
 //
 void outputSignalsPreproc(void);
-
-//
-// Warning: read/write signals functions DO LOCK the critical section for Simulator mode
-// because the Simulator can also read and write the signals memory
-//
 
 // Function returns signal is available by index
 // 

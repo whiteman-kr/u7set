@@ -47,7 +47,7 @@ Module description: Detects and processes touch input events from the touchscree
 
 #include <stdbool.h>
 
-void moduleRnTsInitialize(void);
+void moduleRnTsInitialize(alt_u16 screenWidth, alt_u16 screenHeight);
 
 void moduleRnTsUninitialize(void);
 

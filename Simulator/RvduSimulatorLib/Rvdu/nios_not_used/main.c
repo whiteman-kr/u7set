@@ -125,18 +125,6 @@ int main()
 		logMemoryUsage("moduleRnDiagInitialize", (const alt_u8*)EMIF_0_ECC_CORE_BASE, (const alt_u8*)MEM_IF_DDR3_EMIF_0_End, (alt_u32)EMIF_0_ECC_CORE_SPAN);
 	}
 
-	// Initialize the input
-	//
-	{
-		setStartupStage(STAGE_KBD_INIT);
-		moduleRnKbdInitialize();
-	}
-
-	{
-		setStartupStage(STAGE_TS_INIT);
-		moduleRnTsInitialize();
-	}
-
 	// SD Card
 	//
 	{
@@ -277,6 +265,18 @@ int main()
 		vduConfigPrintSchemasList();
 	}
 
+	// Initialize the input
+	//
+	{
+		setStartupStage(STAGE_KBD_INIT);
+		moduleRnKbdInitialize();
+	}
+
+	{
+		setStartupStage(STAGE_TS_INIT);
+		moduleRnTsInitialize(vduConfig()->display0.width, vduConfig()->display0.height);
+	}
+
 	// Initialize video rendering modules
 	//
 	{
@@ -304,7 +304,6 @@ int main()
 		{
 			(void)pushVideoBuffer();
 		}
-
 	}
 
 	// Load globalScript file
@@ -507,24 +506,19 @@ int main()
 
 		startMeasuringTimer(TIMER_MAINLOOP);
 
-		{
-			externalBusBridgeReadLock();
-
-			trendsProc();
-
-			externalBusBridgeReadUnlock();
-		}
+		trendsProc();
 
 		outputSignalsPreproc();
 
-		bool schemaWasRepainted = false;
-		schemaProc(rvduLuaState, &schemaWasRepainted);
+		bool drawSchema = calculateSchemaDrawingPhase();
+
+		schemaProc(rvduLuaState, drawSchema);
 
 		optoTxProc();
 
 		stopMeasuringTimer(TIMER_MAINLOOP);
 
-		if (schemaWasRepainted == true)
+		if (drawSchema == true)
 		{
 			setTimerValue(TIMER_MAINLOOP, measuringTimerValue(TIMER_MAINLOOP));
 			setTimerValue(TIMER_PREDRAW, measuringTimerValue(TIMER_PREDRAW));

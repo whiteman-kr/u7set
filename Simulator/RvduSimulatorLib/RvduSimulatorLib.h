@@ -18,6 +18,8 @@ enum RnLibLogRecordType
 
 typedef void (*RnLibLogRecordHandler)(int /*RnLibLogRecordType*/, const char*);
 
+#define TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE 65536
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -89,11 +91,12 @@ extern "C"
 
 	void rnLibReadMemoryLock();
 	void rnLibReadMemoryUnlock();
+	bool rnLibReadReadMemory(unsigned int offset, unsigned int count, unsigned char* const result);
 	bool rnLibWriteReadMemory(unsigned int offset, const unsigned char* const data, unsigned int count);
 
 	void rnLibWriteMemoryLock();
 	void rnLibWriteMemoryUnlock();
-	bool rnLibReadWriteMemory(unsigned int offset, unsigned char* const result, unsigned int count);
+	bool rnLibReadWriteMemory(unsigned int offset, unsigned int count, unsigned char* const result);
 
 	bool rnLibSignalValueInt(unsigned int signalIndex, int* res);
 	bool rnLibSignalValueFloat(unsigned int signalIndex, float* res);

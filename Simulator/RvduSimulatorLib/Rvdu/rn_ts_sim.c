@@ -16,9 +16,11 @@ static alt_u16 m_tchscrnPosY = 0;
 //
 // End of Private data
 
-
-void moduleRnTsInitialize(void)
+void moduleRnTsInitialize(alt_u16 screenWidth, alt_u16 screenHeight)
 {
+	(void)screenWidth;
+	(void)screenHeight;
+
 	if (m_moduleInitialized == true)
 	{
 		RN_ASSERT(false);

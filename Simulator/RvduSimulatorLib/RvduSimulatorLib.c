@@ -45,7 +45,6 @@ static const int m_memorySize = 1048576 * 32;
 static alt_u8* m_externalBusBridgeRead = NULL;  // Input memory area
 static alt_u8* m_externalBusBridgeWrite = NULL; // Output memory area
 
-#define TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE 65536
 alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_READ = NULL;
 alt_u16* TO_EXTERNAL_BUS_BRIDGE_1_BASE_WRITE = NULL;
 
@@ -180,18 +179,6 @@ bool rnLibStartSim(const char* buildFolder,
 
 	moduleRnUtilsInitialize();
 
-	// Initialize the input
-	//
-	{
-		setStartupStage(STAGE_KBD_INIT);
-		moduleRnKbdInitialize();
-	}
-
-	{
-		setStartupStage(STAGE_TS_INIT);
-		moduleRnTsInitialize();
-	}
-
 	// Initialize working paths
 	//
 	char workFolder[STRING_MAX_LEN] = {0};
@@ -265,6 +252,18 @@ bool rnLibStartSim(const char* buildFolder,
 		logMemoryUsage("cacheConfigFile", m_memory, memoryEnd, m_memorySize);
 
 		vduConfigPrintSchemasList();
+	}
+
+	// Initialize the input
+	//
+	{
+		setStartupStage(STAGE_KBD_INIT);
+		moduleRnKbdInitialize();
+	}
+
+	{
+		setStartupStage(STAGE_TS_INIT);
+		moduleRnTsInitialize(vduConfig()->display0.width, vduConfig()->display0.height);
 	}
 
 	// Initialize video memory
@@ -361,6 +360,18 @@ bool rnLibStartSim(const char* buildFolder,
 		memoryEnd += bytesRead;
 		memoryAvailable = DEC_MEMORY(memoryAvailable, bytesRead);
 		logMemoryUsage("cacheSignalsFile", m_memory, memoryEnd, m_memorySize);
+	}
+
+	// Write Comparison ID
+	//
+	{
+		const alt_u8* id = vduConfigID();
+		if (id == NULL)
+		{
+			RN_ASSERT(id);
+			return 0;
+		}
+		writeComparsionID(id);
 	}
 
 	// Load font files
@@ -821,9 +832,23 @@ void rnLibReadMemoryUnlock()
 	externalBusBridgeReadUnlock(); 
 }
 
+bool rnLibReadReadMemory(unsigned int offset, unsigned int count, unsigned char* const result)
+{
+	if (offset + count > TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	{
+		assert(false);
+		return false;
+	}
+
+	alt_u8* ptr = m_externalBusBridgeRead + offset;
+	memcpy(result, ptr, count);
+
+	return true;
+}
+
 bool rnLibWriteReadMemory(unsigned int offset, const unsigned char* const data, unsigned int count)
 {
-	if (offset + count >= TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	if (offset + count > TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
 	{
 		assert(false);
 		return false;
@@ -845,9 +870,9 @@ void rnLibWriteMemoryUnlock()
 	externalBusBridgeWriteUnlock(); 
 }
 
-bool rnLibReadWriteMemory(unsigned int offset, unsigned char* const result, unsigned int count)
+bool rnLibReadWriteMemory(unsigned int offset, unsigned int count, unsigned char* const result)
 {
-	if (offset + count >= TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	if (offset + count > TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
 	{
 		assert(false);
 		return false;
