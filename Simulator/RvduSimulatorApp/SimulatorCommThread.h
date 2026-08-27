@@ -79,16 +79,15 @@ private:
 	void processVduSharedData();
 
 	void initSharedMemory();
-	void processSharedMemory(SimVduSharedData::SharedData* const sharedData);
+	void processSharedMemory();
 
 private:
-
 	QString m_sharedMemoryKey;
 	std::optional<QSharedMemory> m_sharedMemory;
 
 	uint64_t m_prevUpdateCounter = (uint64_t)-1;
-	uint64_t m_sharedMemoryTimeoutCounter = 0;
-	bool m_sharedMemoryTimeout = false;
+	uint64_t m_timeoutCounter = 0;
+	bool m_timeout = false;
 };
 
 class SimCommThreadController : public QObject
@@ -111,6 +110,5 @@ signals:
 private:
 	SimCommThreadWorker* m_worker = nullptr;
 	QThread m_workerThread;
-
 };
 

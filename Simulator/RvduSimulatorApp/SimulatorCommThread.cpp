@@ -5,6 +5,10 @@
 constexpr size_t OptoBufferMaxSize = 2560 * 2;
 constexpr size_t OptoPortCount = 8;
 
+constexpr int MemoryUpdateTimeMs = 50;	// Memory update period
+constexpr int StatsUpdateMs = 250;		// Statistics update period
+constexpr int TimeoutMs = 3000;			// Timeout period
+
 SimCommThreadWorker::SimCommThreadWorker(QString sharedMemoryKey) :
 	m_sharedMemoryKey(sharedMemoryKey)
 {
@@ -16,7 +20,7 @@ void SimCommThreadWorker::threadProc()
 	{
 		processVduSharedData();
 
-		QThread::msleep(50);
+		QThread::msleep(MemoryUpdateTimeMs);
 	}
 }
 
@@ -35,23 +39,11 @@ void SimCommThreadWorker::processVduSharedData()
 
 	if (m_sharedMemory.has_value() == true)
 	{
-		assert(m_sharedMemory->isAttached() == true);
+		m_sharedMemory->lock();
 
-		auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_sharedMemory->data());
-		if (sharedData == nullptr)
-		{
-			logError(tr("Shared memory data pointer is null."));
-			m_sharedMemory.reset();
-			return;
-		}
+		processSharedMemory();
 
-		if (sharedData->size != sizeof(SimVduSharedData::SharedData))
-		{
-			logError(tr("Shared memory data has wrong size."));
-			return;
-		}
-
-		processSharedMemory(sharedData);
+		m_sharedMemory->unlock();
 	}
 }
 
@@ -103,22 +95,40 @@ void SimCommThreadWorker::initSharedMemory()
 
 		// std::scoped_lock lock{*m_shared.clientSharedMemory};
 		*sharedData = SimVduSharedData::SharedData{};
-		 sharedData->size = sizeof(SimVduSharedData::SharedData);
+		sharedData->size = sizeof(SimVduSharedData::SharedData);
 
-		 logMessage(tr("Shared memory was successfully created and initialized."));
+		logMessage(tr("Shared memory was successfully created and initialized."));
 	}
 }
 
-void SimCommThreadWorker::processSharedMemory(SimVduSharedData::SharedData* const sharedData)
+void SimCommThreadWorker::processSharedMemory()
 {
+	assert(m_sharedMemory->isAttached() == true);
+
+	auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_sharedMemory->data());
+	if (sharedData == nullptr)
+	{
+		logError(tr("Shared memory data pointer is null."));
+		m_sharedMemory.reset();
+		return;
+	}
+
+	if (sharedData->size != sizeof(SimVduSharedData::SharedData))
+	{
+		logError(tr("Shared memory data has wrong size."));
+		return;
+	}
+
+	// Process statistics
+	//
 	static int counter = 0;
-	if (counter++ >= (250 /*250 ms*/ / 50))
+	if (counter++ >= (StatsUpdateMs / MemoryUpdateTimeMs))
 	{
 		counter = 0;
 
 		QString deviceStatestr;
 
-		if (m_sharedMemoryTimeout == true) 
+		if (m_timeout == true) 
 		{
 			deviceStatestr = "Timeout";
 		}
@@ -144,15 +154,17 @@ void SimCommThreadWorker::processSharedMemory(SimVduSharedData::SharedData* cons
 		QString str =
 			tr("%1, state: %2, counter: %3").arg(m_sharedMemoryKey).arg(deviceStatestr).arg(sharedData->simulatorState.updateCounter);
 
-		emit updateSharedDataInfo(str, m_sharedMemoryTimeout);
+		emit updateSharedDataInfo(str, m_timeout);
 	}
 
+	// Update the contents
+	//
 	if (sharedData->simulatorState.updateCounter != m_prevUpdateCounter)
 	{
 		m_prevUpdateCounter = sharedData->simulatorState.updateCounter;
 
-		m_sharedMemoryTimeout = false;
-		m_sharedMemoryTimeoutCounter = 0;
+		m_timeout = false;
+		m_timeoutCounter = 0;
 
 		rnLibReadMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
@@ -173,7 +185,7 @@ void SimCommThreadWorker::processSharedMemory(SimVduSharedData::SharedData* cons
 		{
 			if (sharedData->fromVdu.portData[i].timeout == false)
 			{
-				rnLibReadWriteMemory(i * OptoBufferMaxSize, sharedData->fromVdu.portData[i].data, OptoBufferMaxSize);
+				rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
 			}
 			// else
 			//{
@@ -184,13 +196,13 @@ void SimCommThreadWorker::processSharedMemory(SimVduSharedData::SharedData* cons
 	}
 	else
 	{
-		if (m_sharedMemoryTimeout == false)
+		if (m_timeout == false)
 		{
-			m_sharedMemoryTimeoutCounter++;
+			m_timeoutCounter++;
 
-			if (m_sharedMemoryTimeoutCounter >= (3000 /*3 secs*/ / 50))
+			if (m_timeoutCounter >= (TimeoutMs / MemoryUpdateTimeMs))
 			{
-				m_sharedMemoryTimeout = true;
+				m_timeout = true;
 			}
 		}
 	}

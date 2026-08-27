@@ -14,9 +14,14 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QString buildFolder, int subsystemKey, QString sharedMemoryKey, QWidget* parent = nullptr);
 	~MainWindow();
+
+signals:
+	void aboutToClose();
+
 private slots:
 	void onTimer();
 	void onSignals();
+	void onShowSharedMemory();
 	void onShowAppLog();
 	void onShowAbout();
 

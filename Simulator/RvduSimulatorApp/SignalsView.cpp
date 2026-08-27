@@ -2,13 +2,12 @@
 
 #include <RvduSimulatorLib.h>
 
+#include <QTableView>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSettings>
-#include <QTableWidget>
 #include <QTimer>
-
 
 SignalsModel::SignalsModel()
 {

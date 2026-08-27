@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QTableWidget>
+#include <QAbstractTableModel>
+class QTableView;
 
 class SignalsModel : public QAbstractTableModel
 {

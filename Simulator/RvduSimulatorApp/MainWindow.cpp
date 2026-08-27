@@ -4,6 +4,7 @@
 #include "SimulatorCommThread.h"
 #include "RvduWidget.h"
 #include "SignalsView.h"
+#include "SharedMemoryView.h"
 
 #include <QTimer>
 #include <QSettings>
@@ -105,6 +106,17 @@ void MainWindow::onSignals()
 {
 	SignalsView* dialogView = SignalsView::create(this);
 	Q_UNUSED(dialogView);
+}
+
+void MainWindow::onShowSharedMemory() 
+{
+	if (m_rvduController->isRunning() == true)
+	{
+		SharedMemoryView* dialogView = SharedMemoryView::create(this);
+		Q_UNUSED(dialogView);
+
+		connect(this, &MainWindow::aboutToClose, dialogView, &QWidget::close);
+	}
 }
 
 void MainWindow::onShowAppLog()
@@ -251,9 +263,13 @@ void MainWindow::createMenu()
 
 	auto signalsMenu = menuBar()->addMenu(tr("&Signals"));
 
-	QAction* signalsView = new QAction(tr("Signals View"), this);
-	connect(signalsView, &QAction::triggered, this, &MainWindow::onSignals);
-	signalsMenu->addAction(signalsView);
+	a = new QAction(tr("Signals View"), this);
+	connect(a, &QAction::triggered, this, &MainWindow::onSignals);
+	signalsMenu->addAction(a);
+
+	a = new QAction(tr("Memory View"), this);
+	connect(a, &QAction::triggered, this, &MainWindow::onShowSharedMemory);
+	signalsMenu->addAction(a);
 
 	auto helpMenu = menuBar()->addMenu(tr("&?"));
 
@@ -332,7 +348,14 @@ void MainWindow::updateStatusBar()
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
-	if (object == m_statusBarLogAlerts && m_statusBarLogAlerts->text().isEmpty() == false && event->type() == QEvent::MouseButtonPress)
+	if (event->type() == QEvent::Close)
+	{
+		emit aboutToClose();
+	}
+
+	if (event->type() == QEvent::MouseButtonPress &&
+		object == m_statusBarLogAlerts && 
+		m_statusBarLogAlerts->text().isEmpty() == false)
 	{
 		onShowAppLog();
 	}

@@ -22,6 +22,8 @@ set (TC_SOURCES
     RvduWidget.h
 	SignalsView.cpp
 	SignalsView.h
+	SharedMemoryView.cpp
+	SharedMemoryView.h
 	SimulatorCommThread.cpp
 	SimulatorCommThread.h
 )
@@ -56,7 +58,12 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-
+	<QTableView>
+	<QHeaderView>
+	<QInputDialog>
+	<QMessageBox>
+	<QSettings>
+	<QTimer>
 	<QApplication>
 	<QHBoxLayout>
 	<QLabel>
