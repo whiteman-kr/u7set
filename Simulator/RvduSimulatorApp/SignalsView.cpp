@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
+#include <QClipboard>
 
 SignalsModel::SignalsModel()
 {
@@ -277,6 +278,7 @@ void SignalsView::setupUi()
 	m_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -301,6 +303,36 @@ void SignalsView::setupUi()
 				}
 
 				onSignalClicked(static_cast<unsigned int>(row));
+			});
+
+	connect(m_tableView,
+			&QTableView::customContextMenuRequested,
+			this,
+			[this](const QPoint& pos)
+			{
+				QModelIndex index = m_tableView->indexAt(pos);
+				if (index.isValid() == false)
+				{
+					return;
+				}
+
+				const int row = index.row();
+
+				QMenu menu(m_tableView);
+				QModelIndex modelIndex = m_tableView->model()->index(row, 1 /*AppSignalCustomID*/);
+				QString value = modelIndex.data(Qt::DisplayRole).toString();
+
+				QAction* action = menu.addAction(QString("Copy %1").arg(value));
+
+				connect(action,
+						&QAction::triggered,
+						this,
+						[value]()
+						{
+							QClipboard* clipboard = QApplication::clipboard();
+							clipboard->setText(value);
+						});
+				menu.exec(m_tableView->viewport()->mapToGlobal(pos));
 			});
 }
 

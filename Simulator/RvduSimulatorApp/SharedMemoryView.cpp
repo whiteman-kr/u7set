@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
+#include <QRegularExpressionValidator>
 
 #include "SharedMemoryView.h"
 #include <RvduSimulatorLib.h>
@@ -152,26 +153,98 @@ SharedMemoryView::~SharedMemoryView()
 	m_instance = nullptr;
 }
 
+static void findAndSelectOffset(QTableView* view, const QString& value)
+{
+	QAbstractItemModel* model = view->model();
+
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	for (int row = 0; row < model->rowCount(); ++row)
+	{
+		QModelIndex index = model->index(row, 0);
+
+		if ((index.data().toString()) == value || (index.row() == value.toInt()))
+		{
+			view->selectionModel()->clearSelection();
+			view->selectionModel()->select(model->index(row, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+			view->setCurrentIndex(index);
+			view->scrollTo(index, QAbstractItemView::PositionAtCenter);
+
+			return;
+		}
+	}
+	return;
+}
+
+
+
 void SharedMemoryView::setupUi()
 {
-	m_readTableView = new QTableView(this);
+	QRegularExpression regex("^\\d{0,5}$");
+	QRegularExpressionValidator* validator = new QRegularExpressionValidator(regex, this);
+
+	QWidget* readWidget = new QWidget(this);
+	QVBoxLayout* readLayout = new QVBoxLayout(readWidget);
+	readLayout->setContentsMargins(0, 0, 0, 0);
+
+	QLabel* readLabel = new QLabel(tr("Read RVDU Memory"), readWidget);
+	readLayout->addWidget(readLabel);
+
+	m_readTableView = new QTableView(readWidget);
 	m_readTableView->setModel(&m_readModel);
 	m_readTableView->verticalHeader()->setVisible(false);
 	m_readTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_readTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_readTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	readLayout->addWidget(m_readTableView, 1);
 
-	m_writeTableView = new QTableView(this);
+	QLineEdit* readEdit = new QLineEdit(this);
+	readEdit->setPlaceholderText("Enter read offset");
+	readEdit->setValidator(validator);
+	readLayout->addWidget(readEdit);
+
+	QWidget* writeWidget = new QWidget(this);
+	QVBoxLayout* writeLayout = new QVBoxLayout(writeWidget);
+	writeLayout->setContentsMargins(0, 0, 0, 0);
+
+	QLabel* writeLabel = new QLabel(tr("Write RVDU Memory"), writeWidget);
+	writeLayout->addWidget(writeLabel);
+
+	m_writeTableView = new QTableView(writeWidget);
 	m_writeTableView->setModel(&m_writeModel);
 	m_writeTableView->verticalHeader()->setVisible(false);
 	m_writeTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_writeTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_writeTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	writeLayout->addWidget(m_writeTableView, 1);
+
+	QLineEdit* writeEdit = new QLineEdit(this);
+	writeEdit->setPlaceholderText("Enter write offset");
+	writeEdit->setValidator(validator);
+	writeLayout->addWidget(writeEdit);
 
 	QHBoxLayout* layout = new QHBoxLayout(this);
-	layout->setContentsMargins(0, 0, 0, 0);
-	layout->addWidget(m_readTableView);
-	layout->addWidget(m_writeTableView);
+	layout->addWidget(readWidget);
+	layout->addWidget(writeWidget);
+
+	connect(readEdit,
+			&QLineEdit::returnPressed,
+			this,
+			[this, readEdit]()
+			{
+				findAndSelectOffset(m_readTableView, readEdit->text());
+			});
+
+	connect(writeEdit,
+			&QLineEdit::returnPressed,
+			this,
+			[this, writeEdit]()
+			{
+				findAndSelectOffset(m_writeTableView, writeEdit->text());
+			});
 }
 
 void SharedMemoryView::onTimer()
