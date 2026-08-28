@@ -2,6 +2,7 @@
 #include "version.h"
 #include <CommonLib/ConstStrings.h>
 #include <CommonStdLib/u7_vld.h>
+#include <LicenseLib/AppLicenser.h>
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
@@ -84,8 +85,25 @@ static bool checkRunningInstance(const QString& memoryId)
 		sharedData->showCommand = true;
 		return false;
 	}
+}
 
-	return false;
+static bool checkLicense() 
+{
+	// --
+	//
+	Q_INIT_RESOURCE(LicenseLib);
+
+	if (LicenseLib::AppLicenser::guiAppStartValidation(QDateTime::fromSecsSinceEpoch(U7SET_BUILD_DATE_SECONDS).date()) == false)
+	{
+		return false;
+	}
+
+	bool isAppLicenseValid =
+		LicenseLib::AppLicenser::showRestrictionMessageBox(nullptr,
+														   LicenseLib::AppLicenser{}.validator().validateAppSimulator(),
+														   "RVDU Simulator");
+
+	return isAppLicenseValid;
 }
 
 int main(int argc, char* argv[])
@@ -100,11 +118,16 @@ int main(int argc, char* argv[])
 	app.setApplicationVersion(
 		QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
+	if (checkLicense() == false)
+	{
+		return EXIT_FAILURE;
+	}
+
 	AppSettings settings;
 
 	if (parseCommandLine(settings) == false)
 	{
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	bool runAppAllow = true;
@@ -117,7 +140,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	int result = 0;
+	int result = EXIT_SUCCESS;
 
 	if (runAppAllow == true)
 	{

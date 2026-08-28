@@ -85,6 +85,6 @@ target_compile_definitions(${TARGET} PRIVATE RVDU_SIM)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Widgets)
-target_link_libraries(${TARGET} PRIVATE CommonLib UiLib RvduSimulatorLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib UiLib LicenseLib RvduSimulatorLib)
 
 #add_code_coverage_options(${TARGET} CODE_COVERAGE)
