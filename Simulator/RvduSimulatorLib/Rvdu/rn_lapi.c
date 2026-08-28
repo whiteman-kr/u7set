@@ -342,13 +342,13 @@ static int luaSetTrendSignalVisible(lua_State* L);
 
 // Custom check function for boolean arguments
 //
-int luaL_checkboolean(lua_State* L, int arg) 
+static bool luaL_checkboolean(lua_State* L, int arg) 
 {
 	if (lua_isboolean(L, arg) == false) 
 	{
 		luaL_error(L, "argument %d must be a boolean", arg);
 	}
-	return lua_toboolean(L, arg); // returns 0 (false) or 1 (true)
+	return (lua_toboolean(L, arg) == 0) ? false : true; // returns 0 (false) or 1 (true)
 }
 //*************************************
 // Pointers and strings checking macros
@@ -864,7 +864,7 @@ static int luaBlinkPhase(lua_State* L)
 
 static int signalExistsByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 	bool res = false;
 
 	if (signalIndex < appSignalsCount())
@@ -878,7 +878,7 @@ static int signalExistsByIndex( lua_State* L )
 
 static int signalIsAvailableByIndex(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	if (signalIndex < appSignalsCount())
 	{
@@ -898,7 +898,7 @@ static int signalIsAvailableByIndex(lua_State* L)
 
 static int luaSignalIdByIndex(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -917,7 +917,7 @@ static int luaSignalIdByIndex(lua_State* L)
 
 static int luaSignalCaptionByIndex(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -936,7 +936,7 @@ static int luaSignalCaptionByIndex(lua_State* L)
 
 static int luaSignalUnitsByIndex(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -955,7 +955,7 @@ static int luaSignalUnitsByIndex(lua_State* L)
 
 static int isDiscreteByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	bool res = false;
 
@@ -980,7 +980,7 @@ static int isDiscreteByIndex( lua_State* L )
 
 static int isAnalogByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	bool res = false;
 
@@ -1005,7 +1005,7 @@ static int isAnalogByIndex( lua_State* L )
 
 static int isTuningByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	bool res = false;
 
@@ -1030,7 +1030,7 @@ static int isTuningByIndex( lua_State* L )
 
 static int signalTypeByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1053,7 +1053,7 @@ static int signalTypeByIndex( lua_State* L )
 static int signalValueByIndexInt( lua_State* L )
 {
 	alt_32 res = 0;
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	if (readSignalValueIntByIndex(signalIndex, &res) == false)
 	{
@@ -1075,7 +1075,7 @@ static int signalValueByIndexFloat( lua_State* L )
 {
 	float res = 0.0f;
 
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	if (readSignalValueFloatByIndex(signalIndex, &res) == false)
 	{
@@ -1460,7 +1460,7 @@ static int signalValueFloat(lua_State* L)
 
 static int signalTuningDefaultValueByIndexInt( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
@@ -1504,7 +1504,7 @@ static int signalTuningDefaultValueByIndexInt( lua_State* L )
 
 static int signalTuningDefaultValueByIndexFloat( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1546,7 +1546,7 @@ static int signalTuningDefaultValueByIndexFloat( lua_State* L )
 
 static int signalLowEngUnitsByIndexInt( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1588,7 +1588,7 @@ static int signalLowEngUnitsByIndexInt( lua_State* L )
 
 static int signalTuningLowEngUnitsByIndexInt(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1630,7 +1630,7 @@ static int signalTuningLowEngUnitsByIndexInt(lua_State* L)
 
 static int signalLowEngUnitsByIndexFloat( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1671,7 +1671,7 @@ static int signalLowEngUnitsByIndexFloat( lua_State* L )
 
 static int signalTuningLowEngUnitsByIndexFloat(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1712,7 +1712,7 @@ static int signalTuningLowEngUnitsByIndexFloat(lua_State* L)
 
 static int signalHighEngUnitsByIndexInt( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1753,7 +1753,7 @@ static int signalHighEngUnitsByIndexInt( lua_State* L )
 
 static int signalTuningHighEngUnitsByIndexInt(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1794,7 +1794,7 @@ static int signalTuningHighEngUnitsByIndexInt(lua_State* L)
 
 static int signalHighEngUnitsByIndexFloat( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1835,7 +1835,7 @@ static int signalHighEngUnitsByIndexFloat( lua_State* L )
 
 static int signalTuningHighEngUnitsByIndexFloat(lua_State* L)
 {
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -1877,7 +1877,7 @@ static int signalTuningHighEngUnitsByIndexFloat(lua_State* L)
 
 static int decimalPlacesByIndex( lua_State* L )
 {
-	alt_u16 signalIndex = luaL_checkinteger ( L, 1 );
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	const struct VduAppSignalParam* const param = appSignalParamByIndex(signalIndex);
 	if (param == NULL)
@@ -2449,8 +2449,8 @@ static int writeValueByIndexInt( lua_State* L )
 {
 	bool res = true;
 
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
-	alt_32 newValue = luaL_checkinteger(L, 2);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
+	alt_32 newValue = (alt_32)luaL_checkinteger(L, 2);
 	if (writeSignalValueIntByIndex(signalIndex, newValue) == false)
 	{
 		char msg[STRING_MAX_LEN];
@@ -2468,8 +2468,8 @@ static int writeValueByIndexFloat( lua_State* L )
 {
 	bool res = true;
 
-	alt_u16 signalIndex = luaL_checkinteger(L, 1);
-	float newValue = luaL_checknumber(L, 2);
+	alt_u16 signalIndex = (alt_u16)luaL_checkinteger(L, 1);
+	float newValue = (float)luaL_checknumber(L, 2);
 
 	if (writeSignalValueFloatByIndex(signalIndex, newValue) == false)
 	{
@@ -2575,8 +2575,8 @@ static void copyValueProc(lua_State* L, alt_u16 signalIndexSrc, alt_u16 signalIn
 
 static int copyValueByIndex(lua_State* L)
 {
-	alt_u16 signalIndexSrc = luaL_checkinteger(L, 1);
-	alt_u16 signalIndexDst = luaL_checkinteger(L, 2);
+	alt_u16 signalIndexSrc = (alt_u16)luaL_checkinteger(L, 1);
+	alt_u16 signalIndexDst = (alt_u16)luaL_checkinteger(L, 2);
 
 	copyValueProc(L, signalIndexSrc, signalIndexDst);
 	return 1;
@@ -2607,7 +2607,7 @@ static int writeValueInt(lua_State* L)
 	}
 	else
 	{
-		alt_32 newValue = luaL_checkinteger(L, 2);
+		alt_32 newValue = (alt_32)luaL_checkinteger(L, 2);
 		if (writeSignalValueIntByIndex(signalIndex, newValue) == false)
 		{
 			(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: can't write value of signal '%s'.", appSignalId);
@@ -2646,7 +2646,7 @@ static int writeValueFloat(lua_State* L)
 	}
 	else
 	{
-		float newValue = luaL_checknumber(L, 2);
+		float newValue = (float)luaL_checknumber(L, 2);
 
 		if (writeSignalValueFloatByIndex(signalIndex, newValue) == false)
 		{
@@ -2926,7 +2926,7 @@ static alt_u16 signalGlobalIndexProc(const struct VduSchemaFileSchemaItem1* cons
 
 static int signalGlobalIndex(lua_State* L)
 {
-	alt_u16 localIndex = luaL_checkinteger(L, 2);
+	alt_u16 localIndex = (alt_u16)luaL_checkinteger(L, 2);
 	alt_u16 signalIndex = signalGlobalIndexProc((void*)lua_touserdata(L, 1), localIndex);
 	if (signalIndex == INVALID_INDEX)
 	{
@@ -3057,7 +3057,7 @@ static int itemSetLeft(lua_State* L)
 	struct VduSchemaFileSchemaItem1* schemaItem = lua_touserdata(L, 1);
 	if (SCHEMA_ITEM_PTR_IS_VALID(schemaItem) == true)
 	{
-		alt_u16 left = luaL_checkinteger(L, 2);
+		alt_u16 left = (alt_u16)luaL_checkinteger(L, 2);
 
 		if  (left < m_screenWidth)
 		{
@@ -3103,7 +3103,7 @@ static int itemSetTop(lua_State* L)
 	struct VduSchemaFileSchemaItem1* schemaItem = lua_touserdata(L, 1);
 	if (SCHEMA_ITEM_PTR_IS_VALID(schemaItem) == true)
 	{
-		alt_u16 top = luaL_checkinteger(L, 2);
+		alt_u16 top = (alt_u16)luaL_checkinteger(L, 2);
 
 		if  (top < m_screenHeight)
 		{
@@ -3149,7 +3149,7 @@ static int itemSetWidth(lua_State* L)
 	struct VduSchemaFileSchemaItem1* schemaItem = lua_touserdata(L, 1);
 	if (SCHEMA_ITEM_PTR_IS_VALID(schemaItem) == true)
 	{
-		alt_u16 width = luaL_checkinteger(L, 2);
+		alt_u16 width = (alt_u16)luaL_checkinteger(L, 2);
 
 		if  (width <= m_screenWidth)
 		{
@@ -3195,7 +3195,7 @@ static int itemSetHeight(lua_State* L)
 	struct VduSchemaFileSchemaItem1* schemaItem = lua_touserdata(L, 1);
 	if (SCHEMA_ITEM_PTR_IS_VALID(schemaItem) == true)
 	{
-		alt_u16 height  = luaL_checkinteger(L, 2);
+		alt_u16 height = (alt_u16)luaL_checkinteger(L, 2);
 
 		if  (height <= m_screenHeight)
 		{
@@ -3466,7 +3466,7 @@ static int itemLineSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_LINE)
 		{
 			invalidParams = false;
-			schemaItem->line.weight = luaL_checkinteger(L, 2);
+			schemaItem->line.weight = (alt_u16)luaL_checkinteger(L, 2);
 			
 			if (schemaItem->line.weight > 16u)
 			{
@@ -3523,7 +3523,7 @@ static int itemLineSetLineColor(lua_State* L)
 		if (schemaItem->itemType == TYPE_LINE)
 		{
 			invalidParams = false;
-			schemaItem->line.color = luaL_checkinteger(L, 2);
+			schemaItem->line.color = (alt_u32)luaL_checkinteger(L, 2);
 		}
 	}
 
@@ -3576,7 +3576,7 @@ static int itemRectSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.weight = luaL_checkinteger(L, 2);
+			schemaItem->rect.weight = (alt_u16)luaL_checkinteger(L, 2);
 
 			if (schemaItem->rect.weight > 16u)
 			{
@@ -3729,7 +3729,7 @@ static int itemRectSetLineColor(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.lineColor = luaL_checkinteger(L, 2);
+			schemaItem->rect.lineColor = (alt_u32)luaL_checkinteger(L, 2);
 		}
 	}
 
@@ -3828,7 +3828,7 @@ static int itemRectSetTextColor(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.textColor = luaL_checkinteger(L, 2);
+			schemaItem->rect.textColor = (alt_u32)luaL_checkinteger(L, 2);
 		}
 	}
 
@@ -3929,7 +3929,7 @@ static int itemValueSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.weight = luaL_checkinteger(L, 2);
+			schemaItem->value.weight = (alt_u16)luaL_checkinteger(L, 2);
 
 			if (schemaItem->value.weight > 16u)
 			{
@@ -4033,7 +4033,7 @@ static int itemValueSetLineColor(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.lineColor = luaL_checkinteger(L, 2);
+			schemaItem->value.lineColor = (alt_u32)luaL_checkinteger(L, 2);
 		}
 	}
 
@@ -4132,7 +4132,7 @@ static int itemValueSetTextColor(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.textColor = luaL_checkinteger(L, 2);
+			schemaItem->value.textColor = (alt_u32)luaL_checkinteger(L, 2);
 		}
 	}
 
@@ -4182,7 +4182,7 @@ static int itemValueSetDecimalPlaces(lua_State* L)
 		{
 			invalidParams = false;
 
-			alt_16 places = luaL_checkinteger(L, 2);
+			alt_16 places = (alt_16)luaL_checkinteger(L, 2);
 			if (places < -1)
 			{
 				logWarning(InternalWarning, "LUA itemValueSetDecimalPlaces: line width was limited to -1.");
@@ -4455,8 +4455,8 @@ static int editModeByIndex(lua_State* L)
 	char msg[STRING_MAX_LEN];
 	struct PopUpSchemaParams schema = { 0 };
 
-	schema.tuningSignalIndex = luaL_checkinteger(L, 1);
-	schema.controlSignalIndex = luaL_checkinteger(L, 2);
+	schema.tuningSignalIndex = (alt_u16)luaL_checkinteger(L, 1);
+	schema.controlSignalIndex = (alt_u16)luaL_checkinteger(L, 2);
 
 	{
 		const struct VduAppSignalParam* const param = appSignalParamByIndex(schema.tuningSignalIndex);
@@ -4568,7 +4568,7 @@ static int checkPinCodeByIndex(lua_State* L)
 	char msg[STRING_MAX_LEN];
 	struct PopUpSchemaParams schema = { 0 };
 	
-	schema.controlSignalIndex = luaL_checkinteger(L, 1);
+	schema.controlSignalIndex = (alt_u16)luaL_checkinteger(L, 1);
 
 	{
 		const struct VduAppSignalParam* const param = appSignalParamByIndex(schema.controlSignalIndex);
@@ -4698,7 +4698,7 @@ static int luaLogWriteMessage(lua_State* L)
 
 static int luaTimerValue(lua_State* L)
 {
-	alt_u8 timerIndex = luaL_checkinteger(L, 1);
+	alt_u8 timerIndex = (alt_u8)luaL_checkinteger(L, 1);
 	if ((timerIndex != TIMER_MAINLOOP) && (timerIndex != TIMER_PREDRAW))
 	{
 		logWarning(InternalWarning, "LUA luaTimerValue: invalid timer index was supplied.");
@@ -4713,7 +4713,7 @@ static int luaTimerValue(lua_State* L)
 
 static int luaTimerMaxValue(lua_State* L)
 {
-	alt_u8 timerIndex = luaL_checkinteger(L, 1);
+	alt_u8 timerIndex = (alt_u8)luaL_checkinteger(L, 1);
 	if ((timerIndex != TIMER_MAINLOOP) && (timerIndex != TIMER_PREDRAW))
 	{
 		logWarning(InternalWarning, "LUA luaTimerMaxValue: invalid timer index was supplied.");
@@ -4752,7 +4752,7 @@ static int luaSetTrendDuration(lua_State* L)
 		return 0;
 	}
 
-	alt_u32 duration = luaL_checkinteger(L, 2);
+	alt_u32 duration = (alt_u32)luaL_checkinteger(L, 2);
 
 	// Find a TrendState record with such parameters
 	//
@@ -4798,7 +4798,7 @@ static int luaSetTrendViewMode(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 viewMode = luaL_checkinteger(L, 2);
+	alt_u16 viewMode = (alt_u16)luaL_checkinteger(L, 2);
 	if ((viewMode != (alt_u16)Separate) && (viewMode != (alt_u16)Overlapped))
 	{
 		logWarning(InternalWarning, "LUA luaSetTrendViewMode: invalid viewMode was supplied.");
@@ -4819,7 +4819,7 @@ static int luaSetTrendScaleType(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 scaleType = luaL_checkinteger(L, 2);
+	alt_u16 scaleType = (alt_u16)luaL_checkinteger(L, 2);
 	if ((scaleType != (alt_u16)Linear) && (scaleType != (alt_u16)Logarithmic))
 	{
 		logWarning(InternalWarning, "LUA luaSetTrendScaleType: invalid scaleType was supplied.");
@@ -4840,7 +4840,7 @@ static int luaSetTrendSignalHighViewLimit(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalHighViewLimit: invalid signal index was supplied.");
@@ -4849,8 +4849,8 @@ static int luaSetTrendSignalHighViewLimit(lua_State* L)
 
 	switch (schemaItem->trend.trendSignals[si].highViewLimit.type)
 	{
-	case f32:		schemaItem->trend.trendSignals[si].highViewLimit.data.f32 = luaL_checknumber(L, 3);		break;
-	case i32:		schemaItem->trend.trendSignals[si].highViewLimit.data.i32 = luaL_checkinteger(L, 3);	break;
+	case f32:		schemaItem->trend.trendSignals[si].highViewLimit.data.f32 = (float)luaL_checknumber(L, 3);		break;
+	case i32:		schemaItem->trend.trendSignals[si].highViewLimit.data.i32 = (alt_32)luaL_checkinteger(L, 3);	break;
 	default:		RN_ASSERT(false);	break;
 	}
 	
@@ -4867,7 +4867,7 @@ static int luaSetTrendSignalLowViewLimit(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalLowViewLimit: invalid signal index was supplied.");
@@ -4877,8 +4877,8 @@ static int luaSetTrendSignalLowViewLimit(lua_State* L)
 
 	switch (schemaItem->trend.trendSignals[si].lowViewLimit.type)
 	{
-	case f32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.f32 = luaL_checknumber(L, 3);		break;
-	case i32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.i32 = luaL_checkinteger(L, 3);		break;
+	case f32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.f32 = (float)luaL_checknumber(L, 3);		break;
+	case i32:		schemaItem->trend.trendSignals[si].lowViewLimit.data.i32 = (alt_32)luaL_checkinteger(L, 3);		break;
 	default:		RN_ASSERT(false);	break;
 	}
 
@@ -4895,7 +4895,7 @@ static int luaSetTrendSignalLineWidth(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalLineWidth: invalid signal index was supplied.");
@@ -4903,7 +4903,7 @@ static int luaSetTrendSignalLineWidth(lua_State* L)
 	}
 
 
-	alt_u16 lineWidth = luaL_checkinteger(L, 3);
+	alt_u16 lineWidth = (alt_u16)luaL_checkinteger(L, 3);
 	if (lineWidth > 6u)
 	{
 		logWarning(InternalWarning, "LUA luaSetTrendSignalLineWidth: line width was limited to 6.");
@@ -4924,7 +4924,7 @@ static int luaSetTrendSignalLineColor(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalLineColor: invalid signal index was supplied.");
@@ -4932,7 +4932,7 @@ static int luaSetTrendSignalLineColor(lua_State* L)
 	}
 
 
-	schemaItem->trend.trendSignals[si].color = luaL_checkinteger(L, 3);
+	schemaItem->trend.trendSignals[si].color = (alt_u32)luaL_checkinteger(L, 3);
 	return 0;
 }
 
@@ -4946,7 +4946,7 @@ static int luaSetTrendSignalValueFormat(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalValueFormat: invalid signal index was supplied.");
@@ -4954,7 +4954,7 @@ static int luaSetTrendSignalValueFormat(lua_State* L)
 	}
 
 
-	alt_u16 valueFormat = luaL_checkinteger(L, 3);
+	alt_u16 valueFormat = (alt_u16)luaL_checkinteger(L, 3);
 	if ((valueFormat != (alt_u16)Auto) && (valueFormat != (alt_u16)Decimal) && (valueFormat != (alt_u16)Exponential))
 	{
 		logWarning(InternalWarning, "LUA luaSetTrendSignalValueFormat: invalid valueFormat was supplied.");
@@ -4975,7 +4975,7 @@ static int luaSetTrendSignalDecimalPlaces(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalDecimalPlaces: invalid signal index was supplied.");
@@ -4983,7 +4983,7 @@ static int luaSetTrendSignalDecimalPlaces(lua_State* L)
 	}
 
 
-	alt_16 places = luaL_checkinteger(L, 3);
+	alt_16 places = (alt_16)luaL_checkinteger(L, 3);
 	if (places < -1)
 	{
 		logWarning(InternalWarning, "LUA luaSetTrendSignalDecimalPlaces: line width was limited to -1.");
@@ -5009,7 +5009,7 @@ static int luaSetTrendSignalVisible(lua_State* L)
 		return 0;
 	}
 
-	alt_u16 si = luaL_checkinteger(L, 2);
+	alt_u16 si = (alt_u16)luaL_checkinteger(L, 2);
 	if (si >= schemaItem->trend.signalCount)
 	{
 		logWarning(SignalWasNotFound, "LUA luaSetTrendSignalVisible: invalid signal index was supplied.");
