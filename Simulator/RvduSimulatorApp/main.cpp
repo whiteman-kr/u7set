@@ -5,12 +5,11 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
+#include <QSharedMemory>
 
-static QString m_buildFolder;
-static int m_subsystemKey = 0;
-static QString m_sharedMemoryKey;
+std::unique_ptr<QSharedMemory> theSharedMemorySingleApp;
 
-bool parseCommandLine()
+bool parseCommandLine(AppSettings& settings)
 {
 	QCommandLineParser parser;
 
@@ -49,11 +48,44 @@ bool parseCommandLine()
 		return false;
 	}
 
-	m_buildFolder = build;
-	m_subsystemKey = key;
-	m_sharedMemoryKey = memoryKey;
+	settings.buildFolder = build;
+	settings.subsystemKey = key;
+	settings.sharedMemoryKey = memoryKey;
 
 	return true;
+}
+
+static bool checkRunningInstance(const QString& memoryId)
+{
+	// Check to run the application in one instance
+	//
+	theSharedMemorySingleApp = std::make_unique<QSharedMemory>(QString("RvduSimulatorApp") + memoryId);
+
+	if (theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
+	{
+		if (theSharedMemorySingleApp->create(sizeof(RvduSimSharedData)) == false)
+		{
+			qDebug() << "Failed to create QSharedMemory object!";
+			assert(false);
+			return false;
+		}
+		else
+		{
+			std::scoped_lock lock(*theSharedMemorySingleApp);
+			auto sharedData = static_cast<RvduSimSharedData*>(theSharedMemorySingleApp->data());
+			*sharedData = RvduSimSharedData{};
+			return true;
+		}
+	}
+	else
+	{
+		std::scoped_lock lock(*theSharedMemorySingleApp);
+		auto sharedData = static_cast<RvduSimSharedData*>(theSharedMemorySingleApp->data());
+		sharedData->showCommand = true;
+		return false;
+	}
+
+	return false;
 }
 
 int main(int argc, char* argv[])
@@ -68,13 +100,33 @@ int main(int argc, char* argv[])
 	app.setApplicationVersion(
 		QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
-	if (parseCommandLine() == false)
+	AppSettings settings;
+
+	if (parseCommandLine(settings) == false)
 	{
 		return -1;
 	}
 
-	MainWindow w(m_buildFolder, m_subsystemKey, m_sharedMemoryKey);
-	w.show();
+	bool runAppAllow = true;
 
-	return app.exec();
+	if (settings.sharedMemoryKey.isEmpty() == false)
+	{
+		if (checkRunningInstance(settings.sharedMemoryKey) == false) 
+		{
+			runAppAllow = false;
+		}
+	}
+
+	int result = 0;
+
+	if (runAppAllow == true)
+	{
+		MainWindow w(settings);
+		w.show();
+
+		result = app.exec();
+
+	}
+
+	return result;
 }

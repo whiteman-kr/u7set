@@ -22,6 +22,8 @@ void SimCommThreadWorker::threadProc()
 
 		QThread::msleep(MemoryUpdateTimeMs);
 	}
+	
+	return;
 }
 
 void SimCommThreadWorker::processVduSharedData()
@@ -39,11 +41,9 @@ void SimCommThreadWorker::processVduSharedData()
 
 	if (m_sharedMemory.has_value() == true)
 	{
-		m_sharedMemory->lock();
-
+		std::scoped_lock lock{*m_sharedMemory};
 		processSharedMemory();
 
-		m_sharedMemory->unlock();
 	}
 }
 
@@ -93,9 +93,11 @@ void SimCommThreadWorker::initSharedMemory()
 			return;
 		}
 
-		// std::scoped_lock lock{*m_shared.clientSharedMemory};
-		*sharedData = SimVduSharedData::SharedData{};
-		sharedData->size = sizeof(SimVduSharedData::SharedData);
+		{
+			std::scoped_lock lock{*m_sharedMemory};
+			*sharedData = SimVduSharedData::SharedData{};
+			sharedData->size = sizeof(SimVduSharedData::SharedData);
+		}
 
 		logMessage(tr("Shared memory was successfully created and initialized."));
 	}

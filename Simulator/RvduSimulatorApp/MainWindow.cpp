@@ -12,6 +12,7 @@
 
 #include <UiLib/DialogAbout.h>
 #include <UiLib/LogDialog.h>
+#include <UiLib/UiTools.h>
 
 static const int m_logFileCount = 9999;
 static const int m_logFileMaxSize = 1048576;
@@ -19,13 +20,12 @@ static int m_logFileIndex = 0;
 #define STRING_MAX_LEN 256
 
 static Log::LogFile* theLogFile = nullptr;
+extern std::unique_ptr<QSharedMemory> theSharedMemorySingleApp;
 
-MainWindow::MainWindow(QString buildFolder, int subsystemKey, QString sharedMemoryKey, QWidget* parent) :
+MainWindow::MainWindow(const AppSettings& settings, QWidget* parent) :
 	QMainWindow(parent),
-	m_buildFolder(buildFolder), 
-	m_subsystemKey(subsystemKey),
-	m_sharedMemoryKey(sharedMemoryKey),
-	m_logFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + QString::number(subsystemKey)}
+	m_appSettings(settings),
+	m_logFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + QString::number(m_appSettings.subsystemKey)}
 {
 
 	theLogFile = &m_logFile;
@@ -44,7 +44,7 @@ MainWindow::MainWindow(QString buildFolder, int subsystemKey, QString sharedMemo
 
 	// Set window caption
 	//
-	setWindowTitle(tr("RVDU - Build path: %1, Key: %2").arg(m_buildFolder).arg(m_subsystemKey));
+	setWindowTitle(tr("RVDU - Build path: %1, Key: %2").arg(m_appSettings.buildFolder).arg(m_appSettings.subsystemKey));
 
 	setupRvduController();
 
@@ -85,6 +85,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::onTimer()
 {
+	if (theSharedMemorySingleApp != nullptr)
+	{
+		std::scoped_lock lock(*theSharedMemorySingleApp);
+
+		auto sharedData = static_cast<RvduSimSharedData*>(theSharedMemorySingleApp->data());
+		if (sharedData->showCommand == true)
+		{
+			sharedData->showCommand = false;
+
+			showNormal();
+			raise(); // Brings the window to the top of the stack
+			activateWindow(); // Gives keyboard focus to the window
+
+			UiTools::ensureVisible(this);
+		}
+	}
+	
 	if (m_rvduController->isError() == true) 
 	{
 		m_rvduWidget->setErrorMode(true, tr("RVDU build loading error, please check the log file."));
@@ -157,7 +174,7 @@ void MainWindow::setupRvduController()
 {
 	// Create controller
 	//
-	m_rvduController = new RvduSimThreadController(this, m_pHdmiBuffer, m_buildFolder, m_subsystemKey, m_width, m_height);
+	m_rvduController = new RvduSimThreadController(this, m_pHdmiBuffer, m_appSettings.buildFolder, m_appSettings.subsystemKey, m_width, m_height);
 
 	connect(m_rvduController,
 			&RvduSimThreadController::logError,
@@ -188,7 +205,7 @@ void MainWindow::setupRvduController()
 			{
 				// When the simulator is started, create a shared memory communication thread
 				//
-				if (m_sharedMemoryKey.isEmpty() == false)
+				if (m_appSettings.sharedMemoryKey.isEmpty() == false)
 				{
 					setupSharedMemController();
 				}
@@ -213,7 +230,7 @@ void MainWindow::setupSharedMemController()
 	// Create controller
 	//
 	m_sharedMemController =
-		new SimCommThreadController(this, m_sharedMemoryKey);
+		new SimCommThreadController(this, m_appSettings.sharedMemoryKey);
 
 	connect(m_sharedMemController,
 			&SimCommThreadController::logError,

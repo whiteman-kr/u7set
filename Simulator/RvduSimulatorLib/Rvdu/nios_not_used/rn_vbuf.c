@@ -78,6 +78,8 @@ void moduleRnVbufInitialize(alt_u32* const pVideoBuffer, alt_u32* const pHdmiBuf
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 
+	writeVideoBuffer(0x0);	// Fill color with black
+
 	return;
 }
 

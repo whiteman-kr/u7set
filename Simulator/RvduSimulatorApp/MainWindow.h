@@ -8,11 +8,26 @@ class RvduWidget;
 class RvduSimThreadController;
 class SimCommThreadController;
 
+struct AppSettings
+{
+	QString buildFolder;
+	int subsystemKey = 0;
+	QString sharedMemoryKey;
+};
+
+#pragma pack(1)
+struct RvduSimSharedData
+{
+	int version = 1;
+	bool showCommand = false;
+};
+#pragma pack()
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit MainWindow(QString buildFolder, int subsystemKey, QString sharedMemoryKey, QWidget* parent = nullptr);
+	explicit MainWindow(const AppSettings& settings, QWidget* parent = nullptr);
 	~MainWindow();
 
 signals:
@@ -39,9 +54,8 @@ private:
 	static void writeLogFileMessage(int code, const char* message);
 
 private:
-	QString m_buildFolder;
-	int m_subsystemKey = 0;
-	QString m_sharedMemoryKey;
+	AppSettings m_appSettings;
+
 	int m_width = 1280;
 	int m_height = 720;
 
