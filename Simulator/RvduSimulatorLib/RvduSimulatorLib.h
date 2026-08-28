@@ -79,6 +79,12 @@ extern "C"
 
 	int rnLibSignalOffset(unsigned int index);
 	int rnLibSignalBit(unsigned int index);
+
+	int rnLibTxPortIndex(unsigned int index);
+
+	int rnLibTxSignalOffset(unsigned int index);
+	int rnLibTxSignalBit(unsigned int index);
+
 	bool rnLibSignalTunable(unsigned int index);
 
 	float rnLibSignalHighLimitFloat(unsigned int index);

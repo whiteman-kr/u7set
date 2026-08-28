@@ -168,35 +168,59 @@ void SimCommThreadWorker::processSharedMemory()
 		m_timeout = false;
 		m_timeoutCounter = 0;
 
+		uint16_t optoValidity = 0;
+
+		// Write optical buffers
+
 		rnLibReadMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
 		{
-
-			//qDebug() << sharedData->toVdu.portData[i].occupied;
-
-			// if (sharedData->toVdu.portData[i].timeout == false)
+			if (sharedData->toVdu.portData[i].timeout == false && 
+				sharedData->toVdu.portData[i].occupied != 0)
 			{
-				rnLibWriteReadMemory(i * OptoBufferMaxSize, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
+				uint8_t reversedData[OptoBufferMaxSize];
+				memcpy(reversedData, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
+
+				// Reverse bytes in words
+				//
+				uint16_t* data16 = (uint16_t*)reversedData;
+				for (int j = 0; j < OptoBufferMaxSize / 2; j++) 
+				{
+					*data16 = qbswap(*data16);
+					data16++;
+				}
+
+				rnLibWriteReadMemory(i * OptoBufferMaxSize, reversedData, OptoBufferMaxSize);
+
+				optoValidity |= (1 << i);
 			}
-			// else
-			//{
-			//  clear on timeout?
-			//}
+
+			// Write optical ports validity
+
+#define ADDR_OPTO_VALIDITY 20491u
+			rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
 		}
+
 		rnLibReadMemoryUnlock();
+
+		sharedData->fromVdu.updateCounter++;
 
 		rnLibWriteMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
 		{
-			sharedData->fromVdu.updateCounter++;
-			//if (sharedData->fromVdu.portData[i].timeout == false)
+			sharedData->fromVdu.portData[i].timeout = 0;
+			sharedData->fromVdu.portData[i].occupied = OptoBufferMaxSize;
+
+			rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
+
+			// Reverse bytes in words
+			//
+			uint16_t* data16 = (uint16_t*)sharedData->fromVdu.portData[i].data;
+			for (int j = 0; j < OptoBufferMaxSize / 2; j++)
 			{
-				rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
+				*data16 = qbswap(*data16);
+				data16++;
 			}
-			// else
-			//{
-			//  clear on timeout?
-			//}
 		}
 		rnLibWriteMemoryUnlock();
 	}
@@ -209,6 +233,11 @@ void SimCommThreadWorker::processSharedMemory()
 			if (m_timeoutCounter >= (TimeoutMs / MemoryUpdateTimeMs))
 			{
 				m_timeout = true;
+				
+				// Clear optical ports validity
+				//
+				uint16_t optoValidity = 0;
+				rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
 			}
 		}
 	}

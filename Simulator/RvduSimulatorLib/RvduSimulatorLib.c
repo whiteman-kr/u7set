@@ -767,7 +767,64 @@ int rnLibSignalBit(unsigned int index)
 	return param->optoAddr.bitNo;
 }
 
-bool rnLibSignalTunable(unsigned int index) 
+int rnLibTxPortIndex(unsigned int index) 
+{
+	for (alt_u16 j = 0; j < txAppSignalsCount(); j++)
+	{
+		const struct VduTxRxAppSignal* const txRxSignal = txRxAppSignal(j);
+		if (txRxSignal == NULL)
+		{
+			assert(txRxSignal);
+			return false;
+		}
+
+		if (txRxSignal->signalIndex == index)
+		{
+			return txRxSignal->optoPortIndex;
+		}
+	}
+	return -1;
+}
+
+int rnLibTxSignalOffset(unsigned int index)
+{
+	for (alt_u16 j = 0; j < txAppSignalsCount(); j++)
+	{
+		const struct VduTxRxAppSignal* const txRxSignal = txRxAppSignal(j);
+		if (txRxSignal == NULL)
+		{
+			assert(txRxSignal);
+			return false;
+		}
+
+		if (txRxSignal->signalIndex == index)
+		{
+			return txRxSignal->offsetW;
+		}
+	}
+	return -1;
+}
+
+int rnLibTxSignalBit(unsigned int index) 
+{
+	for (alt_u16 j = 0; j < txAppSignalsCount(); j++)
+	{
+		const struct VduTxRxAppSignal* const txRxSignal = txRxAppSignal(j);
+		if (txRxSignal == NULL)
+		{
+			assert(txRxSignal);
+			return false;
+		}
+
+		if (txRxSignal->signalIndex == index)
+		{
+			return txRxSignal->bitNo;
+		}
+	}
+	return -1;
+}
+
+bool rnLibSignalTunable(unsigned int index)
 {
 	const struct VduAppSignalParam* const param = appSignalParamByIndex((alt_u16)index);
 	if (param == NULL)

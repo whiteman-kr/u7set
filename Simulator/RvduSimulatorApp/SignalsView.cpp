@@ -126,15 +126,18 @@ QVariant SignalsModel::data(const QModelIndex& index, int role) const
 	case 6:
 		{
 			QString address;
-			if (rnLibIsInternal(i) == true)
+			if (rnLibIsInternal(i) == false)
 			{
-				address = "";
+				address = tr("RX %1:%2").arg(rnLibSignalOffset(i)).arg(rnLibSignalBit(i));
+
 			}
-			else
+
+			if (rnLibIsTxSignal(i) == true)
 			{
-				address = tr("%1:%2").arg(rnLibSignalOffset(i)).arg(rnLibSignalBit(i));
+				address += tr(" TX %1:%2").arg(rnLibTxSignalOffset(i)).arg(rnLibTxSignalBit(i));
 			}
-			return address;
+
+			return address.trimmed();
 		}
 
 	case 7:
@@ -147,13 +150,15 @@ QVariant SignalsModel::data(const QModelIndex& index, int role) const
 			QString optoPort;
 			if (rnLibIsRxSignal(i) == true)
 			{
-				optoPort = tr("%1").arg(rnLibRxPortIndex(i));
+				optoPort = tr("RX %1").arg(rnLibRxPortIndex(i));
 			}
-			else
+
+			if (rnLibIsTxSignal(i) == true)
 			{
-				optoPort = "";
+				optoPort = tr(" TX %1").arg(rnLibTxPortIndex(i));
 			}
-			return optoPort;
+
+			return optoPort.trimmed();
 		}
 
 	// Value
