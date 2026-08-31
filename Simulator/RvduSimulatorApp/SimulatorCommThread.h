@@ -76,6 +76,8 @@ public slots:
 	void threadProc();
 
 private:
+	void initOptoPortsCounters();
+
 	void processVduSharedData();
 
 	void initSharedMemory();
@@ -88,6 +90,8 @@ private:
 	uint64_t m_prevUpdateCounter = (uint64_t)-1;
 	uint64_t m_timeoutCounter = 0;
 	bool m_timeout = false;
+
+	uint64_t m_outOptoOccupied[SimVduSharedData::OptoPortCount] = {0};
 };
 
 class SimCommThreadController : public QObject

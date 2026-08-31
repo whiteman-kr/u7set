@@ -29,10 +29,10 @@ class SignalsView : public QWidget
 {
 	Q_OBJECT
 public:
-	static SignalsView* create(QWidget* parent = nullptr);
+	static SignalsView* create(bool autonomousMode, QWidget* parent);
 
 private:
-	explicit SignalsView(QWidget* parent = nullptr);
+	explicit SignalsView(bool autonomousMode, QWidget* parent);
 	~SignalsView();
 
 private:
@@ -47,6 +47,7 @@ private slots:
 
 private:
 	SignalsModel m_model;
+	bool m_autonomousMode = true;
 
 	QTableView* m_tableView = nullptr;
 	static inline SignalsView* m_instance = nullptr;

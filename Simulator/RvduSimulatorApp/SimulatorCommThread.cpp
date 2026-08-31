@@ -16,6 +16,8 @@ SimCommThreadWorker::SimCommThreadWorker(QString sharedMemoryKey) :
 
 void SimCommThreadWorker::threadProc()
 {
+	initOptoPortsCounters();
+
 	while (QThread::currentThread()->isInterruptionRequested() == false)
 	{
 		processVduSharedData();
@@ -23,6 +25,46 @@ void SimCommThreadWorker::threadProc()
 		QThread::msleep(MemoryUpdateTimeMs);
 	}
 	
+	return;
+}
+
+void SimCommThreadWorker::initOptoPortsCounters() 
+{ 
+	// Each connection has Port ID at start
+	//
+	for (int p = 0; p < SimVduSharedData::OptoPortCount; p++) 
+	{
+		constexpr uint64_t PortIdSizeInWords = 2;
+		m_outOptoOccupied[p] = PortIdSizeInWords * 2;
+	}
+	
+	unsigned int count = rnLibAppSignalsCount();
+	for (unsigned int si = 0; si < count; si++) 
+	{
+		if (rnLibIsTxSignal(si) == false) 
+		{
+			continue;
+		}
+
+		int pi = rnLibTxPortIndex(si);
+		if (pi < 0 || pi >= SimVduSharedData::OptoPortCount) 
+		{
+			Q_ASSERT(false);
+			return;
+		}
+		
+		uint64_t offset = rnLibTxSignalOffset(si);
+		
+		constexpr uint64_t DiscreteSizeInWords = 1;
+		constexpr uint64_t AnalogSizeInWords = 2;
+		uint64_t sizeInWords = (rnLibIsDiscrete(si) == true) ? DiscreteSizeInWords : AnalogSizeInWords; // SI and FP occupy 2 words
+
+		if (m_outOptoOccupied[pi] < (offset + sizeInWords) * 2) 
+		{
+			m_outOptoOccupied[pi] = (offset + sizeInWords) * 2;
+		}
+	}
+
 	return;
 }
 
@@ -175,24 +217,26 @@ void SimCommThreadWorker::processSharedMemory()
 		rnLibReadMemoryLock();
 		for (int i = 0; i < OptoPortCount; i++)
 		{
-			if (sharedData->toVdu.portData[i].timeout == false && 
-				sharedData->toVdu.portData[i].occupied != 0)
+			if (sharedData->toVdu.portData[i].timeout == 0)
 			{
-				uint8_t reversedData[OptoBufferMaxSize];
-				memcpy(reversedData, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
-
-				// Reverse bytes in words
-				//
-				uint16_t* data16 = (uint16_t*)reversedData;
-				for (int j = 0; j < OptoBufferMaxSize / 2; j++) 
+				if (sharedData->toVdu.portData[i].occupied != 0)
 				{
-					*data16 = qbswap(*data16);
-					data16++;
+					uint8_t reversedData[OptoBufferMaxSize];
+					memcpy(reversedData, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
+
+					// Reverse bytes in words
+					//
+					uint16_t* data16 = (uint16_t*)reversedData;
+					for (int j = 0; j < OptoBufferMaxSize / 2; j++)
+					{
+						*data16 = qbswap(*data16);
+						data16++;
+					}
+
+					rnLibWriteReadMemory(i * OptoBufferMaxSize, reversedData, OptoBufferMaxSize);
+
+					optoValidity |= (1 << i);
 				}
-
-				rnLibWriteReadMemory(i * OptoBufferMaxSize, reversedData, OptoBufferMaxSize);
-
-				optoValidity |= (1 << i);
 			}
 
 			// Write optical ports validity
@@ -209,7 +253,7 @@ void SimCommThreadWorker::processSharedMemory()
 		for (int i = 0; i < OptoPortCount; i++)
 		{
 			sharedData->fromVdu.portData[i].timeout = 0;
-			sharedData->fromVdu.portData[i].occupied = OptoBufferMaxSize;
+			sharedData->fromVdu.portData[i].occupied = m_outOptoOccupied[i];
 
 			rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
 

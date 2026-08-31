@@ -47,13 +47,6 @@ QVariant SignalsModel::data(const QModelIndex& index, int role) const
 
 	int i = index.row();
 
-	const struct VduAppSignalParam* const param = rnLibAppSignalParam(i);
-	if (param == NULL)
-	{
-		Q_ASSERT(param);
-		return QVariant();
-	}
-
 	switch (index.column())
 	{
 	case 0:
@@ -204,11 +197,11 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 }
 
 
-SignalsView* SignalsView::create(QWidget* parent)
+SignalsView* SignalsView::create(bool autonomousMode, QWidget* parent)
 {
 	if (m_instance == nullptr)
 	{
-		m_instance = new SignalsView(parent);
+		m_instance = new SignalsView(autonomousMode, parent);
 		m_instance->setAttribute(Qt::WA_DeleteOnClose);
 		m_instance->setWindowFlag(Qt::Window);
 		m_instance->show();
@@ -217,8 +210,9 @@ SignalsView* SignalsView::create(QWidget* parent)
 }
 
 
-SignalsView::SignalsView(QWidget* parent) :
-	QWidget(parent)
+SignalsView::SignalsView(bool autonomousMode, QWidget* parent) :
+	QWidget(parent),
+	m_autonomousMode(autonomousMode)
 {
 	setWindowTitle(tr("Signals View"));
 	setMinimumSize(1280, 720);
@@ -366,8 +360,9 @@ void SignalsView::updateSignalValues()
 
 void SignalsView::onSignalClicked(unsigned int index)
 {
-	const struct VduAppSignalParam* const param = rnLibAppSignalParam(index);
-	if (param == NULL)
+	// Do not allow edit Rx signals when they are read from RVDU simulator
+	//
+	if (m_autonomousMode == false && rnLibIsRxSignal(index) == true)
 	{
 		return;
 	}
@@ -424,6 +419,12 @@ void SignalsView::onSignalClicked(unsigned int index)
 	if (rnLibIsDiscrete(index) == true || rnLibIsInt32(index) == true)
 	{
 		int newValue = text.toInt(&correct);
+
+		if ((rnLibIsDiscrete(index)) == true && (newValue != 0) && (newValue != 1)) 
+		{
+			correct = false;
+		}
+
 		if (correct == true)
 		{
 			(void)rnLibWriteSignalValueInt(index, newValue);

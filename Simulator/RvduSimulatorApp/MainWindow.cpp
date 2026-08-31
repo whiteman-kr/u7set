@@ -123,7 +123,9 @@ void MainWindow::onSignals()
 {
 	if (m_rvduController->isRunning() == true)
 	{
-		SignalsView* dialogView = SignalsView::create(this);
+		bool autonomousMode = m_appSettings.sharedMemoryKey.isEmpty() == true;
+
+		SignalsView* dialogView = SignalsView::create(autonomousMode, this);
 		Q_UNUSED(dialogView);
 	}
 }
@@ -146,7 +148,7 @@ void MainWindow::onShowAppLog()
 
 void MainWindow::onShowAbout()
 {
-	QString text = qApp->applicationName() + tr(" provides RVDU simuulation.");
+	QString text = qApp->applicationName() + tr(" provides RVDU simulation.");
 	UiLib::DialogAbout::show(this, text, {});
 	return;
 }
