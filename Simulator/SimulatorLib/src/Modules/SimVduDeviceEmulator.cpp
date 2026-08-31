@@ -478,6 +478,27 @@ namespace Sim
 					}
 
 					std::memcpy(toVdu->portData[portIndex].data, receiveBuffer->data(), receiveBuffer->size());
+
+#if 0
+					// Swap bytes in 16bit words.
+					// On platform layer (FPGA code) data sent in mixed endian format.
+					// Byte level swap is required to get words to little endian, then 32bit data words
+					// are kept in big-endian format (16bit words swap for little endian is required).
+					// Here we need only to swap bytes inside 16bit words, and VDU will do all other job.
+					//
+					assert(receiveBuffer->size() % 2 == 0);
+					for (uint16_t *ptr = reinterpret_cast<uint16_t*>(toVdu->portData[portIndex].data),
+								  *end = reinterpret_cast<uint16_t*>(toVdu->portData[portIndex].data + receiveBuffer->size());
+						 ptr < end;
+						 ++ptr)
+					{
+						*ptr = *ptr << 8 | *ptr >> 8;
+					}
+#else
+					// Swap bytes in 16bit words IS DONE IN VDU SIMULATOR!
+					//
+#endif
+
 					toVdu->portData[portIndex].occupied = receiveBuffer->size();
 					toVduUpdated = true;
 
