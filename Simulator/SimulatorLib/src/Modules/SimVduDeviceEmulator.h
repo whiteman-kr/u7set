@@ -7,49 +7,11 @@
 #include "SimDeviceEmulatorCommon.h"
 
 #include <SimulatorLib/SimDeviceState.h>
+#include <SimulatorLib/SimVduSharedData.h>
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
 #include <HardwareLib/ModuleFirmware.h>
-
-namespace SimVduSharedData
-{
-	constexpr size_t OptoBufferMaxSize = 2560 * 2;
-	constexpr size_t OptoPortCount = 8;
-
-	struct SimulatorState
-	{
-		uint64_t updateCounter; // The update counter, incremented by simulator on each update
-		int32_t deviceState;    // enum class DeviceState (0 - Off, Start, Faut, Operate)
-		int32_t reserved0;      // Reserved for future use (padding to 8 bytes)
-		uint64_t plantTime;     // The plant time in microseconds
-	};
-
-	struct OptoBuffer
-	{
-		uint64_t timeout;       //
-		uint64_t occupied;      // The number of bytes occupied in the buffer
-		uint8_t data[OptoBufferMaxSize];
-	};
-
-	struct OptoPorts
-	{
-		uint64_t updateCounter;
-		OptoBuffer portData[OptoPortCount]; // Data from simulator to VDU
-	};
-
-	struct SharedData
-	{
-		uint64_t size;                      // The size of this structure, must be filled first
-
-		SimulatorState simulatorState;      // State of the simulator
-
-		OptoPorts toVdu;                    // Data from simulator to VDU
-		OptoPorts fromVdu;                  // Data from VDU to simulator
-	};
-
-	static_assert(std::is_standard_layout_v<SharedData> && std::is_trivial_v<SharedData>, "SharedData must be POD type");
-} // namespace SimVduSharedData
 
 
 namespace Sim
@@ -136,14 +98,25 @@ namespace Sim
 	private:
 		void setDeviceState(DeviceState value);
 
+		// External discrete inputs and outputs
+		// class VduDeviceEmulator provides inputs with validities,
+		// Vdu Sim App provides outputs.
+		//
 	public:
-#if 0
-		[[nodiscard]] bool armingKey() const;
-		void setArmingKey(bool value);
+		[[nodiscard]] bool discreteInputState(size_t index) const;
+		void setDiscreteInputState(size_t index, bool value);
 
-		[[nodiscard]] bool tuningKey() const;
-		void setTuningKey(bool value);
-#endif
+		[[nodiscard]] bool discreteInputValidity(size_t index) const;
+		void setDiscreteInputValidity(size_t index, bool value);
+
+		static constexpr int INPUTS_COUNT = SimVduSharedData::DiscreteInputCount;
+		static constexpr int OUTPUTS_COUNT = SimVduSharedData::DiscreteOutputCount;
+
+		[[nodiscard]] std::optional<bool> discreteOutputState(size_t index) const;
+		[[nodiscard]] std::array<std::optional<bool>, VduDeviceEmulator::OUTPUTS_COUNT> discreteOutputStates() const;
+
+		void setDiscreteOutputState(size_t index, std::optional<bool> value);
+		void setDiscreteOutputStates(const std::array<std::optional<bool>, VduDeviceEmulator::OUTPUTS_COUNT>& values);
 
 		// Data
 		//
@@ -169,8 +142,10 @@ namespace Sim
 
 		// Lans m_lans{this, m_simulator};     // Device LAN Interfaces, based on m_logicModuleExtraInfo
 
-		// std::atomic<bool> m_armingKey{false}; // External Key
-		// std::atomic<bool> m_tuningKey{false}; // Extrenal Key
+		mutable std::mutex m_insOutsMutex; // Protects m_discreteInputStates, m_discreteInputValidities, m_discreteOutputStates
+		std::array<bool, INPUTS_COUNT> m_discreteInputStates;                  // External keys
+		std::array<bool, INPUTS_COUNT> m_discreteInputValidities;              // External keys
+		std::array<std::optional<bool>, OUTPUTS_COUNT> m_discreteOutputStates; // VDU outputs, received from VDU Simulator App.
 
 		// Cached state
 		//

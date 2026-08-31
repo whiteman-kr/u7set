@@ -59,11 +59,15 @@ namespace Sim
 		[[nodiscard]] virtual bool isPowerOff() const override;
 		virtual void setPowerOff(bool value) override;
 
-		//[[nodiscard]] bool armingKey() const;
-		// void setArmingKey(bool value);
+		[[nodiscard]] bool discreteInputState(size_t index) const;
+		void setDiscreteInputState(size_t index, bool value);
 
-		//[[nodiscard]] bool tuningKey() const;
-		// void setTuningKey(bool value);
+		[[nodiscard]] bool discreteInputValidity(size_t index) const;
+		void setDiscreteInputValidity(size_t index, bool value);
+
+		[[nodiscard]] std::optional<bool> discreteOutputState(size_t index) const;
+		[[nodiscard]] std::array<std::optional<bool>, SimVduSharedData::DiscreteOutputCount> discreteOutputStates() const;
+		void setDiscreteOutputState(size_t index, std::optional<bool> value);
 
 	private:
 		// Loaded LM data

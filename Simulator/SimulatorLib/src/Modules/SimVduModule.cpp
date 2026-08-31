@@ -67,4 +67,40 @@ namespace Sim
 	{
 		return m_impl->setPowerOff(value);
 	}
+
+	bool VduModule::discreteInputState(size_t index) const
+	{
+		return m_impl->discreteInputState(index);
+	}
+
+	void VduModule::setDiscreteInputState(size_t index, bool value)
+	{
+		return m_impl->setDiscreteInputState(index, value);
+	}
+
+	bool VduModule::discreteInputValidity(size_t index) const
+	{
+		return m_impl->discreteInputValidity(index);
+	}
+
+	void VduModule::setDiscreteInputValidity(size_t index, bool value)
+	{
+		return m_impl->setDiscreteInputValidity(index, value);
+	}
+
+	std::optional<bool> VduModule::discreteOutputState(size_t index) const
+	{
+		return m_impl->discreteOutputState(index);
+	}
+
+	std::array<std::optional<bool>, SimVduSharedData::DiscreteOutputCount> VduModule::discreteOutputStates() const
+	{
+		return m_impl->discreteOutputStates();
+	}
+
+	void VduModule::setDiscreteOutputState(size_t index, std::optional<bool> value)
+	{
+		return m_impl->setDiscreteOutputState(index, value);
+	}
+
 } // namespace Sim

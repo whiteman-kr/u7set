@@ -137,6 +137,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SimulatorLib/SimSubsystem.h
 	./include/SimulatorLib/Simulator.h
 	./include/SimulatorLib/SimVduModule.h
+	./include/SimulatorLib/SimVduSharedData.h
 
 	SimulatorLib.qrc
 )

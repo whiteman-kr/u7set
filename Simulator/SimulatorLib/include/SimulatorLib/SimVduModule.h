@@ -4,6 +4,7 @@
 
 #include <HardwareLib/LogicModulesInfo.h>
 #include <SimulatorLib/SimModuleJumpers.h>
+#include <SimulatorLib/SimVduSharedData.h>
 
 #include <memory>
 
@@ -37,13 +38,20 @@ namespace Sim
 		[[nodiscard]] bool isPowerOff() const;
 		void setPowerOff(bool value);
 
-#if 0
-		[[nodiscard]] bool armingKey() const;
-		void setArmingKey(bool value);
+		// External discrete inputs and outputs
+		// SimulatorLib provides inputs with validities,
+		// Vdu Sim App provides outputs.
+		//
+	public:
+		[[nodiscard]] bool discreteInputState(size_t index) const;
+		void setDiscreteInputState(size_t index, bool value);
 
-		[[nodiscard]] bool tuningKey() const;
-		void setTuningKey(bool value);
-#endif
+		[[nodiscard]] bool discreteInputValidity(size_t index) const;
+		void setDiscreteInputValidity(size_t index, bool value);
+
+		[[nodiscard]] std::optional<bool> discreteOutputState(size_t index) const;
+		[[nodiscard]] std::array<std::optional<bool>, SimVduSharedData::DiscreteOutputCount> discreteOutputStates() const;
+		void setDiscreteOutputState(size_t index, std::optional<bool> value);
 
 	private:
 		std::shared_ptr<VduModuleImpl> m_impl;

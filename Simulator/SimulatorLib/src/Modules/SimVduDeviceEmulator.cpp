@@ -14,6 +14,8 @@ namespace Sim
 		m_simulator{simulator},
 		m_log{simulator->log(), "VduDeviceEmulator"}
 	{
+		m_discreteInputStates.fill(false);
+		m_discreteInputValidities.fill(true);
 		return;
 	}
 
@@ -54,6 +56,8 @@ namespace Sim
 										const ConnectionsImpl& connections,
 										const LogicModulesInfo& logicModulesExtraInfo)
 	{
+		(void)subsystemPath;
+
 		clear();
 
 		m_log.setOutputScope(QString("VduDeviceEmulator %1").arg(logicModuleInfo.equipmentId));
@@ -206,12 +210,45 @@ namespace Sim
 				return;
 			}
 
-			std::scoped_lock lock{*m_shared.clientSharedMemory};
+			decltype(m_discreteInputStates) inputStates;
+			decltype(m_discreteInputValidities) inputValidities;
+			decltype(m_discreteOutputStates) outputStates;
 
-			auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
-			sharedData->simulatorState.updateCounter++;
-			sharedData->simulatorState.deviceState = static_cast<int32_t>(deviceState());
-			sharedData->simulatorState.plantTime = currentTime.count();
+			{
+				std::scoped_lock lock{m_insOutsMutex};
+				inputStates = m_discreteInputStates;
+				inputValidities = m_discreteInputValidities;
+			}
+
+			{
+				std::scoped_lock lock{*m_shared.clientSharedMemory};
+
+				auto sharedData = static_cast<SimVduSharedData::SharedData*>(m_shared.clientSharedMemory->data());
+				sharedData->simulatorState.updateCounter++;
+				sharedData->simulatorState.deviceState = static_cast<int32_t>(deviceState());
+				sharedData->simulatorState.plantTime = currentTime.count();
+
+				sharedData->discreteInputs.updateCounter++;
+
+				// Setting discrete inputs and their validities in shared memory
+				//
+				for (size_t i = 0; i < SimVduSharedData::DiscreteInputCount; ++i)
+				{
+					sharedData->discreteInputs.data[i] = inputStates[i];
+					sharedData->discreteInputs.validity[i] = inputValidities[i];
+				}
+
+				// Getting discrete outputs from shared memory
+				//
+				for (size_t i = 0; i < SimVduSharedData::DiscreteOutputCount; ++i)
+				{
+					outputStates[i] = sharedData->discreteOutputs.data[i];
+				}
+			}
+
+			// Update discrete outputs in VduDeviceEmulator from shared memory
+			//
+			this->setDiscreteOutputStates(outputStates);
 
 			return;
 		};
@@ -282,6 +319,8 @@ namespace Sim
 
 	bool VduDeviceEmulator::processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 /*workcycle*/)
 	{
+		(void)currentDateTime;
+
 		// qDebug() << "DeviceEmulator::processOperate " << equipmentId();
 
 		// Send data to fiber optic channels (LM, OCM, ...)
@@ -554,10 +593,6 @@ namespace Sim
 			return true;
 		}
 
-		// Review comment: DO NOT COMMIT!!!!!!!!!!!!!
-		// TEMPORARY RETURN TRUE, VDU is going to FAULT, we need to understand what is going on.
-		return true;
-
 		// Fetch data from shared memory to send to connections
 		//
 		auto fromVduPortsData = std::make_unique<SimVduSharedData::OptoPorts>(SimVduSharedData::OptoPorts{});
@@ -626,29 +661,32 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-			if (portInfo.portNo < 0 || portInfo.portNo > SimVduSharedData::OptoPortCount - 1)
+			if (portInfo.modulePortNo < 1 || portInfo.modulePortNo > SimVduSharedData::OptoPortCount)
 			{
 				SIM_FAULT(QString("Invalid port number %1 for connection %2 in LM %3.")
-							  .arg(portInfo.portNo)
+							  .arg(portInfo.modulePortNo)
 							  .arg(c->connectionId())
 							  .arg(equipmentId()));
 				return false;
 			}
 
-			if ((portInfo.txDataSizeW * 2) != fromVduPortsData->portData[portInfo.portNo].occupied)
+			size_t modulePortIndex = portInfo.modulePortNo - 1; // modulePortNo is 1-based, but array index is 0-based
+
+			if ((portInfo.txDataSizeW * 2) != fromVduPortsData->portData[modulePortIndex].occupied)
 			{
 				SIM_FAULT(QString("Send data error, expected %1 bytes but received %2 bytes, connection %3, port %4 (%5).")
 							  .arg(portInfo.txDataSizeW * 2)
-							  .arg(fromVduPortsData->portData[portInfo.portNo].occupied)
+							  .arg(fromVduPortsData->portData[modulePortIndex].occupied)
 							  .arg(c->connectionId())
-							  .arg(portInfo.portNo)
+							  .arg(portInfo.modulePortNo)
 							  .arg(portInfo.equipmentID));
 				return false;
 			}
 
 			// std::vector<char> sb;
 			// std::vector<char>* sendBuffer = &sb;
-			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
+			std::vector<char>* sendBuffer =
+				c->getPortSendBuffer(portInfo.portNo); // portNo here is 1 or 2, it is different from modulePortNo
 			if (sendBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")
@@ -659,7 +697,7 @@ namespace Sim
 			}
 
 			sendBuffer->resize(portInfo.txDataSizeW * 2);
-			std::memcpy(sendBuffer->data(), fromVduPortsData->portData[portInfo.portNo].data, sendBuffer->size());
+			std::memcpy(sendBuffer->data(), fromVduPortsData->portData[modulePortIndex].data, sendBuffer->size());
 
 			// Send data (actually swap) to send buffer
 			//
@@ -784,23 +822,51 @@ namespace Sim
 		return;
 	}
 
-	// bool VduDeviceEmulator::armingKey() const
-	//{
-	//	return m_armingKey.load();
-	// }
+	bool VduDeviceEmulator::discreteInputState(size_t index) const
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		return m_discreteInputStates[index];
+	}
 
-	// void VduDeviceEmulator::setArmingKey(bool value)
-	//{
-	//	m_armingKey = value;
-	// }
+	void VduDeviceEmulator::setDiscreteInputState(size_t index, bool value)
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		m_discreteInputStates[index] = value;
+	}
 
-	// bool VduDeviceEmulator::tuningKey() const
-	//{
-	//	return m_tuningKey.load();
-	// }
+	bool VduDeviceEmulator::discreteInputValidity(size_t index) const
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		return m_discreteInputValidities[index];
+	}
 
-	// void VduDeviceEmulator::setTuningKey(bool value)
-	//{
-	//	m_tuningKey = value;
-	// }
+	void VduDeviceEmulator::setDiscreteInputValidity(size_t index, bool value)
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		m_discreteInputValidities[index] = value;
+	}
+
+	std::optional<bool> VduDeviceEmulator::discreteOutputState(size_t index) const
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		return m_discreteOutputStates[index];
+	}
+
+	std::array<std::optional<bool>, VduDeviceEmulator::OUTPUTS_COUNT> VduDeviceEmulator::discreteOutputStates() const
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		return m_discreteOutputStates;
+	}
+
+	void VduDeviceEmulator::setDiscreteOutputState(size_t index, std::optional<bool> value)
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		m_discreteOutputStates[index] = value;
+	}
+
+	void VduDeviceEmulator::setDiscreteOutputStates(const std::array<std::optional<bool>, VduDeviceEmulator::OUTPUTS_COUNT>& values)
+	{
+		std::scoped_lock lock{m_insOutsMutex};
+		m_discreteOutputStates = values;
+	}
 } // namespace Sim

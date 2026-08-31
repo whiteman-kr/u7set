@@ -152,23 +152,38 @@ namespace Sim
 		}
 	}
 
-	// bool VduModuleImpl::armingKey() const
-	//{
-	//	return m_device.armingKey();
-	// }
+	bool VduModuleImpl::discreteInputState(size_t index) const
+	{
+		return m_device.discreteInputState(index);
+	}
 
-	// void VduModuleImpl::setArmingKey(bool value)
-	//{
-	//	return m_device.setArmingKey(value);
-	// }
+	void VduModuleImpl::setDiscreteInputState(size_t index, bool value)
+	{
+		m_device.setDiscreteInputState(index, value);
+	}
 
-	// bool VduModuleImpl::tuningKey() const
-	//{
-	//	return m_device.tuningKey();
-	// }
+	bool VduModuleImpl::discreteInputValidity(size_t index) const
+	{
+		return m_device.discreteInputValidity(index);
+	}
 
-	// void VduModuleImpl::setTuningKey(bool value)
-	//{
-	//	return m_device.setTuningKey(value);
-	// }
+	void VduModuleImpl::setDiscreteInputValidity(size_t index, bool value)
+	{
+		m_device.setDiscreteInputValidity(index, value);
+	}
+
+	std::optional<bool> VduModuleImpl::discreteOutputState(size_t index) const
+	{
+		return m_device.discreteOutputState(index);
+	}
+
+	std::array<std::optional<bool>, SimVduSharedData::DiscreteOutputCount> VduModuleImpl::discreteOutputStates() const
+	{
+		return m_device.discreteOutputStates();
+	}
+
+	void VduModuleImpl::setDiscreteOutputState(size_t index, std::optional<bool> value)
+	{
+		m_device.setDiscreteOutputState(index, value);
+	}
 } // namespace Sim

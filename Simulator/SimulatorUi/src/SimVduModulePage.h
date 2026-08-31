@@ -32,20 +32,17 @@ namespace SimUi
 	protected:
 		void simulatorStateChanged(Sim::SimControlState state);
 		void updateLogicModuleInfoInfo();
-		void updateVduModuleInfo();
 
 	protected slots:
 		void projectUpdated();
 
 		void powerOff(bool toPowerOff);
 		void startSimApp();
-		// void armingKeyToggled(bool value);
-		// void tuningKeyToggled(bool value);
 
-		// void signalsButtonClicked();
-		// void codeButtonClicked();
-		// void memoryButtonClicked();
+		void inputStateButtonToggled(size_t index, bool checked);
+		void inputValidityButtonToggled(size_t index, bool checked);
 
+		void updateInputsStates();
 		void updateModuleStates(Sim::ControlStatus state);
 
 	public:
@@ -62,8 +59,6 @@ namespace SimUi
 
 		// UI
 		//
-		QSplitter* m_splitter = nullptr;
-
 		QLabel* m_equipmentIdLabel = nullptr;
 		QLabel* m_equipmentIdValue = nullptr;
 
@@ -84,19 +79,20 @@ namespace SimUi
 		QLabel* m_runtimeModeLabel = nullptr;
 		QLabel* m_runtimeModeValue = nullptr;
 
-		QFrame* m_modeLine = nullptr;
+		// ----------------------
+
+		static constexpr size_t INPUTS_COUNT = SimVduSharedData::DiscreteInputCount;
+		static constexpr size_t OUTPUTS_COUNT = SimVduSharedData::DiscreteOutputCount;
+
+		std::array<QLabel*, INPUTS_COUNT> m_inputLabels = {nullptr};
+		std::array<QPushButton*, INPUTS_COUNT> m_inputStateButtons = {nullptr};
+		std::array<QPushButton*, INPUTS_COUNT> m_inputValidityButtons = {nullptr};
+
+		std::array<QLabel*, OUTPUTS_COUNT> m_outputStateLabels = {nullptr};
+		std::array<QPushButton*, OUTPUTS_COUNT> m_outputStateButtons = {nullptr};
+
 		// ----------------------
 		QLabel* m_simAppArguments = nullptr;
 		QPushButton* m_startSimAppButton = nullptr;
-
-		// QPushButton* m_armingKeyButton = nullptr;
-		// QLabel* m_armingKeyStateLabel = nullptr;
-
-		// QPushButton* m_tuningKeyButton = nullptr;
-		// QLabel* m_tuningKeyStateLabel = nullptr;
-
-		// QPushButton* m_signalsButton = nullptr;
-		// QPushButton* m_memoryButton = nullptr;
-		// QPushButton* m_codeButton = nullptr;
 	};
 } // namespace SimUi
