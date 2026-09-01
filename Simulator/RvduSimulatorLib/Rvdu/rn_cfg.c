@@ -12,7 +12,7 @@ Module description: Loads and stores RVDU configuration settings.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -20,7 +20,7 @@ Module description: Loads and stores RVDU configuration settings.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -42,11 +42,20 @@ Module description: Loads and stores RVDU configuration settings.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.03
+-- Date:	01.09.2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4121
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-4116, rn_cfg сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -70,7 +79,19 @@ static struct VduConfigSchema1* m_pVduConfigSchema = NULL;
 static char* m_pVduConfigGlobalScript = NULL;
 //
 // End of Private data
-					
+
+/*
+Copies the contents of the VduConfig.bin file to memory at the address specified in the parameter.
+Returns "true" if the copy is successful.
+Returns "false" if an error occurs while opening or reading the configuration file or on the cache overflow.
+Parameters:
+    cfgFile - configuration file name.
+    startAddr - 32-bit pointer to a buffer where to store the configuration.
+    bufferSize - size, in bytes, of the buffer.
+Return Value:
+	bytesRead - receives number of actually read bytes.
+	Returns "true" if successful, "false" on error.
+*/
 bool cacheConfigFile(const char* const cfgFile, alt_u8* const startAddr, const alt_u32 bufferSize, alt_u32* bytesRead)
 {
 	char msg[STRING_MAX_LEN];
@@ -160,6 +181,20 @@ bool cacheConfigFile(const char* const cfgFile, alt_u8* const startAddr, const a
 	return false;
 }
 
+/*
+Copies the contents of the GlobalScript.lua file to memory at the address specified in the parameter.
+Returns "true" if the copy is successful.
+Returns "false" if an error occurs while opening or reading the configuration file or on the cache overflow.
+Parameters:
+    luaFile - global script file name.
+    startAddr - 32-bit pointer to a buffer where to store the script.
+    bufferSize - size, in bytes, of the buffer.
+Return Value:
+	bytesRead - receives number of actually read bytes plus 1 byte for terminating zero.
+	Returns "true" if successful, "false" on error.
+
+If the global script is absent, sets the pointer returned by vduConfigGlobalScript() to NULL.
+*/
 bool cacheGlobalScript(const char* const luaFile, alt_u8* const startAddr, const alt_u32 bufferSize, alt_u32* bytesRead)
 {
 	if (bufferSize == 0u) 
@@ -240,16 +275,24 @@ bool cacheGlobalScript(const char* const luaFile, alt_u8* const startAddr, const
 	return false;
 }
 
+// Returns a pointer to a cached configuration or NULL if configuration is not loaded
+//
 const struct VduConfigFile1* const vduConfig(void)
 {
 	return m_pVduConfigFile;
 }
 
+// Returns a pointer to a cached globalScript or NULL if it is not loaded
+//
 const char* const vduConfigGlobalScript(void)
 {
 	return m_pVduConfigGlobalScript;
 }
 
+/*
+Display information about all the schemas contained in file VduConfig.bin in this format:
+schema <>, version <>, size <>, id = <>, caption <>
+*/
 void vduConfigPrintSchemasList(void)
 {
 	const struct VduConfigFile1* cfg = vduConfig();
@@ -276,6 +319,8 @@ void vduConfigPrintSchemasList(void)
 	return;
 }
 
+// Returns a pointer to a cached schema configuration or NULL if configuration is not loaded or index is out of range
+//
 const struct VduConfigSchema1* const vduConfigSchema(const alt_u16 schemaIndex)
 {
 	if ((m_pVduConfigSchema == NULL) || (schemaIndex >= m_pVduConfigFile->schemaCount))
@@ -287,6 +332,8 @@ const struct VduConfigSchema1* const vduConfigSchema(const alt_u16 schemaIndex)
 	return result;
 }
 
+// Returns a pointer to a configuration string by its offset or the NULL if configuration is not loaded or the offset is out of range
+//
 const char* const vduConfigString(const alt_u32 offset)
 {
 	if ((m_pVduConfigFile == NULL) || (offset >= m_configurationSize))
@@ -294,7 +341,7 @@ const char* const vduConfigString(const alt_u32 offset)
 		return NULL;
 	}
 
-	char* str = (char*)m_pVduConfigFile + offset + sizeof(alt_u16) /*skip string size*/;
+	char* str = (char*)m_pVduConfigFile + offset + sizeof(alt_u16); /*skip string size*/
 	return str;
 }
 

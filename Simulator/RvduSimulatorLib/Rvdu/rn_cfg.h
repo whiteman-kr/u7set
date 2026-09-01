@@ -12,7 +12,7 @@ Module description: Loads and stores RVDU configuration settings.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -20,7 +20,7 @@ Module description: Loads and stores RVDU configuration settings.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -42,11 +42,20 @@ Module description: Loads and stores RVDU configuration settings.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.03
+-- Date:	01.09.2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4121
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-4116, rn_cfg сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -58,6 +67,8 @@ Module description: Loads and stores RVDU configuration settings.
 
 #include <stdbool.h>
 
+// Struct stores configuration display dimensions (width and height), the starting schemaId, and the display name.
+//
 struct VduConfigDisplay1
 {
 	alt_u16 version; 		// 1
@@ -79,9 +90,11 @@ struct VduConfigDisplay1
 	alt_u32 reserve4;
 };
 
+// Stores configuration information, including project and equipment identifiers, display and font counts, and schema count.
+//
 struct VduConfigFile1
 {
-	char magic[8];    		// "VDUCFG1\0"
+	char magic[8];    		// "VDUCFG1\0" has length of 8 bytes
 
 	alt_u16 version; 		// 1
 	alt_u16 size;    		// sizeof(VduConfigFile1)
