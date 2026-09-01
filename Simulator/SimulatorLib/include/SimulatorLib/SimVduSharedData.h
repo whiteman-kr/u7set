@@ -9,7 +9,7 @@ namespace SimVduSharedData
 	constexpr size_t OptoBufferMaxSize = 2560 * 2;
 	constexpr size_t OptoPortCount = 8;
 
-	constexpr size_t DiscreteInputCount = 8;
+	constexpr size_t DiscreteInputCount = 6;
 	constexpr size_t DiscreteOutputCount = 6;
 
 	struct SimulatorState
