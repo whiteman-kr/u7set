@@ -76,8 +76,11 @@ static void optoTxProcImpl(void)
 			if (optoPort->txDataSizeW != 0u)
 			{
 				alt_u16 offset = i * WORDS_PER_OPTO_CHANEL;
-				writeEBB16(offset, 0);
-				writeEBB16(offset + 1u, 0);
+
+				alt_u32 txId = vduOptoPort(i)->txDataUID;
+
+				writeEBB16(offset, (alt_u16)(txId >> 16u));
+				writeEBB16(offset + 1u, (alt_u16)(txId & 0xffffu));
 			}
 		}
 	}

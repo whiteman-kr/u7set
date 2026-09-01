@@ -879,6 +879,24 @@ int rnLibSignalLowLimitInt(unsigned int index)
 	return param->lowLimit.intValue;
 }
 
+uint32_t rnLibOptoPortRxDataID(uint16_t portIndex)
+{
+	if (portIndex > 8)
+	{
+		return (uint32_t)-1;
+	}
+	return vduOptoPort(portIndex)->rxDataUID;
+}
+
+uint32_t rnLibOptoPortTxDataID(uint16_t portIndex)
+{
+	if (portIndex > 8)
+	{
+		return (uint32_t)-1;
+	}
+	return vduOptoPort(portIndex)->txDataUID;
+}
+
 void rnLibReadMemoryLock() 
 { 
 	externalBusBridgeReadLock(); 
@@ -935,11 +953,26 @@ bool rnLibReadWriteMemory(unsigned int offset, unsigned int count, unsigned char
 		return false;
 	}
 
-	const alt_u8* const ptr = m_externalBusBridgeWrite+ offset;
+	const alt_u8* const ptr = m_externalBusBridgeWrite + offset;
 	memcpy(result, ptr, count);
 
 	return true;
 }
+
+bool rnLibWriteWriteMemory(unsigned int offset, const unsigned char* const data, unsigned int count)
+{
+	if (offset + count > TO_EXTERNAL_BUS_BRIDGE_1_BASE_SIZE)
+	{
+		assert(false);
+		return false;
+	}
+
+	alt_u8* ptr = m_externalBusBridgeWrite + offset;
+	memcpy(ptr, data, count);
+
+	return true;
+}
+
 bool rnLibSignalValueInt(unsigned int signalIndex, alt_32* res)
 {
 	*res = 0;

@@ -2,9 +2,6 @@
 
 #include <RvduSimulatorLib.h>
 
-constexpr size_t OptoBufferMaxSize = 2560 * 2;
-constexpr size_t OptoPortCount = 8;
-
 constexpr int MemoryUpdateTimeMs = 50;	// Memory update period
 constexpr int StatsUpdateMs = 250;		// Statistics update period
 constexpr int TimeoutMs = 3000;			// Timeout period
@@ -85,7 +82,6 @@ void SimCommThreadWorker::processVduSharedData()
 	{
 		std::scoped_lock lock{*m_sharedMemory};
 		processSharedMemory();
-
 	}
 }
 
@@ -145,6 +141,11 @@ void SimCommThreadWorker::initSharedMemory()
 	}
 }
 
+#define ADDR_OPTO_VALIDITY 20491u
+#define ADDR_DISCRETE_INPUTS 20481u
+#define ADDR_DISCRETE_INPUTS_VALIDITY 20480u
+#define ADDR_DISCRETE_OUTPUTS 20483u
+
 void SimCommThreadWorker::processSharedMemory()
 {
 	assert(m_sharedMemory->isAttached() == true);
@@ -163,6 +164,58 @@ void SimCommThreadWorker::processSharedMemory()
 		return;
 	}
 
+	processStatus(sharedData);
+
+	// Update the Read memory contents
+	//
+	static uint64_t m_prevSimulatorUpdateCounter = (uint64_t)-1;
+	if (sharedData->simulatorState.updateCounter != m_prevSimulatorUpdateCounter)
+	{
+		m_prevSimulatorUpdateCounter = sharedData->simulatorState.updateCounter;
+
+		m_timeout = false;
+		m_timeoutCounter = 0;
+
+		rnLibReadMemoryLock();
+		
+		processInputDiscretes(sharedData);
+
+		processRxOptoPorts(sharedData);
+
+		processOutputDiscretes(sharedData);
+
+		rnLibReadMemoryUnlock();
+
+		// Update the Write memory contents
+		//
+
+		rnLibWriteMemoryLock();
+
+		processTxOptoPorts(sharedData);
+
+		rnLibWriteMemoryUnlock();
+	}
+	else
+	{
+		if (m_timeout == false)
+		{
+			m_timeoutCounter++;
+
+			if (m_timeoutCounter >= (TimeoutMs / MemoryUpdateTimeMs))
+			{
+				m_timeout = true;
+				
+				// Clear optical ports validity
+				//
+				uint16_t optoValidity = 0;
+				rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
+			}
+		}
+	}
+}
+
+void SimCommThreadWorker::processStatus(SimVduSharedData::SharedData* sharedData)
+{
 	// Process statistics
 	//
 	static int counter = 0;
@@ -172,7 +225,7 @@ void SimCommThreadWorker::processSharedMemory()
 
 		QString deviceStatestr;
 
-		if (m_timeout == true) 
+		if (m_timeout == true)
 		{
 			deviceStatestr = "Timeout";
 		}
@@ -200,89 +253,121 @@ void SimCommThreadWorker::processSharedMemory()
 
 		emit updateSharedDataInfo(str, m_timeout);
 	}
+}
 
-	// Update the contents
+void SimCommThreadWorker::processRxOptoPorts(SimVduSharedData::SharedData* sharedData)
+{
+	// Read optical buffers
 	//
-	if (sharedData->simulatorState.updateCounter != m_prevUpdateCounter)
+	uint16_t optoValidity = 0;
+
+	for (int i = 0; i < SimVduSharedData::OptoPortCount; i++)
 	{
-		m_prevUpdateCounter = sharedData->simulatorState.updateCounter;
-
-		m_timeout = false;
-		m_timeoutCounter = 0;
-
-		uint16_t optoValidity = 0;
-
-		// Write optical buffers
-
-		rnLibReadMemoryLock();
-		for (int i = 0; i < OptoPortCount; i++)
+		if (sharedData->toVdu.portData[i].timeout == 0)
 		{
-			if (sharedData->toVdu.portData[i].timeout == 0)
+			if (sharedData->toVdu.portData[i].occupied != 0)
 			{
-				if (sharedData->toVdu.portData[i].occupied != 0)
-				{
-					uint8_t reversedData[OptoBufferMaxSize];
-					memcpy(reversedData, sharedData->toVdu.portData[i].data, OptoBufferMaxSize);
+				uint8_t reversedData[SimVduSharedData::OptoBufferMaxSize];
+				memcpy(reversedData, sharedData->toVdu.portData[i].data, SimVduSharedData::OptoBufferMaxSize);
 
-					// Reverse bytes in words
-					//
-					uint16_t* data16 = (uint16_t*)reversedData;
-					for (int j = 0; j < OptoBufferMaxSize / 2; j++)
-					{
-						*data16 = qbswap(*data16);
-						data16++;
-					}
-
-					rnLibWriteReadMemory(i * OptoBufferMaxSize, reversedData, OptoBufferMaxSize);
-
-					optoValidity |= (1 << i);
-				}
-			}
-
-			// Write optical ports validity
-
-#define ADDR_OPTO_VALIDITY 20491u
-			rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
-		}
-
-		rnLibReadMemoryUnlock();
-
-		sharedData->fromVdu.updateCounter++;
-
-		rnLibWriteMemoryLock();
-		for (int i = 0; i < OptoPortCount; i++)
-		{
-			sharedData->fromVdu.portData[i].timeout = 0;
-			sharedData->fromVdu.portData[i].occupied = m_outOptoOccupied[i];
-
-			rnLibReadWriteMemory(i * OptoBufferMaxSize, OptoBufferMaxSize, sharedData->fromVdu.portData[i].data);
-
-			// Reverse bytes in words
-			//
-			uint16_t* data16 = (uint16_t*)sharedData->fromVdu.portData[i].data;
-			for (int j = 0; j < OptoBufferMaxSize / 2; j++)
-			{
-				*data16 = qbswap(*data16);
-				data16++;
-			}
-		}
-		rnLibWriteMemoryUnlock();
-	}
-	else
-	{
-		if (m_timeout == false)
-		{
-			m_timeoutCounter++;
-
-			if (m_timeoutCounter >= (TimeoutMs / MemoryUpdateTimeMs))
-			{
-				m_timeout = true;
-				
-				// Clear optical ports validity
+				// Reverse bytes in words
 				//
-				uint16_t optoValidity = 0;
-				rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
+				uint16_t* data16 = (uint16_t*)reversedData;
+				for (int j = 0; j < SimVduSharedData::OptoBufferMaxSize / 2; j++)
+				{
+					*data16 = qbswap(*data16);
+					data16++;
+				}
+
+				rnLibWriteReadMemory(i * SimVduSharedData::OptoBufferMaxSize, reversedData, SimVduSharedData::OptoBufferMaxSize);
+
+				optoValidity |= (1 << i);
 			}
+		}
+
+		// Write optical ports validity
+
+		rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
+	}
+}
+
+void SimCommThreadWorker::processTxOptoPorts(SimVduSharedData::SharedData* sharedData)
+{ 
+	// Write the optical ports output data
+	//
+	sharedData->fromVdu.updateCounter++;
+
+	for (int i = 0; i < SimVduSharedData::OptoPortCount; i++)
+	{
+		sharedData->fromVdu.portData[i].timeout = 0;
+		sharedData->fromVdu.portData[i].occupied = m_outOptoOccupied[i];
+	
+		rnLibReadWriteMemory(i * SimVduSharedData::OptoBufferMaxSize,
+							 SimVduSharedData::OptoBufferMaxSize,
+							 sharedData->fromVdu.portData[i].data);
+
+		// Reverse bytes in words
+		//
+		uint16_t* data16 = (uint16_t*)sharedData->fromVdu.portData[i].data;
+		for (int j = 0; j < SimVduSharedData::OptoBufferMaxSize / 2; j++)
+		{
+			*data16 = qbswap(*data16);
+			data16++;
+		}
+
+		// Write tx ID
+		//
+		uint32_t txId = rnLibOptoPortTxDataID(i);
+		*(uint32_t*)sharedData->fromVdu.portData[i].data = qToBigEndian(txId);
+
+	}
+}
+
+void SimCommThreadWorker::processInputDiscretes(SimVduSharedData::SharedData* sharedData)
+{  
+	// Read input discretes
+	//
+	uint8_t diValue = 0;
+	uint8_t diValidity = 0;
+
+	static uint64_t m_prevInputDiscreteUpdateCounter = (uint64_t)-1;
+	if (sharedData->discreteInputs.updateCounter != m_prevInputDiscreteUpdateCounter)
+	{
+		m_prevInputDiscreteUpdateCounter = sharedData->discreteInputs.updateCounter;
+		for (int i = 0; i < SimVduSharedData::DiscreteInputCount; i++)
+		{
+			if (sharedData->discreteInputs.data[i] != 0)
+			{
+				diValue |= (1 << i);
+			}
+			if (sharedData->discreteInputs.validity[i] != 0)
+			{
+				diValidity |= (1 << i);
+			}
+		}
+	}
+	rnLibWriteReadMemory(ADDR_DISCRETE_INPUTS * 2, (unsigned char*)&diValue, sizeof(uint8_t));
+	rnLibWriteReadMemory(ADDR_DISCRETE_INPUTS_VALIDITY * 2, (unsigned char*)&diValidity, sizeof(uint8_t));
+}
+
+void SimCommThreadWorker::processOutputDiscretes(SimVduSharedData::SharedData* sharedData)
+{ 
+	// Write the output discretes state
+	//
+	uint8_t doValue = 0;
+	rnLibReadReadMemory(ADDR_DISCRETE_OUTPUTS * 2, sizeof(uint8_t), &doValue);
+
+	sharedData->discreteOutputs.updateCounter++;
+
+	for (int i = 0; i < SimVduSharedData::DiscreteOutputCount; i++)
+	{
+		if ((doValue & (1 << i)) != 0)
+		{
+			sharedData->discreteOutputs.data[i] = 1;
+		}
+		else
+		{
+			sharedData->discreteOutputs.data[i] = 0;
 		}
 	}
 }

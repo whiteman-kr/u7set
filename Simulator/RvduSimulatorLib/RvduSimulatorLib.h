@@ -2,6 +2,7 @@
 #define RNSW_LIB_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 	#define RNSW_INLINE inline        // C++
@@ -93,6 +94,9 @@ extern "C"
 	int rnLibSignalHighLimitInt(unsigned int index);
 	int rnLibSignalLowLimitInt(unsigned int index);
 
+	uint32_t rnLibOptoPortRxDataID(uint16_t portIndex);
+	uint32_t rnLibOptoPortTxDataID(uint16_t portIndex);
+
 	// Signals read/write
 
 	void rnLibReadMemoryLock();
@@ -103,6 +107,7 @@ extern "C"
 	void rnLibWriteMemoryLock();
 	void rnLibWriteMemoryUnlock();
 	bool rnLibReadWriteMemory(unsigned int offset, unsigned int count, unsigned char* const result);
+	bool rnLibWriteWriteMemory(unsigned int offset, const unsigned char* const data, unsigned int count);
 
 	bool rnLibSignalValueInt(unsigned int signalIndex, int* res);
 	bool rnLibSignalValueFloat(unsigned int signalIndex, float* res);

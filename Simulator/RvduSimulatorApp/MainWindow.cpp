@@ -13,6 +13,7 @@
 #include <UiLib/DialogAbout.h>
 #include <UiLib/LogDialog.h>
 #include <UiLib/UiTools.h>
+#include <LicenseLib/AppLicenser.h>
 
 static const int m_logFileCount = 9999;
 static const int m_logFileMaxSize = 1048576;
@@ -136,8 +137,6 @@ void MainWindow::onShowSharedMemory()
 	{
 		SharedMemoryView* dialogView = SharedMemoryView::create(this);
 		Q_UNUSED(dialogView);
-
-		connect(this, &MainWindow::aboutToClose, dialogView, &QWidget::close);
 	}
 }
 
@@ -149,7 +148,17 @@ void MainWindow::onShowAppLog()
 void MainWindow::onShowAbout()
 {
 	QString text = qApp->applicationName() + tr(" provides RVDU simulation.");
-	UiLib::DialogAbout::show(this, text, {});
+
+	LicenseLib::AppLicenser appLicenser;
+	UiLib::DialogAbout::show(this,
+							 text,
+							 ":/Logo/RadiyLogo.png",
+							 appLicenser.organization(),
+							 appLicenser.person(),
+							 appLicenser.endDate(),
+							 appLicenser.uuid(),
+							 LicenseLib::AppLicenser::workplaceId());
+
 	return;
 }
 
@@ -370,11 +379,6 @@ void MainWindow::updateStatusBar()
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
-	if (event->type() == QEvent::Close)
-	{
-		emit aboutToClose();
-	}
-
 	if (event->type() == QEvent::MouseButtonPress &&
 		object == m_statusBarLogAlerts && 
 		m_statusBarLogAlerts->text().isEmpty() == false)

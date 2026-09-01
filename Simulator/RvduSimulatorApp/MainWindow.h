@@ -30,9 +30,6 @@ public:
 	explicit MainWindow(const AppSettings& settings, QWidget* parent = nullptr);
 	~MainWindow();
 
-signals:
-	void aboutToClose();
-
 private slots:
 	void onTimer();
 	void onSignals();
