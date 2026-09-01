@@ -51,7 +51,6 @@ Module description: Loads and stores RVDU configuration settings.
 -- *************************************************************
 */
 
-#include <string.h>
 #include <stdbool.h>
 
 #include "rn_cfg.h"
@@ -68,7 +67,6 @@ static alt_u32 m_configurationSize = 0;
 
 static struct VduConfigFile1* m_pVduConfigFile = NULL;
 static struct VduConfigSchema1* m_pVduConfigSchema = NULL;
-//static char* m_pVduConfigStrings = NULL;
 static char* m_pVduConfigGlobalScript = NULL;
 //
 // End of Private data
@@ -133,7 +131,7 @@ bool cacheConfigFile(const char* const cfgFile, alt_u8* const startAddr, const a
 
 		// Check file version
 		//
-		if (m_pVduConfigFile->version > FILE_CFG_VERSION)
+		if (m_pVduConfigFile->version != FILE_CFG_VERSION)
 		{
 			(void)snprintf(msg, STRING_MAX_LEN, "cacheConfigFile: file '%s' version (%d) is not supported, max supported version is (%u).",
 				cfgFile,
@@ -146,7 +144,7 @@ bool cacheConfigFile(const char* const cfgFile, alt_u8* const startAddr, const a
 
 		// Check crc64
 		//
-		unsigned long long crc = reverseBytes64(calcCrc64(startAddr, size - sizeof(alt_u64)));
+		alt_u64 crc = reverseBytes64(calcCrc64(startAddr, size - sizeof(alt_u64)));
 		const alt_u64* pFileCrc64 = ((alt_u64*)(startAddr + size - sizeof(alt_u64)));	
 		if (crc != *pFileCrc64)
 		{
@@ -164,6 +162,13 @@ bool cacheConfigFile(const char* const cfgFile, alt_u8* const startAddr, const a
 
 bool cacheGlobalScript(const char* const luaFile, alt_u8* const startAddr, const alt_u32 bufferSize, alt_u32* bytesRead)
 {
+	if (bufferSize == 0u) 
+	{
+		logError(OpenFileError, "cacheGlobalScript: buffer is empty.");
+		return false;
+	}
+	alt_u32 maxFileSize = bufferSize - 1u;
+
 	char msg[STRING_MAX_LEN];
 	(void)snprintf(msg, STRING_MAX_LEN, "cacheGlobalScript: loading from %s.", luaFile);
 	logMessage(msg);
@@ -180,7 +185,6 @@ bool cacheGlobalScript(const char* const luaFile, alt_u8* const startAddr, const
 	// Check file size, it shall be at least smaller by 1 byte than the buffer to include "\0"
 	//
 	alt_u32 size = fileSize(f);
-	alt_u32 maxFileSize = bufferSize - 1u;
 
 	if ((size == WRONG_FILE_SIZE) ||
 		(size > maxFileSize))
@@ -222,6 +226,10 @@ bool cacheGlobalScript(const char* const luaFile, alt_u8* const startAddr, const
 			readbytescount++;
 
 			m_pVduConfigGlobalScript = (char*)startAddr;
+		}
+		else
+		{
+			logMessage("cacheGlobalScript: the global script is empty.");
 		}
 
 		*bytesRead = readbytescount;
@@ -268,7 +276,7 @@ void vduConfigPrintSchemasList(void)
 	return;
 }
 
-const struct VduConfigSchema1* const vduConfigSchema(alt_u16 schemaIndex)
+const struct VduConfigSchema1* const vduConfigSchema(const alt_u16 schemaIndex)
 {
 	if ((m_pVduConfigSchema == NULL) || (schemaIndex >= m_pVduConfigFile->schemaCount))
 	{

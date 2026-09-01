@@ -223,7 +223,7 @@ static bool schemaItemIsValid(const struct VduSchemaFileSchemaItem1* const schem
 
 // Cache specified schema file
 //
-static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr, alt_u32 maxSchemaSize, alt_u32* bytesRead)
+static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr, alt_u64 configCrc, alt_u32 maxSchemaSize, alt_u32* bytesRead)
 {
 	if ((fileName == NULL) || (schemaStartAddr == NULL) || (bytesRead == NULL))
 	{
@@ -302,9 +302,9 @@ static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr,
 	{
 		// Check crc64
 		//
-		unsigned long long crc = reverseBytes64(calcCrc64(schemaStartAddr, (*bytesRead) - sizeof(alt_u64)));
+		alt_u64 crc = reverseBytes64(calcCrc64(schemaStartAddr, (*bytesRead) - sizeof(alt_u64)));
 		const alt_u64* pFileCrc64 = ((alt_u64*)(schemaStartAddr + (*bytesRead) - sizeof(alt_u64)));
-		if (crc != *pFileCrc64)
+		if ((crc != *pFileCrc64) || (configCrc != *pFileCrc64))
 		{
 			(void)snprintf(msg, STRING_MAX_LEN, "cacheSchemaFile: file '%s' CRC64 is incorrect.", fileName);
 			logError(FileFormatError, msg);
@@ -961,7 +961,7 @@ bool cacheSchemas(const char* const schemaPath, alt_u8* const startAddr, alt_u32
 		(void)snprintf(fileName, FILE_NAME_MAX_LEN, "%s/%s.vbs", schemaPath, vduConfigString(pSchema->schemaId));
 
 		alt_u32 schemaBytesRead = 0;
-		bool result = cacheSchemaFile(fileName, schemaStartAddr, memoryAvailable, &schemaBytesRead);
+		bool result = cacheSchemaFile(fileName, schemaStartAddr, pSchema->crc64, memoryAvailable, &schemaBytesRead);
 		if (result == false)
 		{
 			return false;

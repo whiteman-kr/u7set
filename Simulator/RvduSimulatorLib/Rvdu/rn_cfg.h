@@ -183,7 +183,7 @@ void vduConfigPrintSchemasList(void);
 
 // Returns a pointer to a cached schema configuration or NULL if configuration is not loaded or index is out of range
 //
-const struct VduConfigSchema1* const vduConfigSchema(alt_u16 schemaIndex);
+const struct VduConfigSchema1* const vduConfigSchema(const alt_u16 schemaIndex);
 
 // Returns a pointer to a configuration string by its offset or the NULL if configuration is not loaded or the offset is out of range
 //
