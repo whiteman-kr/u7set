@@ -164,10 +164,14 @@ void SimCommThreadWorker::processSharedMemory()
 		return;
 	}
 
+	if (sharedData->simulatorState.bringToFront != 0) 
+	{
+		sharedData->simulatorState.bringToFront = 0;
+		emit bringToFront();
+	}
+
 	processStatus(sharedData);
 
-	// Update the Read memory contents
-	//
 	static uint64_t m_prevSimulatorUpdateCounter = (uint64_t)-1;
 	if (sharedData->simulatorState.updateCounter != m_prevSimulatorUpdateCounter)
 	{
@@ -176,27 +180,37 @@ void SimCommThreadWorker::processSharedMemory()
 		m_timeout = false;
 		m_timeoutCounter = 0;
 
-		rnLibReadMemoryLock();
-		
-		processInputDiscretes(sharedData);
+		if (sharedData->simulatorState.deviceState == static_cast<int>(DeviceState::Operate))
+		{
+			// Update the Read memory contents
 
-		processRxOptoPorts(sharedData);
+			rnLibReadMemoryLock();
 
-		processOutputDiscretes(sharedData);
+			processInputDiscretes(sharedData);
 
-		rnLibReadMemoryUnlock();
+			processRxOptoPorts(sharedData);
 
-		// Update the Write memory contents
-		//
+			processOutputDiscretes(sharedData);
 
-		rnLibWriteMemoryLock();
+			rnLibReadMemoryUnlock();
 
-		processTxOptoPorts(sharedData);
+			// Update the Write memory contents
 
-		rnLibWriteMemoryUnlock();
+			rnLibWriteMemoryLock();
+
+			processTxOptoPorts(sharedData);
+
+			rnLibWriteMemoryUnlock();
+		}
+		else
+		{
+			clearInputValidity();
+		}
 	}
 	else
 	{
+		// Process possible timeout
+		//
 		if (m_timeout == false)
 		{
 			m_timeoutCounter++;
@@ -204,11 +218,7 @@ void SimCommThreadWorker::processSharedMemory()
 			if (m_timeoutCounter >= (TimeoutMs / MemoryUpdateTimeMs))
 			{
 				m_timeout = true;
-				
-				// Clear optical ports validity
-				//
-				uint16_t optoValidity = 0;
-				rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
+				clearInputValidity();
 			}
 		}
 	}
@@ -372,6 +382,19 @@ void SimCommThreadWorker::processOutputDiscretes(SimVduSharedData::SharedData* s
 	}
 }
 
+void SimCommThreadWorker::clearInputValidity()
+{ 
+	// Clear optical ports validity
+	//
+	uint16_t optoValidity = 0;
+	rnLibWriteReadMemory(ADDR_OPTO_VALIDITY * 2, (unsigned char*)&optoValidity, sizeof(uint16_t));
+
+	// Clear input discretes validity
+	//
+	uint8_t diValidity = 0;
+	rnLibWriteReadMemory(ADDR_DISCRETE_INPUTS_VALIDITY * 2, (unsigned char*)&diValidity, sizeof(uint8_t));
+}
+
 SimCommThreadController::SimCommThreadController(QObject* parent,
 												 QString sharedMemoryKey) :
 	QObject(parent)
@@ -386,6 +409,7 @@ SimCommThreadController::SimCommThreadController(QObject* parent,
 	connect(m_worker, &SimCommThreadWorker::logMessage, this, &SimCommThreadController::logMessage);
 
 	connect(m_worker, &SimCommThreadWorker::updateSharedDataInfo, this, &SimCommThreadController::updateSharedDataInfo);
+	connect(m_worker, &SimCommThreadWorker::bringToFront, this, &SimCommThreadController::bringToFront);
 
 	m_workerThread.start();
 }

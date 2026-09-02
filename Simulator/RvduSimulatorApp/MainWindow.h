@@ -36,6 +36,7 @@ private slots:
 	void onShowSharedMemory();
 	void onShowAppLog();
 	void onShowAbout();
+	void onBringToFront();
 
 private:
 	void setupUi();

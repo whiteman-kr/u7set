@@ -95,11 +95,7 @@ void MainWindow::onTimer()
 		{
 			sharedData->showCommand = false;
 
-			showNormal();
-			raise(); // Brings the window to the top of the stack
-			activateWindow(); // Gives keyboard focus to the window
-
-			UiTools::ensureVisible(this);
+			onBringToFront();
 		}
 	}
 	
@@ -160,6 +156,15 @@ void MainWindow::onShowAbout()
 							 LicenseLib::AppLicenser::workplaceId());
 
 	return;
+}
+
+void MainWindow::onBringToFront()
+{
+	showNormal();
+	raise();          // Brings the window to the top of the stack
+	activateWindow(); // Gives keyboard focus to the window
+
+	UiTools::ensureVisible(this);
 }
 
 void MainWindow::setupUi()
@@ -280,6 +285,8 @@ void MainWindow::setupSharedMemController()
 					m_statusBarSharedDataInfo->setStyleSheet(QString("QLabel {color : white; background-color: #C00000}"));
 				}
 			});
+
+	connect(m_sharedMemController, &SimCommThreadController::bringToFront, this, &MainWindow::onBringToFront);
 }
 
 void MainWindow::createMenu() 
@@ -331,7 +338,8 @@ void MainWindow::createStatusBar()
 	// --
 	//
 	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 1);
-	statusBar()->addPermanentWidget(m_statusBarSharedDataInfo, 0);
+	statusBar()->addPermanentWidget(m_statusBarSharedDataInfo, 2);
+	statusBar()->addPermanentWidget(new QLabel(), 1);
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 }
 

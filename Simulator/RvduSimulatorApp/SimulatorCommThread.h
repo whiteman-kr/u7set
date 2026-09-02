@@ -29,6 +29,7 @@ signals:
 	void logMessage(const QString& msg);
 
 	void updateSharedDataInfo(const QString& info, bool timeout);
+	void bringToFront();
 
 public slots:
 	void threadProc();
@@ -46,6 +47,8 @@ private:
 	void processTxOptoPorts(SimVduSharedData::SharedData* sharedData);
 	void processInputDiscretes(SimVduSharedData::SharedData* sharedData);
 	void processOutputDiscretes(SimVduSharedData::SharedData* sharedData);
+
+	void clearInputValidity();
 
 private:
 	QString m_sharedMemoryKey;
@@ -73,6 +76,7 @@ signals:
 
 	void updateProjectInfo(const QString& projectInfo);
 	void updateSharedDataInfo(const QString& info, bool timeout);
+	void bringToFront();
 
 private:
 	SimCommThreadWorker* m_worker = nullptr;
