@@ -43,6 +43,12 @@ namespace Sim
 
 		virtual bool receiveConnectionsData(std::chrono::microseconds currentTime) override;
 
+		// External process, call these functions only from the interface thread (UI thread)
+		//
+		bool startSimAppProcess(const QString& simAppPath);
+
+		QStringList simAppArguments() const;
+
 	public:
 		const ::LogicModuleInfo& logicModuleExtraInfo() const;
 		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);

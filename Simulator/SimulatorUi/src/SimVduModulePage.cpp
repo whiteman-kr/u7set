@@ -213,7 +213,11 @@ namespace SimUi
 
 		// --
 		//
-		m_simAppArguments->setText(simAppArguments().join(' '));
+		auto vdu = vduModule();
+		if (vdu.has_value() == true)
+		{
+			m_simAppArguments->setText(vdu->simAppArguments().join(' '));
+		}
 
 		return;
 	}
@@ -287,10 +291,8 @@ namespace SimUi
 #endif
 
 		const QString applicationPath = QDir{QCoreApplication::applicationDirPath()}.filePath(applicationName);
-		QDir buildDir{m_simulator->buildPath() + QDir::separator() + Directory::SUBSYSTEMS + QDir::separator() +
-					  vdu->logicModuleExtraInfo().subsystemID};
 
-		if (QProcess::startDetached(applicationPath, simAppArguments()) == false)
+		if (vdu->startSimAppProcess(applicationPath) == false)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Cannot start RvduSimulatorApp from %1.").arg(applicationPath));
 		}
@@ -508,25 +510,6 @@ namespace SimUi
 	QString SimVduModulePage::equipmentId() const
 	{
 		return m_vduEquipmentId;
-	}
-
-	QStringList SimVduModulePage::simAppArguments() const
-	{
-		auto vdu = vduModule();
-		if (vdu.has_value() == false)
-		{
-			return {};
-		}
-
-		QStringList args;
-
-		QDir dir{m_simulator->buildPath() + QDir::separator() + Directory::SUBSYSTEMS + QDir::separator() +
-				 vdu->logicModuleExtraInfo().subsystemID};
-		args << QString("--build=") + dir.path();
-		args << QString("--key=%1").arg(vdu->moduleJumpers().jumpersValue);
-		args << QString("--memory=%1").arg(vdu->sharedMemoryKey());
-
-		return args;
 	}
 
 	std::optional<Sim::VduModule> SimVduModulePage::vduModule()

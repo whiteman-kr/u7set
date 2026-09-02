@@ -18,6 +18,10 @@ namespace SimVduSharedData
 		int32_t deviceState;    // enum class DeviceState (0 - Off, Start, Fault, Operate)
 		int32_t reserved0;      // Reserved for future use (padding to 8 bytes)
 		uint64_t plantTime;     // The plant time in microseconds
+
+		int8_t bringToFront;    // Request to activate and bring to front the VDU Simulator App window (0 - no request, 1 - request)
+								// VDU Simulator App should reset this value to 0 after processing the request.
+		int8_t reserved1[7];    // Reserved for future use (padding to 8 bytes)
 	};
 
 	struct OptoBuffer
@@ -30,7 +34,7 @@ namespace SimVduSharedData
 	struct OptoPorts
 	{
 		uint64_t updateCounter;
-		OptoBuffer portData[OptoPortCount]; // Data from simulator to VDU
+		OptoBuffer portData[OptoPortCount]; // Data buffer for each opto port
 	};
 
 	struct DiscreteInputs

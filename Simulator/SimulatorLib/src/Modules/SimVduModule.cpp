@@ -68,6 +68,16 @@ namespace Sim
 		return m_impl->setPowerOff(value);
 	}
 
+	bool VduModule::startSimAppProcess(const QString& simAppPath)
+	{
+		return m_impl->startSimAppProcess(simAppPath);
+	}
+
+	QStringList VduModule::simAppArguments() const
+	{
+		return m_impl->simAppArguments();
+	}
+
 	bool VduModule::discreteInputState(size_t index) const
 	{
 		return m_impl->discreteInputState(index);

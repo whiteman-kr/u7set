@@ -3,6 +3,119 @@
 #include "../SimulatorPrivate.h"
 #include <HardwareLib/ModuleFirmware.h>
 
+namespace
+{
+	struct ExternalSimProcesses
+	{
+		struct Node
+		{
+			QString sharedMemoryKey;
+			QProcess process;
+		};
+
+		std::map<QString, std::unique_ptr<Node>> processes; // Key is a shared memory key.
+		bool shutdownHandlerInstalled = false;
+
+		// --
+		//
+		void installShutdownHandler()
+		{
+			auto* application = QCoreApplication::instance();
+			if (application == nullptr || shutdownHandlerInstalled)
+				return;
+
+			QObject::connect(application,
+							 &QCoreApplication::aboutToQuit,
+							 application,
+							 [this]()
+							 {
+								 stopAll();
+							 });
+
+			shutdownHandlerInstalled = true;
+		}
+
+		~ExternalSimProcesses()
+		{
+			// Do not call terminate(), waitForFinished(), or other Qt APIs here.
+			//
+			// stopAll() must already have been called by aboutToQuit().
+			assert(processes.empty());
+		}
+
+		void stopAll()
+		{
+			for (auto& [_, node] : processes)
+			{
+				assert(node);
+
+				QProcess& process = node->process;
+
+				if (process.state() == QProcess::NotRunning)
+				{
+					continue;
+				}
+
+				process.terminate();
+
+				if (process.waitForFinished(3000) == false)
+				{
+					process.kill();
+					process.waitForFinished();
+				}
+			}
+
+			// This destroys all QProcess objects while Qt is still alive.
+			//
+			processes.clear();
+		}
+
+		bool startProcess(const QString& sharedMemoryKey, const QString& simAppPath, const QStringList& arguments)
+		{
+			installShutdownHandler();
+
+			if (processes.contains(sharedMemoryKey) == true &&
+				processes[sharedMemoryKey]->process.state() == QProcess::ProcessState::Running)
+			{
+				// Activate already running process.
+				//
+				QSharedMemory sharedMemory{sharedMemoryKey};
+				bool attached = sharedMemory.attach(QSharedMemory::ReadWrite);
+				if (attached == false)
+				{
+					return false;
+				}
+
+				std::scoped_lock lock{sharedMemory};
+
+				auto sharedData = static_cast<SimVduSharedData::SharedData*>(sharedMemory.data());
+				if (sharedData == nullptr)
+				{
+					return false;
+				}
+				sharedData->simulatorState.updateCounter++;
+				sharedData->simulatorState.bringToFront = 1;
+
+				return true;
+			}
+
+			auto node = std::make_unique<Node>();
+			node->sharedMemoryKey = sharedMemoryKey;
+			node->process.start(simAppPath, arguments);
+
+			if (node->process.waitForStarted() == false)
+			{
+				return false; // Failed to start the process.
+			}
+
+			processes[sharedMemoryKey] = std::move(node);
+			return true;
+		}
+	};
+
+	ExternalSimProcesses g_externalSimProcesses;
+}; // namespace
+
 
 namespace Sim
 {
@@ -95,6 +208,24 @@ namespace Sim
 	bool VduModuleImpl::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
 		return m_device.receiveConnectionsData(currentTime);
+	}
+
+	bool VduModuleImpl::startSimAppProcess(const QString& simAppPath)
+	{
+		return g_externalSimProcesses.startProcess(sharedMemoryKey(), simAppPath, simAppArguments());
+	}
+
+	QStringList VduModuleImpl::simAppArguments() const
+	{
+		QStringList args;
+
+		QDir dir{m_simulator->buildPath() + QDir::separator() + Directory::SUBSYSTEMS + QDir::separator() +
+				 logicModuleExtraInfo().subsystemID};
+		args << QString("--build=") + dir.path();
+		args << QString("--key=%1").arg(moduleJumpers().jumpersValue);
+		args << QString("--memory=%1").arg(sharedMemoryKey());
+
+		return args;
 	}
 
 	const ::LogicModuleInfo& VduModuleImpl::logicModuleExtraInfo() const

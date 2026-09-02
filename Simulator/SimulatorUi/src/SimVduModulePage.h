@@ -48,8 +48,6 @@ namespace SimUi
 	public:
 		QString equipmentId() const;
 
-		QStringList simAppArguments() const;
-
 	private:
 		std::optional<Sim::VduModule> vduModule();
 		std::optional<Sim::VduModule> vduModule() const;

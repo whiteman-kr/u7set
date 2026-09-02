@@ -38,6 +38,9 @@ namespace Sim
 		[[nodiscard]] bool isPowerOff() const;
 		void setPowerOff(bool value);
 
+		bool startSimAppProcess(const QString& simAppPath);
+		QStringList simAppArguments() const;
+
 		// External discrete inputs and outputs
 		// SimulatorLib provides inputs with validities,
 		// Vdu Sim App provides outputs.
