@@ -1569,11 +1569,7 @@ namespace Sim
 			// Get data (actually swap) to receive buffer
 			//
 			bool timeout = false;
-			bool ok = c->receiveData(portInfo.portNo,
-									 receiveBuffer,
-									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2}, // timeout
-									 &timeout);
+			bool ok = c->receiveData(portInfo.portNo, receiveBuffer, currentTime, &timeout);
 
 			if (ok == false)
 			{

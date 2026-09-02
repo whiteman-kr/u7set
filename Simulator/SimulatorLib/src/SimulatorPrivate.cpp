@@ -427,6 +427,15 @@ namespace Sim
 			}
 		}
 
+		// Set timeouts for connection ports, so they will be used in simulation.
+		// Timeout values are set depending on the port module.
+		//
+		ok = setConnectionPortsTimeouts();
+		if (ok == false)
+		{
+			return false;
+		}
+
 		// Load application signals
 		//
 		ok = loadAppSignals(buildPath);
@@ -570,6 +579,57 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	bool SimulatorPrivate::setConnectionPortsTimeouts()
+	{
+		// Set port timeouts depending on the simulated modules.
+		// VDU requires longer timeouts, because it is a separate process.
+		//
+		auto setPortTimeouts = [this](ConnectionPort& port)
+		{
+			for (const auto& [_, subsystem] : m_subsystems)
+			{
+				auto portModule = subsystem->module(port.lmId());
+				if (portModule == nullptr)
+				{
+					continue;
+				}
+
+				std::chrono::microseconds timeoutValue{};
+				if (subsystem->isLmSubsystem() == true)
+				{
+					timeoutValue = portModule->cycleDuration() * 2; // 10 ms for LM
+				}
+				else if (subsystem->isVduSubsystem() == true)
+				{
+					timeoutValue = std::chrono::milliseconds(1000); // 1 second for receiving from VDU
+				}
+				else
+				{
+					timeoutValue = portModule->cycleDuration() * 2; // fallback to 10 ms for unknown module type
+				}
+
+				port.setTimeoutValue(timeoutValue);
+				break;                                              // No more iterations needed, we found the module for this port
+			}
+
+			return;
+		};
+
+		for (ConnectionImplPtr& connection : m_connectionsImpl.connections())
+		{
+			for (const ConnectionPort& port : connection->ports())
+			{
+				auto portPtr = connection->portForLmRawPtr(port.lmIdHash());
+				if (portPtr != nullptr)
+				{
+					setPortTimeouts(*portPtr);
+				}
+			}
+		}
+
+		return true;
 	}
 
 	bool SimulatorPrivate::loadAppSignals(QString buildPath)

@@ -76,6 +76,7 @@ namespace Sim
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
 		bool loadConnectionsInfo(QString buildPath);
+		bool setConnectionPortsTimeouts();
 		bool loadAppSignals(QString buildPath);
 		bool loadComparatorSet(QString buildPath);
 

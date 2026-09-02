@@ -449,11 +449,7 @@ namespace Sim
 			bool wasTimeout = false;
 			const size_t portIndex = portInfo.modulePortNo - 1;
 
-			bool ok = c->receiveData(portInfo.portNo,
-									 receiveBuffer,
-									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
-									 &wasTimeout);
+			bool ok = c->receiveData(portInfo.portNo, receiveBuffer, currentTime, &wasTimeout);
 
 			if (ok == false)
 			{

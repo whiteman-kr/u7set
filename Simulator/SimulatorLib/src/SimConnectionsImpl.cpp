@@ -146,16 +146,12 @@ namespace Sim
 		}
 	}
 
-	bool ConnectionImpl::receiveData(int portNo,
-									 std::vector<char>* data,
-									 std::chrono::microseconds currentTime,
-									 std::chrono::microseconds timeout,
-									 bool* timeoutHappend)
+	bool ConnectionImpl::receiveData(int portNo, std::vector<char>* data, std::chrono::microseconds currentTime, bool* timeoutHappened)
 	{
-		if (data == nullptr || timeoutHappend == nullptr || portNo < 1 || portNo > 2)
+		if (data == nullptr || timeoutHappened == nullptr || portNo < 1 || portNo > 2)
 		{
 			assert(data);
-			assert(timeoutHappend);
+			assert(timeoutHappened);
 			assert(portNo >= 1 && portNo <= 2);
 			return false;
 		}
@@ -163,7 +159,7 @@ namespace Sim
 		const size_t portIndex = static_cast<size_t>(portNo - 1);
 
 		data->clear();
-		*timeoutHappend = false;
+		*timeoutHappened = false;
 
 		// There is no simulation for single port connection yet
 		// may be later will be added some input file of something else
@@ -171,7 +167,7 @@ namespace Sim
 		//
 		if (m_buildConnection.type == Hardware::Connection::Type::SinglePort)
 		{
-			*timeoutHappend = true;
+			*timeoutHappened = true;
 			m_timeouts[portIndex].store(true);
 			return true;
 		}
@@ -186,13 +182,15 @@ namespace Sim
 				//
 				QMutexLocker ml(&m_dataMutexPort2);
 
+				auto timeout = m_port2.has_value() ? m_port2->timeoutValue() : std::chrono::microseconds(10'002);
+
 				if (currentTime - m_port2sentData.m_sentTime > timeout)
 				{
 					// qDebug() << "ConnectionImpl::receiveData: port2 from timeout " << (currentTime - m_port2sentData.m_sentTime).count()
 					// / 1000;
 
 					data->clear();
-					*timeoutHappend = true;
+					*timeoutHappened = true;
 
 					m_timeouts[portIndex].store(true);
 				}
@@ -224,13 +222,15 @@ namespace Sim
 				//
 				QMutexLocker ml(&m_dataMutexPort1);
 
+				auto timeout = m_port1.has_value() ? m_port1->timeoutValue() : std::chrono::microseconds(10'002);
+
 				if (currentTime - m_port1sentData.m_sentTime > timeout)
 				{
 					// qDebug() << "ConnectionImpl::receiveData: port1 from timeout " << (currentTime - m_port1sentData.m_sentTime).count()
 					// / 1000;
 
 					data->clear();
-					*timeoutHappend = true;
+					*timeoutHappened = true;
 
 					m_timeouts[portIndex].store(true);
 				}
