@@ -261,7 +261,7 @@ namespace Builder
 		std::shared_ptr<AppLogicModule> parseResult;                              // Actuator module for this actuator type,
 																				  // created after parsing all schemas
 
-		bool isValid() const { return (acmPreset != nullptr); }
+		bool isValid() const { return (acmPreset != nullptr && parseResult != nullptr); }
 	};
 
 
@@ -294,7 +294,8 @@ namespace Builder
 
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
-		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet);
+		bool setAfbComponentsLms(const LmDescriptionSet* lmDescriptionSet);
+		bool setAfbComponentsActuators(const LmDescriptionSet* lmDescriptionSet);
 
 		bool resolvePackedLogicAfbs();
 

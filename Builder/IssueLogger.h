@@ -529,6 +529,7 @@ namespace Builder
 		void wrnALC5207(QString signalID);												// Tuning signal %1 is unused.
 		void wrnALC5208(QString actuatorTypeID);                                        // Application logic for actuator type %1 is not found.
 		void errALC5209(QString actuatorTypeID);										// Actuator type %1 is not found in the project
+		void errALC5210(QString errMsg);			                                    // CodeChecker error: %1
 
 		// firmware writing errors
 

@@ -8328,6 +8328,24 @@ namespace Builder
 				  QString(tr("Actuator type %1 is not found in the project")).arg(actuatorTypeID));
 	}
 
+	/// IssueCode: ALC5210
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   CodeChecker error: %1
+	///
+	/// Parameters:
+	///		%1 Error message
+	///
+	/// Description:
+	///		CodeChecker error message.
+	///
+	void IssueLogger::errALC5210(QString errMsg)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5210, 
+			QString(tr("CodeChecker error: %1")).arg(errMsg));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

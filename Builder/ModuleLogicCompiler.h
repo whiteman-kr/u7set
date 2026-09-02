@@ -69,6 +69,8 @@ namespace Builder
 			bool isInputModule() const;
 			bool isOutputModule() const;
 			bool isOptoModule() const;
+			bool isAcmModule() const;
+
 			Hardware::DeviceModule::FamilyType familyType() const;
 			QString equipmentID() const;
 
@@ -156,7 +158,6 @@ namespace Builder
 		using CopyBitsMap = std::map<Address16, CopyBitInfo>;	// destBitAddr => CopyBitInfo;
 																// destBitAddr ascending ordered in map
 																// destBitAddr.offset() for all in map should have equal!
-
 		class BusFilling
 		{
 		public:
@@ -278,9 +279,6 @@ namespace Builder
 	private:
 		bool lmPass1();
 		bool lmPass2();
-
-		bool actuatorPass1();
-		bool actuatorPass2();
 
 		const BuildActuatorType& getBuildActuatorType(const QString& actuatorTypeID);
 
@@ -417,7 +415,6 @@ namespace Builder
 		bool disposeSignalsInHeap();
 
 		bool createSignalLists();
-		bool createActuatorSignalLists();
 
 		bool createAcquiredDiscreteInputSignalsList();
 		bool createAcquiredDiscreteStrictOutputSignalsList();
@@ -970,17 +967,26 @@ namespace Builder
 
 		// Actuator processing
 
-		bool createActuatorSignalSet();
-		bool createActuatorHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
-		bool createActuatorSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
-		bool createActuatorInternalSignals();
-		bool calculateAcmIoSignalsAddresses();
-		bool setInOutSignalsUalAddresses();
-		bool disposeAcmSwInOuts();
-		bool disposeAcmSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes);
+		bool acmPass1();
+		bool acmPass2();
 
-		bool detectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
-		bool detectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
+		bool acmCreateSignalSet();
+		bool acmCreateUalSignals();
+		bool acmCreateUalSignalsFromInputs();
+		bool acmCreateHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
+		bool acmCreateSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
+		bool acmCreateInternalSignals();
+		bool acmCalculateIoSignalsAddresses();
+		bool acmSetInOutSignalsUalAddresses();
+		bool acmDisposeSignalsInMemory();
+		bool acmDisposeSwInOuts();
+		bool acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes);
+		bool acmCreateSignalLists();
+
+		bool acmDetectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
+		bool acmDetectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
+
+		bool acmWriteIoSignalsAddrsFile();
 
 	public:
 		static const int MIN_AFB_OPCODE = 1;

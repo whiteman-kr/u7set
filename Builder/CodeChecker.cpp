@@ -56,7 +56,7 @@ namespace Builder
 	bool CodeChecker::MemArea::addressInArea(quint32 addr, quint32 sizeW) const
 	{
 		return addr >= m_startAddr &&
-			   (addr + sizeW) <= (m_startAddr + m_sizeW);
+			(addr + sizeW) <= (m_startAddr + m_sizeW);
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ namespace Builder
 	//
 	// ----------------------------------------------------------------------------------
 
-	CodeChecker::CodeChecker(const ModuleLogicCompiler& compiler) :
+	CodeChecker::CodeChecker(ModuleLogicCompiler& compiler) :
 		m_compiler(compiler)
 	{
 	}
@@ -86,15 +86,9 @@ namespace Builder
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("CodeChecker init error!"));
 		}
 
-		for(const CodeItem& ci : appLogicCode.code())
+		for (const CodeItem& ci : appLogicCode.code())
 		{
 			bool res = check(ci);
-
-			if (res == false)
-			{
-				logError(ci, "check error");
-			}
-
 			result &= res;
 		}
 
@@ -114,7 +108,7 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_log);
 
 		m_memSizeW = m_lmDesc->memory().m_appMemorySize;
-		m_mem = new quint16 [m_memSizeW];
+		m_mem = new quint16[m_memSizeW];
 
 		std::memset(m_mem, 0, m_memSizeW * sizeof(quint16));
 
@@ -136,9 +130,27 @@ namespace Builder
 
 	bool CodeChecker::initReadableAreas()
 	{
+		bool result = true;
+
+		if (m_compiler.isActuatorCompiler())
+		{
+			result = initActuatorReadableAreas();
+		}
+		else
+		{
+			result = initOtherModulesReadableAreas();
+		}
+
+		return result;
+	}
+
+	bool CodeChecker::initOtherModulesReadableAreas()
+	{
+		Q_ASSERT(m_compiler.isActuatorCompiler() == false);
+
 		// Input data areas of I/O modules actual installed in chassis
 		//
-		for(const auto& [place, module] : m_compiler.modules())
+		for (const auto& [place, module] : m_compiler.modules())
 		{
 			Q_ASSERT(module.place == place);
 
@@ -170,8 +182,7 @@ namespace Builder
 			}
 			else
 			{
-				quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
-											(place - 1)  * m_lmDesc->memory().m_moduleDataSize;
+				quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset + (place - 1) * m_lmDesc->memory().m_moduleDataSize;
 
 				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
 				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
@@ -205,7 +216,7 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		for(const MemArea& ma : optoRxAreas)
+		for (const MemArea& ma : optoRxAreas)
 		{
 			m_readAreas.insert({ma.startAddr(), ma});
 			initToRead(ma);
@@ -213,8 +224,7 @@ namespace Builder
 
 		// Bit memory
 		//
-		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset,
-					   m_lmDesc->memory().m_appLogicBitDataSize);
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset, m_lmDesc->memory().m_appLogicBitDataSize);
 
 		m_readAreas.insert({bitMem.startAddr(), bitMem});
 
@@ -229,17 +239,12 @@ namespace Builder
 			return false;
 		}
 
-		for(auto const& p : framesInfo)
+		for (auto const& p : framesInfo)
 		{
 			MemArea tuningFrame;
 
 			tuningFrame.setStartAddr(p.first);
 			tuningFrame.setSizeW(p.second);
-
-/*			LOG_MESSAGE(m_log, QString("----- Tuning frame start %1 end %2 sizeW %3").
-							arg(tuningFrame.startAddr()).
-							arg(tuningFrame.startAddr() + tuningFrame.sizeW() - 1).
-							arg(tuningFrame.sizeW())); */
 
 			if (tuningFrame.sizeW() > 0)
 			{
@@ -250,8 +255,7 @@ namespace Builder
 
 		// Word memory
 		//
-		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset,
-						m_lmDesc->memory().m_appLogicWordDataSize);
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset, m_lmDesc->memory().m_appLogicWordDataSize);
 
 		m_readAreas.insert({wordMem.startAddr(), wordMem});
 
@@ -260,11 +264,89 @@ namespace Builder
 		return result;
 	}
 
+	bool CodeChecker::initActuatorReadableAreas()
+	{
+		if (m_compiler.isActuatorCompiler() == false || 
+			m_compiler.getLmSharedPtr() == nullptr || 
+			m_compiler.getLmSharedPtr()->isAcm() == false)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_compiler.log());
+			return false;
+		}
+
+		MemArea ma;
+
+		// LMs exchange memory area
+		//
+		for (quint32 p = 0; p < m_lmDesc->memory().m_moduleCount; p++)
+		{
+			quint32 startAddr = m_lmDesc->memory().m_moduleDataOffset + p * m_lmDesc->memory().m_moduleDataSize;
+
+			ma.setStartAddr(startAddr);
+			ma.setSizeW(m_lmDesc->memory().m_moduleDataSize);
+
+			m_readAreas.insert({ma.startAddr(), ma});
+			initToRead(ma);
+		}
+
+		// Bit memory
+		//
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset, m_lmDesc->memory().m_appLogicBitDataSize);
+
+		m_readAreas.insert({bitMem.startAddr(), bitMem});
+
+		// AppLogic word memory
+		//
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset, m_lmDesc->memory().m_appLogicWordDataSize);
+
+		m_readAreas.insert({wordMem.startAddr(), wordMem});
+		initToRead(wordMem);
+
+		// ACM diagnostics data
+		//
+		ma.setStartAddr(m_lmDesc->memory().m_txDiagDataOffset);
+		ma.setSizeW(m_lmDesc->memory().m_txDiagDataSize);
+
+		m_readAreas.insert({ma.startAddr(), ma});
+		initToRead(ma);
+
+		// ACM module app data
+		//
+		ma.setStartAddr(m_lmDesc->memory().m_appDataOffset);
+		ma.setSizeW(m_lmDesc->memory().m_appDataSize);
+
+		m_readAreas.insert({ma.startAddr(), ma});
+		initToRead(ma);
+
+		joiningSequentialAreas(&m_readAreas);
+
+		return true;
+	}
+
 	bool CodeChecker::initWritableAreas()
 	{
+		bool result = true;
+
+		if (m_compiler.isActuatorCompiler())
+		{
+			result = initActuatorWritableAreas();
+		}
+		else
+		{
+			result = initOtherModulesWritableAreas();
+		}
+
+		return result;
+	}
+
+	bool CodeChecker::initOtherModulesWritableAreas()
+	{
+		Q_ASSERT(m_compiler.isActuatorCompiler() == false);
+
 		// Output data areas of I/O modules actual installed in chassis
 		//
-		for(const auto& [place, module] : m_compiler.modules())
+		for (const auto& [place, module] : m_compiler.modules())
 		{
 			Q_ASSERT(module.place == place);
 
@@ -278,7 +360,7 @@ namespace Builder
 
 			if (place == 0)
 			{
-				ma.setStartAddr(module.txAppDataOffset);		// tx... -  its Ok!
+				ma.setStartAddr(module.txAppDataOffset); // tx... -  its Ok!
 				ma.setSizeW(module.txAppDataSize);
 
 				m_writeAreas.insert({ma.startAddr(), ma});
@@ -287,8 +369,7 @@ namespace Builder
 			{
 				if (module.isOptoModule() == false)
 				{
-					quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
-												(place - 1) * m_lmDesc->memory().m_moduleDataSize;
+					quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset + (place - 1) * m_lmDesc->memory().m_moduleDataSize;
 
 					Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
 					Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
@@ -299,11 +380,6 @@ namespace Builder
 					m_writeAreas.insert({ma.startAddr(), ma});
 				}
 			}
-
-/*			LOG_MESSAGE(m_log, QString("Module %1 write area %2 sizeW %3").
-						arg(module.device->equipmentIdTemplate()).
-						arg(ma.startAddr()).
-						arg(ma.sizeW()));*/
 		}
 
 		// Opto ports actual tx data
@@ -314,26 +390,73 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		for(const MemArea& ma : optoTxAreas)
+		for (const MemArea& ma : optoTxAreas)
 		{
 			m_writeAreas.insert({ma.startAddr(), ma});
 		}
 
 		// Bit memory
 		//
-		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset,
-					   m_lmDesc->memory().m_appLogicBitDataSize);
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset, m_lmDesc->memory().m_appLogicBitDataSize);
 
 		m_writeAreas.insert({bitMem.startAddr(), bitMem});
 
 		// Word memory
 		//
-		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset,
-						m_lmDesc->memory().m_appLogicWordDataSize);
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset, m_lmDesc->memory().m_appLogicWordDataSize);
 
 		m_writeAreas.insert({wordMem.startAddr(), wordMem});
 
 		joiningSequentialAreas(&m_writeAreas);
+
+		return true;
+	}
+
+	bool CodeChecker::initActuatorWritableAreas()
+	{
+		if (m_compiler.isActuatorCompiler() == false || 
+			m_compiler.getLmSharedPtr() == nullptr || 
+			m_compiler.getLmSharedPtr()->isAcm() == false)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_compiler.log());
+			return false;
+		}
+
+		MemArea ma;
+
+		// LMs exchange memory area
+		//
+		for (quint32 p = 0; p < m_lmDesc->memory().m_moduleCount; p++)
+		{
+			quint32 startAddr = m_lmDesc->memory().m_moduleDataOffset + p * m_lmDesc->memory().m_moduleDataSize;
+
+			ma.setStartAddr(startAddr);
+			ma.setSizeW(m_lmDesc->memory().m_moduleDataSize);
+
+			m_writeAreas.insert({ma.startAddr(), ma});
+		}
+
+		// Bit memory
+		//
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset, m_lmDesc->memory().m_appLogicBitDataSize);
+
+		m_writeAreas.insert({bitMem.startAddr(), bitMem});
+
+		// AppLogic word memory
+		//
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset, m_lmDesc->memory().m_appLogicWordDataSize);
+
+		m_writeAreas.insert({wordMem.startAddr(), wordMem});
+
+		// ACM module app data
+		//
+		ma.setStartAddr(m_lmDesc->memory().m_appDataOffset);
+		ma.setSizeW(m_lmDesc->memory().m_appDataSize);
+
+		m_writeAreas.insert({ma.startAddr(), ma});
+
+		joiningSequentialAreas(&m_readAreas);
 
 		return true;
 	}
@@ -457,7 +580,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(m_log);
 
-		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(m_lmDesc, false, false)));
+		m_log->errALC5210(QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(m_lmDesc, false, false)));
 	}
 
 	bool CodeChecker::check(const CodeItem& cmd)

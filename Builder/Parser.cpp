@@ -2740,7 +2740,7 @@ namespace Builder
 		return true;
 	}
 
-	bool AppLogicData::setAfbComponents(const LmDescriptionSet* lmDescriptionSet)
+	bool AppLogicData::setAfbComponentsLms(const LmDescriptionSet* lmDescriptionSet)
 	{
 		if (lmDescriptionSet == nullptr)
 		{
@@ -2750,6 +2750,8 @@ namespace Builder
 
 		bool result = true;
 
+		// Set AfbComponents for LogicModule items.
+		//
 		for (std::shared_ptr<AppLogicModule> module : m_modules)
 		{
 			Q_ASSERT(module->lmDescriptionFile().isEmpty() == false);
@@ -2776,6 +2778,55 @@ namespace Builder
 										 module->lmDescriptionFile(),
 										 item.afbElement().opCode(),
 										 item.m_fblItem->guid());
+						result = false;
+					}
+					else
+					{
+						item.m_fblItem->toAfbElement()->afbElement().setComponent(afbComponent);
+						item.afbElement().setComponent(afbComponent);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool AppLogicData::setAfbComponentsActuators(const LmDescriptionSet* lmDescriptionSet)
+	{
+		if (lmDescriptionSet == nullptr)
+		{
+			Q_ASSERT(lmDescriptionSet);
+			return false;
+		}
+
+		bool result = true;
+
+		// Set AfbComponents for Actuator items.
+		//
+		for (auto& [_, bat] : m_actuators)
+		{
+			QString lmDescriptionFile = bat.actuatorHeader.descriptionFile();
+			Q_ASSERT(lmDescriptionFile.isEmpty() == false);
+
+			std::shared_ptr<LmDescription> logicModuleDescription = lmDescriptionSet->get(lmDescriptionFile);
+			if (logicModuleDescription == nullptr)
+			{
+				m_log.errALP4016(QString("Look Actuator for %1").arg(bat.actuatorHeader.actuatorTypeId()), lmDescriptionFile);
+				result = false;
+				continue;
+			}
+
+			for (AppLogicItem& item : bat.parseResult->items())
+			{
+				if (item.m_fblItem->isAfbElement() == true)
+				{
+					Q_ASSERT(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.afbElement().opCode());
+
+					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.afbElement().opCode());
+					if (afbComponent == nullptr)
+					{
+						m_log.errALP4017(item.m_schema->schemaId(), lmDescriptionFile, item.afbElement().opCode(), item.m_fblItem->guid());
 						result = false;
 					}
 					else
@@ -3549,6 +3600,14 @@ namespace Builder
 			return false;
 		}
 
+		// Set AfbComponent to AfbElements
+		//
+		ok = m_applicationData->setAfbComponentsActuators(m_lmDescriptions);
+		if (ok == false)
+		{
+			ok = false;
+		}
+
 		// Dump actuator logic data for debug
 #if 0
 		for (const auto& actuator : *actuators)
@@ -3837,7 +3896,7 @@ namespace Builder
 
 		// Set AfbComponent to AfbElements
 		//
-		ok = m_applicationData->setAfbComponents(m_lmDescriptions);
+		ok = m_applicationData->setAfbComponentsLms(m_lmDescriptions);
 		if (ok == false)
 		{
 			result = false;

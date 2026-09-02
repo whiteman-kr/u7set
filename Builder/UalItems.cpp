@@ -521,6 +521,22 @@ namespace Builder
 		return m_type;
 	}
 
+	bool UalItem::hasRam() const
+	{
+		const Afb::AfbElement& afbElement = afb();
+
+		std::optional<bool> hasRam = afbElement.hasRam();
+
+		if (hasRam.has_value() == true)
+		{
+			return hasRam.value();
+		}
+
+		std::shared_ptr<Afb::AfbComponent> afbComp = afbComponent();
+
+		return afbComp->hasRam();
+	}
+
 	const SchemaConst* UalItem::schemaConst() const
 	{
 		const SchemaConst* ptr = m_appLogicItem.m_fblItem->toSchemaItemConst();
@@ -2174,6 +2190,11 @@ namespace Builder
 
 	bool UalSignal::setUalAddr(const Address16& ualAddr)
 	{
+		if (m_refSignals[0]->appSignalID() == "CTRLOUT_OUT03")
+		{
+			DEBUG_STOP;
+		}
+
 		if (m_isConst == true)
 		{
 			Q_ASSERT(false);					// for Const signals ualAddr isn't assigned

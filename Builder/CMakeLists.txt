@@ -130,6 +130,7 @@ qt_add_library(${TARGET} STATIC
 	ModuleFirmwareWriter.h
 	ModuleLogicCompiler.cpp
 	ModuleLogicCompiler.h
+	ModuleLogicCompilerAcm.cpp
 	ModulesRawData.cpp
 	ModulesRawData.h
 	ModulesReportGenerator.cpp
