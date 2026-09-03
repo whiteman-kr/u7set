@@ -115,10 +115,14 @@ namespace EditEngine
 			Afb::AfbParamValue afbValue = item->propertyValue(propertyName).value<Afb::AfbParamValue>();
 			int typeId = afbValue.value().typeId();					// keep the type
 			
-			QVariant v = value.value<Afb::AfbParamValue>().value(); // new value that wants to be be set
-			if (v.convert(typeId) == true)							// convert it to the original type
+			Afb::AfbParamValue newAfbValue = value.value<Afb::AfbParamValue>();	// new value that wants to be be set
+			QVariant newValue = newAfbValue.value();                       
+			QString newReference = newAfbValue.reference();
+
+			if (newValue.convert(typeId) == true)                   // convert it to the original type
 			{
-				afbValue.setValue(v);
+				afbValue.setValue(newValue);
+				afbValue.setReference(newReference);
 				item->setPropertyValue(propertyName, afbValue.toVariant());
 			}
 			else
