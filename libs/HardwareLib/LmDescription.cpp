@@ -674,7 +674,9 @@ QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModu
 		(logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+		assert(logicModule->isFSCConfigurationModule() || 
+				logicModule->isVdu() || 
+				logicModule->isAcm());			// WhiteMan 03.09.2026
 
 		return QString();
 	}

@@ -99,18 +99,19 @@ namespace Builder
 
 										 //
 
-										 PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
-										 PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
+										 //PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
+										 //PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
 
 										 PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
 										 PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 										 PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 
-										 PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
-										 PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
+										 //PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
+										 //PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
 										 PROC_TO_CALL(ModuleLogicCompiler::writeResult),
-										 PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)};
+										 //PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)
+										 };
 
 		bool result = runProcs(procs);
 
@@ -379,6 +380,7 @@ namespace Builder
 			appSignal->setInOutType(inOut);
 			appSignal->setAppSignalID(signalID);
 			appSignal->setCustomAppSignalID(signalID);
+			appSignal->setEquipmentID(m_lm->equipmentIdTemplate());
 			appSignal->setCaption(QString("Signal %1").arg(signalID));
 
 			appSignal->setSignalType(as.signalType());
@@ -497,6 +499,7 @@ namespace Builder
 			appSignal->setInOutType(E::SignalInOutType::Internal);
 			appSignal->setAppSignalID(appSignalID);
 			appSignal->setCustomAppSignalID(appSignalID);
+			appSignal->setEquipmentID(m_lm->equipmentIdTemplate());
 			appSignal->setCaption(QString("Signal %1").arg(appSignalID));
 			appSignal->setAcquire(false);
 
@@ -536,9 +539,9 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ioSignal);
 
-			if (ioSignal->equipmentID().isEmpty())
+			if (ioSignal->appSignalID().endsWith(SW_INOUT_SUFFIX1) || ioSignal->appSignalID().endsWith(SW_INOUT_SUFFIX2))
 			{
-				continue;				// this is Software InOut signal!
+				continue;			// this is Software InOut signal!
 			}
 
 			int pos = ioSignal->appSignalID().lastIndexOf('_');
@@ -565,8 +568,8 @@ namespace Builder
 
 			if (deviceAppSignal == nullptr)
 			{
-				result = false;
-				continue;
+				Q_ASSERT(false);
+				continue;		
 			}
 
 			Address16 ioBufAddr(deviceAppSignal->valueOffset(), deviceAppSignal->valueBit());
@@ -742,10 +745,72 @@ namespace Builder
 	{
 		bool result = true;
 
+		QStringList allIDs;
+
 		for (int ch = ACM_CHANNEL_1_INDEX; ch <= ACM_CHANNEL_2_INDEX; ch++)
 		{
+			m_acmSwInAnalogs[ch].sort();
+			m_acmSwInBusses[ch].sort();
+			m_acmSwInDiscretes[ch].sort();
+
+			allIDs.append(m_acmSwInAnalogs[ch]);
+			allIDs.append(m_acmSwInBusses[ch]);
+			allIDs.append(m_acmSwInDiscretes[ch]);
+
 			result &= acmDisposeSwInOutsChannel(ch, m_acmSwInAnalogs[ch], m_acmSwInBusses[ch], m_acmSwInDiscretes[ch]);
+
+			//
+
+			m_acmSwOutAnalogs[ch].sort();
+			m_acmSwOutBusses[ch].sort();
+			m_acmSwOutDiscretes[ch].sort();
+
+			allIDs.append(m_acmSwOutAnalogs[ch]);
+			allIDs.append(m_acmSwOutBusses[ch]);
+			allIDs.append(m_acmSwOutDiscretes[ch]);
+
 			result &= acmDisposeSwInOutsChannel(ch, m_acmSwOutAnalogs[ch], m_acmSwOutBusses[ch], m_acmSwOutDiscretes[ch]);
+		}
+
+		m_acmSwInOutID = 0;
+
+		for (const QString& id : allIDs)
+		{
+			m_acmSwInOutID = calcHash(id, m_acmSwInOutID);
+
+			const AppSignal* s = m_actuatorSignals->getSignal(id);
+
+			if (s == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			quint32 v = static_cast<quint32>(s->inOutType());
+
+			m_acmSwInOutID = calcHash(&v, sizeof(v), m_acmSwInOutID);
+
+			v = static_cast<quint32>(s->signalType());
+
+			m_acmSwInOutID = calcHash(&v, sizeof(v), m_acmSwInOutID);
+
+			switch (s->signalType())
+			{
+			case E::SignalType::Analog:
+				v = static_cast<quint32>(s->analogSignalFormat());
+				m_acmSwInOutID = calcHash(&v, sizeof(v), m_acmSwInOutID);
+				break;
+
+			case E::SignalType::Bus:
+				m_acmSwInOutID = calcHash(s->busTypeID(), m_acmSwInOutID);
+				break;
+
+			case E::SignalType::Discrete:
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
 		}
 
 		return true;
@@ -755,15 +820,11 @@ namespace Builder
 	{
 		bool result = true;
 
-		analogs.sort();
-		busses.sort();
-		discretes.sort();
-
-		Address16 addr(m_lmDescription->memory().m_moduleDataOffset, 0);
+		Address16 addr(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_ID_SIZE, 0);
 
 		if (chIndex == ACM_CHANNEL_2_INDEX)
 		{
-			addr.setOffset(m_lmDescription->memory().m_moduleDataOffset + m_lmDescription->memory().m_moduleDataSize);
+			addr.setOffset(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_ID_SIZE + m_lmDescription->memory().m_moduleDataSize);
 		}
 
 		QStringList analogsAndBusses;
@@ -773,23 +834,16 @@ namespace Builder
 
 		for (const QString& id : analogsAndBusses)
 		{
-			UalSignal* ualSignal = m_ualSignals.get(id);
 			AppSignal* appSignal = m_actuatorSignals->getSignal(id);
 
-			if (ualSignal == nullptr || appSignal == nullptr)
+			if (appSignal == nullptr)
 			{
 				Q_ASSERT(false);
 				result = false;
 				break;
 			}
 
-			if (ualSignal->ualAddr().isValid())
-			{
-				continue;
-			}
-
 			appSignal->setIoBufAddr(addr);
-			ualSignal->setUalAddr(addr);
 
 			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
 			{
@@ -806,6 +860,27 @@ namespace Builder
 				result = false;
 				break;
 			}
+
+			//
+
+			UalSignal* ualSignal = m_ualSignals.get(id);
+
+			if (ualSignal == nullptr)
+			{
+				//				Q_ASSERT(false);
+				// result = false;
+				//				break;
+
+				qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid())
+			{
+				continue;
+			}
+
+			ualSignal->setUalAddr(addr);
 		}
 
 		if (result == false)
@@ -815,13 +890,7 @@ namespace Builder
 
 		for (const QString& id : discretes)
 		{
-			UalSignal* ualSignal = m_ualSignals.get(id);
 			AppSignal* appSignal = m_actuatorSignals->getSignal(id);
-
-			if (appSignal->appSignalID() == "CMD_OPEN:1")
-			{
-				DEBUG_STOP;
-			}
 
 			if (appSignal == nullptr)
 			{
@@ -829,8 +898,22 @@ namespace Builder
 				result = false;
 				break;
 			}
+			
+			if (appSignal->dataSize() != DISCRETE_SIZE)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
 
-			if (ualSignal == nullptr || appSignal == nullptr)
+			appSignal->setIoBufAddr(addr);
+			addr.addBit(appSignal->dataSize());
+
+			//
+
+			UalSignal* ualSignal = m_ualSignals.get(id);
+
+			if (ualSignal == nullptr)
 			{
 //				Q_ASSERT(false);
 				//result = false;
@@ -845,17 +928,7 @@ namespace Builder
 				continue;
 			}
 
-			appSignal->setIoBufAddr(addr);
 			ualSignal->setUalAddr(addr);
-
-			if (appSignal->dataSize() != DISCRETE_SIZE)
-			{
-				Q_ASSERT(false);
-				result = false;
-				break;
-			}
-
-			addr.addBit(appSignal->dataSize());
 		}
 
 		if (result == false)
@@ -893,7 +966,7 @@ namespace Builder
 		// result &= createAcquiredAnalogTuninglSignalsList();
 		// result &= createAcquiredAnalogConstSignalsList();
 
-		result &= createNonAcquiredAnalogInputSignalsList();
+		// result &= createNonAcquiredAnalogInputSignalsList();			// !!! maybe NO
 		result &= createNonAcquiredAnalogStrictOutputSignalsList();
 		result &= createNonAcquiredAnalogInternalSignalsList();
 
@@ -1196,21 +1269,21 @@ namespace Builder
 				file.append(line);
 				file.append(addrLine);
 				file.append(line);
-				printSignals(m_acmSwInAnalogs[ch]);
+				printSignals(analogs);
 
 				file.append(line);
 				file.append(" Busses");
 				file.append(line);
 				file.append(addrLine);
 				file.append(line);
-				printSignals(m_acmSwInBusses[ch]);
+				printSignals(busses);
 
 				file.append(line);
 				file.append(" Discretes");
 				file.append(line);
 				file.append(addrLine);
 				file.append(line);
-				printSignals(m_acmSwInDiscretes[ch]);
+				printSignals(discretes);
 				file.append(line);
 			}
 		}

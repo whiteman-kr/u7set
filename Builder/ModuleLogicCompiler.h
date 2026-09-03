@@ -1013,6 +1013,11 @@ namespace Builder
 		static constexpr int ACM_CHANNEL_1_INDEX = 0;
 		static constexpr int ACM_CHANNEL_2_INDEX = 1;
 
+		static constexpr int ACM_SW_INOUT_ID_SIZE = 2;		// 2 words = 32 bits
+
+		inline static const QString SW_INOUT_SUFFIX1 = QString(":1");
+		inline static const QString SW_INOUT_SUFFIX2 = QString(":2");
+
 		std::unique_ptr<SignalSet> m_actuatorSignals;
 
 		std::vector<QStringList> m_acmSwInAnalogs {2};
@@ -1024,6 +1029,8 @@ namespace Builder
 		std::vector<QStringList> m_acmSwOutDiscretes {2};
 
 		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
+
+		quint32 m_acmSwInOutID = 0;
 
 		//
 
