@@ -929,6 +929,36 @@ namespace Builder
 			}
 		}
 
+		// Set property modulePortNo for all ConnectionPorts.
+		//
+		for (auto c : m_context->m_connections->getConnections())
+		{
+			c->setPort1ModulePortNo(0);
+			c->setPort2ModulePortNo(0);
+
+			if (auto portDeviceObject = m_context->m_equipmentSet->deviceObject(c->port1EquipmentID()); //
+				portDeviceObject != nullptr)
+			{
+				auto placeProp = portDeviceObject->propertyByCaption("Port");
+				if (placeProp != nullptr)
+				{
+					c->setPort1ModulePortNo(placeProp->value().toInt());
+				}
+			}
+
+			if (auto portDeviceObject = m_context->m_equipmentSet->deviceObject(c->port2EquipmentID()); //
+				portDeviceObject != nullptr)
+			{
+				auto placeProp = portDeviceObject->propertyByCaption("Port");
+				if (placeProp != nullptr)
+				{
+					c->setPort2ModulePortNo(placeProp->value().toInt());
+				}
+			}
+		}
+
+		// --
+		//
 		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context.get());
 		bool res = m_context->m_opticModuleStorage->init();
 

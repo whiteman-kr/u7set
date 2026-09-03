@@ -145,6 +145,7 @@ bool ConnectionsInfoWriter::fill(ConnectionPortInfo* cpi, Hardware::SharedConnec
 	{
 	case 1:
 		cpi->equipmentID = connection->port1EquipmentID();
+		cpi->modulePortNo = connection->port1ModulePortNo();
 
 		cpi->manualRxWordsQuantity = connection->port1ManualRxWordsQuantity();
 		cpi->manualTxStartAddr = connection->port1ManualTxStartAddress();
@@ -158,6 +159,7 @@ bool ConnectionsInfoWriter::fill(ConnectionPortInfo* cpi, Hardware::SharedConnec
 
 	case 2:
 		cpi->equipmentID = connection->port2EquipmentID();
+		cpi->modulePortNo = connection->port2ModulePortNo();
 
 		cpi->manualRxWordsQuantity = connection->port2ManualRxWordsQuantity();
 		cpi->manualTxStartAddr = connection->port2ManualTxStartAddress();
@@ -242,6 +244,7 @@ void ConnectionsInfoWriter::save(const ConnectionPortInfo& cpi, XmlWriteHelper &
 	xml.writeStartElement(portTag(cpi.portNo));
 
 	xml.writeStringAttribute(ConnectionsInfo::ATTR_EQUIPMENT_ID, cpi.equipmentID);
+	xml.writeInt32Attribute(ConnectionsInfo::ATTR_MODULE_PORT_NO, cpi.modulePortNo);
 	xml.writeStringAttribute(ConnectionsInfo::ATTR_MODULE_ID, cpi.moduleID);
 	xml.writeStringAttribute(ConnectionsInfo::ATTR_LM_ID, cpi.lmID);
 

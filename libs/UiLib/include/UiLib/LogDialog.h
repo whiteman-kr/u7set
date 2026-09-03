@@ -6,6 +6,7 @@
 
 class QPushButton;
 class QLabel;
+class QComboBox;
 
 namespace Log
 {

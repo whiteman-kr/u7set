@@ -1,0 +1,342 @@
+#pragma once
+
+#include "../SimConnectionsImpl.h"
+#include "../SimEeprom.h"
+#include "../SimLans.h"
+#include "SimAfb.h"
+#include "SimDeviceEmulatorCommon.h"
+
+#include <SimulatorLib/SimDeviceCommand.h>
+#include <SimulatorLib/SimDeviceState.h>
+#include <SimulatorLib/SimRam.h>
+
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/LogicModulesInfo.h>
+#include <HardwareLib/ModuleFirmware.h>
+
+
+namespace Sim
+{
+	// --
+	//
+	// --
+	//
+	enum class CyclePhase
+	{
+		IdrPhase,
+		AlpPhase,
+		ODT,
+		ST
+	};
+} // namespace Sim
+
+Q_DECLARE_METATYPE(Sim::CyclePhase)
+
+namespace Sim
+{
+	class SimulatorPrivate;
+	class CommandProcessor;
+
+	struct LogicUnitData
+	{
+		int programCounter = 0; // current offset of program memory, in words
+		CyclePhase phase = CyclePhase::IdrPhase;
+		quint16 appStartAddress = 0xFFFF;
+
+		union Flags
+		{
+			struct
+			{
+				quint32 cmp : 1;
+			};
+
+			quint32 value = 0;
+		} flags;
+
+		quint16 acc{}; // Device accumulator
+	};
+
+
+	struct EmulatorCommand : DeviceCommand
+	{
+		explicit EmulatorCommand(const LmCommand& command);
+
+		LmCommand m_command{};
+
+		// Specific data for specific CommandController
+		//
+		std::array<std::byte, 16> m_commandFuncPtr{}; // This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_afbFuncPtr{};     // This function can be called ONLY in in class and instance where it was initialized
+
+		Ram::Handle m_memoryAreaFrom = std::numeric_limits<Ram::Handle>::max();
+		Ram::Handle m_memoryAreaTo = std::numeric_limits<Ram::Handle>::max();
+
+		AfbComponentParam m_afbParam;
+		AfbComponentInstance* m_afbComponentInstance = nullptr;
+
+		// --
+		//
+		void dump() const;
+
+		QString caption() const;
+	};
+
+
+	//
+	// DeviceEmulator
+	//
+	class DeviceEmulator : public QObject
+	{
+		Q_OBJECT
+
+		friend ::SimCommandTest_LM5_LM6;
+		friend ::Sim::Snapshot;
+
+	public:
+		explicit DeviceEmulator(SimulatorPrivate* simulator);
+		virtual ~DeviceEmulator();
+
+	public:
+		bool clear();
+		DeviceError init(const Hardware::LogicModuleInfo& logicModuleInfo, // Run from UI thread
+						 const LmDescription& lmDescription,
+						 const Eeprom& tuningEeprom,
+						 const Eeprom& confEeprom,
+						 const Eeprom& appLogicEeprom,
+						 const ConnectionsImpl& connections,
+						 const LogicModulesInfo& logicModulesExtraInfo);
+
+		bool powerOff();
+		bool reset();
+		bool runWorkcycle(std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle);
+
+		//	Public methods to access from simulation commands
+		//
+	public:
+		EmulatorCommand* command(int index);
+
+		[[nodiscard]] quint16 appStartAddress() const;
+		void setAppStartAddress(quint16 value);
+
+		[[nodiscard]] Sim::CyclePhase phase() const;
+		void setPhase(Sim::CyclePhase value);
+
+		[[nodiscard]] quint32 programCounter() const;
+		void setProgramCounter(quint32 value);
+
+		[[nodiscard]] quint32 flagCmp() const;
+		void setFlagCmp(quint32 value);
+
+		[[nodiscard]] quint16 acc() const;
+		void setAcc(quint16 value);
+
+		Sim::AfbComponent afbComponent(int opCode) const;
+		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
+
+		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
+
+		// RAM access
+		//
+		bool movRamMem(quint32 src, quint32 dst, quint32 sizeW);
+		bool movRamMem(Ram::Handle memoryAreaHandleSrc, quint32 src, Ram::Handle memoryAreaHandleDst, quint32 dst, quint32 sizeW);
+
+		bool setRamMem(quint32 address, quint16 data, quint16 size);
+		bool setRamMem(Ram::Handle memoryAreaHandle, quint32 address, quint16 data, quint16 size);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
+		bool writeRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo, quint16 data);
+
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo);
+		quint16 readRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access);
+
+		bool writeRamWord(quint32 offsetW, quint16 data);
+		bool writeRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 data);
+
+		quint16 readRamWord(quint32 offsetW);
+		quint16 readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW);
+
+		bool writeRamWord(quint32 offsetW, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamWord(quint32 offsetW, E::LogicModuleRamAccess access);
+
+		bool writeRamDword(quint32 offsetW, quint32 data);
+		bool writeRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW, quint32 data);
+
+		quint32 readRamDword(quint32 offsetW);
+		quint32 readRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW);
+
+		bool writeRamDword(quint32 offsetW, quint32 data, E::LogicModuleRamAccess access);
+		quint32 readRamDword(quint32 offsetW, E::LogicModuleRamAccess access);
+
+		// Getting data from m_plainAppLogic
+		//
+		quint16 getWord(int wordOffset) const;
+		quint32 getDword(int wordOffset) const;
+
+	private:
+		RamArea tuningRamArea() const; // Returns copy of Tuning RAM area
+
+									   // --
+		//
+	private:
+		bool initMemory();
+		bool initValiditySignals(); // Sets validity for input signals to 1. Users do not want to set many validities on simulation start.
+
+		bool initEeprom();
+		bool parseAppLogicCode();
+		bool parseCommand(const LmCommand& command, int programCounter);
+
+	public:
+		void fault(QString reasone, QString func);
+
+	private:
+		bool processOffMode();
+		bool processStartMode();
+		bool processFaultMode();
+
+		bool processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle);
+
+		bool runCommand(EmulatorCommand& deviceCommand);
+
+	public:
+		bool receiveConnectionsData(std::chrono::microseconds currentTime); // This one is public to be called from Sim::Control
+		bool sendConnectionsData(std::chrono::microseconds currentTime);    // Actually this one is private
+
+		bool tuningEnterTuningMode(TimeStamp timeStamp);
+		bool tuningLeaveTuningMode();
+		bool tuningApplyCommand();
+
+	private:
+		// Getting data from m_plainAppLogic
+		//
+		template<typename TYPE>
+		TYPE getData(int eepromOffset) const;
+
+		// Props
+		//
+	public:
+		ScopedLog& log();
+
+		const QString& equipmentId() const;
+		Hash equipmentIdHash() const;
+
+		int buildNo() const;
+
+		Hardware::LogicModuleInfo logicModuleInfo() const;
+		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
+
+		const ::LogicModuleInfo& logicModuleExtraInfo() const;
+		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
+
+		const LmDescription& lmDescription() const;
+
+		std::vector<DeviceCommand> commands() const;
+		std::unordered_map<int, size_t> offsetToCommands() const;
+
+		const Ram& ram() const;
+		Ram& mutableRam();
+
+		const Lans& lans() const;
+
+		[[nodiscard]] RuntimeMode runtimeMode() const;
+		void setRuntimeMode(RuntimeMode value);
+
+		[[nodiscard]] DeviceState deviceState() const;
+
+	private:
+		void setDeviceState(DeviceState value);
+
+		// Tuning
+		//
+	public:
+		[[nodiscard]] bool armingKey() const;
+		void setArmingKey(bool value);
+
+		[[nodiscard]] bool tuningKey() const;
+		void setTuningKey(bool value);
+
+		[[nodiscard]] bool sorIsSet() const;
+		void setSorIsSet(bool value);
+
+		[[nodiscard]] bool sorSetSwitch1() const;
+		void setSorSetSwitch1(bool value);
+
+		[[nodiscard]] bool sorSetSwitch2() const;
+		void setSorSetSwitch2(bool value);
+
+		[[nodiscard]] bool sorSetSwitch3() const;
+		void setSorSetSwitch3(bool value);
+
+		[[nodiscard]] bool testSorResetSwitch(bool newValue);
+
+		// Data
+		//
+	private:
+		class SimulatorPrivate* m_simulator = nullptr;
+		mutable ScopedLog m_log;
+
+		Hardware::LogicModuleInfo m_logicModuleInfo;
+		Hash m_logicModuleIdHash = UNDEFINED_HASH; // hash from m_logicModuleInfo.equipmentId.
+
+		LmDescription m_lmDescription;
+		::LogicModuleInfo m_logicModuleExtraInfo;
+
+		std::unique_ptr<CommandProcessor> m_commandProcessor;
+
+		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
+		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
+		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
+
+		QByteArray m_plainAppLogic;   // Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
+		QByteArray m_plainTuningData; // Just Tuning data for specific m_logicModuleNumber and cleaned CRCs
+
+		// Current state
+		//
+		std::atomic<RuntimeMode> m_runtimeMode = RuntimeMode::PoweredOffMode;
+		std::atomic<DeviceState> m_deviceState2 = DeviceState::Off; // The only place where it can be accessed in concurrent mode is
+																	// powerOff/reset powerOff can be called while simulation is running
+																	// reset can be called to restart module after powerOff
+
+		Ram m_ram;
+		LogicUnitData m_logicUnit;
+		std::vector<ConnectionImplPtr> m_connections;
+
+		std::vector<EmulatorCommand> m_commands;
+		std::vector<int> m_offsetToCommand; // index: command offset, value: index in m_commands
+											// empty offsets is -1
+											// Program memory is not so big, max
+		AfbComponentSet m_afbComponents;
+
+		Lans m_lans{this, m_simulator};     // Device LAN Interfaces, based on m_logicModuleExtraInfo
+
+		// Tuning
+		//
+		std::atomic<bool> m_armingKey{false}; // External Key
+		std::atomic<bool> m_tuningKey{false}; // Extrenal Key
+
+		RamArea m_tuningRamArea{false};       // The copy of tuning ram area at the momemt device entered the TuningMode,
+											  // On command 'Apply' RAM memory is copied into this area
+											  // On leaving tuning mode this area is copied back to RAM
+
+		// External SOR Set Keys
+		//
+		std::atomic<bool> m_sorIsSet{false};       // Cached value of signal SOR is Set from module RAM
+
+		std::atomic<bool> m_sorSetSwitch1{false};  // External Key
+		std::atomic<bool> m_sorSetSwitch2{false};  // External Key
+		std::atomic<bool> m_sorSetSwitch3{false};  // External Key
+
+		std::atomic<bool> m_sorResetSwitch{false}; // External Key
+
+		// Cached state
+		//
+		mutable QMutex m_cacheMutex;
+
+		Hardware::LogicModuleInfo m_cachedLogicModuleInfo;
+
+		std::vector<EmulatorCommand> m_cachedCommands;
+		std::unordered_map<int, size_t> m_cachedOffsetToCommand; // key: command offset, value: index in m_commands
+	};
+} // namespace Sim

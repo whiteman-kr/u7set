@@ -38,7 +38,7 @@ namespace SimUi
 		void fillEquipmentTree();
 
 	signals:
-		void signal_openLogicModuleTabPage(QString equipmentId);
+		void signal_openModuleTabPage(QString equipmentId);
 		void signal_openCodeTabPage(QString equipmentID);
 		void signal_openConnectionTabPage(QString connectionId);
 		void signal_openAppSchemasTabPage();
@@ -82,6 +82,20 @@ namespace SimUi
 		{
 		public:
 			LogicModuleTreeItem(QTreeWidgetItem* parent, const Sim::LogicModule& lm);
+
+			virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
+			virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
+			virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
+
+		public:
+			QString m_equipmentId;
+		};
+
+
+		class VduModuleTreeItem : public BaseTreeItem
+		{
+		public:
+			VduModuleTreeItem(QTreeWidgetItem* parent, const Sim::VduModule& lm);
 
 			virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
 			virtual void doubleClick(SimProjectWidget* simProjectWidget) override;

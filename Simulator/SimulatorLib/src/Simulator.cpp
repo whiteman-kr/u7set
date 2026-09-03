@@ -1,4 +1,5 @@
 #include <SimulatorLib/Simulator.h>
+
 #include "SimulatorPrivate.h"
 
 
@@ -131,6 +132,64 @@ namespace Sim
 		return result;
 	}
 
+	std::vector<LmSubsystem> Simulator::lmSubsystems() const
+	{
+		auto subsystems = m_impl->lmSubsystems();
+
+		std::vector<LmSubsystem> result;
+		result.reserve(subsystems.size());
+
+		for (auto& subsystem : subsystems)
+		{
+			result.push_back(LmSubsystem{subsystem});
+		}
+
+		return result;
+	}
+
+	std::vector<VduSubsystem> Simulator::vduSubsystems() const
+	{
+		auto subsystems = m_impl->vduSubsystems();
+		std::vector<VduSubsystem> result;
+		result.reserve(subsystems.size());
+		for (auto& subsystem : subsystems)
+		{
+			result.push_back(VduSubsystem{subsystem});
+		}
+		return result;
+	}
+
+	std::optional<Sim::Module> Simulator::module(QString equipmentId) const
+	{
+		std::optional<Module> result;
+
+		auto lm = m_impl->module(equipmentId);
+		if (lm != nullptr)
+		{
+			result = Module{lm};
+		}
+
+		return result;
+	}
+
+	std::vector<Sim::Module> Simulator::modules() const
+	{
+		auto modules = m_impl->modules();
+
+		std::vector<Module> result;
+		result.reserve(modules.size());
+
+		std::transform(modules.begin(),
+					   modules.end(),
+					   std::back_inserter(result),
+					   [](const auto& moduleImpl)
+					   {
+						   return Module{moduleImpl};
+					   });
+
+		return result;
+	}
+
 	std::optional<LogicModule> Simulator::logicModule(QString equipmentId) const
 	{
 		std::optional<LogicModule> result;
@@ -151,11 +210,44 @@ namespace Sim
 		std::vector<LogicModule> result;
 		result.reserve(lms.size());
 
-		for (auto& lm : lms)
+		std::transform(lms.begin(),
+					   lms.end(),
+					   std::back_inserter(result),
+					   [](const auto& lmImpl)
+					   {
+						   return LogicModule{lmImpl};
+					   });
+
+		return result;
+	}
+
+	std::optional<VduModule> Simulator::vduModule(QString equipmentId) const
+	{
+		std::optional<VduModule> result;
+
+		auto vdu = m_impl->vduModule(equipmentId);
+		if (vdu != nullptr)
 		{
-			Q_ASSERT(lm);
-			result.push_back(LogicModule{lm});
+			result = VduModule{vdu};
 		}
+
+		return result;
+	}
+
+	std::vector<VduModule> Simulator::vduModules() const
+	{
+		auto vdus = m_impl->vduModules();
+
+		std::vector<VduModule> result;
+		result.reserve(vdus.size());
+
+		std::transform(vdus.begin(),
+					   vdus.end(),
+					   std::back_inserter(result),
+					   [](const auto& vduImpl)
+					   {
+						   return VduModule{vduImpl};
+					   });
 
 		return result;
 	}

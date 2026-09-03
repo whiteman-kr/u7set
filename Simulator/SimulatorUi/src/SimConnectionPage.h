@@ -20,7 +20,8 @@ namespace SimUi
 	protected slots:
 		void disableConnection(bool disable);
 
-		void updateConnectionState(QString connectionId, bool enabled);
+		void updateConnectionState1(QString connectionId, bool enabled);
+		void updateConnectionState2(QString connectionId, bool enabled, bool timeOut);
 		void updateData();
 
 		void showTxSignals(int portIndex);

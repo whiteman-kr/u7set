@@ -1,5 +1,5 @@
 #pragma once
-#include "SimLogicModuleImpl.h"
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimScriptRamAddress.h"
 
 namespace Sim

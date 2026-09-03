@@ -1,0 +1,8 @@
+#ifndef RN_KBD_SIM_H
+#define RN_KBD_SIM_H
+
+#include <alt_types.h>
+
+void setPressedKey(alt_u16 code);
+
+#endif
