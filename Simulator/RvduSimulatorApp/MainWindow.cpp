@@ -160,7 +160,14 @@ void MainWindow::onShowAbout()
 
 void MainWindow::onBringToFront()
 {
-	showNormal();
+	// Force the window to the top by toggling the "Always on Top" hint
+	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+	this->show(); // Applies the flag
+
+	// Immediately remove the hint so it doesn't stay permanently stuck on top
+	this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
+	this->show(); 
+
 	raise();          // Brings the window to the top of the stack
 	activateWindow(); // Gives keyboard focus to the window
 
