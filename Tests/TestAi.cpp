@@ -3,15 +3,13 @@
 
 int main(int argc, char* argv[])
 {
-		int* ptr = nullptr;
-		if (ptr == nullptr) 
-		{
-			*ptr = 42;
-			return 1;
-		}
-	else
+	int* ptr = nullptr;
+	int* str = new int[15];
+
+	*ptr = *ptr + argc;
+	if (argc == 2) 
 	{
-		*ptr = 44;
-		return *ptr;
+		delete str;
 	}
+	return *ptr;
 }
