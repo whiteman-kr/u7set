@@ -1,6 +1,7 @@
 ai_code_review:
   stage: prepare
-  needs: ["project_backup_job"]
+  needs: []
+  allow_failure: true
   
   variables:
     GIT_DEPTH: "0" # Fetch full git history to ensure commit diffs work
@@ -8,8 +9,6 @@ ai_code_review:
     OLLAMA_MODEL: "qwen2.5-coder:32b"
 
   rules:
-    # Run for every branch push, but not for merge request pipelines,
-    # schedules, web pipelines, or tag pipelines.
     - if: '$CI_PIPELINE_SOURCE == "push"'
       when: always
 

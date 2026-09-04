@@ -9,9 +9,9 @@ int main(int argc, char* argv[])
 			*ptr = 42;
 			return 1;
 		}
-		else
-		{
-			*ptr = 44;
-			return 0;
-		}
+	else
+	{
+		*ptr = 44;
+		return *ptr;
+	}
 }
