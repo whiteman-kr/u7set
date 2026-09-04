@@ -3,13 +3,13 @@
 
 int main(int argc, char* argv[])
 {
-	int* ptr = nullptr;
 	int* str = new int[15];
-
+	int* ptr = nullptr;
+	
 	*ptr = *ptr + argc;
 	if (argc == 2) 
 	{
-		delete str;
+	delete str; 
 	}
 	return *ptr;
 }
