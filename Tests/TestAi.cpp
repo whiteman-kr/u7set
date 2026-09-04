@@ -4,12 +4,8 @@
 int main(int argc, char* argv[])
 {
 	int* str = new int[15];
-	int* ptr = nullptr;
-	
-	*ptr = *ptr + argc;
-	if (argc == 2) 
-	{
+	*str[argc] = argc + argv[0];
+
 	delete str; 
-	}
-	return *ptr;
+	return *str[argc];
 }

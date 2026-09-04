@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -8,6 +9,7 @@ from typing import Optional
 import requests
 
 ZERO_SHA = "0" * 40
+HUNK_HEADER = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 
 GITLAB_TOKEN = os.environ.get("GITLAB_API_TOKEN")
 CI_PROJECT_ID = os.environ.get("CI_PROJECT_ID")
@@ -56,6 +58,35 @@ def get_git_diff() -> str:
     return result.stdout
 
 
+def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
+    changed_lines: dict[str, set[int]] = {}
+    current_path: Optional[str] = None
+    new_line: Optional[int] = None
+
+    for diff_line in diff_text.splitlines():
+        if diff_line.startswith("+++ b/"):
+            current_path = diff_line[6:]
+            changed_lines.setdefault(current_path, set())
+            new_line = None
+            continue
+
+        hunk_match = HUNK_HEADER.match(diff_line)
+        if hunk_match:
+            new_line = int(hunk_match.group(1))
+            continue
+
+        if current_path is None or new_line is None:
+            continue
+
+        if diff_line.startswith("+"):
+            changed_lines[current_path].add(new_line)
+            new_line += 1
+        elif diff_line.startswith(" "):
+            new_line += 1
+
+    return changed_lines
+
+
 def get_ai_review(diff_text: str) -> str:
     prompt = (
         "You are an expert C++23 code reviewer. Review the supplied Git diff for defects, "
@@ -68,7 +99,8 @@ def get_ai_review(diff_text: str) -> str:
         '"critical_issues":[{"path":"repository/relative/file.cpp","line":123,'
         '"message":"concise Markdown comment"}]}. '
         "Set result to CRITICAL exactly when critical_issues is non-empty. "
-        "Each critical issue must use a path and new-side line number that exists in the committed file. "
+        "Each critical issue must cite an added or modified line on the new side of the diff. "
+        "If the faulty code is unchanged context, cite the nearest added or modified line in that file. "
         "Use an empty critical_issues array when result is OK.\n\n"
         f"```diff\n{diff_text}\n```"
     )
@@ -105,7 +137,23 @@ def validate_issue_location(issue: CriticalIssue) -> None:
         raise ValueError(f"Critical issue references an invalid line: {issue.path}:{issue.line}")
 
 
-def parse_review(review_text: str) -> tuple[str, list[CriticalIssue]]:
+def attach_to_changed_line(issue: CriticalIssue, changed_lines: dict[str, set[int]]) -> CriticalIssue:
+    file_changed_lines = changed_lines.get(issue.path)
+    if not file_changed_lines:
+        raise ValueError(f"Critical issue references a file without changed lines: {issue.path}")
+
+    attached_line = min(file_changed_lines, key=lambda line: abs(line - issue.line))
+    if attached_line == issue.line:
+        return issue
+
+    message = (
+        f"**AI-reported location:** `{issue.path}:{issue.line}`. "
+        f"Attached to the nearest changed line, `{issue.path}:{attached_line}`.\n\n{issue.message}"
+    )
+    return CriticalIssue(issue.path, attached_line, message)
+
+
+def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[str, list[CriticalIssue]]:
     try:
         review = json.loads(review_text)
     except json.JSONDecodeError as error:
@@ -130,7 +178,7 @@ def parse_review(review_text: str) -> tuple[str, list[CriticalIssue]]:
 
         issue = CriticalIssue(path, line, message.strip())
         validate_issue_location(issue)
-        issues.append(issue)
+        issues.append(attach_to_changed_line(issue, changed_lines))
 
     if (result == "CRITICAL") != bool(issues):
         raise ValueError("Ollama result does not match the listed critical issues.")
@@ -150,7 +198,7 @@ def post_commit_comment(note: str, issue: Optional[CriticalIssue] = None) -> Non
     response = requests.post(
         get_commit_comments_url(),
         headers={"PRIVATE-TOKEN": GITLAB_TOKEN},
-        json=payload,
+        data=payload,
         timeout=60,
     )
     response.raise_for_status()
@@ -164,7 +212,7 @@ def main() -> int:
         return 0
 
     print("Sending diff to Ollama on host...")
-    summary, critical_issues = parse_review(get_ai_review(diff))
+    summary, critical_issues = parse_review(get_ai_review(diff), get_changed_new_lines(diff))
     print("\n===== AI Code Review (Markdown) =====")
     print(summary)
     print("===== End AI Code Review =====\n")
