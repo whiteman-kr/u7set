@@ -20,7 +20,7 @@ llm_code_review:
       when: always
 
   tags:
-    - vs2017
+    - projectbackup
 
   script:
     - python --version
