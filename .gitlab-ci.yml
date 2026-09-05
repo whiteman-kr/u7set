@@ -45,4 +45,6 @@ include:
   - local: 'CI/.gitlab-job-linux-cc.yml'
   - local: 'CI/.gitlab-job-linux-test.yml'
   - local: 'CI/.gitlab-job-windows-test.yml'
-  - local: 'CI/.gitlab-job-ai-code-review.yml'
+
+# stage: review
+  - local: 'CI/.gitlab-job-llm-code-review.yml'
