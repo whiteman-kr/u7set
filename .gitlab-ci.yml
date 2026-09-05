@@ -25,6 +25,7 @@ stages:
   - prepare
   - build
   - test
+  - review
 
 before_script:
   - cd
