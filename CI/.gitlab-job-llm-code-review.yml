@@ -1,6 +1,11 @@
 llm_code_review:
   stage: review
   #needs: ["project_backup_job", "windows_adsbridge_build", "windows_build_job", "windows_test_job"]
+  needs:
+    - project_backup_job
+    - windows_adsbridge_build
+    - windows_build_job
+    - windows_test_job
   allow_failure: true
   
   variables:
