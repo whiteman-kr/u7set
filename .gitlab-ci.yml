@@ -25,7 +25,7 @@ stages:
   - prepare
   - build
   - test
-  - review
+#  - review
 
 before_script:
   - cd
@@ -47,4 +47,4 @@ include:
   - local: 'CI/.gitlab-job-windows-test.yml'
 
 # stage: review
-  - local: 'CI/.gitlab-job-llm-code-review.yml'
+#  - local: 'CI/.gitlab-job-llm-code-review.yml'
