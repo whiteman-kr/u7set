@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Optional
@@ -34,6 +35,25 @@ class CriticalIssue:
     path: str
     line: int
     message: str
+
+
+def progress(message: str) -> None:
+    print(f"[AI review {time.strftime('%H:%M:%S')}] {message}", flush=True)
+
+
+def get_commit_metadata() -> tuple[str, str, str, str]:
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%H%n%h%n%an%n%s", CI_COMMIT_SHA],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    values = result.stdout.splitlines()
+    if len(values) < 4:
+        raise RuntimeError(f"Unable to read metadata for commit {CI_COMMIT_SHA}")
+    return values[0], values[1], values[2], values[3]
 
 
 def require_environment() -> None:
@@ -143,12 +163,15 @@ def get_review_context_paths(changed_paths: list[str]) -> list[str]:
     return sorted(context_paths)
 
 
-def build_review_context(diff_text: str) -> str:
-    context_paths = get_review_context_paths(get_changed_paths())
+def build_review_context(diff_text: str, context_paths: list[str]) -> str:
     sections = ["## COMPLETE GIT DIFF\n\n```diff\n" + diff_text + "\n```"]
     included_paths: list[str] = []
     omitted_files: list[str] = []
     context_bytes = len(diff_text.encode("utf-8", errors="replace"))
+
+    progress(f"Review context candidates: {len(context_paths)} file(s)")
+    for path in context_paths:
+        progress(f"  context candidate: {path}")
 
     if context_bytes > MAX_CONTEXT_BYTES:
         print(
@@ -173,9 +196,15 @@ def build_review_context(diff_text: str) -> str:
         context_bytes += len(content)
 
     if included_paths:
-        print(f"Including complete C++ file context: {', '.join(included_paths)}")
+        progress(f"Including complete C++ file context ({len(included_paths)} file(s)):")
+        for path in included_paths:
+            progress(f"  included: {path}")
     if omitted_files:
-        print(f"Omitting C++ context files: {', '.join(omitted_files)}")
+        progress(f"Omitting C++ context files ({len(omitted_files)} file(s)):")
+        for omitted_file in omitted_files:
+            progress(f"  omitted: {omitted_file}")
+
+    progress(f"Review context size: {context_bytes} bytes")
 
     return "\n\n".join(sections)
 
@@ -348,20 +377,45 @@ def post_commit_comment(note: str, issue: Optional[CriticalIssue] = None) -> Non
 
 def main() -> int:
     require_environment()
+    started_at = time.perf_counter()
+    progress(f"Starting review for commit {CI_COMMIT_SHA}")
+    commit_sha, short_sha, author, subject = get_commit_metadata()
+    progress(f"Commit: {short_sha} ({commit_sha})")
+    progress(f"Author: {author}")
+    progress(f"Message: {subject}")
+    progress(f"Model: {OLLAMA_MODEL}")
+    progress(f"Ollama endpoint: {OLLAMA_URL}")
+
+    progress("Collecting Git diff...")
     diff = get_git_diff()
     if not diff.strip():
-        print("No changes detected in diff. Skipping AI review.")
+        progress("No changes detected in diff. Skipping AI review.")
         return 0
 
-    print("Sending diff and C++ file context to Ollama on host...")
-    review_context = build_review_context(diff)
-    summary, critical_issues = parse_review(get_ai_review(review_context), get_changed_new_lines(diff))
-    final_report = build_final_report(summary, critical_issues)
-    print("\n===== AI Code Review (Markdown) =====")
-    print(final_report)
-    print("===== End AI Code Review =====\n")
+    changed_paths = get_changed_paths()
+    progress(f"Changed files ({len(changed_paths)}):")
+    for path in changed_paths:
+        progress(f"  changed: {path}")
+    progress(f"Diff size: {len(diff.encode('utf-8', errors='replace'))} bytes")
 
+    context_paths = get_review_context_paths(changed_paths)
+    review_context = build_review_context(diff, context_paths)
+    progress("Sending diff and C++ file context to Ollama...")
+    model_started_at = time.perf_counter()
+    review_text = get_ai_review(review_context)
+    progress(f"Ollama response received in {time.perf_counter() - model_started_at:.1f}s")
+
+    progress("Parsing and validating review locations...")
+    summary, critical_issues = parse_review(review_text, get_changed_new_lines(diff))
+    final_report = build_final_report(summary, critical_issues)
+    progress(f"Review parsed: {len(critical_issues)} critical issue(s)")
+    print("\n===== AI Code Review (Markdown) =====", flush=True)
+    print(final_report, flush=True)
+    print("===== End AI Code Review =====\n", flush=True)
+
+    progress("Posting overall review comment to GitLab...")
     post_commit_comment(final_report)
+    progress("Overall review comment posted.")
     for issue in critical_issues:
         mention = f"@{GITLAB_REVIEW_MENTION.lstrip('@')} " if GITLAB_REVIEW_MENTION else ""
         note = (
@@ -369,14 +423,18 @@ def main() -> int:
             f"**Location:** `{issue.path}:{issue.line}`\n\n"
             f"{issue.message}"
         )
+        progress(f"Posting inline comment for {issue.path}:{issue.line}...")
         post_commit_comment(note, issue)
-        print(f"Posted critical inline comment: {issue.path}:{issue.line}")
+        progress(f"Inline comment posted for {issue.path}:{issue.line}")
 
     if critical_issues:
-        print("Critical issue found. Marking this allowed-to-fail job as a warning.")
+        progress(
+            f"Critical issue found. Marking this allowed-to-fail job as a warning "
+            f"({time.perf_counter() - started_at:.1f}s total)."
+        )
         return 1
 
-    print("AI Review complete: OK")
+    progress(f"AI review complete: OK ({time.perf_counter() - started_at:.1f}s total)")
     return 0
 
 
