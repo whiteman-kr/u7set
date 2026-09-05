@@ -20,7 +20,7 @@ CI_API_V4_URL = os.environ.get("CI_API_V4_URL")
 GITLAB_REVIEW_MENTION = os.environ.get("GITLAB_REVIEW_MENTION", "").strip()
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "1200"))
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:14b")
 REVIEWABLE_CPP_EXTENSIONS = {".cpp", ".h", ".hpp"}
 MAX_CONTEXT_FILE_BYTES = int(os.environ.get("AI_REVIEW_MAX_FILE_BYTES", "40000"))
 MAX_CONTEXT_BYTES = int(os.environ.get("AI_REVIEW_MAX_CONTEXT_BYTES", "120000"))
@@ -211,10 +211,11 @@ def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
 
 def get_ai_review(review_context: str) -> str:
     prompt = (
-        "You are an expert C++23 code reviewer. Review the supplied Git diff and complete file context for defects, "
+        "You are an expert C++23, Qt6 code reviewer. Review the supplied Git diff and complete file context for defects, "
         "undefined behavior, memory/resource leaks, security risks, and clearly obsolete C++ idioms. "
         "Use the complete files to understand declarations, surrounding functions, and ownership, but report only issues caused by the supplied diff. "
-        "Provide concise, actionable Markdown feedback with source file names and line numbers. "
+        "Provide actionable Markdown feedback. The summary_markdown must explain each finding, not just say that issues exist. "
+        "For every critical issue, state the exact file path, line number, defect, runtime impact, and recommended correction. "
         "A critical issue can cause a security vulnerability, data loss or corruption, a crash, "
         "undefined behavior, or a major functional failure. "
         "Return one JSON object only, with this exact shape: "
@@ -309,6 +310,24 @@ def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[
     return summary.strip(), issues
 
 
+def build_final_report(summary: str, critical_issues: list[CriticalIssue]) -> str:
+    report_lines = ["## AI Code Review", summary.strip()]
+
+    if not critical_issues:
+        report_lines.extend(["", "**Result:** OK - no critical issues found."])
+        return "\n\n".join(report_lines)
+
+    report_lines.extend(["", "## Critical issues"])
+    for issue in critical_issues:
+        report_lines.extend([
+            "",
+            f"### `{issue.path}:{issue.line}`",
+            issue.message,
+        ])
+
+    return "\n".join(report_lines).strip()
+
+
 def get_commit_comments_url() -> str:
     return f"{CI_API_V4_URL}/projects/{CI_PROJECT_ID}/repository/commits/{CI_COMMIT_SHA}/comments"
 
@@ -337,14 +356,19 @@ def main() -> int:
     print("Sending diff and C++ file context to Ollama on host...")
     review_context = build_review_context(diff)
     summary, critical_issues = parse_review(get_ai_review(review_context), get_changed_new_lines(diff))
+    final_report = build_final_report(summary, critical_issues)
     print("\n===== AI Code Review (Markdown) =====")
-    print(summary)
+    print(final_report)
     print("===== End AI Code Review =====\n")
 
-    post_commit_comment(f"### AI Code Review\n\n{summary}")
+    post_commit_comment(final_report)
     for issue in critical_issues:
         mention = f"@{GITLAB_REVIEW_MENTION.lstrip('@')} " if GITLAB_REVIEW_MENTION else ""
-        note = f"{mention}### Critical AI Code Review\n\n{issue.message}"
+        note = (
+            f"{mention}### Critical AI Code Review\n\n"
+            f"**Location:** `{issue.path}:{issue.line}`\n\n"
+            f"{issue.message}"
+        )
         post_commit_comment(note, issue)
         print(f"Posted critical inline comment: {issue.path}:{issue.line}")
 

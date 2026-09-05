@@ -1,11 +1,14 @@
 
 #include <doesnotexists>
 
+namespace Api
+{
+
 int main(int argc, char* argv[])
 {
-	int* str1 = new int[15];
-	*str1[argc] = argc + argv[0];
+	int* str = new int[15];
+	*str[argc] = argc + argv[0];
 
-	delete str1; 
-	return *str1[argc];
+	delete str; 
+	return *str[argc];
 }
