@@ -4,6 +4,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 from typing import Optional
 
 import requests
@@ -20,6 +21,12 @@ GITLAB_REVIEW_MENTION = os.environ.get("GITLAB_REVIEW_MENTION", "").strip()
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "1200"))
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b")
+REVIEWABLE_CPP_EXTENSIONS = {".cpp", ".h", ".hpp"}
+MAX_CONTEXT_FILE_BYTES = int(os.environ.get("AI_REVIEW_MAX_FILE_BYTES", "40000"))
+MAX_CONTEXT_BYTES = int(os.environ.get("AI_REVIEW_MAX_CONTEXT_BYTES", "120000"))
+GENERATED_DIRECTORY_NAMES = {"build", "generated", "autogen", "cmakefiles"}
+GENERATED_FILE_PREFIXES = ("moc_", "ui_", "qrc_")
+GENERATED_FILE_SUFFIXES = (".generated.cpp", ".generated.h", ".generated.hpp", ".pb.cpp", ".pb.h", ".pb.hpp")
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,121 @@ def get_git_diff() -> str:
     return result.stdout
 
 
+def get_changed_paths() -> list[str]:
+    if not CI_BEFORE_SHA or CI_BEFORE_SHA == ZERO_SHA:
+        command = ["git", "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "HEAD"]
+    else:
+        command = ["git", "diff", "--name-only", f"{CI_BEFORE_SHA}...{CI_COMMIT_SHA}"]
+
+    result = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return [path for path in result.stdout.splitlines() if path]
+
+
+def get_commit_file(path: str) -> Optional[bytes]:
+    result = subprocess.run(
+        ["git", "show", f"{CI_COMMIT_SHA}:{path}"],
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def is_reviewable_cpp_path(path: str) -> bool:
+    normalized_path = path.replace("\\", "/")
+    path_parts = PurePosixPath(normalized_path).parts
+    file_name = PurePosixPath(normalized_path).name.lower()
+    suffix = PurePosixPath(normalized_path).suffix.lower()
+
+    if suffix not in REVIEWABLE_CPP_EXTENSIONS:
+        return False
+    if any(part.lower() in GENERATED_DIRECTORY_NAMES for part in path_parts):
+        return False
+    if file_name.startswith(GENERATED_FILE_PREFIXES):
+        return False
+    return not file_name.endswith(GENERATED_FILE_SUFFIXES)
+
+
+def get_review_context_paths(changed_paths: list[str]) -> list[str]:
+    repository_paths = subprocess.run(
+        ["git", "ls-tree", "-r", "--name-only", CI_COMMIT_SHA],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout.splitlines()
+    repository_path_set = set(repository_paths)
+    context_paths = {path for path in changed_paths if is_reviewable_cpp_path(path)}
+
+    for changed_path in changed_paths:
+        if PurePosixPath(changed_path).suffix.lower() != ".cpp":
+            continue
+
+        changed_file = PurePosixPath(changed_path)
+        header_names = {f"{changed_file.stem}.h", f"{changed_file.stem}.hpp"}
+        same_directory = changed_file.parent
+        candidates = [
+            str(same_directory / name) if str(same_directory) != "." else name
+            for name in sorted(header_names)
+        ]
+        candidates.extend(
+            path for path in repository_paths
+            if PurePosixPath(path).name in header_names
+        )
+        context_paths.update(
+            path for path in candidates
+            if path in repository_path_set and is_reviewable_cpp_path(path)
+        )
+
+    return sorted(context_paths)
+
+
+def build_review_context(diff_text: str) -> str:
+    context_paths = get_review_context_paths(get_changed_paths())
+    sections = ["## COMPLETE GIT DIFF\n\n```diff\n" + diff_text + "\n```"]
+    included_paths: list[str] = []
+    omitted_files: list[str] = []
+    context_bytes = len(diff_text.encode("utf-8", errors="replace"))
+
+    if context_bytes > MAX_CONTEXT_BYTES:
+        print(
+            f"Diff is {context_bytes} bytes, exceeding the total context limit "
+            f"of {MAX_CONTEXT_BYTES} bytes; omitting complete-file context."
+        )
+
+    for path in context_paths:
+        content = get_commit_file(path)
+        if content is None:
+            continue
+        if len(content) > MAX_CONTEXT_FILE_BYTES:
+            omitted_files.append(f"{path} (file limit: {len(content)} bytes)")
+            continue
+        if context_bytes + len(content) > MAX_CONTEXT_BYTES:
+            omitted_files.append(f"{path} (total context limit)")
+            continue
+
+        text = content.decode("utf-8", errors="replace")
+        sections.append(f"## COMPLETE FILE: {path}\n\n```cpp\n{text}\n```")
+        included_paths.append(path)
+        context_bytes += len(content)
+
+    if included_paths:
+        print(f"Including complete C++ file context: {', '.join(included_paths)}")
+    if omitted_files:
+        print(f"Omitting C++ context files: {', '.join(omitted_files)}")
+
+    return "\n\n".join(sections)
+
+
 def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
     changed_lines: dict[str, set[int]] = {}
     current_path: Optional[str] = None
@@ -87,10 +209,11 @@ def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
     return changed_lines
 
 
-def get_ai_review(diff_text: str) -> str:
+def get_ai_review(review_context: str) -> str:
     prompt = (
-        "You are an expert C++23 code reviewer. Review the supplied Git diff for defects, "
+        "You are an expert C++23 code reviewer. Review the supplied Git diff and complete file context for defects, "
         "undefined behavior, memory/resource leaks, security risks, and clearly obsolete C++ idioms. "
+        "Use the complete files to understand declarations, surrounding functions, and ownership, but report only issues caused by the supplied diff. "
         "Provide concise, actionable Markdown feedback with source file names and line numbers. "
         "A critical issue can cause a security vulnerability, data loss or corruption, a crash, "
         "undefined behavior, or a major functional failure. "
@@ -102,7 +225,7 @@ def get_ai_review(diff_text: str) -> str:
         "Each critical issue must cite an added or modified line on the new side of the diff. "
         "If the faulty code is unchanged context, cite the nearest added or modified line in that file. "
         "Use an empty critical_issues array when result is OK.\n\n"
-        f"```diff\n{diff_text}\n```"
+        f"{review_context}"
     )
     payload = {
         "model": OLLAMA_MODEL,
@@ -211,8 +334,9 @@ def main() -> int:
         print("No changes detected in diff. Skipping AI review.")
         return 0
 
-    print("Sending diff to Ollama on host...")
-    summary, critical_issues = parse_review(get_ai_review(diff), get_changed_new_lines(diff))
+    print("Sending diff and C++ file context to Ollama on host...")
+    review_context = build_review_context(diff)
+    summary, critical_issues = parse_review(get_ai_review(review_context), get_changed_new_lines(diff))
     print("\n===== AI Code Review (Markdown) =====")
     print(summary)
     print("===== End AI Code Review =====\n")

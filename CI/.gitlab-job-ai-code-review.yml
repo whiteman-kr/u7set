@@ -7,6 +7,8 @@ ai_code_review:
     GIT_DEPTH: "0" # Fetch full git history to ensure commit diffs work
     OLLAMA_URL: "http://127.0.0.1:11434"
     OLLAMA_MODEL: "qwen2.5-coder:32b"
+    AI_REVIEW_MAX_FILE_BYTES: "40000"
+    AI_REVIEW_MAX_CONTEXT_BYTES: "120000"
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
