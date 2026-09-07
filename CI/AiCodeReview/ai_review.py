@@ -28,6 +28,28 @@ MAX_CONTEXT_BYTES = int(os.environ.get("AI_REVIEW_MAX_CONTEXT_BYTES", "120000"))
 GENERATED_DIRECTORY_NAMES = {"build", "generated", "autogen", "cmakefiles"}
 GENERATED_FILE_PREFIXES = ("moc_", "ui_", "qrc_")
 GENERATED_FILE_SUFFIXES = (".generated.cpp", ".generated.h", ".generated.hpp", ".pb.cpp", ".pb.h", ".pb.hpp")
+REVIEW_RESPONSE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["result", "summary_markdown", "critical_issues"],
+    "properties": {
+        "result": {"type": "string", "enum": ["OK", "CRITICAL"]},
+        "summary_markdown": {"type": "string"},
+        "critical_issues": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["path", "line", "message"],
+                "properties": {
+                    "path": {"type": "string"},
+                    "line": {"type": "integer", "minimum": 1},
+                    "message": {"type": "string"},
+                },
+            },
+        },
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -247,7 +269,8 @@ def get_ai_review(review_context: str) -> str:
         "For every critical issue, state the exact file path, line number, defect, runtime impact, and recommended correction. "
         "A critical issue can cause a security vulnerability, data loss or corruption, a crash, "
         "undefined behavior, or a major functional failure. "
-        "Return one JSON object only, with this exact shape: "
+        "Return one JSON object only that conforms to the supplied JSON schema. Do not use Markdown code fences. "
+        "The object has this exact shape: "
         '{"result":"OK or CRITICAL","summary_markdown":"Markdown review",'
         '"critical_issues":[{"path":"repository/relative/file.cpp","line":123,'
         '"message":"concise Markdown comment"}]}. '
@@ -260,13 +283,16 @@ def get_ai_review(review_context: str) -> str:
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt,
-        "format": "json",
+        "format": REVIEW_RESPONSE_SCHEMA,
         "stream": False,
         "keep_alive": "2m",
     }
     response = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=OLLAMA_TIMEOUT)
     response.raise_for_status()
-    return response.json()["response"]
+    review_text = response.json().get("response")
+    if not isinstance(review_text, str):
+        raise ValueError("Ollama response does not contain a text review.")
+    return review_text
 
 
 def validate_issue_location(issue: CriticalIssue) -> None:
@@ -312,11 +338,18 @@ def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[
     except json.JSONDecodeError as error:
         raise ValueError("Ollama returned invalid JSON.") from error
 
+    if not isinstance(review, dict):
+        raise ValueError(f"Ollama review must be a JSON object, got {type(review).__name__}.")
+
     result = review.get("result")
     summary = review.get("summary_markdown")
     raw_issues = review.get("critical_issues")
     if result not in {"OK", "CRITICAL"} or not isinstance(summary, str) or not isinstance(raw_issues, list):
-        raise ValueError("Ollama review does not match the required JSON structure.")
+        raise ValueError(
+            "Ollama review does not match the required JSON structure: "
+            f"result={result!r}, summary_markdown={type(summary).__name__}, "
+            f"critical_issues={type(raw_issues).__name__}."
+        )
 
     issues: list[CriticalIssue] = []
     for raw_issue in raw_issues:
@@ -406,7 +439,14 @@ def main() -> int:
     progress(f"Ollama response received in {time.perf_counter() - model_started_at:.1f}s")
 
     progress("Parsing and validating review locations...")
-    summary, critical_issues = parse_review(review_text, get_changed_new_lines(diff))
+    try:
+        summary, critical_issues = parse_review(review_text, get_changed_new_lines(diff))
+    except ValueError:
+        progress("Ollama returned an invalid structured review. Raw response follows:")
+        print("===== Invalid Ollama Response =====", flush=True)
+        print(review_text, flush=True)
+        print("===== End Invalid Ollama Response =====", flush=True)
+        raise
     final_report = build_final_report(summary, critical_issues)
     progress(f"Review parsed: {len(critical_issues)} critical issue(s)")
     print("\n===== AI Code Review (Markdown) =====", flush=True)
