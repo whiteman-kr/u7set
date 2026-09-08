@@ -154,7 +154,7 @@ function processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, ou
 		return [0,0];				
 	}
 
-	setpointValue = Number(setpointValue.toPrecision(precision));	
+	setpointValue = Number(setpointValue.toFixed(precision));	
 	if (Math.abs(setpointValue - criteria) > tolerance)
 	{
 		log.writeWarning(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
@@ -220,7 +220,7 @@ function processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, o
 	}
 	else
 	{
-		setpointValue = Number(setpointValue.toPrecision(precision));	
+		setpointValue = Number(setpointValue.toFixed(precision));	
 		if (Math.abs(setpointValue - criteria) > tolerance)
 		{
 			log.writeWarning(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
@@ -339,7 +339,7 @@ function testTO5BySchemaID(ctrl)
 			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/];
 			let criteria = Number(data[10 /*Criteria*/]);
 			const precision = data[15 /*Precision*/];
-			criteria = Number(criteria.toPrecision(precision));
+			criteria = Number(criteria.toFixed(precision));
 
 			if (outputAppSignalID === "")
 			{
@@ -460,7 +460,7 @@ function testTO5ByCaseID(ctrl)
 			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
 			let criteria = Number(data[10 /*Criteria*/]);
 			const precision = data[15 /*Precision*/];
-			criteria = Number(criteria.toPrecision(precision));
+			criteria = Number(criteria.toFixed(precision));
 
 			let correct = "";
 
@@ -585,7 +585,7 @@ function testTO5ByAlgorithm(ctrl)
 			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
 			let criteria = Number(data[10 /*Criteria*/]);
 			const precision = data[15 /*Precision*/];
-			criteria = Number(criteria.toPrecision(precision));
+			criteria = Number(criteria.toFixed(precision));
 
 			let correct = "";
 

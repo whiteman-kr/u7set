@@ -405,7 +405,7 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 		return;
 	}
 
-	m_tableWidget->setSortingEnabled(false);
+	//m_tableWidget->setSortingEnabled(false);
 
 	for (const QModelIndex& index : m_tableWidget->selectionModel()->selectedIndexes())
 	{
@@ -455,7 +455,7 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 		}
 	}
 
-	m_tableWidget->setSortingEnabled(true);
+	//m_tableWidget->setSortingEnabled(true);
 
 	m_hasUnsavedChanges = true;
 }
@@ -848,6 +848,8 @@ void PluginTO5MainWindow::createFilterListWidget()
 						static_cast<int>(FilterType::BySchemaID));
 	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::ByCaseID)], 
 						static_cast<int>(FilterType::ByCaseID));
+	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::ByAlgorithm)], 
+		static_cast<int>(FilterType::ByAlgorithm));
 
 	m_comboBox->setCurrentIndex(QSettings().value("MainWindow/comboBoxIndex", 0).toInt());
 
@@ -866,7 +868,7 @@ void PluginTO5MainWindow::createFilterListWidget()
 
 	// Mask
 	//
-	layout->addWidget(new QLabel(tr("SchemaID/CaseID Mask")));
+	layout->addWidget(new QLabel(tr("SchemaID/CaseID/Algorithm Mask")));
 
 	// Mask field and type combo
 	{
@@ -909,9 +911,11 @@ void PluginTO5MainWindow::createTableWidget()
 
 	m_tableWidget->setSelectionBehavior(QAbstractItemView::SelectItems);
 	m_tableWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_tableWidget->installEventFilter(this);
 
 	m_tableWidget->setColumnCount(m_tableHeaders.size());
 	m_tableWidget->setHorizontalHeaderLabels(m_tableHeaders);
+	m_tableWidget->setSortingEnabled(false);
 
 	connect(m_tableWidget, &QTableWidget::itemChanged, this, &PluginTO5MainWindow::onItemCriteriaChanged);
 
@@ -1179,6 +1183,10 @@ void PluginTO5MainWindow::fillFilters(QList<QString> filtersId, bool filterMatch
 		{
 			filteredIds = m_comparatorsStorage.caseIds();
 		}
+		else if (m_filterType == FilterType::ByAlgorithm)
+		{
+			filteredIds = m_comparatorsStorage.algorithms();
+		}
 		else
 		{
 			Q_ASSERT(false);
@@ -1218,7 +1226,7 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 	//
 	m_tableWidget->clearContents();
 
-	m_tableWidget->setSortingEnabled(false);
+	//m_tableWidget->setSortingEnabled(false);
 
 	std::vector<Hash> comparatorsVec;
 	if (filteredIds.isEmpty() == true)
@@ -1285,7 +1293,91 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 		m_tableWidget->setItemDelegateForColumn(m_criteriaColumn, m_numericDelegate);
 	}
 
-	m_tableWidget->setSortingEnabled(true);
+	//m_tableWidget->setSortingEnabled(true);
+}
+
+void PluginTO5MainWindow::swapRows(int row1, int row2)
+{
+	if (row1 == row2)
+	{
+		return;
+	}
+
+	QList<QTableWidgetItem*> items;
+
+	for (int col = 0; col < m_tableWidget->columnCount(); ++col)
+	{
+		QTableWidgetItem* item = m_tableWidget->item(row1, col);
+
+		items.append(item ? item->clone() : nullptr);
+	}
+
+	m_tableWidget->removeRow(row1);
+	m_tableWidget->insertRow(row2);
+
+	for (int col = 0; col < items.size(); ++col)
+	{
+		m_tableWidget->setItem(row2, col, items[col]);
+	}
+}
+
+void PluginTO5MainWindow::moveSelectedRows(int direction)
+{
+	QModelIndexList indexes = m_tableWidget->selectionModel()->selectedRows();
+
+	if (indexes.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<int> rows;
+	for (const QModelIndex& index : indexes)
+	{
+		rows.push_back(index.row());
+	}
+
+	std::sort(rows.begin(), rows.end());
+
+	// UP
+	if (direction < 0)
+	{
+		if (rows.front() == 0)
+		{
+			return;
+		}
+
+		for (int row : rows)
+		{
+			QSignalBlocker blocker(m_tableWidget);
+			swapRows(row, row - 1);
+			m_comparatorsStorage.swapComparatorPlace(row, row - 1);
+		}
+	}
+	// DOWN
+	else
+	{
+		if (rows.back() == m_tableWidget->rowCount() - 1)
+		{
+			return;
+		}
+
+		for (auto it = rows.rbegin(); it != rows.rend(); ++it)
+		{
+			int row = *it;
+			QSignalBlocker blocker(m_tableWidget);
+			swapRows(row, row + 1);
+			m_comparatorsStorage.swapComparatorPlace(row, row + 1);
+		}
+	}
+
+	m_hasUnsavedChanges = true;
+
+	m_tableWidget->clearSelection();
+
+	for (int row : rows)
+	{
+		m_tableWidget->selectRow(row + direction);
+	}
 }
 
 void PluginTO5MainWindow::showSoftwareConnection(const QString& caption,
@@ -1354,6 +1446,24 @@ void PluginTO5MainWindow::showSoftwareConnection(const QString& caption,
 
 bool PluginTO5MainWindow::eventFilter(QObject* object, QEvent* event)
 {
+	if (object == m_tableWidget && event->type() == QEvent::KeyPress)
+	{
+		auto* keyEvent = static_cast<QKeyEvent*>(event);
+
+		if (keyEvent->modifiers() == Qt::ControlModifier)
+		{
+			if (keyEvent->key() == Qt::Key_Up)
+			{
+				moveSelectedRows(-1);
+			}
+
+			if (keyEvent->key() == Qt::Key_Down)
+			{
+				moveSelectedRows(1);
+			}
+		}
+	}
+
 	if (object == m_statusBarLogAlerts && m_statusBarLogAlerts->text().isEmpty() == false && event->type() == QEvent::MouseButtonPress)
 	{
 		showAppLog();

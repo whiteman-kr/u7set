@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ReportTemplateStorage Version="1">
 	<Report Caption="РАЕС КСБ ТО-5" Version="1">
-		<Header Caption="Header" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1">
+		<Header Caption="Header" PageSize="A4" Orientation="Portrait" Margins="15,15,10,15" Version="1">
 			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="$FIRST(PLANT)" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="$FIRST(UNIT)" FontName="Arial" FontSize="12" Alignment="Right"/>
@@ -9,20 +9,19 @@
 			<Text Text="\n\nПротокол №: ________ ТО-5; НЗ ЦТАВ: ________\n\n" FontName="Arial" FontSize="16" Alignment="Center"/>
 			<Text Tag="$FIRST(START_TIME)" FontName="Arial" FontSize="12" Alignment="Center"/>
 		</Header>
-		<Section Caption="Main" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1" Tag="to5">
-			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
-			<Text Tag="TO_ALG_$(REPEATINDEX)" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Left"/>
-			<Table Tag="TO_TABLE_$(REPEATINDEX)" FontName="Arial" FontSize="10" Separator=";" BorderWidth="1">
-				<Column Caption="Найменування" Alignment="Left" Width = "40"/>
-				<Column Caption="ІД" Alignment="Left" Width = "20"/>
-				<Column Caption="Шафа" Alignment="Left" Width = "5"/>
-				<Column Caption="Значення сигнала" Alignment="Left" Width = "10"/>
-				<Column Caption="Еталон уставки" Alignment="Left" Width = "10"/>
-				<Column Caption="Значення уставки" Alignment="Left" Width = "10"/>
-				<Column Caption="Відповідність" Alignment="Left" Width = "5"/>
+		<Section Caption="Main" PageSize="A4" Orientation="Landscape" Margins="15,15,10,15" Version="1" Tag="to5">
+			<Text Tag="TO_ALG_$(REPEATINDEX)" FontName="Arial" FontSize="10" FontBold = "True" Alignment="Left"/>
+			<Table Tag="TO_TABLE_$(REPEATINDEX)" FontName="Arial" FontSize="9" Separator=";" BorderWidth="1">
+				<Column Caption="Найменування" Alignment="Left" Width = "38"/>
+				<Column Caption="ІД" Alignment="Left" Width = "22"/>
+				<Column Caption="Шафа" Alignment="Left" Width = "7"/>
+				<Column Caption="Значення сигнала" Alignment="Left" Width = "8"/>
+				<Column Caption="Еталон уставки" Alignment="Left" Width = "8"/>
+				<Column Caption="Значення уставки" Alignment="Left" Width = "8"/>
+				<Column Caption="Результат" Alignment="Left" Width = "9"/>
 			</Table>
 		</Section>
-		<Footer Caption="Footer" PageSize="A4" Orientation="Landscape" Margins="25,15,10,15" Version="1">
+		<Footer Caption="Footer" PageSize="A4" Orientation="Landscape" Margins="15,15,10,15" Version="1">
 			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="TO_RESULT" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Left"/>
 			<Text Text="\n\nНЗ ЦТАВ: ___________________________" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Center"/>

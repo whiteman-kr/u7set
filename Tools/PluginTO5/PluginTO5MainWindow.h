@@ -67,6 +67,9 @@ private:
 
 	void updateTable(const QList<QString>& filteredIds, FilterType sortType);
 
+	void swapRows(int row1, int row2);
+	void moveSelectedRows(int direction);
+
 	void showSoftwareConnection(const QString& caption,
 								const QString& nameFilter,
 								const std::vector<TcpClientStatistics::Statistics>& connectionStatistics,

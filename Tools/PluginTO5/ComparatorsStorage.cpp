@@ -392,6 +392,18 @@ std::vector<Hash> ComparatorsStorage::filteredComparatorsHashes(QList<QString> i
 			}
 		}
 	}
+	else if (filterType == FilterType::ByAlgorithm)
+	{
+		for (const Hash hash : m_comparatorData)
+		{
+			const auto& data = m_comparatorDataMap.at(hash);
+
+			if (id.isEmpty() == true || id.contains(data.algorithm))
+			{
+				comparatorDataByCaseID.push_back(hash);
+			}
+		}
+	}
 
 	return comparatorDataByCaseID;
 }
@@ -447,6 +459,20 @@ QList<QString> ComparatorsStorage::caseIds() const
 	return caseIDsSet;
 }
 
+QList<QString> ComparatorsStorage::algorithms() const
+{
+	QList<QString> algorithmsSet;
+	for (const Hash hash : m_comparatorData)
+	{
+		const auto& data = m_comparatorDataMap.at(hash);
+		if (algorithmsSet.contains(data.algorithm) == false)
+		{
+			algorithmsSet.append(data.algorithm);
+		}
+	}
+	return algorithmsSet;
+}
+
 void ComparatorsStorage::setComparatorCriteria(Hash hash, double criteria)
 {
 	auto it = m_comparatorDataMap.find(hash);
@@ -467,6 +493,17 @@ void ComparatorsStorage::setComparatorAlgorithm(Hash hash, const QString& algori
 		return;
 	}
 	it->second.algorithm = algorithm;
+}
+
+void ComparatorsStorage::swapComparatorPlace(int index1, int index2)
+{
+	if ((index1 < 0) || (index2 < 0) || 
+		(index1 >= static_cast<int>(m_comparatorData.size())) || (index2 >= static_cast<int>(m_comparatorData.size())))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+	std::swap(m_comparatorData[index1], m_comparatorData[index2]);
 }
 
 bool ComparatorsStorage::loadComparators(const QString& comparatorsFile, ComparatorSet& comparatorSet) const
