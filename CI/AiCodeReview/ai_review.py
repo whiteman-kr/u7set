@@ -265,7 +265,7 @@ def get_ai_review(review_context: str) -> str:
         "You are an expert C++23, Qt6 code reviewer. Review the supplied Git diff and complete file context for defects, "
         "undefined behavior, memory/resource leaks, security risks, and clearly obsolete C++ idioms. "
         "Use the complete files to understand declarations, surrounding functions, and ownership, but report only issues caused by the supplied diff. "
-        "Provide actionable Markdown feedback. The summary_markdown must explain each finding, not just say that issues exist. "
+        "Provide actionable Markdown feedback. The summary_markdown must explain each found issue, not just say that issues exist. "
         "For every critical issue, state the exact file path, line number, defect, runtime impact, and recommended correction. "
         "A critical issue can cause a security vulnerability, data loss or corruption, a crash, "
         "undefined behavior, or a major functional failure. "
@@ -366,8 +366,12 @@ def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[
         validate_issue_location(issue)
         issues.append(attach_to_changed_line(issue, changed_lines))
 
-    if (result == "CRITICAL") != bool(issues):
-        raise ValueError("Ollama result does not match the listed critical issues.")
+    expected_result = "CRITICAL" if issues else "OK"
+    if result != expected_result:
+        progress(
+            f"Ollama result {result!r} disagrees with the {len(issues)} parsed critical issue(s); "
+            f"using {expected_result!r}."
+        )
 
     return summary.strip(), issues
 
