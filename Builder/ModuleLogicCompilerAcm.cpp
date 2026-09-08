@@ -184,6 +184,13 @@ namespace Builder
 			appSignal->setAcquire(false);
 		}
 
+		//qDebug() << "=== IO Signals ====";
+
+		//for (const AppSignal* s : m_ioSignals)
+		//{
+		//	qDebug() << C_STR(QString("%1 %2 %3").arg(s->appSignalID()).arg(E::valueToString(s->signalType())).arg(E::valueToString(s->inOutType())));
+		//}
+
 		return result;
 	}
 
@@ -488,6 +495,11 @@ namespace Builder
 			}
 
 			QString appSignalID = item->strID();
+
+			if (appSignalID == "INT_BUS")
+			{
+				DEBUG_STOP;
+			}
 
 			if (m_actuatorSignals->contains(appSignalID))
 			{
@@ -845,6 +857,32 @@ namespace Builder
 
 			appSignal->setIoBufAddr(addr);
 
+			//
+
+			if (appSignal->isInput() && appSignal->isBus())
+			{
+				UalSignal* ualSignal = m_ualSignals.get(id);
+
+				if (ualSignal == nullptr)
+				{
+					//				Q_ASSERT(false);
+					// result = false;
+					//				break;
+
+					qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
+					continue;
+				}
+
+				if (ualSignal->ualAddr().isValid())
+				{
+					continue;
+				}
+
+				ualSignal->setUalAddr(addr);
+			}
+
+			//
+
 			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
 			{
 				Q_ASSERT(false);
@@ -860,27 +898,6 @@ namespace Builder
 				result = false;
 				break;
 			}
-
-			//
-
-			UalSignal* ualSignal = m_ualSignals.get(id);
-
-			if (ualSignal == nullptr)
-			{
-				//				Q_ASSERT(false);
-				// result = false;
-				//				break;
-
-				qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
-				continue;
-			}
-
-			if (ualSignal->ualAddr().isValid())
-			{
-				continue;
-			}
-
-			ualSignal->setUalAddr(addr);
 		}
 
 		if (result == false)
@@ -927,8 +944,8 @@ namespace Builder
 			{
 				continue;
 			}
-
-			ualSignal->setUalAddr(addr);
+//
+//			ualSignal->setUalAddr(addr);
 		}
 
 		if (result == false)
@@ -1086,14 +1103,76 @@ namespace Builder
 		case E::UalItemType::Transmitter:
 		case E::UalItemType::Receiver:
 		case E::UalItemType::Terminator:
-		case E::UalItemType::Const:
-		case E::UalItemType::BusComposer:
 		case E::UalItemType::BusExtractor:
 		case E::UalItemType::LoopbackSource:
 		case E::UalItemType::LoopbackTarget:
 			Q_ASSERT(false); // TO DO
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
+
+		case E::UalItemType::BusComposer:
+			{
+				const SchemaBusComposer* composer = outPinParent->schemaBusComposer();
+
+				TEST_PTR_RETURN_FALSE(composer);
+
+				pinSignalType->signalType = E::SignalType::Bus;
+				pinSignalType->analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+				pinSignalType->busType = composer->busTypeId();
+				pinSignalType->byteOrder = E::ByteOrder::BigEndian;
+
+				auto bus = m_actuatorSignals->getBus(pinSignalType->busType);
+
+				TEST_PTR_RETURN_FALSE(bus);
+
+				pinSignalType->dataSize = bus->sizeBit();
+
+				result = true;
+			}
+			break;
+
+		case E::UalItemType::Const:
+			{
+				const SchemaConst* constItem = outPinParent->schemaConst();
+
+				TEST_PTR_RETURN_FALSE(constItem);
+
+				E::SignalType signalType = E::SignalType::Discrete;
+				E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+				int dataSize = 0;
+				
+				switch (constItem->type())
+				{
+				case VFrame30::SchemaItemConst::ConstType::IntegerType:
+					signalType = E::SignalType::Analog;
+					analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+					dataSize = SIGNED_INT32_SIZE;
+					break;
+
+				case VFrame30::SchemaItemConst::ConstType::FloatType:
+					signalType = E::SignalType::Analog;
+					analogFormat = E::AnalogAppSignalFormat::Float32;
+					dataSize = FLOAT32_SIZE;
+					break;
+
+				case VFrame30::SchemaItemConst::ConstType::Discrete:
+					signalType = E::SignalType::Discrete;
+					dataSize = DISCRETE_SIZE;
+					break;
+
+				default:
+					Q_ASSERT(false);
+				}
+
+				pinSignalType->signalType = signalType;
+				pinSignalType->analogFormat = analogFormat;
+				pinSignalType->busType.clear();
+				pinSignalType->byteOrder = E::ByteOrder::BigEndian;
+				pinSignalType->dataSize = dataSize;
+
+				result = true;
+			}
+			break;
 
 		case E::UalItemType::Signal:
 			{
@@ -1218,7 +1297,7 @@ namespace Builder
 
 		static const QString line("--------------------------------------------------------------------------------");
 		static const QString line2("================================================================================");
-		static const QString addrLine(" IO buf Address | AppSignalID");
+		static const QString addrLine(" IO buf Address | SizeBit | AppSignalID");
 
 		QStringList file;
 
@@ -1236,7 +1315,10 @@ namespace Builder
 					continue;
 				}
 
-				QString str = QString(" %1       | %2").arg(appSignal->ioBufAddr().toString(true)).arg(appSignal->appSignalID());
+				QString str = QString(" %1       | %2 | %3").
+										arg(appSignal->ioBufAddr().toString(true)).
+										arg(appSignal->dataSize(), 7, 10, QChar(' ')).
+										arg(appSignal->appSignalID());
 
 				file.append(str);
 			}
@@ -1288,7 +1370,7 @@ namespace Builder
 			}
 		}
 
-		BuildFile* bf = m_resultWriter->addFile(QString("Subsystems/%1").arg(m_lmSubsystemID), QString("%1-%2-sw-inouts.txt").arg(m_lmSubsystemID).arg(m_lmNumber), file, false);
+		BuildFile* bf = m_resultWriter->addFile(QString("Subsystems/%1").arg(m_lmSubsystemID), QString("%1-%2-sw-inouts.txt").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file, false);
 
 		return (bf != nullptr);
 	}
