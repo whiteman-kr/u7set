@@ -136,8 +136,9 @@ namespace ReportLib
 	//
 	// ReportObject
 	//
-	ReportObject::ReportObject(ReportObject::Type type) :
-		m_type(type)
+	ReportObject::ReportObject(ReportObject::Type type, const QString& hint) :
+		m_type(type),
+		m_hint(hint)
 	{
 	}
 
@@ -146,23 +147,30 @@ namespace ReportLib
 		return m_type;
 	}
 
+	const QString& ReportObject::hint() const
+	{ 
+		return m_hint; 
+	}
+
 	//
 	// ReportSchema
 	//
 	std::shared_ptr<ReportSchema> ReportSchema::create(const QString& caption,
 													   const SchemaFormat& format,
 													   std::shared_ptr<VFrame30::Schema> schema,
-													   const std::map<QUuid, ReportSchemaCompareAction>& compareActions)
+													   const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+													   const QString& hint)
 	{
-		auto result = std::make_shared<ReportSchema>(caption, format, schema, compareActions);
+		auto result = std::make_shared<ReportSchema>(caption, format, schema, compareActions, hint);
 		return result;
 	}
 
 	ReportSchema::ReportSchema(const QString& caption,
 							   const SchemaFormat& format,
 							   std::shared_ptr<VFrame30::Schema> schema,
-							   const std::map<QUuid, ReportSchemaCompareAction>& compareActions) :
-		ReportObject(Type::Schema),
+							   const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+							   const QString& hint) :
+		ReportObject(Type::Schema, hint),
 		m_caption(caption),
 		m_format(format),
 		m_schema(schema),
@@ -193,15 +201,15 @@ namespace ReportLib
 	// ReportTable
 	//
 
-	ReportTable::ReportTable(const TableFormat& format) :
-		ReportObject(Type::Table),
+	ReportTable::ReportTable(const TableFormat& format, const QString& hint) :
+		ReportObject(Type::Table, hint),
 		m_format(format)
 	{
 	}
 
-	std::shared_ptr<ReportTable> ReportTable::create(const TableFormat& format)
+	std::shared_ptr<ReportTable> ReportTable::create(const TableFormat& format, const QString& hint)
 	{
-		auto result = std::make_shared<ReportTable>(format);
+		auto result = std::make_shared<ReportTable>(format, hint);
 		return result;
 	}
 
@@ -403,16 +411,16 @@ namespace ReportLib
 	// ReportText
 	//
 
-	ReportText::ReportText(const QString& text, const TextFormat& format) :
-		ReportObject(Type::Text),
+	ReportText::ReportText(const QString& text, const TextFormat& format, const QString& hint) :
+		ReportObject(Type::Text, hint),
 		m_format(format),
 		m_text(text)
 	{
 	}
 
-	std::shared_ptr<ReportText> ReportText::create(const QString& text, const TextFormat& format)
+	std::shared_ptr<ReportText> ReportText::create(const QString& text, const TextFormat& format, const QString& hint)
 	{
-		auto result = std::make_shared<ReportText>(text, format);
+		auto result = std::make_shared<ReportText>(text, format, hint);
 		return result;
 	}
 
@@ -493,9 +501,9 @@ namespace ReportLib
 		m_startPage = page;
 	}
 
-	std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format)
+	std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format, const QString& hint)
 	{
-		std::shared_ptr<ReportLib::ReportText> object = std::make_shared<ReportLib::ReportText>(text, format);
+		std::shared_ptr<ReportLib::ReportText> object = std::make_shared<ReportLib::ReportText>(text, format, hint);
 		addObject(object);
 		return object;
 	}
@@ -506,9 +514,9 @@ namespace ReportLib
 		return object;
 	}
 
-	std::shared_ptr<ReportTable> ReportSection::addTable(const TableFormat& format)
+	std::shared_ptr<ReportTable> ReportSection::addTable(const TableFormat& format, const QString& hint)
 	{
-		std::shared_ptr<ReportTable> object = std::make_shared<ReportLib::ReportTable>(format);
+		std::shared_ptr<ReportTable> object = std::make_shared<ReportLib::ReportTable>(format, hint);
 		addObject(object);
 		return object;
 	}

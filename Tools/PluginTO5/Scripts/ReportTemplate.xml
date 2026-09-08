@@ -8,8 +8,9 @@
 			<Text Tag="$FIRST(SYSTEM)" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Text="\n\nÏðîòîêîë ¹: ________ ÒÎ-5; ÍÇ ÖÒÀÂ: ________\n\n" FontName="Arial" FontSize="16" Alignment="Center"/>
 			<Text Tag="$FIRST(START_TIME)" FontName="Arial" FontSize="12" Alignment="Center"/>
+			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
 		</Header>
-		<Section Caption="Main" PageSize="A4" Orientation="Landscape" Margins="15,15,10,15" Version="1" Tag="to5">
+		<Section Caption="Main" PageSize="A4" Orientation="Portrait" Margins="15,15,10,15" Version="1" Tag="to5">
 			<Text Tag="TO_ALG_$(REPEATINDEX)" FontName="Arial" FontSize="10" FontBold = "True" Alignment="Left"/>
 			<Table Tag="TO_TABLE_$(REPEATINDEX)" FontName="Arial" FontSize="9" Separator=";" BorderWidth="1">
 				<Column Caption="Íàéìåíóâàííÿ" Alignment="Left" Width = "38"/>
@@ -21,8 +22,8 @@
 				<Column Caption="Ðåçóëüòàò" Alignment="Left" Width = "9"/>
 			</Table>
 		</Section>
-		<Footer Caption="Footer" PageSize="A4" Orientation="Landscape" Margins="15,15,10,15" Version="1">
-			<Text Text="\n\n" FontName="Arial" FontSize="12" Alignment="Right"/>
+		<Footer Caption="Footer" PageSize="A4" Orientation="Portrait" Margins="15,15,10,15" Version="1">
+			<Text Text="\n\n" Hint="fromNewPageIfAtBottom" FontName="Arial" FontSize="12" Alignment="Right"/>
 			<Text Tag="TO_RESULT" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Left"/>
 			<Text Text="\n\nÍÇ ÖÒÀÂ: ___________________________" FontName="Arial" FontSize="12" FontBold = "True" Alignment="Center"/>
 			<Text Text="ï³äïèñ, Ï.².Á." FontName="Arial" FontSize="10" Alignment="Center"/>

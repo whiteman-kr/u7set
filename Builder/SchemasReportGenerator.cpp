@@ -1091,7 +1091,7 @@ namespace Builder
 			}
 
 			{
-				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {});
+				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {}, "" /*hint*/);
 				auto pageLayout = getSchemaPageLayout(schemaInfo);
 				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, pageLayout));
 				schemaDrawingSection->addSchema(reportSchema);
@@ -1179,7 +1179,7 @@ namespace Builder
 					m_statistics.m_currentSchemaId = schemaId;
 				}
 
-				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {});
+				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {}, "" /*hint*/);
 				auto pageLayout = getSchemaPageLayout(schemaInfo);
 				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, pageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schemaId).arg(schemaInfo.schema()->caption()));
@@ -1762,7 +1762,7 @@ namespace Builder
 
 				schemaInfo.schema()->setContext(context);
 
-				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {});
+				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schemaInfo.schema(), {}, "" /*hint*/);
 
 				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, schemaPageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schemaId).arg(schemaInfo.schema()->caption()));
@@ -1842,10 +1842,11 @@ namespace Builder
 		auto contentsSection = report->addSection(ReportSection::create(caption, pageLayout));
 		contentsSection->setTag(caption);
 
-		contentsSection->addText(caption, {m_contentsTextFont, Qt::AlignHCenter});
+		contentsSection->addText(caption, {m_contentsTextFont, Qt::AlignHCenter}, "" /*hint*/);
 
 		auto contentsTable = ReportTable::create(
-			{m_contentsTableFont, {tr("Schema ID"), tr("Caption"), tr("Page")}, {30, 50, 20}, Qt::AlignLeft, 0 /*borderWidth*/});
+			{m_contentsTableFont, {tr("Schema ID"), tr("Caption"), tr("Page")}, {30, 50, 20}, Qt::AlignLeft, 0 /*borderWidth*/},
+			"" /*hint*/);
 
 		contentsSection->addTable(contentsTable);
 
@@ -1973,7 +1974,8 @@ namespace Builder
 																   const VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		auto table = ReportTable::create(
-			{m_tableFont, {tr("Signal ID"), tr("Caption"), tr("Type"), tr("Schemas")}, {20, 30, 20, 30}, Qt::AlignLeft, 0 /*borderWidth*/});
+			{m_tableFont, {tr("Signal ID"), tr("Caption"), tr("Type"), tr("Schemas")}, {20, 30, 20, 30}, Qt::AlignLeft, 0 /*borderWidth*/},
+			"" /*hint*/);
 		table->setHtmlEscaped(false);
 
 		// Get list of signals for current schema
@@ -2112,7 +2114,8 @@ namespace Builder
 		if (table->rowCount() > 0)
 		{
 			section->addText(tr("Schema '%1 - %2' Signals").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
-							 {m_textFont, Qt::AlignHCenter});
+							 {m_textFont, Qt::AlignHCenter},
+							 "" /*hint*/);
 			section->addTable(table);
 		}
 	}
@@ -2123,7 +2126,8 @@ namespace Builder
 																   const VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		auto table = ReportTable::create(
-			{m_tableFont, {tr("Loopback ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/});
+			{m_tableFont, {tr("Loopback ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/},
+			"" /*hint*/);
 		table->setHtmlEscaped(false);
 
 		// Get list of loopbacks for current schema
@@ -2220,7 +2224,8 @@ namespace Builder
 		if (table->rowCount() > 0)
 		{
 			section->addText(tr("\n\nSchema '%1 - %2' Loopbacks").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
-							 {m_textFont, Qt::AlignHCenter});
+							 {m_textFont, Qt::AlignHCenter},
+							 "" /*hint*/);
 			section->addTable(table);
 		}
 	}
@@ -2231,7 +2236,8 @@ namespace Builder
 																	 const VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		auto table = ReportTable::create(
-			{m_tableFont, {tr("Connection ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/});
+			{m_tableFont, {tr("Connection ID"), tr("Type"), tr("Schemas")}, {30, 20, 50}, Qt::AlignLeft, 0 /*borderWidth*/},
+			"" /*hint*/);
 		table->setHtmlEscaped(false);
 
 		// Get list of signals for current schema
@@ -2400,7 +2406,8 @@ namespace Builder
 		if (table->rowCount() > 0)
 		{
 			section->addText(tr("\n\nSchema '%1 - %2' Connections").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
-							 {m_textFont, Qt::AlignHCenter});
+							 {m_textFont, Qt::AlignHCenter},
+							 "" /*hint*/);
 			section->addTable(table);
 		}
 	}

@@ -23,6 +23,11 @@ namespace ReportLib
             m_tag = reader.attributes().value("Tag").toString();
         }
 
+        if (reader.attributes().hasAttribute("Hint"))
+		{
+			m_hint = reader.attributes().value("Hint").toString();
+		}
+
 		if (reader.attributes().hasAttribute("Text"))
 		{
 			m_text = reader.attributes().value("Text").toString();
@@ -58,6 +63,11 @@ namespace ReportLib
     {
         return m_tag;
     }
+
+	const QString& ObjectTemplate::hint() const
+	{ 
+		return m_hint; 
+	}
 
 	//
 	// TextTemplate
@@ -163,11 +173,12 @@ namespace ReportLib
 			alStr = "???";
 		}
 
-		QString format = QObject::tr("[%1, %2, %3, %4]")
-						  .arg(m_format.font().family)
-						  .arg(m_format.font().pointSize)
-						  .arg(m_format.font().weight == QFont::Bold ? "Bold" : "Normal")
-						  .arg(alStr);
+		QString format = QObject::tr("[%1, %2, %3, %4, Hint='%5']")
+							 .arg(m_format.font().family)
+							 .arg(m_format.font().pointSize)
+							 .arg(m_format.font().weight == QFont::Bold ? "Bold" : "Normal")
+							 .arg(alStr)
+							 .arg(hint());
 
 		if (tag().isEmpty() == true)
 		{
@@ -320,7 +331,12 @@ namespace ReportLib
 
 	QString TableTemplate::propToText() const
 	{
-		return QString("Tag: '%1', Sep: '%2', Cols: %3, BorderWidth: %4").arg(tag()).arg(separator()).arg(m_format.columnsFormat().size()).arg(m_format.borderWidth());
+		return QString("Tag: '%1', Sep: '%2', Cols: %3, BorderWidth: %4, Hint = '%5'")
+			.arg(tag())
+			.arg(separator())
+			.arg(m_format.columnsFormat().size())
+			.arg(m_format.borderWidth())
+			.arg(hint());
 	}
 
 	//

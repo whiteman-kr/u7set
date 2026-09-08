@@ -528,6 +528,8 @@ namespace ReportLib
 				case ReportObject::Type::Text:
 					{
 						bool isTableHeader = false;
+						bool fromNewPageIfAtBottom = false;
+
 						{
 							if (oi < objectCount - 1)
 							{
@@ -536,11 +538,19 @@ namespace ReportLib
 							}
 						}
 
-						if (isTableHeader == true && (lastDocumentTextPageHeight >= (pageRectPixels.height() * 0.9))) 
+						if (object->hint().contains("fromNewPageIfAtBottom")) 
 						{
-							lastDocumentTextPageHeight = 0;
-							printText.reset();
-							fromNewPage = true;
+							fromNewPageIfAtBottom = true;
+						}
+
+						if (isTableHeader == true || fromNewPageIfAtBottom == true)
+						{
+							if (lastDocumentTextPageHeight >= (pageRectPixels.height() * 0.9))
+							{
+								lastDocumentTextPageHeight = 0;
+								printText.reset();
+								fromNewPage = true;
+							}
 						}
 
 						// Create new text print object in cases:
