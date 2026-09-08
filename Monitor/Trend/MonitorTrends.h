@@ -16,6 +16,8 @@ class QLabel;
 class MonitorTrends
 {
 public:
+	MonitorTrends() = delete;
+
 	static std::vector<MonitorTrendsWidget*> getTrendsList();
 	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
 	static bool startTrendApp(const ClientLib::AppSignalManager& signalManager,
@@ -43,6 +45,10 @@ public:
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
+public:
+	using TrendLib::TrendMainWindow::addSignals;
+	void addSignals(const std::vector<AppSignalParam>& appSignalParams, bool redraw);
+
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
@@ -56,12 +62,14 @@ private:
 	void setRealtimeParams();
 
 public:
-
 	// Slots
 	//
 protected slots:
 	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
-	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId,
+								  TimeStamp requestedHour,
+								  E::TimeType timeType,
+								  std::shared_ptr<TrendLib::OneHourData> data);
 
 	void slot_realtimeDataReceived(QString sourceEquipmentId,
 								   std::shared_ptr<TrendLib::RealtimeData> data,
@@ -83,7 +91,7 @@ private:
 
 	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
-	enum  StatusBarColumns
+	enum StatusBarColumns
 	{
 		SB_Text,
 		SB_QueueSize,

@@ -127,6 +127,11 @@ namespace ClientLib
 		return m_core.signalParam(signalHash);
 	}
 
+	std::vector<std::optional<AppSignalParam>> AppSignalManager::signalParams(std::span<const Hash> appSignalHashes) const
+	{
+		return m_core.signalParams(appSignalHashes);
+	}
+
 	std::optional<AppSignalState> AppSignalManager::signalState(Hash signalHash) const
 	{
 		return signalState(signalHash, {});

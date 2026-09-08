@@ -53,6 +53,11 @@ public slots:
 	void signalContextMenu(QStringList appSignals, QStringList impactSignals, QStringList loopbacks, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
+signals:
+	// Request to create new trend for the specified signals
+	//
+	void signal_newTrend(QStringList appSignalIds);
+
 	// Properties
 	//
 public:

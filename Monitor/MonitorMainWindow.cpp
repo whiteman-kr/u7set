@@ -1484,8 +1484,7 @@ void MonitorMainWindow::slot_trends()
 	//
 	if (trendToActivate == nullptr)
 	{
-		std::vector<AppSignalParam> appSignals;
-		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
+		slot_newTrend();
 	}
 	else
 	{
@@ -1494,6 +1493,34 @@ void MonitorMainWindow::slot_trends()
 
 	return;
 }
+
+void MonitorMainWindow::slot_newTrend(QStringList appSignalIds)
+{
+	std::vector<Hash> signalHashes;
+	signalHashes.reserve(appSignalIds.size());
+	std::transform(appSignalIds.begin(),
+				   appSignalIds.end(),
+				   std::back_inserter(signalHashes),
+				   [](const QString& appSignalId)
+				   {
+					   return ::calcHash(appSignalId);
+				   });
+
+	std::vector<AppSignalParam> appSignalParams;
+	appSignalParams.reserve(signalHashes.size());
+
+	for (auto s : m_signalManager.signalParams(signalHashes))
+	{
+		if (s.has_value() == true)
+		{
+			appSignalParams.push_back(std::move(*s));
+		}
+	}
+
+	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignalParams, m_appSignalListSet, this);
+	return;
+}
+
 
 void MonitorMainWindow::slot_signalLog()
 {

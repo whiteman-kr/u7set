@@ -4,6 +4,7 @@
 #include "MonitorSchemaManager.h"
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
+#include "Trend/MonitorTrends.h"
 
 #include <ClientLib/AppSignalManager.h>
 #include <VFrame30/AppSignalController.h>
@@ -388,11 +389,74 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	allIds.sort();
 	allIds.removeDuplicates();
 
-	// --
+	// Menu "Trends"
 	//
-	if (signalsSchemasSet.empty() == false || impactSignalsSchemasSet.empty() == false || loopbackSchemas.empty() == false)
+	if (allIds.isEmpty() == false)
 	{
 		menu.addSeparator();
+		QMenu* trendsSubMenu = menu.addMenu(tr("Trends"));
+		trendsSubMenu->setToolTipsVisible(true);
+
+		QAction* newTrendAction = trendsSubMenu->addAction("New...");
+		connect(newTrendAction,
+				&QAction::triggered,
+				[this, allIds]()
+				{
+					emit signal_newTrend(allIds);
+				});
+
+		auto trends = MonitorTrends::getTrendsList();
+		std::sort(trends.begin(),
+				  trends.end(),
+				  [](auto lhs, auto rhs)
+				  {
+					  return lhs->windowTitle() < rhs->windowTitle();
+				  });
+
+		if (trends.empty() == false)
+		{
+			trendsSubMenu->addSeparator();
+		}
+
+		for (auto trend : trends)
+		{
+			QAction* action = trendsSubMenu->addAction(trend->windowTitle());
+			Q_ASSERT(action);
+
+			connect(action,
+					&QAction::triggered,
+					[this, allIds, trend]()
+					{
+						std::vector<Hash> signalHashes;
+						signalHashes.reserve(allIds.size());
+						std::transform(allIds.begin(),
+									   allIds.end(),
+									   std::back_inserter(signalHashes),
+									   [](const QString& s)
+									   {
+										   return ::calcHash(s);
+									   });
+
+						std::vector<AppSignalParam> appSignalParams;
+						appSignalParams.reserve(signalHashes.size());
+
+						for (auto& sp : clientAppSignalManager().signalParams(signalHashes))
+						{
+							if (sp.has_value() == true)
+							{
+								appSignalParams.push_back(std::move(*sp));
+							}
+						}
+
+						trend->addSignals(appSignalParams, true);
+						MonitorTrends::activateTrendWindow(trend);
+						return;
+					});
+		}
+	}
+
+	if (signalsSchemasSet.empty() == false || impactSignalsSchemasSet.empty() == false || loopbackSchemas.empty() == false)
+	{
 		QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
 		schemasSubMenu->setToolTipsVisible(true);
 
