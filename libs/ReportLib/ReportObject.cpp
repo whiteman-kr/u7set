@@ -431,7 +431,7 @@ namespace ReportLib
 		bf.setAlignment(m_format.alignment());
 		cursor.setBlockFormat(bf);
 
-		cursor.insertText(tagStorage.processTags(m_text));
+		cursor.insertText(tagStorage.processTags(m_text) + "\n");
 	}
 
 	//
