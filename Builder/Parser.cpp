@@ -5213,28 +5213,19 @@ namespace Builder
 					}
 				}
 
-				if (item.m_fblItem->isOutputSignalElement() == true && item.m_fblItem->outputsCount() == 0)
+				if ((item.m_fblItem->isInOutSignalElement() == true || item.m_fblItem->isOutputSignalElement() == true) && //
+					item.m_fblItem->hasInputs() == true)
 				{
 					auto signalElement = item.m_fblItem->toSignalElement();
 					assert(signalElement);
 
 					QString signalId = signalElement->appSignalIds().trimmed();
 
-					if (possibleOutputs.contains(signalId) == false && buildActuatorType.acmOutputs.contains(signalId) == false)
+					if (possibleInputs.contains(signalId) == true || buildActuatorType.acmInputs.contains(signalId) == true)
 					{
-						if (buildActuatorType.acmInputs.contains(signalId) == true)
-						{
-							// Cannot use input signal as output, SchemaItem %1 (ActuatorType '%2').
-							//
-							m_log.errALP4106(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
-						}
-						else
-						{
-							// Unknwown signal
-							//
-							m_log.errALP4103(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
-						}
-
+						// Cannot use input signal as output, SchemaItem %1 (ActuatorType '%2').
+						//
+						m_log.errALP4106(item.m_schema->schemaId(), item.m_fblItem->label(), signalId, item.m_fblItem->guid());
 						result = false;
 					}
 				}
