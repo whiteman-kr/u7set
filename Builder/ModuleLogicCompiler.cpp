@@ -8901,6 +8901,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStart),
 			PROC_TO_CALL(ModuleLogicCompiler::generateCustomCode),
 			PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
+			PROC_TO_CALL(ModuleLogicCompiler::acmGenerateActuatorIdrCode),
 			PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
 			PROC_TO_CALL(ModuleLogicCompiler::generateConstBitsInitialization),
@@ -8981,6 +8982,7 @@ namespace Builder
 				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
 				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
 				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
+				PROC_TO_CALL(ModuleLogicCompiler::acmWriteActuatorDataToOutputBuffer),
 				PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
 				//PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
 			};

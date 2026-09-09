@@ -2190,11 +2190,6 @@ namespace Builder
 
 	bool UalSignal::setUalAddr(const Address16& ualAddr)
 	{
-		if (appSignalID() == "CTRLOUT_LED1")
-		{
-			DEBUG_STOP;
-		}
-
 		if (m_isConst == true)
 		{
 			Q_ASSERT(false);					// for Const signals ualAddr isn't assigned

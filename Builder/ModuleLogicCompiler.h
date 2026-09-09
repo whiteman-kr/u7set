@@ -980,13 +980,16 @@ namespace Builder
 		bool acmSetInOutSignalsUalAddresses();
 		bool acmDisposeSignalsInMemory();
 		bool acmDisposeSwInOuts();
-		bool acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes);
+		bool acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes, E::SignalInOutType inOut);
 		bool acmCreateSignalLists();
 
 		bool acmDetectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
 		bool acmDetectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
 
 		bool acmWriteIoSignalsAddrsFile();
+
+		bool acmGenerateActuatorIdrCode(CodeSnippet* code);
+		bool acmWriteActuatorDataToOutputBuffer(CodeSnippet* code);
 
 	public:
 		static const int MIN_AFB_OPCODE = 1;
@@ -1013,7 +1016,7 @@ namespace Builder
 		static constexpr int ACM_CHANNEL_1_INDEX = 0;
 		static constexpr int ACM_CHANNEL_2_INDEX = 1;
 
-		static constexpr int ACM_SW_INOUT_ID_SIZE = 2;		// 2 words = 32 bits
+		static constexpr int ACM_SW_INOUT_HEADER_SIZE = 3;		// DataID (2 words) + Flags (1 word)
 
 		inline static const QString SW_INOUT_SUFFIX1 = QString(":1");
 		inline static const QString SW_INOUT_SUFFIX2 = QString(":2");
@@ -1031,6 +1034,8 @@ namespace Builder
 		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
 
 		quint32 m_acmSwInOutID = 0;
+		int m_acmInBufSize = 0;
+		int m_acmOutBufSize = 0;
 
 		//
 

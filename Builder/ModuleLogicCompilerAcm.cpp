@@ -496,11 +496,6 @@ namespace Builder
 
 			QString appSignalID = item->strID();
 
-			if (appSignalID == "INT_BUS")
-			{
-				DEBUG_STOP;
-			}
-
 			if (m_actuatorSignals->contains(appSignalID))
 			{
 				continue;
@@ -769,7 +764,7 @@ namespace Builder
 			allIDs.append(m_acmSwInBusses[ch]);
 			allIDs.append(m_acmSwInDiscretes[ch]);
 
-			result &= acmDisposeSwInOutsChannel(ch, m_acmSwInAnalogs[ch], m_acmSwInBusses[ch], m_acmSwInDiscretes[ch]);
+			result &= acmDisposeSwInOutsChannel(ch, m_acmSwInAnalogs[ch], m_acmSwInBusses[ch], m_acmSwInDiscretes[ch], E::SignalInOutType::Input);
 
 			//
 
@@ -781,7 +776,7 @@ namespace Builder
 			allIDs.append(m_acmSwOutBusses[ch]);
 			allIDs.append(m_acmSwOutDiscretes[ch]);
 
-			result &= acmDisposeSwInOutsChannel(ch, m_acmSwOutAnalogs[ch], m_acmSwOutBusses[ch], m_acmSwOutDiscretes[ch]);
+			result &= acmDisposeSwInOutsChannel(ch, m_acmSwOutAnalogs[ch], m_acmSwOutBusses[ch], m_acmSwOutDiscretes[ch], E::SignalInOutType::Output);
 		}
 
 		m_acmSwInOutID = 0;
@@ -828,15 +823,15 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes)
+	bool ModuleLogicCompiler::acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes, E::SignalInOutType inOut)
 	{
 		bool result = true;
 
-		Address16 addr(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_ID_SIZE, 0);
+		Address16 addr(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_HEADER_SIZE, 0);
 
 		if (chIndex == ACM_CHANNEL_2_INDEX)
 		{
-			addr.setOffset(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_ID_SIZE + m_lmDescription->memory().m_moduleDataSize);
+			addr.setOffset(m_lmDescription->memory().m_moduleDataOffset + ACM_SW_INOUT_HEADER_SIZE + m_lmDescription->memory().m_moduleDataSize);
 		}
 
 		QStringList analogsAndBusses;
@@ -859,16 +854,12 @@ namespace Builder
 
 			//
 
-			if (appSignal->isInput() && appSignal->isBus())
+			if (appSignal->isInput())
 			{
 				UalSignal* ualSignal = m_ualSignals.get(id);
 
 				if (ualSignal == nullptr)
 				{
-					//				Q_ASSERT(false);
-					// result = false;
-					//				break;
-
 					qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
 					continue;
 				}
@@ -928,24 +919,56 @@ namespace Builder
 
 			//
 
-			UalSignal* ualSignal = m_ualSignals.get(id);
-
-			if (ualSignal == nullptr)
+			if (appSignal->isInput())
 			{
-//				Q_ASSERT(false);
-				//result = false;
-//				break;
+				UalSignal* ualSignal = m_ualSignals.get(id);
 
-				qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
-				continue;
+				if (ualSignal == nullptr)
+				{
+					qDebug() << C_STR(QString("UalSignal not found for %1").arg(appSignal->appSignalID()));
+					continue;
+				}
+
+				if (ualSignal->ualAddr().isValid())
+				{
+					continue;
+				}
+
+				ualSignal->setUalAddr(addr);
 			}
+		}
 
-			if (ualSignal->ualAddr().isValid())
+		if (addr.bit() != 0)
+		{
+			addr.addWord(1);
+			addr.setBit(0);
+		}
+
+		int dataSize = addr.offset();
+
+		if (chIndex == ACM_CHANNEL_2_INDEX)
+		{
+			dataSize -= m_lmDescription->memory().m_moduleDataSize;
+		}
+
+		if (inOut == E::SignalInOutType::Input)
+		{
+			Q_ASSERT((m_acmInBufSize == 0) || (m_acmInBufSize == dataSize));
+
+			m_acmInBufSize = std::max(m_acmInBufSize, dataSize);
+		}
+		else
+		{
+			if (inOut == E::SignalInOutType::Output)
 			{
-				continue;
+				Q_ASSERT((m_acmOutBufSize == 0) || (m_acmOutBufSize == dataSize));
+
+				m_acmOutBufSize = std::max(m_acmOutBufSize, dataSize);
 			}
-//
-//			ualSignal->setUalAddr(addr);
+			else
+			{
+				Q_ASSERT(false);
+			}
 		}
 
 		if (result == false)
@@ -1259,6 +1282,8 @@ namespace Builder
 
 						Q_ASSERT(dataSize == 32);
 
+						pinSignalType->dataSize = dataSize;
+
 						switch (dataFormat)
 						{
 						case E::DataFormat::Float:
@@ -1374,4 +1399,52 @@ namespace Builder
 
 		return (bf != nullptr);
 	}
+
+	bool ModuleLogicCompiler::acmGenerateActuatorIdrCode(CodeSnippet* code)
+	{
+		if (isActuatorCompiler() == false)
+		{
+			return true;
+		}
+
+		code->comment_nl("Actuator initialization code");
+
+		CodeItem cmd;
+
+		DEBUG_STOP;
+
+		cmd.movConstUInt32(58038, m_acmSwInOutID, "actuator DataID");
+		code->append(cmd);
+
+		cmd.movConst(58040, m_acmInBufSize, "actuator input data size (from LM)");
+		code->append(cmd);
+
+		cmd.movConst(58041, m_acmOutBufSize, "actuator output data size (to LM)");
+		code->append(cmd);
+
+		code->newLine();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::acmWriteActuatorDataToOutputBuffer(CodeSnippet* code)
+	{
+		code->comment_nl("Write Actuator data to output buffers");
+
+		CodeItem cmd;
+
+		Address16 addr(m_lmDescription->memory().m_moduleDataOffset, 0);
+
+		cmd.movConstUInt32(addr, m_acmSwInOutID, "actuator DataID");
+		code->append(cmd);
+
+		addr.addWord(m_lmDescription->memory().m_moduleDataSize);
+
+		cmd.movConstUInt32(addr, m_acmSwInOutID, "actuator DataID");
+		code->append(cmd);
+
+		code->newLine();
+		return true;
+	}
+
 }

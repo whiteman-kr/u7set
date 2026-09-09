@@ -456,6 +456,15 @@ namespace Builder
 
 		m_writeAreas.insert({ma.startAddr(), ma});
 
+		// ACM module data configuration area
+		//
+		DEBUG_STOP;
+
+		ma.setStartAddr(58038);
+		ma.setSizeW(32);
+
+		m_writeAreas.insert({ma.startAddr(), ma});
+
 		joiningSequentialAreas(&m_readAreas);
 
 		return true;
