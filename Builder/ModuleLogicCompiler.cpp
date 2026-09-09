@@ -6201,30 +6201,17 @@ namespace Builder
 			}
 		}
 
-		// sort array be appSignalID
+		// sort array by appSignalID
 
-		qsizetype count = m_analogOutputSignalsToConversion.count();
+		std::sort(m_analogOutputSignalsToConversion.begin(),
+				  m_analogOutputSignalsToConversion.end(),
+				  [](const AppSignal* a, const AppSignal* b)
+				  {
+					  assert(a != nullptr);
+					  assert(b != nullptr);
 
-		for(qsizetype i = 0; i < count - 1; i++)
-		{
-			for(qsizetype k = i + 1; k < count; k++)
-			{
-				AppSignal* si = m_analogOutputSignalsToConversion[i];
-				AppSignal* sk = m_analogOutputSignalsToConversion[k];
-
-				if (si == nullptr || sk == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				if (si->appSignalID() > sk->appSignalID())
-				{
-					m_analogOutputSignalsToConversion[i] = sk;
-					m_analogOutputSignalsToConversion[k] = si;
-				}
-			}
-		}
+					  return a->appSignalID() < b->appSignalID();
+				  });
 
 		return true;
 	}
@@ -16198,6 +16185,11 @@ namespace Builder
 
 			result &= generateMemCopyCode(ualSignal->ioBufAddr(), ualSignal->ualAddr(), busSizeW,
 											QString("copy %1").arg(ualSignal->refSignalIDsJoined()), code);
+		}
+
+		if (first == false)
+		{
+			code->newLine();
 		}
 
 		return true;

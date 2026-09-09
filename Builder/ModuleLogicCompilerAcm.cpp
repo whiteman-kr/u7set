@@ -987,7 +987,7 @@ namespace Builder
 		result &= createNonAcquiredAnalogStrictOutputSignalsList();
 		result &= createNonAcquiredAnalogInternalSignalsList();
 
-		result &= createAnalogOutputSignalsToConversionList();
+		//result &= createAnalogOutputSignalsToConversionList();
 
 		// result &= createAcquiredInputBusesList();
 		// result &= createAcquiredOutputBusesList();
