@@ -1,19 +1,80 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Do not include this file in the project! Link HardwareLib instead.
+	#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
 #include "../UtilsLib/DomXmlHelper.h"
-#include <HardwareLib/LmDescription.h>
 #include <HardwareLib/DataProtocols.h>
 #include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/LmDescription.h>
 #include <HardwareLib/PropertyNames.h>
+
+#include <algorithm>
+#include <expected>
+#include <stdexcept>
+#include <type_traits>
+
+namespace
+{
+	template<class>
+	inline constexpr bool always_false_v = false;
+
+	// Func for getting data from some xml section
+	//
+	template<typename T>
+	std::expected<T, QString> getSectionValue(const QDomElement& element, QLatin1StringView section)
+	{
+		QDomNodeList nl = element.elementsByTagName(section);
+		if (nl.size() != 1)
+		{
+			return std::unexpected(QString{"Expected one %1 section in element %2."}.arg(section).arg(element.tagName()));
+		}
+
+		QString nodeText = nl.at(0).toElement().text();
+
+		if constexpr (std::is_same_v<T, quint32>)
+		{
+			bool convertOk = false;
+			T value = nodeText.toUInt(&convertOk);
+
+			if (convertOk == false)
+			{
+				return std::unexpected(QString{"Cannot convert value '%1', element: %2."}.arg(nodeText).arg(element.tagName()));
+			}
+			else
+			{
+				return value;
+			}
+		}
+		else if constexpr (std::is_same_v<T, bool>)
+		{
+			return nodeText.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		}
+		else if constexpr (std::is_same_v<T, QString>)
+		{
+			return nodeText;
+		}
+		else
+		{
+			static_assert(always_false_v<T>, "Unsupported type.");
+		}
+	};
+
+	bool sectionExists(QDomElement element, QLatin1String section)
+	{
+		QDomNodeList nl = element.elementsByTagName(section);
+		if (nl.size() != 1)
+		{
+			return false;
+		}
+
+		return true;
+	};
+} // namespace
 
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 {
-	if (errorMessage == nullptr ||
-		element.isNull() == true ||
-		element.tagName() != QLatin1String("Command"))
+	if (errorMessage == nullptr || element.isNull() == true || element.tagName() != QLatin1String("Command"))
 	{
 		assert(errorMessage);
 		assert(element.isNull() == false);
@@ -94,56 +155,80 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 
 	// ConstRuntime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "ConstRuntime", LmCommand::UNDEFINED_PARAM,
-											  &constRuntime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element, "ConstRuntime", LmCommand::UNDEFINED_PARAM, &constRuntime, errorMessage, 10) ==
+		false)
 	{
 		return false;
 	}
 
 	// WriteToBitMemRuntime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "WriteToBitMemRuntime", LmCommand::UNDEFINED_PARAM,
-											  &writeToBitMemRuntime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "WriteToBitMemRuntime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &writeToBitMemRuntime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
 
 	// WriteToWordMemRuntime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "WriteToWordMemRuntime", LmCommand::UNDEFINED_PARAM,
-											  &writeToWordMemRuntime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "WriteToWordMemRuntime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &writeToWordMemRuntime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
 
 	// PreFbReadWordTime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "PreFbReadWordTime", LmCommand::UNDEFINED_PARAM,
-											  &preFbReadWordTime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "PreFbReadWordTime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &preFbReadWordTime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
 
 	// PostFbReadWordTime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "PostFbReadWordTime", LmCommand::UNDEFINED_PARAM,
-											  &postFbReadWordTime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "PostFbReadWordTime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &postFbReadWordTime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
 
 	// PreFbReadBitTime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "PreFbReadBitTime", LmCommand::UNDEFINED_PARAM,
-											  &preFbReadBitTime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "PreFbReadBitTime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &preFbReadBitTime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
 
 	// PostFbReadBitTime
 	//
-	if (DomXmlHelper::getIntAttributeIfExists(element, "PostFbReadBitTime", LmCommand::UNDEFINED_PARAM,
-											  &postFbReadBitTime, errorMessage, 10) == false)
+	if (DomXmlHelper::getIntAttributeIfExists(element,
+											  "PostFbReadBitTime",
+											  LmCommand::UNDEFINED_PARAM,
+											  &postFbReadBitTime,
+											  errorMessage,
+											  10) == false)
 	{
 		return false;
 	}
@@ -178,8 +263,8 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 	return true;
 }
 
-LmDescription::LmDescription(QObject *parent)
-	: QObject(parent)
+LmDescription::LmDescription(QObject* parent) :
+	QObject(parent)
 {
 }
 
@@ -205,11 +290,15 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 	m_memory = src.m_memory;
 	m_logicUnit = src.m_logicUnit;
 	m_optoInterface = src.m_optoInterface;
+	m_lan = src.m_lan;
+	m_other = src.m_other;
+	m_dataConfiguration = src.m_dataConfiguration;
 
 	// LmCommands
 	//
 	m_commands = src.m_commands;
 	m_logicUnitCommandsVersion = src.m_logicUnitCommandsVersion;
+
 	m_bitAccAvailable = src.m_bitAccAvailable;
 
 	// AFBs
@@ -221,23 +310,21 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 	for (const auto& p : src.m_afbComponents)
 	{
 		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
-		m_afbComponents.insert({p.first, afbComponentCopy});
+		m_afbComponents.insert({p.first, std::move(afbComponentCopy)});
 	}
 
 	m_afbElements.clear();
 	m_afbElements.reserve(src.m_afbElements.size());
-	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbElements)
+	for (const std::shared_ptr<Afb::AfbElement>& afb : src.m_afbElements)
 	{
 		std::shared_ptr<Afb::AfbElement> afbCopy = std::make_shared<Afb::AfbElement>(*afb.get());
-		m_afbElements.push_back(afbCopy);
+		m_afbElements.push_back(std::move(afbCopy));
 	}
 
 	return *this;
 }
 
-LmDescription::~LmDescription()
-{
-}
+LmDescription::~LmDescription() = default;
 
 bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 {
@@ -259,8 +346,7 @@ bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 
 	if (pr.errorMessage.isEmpty() == false)
 	{
-		errorMessage->append(tr(" Error %1, line %2, column %3").
-								arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
+		errorMessage->append(tr(" Error %1, line %2, column %3").arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
 		return false;
 	}
 
@@ -287,8 +373,7 @@ bool LmDescription::load(const QString& xml, QString* errorMessage)
 
 	if (pr.errorMessage.isEmpty() == false)
 	{
-		errorMessage->append(tr(" Error %1, line %2, column %3").
-								arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
+		errorMessage->append(tr(" Error %1, line %2, column %3").arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
 		return false;
 	}
 
@@ -313,8 +398,7 @@ bool LmDescription::load(const QDomDocument& doc, QString* errorMessage)
 	//
 	QDomElement logicModuleElement = doc.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -341,25 +425,25 @@ bool LmDescription::load(const QDomDocument& doc, QString* errorMessage)
 		return false;
 	}
 
-    // Attribute ConfigurationScriptFile
-    //
+	// Attribute ConfigurationScriptFile
+	//
 	m_configurationScriptFile = logicModuleElement.attribute(QLatin1String("ConfigurationScriptFile"));
-    if (m_configurationScriptFile.isEmpty() == true)
-    {
-        errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
-        return false;
+	if (m_configurationScriptFile.isEmpty() == true)
+	{
+		errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
+		return false;
 	}
 
-    // Attribute Version
-    //
+	// Attribute Version
+	//
 	m_version = logicModuleElement.attribute(QLatin1String("Version"));
-    if (m_version.isEmpty() == true)
-    {
-        errorMessage->append(tr("Cant't find attribute Version"));
-        return false;
-    }
+	if (m_version.isEmpty() == true)
+	{
+		errorMessage->append(tr("Cant't find attribute Version"));
+		return false;
+	}
 
-    // <FlashMemory> -> m_flashMemory
+	// <FlashMemory> -> m_flashMemory
 	//
 	ok = m_flashMemory.load(doc, errorMessage);
 	if (ok == false)
@@ -402,6 +486,17 @@ bool LmDescription::load(const QDomDocument& doc, QString* errorMessage)
 	// <Other> -> m_other
 	//
 	ok = m_other.load(doc, errorMessage);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// DataConfiguration -> m_dataConfiguration
+	//
+	ok = m_dataConfiguration.load(doc, errorMessage);
+	m_dataConfiguration.dataConfigurationOffset = m_memory.m_dataConfigurationOffset;
+	m_dataConfiguration.dataConfigurationSize = m_memory.m_dataConfigurationSize;
+
 	if (ok == false)
 	{
 		return false;
@@ -516,8 +611,7 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 	{
 		QDomNode node = nodeList.at(i);
 
-		if (node.isNull() == true ||
-			node.isElement() == false)
+		if (node.isNull() == true || node.isElement() == false)
 		{
 			*errorMessage = tr("Loading LogicUnitCommnads list error. Some nodes are null or not XML element.");
 			return false;
@@ -566,8 +660,7 @@ bool LmDescription::loadAfbComponents(const QDomElement& element, QString* error
 	{
 		QDomNode afbNode = afbNodeList.at(i);
 
-		if (afbNode.isNull() == true ||
-			afbNode.isElement() == false)
+		if (afbNode.isNull() == true || afbNode.isElement() == false)
 		{
 			*errorMessage = tr("Loading AFB components list error. Some nodes are null or not XML element.");
 			return false;
@@ -617,8 +710,7 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 	{
 		QDomNode afbNode = afbNodeList.at(i);
 
-		if (afbNode.isNull() == true ||
-			afbNode.isElement() == false)
+		if (afbNode.isNull() == true || afbNode.isElement() == false)
 		{
 			*errorMessage = tr("Loading AFB list error. Some nodes are null or not XML element.");
 			return false;
@@ -627,7 +719,7 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 		QDomElement afbElement = afbNode.toElement();
 
 		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
-		
+
 		bool ok = afb->loadFromXml(afbElement, errorMessage);
 		if (ok == false)
 		{
@@ -665,8 +757,7 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 
 QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
-	if (logicModule == nullptr ||
-		(logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
+	if (logicModule == nullptr || (logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
 		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
@@ -713,8 +804,7 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -733,77 +823,41 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 
 	*this = FlashMemory();
 
-	// Func for gettiong data from some xml section
-	//
-	auto getSectionUintValue =
-		[&element](QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-
-	auto getSectionUintDefaultValue =
-		[&element](QLatin1String section, quint32 defaultValue) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-			if (nl.size() != 1)
-			{
-				return defaultValue;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-
-	auto getSectionBoolDefaultValue =
-		[&element](QLatin1String section, bool defaultValue) -> bool
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-			if (nl.size() != 1)
-			{
-				return defaultValue;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
-		};
-
 	// Getting data
 	//
+	try
+	{
+		m_appLogicFrameCount = getSectionValue<quint32>(element, QLatin1String("AppLogicFrameCount")).value();
+		m_appLogicFramePayload = getSectionValue<quint32>(element, QLatin1String("AppLogicFramePayload")).value();
+		m_appLogicFrameSize = getSectionValue<quint32>(element, QLatin1String("AppLogicFrameSize")).value();
+		m_appLogicUartId = getSectionValue<quint32>(element, QLatin1String("AppLogicUartID")).value_or(0);
+		m_appLogicWriteBitstream = getSectionValue<bool>(element, QLatin1String("AppLogicWriteBitstream")).value_or(false);
 
-	errorMessage->clear();	// Just in case
+		m_configFrameCount = getSectionValue<quint32>(element, QLatin1String("ConfigFrameCount")).value();
+		m_configFramePayload = getSectionValue<quint32>(element, QLatin1String("ConfigFramePayload")).value();
+		m_configFrameSize = getSectionValue<quint32>(element, QLatin1String("ConfigFrameSize")).value();
+		m_configUartId = getSectionValue<quint32>(element, QLatin1String("ConfigUartID")).value_or(0);
+		m_configWriteBitstream = getSectionValue<bool>(element, QLatin1String("ConfigWriteBitstream")).value_or(false);
 
-	m_appLogicFrameCount = getSectionUintValue(QLatin1String("AppLogicFrameCount"), errorMessage);
-	m_appLogicFramePayload = getSectionUintValue(QLatin1String("AppLogicFramePayload"), errorMessage);
-	m_appLogicFrameSize = getSectionUintValue(QLatin1String("AppLogicFrameSize"), errorMessage);
-	m_appLogicUartId = getSectionUintDefaultValue(QLatin1String("AppLogicUartID"), 0);
-	m_appLogicWriteBitstream = getSectionBoolDefaultValue(QLatin1String("AppLogicWriteBitstream"), false);
+		m_tuningFrameCount = getSectionValue<quint32>(element, QLatin1String("TuningFrameCount")).value();
+		m_tuningFramePayload = getSectionValue<quint32>(element, QLatin1String("TuningFramePayload")).value();
+		m_tuningFrameSize = getSectionValue<quint32>(element, QLatin1String("TuningFrameSize")).value();
+		m_tuningUartId = getSectionValue<quint32>(element, QLatin1String("TuningUartID")).value_or(0);
+		m_tuningWriteBitstream = getSectionValue<bool>(element, QLatin1String("TuningWriteBitstream")).value_or(false);
 
-	m_configFrameCount = getSectionUintValue(QLatin1String("ConfigFrameCount"), errorMessage);
-	m_configFramePayload = getSectionUintValue(QLatin1String("ConfigFramePayload"), errorMessage);
-	m_configFrameSize = getSectionUintValue(QLatin1String("ConfigFrameSize"), errorMessage);
-	m_configUartId = getSectionUintDefaultValue(QLatin1String("ConfigUartID"), 0);
-	m_configWriteBitstream = getSectionBoolDefaultValue(QLatin1String("ConfigWriteBitstream"), false);
+		m_maxConfigurationCount = getSectionValue<quint32>(element, QLatin1String("MaxConfigurationCount")).value();
+		m_singleConfigFirstFrame = getSectionValue<quint32>(element, QLatin1String("SingleConfigFirstFrame")).value();
+		m_singleConfigFrameCount = getSectionValue<quint32>(element, QLatin1String("SingleConfigFrameCount")).value();
+		m_singleConfigUniqueIdOffset = getSectionValue<quint32>(element, QLatin1String("SingleConfigUniqueIDOffset")).value();
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
 
-	m_tuningFrameCount = getSectionUintValue(QLatin1String("TuningFrameCount"), errorMessage);
-	m_tuningFramePayload = getSectionUintValue(QLatin1String("TuningFramePayload"), errorMessage);
-	m_tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
-	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
-	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
-
-	m_maxConfigurationCount = getSectionUintValue(QLatin1String("MaxConfigurationCount"), errorMessage);
-	m_singleConfigFirstFrame = getSectionUintValue(QLatin1String("SingleConfigFirstFrame"), errorMessage);
-	m_singleConfigFrameCount = getSectionUintValue(QLatin1String("SingleConfigFrameCount"), errorMessage);
-	m_singleConfigUniqueIdOffset = getSectionUintValue(QLatin1String("SingleConfigUniqueIDOffset"), errorMessage);
-
-	return errorMessage->isEmpty();
+	errorMessage->clear(); // Just in case, no error happened.
+	return true;
 }
 
 bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMessage)
@@ -825,8 +879,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -846,67 +899,58 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	*this = Memory();
 
-	// Func for gettiong data from some xml section
-	//
-	auto getSectionUintValue =
-		[&element](QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-
 	// Getting data
 	//
-	errorMessage->clear();	// Just in case
+	try
+	{
+		m_codeMemorySize = getSectionValue<quint32>(element, QLatin1String("CodeMemorySize")).value();
 
-	m_codeMemorySize = getSectionUintValue(QLatin1String("CodeMemorySize"), errorMessage);
+		m_appMemorySize = getSectionValue<quint32>(element, QLatin1String("AppMemorySize")).value();
 
-	m_appMemorySize = getSectionUintValue(QLatin1String("AppMemorySize"), errorMessage);
+		m_appDataOffset = getSectionValue<quint32>(element, QLatin1String("AppDataOffset")).value();
+		m_appDataSize = getSectionValue<quint32>(element, QLatin1String("AppDataSize")).value();
 
-	m_appDataOffset = getSectionUintValue(QLatin1String("AppDataOffset"), errorMessage);
-	m_appDataSize= getSectionUintValue(QLatin1String("AppDataSize"), errorMessage);
+		m_appLogicBitDataOffset = getSectionValue<quint32>(element, QLatin1String("AppLogicBitDataOffset")).value();
+		m_appLogicBitDataSize = getSectionValue<quint32>(element, QLatin1String("AppLogicBitDataSize")).value();
 
-	m_appLogicBitDataOffset = getSectionUintValue(QLatin1String("AppLogicBitDataOffset"), errorMessage);
-	m_appLogicBitDataSize = getSectionUintValue(QLatin1String("AppLogicBitDataSize"), errorMessage);
+		m_appLogicWordDataOffset = getSectionValue<quint32>(element, QLatin1String("AppLogicWordDataOffset")).value();
+		m_appLogicWordDataSize = getSectionValue<quint32>(element, QLatin1String("AppLogicWordDataSize")).value();
 
-	m_appLogicWordDataOffset = getSectionUintValue(QLatin1String("AppLogicWordDataOffset"), errorMessage);
-	m_appLogicWordDataSize = getSectionUintValue(QLatin1String("AppLogicWordDataSize"), errorMessage);
+		m_moduleDataOffset = getSectionValue<quint32>(element, QLatin1String("ModuleDataOffset")).value();
+		m_moduleDataSize = getSectionValue<quint32>(element, QLatin1String("ModuleDataSize")).value();
+		m_moduleCount = getSectionValue<quint32>(element, QLatin1String("ModuleCount")).value();
 
-	m_moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
-	m_moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
-	m_moduleCount = getSectionUintValue(QLatin1String("ModuleCount"), errorMessage);
+		m_tuningDataOffset = getSectionValue<quint32>(element, QLatin1String("TuningDataOffset")).value();
+		m_tuningDataSize = getSectionValue<quint32>(element, QLatin1String("TuningDataSize")).value();
 
-	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
-	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
+		m_tuningDataFrameCount = getSectionValue<quint32>(element, QLatin1String("TuningDataFrameCount")).value();
+		m_tuningDataFramePayload = getSectionValue<quint32>(element, QLatin1String("TuningDataFramePayload")).value();
+		m_tuningDataFrameSize = getSectionValue<quint32>(element, QLatin1String("TuningDataFrameSize")).value();
 
-	m_tuningDataFrameCount = getSectionUintValue(QLatin1String("TuningDataFrameCount"), errorMessage);
-	m_tuningDataFramePayload = getSectionUintValue(QLatin1String("TuningDataFramePayload"), errorMessage);
-	m_tuningDataFrameSize = getSectionUintValue(QLatin1String("TuningDataFrameSize"), errorMessage);
+		m_txDiagDataOffset = getSectionValue<quint32>(element, QLatin1String("TxDiagDataOffset")).value();
+		m_txDiagDataSize = getSectionValue<quint32>(element, QLatin1String("TxDiagDataSize")).value();
 
-	m_txDiagDataOffset = getSectionUintValue(QLatin1String("TxDiagDataOffset"), errorMessage);
-	m_txDiagDataSize = getSectionUintValue(QLatin1String("TxDiagDataSize"), errorMessage);
+		m_dataConfigurationOffset = getSectionValue<quint32>(element, QLatin1String("DataConfigurationOffset")).value_or(0xFFFFFFFF);
+		m_dataConfigurationSize = getSectionValue<quint32>(element, QLatin1String("DataConfigurationSize")).value_or(0xFFFFFFFF);
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
 
-	return errorMessage->isEmpty();
+	errorMessage->clear(); // Just in case
+	return true;
 }
 
 bool LmDescription::Memory::isAppLogicBitData(quint32 address) const
 {
-	return address >= m_appLogicBitDataOffset &&
-	       address < (m_appLogicBitDataOffset + m_appLogicBitDataSize);
+	return address >= m_appLogicBitDataOffset && address < (m_appLogicBitDataOffset + m_appLogicBitDataSize);
 }
 
 bool LmDescription::Memory::isAppLogicWordData(quint32 address) const
 {
-	return address >= m_appLogicWordDataOffset &&
-	       address < (m_appLogicWordDataOffset + m_appLogicWordDataSize);
+	return address >= m_appLogicWordDataOffset && address < (m_appLogicWordDataOffset + m_appLogicWordDataSize);
 }
 
 bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* errorMessage)
@@ -928,8 +972,7 @@ bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* error
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -949,33 +992,24 @@ bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* error
 
 	*this = LogicUnit();
 
-	// Func for gettiong data from some xml section
-	//
-	auto getSectionUintValue =
-		[&element](QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-
 	// Getting data
 	//
-	errorMessage->clear();	// Just in case
 
-	m_alpPhaseTime = getSectionUintValue(QLatin1String("ALPPhaseTime"), errorMessage);
-	m_clockFrequency= getSectionUintValue(QLatin1String("ClockFrequency"), errorMessage);
-	m_cycleDuration = getSectionUintValue(QLatin1String("CycleDuration"), errorMessage);
-	m_idrPhaseTime = getSectionUintValue(QLatin1String("IDRPhaseTime"), errorMessage);
+	try
+	{
+		m_alpPhaseTime = getSectionValue<quint32>(element, QLatin1String("ALPPhaseTime")).value();
+		m_clockFrequency = getSectionValue<quint32>(element, QLatin1String("ClockFrequency")).value();
+		m_cycleDuration = getSectionValue<quint32>(element, QLatin1String("CycleDuration")).value();
+		m_idrPhaseTime = getSectionValue<quint32>(element, QLatin1String("IDRPhaseTime")).value();
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
 
-	return errorMessage->isEmpty();
+	errorMessage->clear(); // Just in case
+	return true;
 }
 
 double LmDescription::LogicUnit::clockTimeSecs() const
@@ -1018,8 +1052,7 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -1039,47 +1072,25 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 
 	*this = OptoInterface();
 
-	// Func for gettiong data from some xml section
-	//
-	auto getSectionUintValue =
-		[&element](QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-	auto getSectionBoolDefaultValue =
-		[&element](QLatin1String section, bool defaultValue) -> bool
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-			if (nl.size() != 1)
-			{
-				return defaultValue;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
-		};
-
 	// Getting data
 	//
-	errorMessage->clear();	// Just in case
+	try
+	{
+		m_optoPortCount = getSectionValue<quint32>(element, QLatin1String("OptoPortCount")).value();
+		m_optoPortAppDataOffset = getSectionValue<quint32>(element, QLatin1String("OptoPortAppDataOffset")).value();
+		m_optoPortAppDataSize = getSectionValue<quint32>(element, QLatin1String("OptoPortAppDataSize")).value();
+		m_optoInterfaceDataOffset = getSectionValue<quint32>(element, QLatin1String("OptoInterfaceDataOffset")).value();
+		m_optoPortDataSize = getSectionValue<quint32>(element, QLatin1String("OptoPortDataSize")).value();
+		m_sharedBuffer = getSectionValue<bool>(element, QLatin1String("SharedBuffer")).value_or(false);
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
 
-	m_optoPortCount = getSectionUintValue(QLatin1String("OptoPortCount"), errorMessage);
-	m_optoPortAppDataOffset= getSectionUintValue(QLatin1String("OptoPortAppDataOffset"), errorMessage);
-	m_optoPortAppDataSize = getSectionUintValue(QLatin1String("OptoPortAppDataSize"), errorMessage);
-	m_optoInterfaceDataOffset = getSectionUintValue(QLatin1String("OptoInterfaceDataOffset"), errorMessage);
-	m_optoPortDataSize = getSectionUintValue(QLatin1String("OptoPortDataSize"), errorMessage);
-	m_sharedBuffer = getSectionBoolDefaultValue(QLatin1String("SharedBuffer"), false);
-
-	return errorMessage->isEmpty();
+	errorMessage->clear(); // Just in case
+	return true;
 }
 
 bool LmDescription::LanController::isProvideTuning() const
@@ -1190,6 +1201,8 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		return false;
 	}
 
+	errorMessage->clear();
+
 	if (document.isNull() == true)
 	{
 		assert(document.isNull() == false);
@@ -1201,8 +1214,7 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -1217,8 +1229,6 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		*errorMessage = "Expected one Lan section";
 		return false;
 	}
-
-	errorMessage->clear();	// Just in case
 
 	QDomElement element = elements.at(0).toElement();
 
@@ -1245,7 +1255,7 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		}
 		else
 		{
-			m_rupVersion = defaultRupVersion;	// Default value
+			m_rupVersion = defaultRupVersion; // Default value
 		}
 
 		// FotipVersion
@@ -1261,90 +1271,56 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		}
 		else
 		{
-			m_fotipVersion = defaultFotipVersion;	// Default value
+			m_fotipVersion = defaultFotipVersion; // Default value
 		}
 	}
-
-	// Func for gettiong data from some xml section
-	//
-	auto sectionExists = 
-		[](QDomElement element, QLatin1String section) -> bool
-	{
-		QDomNodeList nl = element.elementsByTagName(section);
-		if (nl.size() != 1)
-		{
-			return false;
-		}
-
-		return true;
-	};
-
-	auto getSectionUintValue =
-		[](QDomElement element, QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
-
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
-
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
-	auto getSectionStringValue =
-			[](QDomElement element, QLatin1String section, QString* errorMessage) -> QString
-			{
-				QDomNodeList nl = element.elementsByTagName(section);
-
-				if (nl.size() != 1)
-				{
-					*errorMessage = QString("Expected one %1 section.").arg(section);
-					return "";
-				}
-
-				QString nodeText = nl.at(0).toElement().text();
-				return nodeText;
-			};
 
 	// Read LAN Controllers
 	//
-
-	QDomNodeList controllers = element.elementsByTagName(QLatin1String("LanController"));
-
-	int count = controllers.count();
-	for (int i = 0; i < count; i++)
+	try
 	{
-		QDomNode node = controllers.at(i);
+		QDomNodeList controllers = element.elementsByTagName(QLatin1String("LanController"));
 
-		LanController li;
-
-		QString typeStr = getSectionStringValue(node.toElement(), QLatin1String("Type"), errorMessage);
-
-		bool ok = false;
-		li.m_type = E::stringToValue<E::LanControllerType>(typeStr, &ok);
-		if (ok == false)
+		int count = controllers.count();
+		for (int i = 0; i < count; i++)
 		{
-			*errorMessage = QString("Unknown LAN controller type: '%1'.").arg(typeStr);
-			break;
-		}
+			QDomNode node = controllers.at(i);
 
-		li.m_place = getSectionUintValue(node.toElement(), QLatin1String("Place"), errorMessage);
+			LanController li;
 
-		if (sectionExists(node.toElement(), QLatin1String("ConfigVersion")) == true)
-		{
-			li.m_configVersion = getSectionUintValue(node.toElement(), QLatin1String("ConfigVersion"), errorMessage);
-		}
-		else 
-		{
-			li.m_configVersion = li.m_type == E::LanControllerType::TuningAndAppAndDiagData ? 1 : 0;	// Default value for config version based on the type
-		}
+			QString typeStr = getSectionValue<QString>(node.toElement(), QLatin1String("Type")).value();
 
-		m_lanControllers.push_back(li);
+			bool ok = false;
+			li.m_type = E::stringToValue<E::LanControllerType>(typeStr, &ok);
+			if (ok == false)
+			{
+				*errorMessage = QString("Unknown LAN controller type: '%1'.").arg(typeStr);
+				return false;
+			}
+
+			li.m_place = getSectionValue<quint32>(node.toElement(), QLatin1String("Place")).value();
+
+			if (sectionExists(node.toElement(), QLatin1String("ConfigVersion")) == true)
+			{
+				li.m_configVersion = getSectionValue<quint32>(node.toElement(), QLatin1String("ConfigVersion")).value();
+			}
+			else
+			{
+				li.m_configVersion = li.m_type == E::LanControllerType::TuningAndAppAndDiagData ?
+										 1 :
+										 0; // Default value for config version based on the type
+			}
+
+			m_lanControllers.push_back(li);
+		}
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
 	}
 
-	return errorMessage->isEmpty();
+	return true;
 }
 
 bool LmDescription::Other::load(const QDomDocument& document, QString* errorMessage)
@@ -1353,8 +1329,9 @@ bool LmDescription::Other::load(const QDomDocument& document, QString* errorMess
 	{
 		assert(errorMessage);
 		return false;
-
 	}
+
+	errorMessage->clear();
 
 	if (document.isNull() == true)
 	{
@@ -1367,8 +1344,7 @@ bool LmDescription::Other::load(const QDomDocument& document, QString* errorMess
 	//
 	QDomElement logicModuleElement = document.documentElement();
 
-	if (logicModuleElement.isNull() == true ||
-		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
 		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
@@ -1388,29 +1364,140 @@ bool LmDescription::Other::load(const QDomDocument& document, QString* errorMess
 
 	*this = Other{};
 
-	// Func for gettiong data from some xml section
+	// Getting data
 	//
-	auto getSectionUintValue =
-		[&element](QLatin1String section, QString* errorMessage) -> quint32
-		{
-			QDomNodeList nl = element.elementsByTagName(section);
+	try
+	{
+		ocmTxDataSizeLimit = getSectionValue<quint32>(element, QLatin1String("OcmTxDataSizeLimit")).value();
+		ocmRxDataSizeLimit = getSectionValue<quint32>(element, QLatin1String("OcmRxDataSizeLimit")).value();
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
 
-			if (nl.size() != 1)
-			{
-				*errorMessage = QString("Expected one %1 section.").arg(section);
-				return 0xFFFFFFFF;
-			}
+	return true;
+}
 
-			QString nodeText = nl.at(0).toElement().text();
-			return nodeText.toUInt();
-		};
+std::optional<LmDescription::DataConfigurationParam> LmDescription::DataConfiguration::param(const QString& id) const
+{
+	auto it = std::find_if(params.begin(),
+						   params.end(),
+						   [&id](const DataConfigurationParam& param)
+						   {
+							   return param.id == id;
+						   });
+	if (it != params.end())
+	{
+		return *it;
+	}
+
+	return std::nullopt;
+}
+
+bool LmDescription::DataConfiguration::load(const QDomDocument& document, QString* errorMessage)
+{
+	*this = {};
+
+	if (errorMessage == nullptr)
+	{
+		assert(errorMessage);
+		return false;
+	}
+
+	errorMessage->clear();
+
+	if (document.isNull() == true)
+	{
+		assert(document.isNull() == false);
+		*errorMessage = "XML document is null";
+		return false;
+	}
+
+	// <LogicModule>
+	//
+	QDomElement logicModuleElement = document.documentElement();
+	if (logicModuleElement.isNull() == true || logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	{
+		errorMessage->append(tr("Cant't find root element LogicModule."));
+		return false;
+	}
+
+	// <DataConfiguration>
+	//
+	QDomNodeList elements = logicModuleElement.elementsByTagName(QLatin1String("DataConfiguration"));
+	if (elements.size() == 0)
+	{
+		// DataConfiguration is an optional section, now it present only in ACM.
+		//
+		return true;
+	}
+
+	if (elements.size() > 1)
+	{
+		*errorMessage = "Too many 'DataConfiguration' sections: expected 0 or 1";
+		return false;
+	}
 
 	// Getting data
 	//
-	ocmTxDataSizeLimit = getSectionUintValue(QLatin1String("OcmTxDataSizeLimit"), errorMessage);
-	ocmRxDataSizeLimit = getSectionUintValue(QLatin1String("OcmRxDataSizeLimit"), errorMessage);
+	try
+	{
+		QDomElement dataConfigurationElement = elements.at(0).toElement();
+		QDomNodeList confParamElements = dataConfigurationElement.elementsByTagName("ConfParam");
 
-	return errorMessage->isEmpty();
+		for (auto sz = confParamElements.size(), index = 0; index < sz; index++)
+		{
+			bool convertOk = false;
+			QDomElement element = confParamElements.at(index).toElement();
+			DataConfigurationParam param{};
+
+			param.id = element.attribute(QLatin1String("ID"));
+			if (param.id.isEmpty() == true)
+			{
+				throw std::runtime_error{"Parse ConfParam error, no ID attribute."};
+			}
+
+			param.offset = element.attribute(QLatin1String("Offset")).toUInt(&convertOk);
+			if (convertOk == false)
+			{
+				throw std::runtime_error{"Parse ConfParam error, cannot convert attribute Offset to uint32."};
+			}
+
+			param.sizeBits = element.attribute(QLatin1String("SizeBits")).toUInt(&convertOk);
+			if (convertOk == false)
+			{
+				throw std::runtime_error{"Parse ConfParam error, cannot convert attribute SizeBits to uint32."};
+			}
+
+			if (auto er = E::stringToValue<E::DataFormat>(element.attribute(QLatin1String("DataFormat"))); //
+				er.second == false)
+			{
+				throw std::runtime_error{QString{"Cannot convert '%1' to enum E::DataFormat."}
+											 .arg(element.attribute(QLatin1String("DataFormat")))
+											 .toStdString()};
+			}
+			else
+			{
+				param.format = er.first;
+			}
+
+			params.push_back(param);
+		}
+	}
+	catch (std::bad_expected_access<QString>& e)
+	{
+		*errorMessage = e.error();
+		return false;
+	}
+	catch (std::runtime_error& e)
+	{
+		*errorMessage = e.what();
+		return false;
+	}
+
+	return true;
 }
 
 QString LmDescription::name() const
@@ -1425,7 +1512,7 @@ int LmDescription::descriptionNumber() const
 
 const QString& LmDescription::configurationStringFile() const
 {
-    return m_configurationScriptFile;
+	return m_configurationScriptFile;
 }
 
 QString LmDescription::jsConfigurationStringFile() const
@@ -1435,7 +1522,7 @@ QString LmDescription::jsConfigurationStringFile() const
 
 const QString& LmDescription::version() const
 {
-    return m_version;
+	return m_version;
 }
 
 const LmDescription::FlashMemory& LmDescription::flashMemory() const
@@ -1466,6 +1553,11 @@ const LmDescription::Lan& LmDescription::lan() const
 const LmDescription::Other& LmDescription::other() const
 {
 	return m_other;
+}
+
+const LmDescription::DataConfiguration& LmDescription::dataConfiguration() const
+{
+	return m_dataConfiguration;
 }
 
 int LmDescription::jsLanControllerType(int index)
@@ -1502,7 +1594,7 @@ std::vector<std::shared_ptr<Afb::AfbElement>> LmDescription::afbElements(int opC
 {
 	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
 
-	for(auto& elem : m_afbElements)
+	for (auto& elem : m_afbElements)
 	{
 		if (elem->opCode() == opCode)
 		{
@@ -1527,7 +1619,7 @@ std::vector<std::shared_ptr<Afb::AfbElement>> LmDescription::afbElements(const Q
 
 const std::shared_ptr<Afb::AfbElement> LmDescription::afbElement(const QString& elementCaption) const
 {
-	for(auto& elem : m_afbElements)
+	for (auto& elem : m_afbElements)
 	{
 		if (elem->caption() == elementCaption)
 		{
@@ -1551,7 +1643,7 @@ std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 
 std::shared_ptr<Afb::AfbComponent> LmDescription::component(const QString& caption) const
 {
-	for(auto& afbComponent : m_afbComponents)
+	for (auto& afbComponent : m_afbComponents)
 	{
 		if (afbComponent.second == nullptr)
 		{
@@ -1576,7 +1668,7 @@ const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbCompo
 LmCommand LmDescription::command(int commandCode) const
 {
 	auto it = m_commands.find(commandCode);
-	if (it !=m_commands.end())
+	if (it != m_commands.end())
 	{
 		return it->second;
 	}
@@ -1590,7 +1682,7 @@ const LmCommand* LmDescription::commandPtr(int commandCode) const
 {
 	auto it = m_commands.find(commandCode);
 
-	if (it !=m_commands.end())
+	if (it != m_commands.end())
 	{
 		return &it->second;
 	}
@@ -1625,7 +1717,7 @@ int LmDescription::logicUnitCommandsVersion() const
 
 bool LmDescription::isCommandsAvailable(const std::vector<LmCommandCode>& commandsCodes) const
 {
-	for(const LmCommandCode cmd : commandsCodes)
+	for (const LmCommandCode cmd : commandsCodes)
 	{
 		if (commandPtr(cmd) == nullptr)
 		{
@@ -1640,8 +1732,7 @@ bool LmDescription::isBitAccAvailable() const
 {
 	if (m_bitAccAvailable.has_value() == false)
 	{
-		static const std::vector<LmCommandCode> bitAccCommands =
-		{
+		static const std::vector<LmCommandCode> bitAccCommands = {
 			LmCommand::RESET,
 			LmCommand::SET,
 			LmCommand::OR,
@@ -1661,5 +1752,3 @@ bool LmDescription::isBitAccAvailable() const
 
 	return m_bitAccAvailable.value();
 }
-
-

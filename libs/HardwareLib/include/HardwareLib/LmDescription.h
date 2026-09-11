@@ -1,9 +1,13 @@
 #pragma once
 
-#include <memory>
+#include "Afb.h"
+
 #include <QObject>
 
-#include "Afb.h"
+#include <map>
+#include <memory>
+#include <optional>
+#include <vector>
 
 class QDomDocument;
 class SimCommandTest_LM5_LM6;
@@ -14,6 +18,8 @@ namespace Hardware
 }
 
 using LmCommandCode = quint16;
+
+// clang-format off
 
 struct LmCommand
 {
@@ -99,22 +105,24 @@ public:
 	static const LmCommandCode MOVB_ADDR_ACC	= 0x03D0;
 };
 
+// clang-format on
+
 class LmDescription : public QObject
 {
 	Q_OBJECT
 
 	// Properties needed for accessing the data by configuration script
 	//
-	Q_PROPERTY(quint32 FlashMemory_ConfigFrameCount READ (m_flashMemory.configFrameCount))
-	Q_PROPERTY(quint32 FlashMemory_ConfigFramePayload READ (m_flashMemory.configFramePayload))
-	Q_PROPERTY(quint32 FlashMemory_ConfigUartId READ (m_flashMemory.configUartId))
-	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ (m_flashMemory.maxConfigurationCount))
+	Q_PROPERTY(quint32 FlashMemory_ConfigFrameCount READ(m_flashMemory.configFrameCount))
+	Q_PROPERTY(quint32 FlashMemory_ConfigFramePayload READ(m_flashMemory.configFramePayload))
+	Q_PROPERTY(quint32 FlashMemory_ConfigUartId READ(m_flashMemory.configUartId))
+	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ(m_flashMemory.maxConfigurationCount))
 	Q_PROPERTY(quint32 FlashMemory_SingleConfigFirstFrame READ(m_flashMemory.singleConfigFirstFrame))
 	Q_PROPERTY(quint32 FlashMemory_SingleConfigFrameCount READ(m_flashMemory.singleConfigFrameCount))
 	Q_PROPERTY(quint32 FlashMemory_SingleConfigUniqueIdOffset READ(m_flashMemory.singleConfigUniqueIdOffset))
 	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ(m_memory.txDiagDataSize))
-	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ (m_optoInterface.optoPortCount))
-	Q_PROPERTY(int Lan_ControllerCount READ (m_lan.lanControllerCount))
+	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ(m_optoInterface.optoPortCount))
+	Q_PROPERTY(int Lan_ControllerCount READ(m_lan.lanControllerCount))
 
 	friend SimCommandTest_LM5_LM6;
 
@@ -214,6 +222,13 @@ public:
 
 		quint32 txDiagDataSize() const { return m_txDiagDataSize; }
 
+		// DataConfiguration - optional, now ACM only
+		//
+		quint32 m_dataConfigurationOffset = 0xFFFFFFFF;
+		quint32 m_dataConfigurationSize = 0xFFFFFFFF;
+
+		// --
+		//
 		bool load(const QDomDocument& document, QString* errorMessage);
 
 		bool isAppLogicBitData(quint32 address) const;
@@ -222,10 +237,10 @@ public:
 
 	struct LogicUnit
 	{
-		quint32 m_alpPhaseTime = 0xFFFFFFFF;			// in microseconds
-		quint32 m_clockFrequency = 0xFFFFFFFF;			// in Hz
-		quint32 m_cycleDuration = 0xFFFFFFFF;			// in microseconds
-		quint32 m_idrPhaseTime = 0xFFFFFFFF;			// in microseconds
+		quint32 m_alpPhaseTime = 0xFFFFFFFF;   // in microseconds
+		quint32 m_clockFrequency = 0xFFFFFFFF; // in Hz
+		quint32 m_cycleDuration = 0xFFFFFFFF;  // in microseconds
+		quint32 m_idrPhaseTime = 0xFFFFFFFF;   // in microseconds
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 
@@ -284,7 +299,27 @@ public:
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
-	// Properties
+	struct DataConfigurationParam
+	{
+		QString id;
+		quint32 offset = 0xFFFFFFFF;                  // Offset in words from the beginning of DataConfiguration
+		quint32 sizeBits = 0xFFFFFFFF;                // Size in bits
+		E::DataFormat format = E::DataFormat::UnsignedInt;
+	};
+
+	struct DataConfiguration
+	{
+		quint32 dataConfigurationOffset = 0xFFFFFFFF; // Same as Memory.m_dataConfigurationOffset, but here for convenience
+		quint32 dataConfigurationSize = 0xFFFFFFFF;   // Same as Memory.m_dataConfigurationSize, but here for convenience
+
+		std::vector<DataConfigurationParam> params;
+
+		std::optional<LmDescription::DataConfigurationParam> param(const QString& id) const; // Get param by id
+
+		bool load(const QDomDocument& document, QString* errorMessage);
+	};
+
+																							 // Properties
 	//
 public:
 	QString name() const;
@@ -302,6 +337,7 @@ public:
 	const OptoInterface& optoInterface() const;
 	const Lan& lan() const;
 	const Other& other() const;
+	const DataConfiguration& dataConfiguration() const;
 
 	Q_INVOKABLE int jsLanControllerType(int index);
 	Q_INVOKABLE int jsLanControllerPlace(int index);
@@ -334,8 +370,8 @@ private:
 	//
 	QString m_name;
 	int m_descriptionNumber = -1;
-    QString m_configurationScriptFile;
-    QString m_version;
+	QString m_configurationScriptFile;
+	QString m_version;
 
 	FlashMemory m_flashMemory;
 	Memory m_memory;
@@ -343,27 +379,26 @@ private:
 	OptoInterface m_optoInterface;
 	Lan m_lan;
 	Other m_other;
+	DataConfiguration m_dataConfiguration;
 
 	// Possible commands
 	//
-	std::map<int, LmCommand> m_commands;		// Key is command.code
+	std::map<int, LmCommand> m_commands; // Key is command.code
 	int m_logicUnitCommandsVersion = 0;
 
 	mutable std::optional<bool> m_bitAccAvailable;
 
 	// AFBs
 	//
-	bool m_checkAfbVersions = false;			// Generate code for checking AFB versions
-	quint32 m_checkAfbVersionsOffset = 0;		// Result offset to genarate checking AFB versions
+	bool m_checkAfbVersions = false;                                   // Generate code for checking AFB versions
+	quint32 m_checkAfbVersionsOffset = 0;                              // Result offset to generate checking AFB versions
 
-	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
+	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents; // Key is OpCode of AFBComponent
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbElements;
 
-	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	// !!! Copy constructor is defined, don't forget to add new members copy to it
 	//
 };
 
 using LmDescriptionShared = std::shared_ptr<LmDescription>;
 using LmDescriptionConstShared = std::shared_ptr<const LmDescription>;
-
-

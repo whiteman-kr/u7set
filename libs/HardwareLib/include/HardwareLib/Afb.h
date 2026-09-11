@@ -1,5 +1,8 @@
 #pragma once
+#include <memory>
 #include <optional>
+#include <unordered_map>
+#include <vector>
 
 class QDomElement;
 class QXmlStreamReader;
@@ -8,7 +11,7 @@ namespace Proto
 {
 	class AfbElementXml;
 	class AfbElementCollection;
-}
+} // namespace Proto
 
 namespace Afb
 {
@@ -35,42 +38,17 @@ namespace Afb
 		bool saveToXml(QDomElement* xmlElement) const;
 
 	public:
-		const QString& caption() const noexcept
-		{
-			return m_caption;
-		}
-		void setCaption(const QString& value) noexcept
-		{
-			m_caption = value;
-		}
+		const QString& caption() const noexcept { return m_caption; }
+		void setCaption(const QString& value) noexcept { m_caption = value; }
 
-		int opIndex() const noexcept
-		{
-			return m_opIndex;
-		}
-		void setOpIndex(int value) noexcept
-		{
-			m_opIndex = value;
-		}
+		int opIndex() const noexcept { return m_opIndex; }
+		void setOpIndex(int value) noexcept { m_opIndex = value; }
 
-		AfbComponentPinType type() const noexcept
-		{
-			return m_type;
-		}
-		void setType(AfbComponentPinType value) noexcept
-		{
-			m_type = value;
-		}
+		AfbComponentPinType type() const noexcept { return m_type; }
+		void setType(AfbComponentPinType value) noexcept { m_type = value; }
 
-		bool isInputOrParam() const noexcept
-		{
-			return	m_type == AfbComponentPinType::Input ||
-					m_type == AfbComponentPinType::Param;
-		}
-		bool isOutput() const noexcept
-		{
-			return	m_type == AfbComponentPinType::Output;
-		}
+		bool isInputOrParam() const noexcept { return m_type == AfbComponentPinType::Input || m_type == AfbComponentPinType::Param; }
+		bool isOutput() const noexcept { return m_type == AfbComponentPinType::Output; }
 
 	private:
 		QString m_caption;
@@ -133,15 +111,15 @@ namespace Afb
 		bool m_hasRam = false;
 		QString m_caption;
 		int m_impVersion = -1;
-        int m_versionOpIndex = -1;
+		int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
 		QString m_simulationFunc;
 		bool m_softwareImplemented = false;
 
-		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
-		std::vector<bool> m_pinExists;							// For fast searching of pin, intensively used in simulator
-		// Operator= is present, don't forget to add new fields to it
-		//
+		std::unordered_map<int, AfbComponentPin> m_pins; // Key is OpIndex of pin - AfbComponentPin::opIndex()
+		std::vector<bool> m_pinExists;                   // For fast searching of pin, intensively used in simulator
+														 // Operator= is present, don't forget to add new fields to it
+														 //
 	};
 
 
@@ -181,10 +159,10 @@ namespace Afb
 		PULSE_GEN = 30,
 
 		First = LOGIC,
-		Last = PULSE_GEN,				// update on adding new AFBs !!!
+		Last = PULSE_GEN,                      // update on adding new AFBs !!!
 	};
 
-	inline const int AFB_NOT_ACC_OPCODE = 254;		// bit ACC based NOT opcode
+	inline const int AFB_NOT_ACC_OPCODE = 254; // bit ACC based NOT opcode
 	inline const int PACKED_OR_OPCODE = 253;
 	inline const int PACKED_AND_OPCODE = 252;
 	inline const int CONST_COMPARATOR_OPCODE = 10;
@@ -239,7 +217,7 @@ namespace Afb
 		const std::vector<int>& additionalSizes() const;
 		void setAdditionalSizes(std::vector<int> value);
 
-		std::vector<int> allSizes() const;		// Returns size() and additionalSizes() as single vector
+		std::vector<int> allSizes() const; // Returns size() and additionalSizes() as single vector
 
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
@@ -255,7 +233,7 @@ namespace Afb
 
 		// Data
 		//
-private:
+	private:
 		// Operator= is present, don't forget to add new fields to it
 		//
 		QString m_opName;
@@ -265,7 +243,7 @@ private:
 		int m_operandIndex = 0;
 		int m_size = 0;
 		std::vector<int> m_additionalSizes;
-		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
 
 		// WARNING!!!
@@ -284,7 +262,11 @@ private:
 		// Methods
 		//
 	public:
-		void update(const E::SignalType& type, const E::DataFormat dataFormat, E::ByteOrder byteOrder, const QVariant& lowLimit, const QVariant& highLimit);
+		void update(const E::SignalType& type,
+					const E::DataFormat dataFormat,
+					E::ByteOrder byteOrder,
+					const QVariant& lowLimit,
+					const QVariant& highLimit);
 
 		// Serialization
 		//
@@ -352,19 +334,19 @@ private:
 		// Data
 		//
 	private:
-		QString m_opName;			// Param name
-		QString m_caption;			// Param caption
+		QString m_opName;  // Param name
+		QString m_caption; // Param caption
 		bool m_visible;
 		E::ByteOrder m_byteOrder;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
 
-		AfbParamValue m_afbParamValue;	// Param value
-		QVariant m_defaultValue;	// Param default value
+		AfbParamValue m_afbParamValue; // Param value
+		QVariant m_defaultValue;       // Param default value
 
-		QVariant m_lowLimit;		// Low limit for param
-		QVariant m_highLimit;		// High limit for param
+		QVariant m_lowLimit;           // Low limit for param
+		QVariant m_highLimit;          // High limit for param
 
 		int m_operandIndex;
 
@@ -375,8 +357,7 @@ private:
 	//
 	// FblElement
 	//
-	class AfbElement :
-		public QObject
+	class AfbElement : public QObject
 	{
 		Q_OBJECT
 
@@ -463,9 +444,9 @@ private:
 		//
 		struct PackedLogicData
 		{
-			QString counterpart;	// AFB caption of the counterpart item.
-			QString idPrefix;		// PackedID prefix, is used for initial creation of the ID.
-			int minInputCount{};	// Minimum inputs count which resulting output must have, this is uses only for output part.
+			QString counterpart; // AFB caption of the counterpart item.
+			QString idPrefix;    // PackedID prefix, is used for initial creation of the ID.
+			int minInputCount{}; // Minimum inputs count which resulting output must have, this is uses only for output part.
 		};
 
 		bool isPackedLogic() const;
@@ -532,5 +513,4 @@ private:
 	public:
 		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
-}
-
+} // namespace Afb
