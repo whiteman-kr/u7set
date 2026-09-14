@@ -1,4 +1,4 @@
-<LogicModule Name="ACM1_SR70" DescriptionNumber="70" ConfigurationScriptFile="ConfigScript.js" Version="1.0">
+<LogicModule Name="ACM1_SR70" DescriptionNumber="70" ConfigurationScriptFile="ConfigScript.js" Version="1.1">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -40,6 +40,9 @@
     <TuningDataFrameSize>0</TuningDataFrameSize>
     <TxDiagDataOffset>57526</TxDiagDataOffset>
     <TxDiagDataSize>256</TxDiagDataSize>
+
+    <DataConfigurationOffset>57782</DataConfigurationOffset>
+    <DataConfigurationSize>256</DataConfigurationSize>
   </Memory>
   <LogicUnit>
     <ClockFrequency>96000000</ClockFrequency>
@@ -61,6 +64,11 @@
     <OcmTxDataSizeLimit>0</OcmTxDataSizeLimit>
     <OcmRxDataSizeLimit>0</OcmRxDataSizeLimit>
   </Other>
+  <DataConfiguration>
+    <ConfParam ID="ActuatorDataID" Offset="0" SizeBits="32" DataFormat="UnsignedInt" />
+    <ConfParam ID="SizeReceiveFromLM" Offset="2" SizeBits="16" DataFormat="UnsignedInt" />
+    <ConfParam ID="SizeSendToLM" Offset="3" SizeBits="16" DataFormat="UnsignedInt" />
+  </DataConfiguration>
   <LogicUnitCommnads Version="3">
     <Command Caption="nop" Code="0040" CodeMask="07f8" SimulationFunc="command_nop" ParseFunc="parse_nop" Description="No operation" CodeSize="1" ReadTime="5" WaitFbExecution="false" ConstRuntime="2" CheckFunc="check_nothing" GetMnemoFunc="mnemo_nop" CalcExecTimeFunc="exectime_const" />
     <Command Caption="reset" Code="0060" CodeMask="07f8" SimulationFunc="command_reset" ParseFunc="parse_reset" Description="Reset ACC to 0" CodeSize="1" ReadTime="5" WaitFbExecution="false" ConstRuntime="2" CheckFunc="check_nothing" GetMnemoFunc="mnemo_acc" CalcExecTimeFunc="exectime_const" />

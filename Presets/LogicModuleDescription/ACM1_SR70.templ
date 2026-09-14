@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="ACM1_SR70" DescriptionNumber="70" ConfigurationScriptFile="ConfigScript.js" Version="1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+<LogicModule Name="ACM1_SR70" DescriptionNumber="70" ConfigurationScriptFile="ConfigScript.js" Version="1.1" xmlns:xi="http://www.w3.org/2001/XInclude">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -41,6 +41,8 @@
 		<TuningDataFrameSize>0</TuningDataFrameSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
 		<TxDiagDataSize>256</TxDiagDataSize>
+		<DataConfigurationOffset>57782</DataConfigurationOffset>
+		<DataConfigurationSize>256</DataConfigurationSize>
 	</Memory>
 	<LogicUnit>
 		<ClockFrequency>96000000</ClockFrequency>
@@ -62,6 +64,11 @@
 		<OcmTxDataSizeLimit>0</OcmTxDataSizeLimit>
 		<OcmRxDataSizeLimit>0</OcmRxDataSizeLimit>
 	</Other>
+	<DataConfiguration>
+		<ConfParam ID="ActuatorDataID" Offset="0" SizeBits="32" DataFormat="UnsignedInt"/>
+		<ConfParam ID="SizeReceiveFromLM" Offset="2" SizeBits="16" DataFormat="UnsignedInt"/>
+		<ConfParam ID="SizeSendToLM" Offset="3" SizeBits="16" DataFormat="UnsignedInt"/>
+	</DataConfiguration>
 	<LogicUnitCommnads Version="3">
 		<xi:include href="./instructions/nop.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/reset.v1.xml" parse="xml"/>
