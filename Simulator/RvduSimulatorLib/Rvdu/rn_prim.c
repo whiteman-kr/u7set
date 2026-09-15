@@ -116,7 +116,7 @@ bool showLogo(const char* logoFile)
 
 	if (m_moduleInitialized == false)
 	{
-		RN_ASSERT_MSG(false, "showLogo: module is not initialized, moduleRnVbufInitialize shall be executed!.");
+		RN_ASSERT_MSG(false, "showLogo: module is not initialized, moduleRnPrimInitialize shall be executed!.");
 		return false;
 	}
 

@@ -116,6 +116,7 @@ int main()
 		if (moduleRnDiagInitialize((alt_u8*)startAddr, recordCount, memoryAvailable, &bytesRead) == false)
 		{
 			setStartupStage(STAGE_MEM_ERR);
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -123,6 +124,12 @@ int main()
 		memoryAvailable = DEC_MEMORY(memoryAvailable, bytesRead);
 
 		logMemoryUsage("moduleRnDiagInitialize", (const alt_u8*)EMIF_0_ECC_CORE_BASE, (const alt_u8*)MEM_IF_DDR3_EMIF_0_End, (alt_u32)EMIF_0_ECC_CORE_SPAN);
+	}
+
+	// Initialize video buffer
+	//
+	{
+		moduleRnVbufInitialize((alt_u32*)EMIF_0_ECC_CORE_BASE, (alt_u32*)TO_EXTERNAL_BUS_BRIDGE_0_BASE,	RVDU_SCREEN_WIDTH, RVDU_SCREEN_HEIGHT);
 	}
 
 	// SD Card
@@ -156,6 +163,7 @@ int main()
 		else            
 		{
 			setStartupStage(STAGE_SD_ERR);
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -169,6 +177,7 @@ int main()
 			{
 				setStartupStage(STAGE_SD_FS_ERR);
 				alt_printf("not FAT16\n");
+				writeExternalDiagPacket();
 				return 0;
 			}
 		}
@@ -183,6 +192,7 @@ int main()
 		{
 			setStartupStage(STAGE_FAT_ERR);
 			alt_printf("ERROR: Failed to init file system\n");
+			writeExternalDiagPacket();
 			return 0;
 		}
 	}
@@ -213,6 +223,7 @@ int main()
 		{
 			setStartupStage(STAGE_EQUIPMENT_ERR);
 			alt_printf("findEquipmentId failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 	}
@@ -233,6 +244,7 @@ int main()
 		{
 			setStartupStage(STAGE_CFG_ERR);
 			alt_printf("cacheConfigFile failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -259,6 +271,7 @@ int main()
 			alt_printf(msg);
 
 			setStartupStage(STAGE_SCREEN_ERR);
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -280,9 +293,6 @@ int main()
 	// Initialize video rendering modules
 	//
 	{
-		moduleRnVbufInitialize((alt_u32*)EMIF_0_ECC_CORE_BASE, (alt_u32*)TO_EXTERNAL_BUS_BRIDGE_0_BASE,
-			vduConfig()->display0.width, vduConfig()->display0.height);
-
 		moduleRnPrimInitialize((alt_u32*)EMIF_0_ECC_CORE_BASE,
 			vduConfig()->display0.width, vduConfig()->display0.height);
 
@@ -322,6 +332,7 @@ int main()
 		{
 			setStartupStage(STAGE_GLOBALSCRIPT_ERR);
 			alt_printf("cacheGlobalScript failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -341,6 +352,7 @@ int main()
 	{	
 		setStartupStage(STAGE_LUA_INIT_ERR);
 		alt_printf("scriptApiRegistration failed.");
+		writeExternalDiagPacket();
 		return 0;
 	}
 
@@ -355,6 +367,7 @@ int main()
 		{
 			setStartupStage(STAGE_GLOBALSCRIPT_COMPILE_ERR);
 			alt_printf("compileGlobalScript failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 	}
@@ -375,6 +388,7 @@ int main()
 		{
 			setStartupStage(STAGE_SIGNALS_ERR);
 			alt_printf("cacheSignalsFile failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -391,6 +405,7 @@ int main()
 		if (id == NULL)
 		{
 			RN_ASSERT(id);
+			writeExternalDiagPacket();
 			return 0;
 		}
 		writeComparsionID(id);
@@ -412,6 +427,7 @@ int main()
 		{
 			setStartupStage(STAGE_FONTS_ERR);
 			alt_printf("cacheFonts failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -437,6 +453,7 @@ int main()
 		{
 			setStartupStage(STAGE_SCHEMAS_ERR);
 			alt_printf("cacheSchemas failed.");
+			writeExternalDiagPacket();
 			return 0;
 		}
 		MEM_IF_DDR3_EMIF_0_End = startAddr + bytesRead;
@@ -457,6 +474,7 @@ int main()
 			logError(InternalError, "allocateTrendsMemory: error allocating memory for trends data.");
 
 			setStartupStage(STAGE_MEM_ERR);
+			writeExternalDiagPacket();
 			return 0;
 		}
 
@@ -490,6 +508,7 @@ int main()
 			logWarning(SchemaWasNotFound, msg);
 			
 			setStartupStage(STAGE_SET_DEFAULT_SCHEMA_ERR);
+			writeExternalDiagPacket();
 			return 0;
 		}
 	}

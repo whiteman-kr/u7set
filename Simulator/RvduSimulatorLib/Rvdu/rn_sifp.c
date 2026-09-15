@@ -133,7 +133,8 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 	alt_u32 size = fileSize(f);
 
 	if ((size == WRONG_FILE_SIZE) ||
-		(size > maxFileSize))
+		(size > maxFileSize) ||
+		(size < (sizeof(struct AppSignalsFile) + sizeof(alt_u64))))
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "cacheSignalsFile: file has wrong size (%d), max size is %d bytes.",
 				(int)size,
@@ -180,7 +181,7 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 	{
 		// Check crc64
 		//
-		unsigned long long crc = calcCrc64(startAddr, readbytescount - sizeof(alt_u64));
+		alt_u64 crc = calcCrc64(startAddr, readbytescount - sizeof(alt_u64));
 		const alt_u64* pFileCrc64 = ((alt_u64*)(startAddr + readbytescount - sizeof(alt_u64)));
 		if (crc != *pFileCrc64)
 		{

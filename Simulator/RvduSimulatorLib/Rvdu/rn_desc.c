@@ -13,14 +13,14 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 -- Changes: RADIX-3966, rn_desc initial update
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -34,11 +34,20 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 -- *************************************************************
 
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.03
+-- Date:	15.09.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4130, rn_desc сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -56,6 +65,17 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 
 #include <alt_errno.h>
 
+/*
+Finds a record in description file that has the same key set by jumpers as passed by the quipmentKey parameter.
+Records the device identifier to the address specified by the equipmentId parameter.
+Parameters:
+    equipmentKey - a hardware-set key of the device (jumpers)
+    descriptionFile - description file name
+    equipmentId - pointer to a buffer where to store the identifier
+    bufferSize - size, in bytes, of the buffer.
+Return Value:
+    Returns "true" if successful, "false" on error.
+*/
 bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, char* const equipmentId, alt_u16 bufferSize)
 {
 	if ((descriptionFile == NULL) ||
@@ -127,7 +147,7 @@ bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, ch
 			alt_u16 keyPos = 0;
 			(void)memset(keyValue, 0, sizeof(keyValue));
 
-			for (int r = 0; r < 1048576; r++)	// Limit the file size to 1 Megabyte to prevent infinite loop
+			for (int r = 0; r < 1048576; r++)	// Limit the file size to 1 Megabytes (1048576 bytes) to prevent infinite loop
 			{
 				dataRead = fl_fgetc(f);
 				if (dataRead == EOF)
@@ -183,7 +203,7 @@ bool findEquipmentId(alt_u16 equipmentKey, const char* const descriptionFile, ch
 							//
 							char* lastChar = NULL;
 							errno = 0;
-							alt_u16 keyCode = (alt_u16)strtol(keyValue, &lastChar, 10);
+							alt_u16 keyCode = (alt_u16)strtol(keyValue, &lastChar, 10); // convert a string to a integer with decimal (10-base)
 							if ((strlen(keyValue) == 0u) || (errno != 0) || (*lastChar != '\0'))
 							{
 								// Invalid number format

@@ -73,7 +73,11 @@ void moduleRnTrendProcInitialize(void)
 
 bool trendIsConsistent(const VduSchemaFileSchemaItemTrend1* const trend)
 {
-	if ((trend == NULL) || (trend->version != 2u) || (trend->durationsSecs[0] < TREND_MIN_DURATION) || (trend->columnCount == 0u))
+	if ((trend == NULL) || 
+		(trend->version != TYPE_TREND_VERSION) || 
+		(trend->durationsSecs[0] < TREND_MIN_DURATION) ||
+		(trend->durationsSecs[0] > TREND_MAX_DURATION) ||
+		(trend->columnCount == 0u))
 	{
 		return false;
 	}
@@ -94,9 +98,9 @@ static bool allocateTrendSignalData(struct VduSchemaFileSchemaItem1* const item,
 		for (alt_u16 i = 0; i < m_trendSignalDataCount; i++)
 		{
 			const struct TrendSignalData* tsd = (struct TrendSignalData*)(m_trendSignalData + sizeof(struct TrendSignalData) * i);
-			if ((tsd->appSignalIndex == item->trend.trendSignals[si].appSignalIndex) &&
-				(tsd->validityAppSignalIndex == item->trend.trendSignals[si].validityAppSignalIndex) &&
-				(tsd->columnCount == item->trend.columnCount) &&
+			if ((tsd->appSignalIndex == (alt_u16)item->trend.trendSignals[si].appSignalIndex) &&
+				(tsd->validityAppSignalIndex == (alt_u16)item->trend.trendSignals[si].validityAppSignalIndex) &&
+				(tsd->columnCount == (alt_u16)item->trend.columnCount) &&
 				(tsd->durationSecs == durationSecs))
 			{
 				item->trend.trendSignals[si].trendSignalDataRecordIndex = i;
@@ -143,6 +147,13 @@ static bool allocateTrendSignalData(struct VduSchemaFileSchemaItem1* const item,
 
 bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_u32* bytesUsed)
 {
+	if ((startAddr == NULL) || (bytesUsed == NULL))
+	{
+		RN_ASSERT(startAddr != NULL);
+		RN_ASSERT(bytesUsed != NULL);
+		return false;
+	}
+
 	*bytesUsed = 0;
 	int trendsCount = 0;
 
@@ -171,10 +182,14 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 
 			trendsCount++;
 
-			if (item->trend.version != 2u)
+			if (item->trend.version != TYPE_TREND_VERSION)
 			{
 				char msg[STRING_MAX_LEN];
-				(void)snprintf(msg, STRING_MAX_LEN, "allocateTrendsMemory: unsupported trend version %u, expected 2.", (unsigned int)item->trend.version);
+				(void)snprintf(msg,
+							   STRING_MAX_LEN,
+							   "allocateTrendsMemory: unsupported trend version %u, expected %u.",
+							   (unsigned int)item->trend.version,
+							   (unsigned int)TYPE_TREND_VERSION);
 				logWarning(InternalWarning, msg);
 				continue;
 			}
@@ -185,7 +200,7 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 				continue;
 			}
 
-			// Create TrendSignalData structures for extra durations
+			// Create TrendSignalData structures for in-range durations
 			//
 			for (alt_u16 i = 0; i < TREND_MAX_DURATIONS_COUNT; i++)
 			{
@@ -308,7 +323,8 @@ static void processTrendData(alt_u16 ti, alt_u64 timeCode)
 
 	if ((tsd->columnCount == 0u) || (tsd->durationSecs == 0u))
 	{
-		RN_ASSERT((tsd->columnCount != 0u) || (tsd->durationSecs != 0u));
+		RN_ASSERT(tsd->columnCount != 0u);
+		RN_ASSERT(tsd->durationSecs != 0u);
 		return;
 	}
 

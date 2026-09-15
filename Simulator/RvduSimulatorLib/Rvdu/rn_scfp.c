@@ -255,7 +255,8 @@ static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr,
 	alt_u32 size = fileSize(f);
 
 	if ((size == WRONG_FILE_SIZE) ||
-		(size > maxSchemaSize))
+		(size > maxSchemaSize) ||
+		(size < (sizeof(struct VduSchemaFile) + sizeof(alt_u64))))
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "cacheSchemaFile: file has wrong size (%d), max size is %d bytes.",
 				(int)size,

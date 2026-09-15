@@ -245,7 +245,7 @@ void modeQuestionShow(const struct PopUpSchemaParams* const schema)
 	if ((textLength >= STRING_MAX_LEN) && (m_textMaxLength == false))
 	{
 		char msg[STRING_MAX_LEN];
-		(void)snprintf(msg, STRING_MAX_LEN, "modeQuestionShow: Message exsided text length (%u)", (alt_16)textLength);
+		(void)snprintf(msg, STRING_MAX_LEN, "modeQuestionShow: Message exceeded text length (%u)", (alt_16)textLength);
 		logWarning(DrawError, msg);
 
 		m_textMaxLength = true;

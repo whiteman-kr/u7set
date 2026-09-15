@@ -13,14 +13,14 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 -- Changes: RADIX-3966, rn_desc initial update
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -34,11 +34,20 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 -- *************************************************************
 
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.03
+-- Date:	15.09.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4130, rn_desc сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -51,7 +60,7 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 #include <stdbool.h>
 
 /*
-Finds a record in description file that has the same key set by jumpers as passed by thee quipmentKey parameter.
+Finds a record in description file that has the same key set by jumpers as passed by the quipmentKey parameter.
 Records the device identifier to the address specified by the equipmentId parameter.
 Parameters:
     equipmentKey - a hardware-set key of the device (jumpers)

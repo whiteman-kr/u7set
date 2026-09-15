@@ -12,7 +12,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -20,7 +20,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	06,04,2026.
+-- Date:	06.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -33,9 +33,12 @@ Module description: Loads, parses, and manages font files for text rendering.
 -- Changes: RADIX-3969, add logging and debugging support
 -- Add log errors and messages
 
+-- Changes: RADIX-3969, add logging and debugging support
+-- Add log errors and messages
+
 -- *************************************************************
 -- Version v1.02
--- Date:	25,04,2026.
+-- Date:	25.04.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4095
 -- Reviewed by: Mazyr S.M.
 
@@ -45,11 +48,20 @@ Module description: Loads, parses, and manages font files for text rendering.
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.04
+-- Date:	14.09.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4124, rn_fofp сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -93,7 +105,8 @@ static bool cacheFontFile(const char* fileName, alt_u16 fontIndex, alt_u8* const
 	alt_u32 size = fileSize(f);
 
 	if ((size == WRONG_FILE_SIZE) ||
-		(size > maxFontSize))
+		(size > maxFontSize) ||
+		(size < sizeof(struct VduSymbolHeader)))
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "cacheFontFile: file has wrong size (%d), max size is %d bytes.",
 				(int)size,
@@ -124,7 +137,7 @@ static bool cacheFontFile(const char* fileName, alt_u16 fontIndex, alt_u8* const
 		const struct VduSymbolHeader* const symbolHeader = (const struct VduSymbolHeader* const)fontStartAddr;
 
 		const alt_u32 symbolsCount = symbolHeader->offset / sizeof(struct VduSymbolHeader);
-		static const alt_u32 maxSymbolsCount = 65535;
+		static const alt_u32 maxSymbolsCount = 65535u;
 
 		if (symbolsCount > maxSymbolsCount)
 		{
@@ -150,6 +163,18 @@ static bool cacheFontFile(const char* fileName, alt_u16 fontIndex, alt_u8* const
 	return readOk;
 }
 
+/*
+Copies the contents of the all fonts files to memory at the address specified in the parameter.
+Returns "true" if the copy is successful.
+Returns "false" if an error.
+Parameters:
+    fontsPath - Path to fonts subfolders (e.g EQUIPMENTID_/Fonts).
+    startAddr - 32-bit pointer to a buffer where to store the configuration.
+    memoryAvailable - memory, in bytes, available for all font files.
+Return Value:
+    bytesRead - receives number of actually read bytes. The size of each file is upward-aligned by 4 bytes (to dword).
+    Returns "true" if successful, "false" on error.
+*/
 bool cacheFonts(const char* const fontsPath, alt_u8* const startAddr, alt_u32 memoryAvailable, alt_u32* bytesRead)
 {
 	if ((fontsPath == NULL) || (startAddr == NULL) || (bytesRead == NULL) || (memoryAvailable == 0u))
@@ -166,9 +191,9 @@ bool cacheFonts(const char* const fontsPath, alt_u8* const startAddr, alt_u32 me
 	}
 
 	alt_u8* fontStartAddr = startAddr;
-	*bytesRead = 0;
+	*bytesRead = 0u;
 
-	for (alt_u16 i = 0; i < fontCount; i++)
+	for (alt_u16 i = 0u; i < fontCount; i++)
 	{
 		char fileName[FILE_NAME_MAX_LEN] = { 0 };
 		(void)snprintf(fileName, FILE_NAME_MAX_LEN, "%s/%d/font.vdf", fontsPath, i);
@@ -195,16 +220,20 @@ bool cacheFonts(const char* const fontsPath, alt_u8* const startAddr, alt_u32 me
 	return true;
 }
 
+// Returns the font symbols count
+//
 static alt_u16 fontSymbolsCount(alt_u16 fontIndex)
 {
 	if (fontIndex >= MAX_FONTS_COUNT)
 	{
 		RN_ASSERT(false);
-		return 0;
+		return 0u;
 	}
 	return m_symbolsCount[fontIndex];
 }
 
+// Returns the font data structure for provided fontor NULL if parameters are incorrect
+//
 const alt_u8* const fontData(alt_u16 fontIndex)
 {
 	if (fontIndex >= MAX_FONTS_COUNT)
@@ -216,6 +245,8 @@ const alt_u8* const fontData(alt_u16 fontIndex)
 	return (alt_u8*)(m_pFontData[fontIndex]);
 }
 
+// Returns the font symbol header structure for provided font and character or NULL if parameters are incorrect
+//
 const struct VduSymbolHeader* const fontSymbolHeader(alt_u16 fontIndex, alt_u32 c)
 {
 	if (fontIndex >= MAX_FONTS_COUNT)
@@ -233,6 +264,16 @@ const struct VduSymbolHeader* const fontSymbolHeader(alt_u16 fontIndex, alt_u32 
 	return (const struct VduSymbolHeader* const)(m_pFontData[fontIndex] + (c * sizeof(struct VduSymbolHeader)));
 }
 
+// Finds a symbol information for a specified Unicode symbol.
+/*Returns "1 - 3" if the copy is successful.
+Returns "0" if an error.
+Parameters:
+    fontIndex - index to a font
+    pCode - a pointer to a symbol code (may be variable-length)
+Return Value:
+    currSymbol - receives a pointer to a symbol record.
+    Returns number of bytes for this symbol, or 0 on error.
+*/
 alt_u8 findUtf8Character(const alt_u8 fontIndex, const alt_u8* const pCode, struct VduSymbolHeader* currSymbol)
 {
 	static const alt_u32 DEFAULT_CHAR = ((alt_u32)0x7Fu - (alt_u32)' ');
@@ -245,16 +286,19 @@ alt_u8 findUtf8Character(const alt_u8 fontIndex, const alt_u8* const pCode, stru
 		if (defaultHeader == NULL)
 		{
 			RN_ASSERT(defaultHeader != NULL);
-			return 0;
+			return 0u;
 		}
 		*currSymbol = *defaultHeader;
 
-		return 1;
+		return 1u;
 	}
 
 	// ASCII character
 	//
-	if (*pCode < 128)
+	static const alt_u8 maxLatinCharacter = 127u;
+	static const alt_u8 minLatinCharacter = 32u;
+
+	if (*pCode <= maxLatinCharacter)
 	{
 		const alt_u32 correctedCode = ((alt_u32)*pCode) - ((alt_u32)' ');
 
@@ -262,10 +306,10 @@ alt_u8 findUtf8Character(const alt_u8 fontIndex, const alt_u8* const pCode, stru
 		if (header == NULL)
 		{
 			RN_ASSERT(header != NULL);
-			return 0;
+			return 0u;
 		}
 		*currSymbol = *header;
-		return 1;
+		return 1u;
 	}
 
 	// Unicode characters
@@ -274,85 +318,57 @@ alt_u8 findUtf8Character(const alt_u8 fontIndex, const alt_u8* const pCode, stru
 	if (defaultHeader == NULL)
 	{
 		RN_ASSERT(defaultHeader != NULL);
-		return 0;
+		return 0u;
 	}
 	*currSymbol = *defaultHeader;
 
-	alt_u32 symbolsQuantity = fontSymbolsCount(fontIndex);
+	alt_u8 utfBytes = 0u;
+	alt_u32 utf8code = 0u;
 
-	// First byte of a 2-byte code unit sequence
-	//
 	if ((*pCode & 0b11100000u) == 0b11000000u)
 	{
-		alt_u32 utf8code = (alt_u32)*pCode + ((alt_u32)*(pCode + 1u) << 8u);
-
-		for (alt_u32 i = (127 - 32); i < symbolsQuantity; i++)
-		{
-			const struct VduSymbolHeader* const header = fontSymbolHeader(fontIndex, i);
-			if (header == NULL)
-			{
-				RN_ASSERT(header != NULL);
-				return 0;
-			}
-
-			if (header->code == utf8code)
-			{
-				*currSymbol = *header;
-				break;
-			}
-		}
-		return 2;
+		// First byte of a 2-byte code unit sequence
+		//
+		utf8code = (alt_u32)*pCode + ((alt_u32)*(pCode + 1u) << 8u); // 2-bytes code to find 
+		utfBytes = 2u;
 	}
-
-	// First byte of a 3-byte code unit sequence
-	//
-	if ((*pCode & 0b11110000u) == 0b11100000u)
+	else if ((*pCode & 0b11110000u) == 0b11100000u)
 	{
-		alt_u32 utf8code = (alt_u32)*pCode + ((alt_u32) *(pCode + 1) << 8u) + ((alt_u32) *(pCode + 2u) << 16u);
-
-		for (alt_u32 i = (127 - 32); i < symbolsQuantity; i++)
-		{
-			const struct VduSymbolHeader* const header = fontSymbolHeader(fontIndex, i);
-			if (header == NULL)
-			{
-				RN_ASSERT(header != NULL);
-				return 0;
-			}
-
-			if (header->code == utf8code)
-			{
-				*currSymbol = *header;
-				break;
-			}
-		}
-		return 3;
+		// First byte of a 3-byte code unit sequence
+		//
+		utf8code = (alt_u32)*pCode + ((alt_u32) *(pCode + 1) << 8u) + ((alt_u32) *(pCode + 2u) << 16u); // 3-bytes code to find 
+		utfBytes = 3u;
 	}
-	
-	// First byte of a 4-byte code unit sequence
-	//
-	if ((*pCode & 0b11111000u) == 0b11110000u)
+	else if ((*pCode & 0b11111000u) == 0b11110000u)
 	{
-		alt_u32 utf8code = (alt_u32)*pCode + ((alt_u32) *(pCode + 1) << 8u) + ((alt_u32) *(pCode + 2u) << 16u) + ((alt_u32)*(pCode + 3u) << 24u);
-
-		for (alt_u32 i = (127 - 32); i < symbolsQuantity; i++)
-		{
-			const struct VduSymbolHeader* const header = fontSymbolHeader(fontIndex, i);
-			if (header == NULL)
-			{
-				RN_ASSERT(header != NULL);
-				return 0;
-			}
-
-			if (header->code == utf8code)
-			{
-				*currSymbol = *header;
-				break;
-			}
-		}
-		return 4;
+		// First byte of a 4-byte code unit sequence
+		//
+		utf8code = (alt_u32)*pCode + ((alt_u32) *(pCode + 1) << 8u) + ((alt_u32) *(pCode + 2u) << 16u) + ((alt_u32)*(pCode + 3u) << 24u); // 4-bytes code to find
+		utfBytes = 4u;
+	}
+	else
+	{
+		// Incorrect UTF code
+		//
+		return 0u;
 	}
 
-	// Incorrect UTF code
-	//
-	return 0;
+	alt_u32 symbolsQuantity = fontSymbolsCount(fontIndex);
+	for (alt_u32 i = (maxLatinCharacter - minLatinCharacter); i < symbolsQuantity; i++) // loop through all non-latin characters
+	{
+		const struct VduSymbolHeader* const header = fontSymbolHeader(fontIndex, i);
+		if (header == NULL)
+		{
+			RN_ASSERT(header != NULL);
+			return 0u;
+		}
+
+		if (header->code == utf8code)
+		{
+			*currSymbol = *header;
+			break;
+		}
+	}
+
+	return utfBytes;
 }

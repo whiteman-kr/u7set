@@ -12,7 +12,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -20,7 +20,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	06,04,2026.
+-- Date:	06.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -38,7 +38,7 @@ Module description: Loads, parses, and manages font files for text rendering.
 
 -- *************************************************************
 -- Version v1.02
--- Date:	25,04,2026.
+-- Date:	25.04.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4095
 -- Reviewed by: Mazyr S.M.
 
@@ -48,11 +48,20 @@ Module description: Loads, parses, and manages font files for text rendering.
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.04
+-- Date:	14.09.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4124, rn_fofp сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -78,8 +87,8 @@ struct VduSymbolHeader
 
 /*
 Copies the contents of the all fonts files to memory at the address specified in the parameter.
-Returns �true� if the copy is successful.
-Returns �false� if an error.
+Returns "true" if the copy is successful.
+Returns "false" if an error.
 Parameters:
     fontsPath - Path to fonts subfolders (e.g EQUIPMENTID_/Fonts).
     startAddr - 32-bit pointer to a buffer where to store the configuration.
