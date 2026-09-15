@@ -942,6 +942,30 @@ namespace Sim
 		return it->second;
 	}
 
+	std::vector<std::optional<AppSignalParam>> AppSignalManagerImpl::signalParams(std::span<const Hash> appSignalHashes) const
+	{
+		std::vector<std::optional<AppSignalParam>> result;
+		result.reserve(appSignalHashes.size());
+
+		QReadLocker rl{&m_signalParamLock};
+
+		for (const Hash signalHash : appSignalHashes)
+		{
+			auto it = m_signalParams.find(signalHash);
+
+			if (it != m_signalParams.end())
+			{
+				result.push_back(it->second);
+			}
+			else
+			{
+				result.push_back(std::nullopt);
+			}
+		}
+
+		return result;
+	}
+
 	std::optional<AppSignalState> AppSignalManagerImpl::signalState(Hash signalHash) const
 	{
 		return signalState(signalHash, true);

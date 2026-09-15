@@ -18,7 +18,10 @@ namespace SimUi
 	{
 	}
 
-	SimIdeSimulator::~SimIdeSimulator() = default;
+	SimIdeSimulator::~SimIdeSimulator()
+	{
+		qDebug() << "SimIdeSimulator::~SimIdeSimulator()";
+	}
 
 	bool SimIdeSimulator::load(QString buildPath)
 	{

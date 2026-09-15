@@ -14,7 +14,6 @@ namespace SimUi
 	SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent) :
 		QWidget{parent},
 		m_simulator{simulator}
-
 	{
 		assert(m_simulator);
 

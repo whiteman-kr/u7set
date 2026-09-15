@@ -11,7 +11,6 @@ namespace Sim
 	Simulator::Simulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
 		QObject{parent},
 		m_impl{std::make_unique<Sim::SimulatorPrivate>(log, allowDebugMessages, this)}
-
 	{
 		connect(m_impl.get(), &SimulatorPrivate::projectUpdated, this, &Simulator::projectUpdated);
 		connect(m_impl.get(), &SimulatorPrivate::scriptStarted, this, &Simulator::scriptStarted);

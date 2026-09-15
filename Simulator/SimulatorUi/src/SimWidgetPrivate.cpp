@@ -177,6 +177,25 @@ namespace SimUi
 	void SimWidgetPrivate::startTrends(const std::vector<AppSignalParam>& appSignals)
 	{
 		SimTrends::startTrendApp(m_simulator, appSignals, this);
+		return;
+	}
+
+	void SimWidgetPrivate::startTrends(QStringList appSignalIds)
+	{
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(appSignalIds.size());
+
+		for (const auto& appSignalId : appSignalIds)
+		{
+			auto o = m_appSignalController->signalParam(appSignalId);
+			if (o.has_value() == true)
+			{
+				appSignals.emplace_back(o.value());
+			}
+		}
+
+		startTrends(appSignals);
+		return;
 	}
 
 	void SimWidgetPrivate::signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
@@ -250,6 +269,8 @@ namespace SimUi
 		}
 
 		SimSchemaPage* page = new SimSchemaPage{schema, m_simulator.get(), &m_schemaManager, m_appSignalController, m_tabWidget};
+
+		connect(page, &SimSchemaPage::signal_newTrend, this, qOverload<QStringList>(&SimWidgetPrivate::startTrends));
 
 		int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 		m_tabWidget->setCurrentIndex(tabIndex);

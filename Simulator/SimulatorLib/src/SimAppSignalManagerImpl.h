@@ -92,6 +92,8 @@ namespace Sim
 		using ISignalManager::signalParam;
 		virtual std::optional<AppSignalParam> signalParam(Hash signalHash) const override;
 
+		std::vector<std::optional<AppSignalParam>> signalParams(std::span<const Hash> appSignalHashes) const;
+
 		virtual std::optional<AppSignalState> signalState(Hash signalHash) const override;
 		virtual std::optional<AppSignalState> signalState(Hash signalHash, Hash dataServerHash) const override;
 

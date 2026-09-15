@@ -46,10 +46,9 @@ namespace SimUi
 						 SimWidgetPrivate* masterWindow = nullptr); // If slaveWindow is true, then masterWindow must be not null
 		virtual ~SimWidgetPrivate();
 
-	public:
-		void startTrends(const std::vector<AppSignalParam>& appSignals);
-
 	public slots:
+		void startTrends(const std::vector<AppSignalParam>& appSignals);
+		void startTrends(QStringList appSignalIds);
 		void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 		void signalInfo(QString appSignalId);
 		void openSchemaTabPage(QString schemaId, QStringList highlightIds);
