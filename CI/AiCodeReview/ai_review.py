@@ -1,3 +1,15 @@
+"""Post an AI review of the current GitLab CI commit.
+
+The script reads CI metadata and the commit diff, includes bounded complete-file context
+for changed C/C++ source and related headers, and asks Ollama for a JSON review. It
+validates every reported issue against the committed files and changed lines, posts an
+overall GitLab comment plus inline critical-issue comments, and exits nonzero when
+critical issues exist. Ollama transport and server failures are retried with diagnostics.
+
+Update this comment whenever a change alters this script's behavior, inputs, output,
+validation, or failure handling.
+"""
+
 import json
 import os
 import re
@@ -22,18 +34,20 @@ GITLAB_REVIEW_MENTION = os.environ.get("GITLAB_REVIEW_MENTION", "").strip()
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "1200"))
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:14b")
-REVIEWABLE_CPP_EXTENSIONS = {".cpp", ".h", ".hpp"}
+OLLAMA_REQUEST_ATTEMPTS = max(1, int(os.environ.get("OLLAMA_REQUEST_ATTEMPTS", "3")))
+OLLAMA_RETRY_DELAY_SECONDS = max(0.0, float(os.environ.get("OLLAMA_RETRY_DELAY_SECONDS", "5")))
+REVIEWABLE_SOURCE_EXTENSIONS = {".c", ".cpp", ".h", ".hpp"}
+IMPLEMENTATION_EXTENSIONS = {".c", ".cpp"}
 MAX_CONTEXT_FILE_BYTES = int(os.environ.get("AI_REVIEW_MAX_FILE_BYTES", "40000"))
 MAX_CONTEXT_BYTES = int(os.environ.get("AI_REVIEW_MAX_CONTEXT_BYTES", "120000"))
 GENERATED_DIRECTORY_NAMES = {"build", "generated", "autogen", "cmakefiles"}
 GENERATED_FILE_PREFIXES = ("moc_", "ui_", "qrc_")
-GENERATED_FILE_SUFFIXES = (".generated.cpp", ".generated.h", ".generated.hpp", ".pb.cpp", ".pb.h", ".pb.hpp")
+GENERATED_FILE_SUFFIXES = (".generated.c", ".generated.cpp", ".generated.h", ".generated.hpp", ".pb.c", ".pb.cpp", ".pb.h", ".pb.hpp")
 REVIEW_RESPONSE_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["result", "summary_markdown", "critical_issues"],
+    "required": ["summary_markdown", "critical_issues"],
     "properties": {
-        "result": {"type": "string", "enum": ["OK", "CRITICAL"]},
         "summary_markdown": {"type": "string"},
         "critical_issues": {
             "type": "array",
@@ -135,13 +149,13 @@ def get_commit_file(path: str) -> Optional[bytes]:
     return result.stdout
 
 
-def is_reviewable_cpp_path(path: str) -> bool:
+def is_reviewable_source_path(path: str) -> bool:
     normalized_path = path.replace("\\", "/")
     path_parts = PurePosixPath(normalized_path).parts
     file_name = PurePosixPath(normalized_path).name.lower()
     suffix = PurePosixPath(normalized_path).suffix.lower()
 
-    if suffix not in REVIEWABLE_CPP_EXTENSIONS:
+    if suffix not in REVIEWABLE_SOURCE_EXTENSIONS:
         return False
     if any(part.lower() in GENERATED_DIRECTORY_NAMES for part in path_parts):
         return False
@@ -160,10 +174,10 @@ def get_review_context_paths(changed_paths: list[str]) -> list[str]:
         errors="replace",
     ).stdout.splitlines()
     repository_path_set = set(repository_paths)
-    context_paths = {path for path in changed_paths if is_reviewable_cpp_path(path)}
+    context_paths = {path for path in changed_paths if is_reviewable_source_path(path)}
 
     for changed_path in changed_paths:
-        if PurePosixPath(changed_path).suffix.lower() != ".cpp":
+        if PurePosixPath(changed_path).suffix.lower() not in IMPLEMENTATION_EXTENSIONS:
             continue
 
         changed_file = PurePosixPath(changed_path)
@@ -179,7 +193,7 @@ def get_review_context_paths(changed_paths: list[str]) -> list[str]:
         )
         context_paths.update(
             path for path in candidates
-            if path in repository_path_set and is_reviewable_cpp_path(path)
+            if path in repository_path_set and is_reviewable_source_path(path)
         )
 
     return sorted(context_paths)
@@ -218,11 +232,11 @@ def build_review_context(diff_text: str, context_paths: list[str]) -> str:
         context_bytes += len(content)
 
     if included_paths:
-        progress(f"Including complete C++ file context ({len(included_paths)} file(s)):")
+        progress(f"Including complete C/C++ file context ({len(included_paths)} file(s)):")
         for path in included_paths:
             progress(f"  included: {path}")
     if omitted_files:
-        progress(f"Omitting C++ context files ({len(omitted_files)} file(s)):")
+        progress(f"Omitting C/C++ context files ({len(omitted_files)} file(s)):")
         for omitted_file in omitted_files:
             progress(f"  omitted: {omitted_file}")
 
@@ -260,9 +274,20 @@ def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
     return changed_lines
 
 
+def describe_ollama_error(error: requests.RequestException) -> str:
+    response = error.response
+    if response is None:
+        return str(error)
+
+    response_text = response.text.strip()
+    if response_text:
+        return f"HTTP {response.status_code}: {response_text[:2000]}"
+    return f"HTTP {response.status_code}"
+
+
 def get_ai_review(review_context: str) -> str:
     prompt = (
-        "You are an expert C++23, Qt6 code reviewer. Review the supplied Git diff and complete file context for defects, "
+        "You are an expert C and C++23, Qt6 code reviewer. Review the supplied Git diff and complete file context for defects, "
         "undefined behavior, memory/resource leaks, security risks, and clearly obsolete C++ idioms. "
         "Use the complete files to understand declarations, surrounding functions, and ownership, but report only issues caused by the supplied diff. "
         "Provide actionable Markdown feedback. The summary_markdown must explain each found issue, not just say that issues exist. "
@@ -271,13 +296,12 @@ def get_ai_review(review_context: str) -> str:
         "undefined behavior, or a major functional failure. "
         "Return one JSON object only that conforms to the supplied JSON schema. Do not use Markdown code fences. "
         "The object has this exact shape: "
-        '{"result":"OK or CRITICAL","summary_markdown":"Markdown review",'
+        '{"summary_markdown":"Markdown review",'
         '"critical_issues":[{"path":"repository/relative/file.cpp","line":123,'
         '"message":"concise Markdown comment"}]}. '
-        "Set result to CRITICAL exactly when critical_issues is non-empty. "
         "Each critical issue must cite an added or modified line on the new side of the diff. "
         "If the faulty code is unchanged context, cite the nearest added or modified line in that file. "
-        "Use an empty critical_issues array when result is OK.\n\n"
+        "Use an empty critical_issues array when no critical issues are found.\n\n"
         f"{review_context}"
     )
     payload = {
@@ -287,9 +311,32 @@ def get_ai_review(review_context: str) -> str:
         "stream": False,
         "keep_alive": "2m",
     }
-    response = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=OLLAMA_TIMEOUT)
-    response.raise_for_status()
-    review_text = response.json().get("response")
+    for attempt in range(1, OLLAMA_REQUEST_ATTEMPTS + 1):
+        try:
+            response = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=OLLAMA_TIMEOUT)
+            response.raise_for_status()
+            break
+        except requests.RequestException as error:
+            is_retryable = error.response is None or error.response.status_code >= 500
+            if is_retryable and attempt < OLLAMA_REQUEST_ATTEMPTS:
+                progress(
+                    f"Ollama request attempt {attempt}/{OLLAMA_REQUEST_ATTEMPTS} failed: "
+                    f"{describe_ollama_error(error)}. Retrying..."
+                )
+                time.sleep(OLLAMA_RETRY_DELAY_SECONDS * attempt)
+                continue
+            raise RuntimeError(
+                f"Ollama request failed after {attempt} attempt(s): {describe_ollama_error(error)}"
+            ) from error
+
+    try:
+        response_payload = response.json()
+    except ValueError as error:
+        raise ValueError(f"Ollama returned a non-JSON success response: {response.text[:2000]!r}") from error
+
+    if not isinstance(response_payload, dict):
+        raise ValueError("Ollama response must be a JSON object.")
+    review_text = response_payload.get("response")
     if not isinstance(review_text, str):
         raise ValueError("Ollama response does not contain a text review.")
     return review_text
@@ -341,13 +388,12 @@ def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[
     if not isinstance(review, dict):
         raise ValueError(f"Ollama review must be a JSON object, got {type(review).__name__}.")
 
-    result = review.get("result")
     summary = review.get("summary_markdown")
     raw_issues = review.get("critical_issues")
-    if result not in {"OK", "CRITICAL"} or not isinstance(summary, str) or not isinstance(raw_issues, list):
+    if not isinstance(summary, str) or not isinstance(raw_issues, list):
         raise ValueError(
             "Ollama review does not match the required JSON structure: "
-            f"result={result!r}, summary_markdown={type(summary).__name__}, "
+            f"summary_markdown={type(summary).__name__}, "
             f"critical_issues={type(raw_issues).__name__}."
         )
 
@@ -365,13 +411,6 @@ def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[
         issue = CriticalIssue(path, line, message.strip())
         validate_issue_location(issue)
         issues.append(attach_to_changed_line(issue, changed_lines))
-
-    expected_result = "CRITICAL" if issues else "OK"
-    if result != expected_result:
-        progress(
-            f"Ollama result {result!r} disagrees with the {len(issues)} parsed critical issue(s); "
-            f"using {expected_result!r}."
-        )
 
     return summary.strip(), issues
 
@@ -437,7 +476,7 @@ def main() -> int:
 
     context_paths = get_review_context_paths(changed_paths)
     review_context = build_review_context(diff, context_paths)
-    progress("Sending diff and C++ file context to Ollama...")
+    progress("Sending diff and C/C++ file context to Ollama...")
     model_started_at = time.perf_counter()
     review_text = get_ai_review(review_context)
     progress(f"Ollama response received in {time.perf_counter() - model_started_at:.1f}s")

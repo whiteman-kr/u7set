@@ -325,6 +325,7 @@ namespace TrendLib
 	{
 		m_toolBar = new QToolBar(this);
 		m_toolBar->setObjectName("TrendToolBar");
+		m_toolBar->setWindowTitle(tr("Toolbar"));
 
 		m_toolBar->setMovable(false);
 		m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
