@@ -7494,6 +7494,48 @@ namespace Builder
 			}
 		}
 
+		// add comparator for Actuator DataID comparison
+		//
+		if (isActuatorCompiler())
+		{
+			auto it = m_fbConv.find(Afb::CMP_SI_NE);
+
+			if (it == m_fbConv.end())
+			{
+				LOG_INTERNAL_ERROR(this->m_log);
+				result = false;
+			}
+			else
+			{
+				FbConv& fb = it->second;
+
+				QString errorMsg;
+				UalItem appItem;
+
+				appItem.init(fb.pointer, errorMsg);
+
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(this->m_log, errorMsg);
+					result = false;
+				}
+				else
+				{
+					m_acmCmpSiNeAfb = createUalAfb(appItem);
+
+					if (m_acmCmpSiNeAfb != nullptr)
+					{
+						fb.ualAfbs.insert(m_acmCmpSiNeAfb);
+					}
+					else
+					{
+						LOG_INTERNAL_ERROR(this->m_log);
+						result = false;
+					}
+				}
+			}
+		}
+
 		return result;
 	}
 
@@ -7525,6 +7567,10 @@ namespace Builder
 			//
 			Afb::AFB_BUS_NOT,
 			Afb::AFB_NOT,
+
+			// for Actuator DataID comparison
+			//
+			Afb::CMP_SI_NE
 		};
 
 		static const QString FB_SCALE_PREFIX("scale_");

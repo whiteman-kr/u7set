@@ -1030,6 +1030,7 @@ namespace Builder
 		std::vector<QStringList> m_acmSwOutAnalogs {2};
 		std::vector<QStringList> m_acmSwOutBusses {2};
 		std::vector<QStringList> m_acmSwOutDiscretes {2};
+		const UalAfb* m_acmCmpSiNeAfb = nullptr;
 
 		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
 

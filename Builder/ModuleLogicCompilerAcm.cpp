@@ -46,7 +46,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
 			PROC_TO_CALL(ModuleLogicCompiler::acmCreateSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::acmDisposeSignalsInMemory),
-			//PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			// PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
 			// PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
@@ -1408,19 +1408,62 @@ namespace Builder
 		}
 
 		code->comment_nl("Actuator initialization code");
-
 		CodeItem cmd;
 
-		DEBUG_STOP;
+		//
 
-		cmd.movConstUInt32(58038, m_acmSwInOutID, "actuator DataID");
+		const LmDescription::DataConfiguration& dataCfg = m_lmDescription->dataConfiguration();
+		int dataCfgOffset = dataCfg.dataConfigurationOffset;
+
+		//
+
+		std::optional<LmDescription::DataConfigurationParam> paramActuatorDataID = dataCfg.param("ActuatorDataID");
+
+		if (paramActuatorDataID.has_value() == false || 
+			paramActuatorDataID.value().sizeBits != SIZE_32BIT ||
+			paramActuatorDataID.value().format != E::DataFormat::UnsignedInt)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			Q_ASSERT(false);
+			return false;
+		}
+
+		cmd.movConstUInt32(dataCfgOffset + paramActuatorDataID.value().offset, m_acmSwInOutID, "actuator DataID");
 		code->append(cmd);
 
-		cmd.movConst(58040, m_acmInBufSize, "actuator input data size (from LM)");
+		//
+
+		std::optional<LmDescription::DataConfigurationParam> paramSizeReceiveFromLM = dataCfg.param("SizeReceiveFromLM");
+
+		if (paramSizeReceiveFromLM.has_value() == false || 
+			paramSizeReceiveFromLM.value().sizeBits != SIZE_16BIT || 
+			paramSizeReceiveFromLM.value().format != E::DataFormat::UnsignedInt)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			Q_ASSERT(false);
+			return false;
+		}
+
+		cmd.movConst(dataCfgOffset + paramSizeReceiveFromLM.value().offset, m_acmInBufSize, "actuator input data size (from LM)");
 		code->append(cmd);
 
-		cmd.movConst(58041, m_acmOutBufSize, "actuator output data size (to LM)");
+		//
+
+		std::optional<LmDescription::DataConfigurationParam> paramSizeSendToLM = dataCfg.param("SizeSendToLM");
+
+		if (paramSizeSendToLM.has_value() == false || 
+			paramSizeSendToLM.value().sizeBits != SIZE_16BIT || 
+			paramSizeSendToLM.value().format != E::DataFormat::UnsignedInt)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			Q_ASSERT(false);
+			return false;
+		}
+
+		cmd.movConst(dataCfgOffset + paramSizeSendToLM.value().offset, m_acmOutBufSize, "actuator output data size (to LM)");
 		code->append(cmd);
+
+		//
 
 		code->newLine();
 
@@ -1429,22 +1472,88 @@ namespace Builder
 
 	bool ModuleLogicCompiler::acmWriteActuatorDataToOutputBuffer(CodeSnippet* code)
 	{
+		if (m_acmCmpSiNeAfb == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Address16 addr1(m_lmDescription->memory().m_moduleDataOffset, 0);
+		Address16 addr2(m_lmDescription->memory().m_moduleDataOffset + m_lmDescription->memory().m_moduleDataSize, 0);
+
+		const SchemaPin* inPin = m_acmCmpSiNeAfb->getPin(Afb::IN_PIN_CAPTION);
+		const SchemaPin* setPin = m_acmCmpSiNeAfb->getPin(Afb::SET_PIN_CAPTION);
+		const SchemaPin* outPin = m_acmCmpSiNeAfb->getPin(Afb::OUT_PIN_CAPTION);
+
+		if (inPin == nullptr || setPin == nullptr || outPin == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			Q_ASSERT(false);
+			return false;
+		}
+
 		code->comment_nl("Write Actuator data to output buffers");
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
 		CodeItem cmd;
 
-		Address16 addr(m_lmDescription->memory().m_moduleDataOffset, 0);
+		cmd.movConst(bitAccAddr, 0);
+		code->append(cmd);
+		code->newLine();
 
-		cmd.movConstUInt32(addr, m_acmSwInOutID, "actuator DataID");
+		// check channel 1 DataID
+
+		cmd.writeFuncBlock32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), inPin->afbOperandIndex(), addr1.offset(), m_acmCmpSiNeAfb->caption());
 		code->append(cmd);
 
-		addr.addWord(m_lmDescription->memory().m_moduleDataSize);
+		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption());
+		code->append(cmd);
 
-		cmd.movConstUInt32(addr, m_acmSwInOutID, "actuator DataID");
+		cmd.startafb(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), m_acmCmpSiNeAfb->caption(), m_acmCmpSiNeAfb->runTime(), 
+									"check received Actuator DataID for channel 1");
+		code->append(cmd);
+
+		cmd.readFuncBlockBit(bitAccAddr, 0, m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), outPin->afbOperandIndex(), m_acmCmpSiNeAfb->caption());
+		code->append(cmd);
+		
+		code->newLine();
+
+		// check channel 2 DataID
+
+		cmd.writeFuncBlock32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), inPin->afbOperandIndex(), addr2.offset(), m_acmCmpSiNeAfb->caption());
+		code->append(cmd);
+
+		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption());
+		code->append(cmd);
+
+		cmd.startafb(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), m_acmCmpSiNeAfb->caption(), m_acmCmpSiNeAfb->runTime(), 
+			"check received Actuator DataID for channel 2");
+		code->append(cmd);
+
+		cmd.readFuncBlockBit(bitAccAddr, 1, m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), outPin->afbOperandIndex(), m_acmCmpSiNeAfb->caption());
 		code->append(cmd);
 
 		code->newLine();
+
+		//
+
+		cmd.movConstUInt32(addr1, m_acmSwInOutID, "actuator DataID for channel 1");
+		code->append(cmd);
+
+		cmd.mov(addr1.offset() + 2, bitAccAddr, "write check result for channel 1");
+		code->append(cmd);
+
+		code->newLine();
+
+		cmd.movConstUInt32(addr2, m_acmSwInOutID, "actuator DataID for channel 2");	
+		code->append(cmd);
+
+		cmd.mov(addr2.offset() + 2, bitAccAddr, "write check result for channel 2");
+		code->append(cmd);
+
+		code->newLine();
+
 		return true;
 	}
-
 }

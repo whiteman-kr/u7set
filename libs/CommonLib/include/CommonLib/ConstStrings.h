@@ -1030,6 +1030,7 @@ namespace Afb
 
 	inline const QString IN_PIN_CAPTION("in");
 	inline const QString OUT_PIN_CAPTION("out");
+	inline const QString SET_PIN_CAPTION("set");
 
 	inline const QString IN_1_PIN_CAPTION("in_1");
 	inline const QString IN_2_PIN_CAPTION("in_2");
@@ -1065,6 +1066,7 @@ namespace Afb
 	inline const QString AFB_BUS_NOT("bus_not");
 	inline const QString AFB_OR("or");
 	inline const QString AFB_AND("and");
+	inline const QString CMP_SI_NE("cmp_si_ne");
 
 	inline const QString SET_FLAGS("set_flags");
 	inline const QString SIMLOCK("simlock");
