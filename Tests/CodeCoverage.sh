@@ -15,9 +15,10 @@ set -x
 # Terminate script if any command returns error.
 set -e
 
-# Run StopServices when exit (any error or success).
+# Print the failing command and preserve its exit status during cleanup.
 #
-trap StopServices EXIT  
+trap 'exit_code=$?; echo "ERROR: command failed with exit status $exit_code: $BASH_COMMAND"' ERR
+trap 'exit_code=$?; echo "CodeCoverage.sh exiting with status: $exit_code"; StopServices; exit "$exit_code"' EXIT
 
 function StopServices() {
     echo "---Enter StopServices()---"
@@ -31,6 +32,19 @@ function StopServices() {
     pkill -SIGINT GatewaySrv || true
     sleep 6
     echo "---Leave StopServices()---"
+}
+
+function RunTest() {
+    local test_name="$1"
+    shift
+
+    set +e
+    "$@"
+    local exit_code=$?
+    set -e
+
+    echo "$test_name returned: $exit_code"
+    return "$exit_code"
 }
 
 # Stop if any service is running.
@@ -167,10 +181,11 @@ echo "-  Run other tests, no services are required here  -"
 echo "----------------------------------------------------"
 
 #./LicenseLibTests
-./MetrologyTests
-./SimulatorTests
-./TestSuiteLibUnitTests
-./u7databasetests -config=$CI_PROJECT_DIR/Tests/u7databasetestsArgsCoverage.xml
+
+RunTest "MetrologyTests" ./MetrologyTests
+RunTest "SimulatorTests" ./SimulatorTests
+RunTest "TestSuiteLibUnitTests" ./TestSuiteLibUnitTests
+RunTest "u7databasetests" ./u7databasetests -config="$CI_PROJECT_DIR/Tests/u7databasetestsArgsCoverage.xml"
 
 popd
 
