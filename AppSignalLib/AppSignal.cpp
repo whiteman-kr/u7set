@@ -873,6 +873,11 @@ void AppSignal::setIoBufAddr(const Address16& addr)
 	m_ioBufAddr = addr;
 }
 
+bool AppSignal::ioBufAddrIsValid() const 
+{
+	return m_ioBufAddr.isValid();
+}
+
 Address16 AppSignal::actualAddr(E::LogicModuleRamAccess* lmRamAccess) const
 {
 	if (lmRamAccess != nullptr)

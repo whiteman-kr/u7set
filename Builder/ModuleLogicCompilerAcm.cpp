@@ -850,7 +850,24 @@ namespace Builder
 				break;
 			}
 
+			Address16 ualAddr = addr;
+
 			appSignal->setIoBufAddr(addr);
+			addr.addBit(appSignal->dataSize());
+
+			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
+
+			if (addr.bit() != 0)
+			{
+				Q_ASSERT(false);
+				result = false;
+				break;
+			}
 
 			//
 
@@ -869,25 +886,7 @@ namespace Builder
 					continue;
 				}
 
-				ualSignal->setUalAddr(addr);
-			}
-
-			//
-
-			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
-			{
-				Q_ASSERT(false);
-				result = false;
-				break;
-			}
-
-			addr.addBit(appSignal->dataSize());
-
-			if (addr.bit() != 0)
-			{
-				Q_ASSERT(false);
-				result = false;
-				break;
+				ualSignal->setUalAddr(ualAddr);
 			}
 		}
 
@@ -914,6 +913,8 @@ namespace Builder
 				break;
 			}
 
+			Address16 ualAddr = addr;
+
 			appSignal->setIoBufAddr(addr);
 			addr.addBit(appSignal->dataSize());
 
@@ -934,7 +935,7 @@ namespace Builder
 					continue;
 				}
 
-				ualSignal->setUalAddr(addr);
+				ualSignal->setUalAddr(ualAddr);
 			}
 		}
 
@@ -1554,6 +1555,261 @@ namespace Builder
 
 		code->newLine();
 
+		bool result = true;
+
+		result &= acmWriteActuatorOutputSignals(code, ACM_CHANNEL_1_INDEX, 
+						m_acmSwOutAnalogs[ACM_CHANNEL_1_INDEX], m_acmSwOutBusses[ACM_CHANNEL_1_INDEX], m_acmSwOutDiscretes[ACM_CHANNEL_1_INDEX]);
+
+		result &= acmWriteActuatorOutputSignals(code, ACM_CHANNEL_2_INDEX, 
+						m_acmSwOutAnalogs[ACM_CHANNEL_2_INDEX], m_acmSwOutBusses[ACM_CHANNEL_2_INDEX], m_acmSwOutDiscretes[ACM_CHANNEL_2_INDEX]);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::acmWriteActuatorOutputSignals(CodeSnippet* code, int chIndex, const QStringList& analogs, const QStringList& busses, const QStringList& discretes) 
+	{
+		const AppSignal* appSignal = nullptr;
+		const UalSignal* ualSignal = nullptr;
+
+		bool first = true;
+
+		CodeItem cmd;
+
+		bool result = true;
+
+		// Copy analog signals
+		//
+		for (const QString& id : analogs)
+		{
+			acmGetAppUalSignals(id, &appSignal, &ualSignal);
+
+			if (appSignal == nullptr || 
+				appSignal->ioBufAddrIsValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				result = false;
+				continue;
+			}
+
+			if (first)
+			{
+				code->comment_nl(QString("Write Actuator output analog signals channel %1").arg(chIndex + 1));
+				first = false;
+			}
+
+			if (ualSignal != nullptr && ualSignal->ualAddrIsValid())
+			{
+				cmd.mov32(appSignal->ioBufAddr(), ualSignal->ualAddr(), QString("%1 <= %2").arg(id).arg(ualSignal->refSignalIDsJoined()));
+			}
+			else
+			{
+				if (ualSignal == nullptr)
+				{
+					cmd.movConstInt32(appSignal->ioBufAddr().offset(), 0, QString("%1 <= #0").arg(id));
+				}
+				else
+				{
+					if (ualSignal->isConst())
+					{
+						switch (ualSignal->constAnalogFormat())
+						{
+						case E::AnalogAppSignalFormat::SignedInt32:
+							cmd.movConstInt32(appSignal->ioBufAddr().offset(), ualSignal->constAnalogIntValue(), QString("%1 <= %2").arg(id).arg(ualSignal->constAnalogIntValue()));
+							break;
+
+						case E::AnalogAppSignalFormat::Float32:
+							cmd.movConstFloat(appSignal->ioBufAddr().offset(), ualSignal->constAnalogFloatValue(), QString("%1 <= %2").arg(id).arg(ualSignal->constAnalogFloatValue()));
+							break;
+
+						default:
+							LOG_INTERNAL_ERROR(m_log);
+							Q_ASSERT(false);
+							result = false;
+						}
+					}
+					else
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						Q_ASSERT(false);
+						result = false;
+					}
+				}
+			}
+
+			code->append(cmd);
+		}
+
+		if (analogs.isEmpty() == false)
+		{
+			code->newLine();
+		}
+
+		first = true;
+
+		// Copy bus signals
+		//
+		for (const QString& id : busses)
+		{
+			acmGetAppUalSignals(id, &appSignal, &ualSignal);
+
+			if (appSignal == nullptr || appSignal->ioBufAddrIsValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				result = false;
+				continue;
+			}
+
+			BusShared bus = m_actuatorSignals->getBus(appSignal->busTypeID());
+
+			if (bus == nullptr)
+			{
+				// Bus type ID %1 of signal %2 is undefined.
+				//
+				m_log->errALC5092(appSignal->busTypeID(), id);
+				Q_ASSERT(false);
+				return false;
+			}
+
+			if (first)
+			{
+				code->comment_nl(QString("Write Actuator output bus signals channel %1").arg(chIndex + 1));
+				first = false;
+			}
+
+			if (ualSignal != nullptr && ualSignal->ualAddrIsValid())
+			{
+				cmd.movMem(appSignal->ioBufAddr(), ualSignal->ualAddr(), bus->sizeW(), QString("%1 <= %2").arg(id).arg(ualSignal->refSignalIDsJoined()));
+			}
+			else
+			{
+				cmd.setMem(appSignal->ioBufAddr().offset(), 0, bus->sizeW(), QString("%1 <= #0").arg(id));
+			}
+
+			code->append(cmd);
+		}
+
+		if (busses.isEmpty() == false)
+		{
+			code->newLine();
+		}
+		
+		// Copy diacrete signals
+		//
+		std::map<int, std::map<int, const AppSignal*>> discretesMap;		// appSignal->ioBufAddr().offset() => std::mapr<const AppSignal*>
+
+		for (const QString& id : discretes)
+		{
+			acmGetAppUalSignals(id, &appSignal, &ualSignal);
+
+			if (appSignal == nullptr || appSignal->ioBufAddrIsValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				result = false;
+				continue;
+			}
+
+			int ioBufAddrOffset = appSignal->ioBufAddr().offset();
+			int ioBufAddrBit = appSignal->ioBufAddr().bit();
+
+			auto it = discretesMap.find(ioBufAddrOffset);
+
+			if (it == discretesMap.end())
+			{
+				auto [newIt, b] = discretesMap.emplace(ioBufAddrOffset, std::map<int, const AppSignal*>{});
+				it = newIt;
+			}
+
+			auto [newIt, b] = it->second.emplace(ioBufAddrBit, appSignal);
+
+			Q_ASSERT(b == true);
+		}
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+		first = true;
+
+		for (const auto& [offset, bitsMap] : discretesMap)
+		{
+			if (first)
+			{
+				code->comment_nl(QString("Write Actuator output discrete signals channel %1").arg(chIndex + 1));
+				first = false;
+			}
+
+			CodeSnippet code2;
+
+			for (const auto& [bit, appSignal] : bitsMap)
+			{
+				const UalSignal* ualSignal = m_ualSignals.get(appSignal->appSignalID());
+
+				if (ualSignal == nullptr)
+				{
+					continue;
+				}
+
+				if (ualSignal->isConst())
+				{
+					Q_ASSERT(ualSignal->isConstDiscrete());
+
+					cmd.movBitConst(bitAccAddr, bit, ualSignal->constDiscreteValue(), 
+						QString("%1 <= #%2").arg(appSignal->appSignalID()).arg(ualSignal->constDiscreteValue()));
+					code2.append(cmd);
+				}
+				else
+				{
+					if (ualSignal->ualAddrIsValid() == false)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						Q_ASSERT(false);
+						result = false;
+						continue;
+					}
+
+					cmd.movBit(bitAccAddr, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit(), 
+						QString("%1 <= %2").arg(appSignal->appSignalID()).arg(ualSignal->refSignalIDsJoined()));
+					code2.append(cmd);
+				}
+			}
+
+			Q_ASSERT(code2.itemsCount() <= SIZE_16BIT);
+
+			if (code2.itemsCount() == 0)
+			{
+				cmd.movConst(offset, 0);
+				code->append(cmd);
+			}
+			else
+			{
+				if (code2.itemsCount() < SIZE_16BIT)
+				{
+					cmd.movConst(bitAccAddr, 0);
+					code->append(cmd);
+				}
+
+				code->append(code2);
+
+				cmd.mov(offset, bitAccAddr);
+				code->append(cmd);
+			}
+
+			code->newLine();
+		}
+
 		return true;
 	}
-}
+
+	void ModuleLogicCompiler::acmGetAppUalSignals(const QString& appSignalID, const AppSignal** appSignal, const UalSignal** ualSignal)
+	{
+		TEST_PTR_RETURN(appSignal);
+		TEST_PTR_RETURN(ualSignal);
+
+		*appSignal = nullptr;
+		*ualSignal = nullptr;
+		
+		*appSignal = m_actuatorSignals->getSignal(appSignalID);
+		*ualSignal = m_ualSignals.get(appSignalID);
+	}
+
+} // namespace Builder

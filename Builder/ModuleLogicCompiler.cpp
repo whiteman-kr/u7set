@@ -9029,7 +9029,7 @@ namespace Builder
 				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
 				//PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
 				PROC_TO_CALL(ModuleLogicCompiler::acmWriteActuatorDataToOutputBuffer),
-				PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
+				//PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
 				//PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
 			};
 
@@ -11602,9 +11602,19 @@ namespace Builder
 	bool ModuleLogicCompiler::generateAfbBitAccNotCode(CodeSnippet* code, const UalAfb* ualAfb,
 													const BusProcessingStepInfo& bpStepInfo, bool* result)
 	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(ualAfb);
+		TEST_PTR_RETURN_FALSE(result);
+
 		Q_ASSERT(ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE);
 
 		*result = true;
+
+		if (isOutConnectedToTerminatorOnly(ualAfb))
+		{
+			code->comment_nl(QString("Output(s) of Afb %1 connected to Terminator only. Code generation skiped.").arg(ualAfb->label()));
+			return true;
+		}
 
 		UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, Afb::IN_PIN_CAPTION, true);
 
@@ -18277,7 +18287,14 @@ namespace Builder
 
 		if (m_context->generateExtraDebugInfo() == true)
 		{
-			BuildFile* binFile = m_resultWriter->addFile(Directory::BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
+			QString fileName = lmEquipmentID();
+
+			if (isActuatorCompiler())
+			{
+				fileName = QString("%1-%2").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber);
+			}
+
+			BuildFile* binFile = m_resultWriter->addFile(Directory::BIN, QString("%1.bin").arg(fileName), "", "", binCode);
 
 			if (binFile == nullptr)
 			{

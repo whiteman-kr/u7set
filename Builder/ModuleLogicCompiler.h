@@ -990,6 +990,9 @@ namespace Builder
 
 		bool acmGenerateActuatorIdrCode(CodeSnippet* code);
 		bool acmWriteActuatorDataToOutputBuffer(CodeSnippet* code);
+		bool acmWriteActuatorOutputSignals(CodeSnippet* code, int chIndex, 
+						const QStringList& analogs, const QStringList& busses, const QStringList& discretes);
+		void acmGetAppUalSignals(const QString& appSignalID, const AppSignal** appSignal, const UalSignal** ualSignal);
 
 	public:
 		static const int MIN_AFB_OPCODE = 1;
