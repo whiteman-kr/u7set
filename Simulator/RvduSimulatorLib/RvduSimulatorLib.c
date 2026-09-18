@@ -146,6 +146,8 @@ bool rnLibStartSim(const char* buildFolder,
 	m_buildFolder = buildFolder;
 	m_subsystemKey = (alt_u16)subsystemKey;
 
+	setStartupStage(STAGE_MEM_INIT);
+
 	// Memory initialization
 	//
 	if (m_memory == NULL || m_externalBusBridgeRead == NULL || m_externalBusBridgeWrite == NULL)
@@ -154,8 +156,6 @@ bool rnLibStartSim(const char* buildFolder,
 	}
 	alt_u8* memoryEnd = m_memory;
 	alt_u32 memoryAvailable = m_memorySize;
-
-	setStartupStage(STAGE_MEM_INIT);
 
 	// Initialize memory for log
 	//
@@ -167,7 +167,7 @@ bool rnLibStartSim(const char* buildFolder,
 		alt_u32 bytesRead = 0;
 		if (moduleRnDiagInitialize(startAddr, 1000, memoryAvailable, &bytesRead) == false)
 		{
-			setStartupStage(STAGE_MEM_ERR);
+			setStartupStage(STAGE_LOG_ERR);
 			return false;
 		}
 
@@ -268,6 +268,7 @@ bool rnLibStartSim(const char* buildFolder,
 
 	// Initialize video memory
 	//
+	setStartupStage(STAGE_DRAW_INIT);
 	moduleRnVbufInitialize((alt_u32*)pVideoBuffer, (alt_u32*)pHdmiBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
 	moduleRnPrimInitialize((alt_u32*)pVideoBuffer, vduConfig()->display0.width, vduConfig()->display0.height);
 
@@ -425,15 +426,15 @@ bool rnLibStartSim(const char* buildFolder,
 	// Allocate memory for trends
 	//
 	{
+		setStartupStage(STAGE_TREND_INIT);
+
 		alt_u8* const startAddr = memoryEnd;
 
 		alt_u32 bytesUsed = 0;
 		bool result = allocateTrendsMemory(startAddr, memoryAvailable, &bytesUsed);
 		if (result == false)
 		{
-			logError(InternalError, "allocateTrendsMemory: error allocating memory for trends data.");
-
-			setStartupStage(STAGE_MEM_ERR);
+			setStartupStage(STAGE_TREND_ERR);
 			return false;
 		}
 
@@ -442,6 +443,11 @@ bool rnLibStartSim(const char* buildFolder,
 		memoryAvailable = DEC_MEMORY(memoryAvailable, bytesUsed);
 		logMemoryUsage("allocateTrendsMemory", m_memory, memoryEnd, m_memorySize);
 	}
+
+	// Initialize trends
+	//
+	moduleRnTrendProcInitialize();
+	moduleRnTrendViewInitialize(vduConfig()->display0.width, vduConfig()->display0.height);
 
 	// Set default schema file
 	//
@@ -468,12 +474,6 @@ bool rnLibStartSim(const char* buildFolder,
 			return false;
 		}
 	}
-
-	// Initialize trends
-	//
-
-	moduleRnTrendProcInitialize();
-	moduleRnTrendViewInitialize(vduConfig()->display0.width, vduConfig()->display0.height);
 
 	setStartupStage(STAGE_RUNNING);
 

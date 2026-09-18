@@ -79,6 +79,12 @@ void moduleRnTrendViewInitialize(alt_u16 screenWidth, alt_u16 screenHeight)
 
 void drawTrend(const VduSchemaFileSchemaItemTrend1* const trend)
 {
+	if (trend == NULL) 
+	{
+		RN_ASSERT(trend);
+		return;
+	}
+
 	alt_u32 signalBackColor[2] = { trend->backColor1st, trend->backColor2nd };
 
 	if (m_moduleInitialized == false)
@@ -87,13 +93,40 @@ void drawTrend(const VduSchemaFileSchemaItemTrend1* const trend)
 		return;
 	}
 
-	if (trendIsConsistent(trend) == false)
+	if (trend->version != TYPE_TREND_VERSION)
 	{
-		// Trend has invalid properties
-		//
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg,
+					   STRING_MAX_LEN,
+					   "drawTrend: unsupported trend version %u, expected %u.",
+					   (unsigned int)trend->version,
+					   (unsigned int)TYPE_TREND_VERSION);
+		logError(InternalError, msg);
 		return;
 	}
 
+	if (trendIsConsistent(trend) == false)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg, STRING_MAX_LEN, "drawTrend: trend object is inconsistent.");
+
+		logError(InternalError, msg);
+		return;
+	}
+
+	if (trend->signalCount > TREND_MAX_SIGNALS_COUNT)
+	{
+		char msg[STRING_MAX_LEN];
+		(void)snprintf(msg,
+					   STRING_MAX_LEN,
+					   "drawTrend: trend object has too many signals (%u), expected: %u.",
+					   (unsigned int)trend->signalCount,
+					   (unsigned int)TREND_MAX_SIGNALS_COUNT);
+
+		logError(InternalError, msg);
+		return;
+	}
+		
 	if ((trend->width == 0u) || (trend->height == 0u))
 	{
 		// Rect is invisible
@@ -366,6 +399,12 @@ static void drawTimeGrid(const VduSchemaFileSchemaItemTrend1* const trend,
 		const alt_u16 timeGridInterval = (alt_u16)(tsd->durationSecs / horzGridCount);
 		const alt_u16 pixelGridInterval = tsd->columnCount / horzGridCount;
 
+		if ((timeGridInterval == 0u) || (pixelGridInterval == 0u)) 
+		{
+			RN_ASSERT(false);
+			return;
+		}
+
 		alt_u64 startTimeStamp = timeCode - tsd->durationSecs;	// Timestamp of the leftmost trend coordinate
 		
 		alt_u64 gridTimeStamp = startTimeStamp;		// Timestamp, aligned by the grid step to the right 
@@ -551,11 +590,17 @@ static void valueString(const VduValue* val,
 			(void)snprintf(str, STRING_MAX_LEN, "%d %s", (int)val->data.i32, units);
 		}
 	}
+	else if (type == Discrete)
+	{
+		// Discrete value is printed as zero or non-zero
+		(void)snprintf(str, STRING_MAX_LEN, "%d", (val->data.i32 == 0) ? 0 : 1);
+	}
 	else
 	{
-		RN_ASSERT(false);	// No discretes
+		// Unknown unsupported type
+		RN_ASSERT(false);
+		str[0] = '\0';
 	}
-
 }
 
 static void drawScaleGrid(const VduSchemaFileSchemaItemTrend1* const trend, alt_u16 laneIndex, alt_u16 laneCount, alt_u16 vertGridCount,
@@ -597,10 +642,20 @@ static void drawScaleGrid(const VduSchemaFileSchemaItemTrend1* const trend, alt_
 		alt_u16 col = laneIndex / 2u;
 		alt_u16 row = laneIndex % 3u;
 
-		alt_u16 decimalPlaces = (tsp->decimalPlaces == -1) ? asp->decimalPlaces : (alt_u16)tsp->decimalPlaces;
-
-		if (asp->vduSignalType != (alt_u16)Discrete)
+		if ((asp->vduSignalType == (alt_u16)AnalogFloat32) || (asp->vduSignalType == (alt_u16)AnalogSignedInt32))
 		{
+			// Validate the analog signal format
+			//
+			if ((tsp->valueFormat != (alt_u16)Auto) && (tsp->valueFormat != (alt_u16)Decimal) && (tsp->valueFormat != (alt_u16)Exponential))
+			{
+				RN_ASSERT(false);
+				return;
+			}
+
+			alt_u16 decimalPlaces = (tsp->decimalPlaces == -1) ? asp->decimalPlaces : (alt_u16)tsp->decimalPlaces;
+
+			// Print end values
+			//
 			valueString(&tsp->highViewLimit, asp->vduSignalType, decimalPlaces, trend->scaleType, 
 				tsp->valueFormat, signalUnit(asp->signalIndex), str);
 
@@ -612,70 +667,96 @@ static void drawScaleGrid(const VduSchemaFileSchemaItemTrend1* const trend, alt_
 
 			printStr(trend->left, top + height - ((row + 1u) * fontHeight), scaleAreaWidth, fontHeight, (alt_u8)trend->fontIndex, tsp->color,
 				backColor, (col == 0u) ? (ALIGN_H_RIGHT | ALIGN_V_TOP) : (ALIGN_H_LEFT | ALIGN_V_TOP), str);
+
+			// Print grid values
+			//
+			if (vertGridCount > 0u)
+			{
+				alt_u16 yStep = height / vertGridCount;
+
+				VduValue valueStep = {0};
+				VduValue valuePos = {0};
+
+				if (asp->vduSignalType == (alt_u16)AnalogFloat32)
+				{
+					valueStep.data.f32 = (tsp->highViewLimit.data.f32 - tsp->lowViewLimit.data.f32) / (float)vertGridCount;
+					valuePos.data.f32 = tsp->highViewLimit.data.f32;
+
+					valueStep.type = (alt_u16)f32;
+					valuePos.type = valueStep.type;
+				}
+				else if (asp->vduSignalType == (alt_u16)AnalogSignedInt32)
+				{
+					valueStep.data.i32 = (tsp->highViewLimit.data.i32 - tsp->lowViewLimit.data.i32) / (alt_32)vertGridCount;
+					valuePos.data.i32 = tsp->highViewLimit.data.i32;
+
+					valueStep.type = (alt_u16)i32;
+					valuePos.type = valueStep.type;
+				}
+				else
+				{
+					RN_ASSERT(false);
+					return;
+				}
+
+				for (alt_u16 i = 1u; i < vertGridCount; i++)
+				{
+					alt_u16 yPos = yStep * i;
+
+					drawLine(left, top + yPos, left + width, top + yPos, 1, trend->lineColor);
+
+					if (asp->vduSignalType == (alt_u16)AnalogFloat32)
+					{
+						valuePos.data.f32 -= valueStep.data.f32;
+					}
+					else if (asp->vduSignalType == (alt_u16)AnalogSignedInt32)
+					{
+						valuePos.data.i32 -= valueStep.data.i32;
+					}
+					else
+					{
+						RN_ASSERT(false);
+						return;
+					}
+
+					valueString(&valuePos,
+								asp->vduSignalType,
+								decimalPlaces,
+								trend->scaleType,
+								tsp->valueFormat,
+								signalUnit(asp->signalIndex),
+								str);
+
+					alt_u16 textY = top + yPos + (laneIndex * fontHeight) - (laneCount * fontHeight) / 2u;
+
+					printStr(trend->left,
+							 textY,
+							 scaleAreaWidth,
+							 fontHeight,
+							 (alt_u8)trend->fontIndex,
+							 tsp->color,
+							 backColor,
+							 (col == 0u) ? (ALIGN_H_RIGHT | ALIGN_V_TOP) : (ALIGN_H_LEFT | ALIGN_V_TOP),
+							 str);
+				}
+			}
 		}
-		else
+		else if (asp->vduSignalType == (alt_u16)Discrete)
 		{
+			// Discrete signal
+			//
 			printStr(trend->left, top + (row * fontHeight), scaleAreaWidth, fontHeight, (alt_u8)trend->fontIndex, tsp->color,
 				backColor, (col == 0u) ? (ALIGN_H_RIGHT | ALIGN_V_TOP) : (ALIGN_H_LEFT | ALIGN_V_TOP), "1");
 
 			printStr(trend->left, top + height - ((row + 1u) * fontHeight), scaleAreaWidth, fontHeight, (alt_u8)trend->fontIndex, tsp->color,
 				backColor, (col == 0u) ? (ALIGN_H_RIGHT | ALIGN_V_TOP) : (ALIGN_H_LEFT | ALIGN_V_TOP), "0");
 		}
-
-		// Print grid values
-		//
-		if ((asp->vduSignalType != (alt_u16)Discrete) && (vertGridCount > 0u))
+		else
 		{
-			alt_u16 yStep = height / vertGridCount;
-
-			VduValue valueStep = { 0 };
-			VduValue valuePos = { 0 };
-
-			if (asp->vduSignalType == (alt_u16)AnalogFloat32)
-			{
-				valueStep.data.f32 = (tsp->highViewLimit.data.f32 - tsp->lowViewLimit.data.f32) / (float)vertGridCount;
-				valuePos.data.f32 = tsp->highViewLimit.data.f32;
-
-				valueStep.type = (alt_u16)f32;
-				valuePos.type = valueStep.type;
-			}
-			else if (asp->vduSignalType == (alt_u16)AnalogSignedInt32)
-			{
-				valueStep.data.i32 = (tsp->highViewLimit.data.i32 - tsp->lowViewLimit.data.i32) / (alt_32)vertGridCount;
-				valuePos.data.i32 = tsp->highViewLimit.data.i32;
-
-				valueStep.type = (alt_u16)i32;
-				valuePos.type = valueStep.type;
-			}
-			else
-			{
-			}
-
-			for (alt_u16 i = 1u; i < vertGridCount; i++)
-			{
-				alt_u16 yPos = yStep * i;
-
-				drawLine(left, top + yPos, left + width, top + yPos, 1, trend->lineColor);
-
-				if (asp->vduSignalType == (alt_u16)AnalogFloat32)
-				{
-					valuePos.data.f32 -= valueStep.data.f32;
-				}
-				else
-				{
-					valuePos.data.i32 -= valueStep.data.i32;
-				}
-
-				valueString(&valuePos, asp->vduSignalType, decimalPlaces, trend->scaleType,
-					tsp->valueFormat, signalUnit(asp->signalIndex), str);
-
-				alt_u16 textY = top + yPos + (laneIndex * fontHeight) - (laneCount * fontHeight) / 2u;
-
-				printStr(trend->left, textY, scaleAreaWidth, fontHeight, (alt_u8)trend->fontIndex, tsp->color,
-					backColor, (col == 0u) ? (ALIGN_H_RIGHT | ALIGN_V_TOP) : (ALIGN_H_LEFT | ALIGN_V_TOP), str);
-			}
+			RN_ASSERT(false);
+			return;
 		}
-	}
+	} // showSignalScales
 }
 
 static void drawCurve(const VduSchemaFileSchemaItemTrend1* const trend, alt_u16 trendSignalIndex, alt_u16 left, alt_u16 top, alt_u16 width, alt_u16 height)
@@ -688,6 +769,7 @@ static void drawCurve(const VduSchemaFileSchemaItemTrend1* const trend, alt_u16 
 		RN_ASSERT(tsd != NULL);
 		return;
 	}
+
 	if ((tsd->columnCount == 0u) || (tsd->durationSecs < TREND_MIN_DURATION) || (tsd->durationSecs > TREND_MAX_DURATION))
 	{
 		RN_ASSERT(false);
@@ -707,10 +789,20 @@ static void drawCurve(const VduSchemaFileSchemaItemTrend1* const trend, alt_u16 
 
 	if (asp->vduSignalType == (alt_u16)AnalogFloat32)
 	{
+		if (tsp->highViewLimit.data.f32 == tsp->lowViewLimit.data.f32) 
+		{
+			RN_ASSERT(false);
+			return;
+		}
 		yScale = ((float)height - 1.0f) / (tsp->highViewLimit.data.f32 - tsp->lowViewLimit.data.f32);
 	}
 	else if (asp->vduSignalType == (alt_u16)AnalogSignedInt32)
 	{
+		if (tsp->highViewLimit.data.i32 == tsp->lowViewLimit.data.i32)
+		{
+			RN_ASSERT(false);
+			return;
+		}
 		yScale = ((float)height - 1.0f) / ((float)tsp->highViewLimit.data.i32 - (float)tsp->lowViewLimit.data.i32);
 	}
 	else if (asp->vduSignalType == (alt_u16)Discrete)

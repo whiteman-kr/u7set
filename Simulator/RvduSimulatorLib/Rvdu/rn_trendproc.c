@@ -190,14 +190,20 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 							   "allocateTrendsMemory: unsupported trend version %u, expected %u.",
 							   (unsigned int)item->trend.version,
 							   (unsigned int)TYPE_TREND_VERSION);
-				logWarning(InternalWarning, msg);
-				continue;
+				logError(InternalError, msg);
+				return false;
 			}
-
+			
 			if (trendIsConsistent(&item->trend) == false)
 			{
-				RN_ASSERT_MSG(false, "allocateTrendsMemory: trend object is inconsistent.");
-				continue;
+				char msg[STRING_MAX_LEN];
+				(void)snprintf(msg,
+							   STRING_MAX_LEN,
+							   "allocateTrendsMemory: trend object %s is inconsistent.",
+							   vduSchemaString(schema, item->label));
+
+				logError(InternalError, msg);
+				return false;
 			}
 
 			// Create TrendSignalData structures for in-range durations
@@ -212,6 +218,13 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 				alt_u32 trendSignalDataSize = 0u;
 				if (allocateTrendSignalData(item, item->trend.durationsSecs[i], memoryAvailable, &trendSignalDataSize) == false)
 				{
+					char msg[STRING_MAX_LEN];
+					(void)snprintf(msg,
+								   STRING_MAX_LEN,
+								   "allocateTrendsMemory: insufficient memory for trend %s signals.",
+								   vduSchemaString(schema, item->label));
+
+					logError(InternalError, msg);
 					return false;
 				}
 
@@ -232,6 +245,7 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 
 		if (memoryAvailable < sizeof(struct TrendColumnData) * tsd->columnCount)
 		{
+			logError(InternalError, "allocateTrendsMemory: insufficient memory for trends data.");
 			return false;
 		}
 
@@ -259,6 +273,12 @@ void trendsProc(void)
 	if (m_moduleInitialized == false)
 	{
 		RN_ASSERT_MSG(false, "rn_trendproc is not initialized.");
+		return;
+	}
+
+	if (m_trendSignalData == NULL)
+	{
+		RN_ASSERT(m_trendSignalData);
 		return;
 	}
 
@@ -290,6 +310,12 @@ alt_u16 trendSignalDataCount(void)
 
 const struct TrendSignalData* const trendSignalData(alt_u16 index)
 {
+	if (m_trendSignalData == NULL) 
+	{
+		RN_ASSERT(m_trendSignalData);
+		return NULL;
+	}
+
 	if (index >= m_trendSignalDataCount)
 	{
 		RN_ASSERT(false);
@@ -302,6 +328,12 @@ const struct TrendSignalData* const trendSignalData(alt_u16 index)
 
 struct TrendSignalData* const trendSignalDataMutable(alt_u16 index)
 {
+	if (m_trendSignalData == NULL)
+	{
+		RN_ASSERT(m_trendSignalData);
+		return NULL;
+	}
+
 	if (index >= m_trendSignalDataCount)
 	{
 		RN_ASSERT(false);

@@ -140,51 +140,57 @@ typedef struct
 
 // Startup stages
 //
-#define STAGE_MEM_INIT	0
-#define STAGE_MEM_ERR	1
+#define STAGE_MEM_INIT	0	// Memory initialization
 
-#define STAGE_TS_INIT	2
-#define STAGE_KBD_INIT	4
-#define STAGE_LOG_INIT	6
+#define STAGE_LOG_INIT	4	// Log initialization
+#define STAGE_LOG_ERR   5	// Log initialization error
 
-#define STAGE_SD_INIT	8
-#define STAGE_SD_ERR	10
-#define STAGE_SD_FS_ERR 12
+#define STAGE_SD_INIT	8	// SD Card initialization
+#define STAGE_SD_ERR	9	// SD Card initialization error
+#define STAGE_SD_FS_ERR 11	// SD Card file system is not FAT16
 
-#define STAGE_FAT_INIT	14
-#define STAGE_FAT_ERR	16
+#define STAGE_FAT_INIT	12	// FAT library initialization
+#define STAGE_FAT_ERR	13	// FAT library initialization error
 
-#define STAGE_EQUIPMENT_INIT	18
-#define STAGE_EQUIPMENT_ERR		20
+#define STAGE_EQUIPMENT_INIT	16	// Equipment ID initialization
+#define STAGE_EQUIPMENT_ERR		17	// Equipment ID initialization error
 
-#define STAGE_SHOWLOGO	22
+#define STAGE_CFG_READ	20	// Configuration file processing
+#define STAGE_CFG_ERR	21	// Configuration file processing error
+#define STAGE_SCREEN_ERR	23	// Unsupported screen resolution
 
-#define STAGE_CFG_READ	24
-#define STAGE_CFG_ERR	26
-#define STAGE_SCREEN_ERR	27
+#define STAGE_TS_INIT	24	// Touchscreen initialization
+#define STAGE_KBD_INIT	25	// Keybourd initialization
 
-#define STAGE_GLOBALSCRIPT_INIT	28
-#define STAGE_GLOBALSCRIPT_ERR	30
+#define STAGE_DRAW_INIT 28 // Drawing modules initialization
 
-#define STAGE_LUA_INIT	32
-#define STAGE_LUA_INIT_ERR	33
+#define STAGE_SHOWLOGO	32	// Displaying the Logo
 
-#define STAGE_GLOBALSCRIPT_COMPILE	34
-#define STAGE_GLOBALSCRIPT_COMPILE_ERR 36
+#define STAGE_GLOBALSCRIPT_INIT	36	// Global script loading
+#define STAGE_GLOBALSCRIPT_ERR	37	// Global script loading error
 
-#define STAGE_SIGNALS_INIT	38
-#define STAGE_SIGNALS_ERR	40
+#define STAGE_LUA_INIT	40	// Lua library initialization
+#define STAGE_LUA_INIT_ERR	41	// Lua library initialization error
 
-#define STAGE_FONTS_INIT	42
-#define STAGE_FONTS_ERR		44
+#define STAGE_GLOBALSCRIPT_COMPILE	44	// Global script compiling
+#define STAGE_GLOBALSCRIPT_COMPILE_ERR 45	// Global script compiling error
 
-#define STAGE_SCHEMAS_INIT	46
-#define STAGE_SCHEMAS_ERR	48
+#define STAGE_SIGNALS_INIT	48	// Signals file proccesing
+#define STAGE_SIGNALS_ERR	49	// Signals file proccesing error
 
-#define STAGE_SET_DEFAULT_SCHEMA	50
-#define STAGE_SET_DEFAULT_SCHEMA_ERR 52
+#define STAGE_FONTS_INIT	52	// Font files proccesing
+#define STAGE_FONTS_ERR		53	// Font files proccesing error
 
-#define STAGE_RUNNING	255
+#define STAGE_SCHEMAS_INIT	56	// Schemas files proccesing
+#define STAGE_SCHEMAS_ERR	57	// Schemas files proccesing error
+
+#define STAGE_TREND_INIT 60	// Trends initialization
+#define STAGE_TREND_ERR	 61	// Trends initialization error
+
+#define STAGE_SET_DEFAULT_SCHEMA	64	// Setting default schema
+#define STAGE_SET_DEFAULT_SCHEMA_ERR 65	// Setting default schema error
+
+#define STAGE_RUNNING	255		// Running
 //
 // Startup stages
 
