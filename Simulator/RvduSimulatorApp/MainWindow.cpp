@@ -182,7 +182,7 @@ void MainWindow::setupUi()
 	createStatusBar();
 
 	m_rvduWidget = new RvduWidget(m_pHdmiBuffer, m_width, m_height, this);
-	m_rvduWidget->setFixedSize(m_width, m_height);
+	m_rvduWidget->setMinimumSize(m_width, m_height);
 	m_rvduWidget->setFocusPolicy(Qt::StrongFocus);
 
 	QWidget* w = new QWidget();

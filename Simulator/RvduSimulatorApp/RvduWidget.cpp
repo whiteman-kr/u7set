@@ -44,13 +44,23 @@ void RvduWidget::paintEvent(QPaintEvent* event)
 		{
 			rnLibVideoBufferLock();
 
+			painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+			
 			QImage image(reinterpret_cast<const uchar*>(m_pHdmiBuffer),
 						 m_width,
 						 m_height,
 						 m_width * sizeof(unsigned int),
 						 QImage::Format_RGB32);
 
-			painter.drawImage(0, 0, image);
+			QRect widgetRect = this->rect();
+
+			QRect targetRect = QStyle::alignedRect(Qt::LeftToRight,
+												   Qt::AlignCenter,
+												   image.size().scaled(widgetRect.size(), Qt::KeepAspectRatio),
+												   widgetRect);
+
+			painter.drawImage(targetRect, image);
+
 			rnLibVideoBufferUnlock();
 		}
 	}
@@ -60,7 +70,39 @@ void RvduWidget::mousePressEvent(QMouseEvent* event)
 {
 	if (m_isRunning == true)
 	{
-		rnLibClickEvent(event->pos().x(), event->pos().y());
+		if (m_width == 0 || m_height == 0) 
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		QSize sourceSize(m_width, m_height);
+		QRect widgetRect = this->rect();
+
+		QRect targetRect =
+			QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, sourceSize.scaled(widgetRect.size(), Qt::KeepAspectRatio), widgetRect);
+
+		int x = event->pos().x();
+		int y = event->pos().y();
+
+		if (targetRect.contains(x, y) == false) 
+		{
+			return;
+		}
+
+		double kx = (double)targetRect.width() / m_width;
+		double ky = (double)targetRect.height() / m_height;
+
+		if (kx == 0.0 || ky == 0.0)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		int dx = targetRect.x();
+		int dy = targetRect.y();
+
+		rnLibClickEvent((x - dx) / kx, (y - dy) / ky);
 	}
 }
 
