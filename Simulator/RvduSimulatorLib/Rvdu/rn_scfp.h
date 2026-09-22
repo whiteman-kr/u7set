@@ -10,7 +10,7 @@ Module description: Loads and manages schema files.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Loads and manages schema files.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	30,04,2026.
+-- Date:	30.04.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Mazyr S.M.
 
@@ -34,7 +34,7 @@ Module description: Loads and manages schema files.
 
 -- *************************************************************
 -- Version v1.02
--- Date:	19,06,2026.
+-- Date:	19.06.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -42,7 +42,7 @@ Module description: Loads and manages schema files.
 
 -- *************************************************************
 -- Version v1.03
--- Date:	25,06,2026.
+-- Date:	25.06.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4095
 -- Reviewed by: Mazyr S.M.
 
@@ -51,7 +51,7 @@ Module description: Loads and manages schema files.
 -- *************************************************************
 
 -- Version v1.04
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -60,11 +60,20 @@ Module description: Loads and manages schema files.
 -- *************************************************************
 
 -- Version v1.05
--- Date:	11,08,2026.
+-- Date:	11.08.2026.
 -- Designed by: Vintenko B.U.
 -- Reviewed by: Nesterenko M.V.
 
-RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
+-- Changes: RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
+
+-- *************************************************************
+
+-- Version v1.06
+-- Date:	22.09.2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4146
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-4146, rn_scfp сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -104,35 +113,36 @@ struct BMPFileHeader
 {
 	// BITMAPFILEHEADER (14 bytes)
 
-	unsigned short bfType;      // Must be 'BM' = 0x4D42
-	unsigned int   bfSize;      // Size of the BMP file in bytes
-	unsigned short bfReserved1; // Must be 0
-	unsigned short bfReserved2; // Must be 0
-	unsigned int   bfOffBits;   // Offset to pixel data
+	alt_u16 bfType;      // Must be 'BM' = 0x4D42
+	alt_u32 bfSize;      // Size of the BMP file in bytes
+	alt_u16 bfReserved1; // Must be 0
+	alt_u16 bfReserved2; // Must be 0
+	alt_u32 bfOffBits;   // Offset to pixel data
 };
 
 struct BMPInfoHeader
 {
 	// BITMAPINFOHEADER (40 bytes)
 
-	unsigned int   biSize;          // Size of this header = 40
-	int            biWidth;         // Image width
-	int            biHeight;        // Image height
-	unsigned short biPlanes;        // Must be 1
-	unsigned short biBitCount;      // Bits per pixel (24 for RGB)
-	unsigned int   biCompression;   // 0 = BI_RGB (no compression)
-	unsigned int   biSizeImage;     // Image size including padding
-	int            biXPelsPerMeter; // Horizontal resolution
-	int            biYPelsPerMeter; // Vertical resolution
-	unsigned int   biClrUsed;       // Number of colors used
-	unsigned int   biClrImportant;  // Important colors
+	alt_u32 biSize;                 // Size of this header = 40
+	alt_32	biWidth;                // Image width
+	alt_32	biHeight;               // Image height
+	alt_u16 biPlanes;               // Must be 1
+	alt_u16 biBitCount;             // Bits per pixel (24 for RGB)
+	alt_u32 biCompression;          // 0 = BI_RGB (no compression)
+	alt_u32 biSizeImage;            // Image size including padding
+	alt_32	biXPelsPerMeter;        // Horizontal resolution
+	alt_32	biYPelsPerMeter;        // Vertical resolution
+	alt_u32 biClrUsed;              // Number of colors used
+	alt_u32 biClrImportant;         // Important colors
 };
 
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 
-struct VduSchemaFileProperties1 {
+struct VduSchemaFileProperties1 
+{
 	alt_u16 version;    			// 1
 	alt_u16 headerSize; 			// This header size
 	alt_u16 width;      			// In pixels
@@ -153,12 +163,12 @@ struct VduSchemaFile
 {
 	// 1. Header and schema properties
 	//
-	char magic[4];				// "VDU\0"
+	char magic[4];				// "VDU\0" has length of 4 bytes.
 	alt_u16 fileVersion;		// 1
 	alt_u16 reserve1;
 
 	struct VduSchemaFileProperties1 schemaProperties;
-	alt_u32 reserve2[4];
+	alt_u32 reserve2[4];		// Reserve has length of 4 bytes.
 
 	alt_u16 schemaItemCount;	// Number of schema items - each items is a VduSchemaFileSchemaItem1 + specific data
 								// (VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...).
@@ -182,7 +192,7 @@ struct VduSchemaFile
 
 	// 5. crc64
 	// alt_u64 crc64; // CRC64 of the file from the beginning to the end of the strings.
-}; //*pSchemaFile;
+}; // *pSchemaFile;
 
 
 
@@ -229,7 +239,7 @@ typedef struct
 	bool wordWrap;
 	bool reserverBool1;
 	
-	char text[128];			// Text to display, in version 2, changed from vdu_cstr to char[]
+	char text[128];			// Text to display, in version 2, changed from vdu_cstr to char has length 128.
 	
 	alt_u32 reserve4;
 
@@ -257,7 +267,7 @@ typedef struct
 	alt_u32 fillColor;
 	alt_u32 textColor;
 
-	alt_u32 reserve3[8];   // Reserved for different colors
+	alt_u32 reserve3[8];   // Reserved for different colors has length of 8 bytes.
 
 	alt_u16 fontIndex;     // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
 	alt_u16 reserve4;
@@ -268,7 +278,7 @@ typedef struct
 	alt_u32 align;          // HorzAlign | VertAlign
 	alt_u32 reserve7;
 
-	char text[128];			// Text to display
+	char text[128];			// Text to display has length 128.
 
 	alt_u32 appSignalCount;
 
@@ -318,12 +328,12 @@ typedef struct
 	alt_u16 width;
 	alt_u16 height;
 
-	alt_u32 reserve4[4];
+	alt_u32 reserve4[4]; // Reserve has length of 4 bytes
 
 	alt_u16 reserve5;
 	alt_u16 imageCount;    // 1 - 12
 
-	struct ImageInternal images[12];
+	struct ImageInternal images[12]; // has up to 12 images for item.
 
 	alt_u16 currentImage;  // Placeholder for the currently selected image index in the 'images' array. Default value: 0.
 	alt_u16 reserve6;
@@ -389,9 +399,9 @@ struct TrendSignal
 
 	alt_u32 appSignalIndex;
 	alt_u32 validityAppSignalIndex;
-	union {
-		//alt_u16 trendSignalFileRecordIndex; // Index of the record (struct TrendItemSignal) in file File::VDU_TREND_SIGNALS ("TrendSignals.dat")
-		alt_u16 trendSignalDataRecordIndex; // In RVDU program, index of the record (struct TrendSignalData) in the memory, filled during initialization
+	union 
+	{
+		alt_u16 trendSignalDataRecordIndex; // Index of the record (struct TrendSignalData) in the memory, filled during initialization
 	};
 
 	alt_u16 reserve1;
@@ -435,15 +445,18 @@ typedef struct
 	alt_16 indentTop;
 	alt_16 indentBottom;
 
-	alt_u32 reserve4[4];
+	alt_u32 reserve4[4];	// Reserve has length of 4 bytes
 
 	alt_u32 durationsSecs[TREND_MAX_DURATIONS_COUNT];
 
 	alt_u32 columnCount;
 
-	alt_u16 viewMode;  // 0 - E::TrendViewMode::Separated,
+	alt_u16 viewMode;  
+	// 0 - E::TrendViewMode::Separated,
 	// 1 - E::TrendViewMode::Overlapped
-	alt_u16 scaleType; // 0 - E::TrendScaleType::Linear
+
+	alt_u16 scaleType; 
+	// 0 - E::TrendScaleType::Linear
 	// 1 - E::TrendScaleType::Log10
 	// 2 - E::TrendScaleType::Period
 
@@ -465,7 +478,7 @@ typedef struct
 	bool reserve7;
 	bool reserve8;
 
-	alt_u16 maxSignalCount;      // 16
+	alt_u16 maxSignalCount;      // Always equal to 16 (TREND_MAX_SIGNALS_COUNT)
 	alt_u16 signalCount;         // Number of signals in the trend
 	alt_u16 discreteSignalCount; // Number of discrete signals in the trend
 	alt_u16 reserve9;
@@ -528,10 +541,10 @@ struct VduSchemaFileSchemaItem1
 Copies the contents of the all schemas files to memory at the address specified in the parameter.
 Caches the bitmaps contained in schema items
 Compiles the bytecode of scripts
-Returns �true� if the copy is successful.
-Returns �false� if an error.
+Returns true if the copy is successful.
+Returns false if an error.
 Parameters:
-    schemasPath - Path to fonts subfolders (e.g EQUIPMENTID_/Schemas).
+    schemasPath - Path to schemas subfolders (e.g EQUIPMENTID_/Schemas).
     startAddr - 32-bit pointer to a buffer where to store the configuration.
     memoryAvailable - memory available for schemas data.
 Return Value:
@@ -556,27 +569,27 @@ struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const
 
 // --------------- Schema strings access functions -------------------
 
-// Returns a pointer to a schema string by its offset or the NULL if configuration is not loaded or the offset is out of range.
+// Returns a pointer to a schema string by its offset or the NULL if schema is NULL.
 //
 const char* const vduSchemaString(const struct VduSchemaFile* const schema, const alt_u32 offset);
 
-// Returns a length of schema string by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
+// Returns a length of schema string by its offset or INVALID_LENGTH if or the NULL if schema is NULL.
 //
 const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const alt_u32 offset);
 
-// Returns a pointer to a current schema string by its offset or the NULL if configuration is not loaded or the offset is out of range.
+// Returns a pointer to a current schema string by its offset or the NULL if schema is NULL.
 //
 const char* const vduCurrentSchemaString(const alt_u32 offset);
 
-// Returns a length of current schema string by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
+// Returns a length of current schema string by its offset or INVALID_LENGTH if if schema is NULL.
 //
 const alt_u16 vduCurrentSchemaStringLength(const alt_u32 offset);
 
-// Returns a pointer to a current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
+// Returns a pointer to a current schema script by its offset or the NULL if current schema is not set.
 //
 const char* const vduCurrentSchemaScript(const alt_u32 offset);
 
-// Returns a length of current schema script by its offset or INVALID_LENGTH if configuration is not loaded or the offset is out of range.
+// Returns a length of current schema script by its offset or INVALID_LENGTH if current schema is not set.
 //
 const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset);
 
@@ -588,7 +601,7 @@ const struct VduSchemaFile* const vduCurrentSchema(void);
 
 // Immediately changes the block's displayed schema to the schema specified in the parameter.
 //
-bool vduSetCurrentSchema(const char* const shemaId);
+bool vduSetCurrentSchema(const char* const schemaId);
 
 // Returns a pointer to the schema element whose index is specified in the parameter.
 //
@@ -596,7 +609,7 @@ struct VduSchemaFileSchemaItem1* const vduCurrentSchemaItem(alt_u32 itemIndex);
 
 // Schedules the change of the schema at next loop.
 //
-bool vduScheduleSchemaChange(const char* const shemaId);
+bool vduScheduleSchemaChange(const char* const schemaId);
 
 // Gets the pointer to a scheduled schema change and resets the schedule
 //

@@ -699,8 +699,12 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 	{
 		startMeasuringTimer(TIMER_MAINLOOP);
 
+		// Process trend date
+		//
 		trendsProc();
 
+		// Process pop-up schema
+		//
 		switch (type)
 		{
 		case SCENE_EDIT_MODE:
@@ -770,12 +774,18 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		break;
 		}
 
+		// Write optical TX signals
+		//
 		optoTxProc();
 
 		// Update time measuring timer
 		//
 		stopMeasuringTimer(TIMER_MAINLOOP);
 		setTimerValue(TIMER_MAINLOOP, measuringTimerValue(TIMER_MAINLOOP));
+
+		// Write diagnostics
+		//
+		writeExternalDiagPacket();
 	}
 
 	// Start measuring timer
