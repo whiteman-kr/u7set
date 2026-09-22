@@ -35,6 +35,7 @@ private slots:
 	void onSignals();
 	void onShowSharedMemory();
 	void onShowAppLog();
+	void onEnableZoom(bool enable);
 	void onShowAbout();
 	void onBringToFront();
 
@@ -56,6 +57,7 @@ private:
 
 	int m_width = 1280;
 	int m_height = 720;
+	bool m_enableZoom = false;
 
 	Log::LogFile m_logFile;
 

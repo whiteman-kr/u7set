@@ -79,7 +79,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	
 )
 
-target_compile_definitions(${TARGET} PRIVATE RVDU_SIM)
+target_compile_definitions(${TARGET} PRIVATE RVDU_SIM _CRT_SECURE_NO_WARNINGS)
 
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

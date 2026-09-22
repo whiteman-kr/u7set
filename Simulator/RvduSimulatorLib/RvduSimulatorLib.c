@@ -551,23 +551,6 @@ bool rnLibLoop()
 	}
 
 	{
-		// Get current time with nanosecond precision
-		struct timespec ts;
-		(void)timespec_get(&ts, TIME_UTC);
-
-		struct tm* t = localtime(&ts.tv_sec);
-
-		writeReadEBB16(ADDR_RTU_YEAR, (alt_u16)t->tm_year + 1900u);
-		writeReadEBB16(ADDR_RTU_MONTH, (alt_u16)t->tm_mon + 1u);
-		writeReadEBB16(ADDR_RTU_DAY, (alt_u16)t->tm_mday);
-
-		writeReadEBB16(ADDR_RTU_HOUR, (alt_u16)t->tm_hour);
-		writeReadEBB16(ADDR_RTU_MINUTE, (alt_u16)t->tm_min);
-		writeReadEBB16(ADDR_RTU_SECOND, (alt_u16)t->tm_sec);
-		writeReadEBB16(ADDR_RTU_MILLISECOND, (alt_u16)(ts.tv_nsec / 1000000u));
-	}
-
-	{
 		resetBaseMeasuringTimer();
 
 		startMeasuringTimer(TIMER_MAINLOOP);

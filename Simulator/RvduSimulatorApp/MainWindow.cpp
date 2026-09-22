@@ -37,10 +37,15 @@ MainWindow::MainWindow(const AppSettings& settings, QWidget* parent) :
 	m_pHdmiBuffer = new unsigned int[m_width * m_height]; // 4 bytes per pixel
 	memset(m_pHdmiBuffer, 0, m_width * m_height * sizeof(unsigned int));
 
+	// Setup UI
+	//
+	m_enableZoom = QSettings().value("MainWindow/enableZoom").toBool();
 	setupUi();
 	
 	restoreGeometry(QSettings().value("MainWindow/geometry").toByteArray());
 
+	// Setup log
+	//
 	rnLibSetLogRecordHandler(MainWindow::writeLogFileMessage);
 
 	// Set window caption
@@ -63,6 +68,8 @@ MainWindow::~MainWindow()
 	// Save window size
 	QSettings settings;
 	settings.setValue("MainWindow/geometry", saveGeometry());
+
+	QSettings().setValue("MainWindow/enableZoom", m_enableZoom);
 
 	theLogFile = nullptr;
 	
@@ -141,6 +148,12 @@ void MainWindow::onShowAppLog()
 	Log::LogFileDialog::view(m_logFile, this); 
 }
 
+void MainWindow::onEnableZoom(bool enable) 
+{ 
+	m_enableZoom = enable;
+	m_rvduWidget->setEnableZoom(enable);
+}
+
 void MainWindow::onShowAbout()
 {
 	QString text = qApp->applicationName() + tr(" provides RVDU simulation.");
@@ -185,6 +198,8 @@ void MainWindow::setupUi()
 	m_rvduWidget->setMinimumSize(m_width, m_height);
 	m_rvduWidget->setFocusPolicy(Qt::StrongFocus);
 
+	m_rvduWidget->setEnableZoom(m_enableZoom);
+
 	QWidget* w = new QWidget();
 	
 	QHBoxLayout* l = new QHBoxLayout(w);
@@ -228,11 +243,9 @@ void MainWindow::setupRvduController()
 			{
 				// When the simulator is started, create a shared memory communication thread
 				//
-				if (m_appSettings.sharedMemoryKey.isEmpty() == false)
-				{
-					setupSharedMemController();
-				}
-				else
+				setupSharedMemController();
+
+				if (m_appSettings.sharedMemoryKey.isEmpty() == true)
 				{
 					m_statusBarSharedDataInfo->setText("Autonomous Mode");
 				}
@@ -315,6 +328,21 @@ void MainWindow::createMenu()
 	a = new QAction(tr("Memory View"), this);
 	connect(a, &QAction::triggered, this, &MainWindow::onShowSharedMemory);
 	signalsMenu->addAction(a);
+
+	auto viewMenu = menuBar()->addMenu(tr("&View"));
+
+	a = new QAction(tr("Zoom to Window Size"), this);
+	a->setStatusTip(tr("Zoom RVDU screen according to window size"));
+	a->setCheckable(true);
+	a->setChecked(m_enableZoom);
+	connect(a,
+			&QAction::triggered,
+			this,
+			[a, this]()
+			{
+				onEnableZoom(a->isChecked());
+			});
+	viewMenu->addAction(a);
 
 	auto helpMenu = menuBar()->addMenu(tr("&?"));
 

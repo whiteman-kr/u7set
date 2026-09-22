@@ -28,6 +28,11 @@ void RvduWidget::setErrorMode(bool error, const QString& errorMsg)
 	m_errorMsg = errorMsg;
 }
 
+void RvduWidget::setEnableZoom(bool enable) 
+{ 
+	m_enableZoom = enable;
+}
+
 void RvduWidget::paintEvent(QPaintEvent* event)
 {
 	Q_UNUSED(event);
@@ -54,10 +59,20 @@ void RvduWidget::paintEvent(QPaintEvent* event)
 
 			QRect widgetRect = this->rect();
 
-			QRect targetRect = QStyle::alignedRect(Qt::LeftToRight,
-												   Qt::AlignCenter,
-												   image.size().scaled(widgetRect.size(), Qt::KeepAspectRatio),
-												   widgetRect);
+			QRect targetRect;
+
+			if (m_enableZoom == true)
+			{
+				targetRect = QStyle::alignedRect(Qt::LeftToRight,
+									  Qt::AlignCenter,
+									  image.size().scaled(widgetRect.size(), Qt::KeepAspectRatio),
+									  widgetRect);
+			}
+			else
+			{
+				targetRect = QRect(0, 0, m_width, m_height);
+				targetRect.moveCenter(widgetRect.center());
+			}
 
 			painter.drawImage(targetRect, image);
 
@@ -79,8 +94,20 @@ void RvduWidget::mousePressEvent(QMouseEvent* event)
 		QSize sourceSize(m_width, m_height);
 		QRect widgetRect = this->rect();
 
-		QRect targetRect =
-			QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, sourceSize.scaled(widgetRect.size(), Qt::KeepAspectRatio), widgetRect);
+		QRect targetRect;
+
+		if (m_enableZoom == true)
+		{
+			targetRect = QStyle::alignedRect(Qt::LeftToRight,
+											 Qt::AlignCenter,
+											 sourceSize.scaled(widgetRect.size(), Qt::KeepAspectRatio),
+											 widgetRect);
+		}
+		else
+		{
+			targetRect = QRect(0, 0, m_width, m_height);
+			targetRect.moveCenter(widgetRect.center());
+		}
 
 		int x = event->pos().x();
 		int y = event->pos().y();

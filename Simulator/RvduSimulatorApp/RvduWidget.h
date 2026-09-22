@@ -11,6 +11,7 @@ public:
 
 	void setRunningMode(bool running);
 	void setErrorMode(bool error, const QString& errorMsg);
+	void setEnableZoom(bool enable);
 
 private:
 	virtual void paintEvent(QPaintEvent* event) override;
@@ -25,4 +26,5 @@ private:
 	bool m_isRunning = false;
 	bool m_isError = false;
 	QString m_errorMsg;
+	bool m_enableZoom = false;
 };

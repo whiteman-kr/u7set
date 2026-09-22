@@ -6,6 +6,20 @@ constexpr int MemoryUpdateTimeMs = 50;	// Memory update period
 constexpr int StatsUpdateMs = 250;		// Statistics update period
 constexpr int TimeoutMs = 3000;			// Timeout period
 
+#define ADDR_RTU_YEAR 20484u
+#define ADDR_RTU_MONTH 20485u
+#define ADDR_RTU_DAY 20486u
+
+#define ADDR_RTU_HOUR 20487u
+#define ADDR_RTU_MINUTE 20488u
+#define ADDR_RTU_SECOND 20489u
+#define ADDR_RTU_MILLISECOND 20490u
+
+#define ADDR_OPTO_VALIDITY 20491u
+#define ADDR_DISCRETE_INPUTS 20481u
+#define ADDR_DISCRETE_INPUTS_VALIDITY 20480u
+#define ADDR_DISCRETE_OUTPUTS 20483u
+
 SimCommThreadWorker::SimCommThreadWorker(QString sharedMemoryKey) :
 	m_sharedMemoryKey(sharedMemoryKey)
 {
@@ -13,11 +27,21 @@ SimCommThreadWorker::SimCommThreadWorker(QString sharedMemoryKey) :
 
 void SimCommThreadWorker::threadProc()
 {
-	initOptoPortsCounters();
+	bool autonomousMode = m_sharedMemoryKey.isEmpty() == true;
+
+	if (autonomousMode == false)
+	{
+		initOptoPortsCounters();
+	}
 
 	while (QThread::currentThread()->isInterruptionRequested() == false)
 	{
-		processVduSharedData();
+		writeVduTime();
+
+		if (autonomousMode == false)
+		{
+			processVduSharedData();
+		}
 
 		QThread::msleep(MemoryUpdateTimeMs);
 	}
@@ -63,6 +87,35 @@ void SimCommThreadWorker::initOptoPortsCounters()
 	}
 
 	return;
+}
+
+void SimCommThreadWorker::writeVduTime()
+{
+	{
+		// Get current time with nanosecond precision
+		struct timespec ts;
+		(void)timespec_get(&ts, TIME_UTC);
+
+		struct tm* t = localtime(&ts.tv_sec);
+
+		rnLibReadMemoryLock();
+
+		auto writeReadEBB16 = [](unsigned int offsetWords, uint16_t value)
+		{
+			rnLibWriteReadMemory(offsetWords * 2, (unsigned char*)&value, sizeof(uint16_t));
+		};
+
+		writeReadEBB16(ADDR_RTU_YEAR, (uint16_t)t->tm_year + 1900u);
+		writeReadEBB16(ADDR_RTU_MONTH, (uint16_t)t->tm_mon + 1u);
+		writeReadEBB16(ADDR_RTU_DAY, (uint16_t)t->tm_mday);
+
+		writeReadEBB16(ADDR_RTU_HOUR, (uint16_t)t->tm_hour);
+		writeReadEBB16(ADDR_RTU_MINUTE, (uint16_t)t->tm_min);
+		writeReadEBB16(ADDR_RTU_SECOND, (uint16_t)t->tm_sec);
+		writeReadEBB16(ADDR_RTU_MILLISECOND, (uint16_t)(ts.tv_nsec / 1000000u));
+
+		rnLibReadMemoryUnlock();
+	}
 }
 
 void SimCommThreadWorker::processVduSharedData()
@@ -140,11 +193,6 @@ void SimCommThreadWorker::initSharedMemory()
 		logMessage(tr("Shared memory was successfully created and initialized."));
 	}
 }
-
-#define ADDR_OPTO_VALIDITY 20491u
-#define ADDR_DISCRETE_INPUTS 20481u
-#define ADDR_DISCRETE_INPUTS_VALIDITY 20480u
-#define ADDR_DISCRETE_OUTPUTS 20483u
 
 void SimCommThreadWorker::processSharedMemory()
 {

@@ -37,6 +37,7 @@ public slots:
 private:
 	void initOptoPortsCounters();
 
+	void writeVduTime();
 	void processVduSharedData();
 
 	void initSharedMemory();
