@@ -169,6 +169,9 @@ TEST(GrpcCfgLoaderTests, CheckBuildFiles)
 									 SessionParams sessionParams,
 									 std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 						 {
+							Q_UNUSED(configurationXmlData);
+							Q_UNUSED(sessionParams);
+							Q_UNUSED(currentSettingsProfile);
 							cfgReady = true;
 							buildFileArray = buildFileInfoArray;
 						 });
@@ -233,6 +236,9 @@ TEST(GrpcCfgLoaderTests, GetFileBlocked)
 													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 						 {
+							 Q_UNUSED(configurationXmlData);
+							 Q_UNUSED(sessionParams);
+							 Q_UNUSED(currentSettingsProfile);
 							 cfgReady = true;
 							 buildFileArray = buildFileInfoArray;
 						 });
@@ -298,6 +304,9 @@ TEST(GrpcCfgLoaderTests, GetFileBlockedByID)
 													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 						 {
+							 Q_UNUSED(configurationXmlData);
+							 Q_UNUSED(sessionParams);
+							 Q_UNUSED(currentSettingsProfile);
 							 cfgReady = true;
 							 buildFileArray = buildFileInfoArray;
 						 });
@@ -368,6 +377,9 @@ TEST(GrpcCfgLoaderTests, GetWrongFileBlocked)
 													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 						 {
+							 Q_UNUSED(configurationXmlData);
+							 Q_UNUSED(sessionParams);
+							 Q_UNUSED(currentSettingsProfile);
 							 cfgReady = true;
 							 buildFileArray = buildFileInfoArray;
 						 });
@@ -420,6 +432,9 @@ TEST(GrpcCfgLoaderTests, GetWrongFileBlockedByID)
 													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 						 {
+							 Q_UNUSED(configurationXmlData);
+							 Q_UNUSED(sessionParams);
+							 Q_UNUSED(currentSettingsProfile);
 							 cfgReady = true;
 							 buildFileArray = buildFileInfoArray;
 						 });
