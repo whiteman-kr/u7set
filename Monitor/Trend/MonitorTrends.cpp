@@ -36,11 +36,15 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
-								  const MonitorConfigController& configController,
-								  const std::vector<AppSignalParam>& appSignals,
-								  const AppSignalLists::AppSignalListSet& appSignalListSet,
-								  QWidget* parent)
+MonitorTrendsWidget* MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
+												  const MonitorConfigController& configController,
+												  const std::vector<AppSignalParam>& appSignals,
+												  const AppSignalLists::AppSignalListSet& appSignalListSet,
+												  std::optional<E::TimeType> timeType,
+												  std::optional<int> laneCount,
+												  std::optional<E::TrendViewMode> viewMode,
+												  std::optional<E::TrendScaleType> scaleType,
+												  QWidget* parent)
 {
 	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, appSignalListSet, parent);
 
@@ -96,11 +100,30 @@ bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManag
 		}
 	}
 
+	if (timeType.has_value() == true)
+	{
+		window->setTimeType(timeType.value());
+	}
+
+	if (laneCount.has_value() == true)
+	{
+		window->setLaneCount(laneCount.value());
+	}
+
+	if (viewMode.has_value() == true)
+	{
+		window->setViewMode(viewMode.value());
+	}
+
+	if (scaleType.has_value() == true)
+	{
+		window->setScaleType(scaleType.value());
+	}
+
 	window->addSignals(trendSignals, true);
 
 	window->show();
-
-	return false;
+	return window;
 }
 
 void MonitorTrends::registerTrendWindow(MonitorTrendsWidget* window)

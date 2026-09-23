@@ -6,14 +6,25 @@ ScriptMonitorApplication::ScriptMonitorApplication() :
 {
 }
 
-void ScriptMonitorApplication::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+void ScriptMonitorApplication::showArchive(QStringList signalList, QDateTime startTime, QDateTime endTime, int timeType)
 {
-	emit signal_showArchive(std::move(signalsList), startTime, endTime, timeType);
+	emit signal_showArchive(std::move(signalList), startTime, endTime, timeType);
 }
 
-void ScriptMonitorApplication::showSnapshot(QStringList signalsList)
+void ScriptMonitorApplication::showTrendArchive(QStringList appSignalIds,
+												QDateTime startTime,
+												QDateTime endTime,
+												E::TimeType timeType,
+												int laneCount,
+												E::TrendViewMode viewMode,
+												E::TrendScaleType scaleType)
 {
-	emit signal_showSnapshot(std::move(signalsList));
+	emit signal_showTrendArchive(std::move(appSignalIds), startTime, endTime, timeType, laneCount, viewMode, scaleType);
+}
+
+void ScriptMonitorApplication::showSnapshot(QStringList signalList)
+{
+	emit signal_showSnapshot(std::move(signalList));
 }
 
 void ScriptMonitorApplication::showSnapshotByMask(QStringList masks)
@@ -83,7 +94,10 @@ void ScriptMonitorApplication::setMainWindow(MonitorMainWindow* mainWindow)
 
 	if (m_mainWindow != nullptr)
 	{
+		// clang-format off
 		connect(this, &ScriptMonitorApplication::signal_showArchive, m_mainWindow, qOverload<QStringList, QDateTime, QDateTime, int>(&MonitorMainWindow::slot_archive), Qt::QueuedConnection);
+
+		connect(this, &ScriptMonitorApplication::signal_showTrendArchive, m_mainWindow, &MonitorMainWindow::slot_trendArchive, Qt::QueuedConnection);
 
 		connect(this, &ScriptMonitorApplication::signal_showSnapshot, m_mainWindow, qOverload<QStringList>(&MonitorMainWindow::slot_signalSnapshot), Qt::QueuedConnection);
 		connect(this, &ScriptMonitorApplication::signal_showSnapshotByMask, m_mainWindow, &MonitorMainWindow::slot_signalSnapshotByMask, Qt::QueuedConnection);
@@ -96,6 +110,7 @@ void ScriptMonitorApplication::setMainWindow(MonitorMainWindow* mainWindow)
 		connect(this, &ScriptMonitorApplication::signal_setVisibleStatusBar, m_mainWindow, &MonitorMainWindow::setVisibleStatusBar, Qt::QueuedConnection);
 		connect(this, &ScriptMonitorApplication::signal_setVisibleMenu, m_mainWindow, &MonitorMainWindow::setVisibleMenu, Qt::QueuedConnection);
 		connect(this, &ScriptMonitorApplication::signal_setFullScreen, m_mainWindow, &MonitorMainWindow::setFullScreen, Qt::QueuedConnection);
+		// clang-format on
 	}
 
 	return;

@@ -261,6 +261,26 @@ namespace TrendLib
 		return true;
 	}
 
+	void TrendMainWindow::setTimeRange(QDateTime start, QDateTime end)
+	{
+		if (end < start)
+		{
+			std::swap(start, end);
+		}
+
+		auto elapsed = end.toMSecsSinceEpoch() - start.toMSecsSinceEpoch();
+
+		return setTimeRange(start, elapsed);
+	}
+
+	void TrendMainWindow::setTimeRange(QDateTime start, uint64_t durationMs)
+	{
+		m_trendWidget->setStartTime(TimeStamp{start.toUTC()});
+		m_trendWidget->setLaneDuration(durationMs);
+		m_trendWidget->repaint();
+		return;
+	}
+
 	void TrendMainWindow::updateSignals(const std::vector<TrendSignalParam>& trendsignals)
 	{
 		// Remove signals
@@ -1583,6 +1603,17 @@ namespace TrendLib
 	void TrendMainWindow::setViewMode(E::TrendViewMode value)
 	{
 		m_trendWidget->setViewMode(value);
+
+		assert(m_viewCombo);
+
+		int foundIndex = m_viewCombo->findData(QVariant::fromValue(value));
+		if (foundIndex != -1)
+		{
+			QSignalBlocker blocker(m_viewCombo); // Block signals while changing the index
+			m_viewCombo->setCurrentIndex(foundIndex);
+		}
+
+		return;
 	}
 
 	E::TrendScaleType TrendMainWindow::scaleType() const
@@ -1593,6 +1624,17 @@ namespace TrendLib
 	void TrendMainWindow::setScaleType(E::TrendScaleType value)
 	{
 		m_trendWidget->setScaleType(value);
+
+		assert(m_scaleTypeCombo);
+
+		int foundIndex = m_scaleTypeCombo->findData(QVariant::fromValue(value));
+		if (foundIndex != -1)
+		{
+			QSignalBlocker blocker(m_scaleTypeCombo); // Block signals while changing the index
+			m_scaleTypeCombo->setCurrentIndex(foundIndex);
+		}
+
+		return;
 	}
 
 	int TrendMainWindow::laneCount() const
@@ -1603,6 +1645,17 @@ namespace TrendLib
 	void TrendMainWindow::setLaneCount(int value)
 	{
 		m_trendWidget->setLaneCount(value);
+
+		assert(m_lanesCombo);
+
+		int foundIndex = m_lanesCombo->findData(QVariant::fromValue(value));
+		if (foundIndex != -1)
+		{
+			QSignalBlocker blocker(m_lanesCombo); // Block signals while changing the index
+			m_lanesCombo->setCurrentIndex(foundIndex);
+		}
+
+		return;
 	}
 
 	E::TimeType TrendMainWindow::timeType() const
@@ -1613,6 +1666,17 @@ namespace TrendLib
 	void TrendMainWindow::setTimeType(E::TimeType value)
 	{
 		m_trendWidget->setTimeType(value);
+
+		assert(m_timeTypeCombo);
+
+		int foundIndex = m_timeTypeCombo->findData(QVariant::fromValue(value));
+		if (foundIndex != -1)
+		{
+			QSignalBlocker blocker(m_timeTypeCombo); // Block signals while changing the index
+			m_timeTypeCombo->setCurrentIndex(foundIndex);
+		}
+
+		return;
 	}
 
 	TimeStamp TrendMainWindow::startTime() const

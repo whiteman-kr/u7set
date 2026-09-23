@@ -347,7 +347,15 @@ bool MonitorMainWindow::eventFilter(QObject* object, QEvent* event)
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
+	MonitorTrends::startTrendApp(m_signalManager,
+								 m_configController,
+								 appSignals,
+								 m_appSignalListSet,
+								 std::nullopt,
+								 std::nullopt,
+								 std::nullopt,
+								 std::nullopt,
+								 this);
 }
 
 void MonitorMainWindow::saveWindowState()
@@ -1517,10 +1525,83 @@ void MonitorMainWindow::slot_newTrend(QStringList appSignalIds)
 		}
 	}
 
-	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignalParams, m_appSignalListSet, this);
+	MonitorTrends::startTrendApp(m_signalManager,
+								 m_configController,
+								 appSignalParams,
+								 m_appSignalListSet,
+								 std::nullopt,
+								 std::nullopt,
+								 std::nullopt,
+								 std::nullopt,
+								 this);
 	return;
 }
 
+void MonitorMainWindow::slot_trendArchive(QStringList appSignalIds,
+										  QDateTime startTime,
+										  QDateTime endTime,
+										  E::TimeType timeType,
+										  int laneCount,
+										  E::TrendViewMode viewMode,
+										  E::TrendScaleType scaleType)
+{
+	std::vector<Hash> signalHashes;
+	signalHashes.reserve(appSignalIds.size());
+	std::transform(appSignalIds.begin(),
+				   appSignalIds.end(),
+				   std::back_inserter(signalHashes),
+				   [](const QString& appSignalId)
+				   {
+					   return ::calcHash(appSignalId);
+				   });
+
+	std::vector<AppSignalParam> appSignalParams;
+	appSignalParams.reserve(signalHashes.size());
+
+	for (auto s : m_signalManager.signalParams(signalHashes))
+	{
+		if (s.has_value() == true)
+		{
+			appSignalParams.push_back(std::move(*s));
+		}
+	}
+
+	if (timeType != E::TimeType::Plant && timeType != E::TimeType::System && timeType != E::TimeType::Local)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Incorrect time type! Supported values: 0 - Plant, 1 - System, 2 - Local."));
+		return;
+	}
+
+	if (viewMode != E::TrendViewMode::Separated && viewMode != E::TrendViewMode::Overlapped)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Incorrect view mode! Supported values: 0 - Separated, 1 - Overlapped."));
+		return;
+	}
+
+	if (scaleType != E::TrendScaleType::Linear && scaleType != E::TrendScaleType::Log10 && scaleType != E::TrendScaleType::Period)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Incorrect scale type! Supported values: 0 - Linear, 1 - Log10, 2 - Period."));
+		return;
+	}
+
+	auto timeTypeOpt = std::make_optional(timeType);
+	auto laneCountOpt = std::make_optional(std::clamp(laneCount, 1, 6));
+	auto viewModeOpt = std::make_optional(viewMode);
+	auto scaleTypeOpt = std::make_optional(scaleType);
+
+	auto trendWindow = MonitorTrends::startTrendApp(m_signalManager,
+													m_configController,
+													appSignalParams,
+													m_appSignalListSet,
+													timeTypeOpt,
+													laneCountOpt,
+													viewModeOpt,
+													scaleTypeOpt,
+													this);
+	trendWindow->setTimeRange(startTime, endTime);
+
+	return;
+}
 
 void MonitorMainWindow::slot_signalLog()
 {

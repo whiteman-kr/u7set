@@ -277,6 +277,8 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 	SessionParams sessionParams,
 	std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 {
+	Q_UNUSED(configurationXmlData);
+
 	setSessionParams(sessionParams);
 
 	DEBUG_LOG_MSG(logger(), "Configuration is ready");

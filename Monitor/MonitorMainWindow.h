@@ -124,6 +124,13 @@ public slots:
 
 	void slot_trends();
 	void slot_newTrend(QStringList appSignalIds = {});
+	void slot_trendArchive(QStringList appSignalIds,
+						   QDateTime startTime,
+						   QDateTime endTime,
+						   E::TimeType timeType,
+						   int laneCount,
+						   E::TrendViewMode viewMode,
+						   E::TrendScaleType scaleType);
 
 	void slot_signalLog();
 	void slot_updateSignalLogText();

@@ -20,11 +20,16 @@ public:
 
 	static std::vector<MonitorTrendsWidget*> getTrendsList();
 	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
-	static bool startTrendApp(const ClientLib::AppSignalManager& signalManager,
-							  const MonitorConfigController& configController,
-							  const std::vector<AppSignalParam>& appSignals,
-							  const AppSignalLists::AppSignalListSet& appSignalListSet,
-							  QWidget* parent);
+
+	static MonitorTrendsWidget* startTrendApp(const ClientLib::AppSignalManager& signalManager,
+											  const MonitorConfigController& configController,
+											  const std::vector<AppSignalParam>& appSignals,
+											  const AppSignalLists::AppSignalListSet& appSignalListSet,
+											  std::optional<E::TimeType> timeType,
+											  std::optional<int> laneCount,
+											  std::optional<E::TrendViewMode> viewMode,
+											  std::optional<E::TrendScaleType> scaleType,
+											  QWidget* parent);
 
 	static void registerTrendWindow(MonitorTrendsWidget* window);
 	static void unregisterTrendWindow(const MonitorTrendsWidget* window);

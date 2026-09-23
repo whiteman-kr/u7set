@@ -41,6 +41,9 @@ namespace TrendLib
 		bool addSignals(const std::vector<TrendSignalParam>& trendSignals, bool redraw);
 		bool addSignal(const TrendSignalParam& trendSignal, bool redraw);
 
+		void setTimeRange(QDateTime start, QDateTime end);
+		void setTimeRange(QDateTime start, uint64_t durationMs);
+
 		/// Add, remove or reorder signals.
 		///
 		void updateSignals(const std::vector<TrendSignalParam>& trendsignals);
@@ -64,7 +67,7 @@ namespace TrendLib
 		// Events
 		//
 	protected:
-		virtual void closeEvent(QCloseEvent*e) override;
+		virtual void closeEvent(QCloseEvent* e) override;
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void showEvent(QShowEvent*) override;
 
@@ -146,7 +149,7 @@ namespace TrendLib
 		void setProject(const QString& value);
 
 	protected:
-		Ui::TrendsMainWindow *ui;
+		Ui::TrendsMainWindow* ui;
 
 		QToolBar* m_toolBar = nullptr;
 		QComboBox* m_timeCombo = nullptr;
@@ -157,14 +160,14 @@ namespace TrendLib
 
 		QPushButton* m_realtimeModeButton = nullptr;
 		QPushButton* m_realtimeAutoShiftButton = nullptr;
-		QAction* m_realtimeActionForButton = nullptr;	// Watch the following comment for m_refreshActionForButton!
+		QAction* m_realtimeActionForButton = nullptr; // Watch the following comment for m_refreshActionForButton!
 
 		QPushButton* m_refreshButton = nullptr;
-		QAction* m_refreshActionForButton = nullptr;	// When m_refreshButton is added to ToolBar m_refreshActionForButton is returned value.
-														// Action is used for hiding Button from ToolBar, as hiding QWidget does not work
-														// Qt Help for QToolBar::addWidget says:
-														// Note: You should use QAction::setVisible() to change the visibility of the widget.
-														// Using QWidget::setVisible(), QWidget::show() and QWidget::hide() does not work.
+		QAction* m_refreshActionForButton = nullptr; // When m_refreshButton is added to ToolBar m_refreshActionForButton is returned value.
+													 // Action is used for hiding Button from ToolBar, as hiding QWidget does not work
+													 // Qt Help for QToolBar::addWidget says:
+													 // Note: You should use QAction::setVisible() to change the visibility of the widget.
+													 // Using QWidget::setVisible(), QWidget::show() and QWidget::hide() does not work.
 
 		QPushButton* m_signalsButton = nullptr;
 
@@ -183,6 +186,6 @@ namespace TrendLib
 		bool m_autoSelectedScaleType = false;
 	};
 
-}
+} // namespace TrendLib
 
 #endif // TRENDSMAINWINDOW_H
