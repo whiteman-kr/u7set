@@ -129,9 +129,6 @@ void UiTools::ensureVisible(QWidget* widget)
 		int top = qAbs(windowRect.top() - screenRect.top());
 		int bottom = qAbs(windowRect.bottom() - screenRect.bottom());
 
-		int minX = qMin(left, right);
-		int minY = qMin(top, bottom);
-
 		int x = (left < right) ? screenRect.left() : screenRect.right() - windowRect.width() + 1;
 		int y = (top < bottom) ? screenRect.top() : screenRect.bottom() - windowRect.height() + 1;
 
