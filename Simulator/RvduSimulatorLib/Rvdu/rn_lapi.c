@@ -753,7 +753,7 @@ static int deviceCaption(lua_State* L)
 
 static int schemaId(lua_State* L)
 {
-	const struct VduSchemaFile* const schema = vduCurrentSchema();
+	const struct VduSchemaDescriptor* const schema = vduCurrentSchema();
 	if (schema == NULL)
 	{
 		RN_ASSERT(schema != NULL);
@@ -761,7 +761,7 @@ static int schemaId(lua_State* L)
 	}
 	else
 	{
-		(void)lua_pushstring(L, vduCurrentSchemaString(schema->schemaProperties.schemaId));
+		(void)lua_pushstring(L, vduCurrentSchemaString(schema->schemaFile->schemaProperties.schemaId));
 	}
 
 	return 1;
@@ -791,7 +791,7 @@ static int schemaExists(lua_State* L)
 
 static int schemaCaption(lua_State* L)
 {
-	const struct VduSchemaFile* const schema = vduCurrentSchema();
+	const struct VduSchemaDescriptor* const schema = vduCurrentSchema();
 	if (schema == NULL)
 	{
 		RN_ASSERT(schema != NULL);
@@ -799,7 +799,7 @@ static int schemaCaption(lua_State* L)
 	}
 	else
 	{
-		(void)lua_pushstring(L, vduCurrentSchemaString(schema->schemaProperties.caption));
+		(void)lua_pushstring(L, vduCurrentSchemaString(schema->schemaFile->schemaProperties.caption));
 	}
 
 	return 1;
@@ -1389,7 +1389,7 @@ static int signalValueInt(lua_State* L)
 	char msg[STRING_MAX_LEN];
 
 	alt_32 res = 0;
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueInt: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
@@ -1429,7 +1429,7 @@ static int signalValueFloat(lua_State* L)
 	char msg[STRING_MAX_LEN];
 	float res = 0.0f;
 
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalValueFloat: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
@@ -2598,7 +2598,7 @@ static int writeValueInt(lua_State* L)
 	char msg[STRING_MAX_LEN];
 	bool res = true;
 
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueInt: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
@@ -2637,7 +2637,7 @@ static int writeValueFloat(lua_State* L)
 	char msg[STRING_MAX_LEN];
 	bool res = true;
 
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA writeValueFloat: signal '%s' is not found.", appSignalId);
 		logWarning(SignalReadTypeWrong, msg);
@@ -2723,7 +2723,7 @@ static int currentItem(lua_State* L)
 
 static int itemByObjectName(lua_State* L)
 {
-	const struct VduSchemaFile* const schemaFile = vduCurrentSchema();
+	const struct VduSchemaDescriptor* const schemaFile = vduCurrentSchema();
 	if (schemaFile == NULL)
 	{
 		RN_ASSERT(schemaFile != NULL);
@@ -2737,7 +2737,7 @@ static int itemByObjectName(lua_State* L)
 	const char* objectName = luaL_checkstring (L, 1);
 	size_t msgLen = strlen(objectName);
 
-	for (alt_u16 i = 0; i < schemaFile->schemaItemCount; i++)
+	for (alt_u16 i = 0; i < schemaFile->schemaFile->schemaItemCount; i++)
 	{
 		struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(i);
 		if (item == NULL)
@@ -2856,7 +2856,7 @@ static int itemAppSignalIds(lua_State* L)
 			for (alt_u32 i = 0; i < schemaItem->value.appSignalCount; i++)
 			{
 				alt_u16 index = schemaItemValueAppSignalIndex(&schemaItem->value, (alt_u16)i);
-				if (index == INVALID_INDEX)
+				if (index == INVALID_SIGNAL_INDEX)
 				{
 					(void)lua_pushstring(L, "");
 				}
@@ -2878,7 +2878,7 @@ static int itemAppSignalIds(lua_State* L)
 			for (alt_u32 i = 0; i < schemaItem->imageValue.appSignalCount; i++)
 			{
 				alt_u16 index = schemaItemImageValueAppSignalIndex(&schemaItem->imageValue, (alt_u16)i);
-				if (index == INVALID_INDEX)
+				if (index == INVALID_SIGNAL_INDEX)
 				{
 					(void)lua_pushstring(L, "");
 				}
@@ -2906,7 +2906,7 @@ static alt_u16 signalGlobalIndexProc(const struct VduSchemaFileSchemaItem1* cons
 	if (SCHEMA_ITEM_PTR_IS_VALID(item) == false)
 	{
 		logWarning(ItemWasNotFound, "LUA signalGlobalIndexProc: invalid item was supplied.");
-		return INVALID_INDEX;
+		return INVALID_SIGNAL_INDEX;
 	}
 	
 	if (item->itemType == TYPE_VALUE)
@@ -2921,20 +2921,20 @@ static alt_u16 signalGlobalIndexProc(const struct VduSchemaFileSchemaItem1* cons
 	{
 	}
 	
-	return INVALID_INDEX;
+	return INVALID_SIGNAL_INDEX;
 }
 
 static int signalGlobalIndex(lua_State* L)
 {
 	alt_u16 localIndex = (alt_u16)luaL_checkinteger(L, 2);
 	alt_u16 signalIndex = signalGlobalIndexProc((void*)lua_touserdata(L, 1), localIndex);
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		char msg[STRING_MAX_LEN];
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalGlobalIndex: global index by local index = %u not found.", (unsigned int)localIndex);
 		logWarning(SignalReadTypeWrong, msg);
 
-		lua_pushinteger(L, (int) - 1);
+		lua_pushnil(L);
 	}
 	else
 	{
@@ -2954,7 +2954,7 @@ static int itemSignalValueInt(lua_State* L)
 	}
 
 	alt_u16 signalIndex = signalGlobalIndexProc(schemaItem, (alt_u16)luaL_checkinteger(L, 2));
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		char msg[STRING_MAX_LEN];
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalGlobalIndex: global index by local index = %u not found.", (unsigned int)signalIndex);
@@ -2992,7 +2992,7 @@ static int itemSignalValueFloat(lua_State* L)
 	}
 
 	alt_u16 signalIndex = signalGlobalIndexProc(schemaItem, (alt_u16)luaL_checkinteger(L, 2));
-	if (signalIndex == INVALID_INDEX)
+	if (signalIndex == INVALID_SIGNAL_INDEX)
 	{
 		char msg[STRING_MAX_LEN];
 		(void)snprintf(msg, STRING_MAX_LEN, "LUA signalGlobalIndex: global index by local index = %u not found.", (unsigned int)signalIndex);

@@ -194,8 +194,6 @@ struct VduSchemaFile
 	// alt_u64 crc64; // CRC64 of the file from the beginning to the end of the strings.
 }; // *pSchemaFile;
 
-
-
 typedef struct
 {
 	alt_u16 version;  // 1
@@ -535,6 +533,13 @@ struct VduSchemaFileSchemaItem1
 	};
 };
 
+struct VduSchemaDescriptor
+{
+	struct VduSchemaFile* schemaFile;
+	alt_u32 fileSize;
+	alt_u32 maxBytecodeOffset;
+};
+
 #pragma pack(pop)
 
 /*
@@ -555,41 +560,41 @@ bool cacheSchemas(const char* const schemaPath, alt_u8* const startAddr, alt_u32
 
 // --------------- Schema access functions -------------------
 
-// Returns a pointer to a cached schema by index or NULL if schema is not loaded or index is out of range.
+// Returns a pointer to a cached schema descriptor by index or NULL if schema is not loaded or index is out of range.
 //
-struct VduSchemaFile* const vduSchemaByIndex(alt_u16 schemaIndex);
+struct VduSchemaDescriptor* const vduSchemaByIndex(alt_u16 schemaIndex);
 
-// Returns a pointer to a cached schema by schema ID or NULL if schema with the specified identifier not found.
+// Returns a pointer to a cached schema descriptor by schema ID or NULL if schema with the specified identifier not found.
 //
-struct VduSchemaFile* const vduSchemaByID(const char* schemaId);
+struct VduSchemaDescriptor* const vduSchemaByID(const char* schemaId);
 
 // Returns a pointer to the schema element whose index is specified in the parameter.
 //
-struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const schema, alt_u32 itemIndex);
+struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaDescriptor* const schema, alt_u32 itemIndex);
 
 // --------------- Schema strings access functions -------------------
 
-// Returns a pointer to a schema string by its offset or the NULL if schema is NULL.
+// Returns a pointer to a schema string by its offset or the NULL if schema descriptor is NULL.
 //
-const char* const vduSchemaString(const struct VduSchemaFile* const schema, const alt_u32 offset);
+const char* const vduSchemaString(const struct VduSchemaDescriptor* const schema, const alt_u32 offset);
 
-// Returns a length of schema string by its offset or INVALID_LENGTH if or the NULL if schema is NULL.
+// Returns a length of schema string by its offset. If schema descriptor is NULL or offset is out of range, returns 0 and asserts.
 //
-const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const alt_u32 offset);
+const alt_u16 vduSchemaStringLength(const struct VduSchemaDescriptor* const schema, const alt_u32 offset);
 
-// Returns a pointer to a current schema string by its offset or the NULL if schema is NULL.
+// Returns a pointer to a current schema string by its offset or the NULL if current schema descriptor is NULL.
 //
 const char* const vduCurrentSchemaString(const alt_u32 offset);
 
-// Returns a length of current schema string by its offset or INVALID_LENGTH if if schema is NULL.
+// Returns a length of current schema string by its offset. If current schema descriptor is NULL or offset is out of range, returns 0 and asserts.
 //
 const alt_u16 vduCurrentSchemaStringLength(const alt_u32 offset);
 
-// Returns a pointer to a current schema script by its offset or the NULL if current schema is not set.
+// Returns a pointer to a current schema script by its offset or the NULL if current schema descriptor is not set.
 //
 const char* const vduCurrentSchemaScript(const alt_u32 offset);
 
-// Returns a length of current schema script by its offset or INVALID_LENGTH if current schema is not set.
+// Returns a length of current schema script by its offset. If current schema descriptor is NULL or offset is out of range, returns 0 and asserts.
 //
 const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset);
 
@@ -597,7 +602,7 @@ const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset);
 
 // Returns a pointer to the currently displayed diagram.
 //
-const struct VduSchemaFile* const vduCurrentSchema(void);
+const struct VduSchemaDescriptor* const vduCurrentSchema(void);
 
 // Immediately changes the block's displayed schema to the schema specified in the parameter.
 //
@@ -613,7 +618,7 @@ bool vduScheduleSchemaChange(const char* const schemaId);
 
 // Gets the pointer to a scheduled schema change and resets the schedule
 //
-const struct VduSchemaFile* const vduGetScheduledSchema(void);
+const struct VduSchemaDescriptor* const vduGetScheduledSchema(void);
 
 // --------------- Schema items helper functions -------------------
 
@@ -623,7 +628,7 @@ static inline alt_u16 schemaItemValueAppSignalIndex(const VduSchemaFileSchemaIte
 {
 	if ((schemaItem == NULL) || (index >= schemaItem->appSignalCount))
 	{
-		return INVALID_INDEX;
+		return INVALID_SIGNAL_INDEX;
 	}
 	alt_u32 result = ((const alt_u32*)((const alt_u8*)schemaItem + sizeof(VduSchemaFileSchemaItemValue1)))[index];
 	return (alt_u16)result;
@@ -635,7 +640,7 @@ static inline alt_u16 schemaItemImageValueAppSignalIndex(const VduSchemaFileSche
 {
 	if ((schemaItem == NULL) || (index >= schemaItem->appSignalCount))
 	{
-		return INVALID_INDEX;
+		return INVALID_SIGNAL_INDEX;
 	}
 	alt_u32 result = ((const alt_u32*)((const alt_u8*)schemaItem + sizeof(VduSchemaFileSchemaItemImageValue1)))[index];
 	return (alt_u16)result;

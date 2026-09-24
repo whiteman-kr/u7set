@@ -251,7 +251,7 @@ void modeQuestionShow(const struct PopUpSchemaParams* const schema)
 		m_textMaxLength = true;
 	}
 
-	prepareStr(schema->MessageBoxParams.messageText, (char*)outstr, STRING_MAX_LEN, INVALID_INDEX/*signalIndex*/);
+	prepareStr(schema->MessageBoxParams.messageText, (char*)outstr, STRING_MAX_LEN, INVALID_SIGNAL_INDEX /*signalIndex*/);
 
 	printStr(m_textRect.x, m_textRect.y, m_textRect.w, m_textRect.h,
 			RVDU_SYSTEM_FONT, blackColor, backColorStr, ALIGN_V_CENTER + ALIGN_H_CENTER, (const char* const)outstr) ;

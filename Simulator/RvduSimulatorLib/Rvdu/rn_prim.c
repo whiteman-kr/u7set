@@ -189,7 +189,7 @@ bool showLogo(const char* logoFile)
 
 		const alt_u16 rowSize = ((width * 3u) + 3u) & (~3u);
 
-		for (alt_u16 y = (height - 1u); y != 0u; y--)
+		for (alt_u16 y = 0u; y < height; y++)
 		{
 			if (freadBigData(row, rowSize, file) == false)
 			{
@@ -213,7 +213,7 @@ bool showLogo(const char* logoFile)
 				alt_u32 data = 0xff000000u | ((alt_u32)r << 16u) | ((alt_u32)g << 8u) | (alt_u32)b;
 
 				alt_u16 i = x + left;
-				alt_u16 j = y + top;
+				alt_u16 j = height - y + top - 1;
 
 				if ((i < m_screenWidth) && (j < m_screenHeight))
 				{
@@ -980,7 +980,7 @@ void drawItemValue(const struct VduSchemaFileSchemaItem1* const item)
 	if (item->value.appSignalCount > 0u)
 	{
 		alt_u16 signalIndex = schemaItemValueAppSignalIndex(&item->value, 0/*index*/);
-		if (signalIndex == INVALID_INDEX)
+		if (signalIndex == INVALID_SIGNAL_INDEX)
 		{
 			RN_ASSERT(false);
 		}
@@ -991,7 +991,7 @@ void drawItemValue(const struct VduSchemaFileSchemaItem1* const item)
 	}
 	else
 	{
-		prepareStr(item->value.text, outstr, STRING_MAX_LEN, INVALID_INDEX);
+		prepareStr(item->value.text, outstr, STRING_MAX_LEN, INVALID_SIGNAL_INDEX);
 	}
 
 	printStr(
@@ -1100,7 +1100,7 @@ void drawImage(const struct VduSchemaFileSchemaItem1* const item)
 				firstPoint = false;
 				firstPointColor = data;
 
-				if ((vduCurrentSchema()->schemaProperties.backgroundColor & 0x00ffffffu) == firstPointColor)
+				if ((vduCurrentSchema()->schemaFile->schemaProperties.backgroundColor & 0x00ffffffu) == firstPointColor)
 				{
 					transparentBackground = true;
 				}
@@ -1266,7 +1266,7 @@ void prepareStr(const char* const sourceStr, char* resultStr, const alt_u16 maxL
 
 			if (len == 0u)
 			{
-				if (signalIndex != INVALID_INDEX)
+				if (signalIndex != INVALID_SIGNAL_INDEX)
 				{
 					const struct VduAppSignalParam* signalParam = appSignalParamByIndex(signalIndex);
 					if (signalParam == NULL)

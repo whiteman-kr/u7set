@@ -106,20 +106,14 @@ struct CachedBitmap
 	alt_u8* data;
 };
 
-struct SchemaData
-{
-	alt_u8* data;
-	bool transparent;
-};
-
 // Private module data
 //
-static struct SchemaData m_schemas[MAX_SCHEMAS_COUNT] = { 0 };	// Schema data in the block cache memory
+static struct VduSchemaDescriptor m_schemas[MAX_SCHEMAS_COUNT] = {0}; // Schema data in the block cache memory
 
-static struct VduSchemaFile* m_currentSchema = NULL;
+static struct VduSchemaDescriptor* m_currentSchema = NULL;
 static char m_currentSchemaID[STRING_MAX_LEN];
 
-static const struct VduSchemaFile* m_scheduledSchema = NULL;
+static const struct VduSchemaDescriptor* m_scheduledSchema = NULL;
 
 static struct CachedBitmap* m_cachedBitmap = NULL;	// Cached bitmap structures are stored here
 static int m_cachedBitmapCount = 0;	// Cached bitmap structures count
@@ -328,23 +322,23 @@ static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr,
 	//
 	if (readOk == true)
 	{
-		struct VduSchemaFile* const pSchema = (struct VduSchemaFile*)schemaStartAddr;
+		struct VduSchemaDescriptor schema = {0};
+		schema.schemaFile = (struct VduSchemaFile*)schemaStartAddr;
 
-		if (pSchema->schemaProperties.version != SCHEMA_PROP_VERSION)
+		if (schema.schemaFile->schemaProperties.version != SCHEMA_PROP_VERSION)
 		{
 			(void)snprintf(msg, STRING_MAX_LEN, "cacheSchemaFile: file '%s' properties version (%u) is not supported, max supported version is (%u).",
 				fileName,
-				pSchema->schemaProperties.version,
+				schema.schemaFile->schemaProperties.version,
 				SCHEMA_PROP_VERSION);
 			logError(UnsupportedVersion, msg);
 			return false;
 		}
 
 
-
-		for (alt_u32 i = 0; i < pSchema->schemaItemCount; i++)
+		for (alt_u32 i = 0; i < schema.schemaFile->schemaItemCount; i++)
 		{
-			const struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(pSchema, i);
+			const struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(&schema, i);
 			if (schemaItemIsValid(item) == false)
 			{
 				readOk = false;
@@ -357,11 +351,12 @@ static bool cacheSchemaFile(const char* fileName, alt_u8* const schemaStartAddr,
 	//
 	if (readOk == true)
 	{
-		struct VduSchemaFile* const pSchema = (struct VduSchemaFile*)schemaStartAddr;
+		struct VduSchemaDescriptor schema = {0};
+		schema.schemaFile = (struct VduSchemaFile*)schemaStartAddr;
 
-		for (alt_u32 i = 0; i < pSchema->schemaItemCount; i++)
+		for (alt_u32 i = 0; i < schema.schemaFile->schemaItemCount; i++)
 		{
-			struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(pSchema, i);
+			struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(&schema, i);
 			if (item->itemType == TYPE_TREND)
 			{
 				for (alt_u16 si = 0; si < item->trend.signalCount; si++)
@@ -558,13 +553,13 @@ static bool collectBitmapDescriptors(alt_u32* const memoryAvailable, alt_u32* co
 
 	for (alt_u16 i = 0; i < schemaCount; i++)
 	{
-		struct VduSchemaFile* const schema = vduSchemaByIndex(i);
+		struct VduSchemaDescriptor* const schema = vduSchemaByIndex(i);
 		if (schema == NULL)
 		{
 			return false;
 		}
 
-		for (alt_u16 j = 0; j < schema->schemaItemCount; j++)
+		for (alt_u16 j = 0; j < schema->schemaFile->schemaItemCount; j++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(schema, j);
 			if (item == NULL)
@@ -739,7 +734,7 @@ static int countWriter(lua_State* L, const void* p, size_t sz, void* ud)
 // Function that compiles Lua script
 //
 static bool compileScript(lua_State* L, 
-	const struct VduSchemaFile* const schema, 
+	const struct VduSchemaDescriptor* const schema, 
 	alt_u32 codeRef,
 	enum WarningCode warningCode,
 	alt_u8* const bytecodeAddr,
@@ -749,7 +744,7 @@ static bool compileScript(lua_State* L,
 	*bytesUsed = 0;
 
 	alt_u16 len = vduSchemaStringLength(schema, codeRef);
-	if ((len == INVALID_LENGTH) || (len == 0u))
+	if ((len == 0u))
 	{
 		RN_ASSERT(false);
 		return false;
@@ -824,7 +819,7 @@ static bool compileScript(lua_State* L,
 // Compile schema item script
 //
 static bool compileSchemaItemScript(lua_State* L,
-									const struct VduSchemaFile* const schema,
+									struct VduSchemaDescriptor* const schema,
 									alt_u32 scriptRef,
 									enum WarningCode warningCode,
 									alt_u8** const bytecodeAddr,
@@ -834,11 +829,6 @@ static bool compileSchemaItemScript(lua_State* L,
 									alt_u32* const scriptsCompiled)
 {
 	alt_u16 len = vduSchemaStringLength(schema, scriptRef);
-	if (len == INVALID_LENGTH)
-	{
-		return false;
-	}
-
 	if (len == 0u) 
 	{
 		return true;
@@ -850,13 +840,18 @@ static bool compileSchemaItemScript(lua_State* L,
 	{
 		// Set item's pointer to the compiled [size + bytecode]
 		//
-		ptrdiff_t offset = (alt_u8*)(*bytecodeAddr) - (alt_u8*)schema;
+		ptrdiff_t offset = (alt_u8*)(*bytecodeAddr) - (alt_u8*)schema->schemaFile;
 		if (offset < 0)
 		{
 			RN_ASSERT(false);
 			return false;
 		}
 		*bytecodeRef = (alt_u32)offset;
+
+		if (schema->maxBytecodeOffset < (alt_u32)offset)
+		{
+			schema->maxBytecodeOffset = (alt_u32)offset;
+		}
 
 		bytesUsedByScript = alignAddressToDword(bytesUsedByScript);
 
@@ -900,7 +895,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 
 	for (alt_u16 i = 0; i < schemaCount; i++)
 	{
-		struct VduSchemaFile* const schema = vduSchemaByIndex(i);
+		struct VduSchemaDescriptor* const schema = vduSchemaByIndex(i);
 		if (schema == NULL)
 		{
 			return false;
@@ -910,10 +905,10 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 		//
 		bool ok = compileSchemaItemScript(L,
 										  schema,
-										  schema->schemaProperties.onShowScript,
+										  schema->schemaFile->schemaProperties.onShowScript,
 										  LuaPreDrawScript,
 										  &bytecodeAddr,
-										  &schema->schemaProperties.onShowScriptBytecode,
+										  &schema->schemaFile->schemaProperties.onShowScriptBytecode,
 										  &memoryAvailable,
 										  bytesUsed,
 										  &scriptsCompiled);
@@ -926,10 +921,10 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 		//
 		ok = compileSchemaItemScript(L,
 									 schema,
-									 schema->schemaProperties.preDrawScript,
+									 schema->schemaFile->schemaProperties.preDrawScript,
 									 LuaPreDrawScript,
 									 &bytecodeAddr,
-									 &schema->schemaProperties.preDrawScriptBytecode,
+									 &schema->schemaFile->schemaProperties.preDrawScriptBytecode,
 									 &memoryAvailable,
 									 bytesUsed,
 									 &scriptsCompiled);
@@ -940,7 +935,7 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 		
 		// Compile Items Scripts
 		//
-		for (alt_u16 j = 0; j < schema->schemaItemCount; j++)
+		for (alt_u16 j = 0; j < schema->schemaFile->schemaItemCount; j++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(schema, j);
 			if (item == NULL)
@@ -976,7 +971,6 @@ static bool compileSchemasBytecode(alt_u8* const startAddr, alt_u32 memoryAvaila
 			{
 				return false;
 			}
-		
 		}
 	}
 
@@ -1039,8 +1033,8 @@ bool cacheSchemas(const char* const schemaPath, alt_u8* const startAddr, alt_u32
 			return false;
 		}
 
-		m_schemas[i].data = schemaStartAddr;
-		m_schemas[i].transparent = true;
+		m_schemas[i].schemaFile = (struct VduSchemaFile*)schemaStartAddr;
+		m_schemas[i].fileSize = schemaBytesRead;
 
 		// Number of bytes read from the file is upward-rounded to dword-size,
 		// because all fonts data shall be aligned by dword
@@ -1090,9 +1084,9 @@ bool cacheSchemas(const char* const schemaPath, alt_u8* const startAddr, alt_u32
 	return true;
 }
 
-// Returns a pointer to a cached schema by index or NULL if schema is not loaded or index is out of range.
+// Returns a pointer to a cached schema descriptor by index or NULL if schema is not loaded or index is out of range.
 //
-struct VduSchemaFile* const vduSchemaByIndex(alt_u16 schemaIndex)
+struct VduSchemaDescriptor* const vduSchemaByIndex(alt_u16 schemaIndex)
 {
 	if ((vduConfig() == NULL) || (schemaIndex >= vduConfig()->schemaCount))
 	{
@@ -1100,9 +1094,9 @@ struct VduSchemaFile* const vduSchemaByIndex(alt_u16 schemaIndex)
 		return NULL;
 	}
 
-	struct VduSchemaFile* const result = (struct VduSchemaFile* const)m_schemas[schemaIndex].data;
+	struct VduSchemaDescriptor* const result = &m_schemas[schemaIndex];
 
-	if (strncmp(result->magic, "VDU", strlen("VDU")) != 0)
+	if (strncmp(result->schemaFile->magic, "VDU", strlen("VDU")) != 0)
 	{
 		return NULL;
 	}
@@ -1110,9 +1104,9 @@ struct VduSchemaFile* const vduSchemaByIndex(alt_u16 schemaIndex)
 	return result;
 }
 
-// Returns a pointer to a cached schema by schema ID or NULL if schema with the specified identifier not found.
+// Returns a pointer to a cached schema descriptor by index or NULL if schema is not loaded or index is out of range.
 //
-struct VduSchemaFile* const vduSchemaByID(const char* schemaId)
+struct VduSchemaDescriptor* const vduSchemaByID(const char* schemaId)
 {
 	if (vduConfig() == NULL)
 	{
@@ -1132,8 +1126,9 @@ struct VduSchemaFile* const vduSchemaByID(const char* schemaId)
 	alt_u16 schemaCount = vduConfig()->schemaCount;
 	for (alt_u16 i = 0u; i < schemaCount; i++)
 	{
-		struct VduSchemaFile* const result = (struct VduSchemaFile* const)m_schemas[i].data;
-		const char* str = (const char* const)result + result->schemaProperties.schemaId + sizeof(alt_u16); /*skip string size*/
+		struct VduSchemaDescriptor* const result = &m_schemas[i];
+		
+		const char* str = (const char* const)result->schemaFile + result->schemaFile->schemaProperties.schemaId + sizeof(alt_u16); /*skip string size*/
 
 		if (strcmp(schemaId, str) == 0)
 		{
@@ -1146,7 +1141,7 @@ struct VduSchemaFile* const vduSchemaByID(const char* schemaId)
 
 // Returns a pointer to the schema element whose index is specified in the parameter.
 //
-struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const schema, alt_u32 itemIndex)
+struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaDescriptor* const schema, alt_u32 itemIndex)
 {
 	if (schema == NULL)
 	{
@@ -1156,20 +1151,20 @@ struct VduSchemaFileSchemaItem1* const vduSchemaItem(struct VduSchemaFile* const
 		return NULL;
 	}
 
-	if (itemIndex >= schema->schemaItemCount)
+	if (itemIndex >= schema->schemaFile->schemaItemCount)
 	{
 		RN_ASSERT(false);
 		return NULL;
 	}
 
-	const alt_u32* itemOffsets = (const alt_u32*)((alt_u8*)schema + sizeof(struct VduSchemaFile));
+	const alt_u32* itemOffsets = (const alt_u32*)((alt_u8*)schema->schemaFile + sizeof(struct VduSchemaFile));
 
-	return (struct VduSchemaFileSchemaItem1* const)((alt_u8*)schema + itemOffsets[itemIndex]);
+	return (struct VduSchemaFileSchemaItem1* const)((alt_u8*)schema->schemaFile + itemOffsets[itemIndex]);
 }
 
-// Returns a pointer to a schema string by its offset or the NULL if schema is NULL.
+// Returns a pointer to a schema string by its offset or the NULL if schema descriptor is NULL.
 //
-const char* const vduSchemaString(const struct VduSchemaFile* const schema, const alt_u32 offset)
+const char* const vduSchemaString(const struct VduSchemaDescriptor* const schema, const alt_u32 offset)
 {
 	if (schema == NULL)
 	{
@@ -1177,26 +1172,37 @@ const char* const vduSchemaString(const struct VduSchemaFile* const schema, cons
 		return NULL;
 	}
 
-	const char* str = (const char*)schema + offset + sizeof(alt_u16); /*skip string size*/
+	if (offset > (schema->fileSize - sizeof(alt_u16)))
+	{
+		RN_ASSERT(false);
+		return NULL;
+	}
 
+	const char* str = (const char*)schema->schemaFile + offset + sizeof(alt_u16); /*skip string size*/
 	return str;
 }
 
-// Returns a length of schema string by its offset or INVALID_LENGTH if or the NULL if schema is NULL.
+// Returns a length of schema string by its offset. If schema descriptor is NULL or offset is out of range, returns 0 and asserts.
 //
-const alt_u16 vduSchemaStringLength(const struct VduSchemaFile* const schema, const alt_u32 offset)
+const alt_u16 vduSchemaStringLength(const struct VduSchemaDescriptor* const schema, const alt_u32 offset)
 {
 	if (schema == NULL)
 	{
 		RN_ASSERT(false);
-		return INVALID_LENGTH;
+		return 0u;
 	}
 
-	alt_u16 result = *(const alt_u16*)((const alt_u8*)schema + offset);
+	if (offset > (schema->fileSize - sizeof(alt_u16)))
+	{
+		RN_ASSERT(false);
+		return 0u;
+	}
+
+	alt_u16 result = *(const alt_u16*)((const alt_u8*)schema->schemaFile + offset);
 	return result;
 }
 
-// Returns a pointer to a current schema string by its offset or the NULL if schema is NULL.
+// Returns a pointer to a current schema string by its offset or the NULL if current schema descriptor is NULL.
 //
 const char* const vduCurrentSchemaString(const alt_u32 offset)
 {
@@ -1205,24 +1211,39 @@ const char* const vduCurrentSchemaString(const alt_u32 offset)
 		RN_ASSERT(false);
 		return NULL;
 	}
-	const char* str = (const char*)m_currentSchema + offset + sizeof(alt_u16); /*skip string size*/
+
+	if (offset > (m_currentSchema->fileSize - sizeof(alt_u16)))
+	{
+		RN_ASSERT(false);
+		return NULL;
+	}
+
+	const char* str = (const char*)m_currentSchema->schemaFile + offset + sizeof(alt_u16); /*skip string size*/
 	return str;
 }
 
-// Returns a length of current schema string by its offset or INVALID_LENGTH if if schema is NULL.
+// Returns a length of current schema string by its offset. If current schema descriptor is NULL or offset is out of range, returns 0 and
+// asserts.
 //
 const alt_u16 vduCurrentSchemaStringLength(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{
 		RN_ASSERT(false);
-		return INVALID_LENGTH;
+		return 0u;
 	}
-	alt_u16 result = *(const alt_u16*)((const alt_u8*)m_currentSchema + offset);
+
+	if (offset > (m_currentSchema->fileSize - sizeof(alt_u16)))
+	{
+		RN_ASSERT(false);
+		return 0u;
+	}
+
+	alt_u16 result = *(const alt_u16*)((const alt_u8*)m_currentSchema->schemaFile + offset);
 	return result;
 }
 
-// Returns a pointer to a current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
+// Returns a pointer to a current schema script by its offset or the NULL if current schema descriptor is not set.
 //
 const char* const vduCurrentSchemaScript(const alt_u32 offset)
 {
@@ -1231,26 +1252,41 @@ const char* const vduCurrentSchemaScript(const alt_u32 offset)
 		RN_ASSERT(false);
 		return NULL;
 	}
-	const char* str = (const char*)m_currentSchema + offset + sizeof(alt_u32) /*skip data size*/;
+
+	if (offset > m_currentSchema->maxBytecodeOffset)
+	{
+		RN_ASSERT(false);
+		return NULL;
+	}
+
+	const char* str = (const char*)m_currentSchema->schemaFile + offset + sizeof(alt_u32) /*skip data size*/;
 	return str;
 }
 
-// Returns a length of current schema script by its offset or the NULL if configuration is not loaded or the offset is out of range.
+// Returns a length of current schema script by its offset. If current schema descriptor is NULL or offset is out of range, returns 0 and
+// asserts.
 //
 const alt_u32 vduCurrentSchemaScriptLength(const alt_u32 offset)
 {
 	if (m_currentSchema == NULL)
 	{
 		RN_ASSERT(false);
-		return INVALID_LENGTH;
+		return 0u;
 	}
-	alt_u32 result = *(const alt_u32*)((const alt_u8*)m_currentSchema + offset);
+
+	if (offset > m_currentSchema->maxBytecodeOffset)
+	{
+		RN_ASSERT(false);
+		return 0u;
+	}
+
+	alt_u32 result = *(const alt_u32*)((const alt_u8*)m_currentSchema->schemaFile + offset);
 	return result;
 }
 
 // Returns a pointer to the currently displayed diagram.
 //
-const struct VduSchemaFile* const vduCurrentSchema(void)
+const struct VduSchemaDescriptor* const vduCurrentSchema(void)
 {
 	return m_currentSchema;
 }
@@ -1269,7 +1305,7 @@ bool vduSetCurrentSchema(const char* const schemaId)
 
 	if (strcmp((char*)m_currentSchemaID, schemaId) != 0)
 	{
-		struct VduSchemaFile* const newSchema = vduSchemaByID((const char*)schemaId);
+		struct VduSchemaDescriptor* const newSchema = vduSchemaByID((const char*)schemaId);
 		if (newSchema != NULL)
 		{
 			(void)strncpy((char*)m_currentSchemaID, (const char*)schemaId, STRING_MAX_LEN);
@@ -1293,14 +1329,14 @@ bool vduSetCurrentSchema(const char* const schemaId)
 //
 struct VduSchemaFileSchemaItem1* const vduCurrentSchemaItem(alt_u32 itemIndex)
 {
-	if ((m_currentSchema == NULL) || (itemIndex >= m_currentSchema->schemaItemCount))
+	if ((m_currentSchema == NULL) || (itemIndex >= m_currentSchema->schemaFile->schemaItemCount))
 	{
 		RN_ASSERT(false);
 		return NULL;
 	}
 
-	const alt_u32* itemOffsets = (const alt_u32*)((alt_u8*)m_currentSchema + sizeof(struct VduSchemaFile));
-	return (struct VduSchemaFileSchemaItem1* const)((alt_u8*)m_currentSchema + itemOffsets[itemIndex]);
+	const alt_u32* itemOffsets = (const alt_u32*)((alt_u8*)m_currentSchema->schemaFile + sizeof(struct VduSchemaFile));
+	return (struct VduSchemaFileSchemaItem1* const)((alt_u8*)m_currentSchema->schemaFile + itemOffsets[itemIndex]);
 }
 
 // Schedules the change of the schema at next loop.
@@ -1318,7 +1354,7 @@ bool vduScheduleSchemaChange(const char* const schemaId)
 
 	if (strcmp((char*)m_currentSchemaID, schemaId) != 0)
 	{
-		const struct VduSchemaFile* const newSchema = vduSchemaByID((const char*)schemaId);
+		const struct VduSchemaDescriptor* const newSchema = vduSchemaByID((const char*)schemaId);
 		if (newSchema != NULL)
 		{
 			m_scheduledSchema = newSchema;
@@ -1335,9 +1371,9 @@ bool vduScheduleSchemaChange(const char* const schemaId)
 
 // Gets the pointer to a scheduled schema change and resets the schedule
 //
-const struct VduSchemaFile* const vduGetScheduledSchema(void)
+const struct VduSchemaDescriptor* const vduGetScheduledSchema(void)
 {
-	const struct VduSchemaFile* const result = m_scheduledSchema;
+	const struct VduSchemaDescriptor* const result = m_scheduledSchema;
 	m_scheduledSchema = NULL;
 	return result;
 }

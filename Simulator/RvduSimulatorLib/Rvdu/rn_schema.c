@@ -149,7 +149,8 @@ static void processSchemaKeys(void)
 
 		// Get the index of current schema
 		//
-		alt_u16 currentSchemaIndex = INVALID_INDEX;
+		bool currentSchemaFound = false;
+		alt_u16 currentSchemaIndex = 0u;
 
 		const struct VduConfigFile1* const cfg = vduConfig();
 		if ((cfg == NULL) || (cfg->schemaCount == 0u))
@@ -157,7 +158,7 @@ static void processSchemaKeys(void)
 			return;
 		}
 
-		const struct VduSchemaFile* const currentSchema = vduCurrentSchema();
+		const struct VduSchemaDescriptor* const currentSchema = vduCurrentSchema();
 		if (currentSchema == NULL)
 		{
 			RN_ASSERT(currentSchema != NULL);
@@ -166,22 +167,23 @@ static void processSchemaKeys(void)
 
 		for (alt_u16 i = 0; i < cfg->schemaCount; i++)
 		{
-			const struct VduSchemaFile* const schema = vduSchemaByIndex(i);
+			const struct VduSchemaDescriptor* const schema = vduSchemaByIndex(i);
 			if (schema == NULL)
 			{
 				continue;
 			}
 
-			if (currentSchema->schemaProperties.schemaId == schema->schemaProperties.schemaId)
+			if (currentSchema->schemaFile->schemaProperties.schemaId == schema->schemaFile->schemaProperties.schemaId)
 			{
+				currentSchemaFound = true;
 				currentSchemaIndex = i;
 				break;
 			}
 		}
 
-		if (currentSchemaIndex == INVALID_INDEX)
+		if (currentSchemaFound == false)
 		{
-			// Error
+			RN_ASSERT(false);
 			return;
 		}
 
@@ -209,13 +211,13 @@ static void processSchemaKeys(void)
 
 		// Switch to the new schema
 		//
-		const struct VduSchemaFile* newSchema = vduSchemaByIndex(currentSchemaIndex);
+		const struct VduSchemaDescriptor* newSchema = vduSchemaByIndex(currentSchemaIndex);
 		if (newSchema == NULL)
 		{
 			return;
 		}
 
-		(void)vduScheduleSchemaChange(vduSchemaString(newSchema, newSchema->schemaProperties.schemaId));
+		(void)vduScheduleSchemaChange(vduSchemaString(newSchema, newSchema->schemaFile->schemaProperties.schemaId));
 
 		return;
 	}
@@ -248,12 +250,6 @@ static inline bool runScript(lua_State* rvduLuaState, struct VduSchemaFileSchema
 	const char* scriptName)
 {
 	alt_u16 scriptLength = vduCurrentSchemaStringLength(scriptRef);
-	if (scriptLength == INVALID_LENGTH)
-	{
-		RN_ASSERT(false);
-		return false;
-	}
-
 	if (scriptLength == 0u)
 	{
 		return true;
@@ -392,17 +388,17 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 
 	// If there is a schema switch pending - switch it
 	//
-	const struct VduSchemaFile* const scheduledSchema = vduGetScheduledSchema();
+	const struct VduSchemaDescriptor* const scheduledSchema = vduGetScheduledSchema();
 	if (scheduledSchema != NULL)
 	{
-		(void)vduSetCurrentSchema(vduSchemaString(scheduledSchema, scheduledSchema->schemaProperties.schemaId));
+		(void)vduSetCurrentSchema(vduSchemaString(scheduledSchema, scheduledSchema->schemaFile->schemaProperties.schemaId));
 		drawingPhase = true;	// Draw the just switched schema immediately
 	}
 
-	const struct VduSchemaFile* const pSchemaFile = vduCurrentSchema();
-	if (pSchemaFile == NULL)
+	const struct VduSchemaDescriptor* const pSchema = vduCurrentSchema();
+	if (pSchema == NULL)
 	{
-		RN_ASSERT(pSchemaFile != NULL);
+		RN_ASSERT(pSchema != NULL);
 		return;
 	}
 
@@ -410,7 +406,7 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 	{
 		// Erase the screen
 		//
-		if (writeVideoBuffer(pSchemaFile->schemaProperties.backgroundColor) == false)
+		if (writeVideoBuffer(pSchema->schemaFile->schemaProperties.backgroundColor) == false)
 		{
 			RN_ASSERT(false);
 			return;
@@ -426,7 +422,7 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 	//
 	if (isTouchEvent() == true)
 	{
-		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
 			if (item == NULL)
@@ -440,13 +436,8 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			if (item->acceptClick == true)
 			{
 				alt_u16 scriptLength = vduCurrentSchemaStringLength(item->clickScript);
-				if (scriptLength == INVALID_LENGTH)
-				{
-					RN_ASSERT(false);
-					continue;
-				}
 
-				if (scriptLength > 0u)
+				if (scriptLength != 0u)
 				{
 					if (checkTouchZone(
 						item->rect.left,
@@ -485,45 +476,35 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 
 		// OnShowScript
 		
-		static const struct VduSchemaFile* prevSchemaFile = NULL;
-		if (prevSchemaFile != pSchemaFile)
+		static const struct VduSchemaDescriptor* prevSchema = NULL;
+		if (prevSchema != pSchema)
 		{
-			prevSchemaFile = pSchemaFile;		// Schema has been changed
+			prevSchema = pSchema; // Schema has been changed
 
-			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchemaFile->schemaProperties.onShowScript);
-			if (scriptLength == INVALID_LENGTH)
-			{
-				RN_ASSERT(false);
-				return;
-			}
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchema->schemaFile->schemaProperties.onShowScript);
 
-			if (scriptLength > 0u)
+			if (scriptLength != 0u)
 			{
 				(void)runScript(rvduLuaState,
-					NULL,
-					pSchemaFile->schemaProperties.onShowScript,
-					pSchemaFile->schemaProperties.onShowScriptBytecode,
-					LuaPreDrawScript,
-					"SchemaOnShowScript");
+								NULL,
+								pSchema->schemaFile->schemaProperties.onShowScript,
+								pSchema->schemaFile->schemaProperties.onShowScriptBytecode,
+								LuaPreDrawScript,
+								"SchemaOnShowScript");
 			}
 		}
 
 		// PredrawScript
 
 		{
-			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchemaFile->schemaProperties.preDrawScript);
-			if (scriptLength == INVALID_LENGTH)
-			{
-				RN_ASSERT(false);
-				return;
-			}
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchema->schemaFile->schemaProperties.preDrawScript);
 
-			if (scriptLength > 0u)
+			if (scriptLength != 0u)
 			{
 				(void)runScript(rvduLuaState,
 					NULL,
-					pSchemaFile->schemaProperties.preDrawScript,
-					pSchemaFile->schemaProperties.preDrawScriptBytecode,
+								pSchema->schemaFile->schemaProperties.preDrawScript,
+								pSchema->schemaFile->schemaProperties.preDrawScriptBytecode,
 					LuaPreDrawScript,
 					"SchemaPredrawScript");
 			}
@@ -539,7 +520,7 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			return;
 		}
 
-		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
 			if (item == NULL)
@@ -549,13 +530,8 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			}
 
 			alt_u16 scriptLength = vduCurrentSchemaStringLength(item->preDrawScript);
-			if (scriptLength == INVALID_LENGTH)
-			{
-				RN_ASSERT(false);
-				continue;
-			}
 
-			if (scriptLength > 0u)
+			if (scriptLength != 0u)
 			{
 				if (runScript(rvduLuaState,
 					item,
@@ -583,7 +559,7 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 	
 		// Third pass - items rendering
 		//
-		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
 			if (item == NULL)
@@ -641,7 +617,7 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 		//
 		bool blink = blinkPhase();
 
-		for (alt_u16 itemIndex = 0u; itemIndex < pSchemaFile->schemaItemCount; itemIndex++)
+		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 		{
 			const struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
 			if (item == NULL)

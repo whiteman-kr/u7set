@@ -165,14 +165,14 @@ bool allocateTrendsMemory(alt_u8* const startAddr, alt_u32 memoryAvailable, alt_
 	alt_u16 count = vduConfig()->schemaCount;
 	for (alt_u16 s = 0; s < count; s++)
 	{
-		struct VduSchemaFile* const schema = vduSchemaByIndex(s);
+		struct VduSchemaDescriptor* const schema = vduSchemaByIndex(s);
 		if (schema == NULL)
 		{
 			RN_ASSERT(schema != NULL);
 			return false;
 		}
 
-		for (alt_u16 it = 0; it < schema->schemaItemCount; it++)
+		for (alt_u16 it = 0; it < schema->schemaFile->schemaItemCount; it++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduSchemaItem(schema, it);
 			if (item->itemType != TYPE_TREND)
@@ -383,7 +383,7 @@ static void processTrendData(alt_u16 ti, alt_u64 timeCode)
 	VduValue value = { 0 };
 	bool valid = signalAvailableByIndex((alt_u16)tsd->appSignalIndex);
 
-	if ((valid == true) && (tsd->validityAppSignalIndex != INVALID_INDEX))
+	if ((valid == true) && (tsd->validityAppSignalIndex != INVALID_SIGNAL_INDEX))
 	{
 		// Check the validity signal
 		//

@@ -337,7 +337,7 @@ alt_u16 appSignalIndex(const char* const appSignalId)
 
 	{
 		RN_ASSERT(false);
-		return INVALID_INDEX;
+		return INVALID_SIGNAL_INDEX;
 	}
 
 
@@ -365,7 +365,7 @@ alt_u16 appSignalIndex(const char* const appSignalId)
 		}
 	}
 
-	return INVALID_INDEX;
+	return INVALID_SIGNAL_INDEX;
 }
 
 // Function return SignalID by index

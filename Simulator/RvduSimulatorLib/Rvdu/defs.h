@@ -3,8 +3,7 @@
 
 #include <alt_types.h>
 
-#define INVALID_INDEX (alt_u16)-1
-#define INVALID_LENGTH (alt_u16)-1
+#define INVALID_SIGNAL_INDEX (alt_u16)-1
 
 // String lengths
 //
