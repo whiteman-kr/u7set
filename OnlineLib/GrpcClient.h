@@ -54,10 +54,30 @@ public:
 			   int pingPeriodMs)  :
 		LogWrapper(log),
 		m_localSwInfo(localSoftwareInfo),
-		m_serverAddress(serverAddress),
 		m_clientDescription(clientDescription)
 	{
 		setPingPeriod(pingPeriodMs);
+
+		QString addrsStr;
+
+		for (const HostAddressPort& addr : serverAddress) 
+		{
+			addrsStr += QString("%1 ").arg(addr.toString());
+		}
+
+		logMsg(QString("%1: created, server adresses %2").arg(m_clientDescription).arg(addrsStr));
+
+		for (const HostAddressPort& addr : serverAddress)
+		{
+			if (addr.address32() != 0)
+			{
+				m_serverAddress.push_back(addr);
+			}
+			else
+			{
+				logMsg(QString("%1: server address %2 excluded").arg(m_clientDescription).arg(addr.toString()));
+			}
+		}
 
 		Q_ASSERT(m_serverAddress.size() > 0);
 
@@ -115,7 +135,7 @@ public:
 		m_thread = std::thread(&GrpcClient::run, this);
 		m_threadStarted.store(true, std::memory_order::release);
 
-		qDebug() << C_STR(QString("%1 started").arg(m_clientDescription));
+		logMsg(QString("%1: started").arg(m_clientDescription));
 	}
 
 	void stop()
@@ -136,7 +156,7 @@ public:
 
 		m_threadStarted.store(false, std::memory_order::release);
 
-		qDebug() << C_STR(QString("%1 stoped").arg(m_clientDescription));
+		logMsg(QString("%1: stoped").arg(m_clientDescription));
 	}
 
 	bool isThreadStarted() const { return m_threadStarted.load(std::memory_order::acquire); }
@@ -300,14 +320,15 @@ protected:
 
 	virtual grpc::Status createStubAndHandshake()
 	{
-		logMsg(QString("%1::createStubAndHandshake").arg(clientDescription()));
-
 		const std::string endpoint = getNextServerAddr();
+
+		logMsg(QString("%1::createStubAndHandshake to %2").arg(clientDescription()).arg(QString::fromStdString(endpoint)));
 
 		if (m_channel == nullptr || m_endpoint != endpoint)
 		{
 			m_endpoint = endpoint;
 			m_channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
+			m_stub.reset();
 		}
 
 		if (m_stub == nullptr)
@@ -390,6 +411,9 @@ protected:
 		}
 
 		clearAuthToken();
+
+		m_stub.reset();
+		m_channel.reset();
 
 		state.localSoftwareInfo = localSwInfo();
 
