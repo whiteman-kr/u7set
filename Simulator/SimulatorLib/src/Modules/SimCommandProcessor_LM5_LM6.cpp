@@ -4390,7 +4390,7 @@ namespace Sim
 			operand1.mulSignedInteger(operand2);
 			break;
 		case 4:
-			operand1.divSignedInteger(operand2);
+			operand1.divSignedIntegerBugVs104Vs105(operand2);
 			break;
 		case 5:
 			operand1.addFloatingPoint(operand2);

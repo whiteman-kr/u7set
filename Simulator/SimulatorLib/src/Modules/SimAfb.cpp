@@ -313,7 +313,9 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::divSignedInteger(const AfbComponentParam& operand)
+	// This function is renamed from divSignedInteger to divSignedIntegerBugVs104Vs105 because of a bug in AFM math version 104, 105.
+	//
+	void AfbComponentParam::divSignedIntegerBugVs104Vs105(const AfbComponentParam& operand)
 	{
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
@@ -323,7 +325,14 @@ namespace Sim
 
 		if (op2 != 0)
 		{
-			result = op1 / op2;
+			if (op1 == std::numeric_limits<qint32>::min() && op2 == -1)
+			{
+				result = std::numeric_limits<qint32>::min(); // This is wrong, but AFM math version 104, 105 does this.
+			}
+			else
+			{
+				result = op1 / op2;
+			}
 		}
 		else
 		{
@@ -389,11 +398,11 @@ namespace Sim
 		return mulSignedInteger(cp);
 	}
 
-	void AfbComponentParam::divSignedInteger(qint32 operand)
+	void AfbComponentParam::divSignedIntegerBugVs104Vs105(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return divSignedInteger(cp);
+		return divSignedIntegerBugVs104Vs105(cp);
 	}
 
 	void AfbComponentParam::addFloatingPoint(const AfbComponentParam& operand)

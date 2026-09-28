@@ -84,12 +84,18 @@ namespace Sim
 		void addSignedInteger(const AfbComponentParam& operand);
 		void subSignedInteger(const AfbComponentParam& operand);
 		void mulSignedInteger(const AfbComponentParam& operand);
-		void divSignedInteger(const AfbComponentParam& operand);
+
+		// This function is renamed from divSignedInteger to divSignedIntegerBugVs104Vs105 because of a bug in AFM math version 104, 105.
+		//
+		void divSignedIntegerBugVs104Vs105(const AfbComponentParam& operand);
 
 		void addSignedInteger(qint32 operand);
 		void subSignedInteger(qint32 operand);
 		void mulSignedInteger(qint32 operand);
-		void divSignedInteger(qint32 operand);
+
+		// This function is renamed from divSignedInteger to divSignedIntegerBugVs104Vs105 because of a bug in AFM math version 104, 105.
+		//
+		void divSignedIntegerBugVs104Vs105(qint32 operand);
 
 		void addFloatingPoint(const AfbComponentParam& operand);
 		void subFloatingPoint(const AfbComponentParam& operand);
