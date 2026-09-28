@@ -101,12 +101,6 @@ void moduleRnKbdInitialize(void)
 	}*/
 }
 
-void moduleRnKbdUninitialize(void)
-{
-	m_moduleInitialized = false;
-	m_keyboardConnected = false;
-}
-
 static void setPressedKey(alt_u16 code)
 {
 	m_code = code;

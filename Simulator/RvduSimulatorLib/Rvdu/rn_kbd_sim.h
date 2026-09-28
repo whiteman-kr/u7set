@@ -3,6 +3,8 @@
 
 #include <alt_types.h>
 
+void moduleRnKbdUninitialize(void);
+
 void setPressedKey(alt_u16 code);
 
 #endif

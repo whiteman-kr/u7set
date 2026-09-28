@@ -221,8 +221,7 @@ bool cacheSignalsFile(const char* const signalsFile, alt_u8* const startAddr, co
 		{
 			if (m_pSignalEntry[index].vduSignalInOutType == (alt_u16)RxSignal)
 			{
-				m_pSignalEntry[index].optoAddr.offset +=
-					m_pSignalEntry[index].rxPortIndex * WORDS_PER_OPTO_CHANEL;
+				m_pSignalEntry[index].optoAddr.offset += m_pSignalEntry[index].rxPortIndex * WORDS_PER_OPTO_CHANNEL;
 			}
 		}
 

@@ -52,13 +52,11 @@ Module description: Detects and processes key press events from the keyboard.
 //
 void moduleRnKbdInitialize(void);
 
-void moduleRnKbdUninitialize(void);
-
-// This function checks if there is a pending screen click event.
+// This function checks if there is a pending key event and resets it.
 //
 bool isPressedKey(void);
 
-// This function resets the touch event.
+// This function returns the key event code.
 //
 alt_u16 pressedKey(void);
 

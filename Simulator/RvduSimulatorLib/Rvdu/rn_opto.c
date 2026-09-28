@@ -6,11 +6,11 @@ The information presented here is confidential
 and is the intellectual property of PJSC "RPC "Radiy".
 Any use of this information is strictly
 prohibited without the written consent of PJSC "RPC "Radiy".
-Module description: Receives and sends application signals by the optical interface.
+Module description: Sends application signals by the optical interface.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	13,04,2026.
+-- Date:	13.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Receives and sends application signals by the optical interf
 
 -- *************************************************************
 -- Version v1.01
--- Date:	29,04,2026.
+-- Date:	29.04.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Nesterenko M.V.
 
@@ -30,7 +30,7 @@ Module description: Receives and sends application signals by the optical interf
 -- *************************************************************
 
 -- Version v1.02
--- Date:	09,05,2026.
+-- Date:	09.05.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4009
 -- Reviewed by: Nesterenko M.V.
 
@@ -39,13 +39,23 @@ Module description: Receives and sends application signals by the optical interf
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
 
 -- *************************************************************
+
+-- Version v1.04
+-- Date:	25.09.2026.
+-- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4148
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes: RADIX-4148, rn_opto сorrecting errors identified by static analysis testing
+
+-- *************************************************************
+
 */
 
 #include "rn_opto.h"
@@ -58,6 +68,8 @@ Module description: Receives and sends application signals by the optical interf
 
 #include "defs.h"
 
+// This function performs writing application signal values by optical interfaces
+//
 static void optoTxProcImpl(void)
 {
 	char msg[STRING_MAX_LEN];
@@ -75,12 +87,12 @@ static void optoTxProcImpl(void)
 
 			if (optoPort->txDataSizeW != 0u)
 			{
-				alt_u16 offset = i * WORDS_PER_OPTO_CHANEL;
+				alt_u16 offset = i * WORDS_PER_OPTO_CHANNEL;
 
-				alt_u32 txId = vduOptoPort(i)->txDataUID;
+				alt_u32 txId = optoPort->txDataUID;
 
-				writeEBB16(offset, (alt_u16)(txId >> 16u));
-				writeEBB16(offset + 1u, (alt_u16)(txId & 0xffffu));
+				writeEBB16(offset, (alt_u16)(txId >> 16u));			// Write the high word of the data UID (shifted to right by 16 bits) to the offset
+				writeEBB16(offset + 1u, (alt_u16)(txId & 0xffffu));	// Write the low word of the data UID (using 0xffff mask) to the offset plus one word
 			}
 		}
 	}
@@ -98,7 +110,19 @@ static void optoTxProcImpl(void)
 			return;
 		}
 
-		alt_u16 offset = txRxSignal->offsetW + (txRxSignal->optoPortIndex * WORDS_PER_OPTO_CHANEL);
+		if (txRxSignal->optoPortIndex >= optoPortsCount()) 
+		{
+			RN_ASSERT(txRxSignal->optoPortIndex < optoPortsCount());
+			return;
+		}
+
+		if (txRxSignal->offsetW >= WORDS_PER_OPTO_CHANNEL)
+		{
+			RN_ASSERT(txRxSignal->offsetW < WORDS_PER_OPTO_CHANNEL);
+			return;
+		}
+
+		alt_u16 offset = txRxSignal->offsetW + (txRxSignal->optoPortIndex * WORDS_PER_OPTO_CHANNEL);
 
 		const struct VduAppSignalParam* const txRxSignalParam = appSignalParamByIndex(txRxSignal->signalIndex);
 		if (txRxSignalParam == NULL)
@@ -133,7 +157,9 @@ static void optoTxProcImpl(void)
 					(void)snprintf(msg, STRING_MAX_LEN, "optoTxProc: can't read discrete signal by index = %d.", txRxSignalDiscrete->signalIndex);
 					logWarning(SignalReadTypeWrong, msg);
 
-					return;
+					// Force the discrete to fail-safe (zero) state
+					//
+					bitsUnion &= ~(1u << (txRxSignalDiscrete->bitNo));
 				}
 
 				si++;
@@ -164,16 +190,14 @@ static void optoTxProcImpl(void)
 				alt_u32 floatRes = 0;
 				(void)memcpy(&floatRes, &res, sizeof(res));	// float-to-alt_u32-to bit reinterpretation
 
-				writeEBB16(offset, (alt_u16)(floatRes >> 16u));
-				writeEBB16(offset + 1u, (alt_u16)(floatRes & 0xffffu));
+				writeEBB16(offset, (alt_u16)(floatRes >> 16u));			// Write the high word of the data (shifted to right by 16 bits) to the offset
+				writeEBB16(offset + 1u, (alt_u16)(floatRes & 0xffffu));	// Write the low word of the data (using 0xffff mask) to the offset plus one word
 
 			}
 			else
 			{
 				(void)snprintf(msg, STRING_MAX_LEN, "optoTxProc: can't read float signal by index = %d.", txRxSignal->signalIndex);
 				logWarning(SignalReadTypeWrong, msg);
-
-				return;
 			}
 
 			si++;
@@ -187,16 +211,13 @@ static void optoTxProcImpl(void)
 				alt_u32 intRes = 0;
 				(void)memcpy(&intRes, &res, sizeof(res));	// alt_32-to-alt_u32-to bit reinterpretation
 
-
-				writeEBB16(offset, (alt_u16)(intRes >> 16u));
-				writeEBB16(offset + 1u, (alt_u16)(intRes & 0xffffu));
+				writeEBB16(offset, (alt_u16)(intRes >> 16u));			// Write the high word of the data (shifted to right by 16 bits) to the offset
+				writeEBB16(offset + 1u, (alt_u16)(intRes & 0xffffu));	// Write the low word of the data (using 0xffff mask) to the offset plus one word
 			}
 			else
 			{
 				(void)snprintf(msg, STRING_MAX_LEN, "optoTxProc: can't read integer signal by index = %d.", txRxSignal->signalIndex);
 				logWarning(SignalReadTypeWrong, msg);
-
-				return;
 			}
 
 			si++;
@@ -211,6 +232,9 @@ static void optoTxProcImpl(void)
 	return;
 }
 
+// This function locks/unlocks the read and write memory and calls a procedure that writes
+// application signal values by optical interfaces, works as a wrapper to automatically unlock the memory
+//
 void optoTxProc(void)
 {
 	externalBusBridgeReadLock();

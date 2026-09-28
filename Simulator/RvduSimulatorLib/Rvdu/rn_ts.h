@@ -10,7 +10,7 @@ Module description: Detects and processes touch input events from the touchscree
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Detects and processes touch input events from the touchscree
 
 -- *************************************************************
 -- Version v1.01
--- Date:	21,04,2026.
+-- Date:	21.04.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Nesterenko M.V.
 
@@ -31,7 +31,7 @@ Module description: Detects and processes touch input events from the touchscree
 -- *************************************************************
 
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -47,16 +47,16 @@ Module description: Detects and processes touch input events from the touchscree
 
 #include <stdbool.h>
 
-void moduleRnTsInitialize(alt_u16 screenWidth, alt_u16 screenHeight);
+// Initialization of module variables
+//
+void moduleRnTsInitialize(const alt_u16 screenWidth, const alt_u16 screenHeight);
 
-void moduleRnTsUninitialize(void);
-
-// This function checks if there is a pending screen click event.
+// This function checks if there is a pending screen click event
 //
 bool isTouchEvent(void);
 
-// This function checks the screen touch has been occur inside the provided coordinates.
+// This function checks the screen touch has been occur inside the provided coordinates
 //
-bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h);
+bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 w, const alt_u16 h);
 
 #endif

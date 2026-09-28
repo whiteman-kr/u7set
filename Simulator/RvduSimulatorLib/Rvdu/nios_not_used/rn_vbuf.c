@@ -58,8 +58,8 @@ static bool m_moduleInitialized = false;
 static alt_u32* m_pVideoBuffer = NULL;
 static alt_u32* m_pHdmiBuffer = NULL;
 
-static alt_u16 m_screenWidth = 0;
-static alt_u16 m_screenHeight = 0;
+static alt_u16 m_screenWidth = 0u;
+static alt_u16 m_screenHeight = 0u;
 //
 // End of Private data
 
@@ -78,7 +78,7 @@ void moduleRnVbufInitialize(alt_u32* const pVideoBuffer, alt_u32* const pHdmiBuf
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 
-	writeVideoBuffer(0x0);	// Fill color with black
+	writeVideoBuffer(0x0u);	// Fill color with black
 
 	return;
 }
