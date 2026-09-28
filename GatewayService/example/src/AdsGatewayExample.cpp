@@ -8,6 +8,16 @@
 
 void printHelp()
 {
+	std::osyncstream(std::cout) << "Command line parameters:\n"
+								<< "  -address=<ip address> - specifies the gateway service IP address, default value: 127.0.0.1\n"
+								<< "  Example: -address=192.168.0.1\n"
+								<< "  -port=<port> - specifies the gateway service port, default value: " << GatewayClientLib::ADS_GW_PORT
+								<< "\n"
+								<< "  Example: -port=5566\n"
+								<< "  -id=<Client ID> - specifies the gateway service client ID address, default value: CLIENTID\n"
+								<< "  Example: -id=CLIENTID\n"
+								<< std::endl;
+
 	std::osyncstream(std::cout) << "Available commands:\n"
 								<< "  help, h, ? - Show this help message\n"
 								<< "  exit, bye, quit, q - Exit the program\n"
@@ -107,13 +117,67 @@ void printSignalParam(const GatewayClientLib::AdsSignalManager& signalManager, s
 	return;
 }
 
-int main()
+struct AppParams
 {
-	std::cout << "ADS Gateway Client Example\n";
+	std::string_view address;
+	uint16_t port = 0;
+	std::string_view clientID;
+};
+
+bool parseCommandLine(const std::vector<std::string_view>& args, AppParams& params)
+{
+	const std::string_view paramAddress = "-address=";
+	const std::string_view paramPort = "-port=";
+	const std::string_view paramClientID = "-id=";
+
+	for (const auto& arg : args)
+	{
+		if (arg.starts_with(paramAddress) == true)
+		{
+			params.address = arg.substr(paramAddress.length(), arg.length() - paramAddress.length());
+			if (params.address.empty() == true)
+			{
+				std::cout << "Error: specified address is empty." << std::endl;
+				return false;
+			}
+		}
+
+		if (arg.starts_with(paramPort) == true)
+		{
+			const auto [ptr, ec] = std::from_chars(arg.data() + paramPort.length(), arg.data() + arg.size(), params.port);
+			if (ec != std::errc())
+			{
+				std::cout << "Error: specified port is incorrect." << std::endl;
+				return false;
+			}
+		}
+
+		if (arg.starts_with(paramClientID) == true)
+		{
+			params.clientID = arg.substr(paramClientID.length(), arg.length() - paramClientID.length());
+			if (params.clientID.empty() == true)
+			{
+				std::cout << "Error: specified client ID is empty." << std::endl;
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+int main(int argc, char* argv[])
+{
+	AppParams params = {.address = "127.0.0.1", .port = GatewayClientLib::ADS_GW_PORT, .clientID = "CLIENTID"};
+
+	std::cout << "ADS Gateway Client Example\n\n";
 	printHelp();
 
-	std::string_view address = "127.0.0.1";
-	uint16_t port = GatewayClientLib::ADS_GW_PORT;
+	std::vector<std::string_view> args(argv + 1, argv + argc);
+	if (parseCommandLine(args, params) == false)
+	{
+		return -1;
+	}
 
 	GatewayClientLib::AdsSignalManager signalManager{};
 
@@ -122,11 +186,12 @@ int main()
 
 	{
 		std::cout << "Creating TCP connection...\n";
-		std::cout << "\t address: " << address << "\n";
-		std::cout << "\t port: " << port << "\n";
+		std::cout << "\t address: " << params.address << "\n";
+		std::cout << "\t port: " << params.port << "\n";
+		std::cout << "\t client ID: " << params.clientID << "\n";
 
 		GatewayClientLib::AdsGwConnection conn{signalManager, logger};
-		conn.connect(address, port, "CLIENTID");
+		conn.connect(params.address, params.port, params.clientID);
 
 		std::string lastLine;
 
