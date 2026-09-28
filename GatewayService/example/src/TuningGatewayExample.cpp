@@ -14,7 +14,7 @@
 #include <span>
 #include <string>
 #include <syncstream>
-
+#include <vector>
 
 namespace
 {
