@@ -4355,6 +4355,25 @@ namespace Sim
 		return;
 	}
 
+	void CommandProcessor_LM5_LM6::afb_math_v106(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.").arg(conf),
+								Q_FUNC_INFO);
+		}
+
+		return afb_math_private(instance, conf, 106);
+	}
+
 	void CommandProcessor_LM5_LM6::afb_math_private(AfbComponentInstance* instance, int conf, int version)
 	{
 		// Define input opIndexes
@@ -4390,7 +4409,14 @@ namespace Sim
 			operand1.mulSignedInteger(operand2);
 			break;
 		case 4:
-			operand1.divSignedIntegerBugVs104Vs105(operand2);
+			if (version == 104 || version == 105)
+			{
+				operand1.divSignedIntegerBugVs104Vs105(operand2);
+			}
+			else
+			{
+				operand1.divSignedInteger(operand2);
+			}
 			break;
 		case 5:
 			operand1.addFloatingPoint(operand2);
@@ -4428,6 +4454,9 @@ namespace Sim
 		{
 			instance->addParamWord(o_overflow, 1);
 		}
+		// AFB MATH version 104, 105 has an issue for division operation for SI: -2'147'483'648 / -1 = 2'147'483'648, which is out of int32
+		// range, so overflow flag should be set to 1, but LM does not set this flag.
+		//
 		else if ((version == 104 || version == 105) && conf == 4)
 		{
 			// Do not set overflow flag for division for these AFB versions.

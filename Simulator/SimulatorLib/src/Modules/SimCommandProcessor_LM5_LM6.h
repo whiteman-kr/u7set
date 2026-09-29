@@ -379,6 +379,7 @@ namespace Sim
 		//
 		void afb_math_v104(AfbComponentInstance* instance);
 		void afb_math_v105(AfbComponentInstance* instance);
+		void afb_math_v106(AfbComponentInstance* instance);
 		void afb_math_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	SCALE, OpCode 14
@@ -537,6 +538,7 @@ namespace Sim
 			{QStringLiteral("afb_mem_v10"), &CommandProcessor_LM5_LM6::afb_mem_v10},                     // 12
 			{QStringLiteral("afb_math_v104"), &CommandProcessor_LM5_LM6::afb_math_v104},                 // 13
 			{QStringLiteral("afb_math_v105"), &CommandProcessor_LM5_LM6::afb_math_v105},                 // 13
+			{QStringLiteral("afb_math_v106"), &CommandProcessor_LM5_LM6::afb_math_v106},                 // 13
 			{QStringLiteral("afb_scale_v108"), &CommandProcessor_LM5_LM6::afb_scale_v108},               // 14
 			{QStringLiteral("afb_func_v3"), &CommandProcessor_LM5_LM6::afb_func_v3},                     // 16
 			{QStringLiteral("afb_func_v4"), &CommandProcessor_LM5_LM6::afb_func_v4},                     // 16
