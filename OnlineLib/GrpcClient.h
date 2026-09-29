@@ -69,13 +69,13 @@ public:
 
 		for (const HostAddressPort& addr : serverAddress)
 		{
-			if (addr.address32() != 0)
+			if (addr.isValidIPv4TcpClientAddress())
 			{
 				m_serverAddress.push_back(addr);
 			}
 			else
 			{
-				logMsg(QString("%1: server address %2 excluded").arg(m_clientDescription).arg(addr.toString()));
+				logMsg(QString("%1: address %2 excluded as invalid server address").arg(m_clientDescription).arg(addr.toString()));
 			}
 		}
 
