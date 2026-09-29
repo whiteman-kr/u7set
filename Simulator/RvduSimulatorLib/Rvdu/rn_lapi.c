@@ -10,7 +10,7 @@ Module description: Provides data exchange with the Lua environment.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Provides data exchange with the Lua environment.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Vintenko B.U.
 -- Reviewed by: Nesterenko M.V.
 
@@ -35,7 +35,7 @@ Module description: Provides data exchange with the Lua environment.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	09,05,2026.
+-- Date:	09.05.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4009
 -- Reviewed by: Nesterenko M.V.
 
@@ -47,7 +47,7 @@ Module description: Provides data exchange with the Lua environment.
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -68,12 +68,22 @@ RADIX-4109, add itemRectSetText function
 -- *************************************************************
 
 -- Version v1.05
--- Date:	10,08,2026.
+-- Date:	10.08.2026.
 -- Designed by: Vintenko B.U.
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes:
 	RADIX-4112, API functions improvements
+
+-- *************************************************************
+
+-- Version v1.06
+-- Date:	29.09.2026.
+-- Designed by: Vintenko B.U.
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes:
+RADIX-4149, Redraw only non-static items when schema or items size do not change
 
 -- *************************************************************
 */
@@ -3064,21 +3074,41 @@ static int itemSetLeft(lua_State* L)
 			if (schemaItem->itemType == TYPE_RECT)
 			{
 				invalidParams = false;
+				
+				if (schemaItem->rect.left != left) 
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->rect.left = left;
 			}
 			else if (schemaItem->itemType == TYPE_VALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->value.left != left)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->value.left = left;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->image.left != left)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->image.left = left;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGEVALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->imageValue.left != left)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->imageValue.left = left;
 			}
 			else
@@ -3110,21 +3140,41 @@ static int itemSetTop(lua_State* L)
 			if (schemaItem->itemType == TYPE_RECT)
 			{
 				invalidParams = false;
+				
+				if (schemaItem->rect.top != top)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->rect.top = top;
 			}
 			else if (schemaItem->itemType == TYPE_VALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->value.top != top)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->value.top = top;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->image.top != top)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->image.top = top;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGEVALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->imageValue.top != top)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->imageValue.top = top;
 			}
 			else
@@ -3156,21 +3206,41 @@ static int itemSetWidth(lua_State* L)
 			if (schemaItem->itemType == TYPE_RECT)
 			{
 				invalidParams = false;
+
+				if (schemaItem->rect.width != width)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->rect.width = width;
 			}
 			else if (schemaItem->itemType == TYPE_VALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->value.width != width)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->value.width = width;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->image.width != width)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->image.width = width;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGEVALUE)
 			{
 				invalidParams = false;
+
+				if (schemaItem->imageValue.width != width)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->imageValue.width = width;
 			}
 			else
@@ -3202,22 +3272,42 @@ static int itemSetHeight(lua_State* L)
 			if (schemaItem->itemType == TYPE_RECT)
 			{
 				invalidParams = false;
+				
+				if (schemaItem->rect.height != height)
+				{
+					schemaSetFullRedraw();
+				}
 				schemaItem->rect.height  = height;
 			}
 			else if (schemaItem->itemType == TYPE_VALUE)
 			{
 				invalidParams = false;
-				schemaItem->value.height  = height;
+
+				if (schemaItem->value.height != height)
+				{
+					schemaSetFullRedraw();
+				}
+				schemaItem->value.height = height;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGE)
 			{
 				invalidParams = false;
-				schemaItem->image.height  = height;
+
+				if (schemaItem->image.height != height)
+				{
+					schemaSetFullRedraw();
+				}
+				schemaItem->image.height = height;
 			}
 			else if (schemaItem->itemType == TYPE_IMAGEVALUE)
 			{
 				invalidParams = false;
-				schemaItem->imageValue.height  = height;
+
+				if (schemaItem->imageValue.height != height)
+				{
+					schemaSetFullRedraw();
+				}
+				schemaItem->imageValue.height = height;
 			}
 			else
 			{
@@ -3466,14 +3556,19 @@ static int itemLineSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_LINE)
 		{
 			invalidParams = false;
-			schemaItem->line.weight = (alt_u16)luaL_checkinteger(L, 2);
-			
-			if (schemaItem->line.weight > 16u)
+
+			alt_u16 newValue = (alt_u16)luaL_checkinteger(L, 2);
+			if (newValue > 16u)
 			{
 				logWarning(InternalWarning, "LUA itemLineSetWeight: line width was limited to 16.");
-				schemaItem->line.weight = 16u;
+				newValue = 16u;
 			}
 
+			if (schemaItem->line.weight != newValue) 
+			{
+				schemaSetFullRedraw();
+			}
+			schemaItem->line.weight = newValue;
 		}
 	}
 
@@ -3576,13 +3671,19 @@ static int itemRectSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.weight = (alt_u16)luaL_checkinteger(L, 2);
 
-			if (schemaItem->rect.weight > 16u)
+			alt_u16 newValue = (alt_u16)luaL_checkinteger(L, 2);
+			if (newValue > 16u)
 			{
 				logWarning(InternalWarning, "LUA itemRectSetWeight: line width was limited to 16.");
-				schemaItem->rect.weight = 16u;
+				newValue = 16u;
 			}
+
+			if (schemaItem->rect.weight != newValue)
+			{
+				schemaSetFullRedraw();
+			}
+			schemaItem->rect.weight = newValue;
 		}
 	}
 
@@ -3590,7 +3691,6 @@ static int itemRectSetWeight(lua_State* L)
 	{
 		logWarning(ItemWasNotFound, "LUA itemRectSetWeight: invalid item was supplied.");
 	}
-
 	return 0;
 }
 
@@ -3680,7 +3780,14 @@ static int itemRectSetDrawRect(lua_State* L)
 		if (schemaItem->itemType == TYPE_RECT)
 		{
 			invalidParams = false;
-			schemaItem->rect.drawRect = luaL_checkboolean(L, 2);
+		
+			bool newValue = luaL_checkboolean(L, 2);
+
+			if (schemaItem->rect.drawRect != newValue)
+			{
+				schemaSetFullRedraw();
+			}
+			schemaItem->rect.drawRect = newValue;
 		}
 	}
 
@@ -3929,13 +4036,19 @@ static int itemValueSetWeight(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.weight = (alt_u16)luaL_checkinteger(L, 2);
-
-			if (schemaItem->value.weight > 16u)
+			
+			alt_u16 newValue = (alt_u16)luaL_checkinteger(L, 2);
+			if (newValue > 16u)
 			{
 				logWarning(InternalWarning, "LUA itemValueSetWeight: line width was limited to 16.");
-				schemaItem->value.weight = 16u;
+				newValue = 16u;
 			}
+
+			if (schemaItem->value.weight != newValue)
+			{
+				schemaSetFullRedraw();
+			}
+			schemaItem->value.weight = newValue;
 		}
 	}
 
@@ -3984,7 +4097,14 @@ static int itemValueSetDrawRect(lua_State* L)
 		if (schemaItem->itemType == TYPE_VALUE)
 		{
 			invalidParams = false;
-			schemaItem->value.drawRect = luaL_checkboolean(L, 2);
+			
+			bool newValue = luaL_checkboolean(L, 2);
+
+			if (schemaItem->value.drawRect != newValue)
+			{
+				schemaSetFullRedraw();
+			}
+			schemaItem->value.drawRect = newValue;
 		}
 	}
 

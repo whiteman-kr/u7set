@@ -10,7 +10,7 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -19,7 +19,7 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- *************************************************************
 
 -- Version v1.01
--- Date:	13,04,2026.
+-- Date:	13.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -31,7 +31,8 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- Add keyboard support
 -- Added performance counters support to display FPS and scripts executing time
 -- And schemas transparency control
--- By default, schema's background is not cleared before redraw, this saves time. But if Lua functons that move items are called, this schema is redrawed fully.
+-- By default, schema's background is not cleared before redraw, this saves time. But if Lua functons that move items are called, this
+schema is redrawed fully.
 -- Now, predrawScripts and clickScripts are compiled to bytecode on startup.
 
 -- Changes: RADIX-3969, add logging and debugging support
@@ -40,17 +41,18 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	19,06,2026.
+-- Date:	19.06.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
--- Changes: RADIX-3966, schema switching improvement: it is scheduled and actually changed at the next schemaProc loop to prevent scripts data corruption
+-- Changes: RADIX-3966, schema switching improvement: it is scheduled and actually changed at the next schemaProc loop to prevent scripts
+data corruption
 -- RADIX-3973: add real-time blink phase functions
 
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -63,10 +65,20 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- Designed by: Vintenko B.U.
 -- Reviewed by: Nesterenko M.V.
 
--- Changes: 
+-- Changes:
 RADIX-4110, red frame on error is displayed on both errors and warnings counter change
 RADIX-4111, schema item labels are displayed in the log on errors
 RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
+
+-- *************************************************************
+
+-- Version v1.05
+-- Date:	29.09.2026.
+-- Designed by: Vintenko B.U.
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes:
+RADIX-4149, Redraw only non-static items when schema or items size do not change
 
 -- *************************************************************
 */
@@ -109,6 +121,7 @@ static bool m_terminateFlag = false;
 static bool m_popUpTerminateFlag = false;
 
 static struct VduSchemaFileSchemaItem1* m_scriptRunSchemaItem = NULL;
+static bool m_fullRedrawFlag = false;
 static alt_u16 m_blinkPhase = 0;
 //
 // End of Private data
@@ -392,9 +405,10 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 	if (scheduledSchema != NULL)
 	{
 		(void)vduSetCurrentSchema(vduSchemaString(scheduledSchema, scheduledSchema->schemaFile->schemaProperties.schemaId));
-		drawingPhase = true;	// Draw the just switched schema immediately
 	}
 
+	// Take a pointer to current schema
+	//
 	const struct VduSchemaDescriptor* const pSchema = vduCurrentSchema();
 	if (pSchema == NULL)
 	{
@@ -402,10 +416,38 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 		return;
 	}
 
-	if (drawingPhase == true)
+	// If schema change, redraw it including static items, and schedule onShowScript executing
+	//
+	bool drawStatic = false;
+	bool runOnShowScript = false;
+	
+	static const struct VduSchemaDescriptor* prevSchema = NULL;
+	if (prevSchema != pSchema)
 	{
-		// Erase the screen
+		// Schema has been changed
 		//
+		prevSchema = pSchema;
+	
+		drawingPhase = true;        // Draw the schema immediately
+		drawStatic = true;			// Draw all static items
+		runOnShowScript = true;		// Execute the onShowScript
+	}
+
+	// If popup schema has just terminated or full redraw is set, set redraw static items flag
+	//
+	if ((m_popUpTerminateFlag == true) || (m_fullRedrawFlag == true))
+	{
+		drawingPhase = true;		// Draw the schema immediately
+		drawStatic = true;			// Draw all static items
+	}
+
+	m_popUpTerminateFlag = false;
+	m_fullRedrawFlag = false;
+
+	// Erase the screen
+	//
+	if ((drawingPhase == true) && (drawStatic == true))
+	{
 		if (writeVideoBuffer(pSchema->schemaFile->schemaProperties.backgroundColor) == false)
 		{
 			RN_ASSERT(false);
@@ -418,69 +460,56 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 	//
 	externalBusBridgeReadLock();
 
-	// First pass - clickScripts processing
+	// First pass - reset script errors and process clickScripts
 	//
-	if (isTouchEvent() == true)
+	bool touchEvent = isTouchEvent();
+
+	for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 	{
-		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
+		struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
+		if (item == NULL)
 		{
-			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
-			if (item == NULL)
+			RN_ASSERT(item != NULL);
+			continue;
+		}
+
+		item->scriptResult = SCRIPT_OK;	// Reset script error flag on each item
+
+		if ((touchEvent == true) && (item->acceptClick == true))
+		{
+			alt_u16 scriptLength = vduCurrentSchemaStringLength(item->clickScript);
+
+			if (scriptLength != 0u)
 			{
-				RN_ASSERT(item != NULL);
-				continue;
-			}
-
-			item->scriptResult = SCRIPT_OK;
-
-			if (item->acceptClick == true)
-			{
-				alt_u16 scriptLength = vduCurrentSchemaStringLength(item->clickScript);
-
-				if (scriptLength != 0u)
+				if (checkTouchZone(item->rect.left, item->rect.top, item->rect.width, item->rect.height) == true)
 				{
-					if (checkTouchZone(
-						item->rect.left,
-						item->rect.top,
-						item->rect.width,
-						item->rect.height) == true)
+					if (runScript(rvduLuaState, item, item->clickScript, item->clickScriptBytecode, LuaClickScript, "ClickScript") == false)
 					{
-						if (runScript(rvduLuaState,
-							item,
-							item->clickScript,
-							item->clickScriptBytecode,
-							LuaClickScript,
-							"ClickScript") == false)
-						{
-							item->scriptResult = SCRIPT_ERROR;
-						}
+						item->scriptResult = SCRIPT_ERROR;
 					}
 				}
+			}
 
-				if (m_terminateFlag == true)
-				{
-					lua_settop(rvduLuaState, 0);
+			if (m_terminateFlag == true)
+			{
+				lua_settop(rvduLuaState, 0);
 
-					m_terminateFlag = false;
-					return;
-				}
+				m_terminateFlag = false;
+				return;
 			}
 		}
 	}
 
-	// Second pass - preDrawScripts processing
-	//
 	if (drawingPhase == true)
 	{
+		// Second pass - preDrawScripts processing
+		//
 		startMeasuringTimer(TIMER_PREDRAW);
 
-		// OnShowScript
-		
-		static const struct VduSchemaDescriptor* prevSchema = NULL;
-		if (prevSchema != pSchema)
+		// Schema OnShowScript
+		//
+		if (runOnShowScript == true)
 		{
-			prevSchema = pSchema; // Schema has been changed
-
 			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchema->schemaFile->schemaProperties.onShowScript);
 
 			if (scriptLength != 0u)
@@ -494,19 +523,19 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			}
 		}
 
-		// PredrawScript
-
+		// Schema PredrawScript
+		//
 		{
 			alt_u16 scriptLength = vduCurrentSchemaStringLength(pSchema->schemaFile->schemaProperties.preDrawScript);
 
 			if (scriptLength != 0u)
 			{
 				(void)runScript(rvduLuaState,
-					NULL,
+								NULL,
 								pSchema->schemaFile->schemaProperties.preDrawScript,
 								pSchema->schemaFile->schemaProperties.preDrawScriptBytecode,
-					LuaPreDrawScript,
-					"SchemaPredrawScript");
+								LuaPreDrawScript,
+								"SchemaPredrawScript");
 			}
 		}
 
@@ -520,12 +549,19 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			return;
 		}
 
+		// Items PredrawScripts
+		//		
 		for (alt_u16 itemIndex = 0u; itemIndex < pSchema->schemaFile->schemaItemCount; itemIndex++)
 		{
 			struct VduSchemaFileSchemaItem1* const item = vduCurrentSchemaItem(itemIndex);
 			if (item == NULL)
 			{
 				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			if ((item->isStatic == true) && (drawStatic == false))
+			{
 				continue;
 			}
 
@@ -565,6 +601,11 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 			if (item == NULL)
 			{
 				RN_ASSERT(item != NULL);
+				continue;
+			}
+
+			if ((item->isStatic == true) && (drawStatic == false))
+			{
 				continue;
 			}
 
@@ -784,6 +825,11 @@ void popUpSchemaSetTerminate(void)
 struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void)
 {
 	return m_scriptRunSchemaItem;
+}
+
+void schemaSetFullRedraw() 
+{ 
+	m_fullRedrawFlag = true; 
 }
 
 bool blinkPhase(void)

@@ -10,7 +10,7 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -19,7 +19,7 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- *************************************************************
 
 -- Version v1.01
--- Date:	13,04,2026.
+-- Date:	13.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -31,7 +31,8 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- Add keyboard support
 -- Added performance counters support to display FPS and scripts executing time
 -- And schemas transparency control
--- By default, schema's background is not cleared before redraw, this saves time. But if Lua functons that move items are called, this schema is redrawed fully.
+-- By default, schema's background is not cleared before redraw, this saves time. But if Lua functons that move items are called, this
+schema is redrawed fully.
 -- Now, predrawScripts and clickScripts are compiled to bytecode on startup.
 
 -- Changes: RADIX-3969, add logging and debugging support
@@ -40,17 +41,18 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	19,06,2026.
+-- Date:	19.06.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
--- Changes: RADIX-3966, schema switching improvement: it is scheduled and actually changed at the next schemaProc loop to prevent scripts data corruption
+-- Changes: RADIX-3966, schema switching improvement: it is scheduled and actually changed at the next schemaProc loop to prevent scripts
+data corruption
 -- RADIX-3973: add real-time blink phase functions
 
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -63,10 +65,20 @@ Module description: Provides the main functionality for displaying RVDU schemas.
 -- Designed by: Vintenko B.U.
 -- Reviewed by: Nesterenko M.V.
 
--- Changes: 
+-- Changes:
 RADIX-4110, red frame on error is displayed on both errors and warnings counter change
 RADIX-4111, schema item labels are displayed in the log on errors
 RADIX-4112, OnShowScript and PreDrawScript on schemas are processed
+
+-- *************************************************************
+
+-- Version v1.05
+-- Date:	29.09.2026.
+-- Designed by: Vintenko B.U.
+-- Reviewed by: Nesterenko M.V.
+
+-- Changes:
+RADIX-4149, Redraw only non-static items when schema or items size do not change
 
 -- *************************************************************
 */
@@ -163,6 +175,10 @@ void popUpSchemaSetTerminate(void);
 // Returns the address of the schema element whose script is currently being processed.
 //
 struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void);
+
+// Sets the flag for full schema redraw on the next loop
+//
+void schemaSetFullRedraw();
 
 // Returns blink phase: 0 or 1
 //
