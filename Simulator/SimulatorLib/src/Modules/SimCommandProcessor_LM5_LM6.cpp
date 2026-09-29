@@ -4428,6 +4428,12 @@ namespace Sim
 		{
 			instance->addParamWord(o_overflow, 1);
 		}
+		else if ((version == 104 || version == 105) && conf == 4)
+		{
+			// Do not set overflow flag for division for these AFB versions.
+			// The only possible 1 for overflow is -2147483648 / -1 and LM doees not set this flag.
+			// Oveflow for division is set for version 106 and later.
+		}
 		else
 		{
 			instance->addParamWord(o_overflow, operand1.mathOverflow());
