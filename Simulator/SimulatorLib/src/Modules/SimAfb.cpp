@@ -313,12 +313,75 @@ namespace Sim
 		return;
 	}
 
-	// This function is renamed from divSignedInteger to divSignedIntegerBugVs104Vs105 because of a bug in AFM math version 104, 105.
+	void AfbComponentParam::divSignedInteger(const AfbComponentParam& operand)
+	{
+		qint32 op1 = this->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
+		qint32 result = 0;
+		bool overflow = false;
+
+		if (op2 != 0)
+		{
+			if (op1 == std::numeric_limits<qint32>::min() && op2 == -1)
+			{
+				// This is the only case of signed integer overflow in division, because the result is 1 greater than the max signed int.
+				//
+				result = std::numeric_limits<qint32>::max();
+				overflow = true;
+			}
+			else
+			{
+				result = op1 / op2;
+			}
+		}
+		else
+		{
+			// Div by Zero:
+			//  X / 0 = -1
+			// -X / 0 =  1
+			//  0 / 0 = -1
+			//
+			if (op1 == 0)
+			{
+				result = -1;
+			}
+			else
+			{
+				if (op1 < 0)
+				{
+					result = 1;
+				}
+				else
+				{
+					result = -1;
+				}
+			}
+		}
+
+		setSignedIntValue(result);
+
+		// Setting math flags, matters only: zero, divByZero, overflow
+		//
+		resetMathFlags();
+
+		setMathOverflow(overflow);
+
+		if (op2 == 0)
+		{
+			setMathDivByZero(1);
+		}
+		else
+		{
+			setMathZero(result == 0);
+		}
+
+		return;
+	}
+
+	// This function is renamed from divSignedInteger to divSignedIntegerBugVs104Vs105 because of a bug in AFB math version 104, 105.
 	//
 	void AfbComponentParam::divSignedIntegerBugVs104Vs105(const AfbComponentParam& operand)
 	{
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
-		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand.signedIntValue();
 		qint32 result = 0;
@@ -396,6 +459,13 @@ namespace Sim
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
 		return mulSignedInteger(cp);
+	}
+
+	void AfbComponentParam::divSignedInteger(qint32 operand)
+	{
+		AfbComponentParam cp(*this);
+		cp.setSignedIntValue(operand);
+		return divSignedInteger(cp);
 	}
 
 	void AfbComponentParam::divSignedIntegerBugVs104Vs105(qint32 operand)
