@@ -29,13 +29,20 @@ Module description: Detects and processes touch input events from the touchscree
 -- Add log errors and messages
 
 -- *************************************************************
-
 -- Version v1.02
 -- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+-- Version v1.03
+-- Date:	29.09.2026.
+-- Designed by: Mazur S.M. https://jira.radiy.com/browse/RADIX-4119
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: Adding comments; removing magic numbers
 
 -- *************************************************************
 */
@@ -57,6 +64,6 @@ bool isTouchEvent(void);
 
 // This function checks the screen touch has been occur inside the provided coordinates
 //
-bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 w, const alt_u16 h);
+bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 zoneWidth, const alt_u16 zoneHeight);
 
 #endif

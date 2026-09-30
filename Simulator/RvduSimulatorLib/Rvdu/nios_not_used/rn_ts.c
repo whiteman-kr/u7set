@@ -29,13 +29,20 @@ Module description: Detects and processes touch input events from the touchscree
 -- Add log errors and messages
 
 -- *************************************************************
-
 -- Version v1.02
 -- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+-- Version v1.03
+-- Date:	29.09.2026.
+-- Designed by: Mazur S.M. https://jira.radiy.com/browse/RADIX-4119
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: Adding comments; removing magic numbers
 
 -- *************************************************************
 */
@@ -59,12 +66,12 @@ static bool m_moduleInitialized = false;
 
 // Private module data
 //
-static alt_u16 m_screenWidth = 0;
-static alt_u16 m_screenHeight = 0;
+static alt_u16 m_screenWidth = 0u;
+static alt_u16 m_screenHeight = 0u;
 
 static bool m_tchscrnEvent = false;
-static alt_u16 m_tchscrnPosX = 0;
-static alt_u16 m_tchscrnPosY = 0;
+static alt_u16 m_tchscrnPosX = 0u;
+static alt_u16 m_tchscrnPosY = 0u;
 //
 // End of Private data
 
@@ -110,19 +117,33 @@ static void checkTouchEvent(void)
 		IOWR_ALTERA_AVALON_PIO_DATA(DMC6000_RST_BASE, 1);
 
 #if TS_TYPE == PENMOUN6000
-		x = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= 0x66) ? (alt_u16)(0) :
-			(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) >= 0x399) ? (alt_u16)(m_screenWidth - 1) :
-			(alt_u16)((m_screenWidth - 1) * (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) - 0x66) / (0x399 - 0x66));
-		y = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= 0x60) ? (alt_u16)(0) :
-			(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) >= 0x395) ? (alt_u16)(m_screenHeight - 1) :
-			(alt_u16)((m_screenHeight - 1) * (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) - 0x60) / (0x395 - 0x60));
+		// Output value ranges of the touchscreen controller PENMOUN6000
+		//
+		static const alt_u16 minimumHorizontalValue = 0x66u;
+		static const alt_u16 maximumHorizontalValue = 0x399u;
+		static const alt_u16 minimumVerticalValue = 0x60u;
+		static const alt_u16 maximumVerticalValue = 0x395u;
+
+		x = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= minimumHorizontalValue) ? (0u) : // 0u is the coordinate of the leftmost pixel on the screen.
+			(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) >= maximumHorizontalValue) ? (m_screenWidth - 1u) :
+			((m_screenWidth - 1u) * (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) - minimumHorizontalValue) /
+					(maximumHorizontalValue - minimumHorizontalValue));
+		y = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= minimumVerticalValue) ? (0u) : // 0u 0 is the coordinate of the topmost pixel on the screen.
+			(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) >= maximumVerticalValue) ? (m_screenHeight - 1u) :
+			((m_screenHeight - 1u) * (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) - minimumVerticalValue) /
+					(maximumVerticalValue - minimumVerticalValue));
 #elif TS_TYPE == DIVA
-		x = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= 0xf70) ?
-			(alt_u16)(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) * (m_screenWidth - 1) / 0xf70) :
-			(alt_u16)(m_screenWidth - 1);
-		y = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= 0xf70) ?
-			(alt_u16)((m_screenHeight - 1) - (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) * (m_screenHeight - 1) / 0xf70)) :
-			(alt_u16)(0);
+		// Output value ranges of the touchscreen controller DIVA
+		//
+		static const alt_u16 maximumHorizontalValue = 0xf70u;
+		static const alt_u16 maximumVerticalValue = 0xf70u;
+
+		x = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) <= maximumHorizontalValue) ?
+			(IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE) * (m_screenWidth - 1u) / maximumHorizontalValue) :
+			(m_screenWidth - 1u);
+		y = (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) <= maximumVerticalValue) ?
+			((m_screenHeight - 1u) - (IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE) * (m_screenHeight - 1u) / maximumVerticalValue)) :
+			(0u); // 0u is the coordinate of the topmost pixel of the screen.
 #elif TS_TYPE == NONPROC
 		x = (alt_u16)IORD_ALTERA_AVALON_PIO_DATA(DMC6000_X_BASE);
 		y = (alt_u16)IORD_ALTERA_AVALON_PIO_DATA(DMC6000_Y_BASE);
@@ -159,7 +180,7 @@ static void resetTouchEvent(void)
 
 // This function checks the screen touch has been occur inside the provided coordinates
 //
-bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 w, const alt_u16 h)
+bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 zoneWidth, const alt_u16 zoneHeight)
 {
 	if (m_moduleInitialized == false)
 	{
@@ -173,9 +194,9 @@ bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 w, const alt
 	{
 		if (m_tchscrnPosY >= y)
 		{
-			if (m_tchscrnPosX < (x + w))
+			if (m_tchscrnPosX < (x + zoneWidth))
 			{
-				if (m_tchscrnPosY < (y + h))
+				if (m_tchscrnPosY < (y + zoneHeight))
 				{
 					result = true;
 				}

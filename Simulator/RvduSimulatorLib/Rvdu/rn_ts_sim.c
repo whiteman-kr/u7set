@@ -78,7 +78,7 @@ static void resetTouchEvent(void)
 	mtx_unlock(&m_cs);
 }
 
-bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h)
+bool checkTouchZone(const alt_u16 x, const alt_u16 y, const alt_u16 zoneWidth, const alt_u16 zoneHeight)
 {
 	if (m_moduleInitialized == false)
 	{
@@ -94,9 +94,9 @@ bool checkTouchZone(alt_u16 x, alt_u16 y, alt_u16 w, alt_u16 h)
 	{
 		if (m_tchscrnPosY >= y)
 		{
-			if (m_tchscrnPosX < (x + w))
+			if (m_tchscrnPosX < (x + zoneWidth))
 			{
-				if (m_tchscrnPosY < (y + h))
+				if (m_tchscrnPosY < (y + zoneHeight))
 				{
 					result = true;
 				}

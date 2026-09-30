@@ -94,6 +94,8 @@ RvduSimThreadController::RvduSimThreadController(QObject* parent,
 
 RvduSimThreadController::~RvduSimThreadController()
 {
+	rnLibLoopShutdown();
+
 	m_workerThread.requestInterruption();
 	m_workerThread.quit();
 	m_workerThread.wait();

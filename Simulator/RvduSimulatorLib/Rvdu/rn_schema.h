@@ -178,7 +178,7 @@ struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void);
 
 // Sets the flag for full schema redraw on the next loop
 //
-void schemaSetFullRedraw();
+void schemaSetFullRedraw(void);
 
 // Returns blink phase: 0 or 1
 //

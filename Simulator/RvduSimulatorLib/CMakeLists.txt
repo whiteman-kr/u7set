@@ -59,6 +59,8 @@ qt_add_library(${TARGET} STATIC
 	./Rvdu/rn_scfp.h        
 	./Rvdu/rn_schema.c      
 	./Rvdu/rn_schema.h      
+	./Rvdu/rn_schema_sim.c      
+	./Rvdu/rn_schema_sim.h
 	./Rvdu/rn_sifp.c        
 	./Rvdu/rn_sifp.h        
 	./Rvdu/rn_signalsview.c 

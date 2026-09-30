@@ -118,13 +118,16 @@ RADIX-4149, Redraw only non-static items when schema or items size do not change
 // Private module data
 //
 static bool m_terminateFlag = false;
-static bool m_popUpTerminateFlag = false;
 
 static struct VduSchemaFileSchemaItem1* m_scriptRunSchemaItem = NULL;
 static bool m_fullRedrawFlag = false;
 static alt_u16 m_blinkPhase = 0;
 //
 // End of Private data
+
+void popUpSchemaResetTerminate(void);
+
+bool popUpSchemaTerminate(void);
 
 static void logScriptWarning(lua_State* const luaState, enum WarningCode code, const char* const objectName, const char* const label)
 {
@@ -435,13 +438,13 @@ void schemaProc(lua_State* rvduLuaState, bool drawingPhase)
 
 	// If popup schema has just terminated or full redraw is set, set redraw static items flag
 	//
-	if ((m_popUpTerminateFlag == true) || (m_fullRedrawFlag == true))
+	if ((popUpSchemaTerminate() == true) || (m_fullRedrawFlag == true))
 	{
 		drawingPhase = true;		// Draw the schema immediately
 		drawStatic = true;			// Draw all static items
 	}
 
-	m_popUpTerminateFlag = false;
+	popUpSchemaResetTerminate();
 	m_fullRedrawFlag = false;
 
 	// Erase the screen
@@ -710,13 +713,11 @@ void popUpSchema(alt_u8 type, struct PopUpSchemaParams* const schema)
 		return;
 	}
 
-	m_popUpTerminateFlag = false;
-
-	while (m_popUpTerminateFlag == false)
+	while (popUpSchemaTerminate() == false)
 	{
 		startMeasuringTimer(TIMER_MAINLOOP);
 
-		// Process trend date
+		// Process trend data
 		//
 		trendsProc();
 
@@ -817,17 +818,12 @@ void schemaSetTerminate(void)
 	m_terminateFlag = true;
 }
 
-void popUpSchemaSetTerminate(void)
-{
-	m_popUpTerminateFlag = true;
-}
-
 struct VduSchemaFileSchemaItem1* const scriptRunSchemaItem(void)
 {
 	return m_scriptRunSchemaItem;
 }
 
-void schemaSetFullRedraw() 
+void schemaSetFullRedraw(void) 
 { 
 	m_fullRedrawFlag = true; 
 }

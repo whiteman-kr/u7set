@@ -32,6 +32,7 @@
 
 #include "rn_kbd_sim.h"
 #include "rn_ts_sim.h"
+#include "rn_schema_sim.h"
 #include "rn_utils_sim.h"
 #include "rn_vbuf_sim.h"
 
@@ -253,6 +254,8 @@ bool rnLibStartSim(const char* buildFolder,
 
 		vduConfigPrintSchemasList();
 	}
+
+	moduleRnSchemaInitialize();
 
 	// Initialize the input
 	//
@@ -482,6 +485,7 @@ bool rnLibStartSim(const char* buildFolder,
 
 void rnLibStopSim()
 {
+	moduleRnSchemaUninitialize();
 	moduleRnTsUninitialize();
 	moduleRnKbdUninitialize();
 	moduleRnVbufUninitialize();
