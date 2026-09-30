@@ -275,6 +275,7 @@ namespace VFrame30
 
 		QPushButton* control = new QEditorPushButton(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
+		control->setFocusPolicy(Qt::ClickFocus);
 
 		updateWidgetProperties(control, editMode);
 
