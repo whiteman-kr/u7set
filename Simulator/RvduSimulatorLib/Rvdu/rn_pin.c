@@ -427,6 +427,8 @@ static void onOKInErrorModePressed(struct PopUpSchemaParams* const schema)
 
 		if (schema->PinBoxData.tryCount >= m_maxPinTryCount) // Terminate schema if an incorrect PIN code is entered (3) times
 		{
+			logWarning(WrongPinCode, "Incorrect PIN code was entered three times.");
+
 			popUpSchemaSetTerminate();
 			schema->boolResult = false;
 		}

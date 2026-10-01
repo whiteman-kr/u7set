@@ -121,7 +121,9 @@ static const char* m_warningCodeMsg[] =
 	"LuaPreDrawScript",
 	"LuaClickScript",
 
-	"DrawError"
+	"DrawError",
+
+	"WrongPinCode"
 };
 
 LogRecordHandler m_logRecordHandler = NULL;
@@ -441,11 +443,17 @@ void writeExternalDiagPacket(void)
 
 	writeEBB16(ADDR_DIAG_ERRORS_FLAGS, (logErrorCount() == 0u) ? 0u : 1u);
 	
+	static_assert((unsigned long long)ErrorCodeCount <= ADDR_DIAG_ERRORS_SIZE,
+				  "ErrorCodeCount shall not exceed the reserved memory size");
+
 	for (alt_u16 i = 0; i < (alt_u16)ErrorCodeCount; i++)
 	{
 		writeEBB16(ADDR_DIAG_ERRORS_BASE + i, errorCounter(i));
 	}
 	
+	static_assert((unsigned long long)WarningCodeCount <= ADDR_DIAG_WARNINGS_SIZE,
+				  "WarningCodeCount shall not exceed the reserved memory size");
+
 	for (alt_u16 i = 0; i < (alt_u16)WarningCodeCount; i++)
 	{
 		writeEBB16(ADDR_DIAG_WARNINGS_BASE + i, warningCounter(i));

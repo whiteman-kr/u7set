@@ -98,6 +98,8 @@ enum WarningCode
 
 	DrawError,
 
+	WrongPinCode,
+
 	WarningCodeCount
 }; 
 
