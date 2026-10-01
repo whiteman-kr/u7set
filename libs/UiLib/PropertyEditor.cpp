@@ -1,6 +1,7 @@
 #include "../AppSignalLib/TuningValue.h"
-#include <UiLib/UiTools.h>
+
 #include <UiLib/PropertyEditor.h>
+#include <UiLib/UiTools.h>
 
 namespace
 {
@@ -1130,12 +1131,26 @@ namespace ExtWidgets
 	{
 		std::vector<std::shared_ptr<Property>> props = object->properties();
 
-		for (auto prop : props)
+		std::erase_if(props,
+					  [](const std::shared_ptr<Property>& property)
+					  {
+						  return qVariantTypeId(property->value()) != QMetaType::QString;
+					  });
+
+		// Sort essential text properties first, then by category, view order, and caption.
+		//
+		std::sort(props.begin(),
+				  props.end(),
+				  [](const std::shared_ptr<Property>& a, const std::shared_ptr<Property>& b)
+				  {
+					  auto at = std::make_tuple(!a->essential(), a->category(), a->viewOrder(), a->caption());
+					  auto bt = std::make_tuple(!b->essential(), b->category(), b->viewOrder(), b->caption());
+					  return at < bt;
+				  });
+
+		if (props.empty() == false)
 		{
-			if (prop->category().isEmpty() == true && qVariantTypeId(prop->value()) == QMetaType::QString)
-			{
-				return tr("%1 - %2").arg(objectIndex).arg(prop->value().toString());
-			}
+			return QString{"%1 - %2"}.arg(objectIndex).arg(props.front()->value().toString());
 		}
 
 		return QString("%1 - PropertyObject").arg(objectIndex);
