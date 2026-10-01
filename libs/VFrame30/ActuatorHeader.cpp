@@ -38,6 +38,7 @@ namespace VFrame30
 								 ActuatorSignal::setSignalId)
 			->setDescription(tr("SignalID for the actuator type. Only alphanumeric characters and underscores are allowed."))
 			.setValidator("[A-Za-z0-9_]+")
+			.setEssential(true)
 			.setViewOrder(1);
 
 		ADD_PROPERTY_GETTER(QString, PropertyNames::signalIdChannel1, true, ActuatorSignal::signalIdChannel1)

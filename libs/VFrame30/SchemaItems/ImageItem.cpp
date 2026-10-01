@@ -38,7 +38,9 @@ namespace VFrame30
 
 		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::allowScale, true, ImageItem::allowScale, ImageItem::setAllowScale);
 		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::keepAspectRatio, true, ImageItem::keepAspectRatio, ImageItem::setKeepAspectRatio);
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::imageId, true, ImageItem::imageId, ImageItem::setImageId);
+
+		p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::imageId, true, ImageItem::imageId, ImageItem::setImageId);
+		p->setEssential(true);
 
 		p = ADD_PROPERTY_GET_SET_CAT(QImage,
 									 PropertyNames::image,
