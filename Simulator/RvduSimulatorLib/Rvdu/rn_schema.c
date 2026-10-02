@@ -156,7 +156,7 @@ static void processSchemaKeys(void)
 		return;
 	}
 
-	alt_u16 key = pressedKey();
+	alt_u32 key = pressedKey();
 
 	if ((key == RK_LEFT) || (key == RK_RIGHT))
 	{

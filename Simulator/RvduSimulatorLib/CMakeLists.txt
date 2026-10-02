@@ -24,7 +24,6 @@ endif (MSVC)
 set(TARGET RvduSimulatorLib)
 
 qt_add_library(${TARGET} STATIC
-	./Rvdu/alt_errno.h      
 	./Rvdu/alt_stdio.h      
 	./Rvdu/alt_types.h      
 	./Rvdu/defs.h           

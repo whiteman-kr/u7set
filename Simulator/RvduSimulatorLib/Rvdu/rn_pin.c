@@ -557,7 +557,7 @@ void modePinProc(struct PopUpSchemaParams* const schema)
 	{
 		hasEvents = true;
 
-		alt_u16 code = pressedKey();
+		alt_u32 code = pressedKey();
 
 		if (schema->PinBoxData.state == PinCodeOk)
 		{

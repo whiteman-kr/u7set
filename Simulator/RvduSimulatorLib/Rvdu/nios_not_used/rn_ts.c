@@ -43,7 +43,7 @@ Module description: Detects and processes touch input events from the touchscree
 -- Reviewed by: Vintenko B.U.
 
 -- Changes: Adding comments; removing magic numbers
-
+-- Changes: RADIX-4119, rn_ts сorrecting errors identified by static analysis testing
 -- *************************************************************
 */
 

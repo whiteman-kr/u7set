@@ -10,7 +10,7 @@ static mtx_t m_cs;
 
 static bool m_moduleInitialized = false;
 static bool m_keyboardConnected = false;
-static alt_u16 m_code = 0xffu;
+static alt_u32 m_code = 0xffu;
 static bool m_keyPressed = false;
 //
 // End of Private data
@@ -37,7 +37,7 @@ void moduleRnKbdUninitialize(void)
 	mtx_destroy(&m_cs);
 }
 
-void setPressedKey(alt_u16 code)
+void setPressedKey(alt_u32 code)
 {
 	mtx_lock(&m_cs);
 
@@ -70,7 +70,7 @@ bool isPressedKey(void)
 	return result;
 }
 
-alt_u16 pressedKey(void)
+alt_u32 pressedKey(void)
 {
 	if (m_moduleInitialized == false)
 	{
@@ -85,7 +85,7 @@ alt_u16 pressedKey(void)
 
 	mtx_lock(&m_cs);
 
-	alt_u16 result = m_code;
+	alt_u32 result = m_code;
 
 	mtx_unlock(&m_cs);
 

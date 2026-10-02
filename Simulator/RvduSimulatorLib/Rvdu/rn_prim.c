@@ -722,10 +722,10 @@ void drawLine(alt_u16 x1, alt_u16 y1, alt_u16 x2, alt_u16 y2, const alt_u16 line
 
 		for (alt_16 k = 0; k <= (alt_16)lineWeight; k++)
 		{
-			alt_16 j = (alt_16)y1;
 			alt_16 i = (alt_16)x1;
+			alt_16 j = (alt_16)y1;
 
-			while (i <= (alt_16)x2)
+			while (i != (alt_16)x2)
 			{
 				if ((i >= 0) &&
 					((j + st) >= 0) &&

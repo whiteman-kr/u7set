@@ -5,6 +5,6 @@
 
 void moduleRnKbdUninitialize(void);
 
-void setPressedKey(alt_u16 code);
+void setPressedKey(alt_u32 code);
 
 #endif

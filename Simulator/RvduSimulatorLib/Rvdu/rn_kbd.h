@@ -10,7 +10,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	20,04,2026.
+-- Date:	20.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -28,9 +28,8 @@ Module description: Detects and processes key press events from the keyboard.
 -- Add log errors and messages
 
 -- *************************************************************
-
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -48,7 +47,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 #include <stdbool.h>
 
-// Function that initialize keyboard with ps/2
+// Function that initialize keyboard with ps/2.
 //
 void moduleRnKbdInitialize(void);
 
@@ -58,6 +57,6 @@ bool isPressedKey(void);
 
 // This function returns the key event code.
 //
-alt_u16 pressedKey(void);
+alt_u32 pressedKey(void);
 
 #endif

@@ -63,7 +63,7 @@ available RVDUs in the subsystem, Equipment identifiers, Configuration numbers a
 #include <string.h>
 #include <stdlib.h>
 
-#include <alt_errno.h>
+#include <errno.h>
 
 /*
 Finds a record in description file that has the same key set by jumpers as passed by the quipmentKey parameter.

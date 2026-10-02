@@ -30,7 +30,7 @@ Module description: Provides platform-specific support functions for other modul
 
 #include "fat_filelib.h"
 
-#include <alt_errno.h>
+#include <errno.h>
 
 #include "../rvdu_bsp/system.h"
 #include <altera_avalon_performance_counter.h>

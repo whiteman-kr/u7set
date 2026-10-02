@@ -514,7 +514,7 @@ void rnLibClickEvent(unsigned int x, unsigned int y)
 
 void rnLibKeyPressEvent(unsigned int code)
 { 
-	setPressedKey((alt_u16)code); 
+	setPressedKey(code); 
 }
 
 void rnLibVideoBufferLock()

@@ -394,7 +394,7 @@ void logSchemaProc(struct PopUpSchemaParams* const schema)
 
 	if (isPressedKey() == true)
 	{
-		alt_u16 code = pressedKey();
+		alt_u32 code = pressedKey();
 
 		switch (code)
 		{

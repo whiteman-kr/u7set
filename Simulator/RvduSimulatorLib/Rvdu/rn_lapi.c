@@ -92,7 +92,7 @@ RADIX-4149, Redraw only non-static items when schema or items size do not change
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <alt_errno.h>
+#include <errno.h>
 
 #include "rn_lapi.h"
 #include "rn_scfp.h"

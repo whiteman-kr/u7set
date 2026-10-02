@@ -10,7 +10,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	20,04,2026.
+-- Date:	20.04.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 
@@ -18,7 +18,7 @@ Module description: Detects and processes key press events from the keyboard.
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Vintenko B.U.
 
@@ -28,9 +28,8 @@ Module description: Detects and processes key press events from the keyboard.
 -- Add log errors and messages
 
 -- *************************************************************
-
 -- Version v1.02
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
@@ -43,11 +42,8 @@ Module description: Detects and processes key press events from the keyboard.
 #include "rn_diag.h"
 #include "rn_utils.h"
 
-#include <system.h>
 #include <altera_up_avalon_ps2_regs.h>
 #include <altera_up_avalon_ps2.h>
-#include <altera_up_ps2_keyboard.h>
-#include "sys/alt_stdio.h"
 
 // Private module data
 //
@@ -55,7 +51,7 @@ static alt_up_ps2_dev* m_ps2 = NULL;
 
 static bool m_moduleInitialized = false;
 static bool m_keyboardConnected = false;
-static alt_u16 m_code = 0xffu;
+static alt_u32 m_code = 0u;
 static bool m_keyPressed = false;
 //
 // End of Private data
@@ -101,47 +97,60 @@ void moduleRnKbdInitialize(void)
 	}*/
 }
 
-static void setPressedKey(alt_u16 code)
+static void setPressedKey(void)
 {
-	m_code = code;
 	m_keyPressed = true;
 }
 
-static alt_u16 scan_kb(void)
+static bool scan_kb(void)
 {
 	if (m_ps2 == NULL)
 	{
-		return 0xff;
+		return false;
 	}
 
-	static alt_u16 last_kb_code = 0x5Au;
-	last_kb_code &= 0xffu;
-
+	bool result = false;
 	alt_u32 kb_code = IORD_ALT_UP_PS2_PORT_DATA_REG(m_ps2->base);
-	if ((kb_code & 0xffff0000u) > 0x20000u)
+
+	if ((kb_code & ALT_UP_PS2_PORT_DATA_REG_RVALID_MSK) != 0u)
 	{
-		do
+		alt_u8 last = 0u;
+		alt_u8 prev = 0u;
+		alt_u8 prevprev = 0u;
+		alt_u16 numberOfCodes = (kb_code & ALT_UP_PS2_PORT_DATA_REG_RAVAIL_MSK) >> ALT_UP_PS2_PORT_DATA_REG_RAVAIL_OFST;
+
+		while(numberOfCodes-- > 0u)
 		{
+			prevprev = prev;
+			prev = last;
+			last = kb_code & ALT_UP_PS2_PORT_DATA_REG_DATA_MSK;
 			kb_code = IORD_ALT_UP_PS2_PORT_DATA_REG(m_ps2->base);
-		} while ((kb_code & 0xffff0000u) > 0x20000u);
+		}
+		if (last != 0x12u)
+		{
+			m_code = last;
+			if (prevprev == 0xE0u)
+			{
+				m_code |= prevprev<<16;
+			}
+			if ((prev == 0xE0u) || (prev == 0xF0u))
+			{
+				m_code |= prev<<8;
+			}
+			result = true;
+		}
 	}
 
-	if ((kb_code & 0xffff00ffu) == (0x20000u | 0xf0u))
-	{
-		last_kb_code = IORD_ALT_UP_PS2_PORT_DATA_REG(m_ps2->base);
-	}
-
-	return last_kb_code;
+	return result;
 }
 
 // This function checks the hardware for touch events.
 //
 static bool checkPressedKey(void)
 {
-	alt_u16 code = scan_kb();
-	if (m_code != code)
+	if (scan_kb() == true)
 	{
-		setPressedKey(code);
+		setPressedKey();
 		return true;
 	}
 	else
@@ -174,7 +183,7 @@ bool isPressedKey(void)
 	return result;
 }
 
-alt_u16 pressedKey(void)
+alt_u32 pressedKey(void)
 {
 	if (m_moduleInitialized == false)
 	{
@@ -188,6 +197,5 @@ alt_u16 pressedKey(void)
 	}
 
 	alt_u16 result = m_code;
-
 	return result;
 }

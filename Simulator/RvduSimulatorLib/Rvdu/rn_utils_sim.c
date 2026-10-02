@@ -66,7 +66,7 @@ Module description: Provides support functions for other modules (hash calculati
 
 #include "fat_filelib.h"
 
-#include <alt_errno.h>
+#include <errno.h>
 
 static bool m_moduleInitialized = false;
 

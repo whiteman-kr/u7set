@@ -10,14 +10,14 @@ Module description: Provides the functionality for entering the analog value.
 
 -- *************************************************************
 -- Version v1.00
--- Date:	31,03,2026.
+-- Date:	31.03.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Vintenko B.U.
 -- Changes: RADIX-3966, rn_ainput initial update
 
 -- *************************************************************
 -- Version v1.01
--- Date:	01,05,2026.
+-- Date:	01.05.2026.
 -- Designed by: Mazyr S.M. https://jira.radiy.com/browse/RADIX-3966, https://jira.radiy.com/browse/RADIX-3969
 -- Reviewed by: Nesterenko M.V.
 
@@ -34,7 +34,7 @@ Module description: Provides the functionality for entering the analog value.
 -- *************************************************************
 
 -- Version v1.02
--- Date:	09,05,2026.
+-- Date:	09.05.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-4009
 -- Reviewed by: Nesterenko M.V.
 
@@ -43,11 +43,20 @@ Module description: Provides the functionality for entering the analog value.
 -- *************************************************************
 
 -- Version v1.03
--- Date:	28,07,2026.
+-- Date:	28.07.2026.
 -- Designed by: Vintenko B.U. https://jira.radiy.com/browse/RADIX-3966
 -- Reviewed by: Nesterenko M.V.
 
 -- Changes: RADIX-3966, code is made MISRA-2025 compatible
+
+-- *************************************************************
+
+-- Version v1.04
+-- Date:	02.10.2026.
+-- Designed by: Nesterenko M.V. https://jira.radiy.com/browse/RADIX-4116
+-- Reviewed by: Vintenko B.U.
+
+-- Changes: RADIX-4161, rn_ainput сorrecting errors identified by static analysis testing
 
 -- *************************************************************
 */
@@ -59,11 +68,11 @@ Module description: Provides the functionality for entering the analog value.
 
 struct PopUpSchemaParams;
 
-// This function open MessageBox diaglog.
+// This function open Edit schema dialog.
 //
 void modeEditShow(struct PopUpSchemaParams* const schema);
 
-// This function process all Edit diaglog event.
+// This function process all Edit schema dialog event.
 //
 void modeEditProc(struct PopUpSchemaParams* const schema);
 
