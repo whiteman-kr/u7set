@@ -458,8 +458,6 @@ namespace Builder
 
 		// ACM module data configuration area
 		//
-		DEBUG_STOP;
-
 		ma.setStartAddr(58038);
 		ma.setSizeW(32);
 

@@ -731,7 +731,7 @@ namespace Builder
 			if (disposeNonAcquiredAnalogSignals() == false)
 				break;
 
-			if (disposeNonAcquiredBuses() == false)
+			if (acmDisposeNonAquiredBusses() == false)
 				break;
 
 			if (disposeNonAcquiredDiscreteInvertedInputSignals() == false)
@@ -744,6 +744,30 @@ namespace Builder
 			break;
 		} 
 		while (false);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::acmDisposeNonAquiredBusses()
+	{
+		bool result = true;
+
+		QVector<UalSignal*> nonAquiredOutBusses;
+
+		nonAquiredOutBusses.swap(m_nonAcquiredOutputBuses);
+
+		for (UalSignal* ualSignal : nonAquiredOutBusses)
+		{
+			if (ualSignal->isInput())		
+			{
+				continue;		// exclude strict input => output busses
+			}
+
+			m_nonAcquiredOutputBuses.append(ualSignal);
+		}
+
+		result &= m_memoryMap.appendNonAcquiredOutputBusses(m_nonAcquiredOutputBuses);
+		result &= m_memoryMap.appendNonAcquiredInternalBusses(m_nonAcquiredInternalBuses);
 
 		return result;
 	}
@@ -1508,7 +1532,8 @@ namespace Builder
 		cmd.writeFuncBlock32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), inPin->afbOperandIndex(), addr1.offset(), m_acmCmpSiNeAfb->caption());
 		code->append(cmd);
 
-		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption());
+		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption(),
+									 QString("load uint32 DataID %1 as sint32").arg(m_acmSwInOutID));
 		code->append(cmd);
 
 		cmd.startafb(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), m_acmCmpSiNeAfb->caption(), m_acmCmpSiNeAfb->runTime(), 
@@ -1525,7 +1550,8 @@ namespace Builder
 		cmd.writeFuncBlock32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), inPin->afbOperandIndex(), addr2.offset(), m_acmCmpSiNeAfb->caption());
 		code->append(cmd);
 
-		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption());
+		cmd.writeFuncBlockConstInt32(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), setPin->afbOperandIndex(), static_cast<qint32>(m_acmSwInOutID), m_acmCmpSiNeAfb->caption(),
+									 QString("load uint32 DataID %1 as sint32").arg(m_acmSwInOutID));
 		code->append(cmd);
 
 		cmd.startafb(m_acmCmpSiNeAfb->opcode(), m_acmCmpSiNeAfb->instance(), m_acmCmpSiNeAfb->caption(), m_acmCmpSiNeAfb->runTime(), 

@@ -979,6 +979,7 @@ namespace Builder
 		bool acmCalculateIoSignalsAddresses();
 		bool acmSetInOutSignalsUalAddresses();
 		bool acmDisposeSignalsInMemory();
+		bool acmDisposeNonAquiredBusses();
 		bool acmDisposeSwInOuts();
 		bool acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes, E::SignalInOutType inOut);
 		bool acmCreateSignalLists();
