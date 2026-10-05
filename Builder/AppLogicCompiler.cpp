@@ -61,6 +61,8 @@ namespace Builder
 
 		std::function<bool(ApplicationLogicCompiler*)> appLogicCompilerProcs[] =
 		{
+			&ApplicationLogicCompiler::compileActuatorsLogicsPass1,
+			&ApplicationLogicCompiler::compileActuatorsLogicsPass2,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
 			&ApplicationLogicCompiler::checkSignalsIDsAndHashes,
@@ -123,9 +125,9 @@ namespace Builder
 		return m_context->m_lmDescriptions.get();
 	}
 
-	AppLogicData* ApplicationLogicCompiler::appLogicData()
+	std::shared_ptr<AppLogicData> ApplicationLogicCompiler::appLogicData()
 	{
-		return m_context->m_appLogicData.get();
+		return m_context->m_appLogicData;
 	}
 
 	Tuning::TuningDataStorage* ApplicationLogicCompiler::tuningDataStorage()
@@ -183,15 +185,89 @@ namespace Builder
 		return false;
 	}
 
+
+	bool ApplicationLogicCompiler::compileActuatorsLogicsPass1()
+	{
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler for Actuators pass #1...")));
+
+		bool result = true;
+
+		auto actuators = m_context->m_appLogicData->actuators();
+
+		// first compiler pass
+		//
+		for (auto const& [actuatorTypeID, buildActuatorType] : actuators)
+		{
+			if (actuatorTypeID.isEmpty())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, actuatorTypeID);
+
+			if (moduleLogicCompiler->isWorkable() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("ModuleLogicCompiler for Actuator %1 is not workable").arg(actuatorTypeID));
+				result = false;
+				break;
+			}
+
+			m_context->appendActuatorLogicCompiler(actuatorTypeID, moduleLogicCompiler);
+
+			result &= moduleLogicCompiler->pass1();
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::compileActuatorsLogicsPass2()
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler for Actuators pass #2...")));
+
+		// second compiler pass
+		//
+		for (auto& [actuatorTypeID, moduleLogicCompiler] : m_context->m_actuatorsLogicCompilers)
+		{
+			if (moduleLogicCompiler == nullptr)
+			{
+				LOG_NULLPTR_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			result &= moduleLogicCompiler->pass2();
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
 	bool ApplicationLogicCompiler::checkLmIpAddresses()
 	{
+		LOG_EMPTY_LINE(log());
 		LOG_MESSAGE(log(), QString(tr("Check LM's ethernet adapters IP addresses...")));
 
 		bool result = true;
 
 		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
 
-		for(const Hardware::DeviceModule* lm : fscModules())
+		for (const Hardware::DeviceModule* lm : fscModules())
 		{
 			if (lm == nullptr)
 			{
@@ -211,14 +287,19 @@ namespace Builder
 
 			const LmDescription::Lan& lan = lmDescription->lan();
 
-			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+			for (const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
 				LanControllerInfo lanControllerInfo;
 
 				bool res = true;
 
-				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
-												 *m_context, true, &lanControllerInfo, log());
+				res = LanControllerInfoHelper::getInfo(*lm,
+													   lanController.m_type,
+													   lanController.m_place,
+													   *m_context,
+													   true,
+													   &lanControllerInfo,
+													   log());
 				if (res == false)
 				{
 					result = false;
@@ -301,7 +382,7 @@ namespace Builder
 	bool ApplicationLogicCompiler::compileModulesLogicsPass1()
 	{
 		LOG_EMPTY_LINE(log());
-		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #1...")));
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler for LMs pass #1...")));
 
 		bool result = true;
 
@@ -317,6 +398,13 @@ namespace Builder
 			}
 
 			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, lm);
+
+			if (moduleLogicCompiler->isWorkable() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("ModuleLogicCompiler for LM %1 is not workable").arg(lm->equipmentIdTemplate()));
+				result = false;
+				break;
+			}
 
 			m_context->appendModuleLogicCompiler(moduleLogicCompiler);
 
@@ -337,7 +425,7 @@ namespace Builder
 		bool result = true;
 
 		LOG_EMPTY_LINE(log());
-		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #2...")));
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler for LMs pass #2...")));
 
 		// second compiler pass
 		//

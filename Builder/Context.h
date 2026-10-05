@@ -62,6 +62,8 @@ namespace Builder
 		void appendModuleLogicCompiler(std::shared_ptr<ModuleLogicCompiler> mc);
 		std::shared_ptr<ModuleLogicCompiler> getModuleLogicCompiler(const QString& lmEquipmentID) const;
 
+		void appendActuatorLogicCompiler(const QString& actuatorTypeID, std::shared_ptr<ModuleLogicCompiler> mc);
+
 	public:
 		mutable IssueLogger* m_log = nullptr;
 
@@ -92,6 +94,9 @@ namespace Builder
 		std::vector<Hardware::DeviceModule*> m_lmModules;
 		std::map<Hash, std::shared_ptr<ModuleLogicCompiler>>
 			m_moduleLogicCompilers;                          // calcHash(LM.EquipmentID) => ModuleLogicCompilerShared
+
+		std::unordered_map<QString, std::shared_ptr<ModuleLogicCompiler>>
+				m_actuatorsLogicCompilers;                   // actuatorTypeID => ModuleLogicCompilerShared
 
 		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM, BVB, VDU modules
 

@@ -142,7 +142,7 @@ namespace Builder
 
 		E::UalItemType type() const;
 
-		bool hasRam() const { return afb().hasRam().value_or(afbComponent()->hasRam()); }
+		bool hasRam() const;
 		int maxInstances() const { return afbComponent()->maxInstCount(); }
 		int version() const { return afbComponent()->impVersion(); }
 		QString componentCaption() const { return afbComponent()->caption(); }

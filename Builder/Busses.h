@@ -202,5 +202,6 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 
 		QHash<QString, BusShared> m_busses;
+		inline static bool m_reportWritten {false};
 	};
 }

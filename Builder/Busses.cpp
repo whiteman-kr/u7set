@@ -952,6 +952,11 @@ namespace Builder
 
 	bool Busses::writeReport(BuildResultWriter* resultWriter)
 	{
+		if (m_reportWritten)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
 		if (m_busses.count() == 0)
@@ -975,6 +980,8 @@ namespace Builder
 		}
 
 		resultWriter->addFile("Reports", "Busses.txt", "", "", report);
+
+		m_reportWritten = true;
 
 		return true;
 	}

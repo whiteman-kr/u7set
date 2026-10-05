@@ -3785,7 +3785,6 @@ namespace Builder
 				  tr("Application logic for module %1 is not found.").arg(logicModuleID));
 	}
 
-
 	/// IssueCode: ALC5002
 	///
 	/// IssueType: Error
@@ -8290,6 +8289,61 @@ namespace Builder
 		LOG_WARNING2(IssueType::AlCompiler,
 				  5207,
 				  QString(tr("Tuning signal %1 is unused.")).arg(signalID));
+	}
+
+	/// IssueCode: ALC5208
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Application logic for actuator type %1 is not found.
+	///
+	/// Parameters:
+	///		%1 Actuator type ID
+	///
+	/// Description:
+	///		Application logic for specified actuator type is not found.
+	///
+	void IssueLogger::wrnALC5208(QString actuatorTypeID)
+	{ 
+		LOG_WARNING2(IssueType::AlCompiler, 5208, tr("Application logic for actuator type %1 is not found.").arg(actuatorTypeID)); 
+	}
+
+
+	/// IssueCode: ALC5209
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Actuator type %1 is not found in the project
+	///
+	/// Parameters:
+	///		%1 Actuator type ID
+	///
+	/// Description:
+	///		Specified Actuator type %1 is not found in the project
+	///
+	void IssueLogger::errALC5209(QString actuatorTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5209,
+				  QString(tr("Actuator type %1 is not found in the project")).arg(actuatorTypeID));
+	}
+
+	/// IssueCode: ALC5210
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   CodeChecker error: %1
+	///
+	/// Parameters:
+	///		%1 Error message
+	///
+	/// Description:
+	///		CodeChecker error message.
+	///
+	void IssueLogger::errALC5210(QString errMsg)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5210, 
+			QString(tr("CodeChecker error: %1")).arg(errMsg));
 	}
 
 	/// IssueCode: ALC5800

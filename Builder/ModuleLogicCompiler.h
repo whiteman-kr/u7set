@@ -5,6 +5,7 @@
 #include <HardwareLib/Connection.h>
 
 #include <CommonLib/HashedVector.h>
+#include <VFrame30/ActuatorHeader.h>
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/TuningDataStorage.h"
 
@@ -68,6 +69,8 @@ namespace Builder
 			bool isInputModule() const;
 			bool isOutputModule() const;
 			bool isOptoModule() const;
+			bool isAcmModule() const;
+
 			Hardware::DeviceModule::FamilyType familyType() const;
 			QString equipmentID() const;
 
@@ -155,7 +158,6 @@ namespace Builder
 		using CopyBitsMap = std::map<Address16, CopyBitInfo>;	// destBitAddr => CopyBitInfo;
 																// destBitAddr ascending ordered in map
 																// destBitAddr.offset() for all in map should have equal!
-
 		class BusFilling
 		{
 		public:
@@ -171,9 +173,24 @@ namespace Builder
 			std::vector<quint16> m_busArea;
 		};
 
+		struct PinSignalType
+		{
+			E::SignalType signalType = E::SignalType::Discrete;
+			E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
+			QString busType;
+			E::ByteOrder byteOrder = E::ByteOrder::NoEndian;
+			int dataSize = 0;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const QString& actuatorTypeID);
 		~ModuleLogicCompiler();
+
+		bool init();
+		bool isWorkable() const;
+		bool isActuatorCompiler() const;
+		bool isLmCompiler() const;
 
 		SignalSet* signalSet() { return m_signals; }
 		AppSignal* getSignal(const QString& appSignalID);
@@ -260,6 +277,11 @@ namespace Builder
 		bool writeVduAppSignalsInfoFile();
 
 	private:
+		bool lmPass1();
+		bool lmPass2();
+
+		const BuildActuatorType& getBuildActuatorType(const QString& actuatorTypeID);
+
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
 		// pass #1 compilation functions
@@ -943,6 +965,36 @@ namespace Builder
 
 		void findLogicAfbsForBitAccReplacing(const QString& afbCaption, int logicConf, std::set<QUuid>* guidsMap);
 
+		// Actuator processing
+
+		bool acmPass1();
+		bool acmPass2();
+
+		bool acmCreateSignalSet();
+		bool acmCreateUalSignals();
+		bool acmCreateUalSignalsFromInputs();
+		bool acmCreateHardwareInOutSignal(const QString& signalID, const std::shared_ptr<Hardware::DeviceAppSignal>& deviceAppSignal);
+		bool acmCreateSoftwareInOutSignal(const VFrame30::ActuatorSignal& as, E::SignalInOutType inOut);
+		bool acmCreateInternalSignals();
+		bool acmCalculateIoSignalsAddresses();
+		bool acmSetInOutSignalsUalAddresses();
+		bool acmDisposeSignalsInMemory();
+		bool acmDisposeNonAquiredBusses();
+		bool acmDisposeSwInOuts();
+		bool acmDisposeSwInOutsChannel(int chIndex, QStringList& analogs, QStringList& busses, QStringList& discretes, E::SignalInOutType inOut);
+		bool acmCreateSignalLists();
+
+		bool acmDetectInternalSignalType(const UalItem* itemSignal, PinSignalType* pinSignalType);
+		bool acmDetectAfbOutSignalType(const UalItem* item, const QUuid& pinUuid, PinSignalType* pinSignalType);
+
+		bool acmWriteIoSignalsAddrsFile();
+
+		bool acmGenerateActuatorIdrCode(CodeSnippet* code);
+		bool acmWriteActuatorDataToOutputBuffer(CodeSnippet* code);
+		bool acmWriteActuatorOutputSignals(CodeSnippet* code, int chIndex, 
+						const QStringList& analogs, const QStringList& busses, const QStringList& discretes);
+		void acmGetAppUalSignals(const QString& appSignalID, const AppSignal** appSignal, const UalSignal** ualSignal);
+
 	public:
 		static const int MIN_AFB_OPCODE = 1;
 		static const int MAX_AFB_OPCODE = 63;
@@ -952,20 +1004,52 @@ namespace Builder
 		//
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Context* m_context = nullptr;
-		const Hardware::DeviceModule* m_lm = nullptr;
-		DeviceModuleShared m_lmShared;
+		const QString m_actuatorTypeID;
+		bool m_isWorkable = false;
+
+		DeviceModuleShared m_lm;
 
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Builder::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
+
+		// Actuators processing
+		//
+		static constexpr int ACM_CHANNEL_1_INDEX = 0;
+		static constexpr int ACM_CHANNEL_2_INDEX = 1;
+
+		static constexpr int ACM_SW_INOUT_HEADER_SIZE = 3;		// DataID (2 words) + Flags (1 word)
+
+		inline static const QString SW_INOUT_SUFFIX1 = QString(":1");
+		inline static const QString SW_INOUT_SUFFIX2 = QString(":2");
+
+		std::unique_ptr<SignalSet> m_actuatorSignals;
+
+		std::vector<QStringList> m_acmSwInAnalogs {2};
+		std::vector<QStringList> m_acmSwInBusses {2};
+		std::vector<QStringList> m_acmSwInDiscretes {2};
+
+		std::vector<QStringList> m_acmSwOutAnalogs {2};
+		std::vector<QStringList> m_acmSwOutBusses {2};
+		std::vector<QStringList> m_acmSwOutDiscretes {2};
+		const UalAfb* m_acmCmpSiNeAfb = nullptr;
+
+		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
+
+		quint32 m_acmSwInOutID = 0;
+		int m_acmInBufSize = 0;
+		int m_acmOutBufSize = 0;
+
+		//
+
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorSet* m_cmpSet = nullptr;
 
 		LmDescriptionConstShared m_lmDescription;
-		AppLogicData* m_appLogicData = nullptr;
-		AppLogicModule* m_moduleLogic = nullptr;
+		std::shared_ptr<AppLogicData> m_appLogicData;
+		std::shared_ptr<AppLogicModule> m_moduleLogic;
 		BuildResultWriter* m_resultWriter = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 
@@ -1093,7 +1177,7 @@ namespace Builder
 		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogInternalSignals;			// non acquired analog internal non tunigable signals, used in UAL
 
-		QVector<AppSignal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
+		QVector<AppSignal*> m_analogOutputSignalsToConversion;			// all analog output signals requires conversion
 
 		QVector<UalSignal*> m_acquiredInputBuses;						// acquired entirely Input Buses (in end of ALP phase should be copied from IO modules memory to regBuf)
 		QVector<UalSignal*> m_acquiredOutputBuses;						// acquired entirely Output Buses (in end of ALP phase should be copied from regBuf to IO modules memory)
@@ -1116,6 +1200,8 @@ namespace Builder
 		Tuning::TuningDataShared m_tuningData;
 
 		static const QString EMPTY_STR;
+
+		inline static const BuildActuatorType EMPTY_ACTUATOR_TYPE;
 	};
 
 	using ModuleLogicCompilerShared = std::shared_ptr<ModuleLogicCompiler>;

@@ -521,6 +521,22 @@ namespace Builder
 		return m_type;
 	}
 
+	bool UalItem::hasRam() const
+	{
+		const Afb::AfbElement& afbElement = afb();
+
+		std::optional<bool> hasRam = afbElement.hasRam();
+
+		if (hasRam.has_value() == true)
+		{
+			return hasRam.value();
+		}
+
+		std::shared_ptr<Afb::AfbComponent> afbComp = afbComponent();
+
+		return afbComp->hasRam();
+	}
+
 	const SchemaConst* UalItem::schemaConst() const
 	{
 		const SchemaConst* ptr = m_appLogicItem.m_fblItem->toSchemaItemConst();
@@ -3474,7 +3490,7 @@ namespace Builder
 
 	void UalSignals::initDiscreteSignalsHeap(int startAddrW, int sizeW)
 	{
-		m_discreteSignalsHeap.init(startAddrW, sizeW);
+		m_discreteSignalsHeap.initHeap(startAddrW, sizeW);
 	}
 
 	int UalSignals::getDiscreteSignalsHeapSizeW() const
@@ -3484,7 +3500,7 @@ namespace Builder
 
 	void UalSignals::initAnalogAndBusSignalsHeap(int startAddrW, int sizeW)
 	{
-		m_analogAndBusSignalsHeap.init(startAddrW, sizeW);
+		m_analogAndBusSignalsHeap.initHeap(startAddrW, sizeW);
 	}
 
 	int UalSignals::getAnalogAndBusSignalsHeapSizeW() const
@@ -3576,8 +3592,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= m_discreteSignalsHeap.finalize();
-		result &= m_analogAndBusSignalsHeap.finalize();
+		result &= m_discreteSignalsHeap.finalizeHeap();
+		result &= m_analogAndBusSignalsHeap.finalizeHeap();
 
 		return result;
 	}

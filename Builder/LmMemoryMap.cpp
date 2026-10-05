@@ -225,20 +225,23 @@ namespace Builder
 
 		// init opto interface memory mapping
 		//
-		m_optoInterface.memory.setStartAddress(optoInterfaceData.startAddress());
-		m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (optoInterfaceCount));	// optoInterfaceCount+1
-		m_optoInterface.memory.lock();
-
-		m_optoInterface.channel.resize(optoInterfaceCount);
-
-		for(int i = 0; i < optoInterfaceCount; i++)
+		if (optoInterfaceCount > 0)
 		{
-			m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress() + i * optoInterfaceData.sizeW());
-			m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
-		}
+			m_optoInterface.memory.setStartAddress(optoInterfaceData.startAddress());
+			m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (optoInterfaceCount)); // optoInterfaceCount+1
+			m_optoInterface.memory.lock();
 
-		m_optoInterface.reserv.setStartAddress(m_optoInterface.channel[optoInterfaceCount - 1].nextAddress());
-		m_optoInterface.reserv.setSizeW(optoInterfaceData.sizeW());
+			m_optoInterface.channel.resize(optoInterfaceCount);
+
+			for (int i = 0; i < optoInterfaceCount; i++)
+			{
+				m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress() + i * optoInterfaceData.sizeW());
+				m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
+			}
+
+			m_optoInterface.reserv.setStartAddress(m_optoInterface.channel[optoInterfaceCount - 1].nextAddress());
+			m_optoInterface.reserv.setSizeW(optoInterfaceData.sizeW());
+		}
 
 		// init application bit-addressed memory mapping
 		//

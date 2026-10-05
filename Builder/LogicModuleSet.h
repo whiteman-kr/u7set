@@ -26,6 +26,8 @@ public:
 	std::shared_ptr<LmDescription> get(QString fileName);
 
 	std::shared_ptr<LmDescription> get(const Hardware::DeviceModule* logicModule) const;
+
+	std::shared_ptr<LmDescription> get(std::shared_ptr<Hardware::DeviceModule> logicModule);
 	std::shared_ptr<LmDescription> get(Hardware::DeviceModule* logicModule);
 
 	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);

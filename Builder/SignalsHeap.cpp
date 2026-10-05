@@ -34,7 +34,7 @@ namespace Builder
 		}
 	}
 
-	void SignalsHeap::init(int heapStartAddrW, int heapSizeW)
+	void SignalsHeap::initHeap(int heapStartAddrW, int heapSizeW)
 	{
 		m_heapStartAddrW = heapStartAddrW;
 		m_heapSizeW = heapSizeW;
@@ -44,7 +44,7 @@ namespace Builder
 		logInit();
 	}
 
-	bool SignalsHeap::finalize()
+	bool SignalsHeap::finalizeHeap()
 	{
 		bool result = true;
 
@@ -253,8 +253,8 @@ namespace Builder
 
 		if (heapItem->address == BAD_ADDRESS)
 		{
-			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined heap item %1 address").arg(appSignalID));
+			Q_ASSERT(false);
 			return addrForRead;
 		}
 

@@ -149,6 +149,7 @@ protected:
 	// Methods
 	//
 public:
+	static QString lmDescriptionFile(std::shared_ptr<Hardware::DeviceModule> logicModule);
 	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
 	void dump() const;
 

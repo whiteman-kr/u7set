@@ -349,6 +349,7 @@ public:
 
 	Address16 ioBufAddr() const;
 	void setIoBufAddr(const Address16& addr);
+	bool ioBufAddrIsValid() const;
 
 	Address16 tuningAddr() const { return m_tuningAddr; }
 	void setTuningAddr(const Address16& addr) { m_tuningAddr = addr; }

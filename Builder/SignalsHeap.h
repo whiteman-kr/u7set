@@ -27,8 +27,8 @@ namespace Builder
 		SignalsHeap(int memCellSizeBits, bool generateLog, IssueLogger* log);
 		virtual ~SignalsHeap();
 
-		void init(int heapStartAddrW, int heapSizeW);
-		bool finalize();
+		void initHeap(int heapStartAddrW, int heapSizeW);
+		bool finalizeHeap();
 
 		void appendItem(const UalSignal &ualSignal, std::optional<int> expectedReadCount);
 		void removeItem(const UalSignal &ualSignal);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/DeviceAppSignal.h>
 #include <HardwareLib/EquipmentSet.h>
 
 #include "../UtilsLib/OutputLog.h"
@@ -25,9 +26,15 @@ public:
 
 
 public:
+	static bool getIntProperty(std::shared_ptr<Hardware::DeviceObject>, const QString& name, qint32* value, Builder::IssueLogger* log);
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);
+
+	static bool getUIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, quint32* value, Builder::IssueLogger* log);
 	static bool getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log);
+	
+	static bool getStrProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, QString* value, Builder::IssueLogger* log);
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
+	
 	static bool getStrListProperty(const Hardware::DeviceObject* device, const QString& name, QStringList* strList, Builder::IssueLogger* log);
 	static bool getStrListPropertyAsString(const Hardware::DeviceObject* device, const QString& name, QString* str, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
@@ -70,18 +77,29 @@ public:
 	template<typename T>
 	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);
 
+	static bool setIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, qint32 value, Builder::IssueLogger* log);
 	static bool setIntProperty(Hardware::DeviceObject* device, const QString& name, qint32 value, Builder::IssueLogger* log);
+
+	static bool setUIntProperty(std::shared_ptr<Hardware::DeviceObject> device, const QString& name, quint32 value, Builder::IssueLogger* log);
 	static bool setUIntProperty(Hardware::DeviceObject* device, const QString& name, quint32 value, Builder::IssueLogger* log);
 
 	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
 	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
 
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
+	
+	static Hardware::DeviceController* getChildControllerBySuffix(std::shared_ptr<Hardware::DeviceObject> device, const QString& suffix, Builder::IssueLogger* log);
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
+
+	static std::vector<Hardware::DeviceController*> getChildControllers(const Hardware::DeviceObject* device);
+
+	static Hardware::DeviceAppSignal* getChildDeviceAppSignalBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
 
 	static Hardware::DeviceController* getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 
+	static const Hardware::DeviceModule* getModuleOnPlace(std::shared_ptr<Hardware::DeviceModule> lm, int place);
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
+
 	static const Hardware::DeviceModule* getLm(const Hardware::DeviceChassis* chassis);
 	static const Hardware::DeviceModule* getLmBvbMso(const Hardware::DeviceChassis* chassis);
 

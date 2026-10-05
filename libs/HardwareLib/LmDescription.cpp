@@ -755,12 +755,19 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 	return true;
 }
 
+QString LmDescription::lmDescriptionFile(std::shared_ptr<Hardware::DeviceModule> logicModule)
+{
+	return lmDescriptionFile(logicModule.get());
+}
+
 QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr || (logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+		assert(logicModule->isFSCConfigurationModule() || 
+				logicModule->isVdu() || 
+				logicModule->isAcm());			// WhiteMan 03.09.2026
 
 		return QString();
 	}

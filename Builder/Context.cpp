@@ -56,4 +56,11 @@ namespace Builder
 		return nullptr;
 	}
 
+	void Context::appendActuatorLogicCompiler(const QString& actuatorTypeID, std::shared_ptr<ModuleLogicCompiler> mc)
+	{
+		Q_ASSERT(m_actuatorsLogicCompilers.find(actuatorTypeID) == m_actuatorsLogicCompilers.end());
+
+		m_actuatorsLogicCompilers.emplace(actuatorTypeID, mc);
+	}
+
 } // namespace Builder

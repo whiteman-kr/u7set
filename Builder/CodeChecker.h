@@ -36,7 +36,7 @@ namespace Builder
 
 
 	public:
-		CodeChecker(const ModuleLogicCompiler& compiler);
+		CodeChecker(ModuleLogicCompiler& compiler);
 		~CodeChecker();
 
 		bool check(const AppLogicCode& appLogicCode);
@@ -45,7 +45,13 @@ namespace Builder
 		bool init();
 
 		bool initReadableAreas();
+		bool initOtherModulesReadableAreas();
+		bool initActuatorReadableAreas();
+
 		bool initWritableAreas();
+		bool initOtherModulesWritableAreas();
+		bool initActuatorWritableAreas();
+
 		void joiningSequentialAreas(std::map<quint32, MemArea>* areas);
 
 		bool initPartialWrittenAddresses();
@@ -114,7 +120,7 @@ namespace Builder
 		bool addrNotInBitMemArea(quint32 addr, quint32 sizeW) const;
 
 	private:
-		const ModuleLogicCompiler& m_compiler;
+		ModuleLogicCompiler& m_compiler;
 		LmDescriptionConstShared m_lmDesc;
 		const std::map<int, LmCommand>* m_lmCommands = nullptr;
 		mutable IssueLogger* m_log = nullptr;
