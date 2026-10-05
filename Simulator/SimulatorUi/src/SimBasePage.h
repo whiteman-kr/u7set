@@ -8,10 +8,11 @@ class QAction;
 
 namespace SimUi
 {
+	class SimConnectionPage;
 	class SimIdeSimulator;
 	class SimLogicModulePage;
-	class SimConnectionPage;
 	class SimSelectSchemaPage;
+	class SimVduModulePage;
 
 
 	class SimBasePage : public QWidget
@@ -26,6 +27,8 @@ namespace SimUi
 		static void deleteAllPages();
 
 		static SimLogicModulePage* logicModulePage(QString lmEquipmnetId, QWidget* parent);
+		static SimVduModulePage* vduModulePage(QString lmEquipmnetId, QWidget* parent);
+
 		static SimConnectionPage* connectionPage(QString connectionId, QWidget* parent);
 		static SimSelectSchemaPage* selectSchemaPage(QWidget* parent);
 

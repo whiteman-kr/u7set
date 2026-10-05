@@ -2,6 +2,7 @@
 #include "SimConnectionPage.h"
 #include "SimLogicModulePage.h"
 #include "SimSelectSchemaPage.h"
+#include "SimVduModulePage.h"
 
 #include <SimulatorUi/SimIdeSimulator.h>
 
@@ -11,8 +12,8 @@ namespace SimUi
 
 
 	SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent) :
-		QWidget(parent),
-		m_simulator(simulator)
+		QWidget{parent},
+		m_simulator{simulator}
 	{
 		assert(m_simulator);
 
@@ -53,9 +54,26 @@ namespace SimUi
 	{
 		QVariant parentValue = QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
 
-		for (SimBasePage* page : m_pages)
+		for (auto page : m_pages)
 		{
-			SimLogicModulePage* cp = dynamic_cast<SimLogicModulePage*>(page);
+			auto cp = dynamic_cast<SimLogicModulePage*>(page);
+
+			if (cp != nullptr && cp->equipmentId() == lmEquipmnetId && cp->property("SimParentObject") == parentValue)
+			{
+				return cp;
+			}
+		}
+
+		return nullptr;
+	}
+
+	SimVduModulePage* SimBasePage::vduModulePage(QString lmEquipmnetId, QWidget* parent)
+	{
+		QVariant parentValue = QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
+
+		for (auto page : m_pages)
+		{
+			auto cp = dynamic_cast<SimVduModulePage*>(page);
 
 			if (cp != nullptr && cp->equipmentId() == lmEquipmnetId && cp->property("SimParentObject") == parentValue)
 			{

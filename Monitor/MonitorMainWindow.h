@@ -123,6 +123,14 @@ public slots:
 	void slot_archive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
 
 	void slot_trends();
+	void slot_newTrend(QStringList appSignalIds = {});
+	void slot_trendArchive(QStringList appSignalIds,
+						   QDateTime startTime,
+						   QDateTime endTime,
+						   E::TimeType timeType,
+						   int laneCount,
+						   E::TrendViewMode viewMode,
+						   E::TrendScaleType scaleType);
 
 	void slot_signalLog();
 	void slot_updateSignalLogText();
@@ -311,12 +319,14 @@ private:
 	MonitorCentralWidget::CreateSchemaWidgetFunc createSchemaWidgetFunc =
 		[this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
 	{
-		return new MonitorSchemaWidget(schema,
-									   &m_schemaManager,
-									   m_appSignalController.get(),
-									   m_logController.get(),
-									   &m_schemaStats,
-									   parentWidget);
+		auto w = new MonitorSchemaWidget(schema,
+										 &m_schemaManager,
+										 m_appSignalController.get(),
+										 m_logController.get(),
+										 &m_schemaStats,
+										 parentWidget);
+		connect(w, &MonitorSchemaWidget::signal_newTrend, this, &MonitorMainWindow::slot_newTrend);
+		return w;
 	};
 	MonitorCentralWidget m_monitorCentralWidget{&m_schemaManager, createSchemaWidgetFunc, this};
 

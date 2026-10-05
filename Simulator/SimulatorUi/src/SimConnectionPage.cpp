@@ -9,6 +9,24 @@
 #include <QCoreApplication>
 #include <QGridLayout>
 #include <QInputDialog>
+#include <QMainWindow>
+
+namespace
+{
+	QWidget* findDialogParent(QWidget* start)
+	{
+		for (QWidget* parent = start; parent != nullptr; parent = parent->parentWidget())
+		{
+			const char* className = parent->metaObject()->className();
+			if (qstrcmp(className, "SimulatorTabPage") == 0 || qobject_cast<QMainWindow*>(parent) != nullptr)
+			{
+				return parent;
+			}
+		}
+
+		return start;
+	}
+} // namespace
 
 namespace SimUi
 {
@@ -109,8 +127,9 @@ namespace SimUi
 		// --
 		//
 		connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimConnectionPage::updateData);
-		connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimConnectionPage::updateData);
-		connect(&m_simulator->connections(), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState);
+		connect(&m_simulator->control(), &Sim::Control::stateChanged, this, &SimConnectionPage::updateData);
+		connect(&m_simulator->control(), &Sim::Control::statusUpdate, this, &SimConnectionPage::updateData);
+		connect(&m_simulator->connections(), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState1);
 
 		connect(m_disableButton, &QPushButton::toggled, this, &SimConnectionPage::disableConnection);
 
@@ -188,7 +207,30 @@ namespace SimUi
 		return;
 	}
 
-	void SimConnectionPage::updateConnectionState(QString connectionId, bool enabled)
+	void SimConnectionPage::updateConnectionState1(QString connectionId, bool enabled)
+	{
+		if (connectionId != m_connectionId)
+		{
+			return;
+		}
+
+		auto c = m_simulator->connections().connection(connectionId);
+
+		if (c != nullptr)
+		{
+			m_connectionInfo = c.connectionInfo();
+			updateConnectionState2(connectionId, enabled, c.timeout());
+		}
+		else
+		{
+			m_connectionInfo = {};
+			updateConnectionState2(connectionId, false, false);
+		}
+
+		return;
+	}
+
+	void SimConnectionPage::updateConnectionState2(QString connectionId, bool enabled, bool timeOut)
 	{
 		if (connectionId != m_connectionId)
 		{
@@ -216,7 +258,21 @@ namespace SimUi
 			}
 			else
 			{
-				stateText = tr("State: %1").arg(enabled ? tr("ok") : "Disabled");
+				if (enabled == false)
+				{
+					stateText = tr("State: %1").arg("Disabled");
+				}
+				else
+				{
+					if (timeOut == true)
+					{
+						stateText = tr("State: %1").arg("Timeout");
+					}
+					else
+					{
+						stateText = tr("State: %1").arg("ok");
+					}
+				}
 			}
 		}
 
@@ -232,12 +288,12 @@ namespace SimUi
 		if (c != nullptr)
 		{
 			m_connectionInfo = c.connectionInfo();
-			updateConnectionState(m_connectionId, c.enabled());
+			updateConnectionState2(m_connectionId, c.enabled(), c.timeout());
 		}
 		else
 		{
 			m_connectionInfo = {};
-			updateConnectionState(m_connectionId, false);
+			updateConnectionState2(m_connectionId, false, false);
 		}
 
 		m_disableButton->setEnabled(m_simulator->isLoaded());
@@ -465,18 +521,7 @@ namespace SimUi
 										 quint32 sizeW,
 										 QString trx)
 	{
-		// Parent will be SimulatorTabPage*
-		//
-		QWidget* parent = this->parentWidget();
-		while (parent != nullptr)
-		{
-			if (parent->metaObject()->className() == QString("SimulatorTabPage"))
-			{
-				break;
-			}
-
-			parent = parent->parentWidget();
-		}
+		QWidget* parent = findDialogParent(this);
 		Q_ASSERT(parent);
 
 		// Get current buffer
@@ -519,7 +564,7 @@ namespace SimUi
 			offsetInBuffer++;
 		}
 
-		QInputDialog d(this->parentWidget());
+		QInputDialog d(parent);
 
 		d.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 		d.setWindowFlag(Qt::WindowSystemMenuHint, false);

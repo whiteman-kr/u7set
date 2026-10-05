@@ -238,6 +238,7 @@ namespace VFrame30
 
 		QLineEdit* control = new QEditorLineEdit(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
+		control->setFocusPolicy(Qt::ClickFocus);
 
 		updateWidgetProperties(control, editMode);
 
@@ -359,6 +360,14 @@ namespace VFrame30
 		if (senderWidget == nullptr)
 		{
 			assert(senderWidget);
+			return;
+		}
+
+		if (senderWidget->isVisible() == false && senderWidget->objectName().isEmpty() == true)
+		{
+			// This object is deleted in SchemaViewWidget::updateControlWidgets.
+			// Ignore this event.
+			//
 			return;
 		}
 

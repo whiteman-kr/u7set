@@ -10,23 +10,36 @@ namespace Sim
 	using namespace std::literals::chrono_literals;
 
 	class SimulatorPrivate;
-	class LogicModuleImpl;
 	struct SimControlRunStruct;
+
+	class BaseModuleImpl;
+	class LogicModuleImpl;
+	class VduModuleImpl;
+
 
 	// Internal struct must not be used anywhere in code except Sim::Control
 	//
 	struct SimControlRunStruct
 	{
-		SimControlRunStruct(std::shared_ptr<LogicModuleImpl> lm);
+		SimControlRunStruct(std::shared_ptr<BaseModuleImpl> module);
 
 		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished);
 
 		const QString& equipmentId() const;
 
-		LogicModuleImpl* operator->();
-		const LogicModuleImpl* operator->() const;
+		BaseModuleImpl* operator->();
+		const BaseModuleImpl* operator->() const;
 
-		std::shared_ptr<LogicModuleImpl> m_lm;
+		[[nodiscard]] bool isLm() const;
+		[[nodiscard]] bool isVdu() const;
+
+		LogicModuleImpl& toLm();
+		const LogicModuleImpl& toLm() const;
+
+		VduModuleImpl& toVdu();
+		const VduModuleImpl& toVdu() const;
+
+		std::shared_ptr<BaseModuleImpl> m_module;
 		std::chrono::microseconds m_lastStartTime{0};
 		std::chrono::microseconds m_possibleToAdvanceTo{0};
 		qint64 m_cyclesCounter = 0;
@@ -39,7 +52,7 @@ namespace Sim
 	{
 		// Keep this struct simple, it should copy fast enough
 		//
-		std::vector<SimControlRunStruct> m_lms;           // LMs added to simulation
+		std::vector<SimControlRunStruct> m_modules;       // LMs added to simulation
 		SimControlState m_state = SimControlState::Stop;
 
 		std::chrono::microseconds m_startTime = 0us;      // When simulation was started, computer time

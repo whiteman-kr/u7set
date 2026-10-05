@@ -102,6 +102,11 @@ namespace Sim
 		return m_impl.signalState(signalHash);
 	}
 
+	std::vector<std::optional<AppSignalParam>> AppSignalManager::signalParams(std::span<const Hash> appSignalHashes) const
+	{
+		return m_impl.signalParams(appSignalHashes);
+	}
+
 	std::optional<AppSignalState> AppSignalManager::signalState(Hash signalHash, Hash dataServerHash) const
 	{
 		return m_impl.signalState(signalHash, dataServerHash);

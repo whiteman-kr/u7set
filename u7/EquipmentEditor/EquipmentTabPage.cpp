@@ -720,7 +720,7 @@ void EquipmentTabPage::setActionState()
 			m_createInOutsToSignals->setEnabled(true);
 			m_createInOutsToSignals->setVisible(true);
 
-			if (module->isLogicModule() == true)
+			if (module->isLogicModule() == true || module->isVdu() == true)
 			{
 				m_createInternalAppSignal->setEnabled(true);
 				m_createInternalAppSignal->setVisible(true);
@@ -821,7 +821,8 @@ void EquipmentTabPage::setActionState()
 				auto parent1 = controller1->parent()->toModule();
 				assert(parent1);
 
-				if (parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM)
+				if (parent1->isLogicModule() == true || parent1->isVdu() == true ||
+					parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM)
 				{
 					// If id ends with _OPTOPORTXX
 					//
@@ -853,9 +854,13 @@ void EquipmentTabPage::setActionState()
 			auto parent1 = controller1->parent()->toModule();
 			auto parent2 = controller2->parent()->toModule();
 
-			if (parent1 != nullptr && parent2 != nullptr &&
-				(parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM) &&
-				(parent2->isLogicModule() == true || parent2->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			bool canCreateConnection1 = parent1 != nullptr && (parent1->isLogicModule() == true || parent1->isVdu() == true ||
+															   parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM);
+
+			bool canCreateConnection2 = parent2 != nullptr && (parent2->isLogicModule() == true || parent2->isVdu() == true ||
+															   parent2->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM);
+
+			if (canCreateConnection1 == true && canCreateConnection2 == true)
 			{
 				// If id ends with _OPTOPORTXX
 				//

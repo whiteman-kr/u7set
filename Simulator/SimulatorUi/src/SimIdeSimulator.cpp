@@ -18,7 +18,10 @@ namespace SimUi
 	{
 	}
 
-	SimIdeSimulator::~SimIdeSimulator() = default;
+	SimIdeSimulator::~SimIdeSimulator()
+	{
+		qDebug() << "SimIdeSimulator::~SimIdeSimulator()";
+	}
 
 	bool SimIdeSimulator::load(QString buildPath)
 	{
@@ -189,6 +192,26 @@ namespace SimUi
 		return m_simulator->subsystems();
 	}
 
+	std::vector<Sim::LmSubsystem> SimIdeSimulator::lmSubsystems() const
+	{
+		return m_simulator->lmSubsystems();
+	}
+
+	std::vector<Sim::VduSubsystem> SimIdeSimulator::vduSubsystems() const
+	{
+		return m_simulator->vduSubsystems();
+	}
+
+	std::optional<Sim::Module> SimIdeSimulator::module(QString equipmentId) const
+	{
+		return m_simulator->module(equipmentId);
+	}
+
+	std::vector<Sim::Module> SimIdeSimulator::modules() const
+	{
+		return m_simulator->modules();
+	}
+
 	std::optional<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
 	{
 		return m_simulator->logicModule(equipmentId);
@@ -197,6 +220,16 @@ namespace SimUi
 	std::vector<Sim::LogicModule> SimIdeSimulator::logicModules() const
 	{
 		return m_simulator->logicModules();
+	}
+
+	std::optional<Sim::VduModule> SimIdeSimulator::vduModule(QString equipmentId) const
+	{
+		return m_simulator->vduModule(equipmentId);
+	}
+
+	std::vector<Sim::VduModule> SimIdeSimulator::vduModules() const
+	{
+		return m_simulator->vduModules();
 	}
 
 	Sim::AppSignalManager& SimIdeSimulator::appSignalManager()
@@ -239,11 +272,11 @@ namespace SimUi
 		return m_simulator->software();
 	}
 
-	Sim::Service& SimIdeSimulator::service() 
+	Sim::Service& SimIdeSimulator::service()
 	{
 		return m_simulator->service();
 	}
-	const Sim::Service& SimIdeSimulator::service() const 
+	const Sim::Service& SimIdeSimulator::service() const
 	{
 		return m_simulator->service();
 	}

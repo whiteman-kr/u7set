@@ -1,9 +1,9 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Do not include this file in the project! Link HardwareLib instead.
+	#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include <HardwareLib/ModuleFirmware.h>
 #include "../UtilsLib/Crc.h"
+#include <HardwareLib/ModuleFirmware.h>
 
 
 namespace Hardware
@@ -16,18 +16,14 @@ namespace Hardware
 
 		for (const std::vector<quint8>& frame : frames)
 		{
-			QByteArray rawData = QByteArray::fromRawData(reinterpret_cast<const char*>(frame.data()),
-														 static_cast<int>(frame.size()));
+			QByteArray rawData = QByteArray::fromRawData(reinterpret_cast<const char*>(frame.data()), static_cast<int>(frame.size()));
 			ba.push_back(rawData);
 		}
 
 		return ba;
 	}
 
-	void ModuleFirmware::addFirmwareData(int uartId,
-							  const QString& uartType,
-							  int eepromFramePayloadSize,
-							  int frameCount)
+	void ModuleFirmware::addFirmwareData(int uartId, const QString& uartType, int eepromFramePayloadSize, int frameCount)
 
 	{
 		ModuleFirmwareData data;
@@ -55,10 +51,7 @@ namespace Hardware
 		return;
 	}
 
-	void ModuleFirmware::init(const QString& subsysId,
-							  int ssKey,
-							  const QString& lmDescriptionFile,
-							  int lmDescriptionNumber)
+	void ModuleFirmware::init(const QString& subsysId, int ssKey, const QString& lmDescriptionFile, int lmDescriptionNumber)
 	{
 		m_subsysId = subsysId;
 		m_ssKey = static_cast<quint16>(ssKey);
@@ -87,7 +80,7 @@ namespace Hardware
 
 	ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok)
 	{
-static ModuleFirmwareData err;
+		static ModuleFirmwareData err;
 		if (ok == nullptr)
 		{
 			assert(ok);
@@ -106,7 +99,7 @@ static ModuleFirmwareData err;
 
 	const ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok) const
 	{
-static ModuleFirmwareData err;
+		static ModuleFirmwareData err;
 		if (ok == nullptr)
 		{
 			assert(ok);
@@ -161,7 +154,7 @@ static ModuleFirmwareData err;
 
 	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
 	{
-static const std::vector<quint8> err;
+		static const std::vector<quint8> err;
 
 		if (frameIndex < 0 || frameIndex >= eepromFrameCount(uartId))
 		{
@@ -200,13 +193,13 @@ static const std::vector<quint8> err;
 	}
 
 	void ModuleFirmware::addLogicModuleInfo(const QString& equipmentId,
-							const QString& subsystemId,
-							int lmNumber,
-							E::Channel channel,
-							int moduleFamily,
-							int customModuleFamily,
-							int moduleVersion,
-							int moduleType)
+											const QString& subsystemId,
+											int lmNumber,
+											E::Channel channel,
+											int moduleFamily,
+											int customModuleFamily,
+											int moduleVersion,
+											int moduleType)
 	{
 		LogicModuleInfo info;
 
@@ -220,7 +213,6 @@ static const std::vector<quint8> err;
 		info.moduleType = moduleType;
 
 		addLogicModuleInfo(info);
-
 	}
 
 	void ModuleFirmware::addLogicModuleInfo(const LogicModuleInfo& lmi)
@@ -238,13 +230,9 @@ static const std::vector<quint8> err;
 	// ModuleFirmware
 	//
 
-	ModuleFirmwareStorage::ModuleFirmwareStorage()
-	{
-	}
+	ModuleFirmwareStorage::ModuleFirmwareStorage() {}
 
-	ModuleFirmwareStorage::~ModuleFirmwareStorage()
-	{
-	}
+	ModuleFirmwareStorage::~ModuleFirmwareStorage() {}
 
 	void ModuleFirmwareStorage::setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, int changesetId)
 	{
@@ -263,11 +251,9 @@ static const std::vector<quint8> err;
 		}
 
 		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly)  == false)
+		if (file.open(QIODevice::ReadOnly) == false)
 		{
-			*errorCode = QString("Open file %1 error: %2")
-							.arg(fileName)
-							.arg(file.errorString());
+			*errorCode = QString("Open file %1 error: %2").arg(fileName).arg(file.errorString());
 			return false;
 		}
 
@@ -298,11 +284,9 @@ static const std::vector<quint8> err;
 		}
 
 		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly)  == false)
+		if (file.open(QIODevice::ReadOnly) == false)
 		{
-			*errorCode = QString("Open file %1 error: %2")
-							.arg(fileName)
-							.arg(file.errorString());
+			*errorCode = QString("Open file %1 error: %2").arg(fileName).arg(file.errorString());
 			return false;
 		}
 
@@ -379,7 +363,7 @@ static const std::vector<quint8> err;
 
 	ModuleFirmware& ModuleFirmwareStorage::firmware(const QString& subsysId, bool* ok)
 	{
-static ModuleFirmware err;
+		static ModuleFirmware err;
 		if (ok == nullptr)
 		{
 			assert(ok);
@@ -450,7 +434,7 @@ static ModuleFirmware err;
 
 		if (jConfig.value(QLatin1String("fileVersion")).isUndefined() == true)
 		{
-			m_fileVersion = 1;	// in old files there is no version information
+			m_fileVersion = 1; // in old files there is no version information
 		}
 		else
 		{
@@ -575,7 +559,7 @@ static ModuleFirmware err;
 
 			QJsonArray jModuleInfoArray = jSubsystemInfo.value(QLatin1String("z_modules")).toArray();
 
-			for (const QJsonValueRef jModuleInfoRef: jModuleInfoArray)
+			for (const QJsonValueRef jModuleInfoRef : jModuleInfoArray)
 			{
 				LogicModuleInfo lmi;
 
@@ -638,7 +622,6 @@ static ModuleFirmware err;
 				lmi.moduleType = jModuleInfo.value(QLatin1String("moduleType")).toInt();
 
 				fw.addLogicModuleInfo(lmi);
-
 			}
 
 			m_firmwares[fw.subsysId()] = fw;
@@ -696,7 +679,7 @@ static ModuleFirmware err;
 					*errorCode = "Parse firmware error: cant find field eepromFrameSize";
 					return false;
 				}
-				//int eepromFrameSize = jFirmwareData.value(QLatin1String("eepromFrameSize")).toInt();
+				// int eepromFrameSize = jFirmwareData.value(QLatin1String("eepromFrameSize")).toInt();
 
 				if (jFirmwareData.value(QLatin1String("uartId")).isUndefined() == true)
 				{
@@ -754,7 +737,8 @@ static ModuleFirmware err;
 						quint16* frameWordPtr = (quint16*)firmwareData.frames[eepromFrame].data();
 
 						const int frameStringWidth = 16;
-						const int linesCount = static_cast<int>(ceil(static_cast<float>(firmwareData.eepromFrameSize) / 2 / frameStringWidth));
+						const int linesCount =
+							static_cast<int>(ceil(static_cast<float>(firmwareData.eepromFrameSize) / 2 / frameStringWidth));
 
 						for (int l = 0; l < linesCount; l++)
 						{
@@ -796,14 +780,16 @@ static ModuleFirmware err;
 
 						if (Crc::checkDataBlockCrc(static_cast<quint16>(eepromFrame), firmwareData.frames[eepromFrame]) == false)
 						{
-
-							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(eepromFrame);
+							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.")
+											 .arg(fw.subsysId())
+											 .arg(QString::number(uartId, 16))
+											 .arg(eepromFrame);
 							return false;
 						}
 					}
 				} // eepromFrameCount
 			} // jFirmwareDataRef
-		}// jSubsystemDataRef
+		} // jSubsystemDataRef
 
 		return true;
 	}
@@ -908,21 +894,28 @@ static ModuleFirmware err;
 
 				if (jModuleInfo.value(QLatin1String("equipmentId")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field equipmentId";
+					*errorCode = "Parse firmware error: cannot find field equipmentId";
 					return false;
 				}
 				lmi.equipmentId = jModuleInfo.value(QLatin1String("equipmentId")).toString();
 
+				if (jModuleInfo.value(QLatin1String("subsystemId")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cannot find field subsystemId";
+					return false;
+				}
+				lmi.subsystemId = jModuleInfo.value(QLatin1String("subsystemId")).toString();
+
 				if (jModuleInfo.value(QLatin1String("lmNumber")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field lmNumber";
+					*errorCode = "Parse firmware error: cannot find field lmNumber";
 					return false;
 				}
 				lmi.lmNumber = jModuleInfo.value(QLatin1String("lmNumber")).toInt();
 
 				if (jModuleInfo.value(QLatin1String("channel")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field channel";
+					*errorCode = "Parse firmware error: cannot find field channel";
 					return false;
 				}
 
@@ -936,34 +929,33 @@ static ModuleFirmware err;
 
 				if (jModuleInfo.value(QLatin1String("moduleFamily")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field moduleFamily";
+					*errorCode = "Parse firmware error: cannot find field moduleFamily";
 					return false;
 				}
 				lmi.moduleFamily = jModuleInfo.value(QLatin1String("moduleFamily")).toInt();
 
 				if (jModuleInfo.value(QLatin1String("customModuleFamily")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field customModuleFamily";
+					*errorCode = "Parse firmware error: cannot find field customModuleFamily";
 					return false;
 				}
 				lmi.customModuleFamily = jModuleInfo.value(QLatin1String("customModuleFamily")).toInt();
 
 				if (jModuleInfo.value(QLatin1String("moduleVersion")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field moduleVersion";
+					*errorCode = "Parse firmware error: cannot find field moduleVersion";
 					return false;
 				}
 				lmi.moduleVersion = jModuleInfo.value(QLatin1String("moduleVersion")).toInt();
 
 				if (jModuleInfo.value(QLatin1String("moduleType")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field moduleType";
+					*errorCode = "Parse firmware error: cannot find field moduleType";
 					return false;
 				}
 				lmi.moduleType = jModuleInfo.value(QLatin1String("moduleType")).toInt();
 
 				fw.addLogicModuleInfo(lmi);
-
 			}
 
 			m_firmwares[fw.subsysId()] = fw;
@@ -1021,7 +1013,7 @@ static ModuleFirmware err;
 					*errorCode = "Parse firmware error: cant find field eepromFrameSize";
 					return false;
 				}
-				//int eepromFrameSize = jFirmwareData.value(QLatin1String("eepromFrameSize")).toInt();
+				// int eepromFrameSize = jFirmwareData.value(QLatin1String("eepromFrameSize")).toInt();
 
 				if (jFirmwareData.value(QLatin1String("uartId")).isUndefined() == true)
 				{
@@ -1072,7 +1064,8 @@ static ModuleFirmware err;
 						quint16* frameWordPtr = (quint16*)firmwareData.frames[eepromFrame].data();
 
 						const int frameStringWidth = 16;
-						const int linesCount = static_cast<int>(ceil(static_cast<float>(firmwareData.eepromFrameSize) / 2 / frameStringWidth));
+						const int linesCount =
+							static_cast<int>(ceil(static_cast<float>(firmwareData.eepromFrameSize) / 2 / frameStringWidth));
 
 						for (int l = 0; l < linesCount; l++)
 						{
@@ -1106,7 +1099,7 @@ static ModuleFirmware err;
 								{
 									assert(false);
 									break;
-								} 
+								}
 
 								frameWordPtr[dataWordPos++] = qToBigEndian(v);
 							}
@@ -1114,14 +1107,16 @@ static ModuleFirmware err;
 
 						if (Crc::checkDataBlockCrc(static_cast<quint16>(eepromFrame), firmwareData.frames[eepromFrame]) == false)
 						{
-
-							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(eepromFrame);
+							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.")
+											 .arg(fw.subsysId())
+											 .arg(QString::number(uartId, 16))
+											 .arg(eepromFrame);
 							return false;
 						}
 					}
 				} // eepromFrameCount
 			} // jFirmwareDataRef
-		}// jSubsystemDataRef
+		} // jSubsystemDataRef
 
 		return true;
 	}
@@ -1156,4 +1151,4 @@ static ModuleFirmware err;
 		return m_buildNumber;
 	}
 
-}
+} // namespace Hardware

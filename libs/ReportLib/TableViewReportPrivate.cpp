@@ -265,7 +265,7 @@ namespace ReportLib
 		}
 
 		ReportLib::TableFormat format{font, columns, borderWidth};
-		std::shared_ptr<ReportLib::ReportTable> table = std::make_shared<ReportLib::ReportTable>(format);
+		std::shared_ptr<ReportLib::ReportTable> table = std::make_shared<ReportLib::ReportTable>(format, ""/*hint*/);
 		mainSection->addTable(table);
 
 		// Fill the table

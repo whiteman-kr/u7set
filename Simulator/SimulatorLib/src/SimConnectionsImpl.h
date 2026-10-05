@@ -41,9 +41,13 @@ namespace Sim
 		}
 
 	public:
-		const ::ConnectionPortInfo& portInfo() const { return m_portInfo; }
+		[[nodiscard]] const ::ConnectionPortInfo& portInfo() const { return m_portInfo; }
 
-		Hash lmIdHash() const { return m_lmIdHash; }
+		[[nodiscard]] QString lmId() const { return m_portInfo.lmID; }
+		[[nodiscard]] Hash lmIdHash() const { return m_lmIdHash; }
+
+		[[nodiscard]] std::chrono::microseconds timeoutValue() const { return m_timeoutValue; }
+		void setTimeoutValue(std::chrono::microseconds value) { m_timeoutValue = value; }
 
 		// writeValidityBit was moved here as optimisation, this is very convenient place
 		// to store memory area for this bit.
@@ -78,6 +82,7 @@ namespace Sim
 	private:
 		::ConnectionPortInfo m_portInfo;
 		Hash m_lmIdHash = UNDEFINED_HASH;
+		std::chrono::microseconds m_timeoutValue{10'001}; // Timeout value for receiving data from this port.
 
 		Ram::Handle m_receiveValidityBitMemoryArea = Ram::InvalidHandle;
 	};
@@ -102,11 +107,7 @@ namespace Sim
 
 		bool sendData(int portNo, std::vector<char>* data, std::chrono::microseconds currentTime);
 
-		bool receiveData(int portNo,
-						 std::vector<char>* data,
-						 std::chrono::microseconds currentTime,
-						 std::chrono::microseconds timeout,
-						 bool* timeoutHappend);
+		bool receiveData(int portNo, std::vector<char>* data, std::chrono::microseconds currentTime, bool* timeoutHappened);
 
 		QString typeStr() const;
 		Hardware::Connection::Type type() const;
@@ -129,7 +130,7 @@ namespace Sim
 		std::optional<Sim::ConnectionPort> m_port2;
 
 		std::atomic<bool> m_enable = true;
-		std::atomic<bool> m_timeout = false;
+		std::atomic<bool> m_timeouts[2] = {false, false};
 
 		// Data sent by port 1, protected with a mutex
 		//

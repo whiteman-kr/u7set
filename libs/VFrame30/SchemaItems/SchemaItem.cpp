@@ -64,6 +64,13 @@ namespace VFrame30
 																								  true);
 		}
 
+		if (isVduItem() == true && (prop.isEmpty() == true || prop == PropertyNames::isStatic))
+		{
+			addProperty<bool, SchemaItem, &SchemaItem::IsStatic, &SchemaItem::setStatic>(PropertyNames::isStatic,
+																						 PropertyNames::functionalCategory,
+																						 true);
+		}
+
 		bool isSchemaItemControl = qobject_cast<SchemaItemControl*>(this) != nullptr; // Some properties are hidden for SchemaItemControl
 
 		if (prop.isEmpty() == true || prop == PropertyNames::acceptClick)
@@ -769,6 +776,11 @@ namespace VFrame30
 	bool SchemaItem::IsStatic() const noexcept
 	{
 		return m_static;
+	}
+
+	void SchemaItem::setStatic(bool value) 
+	{
+		m_static = value;
 	}
 
 	bool SchemaItem::IsDynamic() const noexcept

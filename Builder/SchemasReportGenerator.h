@@ -155,7 +155,7 @@ namespace Builder
 		{
 			QString caption;
 			QPageLayout layout;
-			bool noMargins;
+			bool noMargins{};
 		};
 
 		std::vector<LayoutInfo> m_pageLayouts;

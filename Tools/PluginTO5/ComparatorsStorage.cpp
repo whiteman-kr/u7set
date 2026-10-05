@@ -11,7 +11,7 @@
 
 ComparatorsStorage::ComparatorsStorage()
 {
-	m_csvHeaders << "Version" << "CaseID" << "SchemaID"
+	m_csvHeaders << "Version" << "Algorithm" << "CaseID" << "SchemaID"
 				 << "InputAppSignalID" << "InputCustomAppSignalID" << "InputAppSignalCaption"
 				 << "OutputAppSignalID" << "OutputCustomAppSignalID" << "OutputAppSignalCaption"
 				 << "DefaultCriteria" << "Criteria" << "Type"
@@ -81,6 +81,7 @@ bool ComparatorsStorage::loadFromFile(const QString& fileName, QString* errorMsg
 		}
 
 		ComparatorData data;
+		data.algorithm = fields[c++];
 		data.caseID = fields[c++];
 		data.schemaID = fields[c++];
 		data.inputAppSignalID = fields[c++];
@@ -117,7 +118,7 @@ bool ComparatorsStorage::loadFromFile(const QString& fileName, QString* errorMsg
 static QStringList getComparatorDataAsStringList(const ComparatorData& data)
 {
 	QStringList fields;
-	fields << "1" << data.caseID << data.schemaID
+	fields << "1" << data.algorithm <<data.caseID << data.schemaID
 		<< data.inputAppSignalID << data.inputCustomAppSignalID << data.inputSignalCaption
 		<< data.outputAppSignalID << data.outputCustomAppSignalID << data.outputSignalCaption
 		<< QString::number(data.defaultValue) << QString::number(data.currentValue) << data.type
@@ -126,6 +127,11 @@ static QStringList getComparatorDataAsStringList(const ComparatorData& data)
 }
 
 bool ComparatorsStorage::saveToFile(const QString& fileName)
+{ 
+	return saveToFile(fileName, m_comparatorData);
+}
+
+bool ComparatorsStorage::saveToFile(const QString& fileName, const std::vector<Hash>& comparators) 
 {
 	QFile file(fileName);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
@@ -137,15 +143,15 @@ bool ComparatorsStorage::saveToFile(const QString& fileName)
 
 	CsvFile toCsv;
 	out << toCsv.stringsToCSV(m_csvHeaders, false);
-	
-	for (const Hash hash : m_comparatorData)
+
+	for (const Hash hash : comparators)
 	{
 		const auto& cmp = m_comparatorDataMap.at(hash);
 
 		out << "\n" << toCsv.stringsToCSV(getComparatorDataAsStringList(cmp), false);
 	}
 	file.close();
-	
+
 	return true;
 }
 
@@ -386,6 +392,18 @@ std::vector<Hash> ComparatorsStorage::filteredComparatorsHashes(QList<QString> i
 			}
 		}
 	}
+	else if (filterType == FilterType::ByAlgorithm)
+	{
+		for (const Hash hash : m_comparatorData)
+		{
+			const auto& data = m_comparatorDataMap.at(hash);
+
+			if (id.isEmpty() == true || id.contains(data.algorithm))
+			{
+				comparatorDataByCaseID.push_back(hash);
+			}
+		}
+	}
 
 	return comparatorDataByCaseID;
 }
@@ -441,6 +459,20 @@ QList<QString> ComparatorsStorage::caseIds() const
 	return caseIDsSet;
 }
 
+QList<QString> ComparatorsStorage::algorithms() const
+{
+	QList<QString> algorithmsSet;
+	for (const Hash hash : m_comparatorData)
+	{
+		const auto& data = m_comparatorDataMap.at(hash);
+		if (algorithmsSet.contains(data.algorithm) == false)
+		{
+			algorithmsSet.append(data.algorithm);
+		}
+	}
+	return algorithmsSet;
+}
+
 void ComparatorsStorage::setComparatorCriteria(Hash hash, double criteria)
 {
 	auto it = m_comparatorDataMap.find(hash);
@@ -450,6 +482,28 @@ void ComparatorsStorage::setComparatorCriteria(Hash hash, double criteria)
 		return;
 	}
 	it->second.currentValue = criteria;
+}
+
+void ComparatorsStorage::setComparatorAlgorithm(Hash hash, const QString& algorithm)
+{
+	auto it = m_comparatorDataMap.find(hash);
+	if (it == m_comparatorDataMap.end())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+	it->second.algorithm = algorithm;
+}
+
+void ComparatorsStorage::swapComparatorPlace(int index1, int index2)
+{
+	if ((index1 < 0) || (index2 < 0) || 
+		(index1 >= static_cast<int>(m_comparatorData.size())) || (index2 >= static_cast<int>(m_comparatorData.size())))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+	std::swap(m_comparatorData[index1], m_comparatorData[index2]);
 }
 
 bool ComparatorsStorage::loadComparators(const QString& comparatorsFile, ComparatorSet& comparatorSet) const

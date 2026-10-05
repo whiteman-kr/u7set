@@ -1,12 +1,12 @@
 #ifndef TRENDSIGNAL_H
 #define TRENDSIGNAL_H
 
-#include <set>
 #include <map>
+#include <set>
 
 #include "TrendArchiveServer.h"
 
-using TrendColor = quint32;		// This is QRgb, the problem is this header is used buy other libs without GUI (simulator)
+using TrendColor = quint32; // This is QRgb, the problem is this header is used by other libs without GUI (simulator)
 
 namespace Proto
 {
@@ -27,8 +27,7 @@ namespace TrendLib
 	{
 	public:
 		TrendSignalParam();
-		TrendSignalParam(const AppSignalParam& appSignal,
-						 const TrendLib::ArchiveServer& archiveServer);
+		TrendSignalParam(const AppSignalParam& appSignal, const TrendLib::ArchiveServer& archiveServer);
 
 	public:
 		bool save(Proto::TrendSignalParam* message) const;
@@ -42,7 +41,7 @@ namespace TrendLib
 		// Properties
 		//
 	public:
-		[[nodiscard]] TrendSignalPlusServerId signalPlusServerId() const;	// This id is composed form AppSignalID and archiveServerId
+		[[nodiscard]] TrendSignalPlusServerId signalPlusServerId() const; // This id is composed from AppSignalID and archiveServerId
 
 		[[nodiscard]] const QString& signalId() const;
 		void setSignalId(const QString& value);
@@ -118,12 +117,12 @@ namespace TrendLib
 		// Data
 		//
 	private:
-		QString m_signalId;				// CustomSignalID
-		QString m_appSignalId;			// AppSignalID, starts from # for app data
+		QString m_signalId;            // CustomSignalID
+		QString m_appSignalId;         // AppSignalID, starts from # for app data
 		QString m_caption;
 		QString m_equipmentId;
 
-		ArchiveServer m_archiveServer;	// This field is set if data was aquired from the archive
+		ArchiveServer m_archiveServer; // This field is set if data was acquired from the archive
 
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
@@ -133,23 +132,24 @@ namespace TrendLib
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 		int m_precision = 0;
 
-		double m_lineWeight = 0;		// 0 is cosmetic pen
+		double m_lineWeight = 0;                                   // 0 is cosmetic pen
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
 		std::map<E::TrendScaleType, TrendViewLimits> m_viewLimits; // Current view limits for signals for different scales
 
-		TrendColor m_color = 0xFF000000;	// Black color
+		TrendColor m_color = 0xFF000000;                           // Black color
 
-		// Temporary variables used in drawing
+																   // Temporary variables used in drawing
 		//
 	private:
-		int m_tempSignalIndex = -1;	// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
-		QRectF m_tempDrawRect;		// Draw signal area
+		int m_tempSignalIndex = -1; // Signal index, separate for discretes and analogs, filled in getting signal list in
+									// TrendSignalSet::analogSignals/discreteSignals
+		QRectF m_tempDrawRect;      // Draw signal area
 	};
 
-}
+} // namespace TrendLib
 
 Q_DECLARE_METATYPE(TrendLib::TrendSignalParam)
 

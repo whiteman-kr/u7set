@@ -68,6 +68,9 @@ public:
 	[[nodiscard]] bool isNull() const;
 	[[nodiscard]] bool isSet() const;
 
+	[[nodiscard]] bool isValidIPv4TcpClientAddress() const;
+	[[nodiscard]] bool isValidIPv4Address() const;
+
 	static bool isValidIPv4(const QString& ipAddressStr);
 	static bool isValidPort(const QString& portStr);
 
@@ -258,9 +261,9 @@ inline bool HostAddressPort::setAddressPortStr(const QString& addressPortStr, qu
 
 inline quint32 HostAddressPort::address32() const
 {
-	if (m_hostAddress.protocol() != QHostAddress::IPv4Protocol)
+	if (isValidIPv4Address() == false)
 	{
-		Q_ASSERT(m_hostAddress.protocol() == QHostAddress::IPv4Protocol);
+		Q_ASSERT(isValidIPv4Address());
 		return 0;
 	}
 
@@ -372,6 +375,22 @@ inline bool HostAddressPort::isNull() const
 inline bool HostAddressPort::isSet() const
 {
 	return isNull() == false;
+}
+
+inline bool HostAddressPort::isValidIPv4TcpClientAddress() const
+{
+	// all IPv4 addresses except: QHostAddress::AnyIPv4 (0.0.0.0), isBroadcast(), isMulticast()  - are valid for TCP client
+	//
+	return (m_hostAddress.isNull() == false && 
+			m_hostAddress.protocol() == QAbstractSocket::IPv4Protocol && 
+			m_hostAddress != QHostAddress::AnyIPv4 &&
+			m_hostAddress.isBroadcast() == false &&
+			m_hostAddress.isMulticast() == false);
+}
+
+inline bool HostAddressPort::isValidIPv4Address() const
+{ 
+	return (m_hostAddress.isNull() == false && m_hostAddress.protocol() == QAbstractSocket::IPv4Protocol); 
 }
 
 inline bool HostAddressPort::isValidIPv4(const QString& ipAddressStr)

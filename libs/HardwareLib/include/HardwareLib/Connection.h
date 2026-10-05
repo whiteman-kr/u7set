@@ -73,7 +73,12 @@ namespace Hardware
 		quint16 getID() const;
 		quint16 linkID() const { return getID(); }
 
-		//
+		int port1ModulePortNo() const;
+		void setPort1ModulePortNo(int value);
+
+		int port2ModulePortNo() const;
+		void setPort2ModulePortNo(int value);
+
 		//
 		//
 		int port1ManualTxStartAddress() const;
@@ -172,41 +177,33 @@ namespace Hardware
 		QUuid m_uuid;
 		QString m_connectionID;
 
-		int m_port1TxStartAddress = 0;
-		QString m_port1EquipmentID;
-		int m_port1ManualTxWordsQuantity = 479;
-		int m_port1ManualRxWordsQuantity = 479;
-		int m_port1TxRxOptoID = 0;
-		quint32 m_port1TxRxOptoDataUID = 0;
-		int m_port1TxRsID = 0;
-		quint32 m_port1TxRsDataUID = 0;
-		QString m_port1RawDataDescription;
-
-		int m_port2TxStartAddress = 0;
-		QString m_port2EquipmentID;
-		int m_port2ManualTxWordsQuantity = 479;
-		int m_port2ManualRxWordsQuantity = 479;
-		int m_port2TxRxOptoID = 0;
-		quint32 m_port2TxRxOptoDataUID = 0;
-		int m_port2TxRsID = 0;
-		quint32 m_port2TxRsDataUID = 0;
-		QString m_port2RawDataDescription;
-
-		bool m_port1EnableSerial = false;
-		bool m_port2EnableSerial = false;
-
-		SerialMode m_port1SerialMode = SerialMode::RS232;
-		SerialMode m_port2SerialMode = SerialMode::RS232;
-
-		bool m_port1EnableDuplex = false;
-		bool m_port2EnableDuplex = false;
-
 		Type m_type = Type::PortToPort;
 
 		bool m_manualSettings = false;
 
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
+
+		struct PortData
+		{
+			int modulePortNo = 0; // Set only during the build process.
+			int txStartAddress = 0;
+			QString equipmentID;
+			int manualTxWordsQuantity = 479;
+			int manualRxWordsQuantity = 479;
+			int txRxOptoID = 0;
+			quint32 txRxOptoDataUID = 0;
+			int txRsID = 0;
+			quint32 txRsDataUID = 0;
+			QString rawDataDescription;
+
+			bool enableSerial = false;
+			SerialMode serialMode = SerialMode::RS232;
+			bool enableDuplex = false;
+		};
+
+		PortData m_port1;
+		PortData m_port2;
     };
 }
 

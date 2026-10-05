@@ -129,7 +129,8 @@ message SnapshotConnectionImpl
     optional string id = 2;
 
     optional bool enable = 4;
-    optional bool timeout = 5;
+    optional bool timeout0 = 5;
+    optional bool timeout1 = 6;
 
     optional string port1EquipmentId = 7;
     optional string port2EquipmentId = 8;

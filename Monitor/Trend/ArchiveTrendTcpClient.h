@@ -70,6 +70,14 @@ public:
 	void incStatRequestCount();
 	void incStatReplyCount();
 
+	void requestStop();
+
+private:
+	// When requesting a very large trend, such as 1 year, many requests can be
+	// enqueued in Qt's event loop. This flag allows us to ignore them and significantly
+	// reduce this class's shutdown time for large trends (from 30 seconds to 80 ms in Debug builds).
+	//
+	std::atomic_bool m_stopRequested{false};
 
 private:
 	int m_periodicTimerId = 0;

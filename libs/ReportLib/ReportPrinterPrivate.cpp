@@ -493,10 +493,10 @@ namespace ReportLib
 		// Render all objects to print objects
 		//
 
-		bool firstSection = true;
-
-		for (const std::shared_ptr<ReportSection>& section : report.sections())
+		size_t sectionCount = report.sectionsCount();
+		for (size_t si = 0; si < sectionCount; si++)
 		{
+			std::shared_ptr<ReportSection> section = report.section(si);
 			renderedSections.push_back(RenderedSection{section});
 
 			std::vector<std::shared_ptr<PrintObject>>& printObjects = renderedSections.back().printObjects();
@@ -508,24 +508,68 @@ namespace ReportLib
 				return true;
 			}
 
-			size_t count = section->objectCount();
-
 			std::shared_ptr<PrintText> printText;
-			std::shared_ptr<PrintSchema> ps;
 
 			ReportObject::Type lastObjectType = ReportObject::Type::Undefined;
 
 			int lastDocumentTextPageHeight = 0; // Height of the text on the last page of QTextDocument
 
-			bool firstObject = true;
-
-			for (size_t i = 0; i < count; i++)
+			size_t objectCount = section->objectCount();
+			for (size_t oi = 0; oi < objectCount; oi++)
 			{
-				std::shared_ptr<ReportObject> object = section->object(i);
+				std::shared_ptr<ReportObject> object = section->object(oi);
+
+				// Start new page if this is first object on a just created section, or after a schema
+				//
+				bool fromNewPage = lastObjectType == ReportObject::Type::Schema || (oi == 0 && si != 0);
 
 				switch (object->type())
 				{
 				case ReportObject::Type::Text:
+					{
+						bool isTableHeader = false;
+						bool fromNewPageIfAtBottom = false;
+
+						{
+							if (oi < objectCount - 1)
+							{
+								std::shared_ptr<ReportObject> nextObject = section->object(oi + 1);
+								isTableHeader = (nextObject->type() == ReportObject::Type::Table);
+							}
+						}
+
+						if (object->hint().contains("fromNewPageIfAtBottom")) 
+						{
+							fromNewPageIfAtBottom = true;
+						}
+
+						if (isTableHeader == true || fromNewPageIfAtBottom == true)
+						{
+							if (lastDocumentTextPageHeight >= (pageRectPixels.height() * 0.9))
+							{
+								lastDocumentTextPageHeight = 0;
+								printText.reset();
+								fromNewPage = true;
+							}
+						}
+
+						// Create new text print object in cases:
+						// 1. This is first text object
+						// 2. New page has been started
+						// 3. Schema has been drawn
+						//
+						if (printText == nullptr || lastObjectType == ReportObject::Type::Schema)
+						{
+							printText =
+								std::make_shared<PrintText>(pageRectPixels.size(), lastDocumentTextPageHeight, fromNewPage, section->tag());
+							printObjects.push_back(printText);
+						}
+
+						object->renderText(printText->textCursor(), fontScaling, tagStorage, m_statisticsMutex, m_statistics, stop);
+
+						lastDocumentTextPageHeight = printText->contentRect().height() % pageRectPixels.height();
+						break;
+					}
 				case ReportObject::Type::Table:
 					{
 						// Create new text print object in cases:
@@ -535,13 +579,14 @@ namespace ReportLib
 						//
 						if (printText == nullptr || lastObjectType == ReportObject::Type::Schema)
 						{
-							printText = std::make_shared<PrintText>(pageRectPixels.size(),
-																	lastDocumentTextPageHeight,
-																	lastObjectType == ReportObject::Type::Schema ||
-																		(firstObject == true && firstSection == false),
-																	section->tag());
+							printText =
+								std::make_shared<PrintText>(pageRectPixels.size(), lastDocumentTextPageHeight, fromNewPage, section->tag());
 							printObjects.push_back(printText);
 						}
+
+						object->renderText(printText->textCursor(), fontScaling, tagStorage, m_statisticsMutex, m_statistics, stop);
+
+						lastDocumentTextPageHeight = printText->contentRect().height() % pageRectPixels.height();
 						break;
 					}
 				case ReportObject::Type::Schema:
@@ -561,15 +606,15 @@ namespace ReportLib
 							return false;
 						}
 
-						ps = std::make_shared<PrintSchema>(m_schemaView,
+						std::shared_ptr<PrintSchema> ps = std::make_shared<PrintSchema>(m_schemaView,
 														   rs->schema(),
 														   rs->compareActions(),
 														   lastDocumentTextPageHeight,
-														   lastObjectType == ReportObject::Type::Schema ||
-															   (firstObject == true && firstSection == false),
+														   fromNewPage,
 														   section->tag());
 						printObjects.push_back(ps);
 
+						lastDocumentTextPageHeight = 0;
 
 						break;
 					}
@@ -577,43 +622,15 @@ namespace ReportLib
 					Q_ASSERT(false);
 				}
 
-				// Render text to print object
-				//
-				if (object->type() == ReportObject::Type::Text || object->type() == ReportObject::Type::Table)
-				{
-					if (printText == nullptr)
-					{
-						Q_ASSERT(printText);
-						return false;
-					}
-
-					object->renderText(printText->textCursor(), fontScaling, tagStorage, m_statisticsMutex, m_statistics, stop);
-
-					lastDocumentTextPageHeight = printText->contentRect().height() % pageRectPixels.height();
-				}
-				else
-				{
-					lastDocumentTextPageHeight = 0;
-				}
-
 				lastObjectType = object->type();
 
-				if (firstObject == true)
-				{
-					firstObject = false;
-				}
-			}
-
-			if (firstSection == true)
-			{
-				firstSection = false;
-			}
+			} // Loop by objects
 
 			{
 				QMutexLocker l(&m_statisticsMutex);
 				m_statistics.sectionIndex++;
 			}
-		}
+		} // Loop by sections
 		return true;
 	}
 

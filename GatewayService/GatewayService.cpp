@@ -243,6 +243,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 {
 	Q_UNUSED(configurationXmlData);
+	Q_UNUSED(buildFileInfoArray);
 
 	setSessionParams(sessionParams);
 

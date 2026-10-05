@@ -4,6 +4,15 @@ Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 
 namespace Sim
 {
+	ConsoleLogFile::ConsoleLogFile()
+	{
+		qCDebug(u7sim).noquote() << "ConsoleLogFile started.";
+	}
+
+	ConsoleLogFile::~ConsoleLogFile()
+	{
+		qCDebug(u7sim).noquote() << "ConsoleLogFile finished.";
+	}
 
 	bool ConsoleLogFile::writeAlert(const QString& text, const QString& /*tag = {}*/)
 	{

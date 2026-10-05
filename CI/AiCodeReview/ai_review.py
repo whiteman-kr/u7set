@@ -1,0 +1,525 @@
+"""Post an AI review of the current GitLab CI commit.
+
+The script reads CI metadata and the commit diff, includes bounded complete-file context
+for changed C/C++ source and related headers, and asks Ollama for a JSON review. It
+validates every reported issue against the committed files and changed lines, posts an
+overall GitLab comment plus inline critical-issue comments, and exits nonzero when
+critical issues exist. Ollama transport and server failures are retried with diagnostics.
+
+Update this comment whenever a change alters this script's behavior, inputs, output,
+validation, or failure handling.
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import PurePosixPath
+from typing import Optional
+
+import requests
+
+ZERO_SHA = "0" * 40
+HUNK_HEADER = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+GITLAB_TOKEN = os.environ.get("GITLAB_API_TOKEN")
+CI_PROJECT_ID = os.environ.get("CI_PROJECT_ID")
+CI_COMMIT_SHA = os.environ.get("CI_COMMIT_SHA")
+CI_BEFORE_SHA = os.environ.get("CI_COMMIT_BEFORE_SHA")
+CI_API_V4_URL = os.environ.get("CI_API_V4_URL")
+GITLAB_REVIEW_MENTION = os.environ.get("GITLAB_REVIEW_MENTION", "").strip()
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
+OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "1200"))
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:14b")
+OLLAMA_REQUEST_ATTEMPTS = max(1, int(os.environ.get("OLLAMA_REQUEST_ATTEMPTS", "3")))
+OLLAMA_RETRY_DELAY_SECONDS = max(0.0, float(os.environ.get("OLLAMA_RETRY_DELAY_SECONDS", "5")))
+REVIEWABLE_SOURCE_EXTENSIONS = {".c", ".cpp", ".h", ".hpp"}
+IMPLEMENTATION_EXTENSIONS = {".c", ".cpp"}
+MAX_CONTEXT_FILE_BYTES = int(os.environ.get("AI_REVIEW_MAX_FILE_BYTES", "40000"))
+MAX_CONTEXT_BYTES = int(os.environ.get("AI_REVIEW_MAX_CONTEXT_BYTES", "120000"))
+GENERATED_DIRECTORY_NAMES = {"build", "generated", "autogen", "cmakefiles"}
+GENERATED_FILE_PREFIXES = ("moc_", "ui_", "qrc_")
+GENERATED_FILE_SUFFIXES = (".generated.c", ".generated.cpp", ".generated.h", ".generated.hpp", ".pb.c", ".pb.cpp", ".pb.h", ".pb.hpp")
+REVIEW_RESPONSE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["summary_markdown", "critical_issues"],
+    "properties": {
+        "summary_markdown": {"type": "string"},
+        "critical_issues": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["path", "line", "message"],
+                "properties": {
+                    "path": {"type": "string"},
+                    "line": {"type": "integer", "minimum": 1},
+                    "message": {"type": "string"},
+                },
+            },
+        },
+    },
+}
+
+
+@dataclass(frozen=True)
+class CriticalIssue:
+    path: str
+    line: int
+    message: str
+
+
+def progress(message: str) -> None:
+    print(f"[AI review {time.strftime('%H:%M:%S')}] {message}", flush=True)
+
+
+def get_commit_metadata() -> tuple[str, str, str, str]:
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%H%n%h%n%an%n%s", CI_COMMIT_SHA],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    values = result.stdout.splitlines()
+    if len(values) < 4:
+        raise RuntimeError(f"Unable to read metadata for commit {CI_COMMIT_SHA}")
+    return values[0], values[1], values[2], values[3]
+
+
+def require_environment() -> None:
+    required = {
+        "GITLAB_API_TOKEN": GITLAB_TOKEN,
+        "CI_PROJECT_ID": CI_PROJECT_ID,
+        "CI_COMMIT_SHA": CI_COMMIT_SHA,
+        "CI_API_V4_URL": CI_API_V4_URL,
+    }
+    missing = [name for name, value in required.items() if not value]
+    if missing:
+        raise RuntimeError(f"Missing required environment variable(s): {', '.join(missing)}")
+
+
+def get_git_diff() -> str:
+    if not CI_BEFORE_SHA or CI_BEFORE_SHA == ZERO_SHA:
+        command = ["git", "diff-tree", "--root", "--no-commit-id", "--patch", "HEAD"]
+    else:
+        command = ["git", "diff", f"{CI_BEFORE_SHA}...{CI_COMMIT_SHA}"]
+
+    result = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return result.stdout
+
+
+def get_changed_paths() -> list[str]:
+    if not CI_BEFORE_SHA or CI_BEFORE_SHA == ZERO_SHA:
+        command = ["git", "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "HEAD"]
+    else:
+        command = ["git", "diff", "--name-only", f"{CI_BEFORE_SHA}...{CI_COMMIT_SHA}"]
+
+    result = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return [path for path in result.stdout.splitlines() if path]
+
+
+def get_commit_file(path: str) -> Optional[bytes]:
+    result = subprocess.run(
+        ["git", "show", f"{CI_COMMIT_SHA}:{path}"],
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def is_reviewable_source_path(path: str) -> bool:
+    normalized_path = path.replace("\\", "/")
+    path_parts = PurePosixPath(normalized_path).parts
+    file_name = PurePosixPath(normalized_path).name.lower()
+    suffix = PurePosixPath(normalized_path).suffix.lower()
+
+    if suffix not in REVIEWABLE_SOURCE_EXTENSIONS:
+        return False
+    if any(part.lower() in GENERATED_DIRECTORY_NAMES for part in path_parts):
+        return False
+    if file_name.startswith(GENERATED_FILE_PREFIXES):
+        return False
+    return not file_name.endswith(GENERATED_FILE_SUFFIXES)
+
+
+def get_review_context_paths(changed_paths: list[str]) -> list[str]:
+    repository_paths = subprocess.run(
+        ["git", "ls-tree", "-r", "--name-only", CI_COMMIT_SHA],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout.splitlines()
+    repository_path_set = set(repository_paths)
+    context_paths = {path for path in changed_paths if is_reviewable_source_path(path)}
+
+    for changed_path in changed_paths:
+        if PurePosixPath(changed_path).suffix.lower() not in IMPLEMENTATION_EXTENSIONS:
+            continue
+
+        changed_file = PurePosixPath(changed_path)
+        header_names = {f"{changed_file.stem}.h", f"{changed_file.stem}.hpp"}
+        same_directory = changed_file.parent
+        candidates = [
+            str(same_directory / name) if str(same_directory) != "." else name
+            for name in sorted(header_names)
+        ]
+        candidates.extend(
+            path for path in repository_paths
+            if PurePosixPath(path).name in header_names
+        )
+        context_paths.update(
+            path for path in candidates
+            if path in repository_path_set and is_reviewable_source_path(path)
+        )
+
+    return sorted(context_paths)
+
+
+def build_review_context(diff_text: str, context_paths: list[str]) -> str:
+    sections = ["## COMPLETE GIT DIFF\n\n```diff\n" + diff_text + "\n```"]
+    included_paths: list[str] = []
+    omitted_files: list[str] = []
+    context_bytes = len(diff_text.encode("utf-8", errors="replace"))
+
+    progress(f"Review context candidates: {len(context_paths)} file(s)")
+    for path in context_paths:
+        progress(f"  context candidate: {path}")
+
+    if context_bytes > MAX_CONTEXT_BYTES:
+        print(
+            f"Diff is {context_bytes} bytes, exceeding the total context limit "
+            f"of {MAX_CONTEXT_BYTES} bytes; omitting complete-file context."
+        )
+
+    for path in context_paths:
+        content = get_commit_file(path)
+        if content is None:
+            continue
+        if len(content) > MAX_CONTEXT_FILE_BYTES:
+            omitted_files.append(f"{path} (file limit: {len(content)} bytes)")
+            continue
+        if context_bytes + len(content) > MAX_CONTEXT_BYTES:
+            omitted_files.append(f"{path} (total context limit)")
+            continue
+
+        text = content.decode("utf-8", errors="replace")
+        sections.append(f"## COMPLETE FILE: {path}\n\n```cpp\n{text}\n```")
+        included_paths.append(path)
+        context_bytes += len(content)
+
+    if included_paths:
+        progress(f"Including complete C/C++ file context ({len(included_paths)} file(s)):")
+        for path in included_paths:
+            progress(f"  included: {path}")
+    if omitted_files:
+        progress(f"Omitting C/C++ context files ({len(omitted_files)} file(s)):")
+        for omitted_file in omitted_files:
+            progress(f"  omitted: {omitted_file}")
+
+    progress(f"Review context size: {context_bytes} bytes")
+
+    return "\n\n".join(sections)
+
+
+def get_changed_new_lines(diff_text: str) -> dict[str, set[int]]:
+    changed_lines: dict[str, set[int]] = {}
+    current_path: Optional[str] = None
+    new_line: Optional[int] = None
+
+    for diff_line in diff_text.splitlines():
+        if diff_line.startswith("+++ b/"):
+            current_path = diff_line[6:]
+            changed_lines.setdefault(current_path, set())
+            new_line = None
+            continue
+
+        hunk_match = HUNK_HEADER.match(diff_line)
+        if hunk_match:
+            new_line = int(hunk_match.group(1))
+            continue
+
+        if current_path is None or new_line is None:
+            continue
+
+        if diff_line.startswith("+"):
+            changed_lines[current_path].add(new_line)
+            new_line += 1
+        elif diff_line.startswith(" "):
+            new_line += 1
+
+    return changed_lines
+
+
+def describe_ollama_error(error: requests.RequestException) -> str:
+    response = error.response
+    if response is None:
+        return str(error)
+
+    response_text = response.text.strip()
+    if response_text:
+        return f"HTTP {response.status_code}: {response_text[:2000]}"
+    return f"HTTP {response.status_code}"
+
+
+def get_ai_review(review_context: str) -> str:
+    prompt = (
+        "You are an expert C and C++23, Qt6 code reviewer. Review the supplied Git diff and complete file context for defects, "
+        "undefined behavior, memory/resource leaks, security risks, and clearly obsolete C++ idioms. "
+        "Use the complete files to understand declarations, surrounding functions, and ownership, but report only issues caused by the supplied diff. "
+        "Provide actionable Markdown feedback. The summary_markdown must explain each found issue, not just say that issues exist. "
+        "For every critical issue, state the exact file path, line number, defect, runtime impact, and recommended correction. "
+        "A critical issue can cause a security vulnerability, data loss or corruption, a crash, "
+        "undefined behavior, or a major functional failure. "
+        "Return one JSON object only that conforms to the supplied JSON schema. Do not use Markdown code fences. "
+        "The object has this exact shape: "
+        '{"summary_markdown":"Markdown review",'
+        '"critical_issues":[{"path":"repository/relative/file.cpp","line":123,'
+        '"message":"concise Markdown comment"}]}. '
+        "Each critical issue must cite an added or modified line on the new side of the diff. "
+        "If the faulty code is unchanged context, cite the nearest added or modified line in that file. "
+        "Use an empty critical_issues array when no critical issues are found.\n\n"
+        f"{review_context}"
+    )
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "format": REVIEW_RESPONSE_SCHEMA,
+        "stream": False,
+        "keep_alive": "2m",
+    }
+    for attempt in range(1, OLLAMA_REQUEST_ATTEMPTS + 1):
+        try:
+            response = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=OLLAMA_TIMEOUT)
+            response.raise_for_status()
+            break
+        except requests.RequestException as error:
+            is_retryable = error.response is None or error.response.status_code >= 500
+            if is_retryable and attempt < OLLAMA_REQUEST_ATTEMPTS:
+                progress(
+                    f"Ollama request attempt {attempt}/{OLLAMA_REQUEST_ATTEMPTS} failed: "
+                    f"{describe_ollama_error(error)}. Retrying..."
+                )
+                time.sleep(OLLAMA_RETRY_DELAY_SECONDS * attempt)
+                continue
+            raise RuntimeError(
+                f"Ollama request failed after {attempt} attempt(s): {describe_ollama_error(error)}"
+            ) from error
+
+    try:
+        response_payload = response.json()
+    except ValueError as error:
+        raise ValueError(f"Ollama returned a non-JSON success response: {response.text[:2000]!r}") from error
+
+    if not isinstance(response_payload, dict):
+        raise ValueError("Ollama response must be a JSON object.")
+    review_text = response_payload.get("response")
+    if not isinstance(review_text, str):
+        raise ValueError("Ollama response does not contain a text review.")
+    return review_text
+
+
+def validate_issue_location(issue: CriticalIssue) -> None:
+    path_parts = issue.path.split("/")
+    if issue.path.startswith("/") or "\\" in issue.path or any(part in {"", ".", ".."} for part in path_parts):
+        raise ValueError(f"Critical issue references an invalid path: {issue.path}")
+
+    result = subprocess.run(
+        ["git", "show", f"{CI_COMMIT_SHA}:{issue.path}"],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        raise ValueError(f"Critical issue references a file absent from the commit: {issue.path}")
+
+    line_count = len(result.stdout.splitlines())
+    if issue.line < 1 or issue.line > line_count:
+        raise ValueError(f"Critical issue references an invalid line: {issue.path}:{issue.line}")
+
+
+def attach_to_changed_line(issue: CriticalIssue, changed_lines: dict[str, set[int]]) -> CriticalIssue:
+    file_changed_lines = changed_lines.get(issue.path)
+    if not file_changed_lines:
+        raise ValueError(f"Critical issue references a file without changed lines: {issue.path}")
+
+    attached_line = min(file_changed_lines, key=lambda line: abs(line - issue.line))
+    if attached_line == issue.line:
+        return issue
+
+    message = (
+        f"**AI-reported location:** `{issue.path}:{issue.line}`. "
+        f"Attached to the nearest changed line, `{issue.path}:{attached_line}`.\n\n{issue.message}"
+    )
+    return CriticalIssue(issue.path, attached_line, message)
+
+
+def parse_review(review_text: str, changed_lines: dict[str, set[int]]) -> tuple[str, list[CriticalIssue]]:
+    try:
+        review = json.loads(review_text)
+    except json.JSONDecodeError as error:
+        raise ValueError("Ollama returned invalid JSON.") from error
+
+    if not isinstance(review, dict):
+        raise ValueError(f"Ollama review must be a JSON object, got {type(review).__name__}.")
+
+    summary = review.get("summary_markdown")
+    raw_issues = review.get("critical_issues")
+    if not isinstance(summary, str) or not isinstance(raw_issues, list):
+        raise ValueError(
+            "Ollama review does not match the required JSON structure: "
+            f"summary_markdown={type(summary).__name__}, "
+            f"critical_issues={type(raw_issues).__name__}."
+        )
+
+    issues: list[CriticalIssue] = []
+    for raw_issue in raw_issues:
+        if not isinstance(raw_issue, dict):
+            raise ValueError("Ollama returned an invalid critical issue.")
+
+        path = raw_issue.get("path")
+        line = raw_issue.get("line")
+        message = raw_issue.get("message")
+        if not isinstance(path, str) or isinstance(line, bool) or not isinstance(line, int) or not isinstance(message, str):
+            raise ValueError("Ollama returned an invalid critical issue.")
+
+        issue = CriticalIssue(path, line, message.strip())
+        validate_issue_location(issue)
+        issues.append(attach_to_changed_line(issue, changed_lines))
+
+    return summary.strip(), issues
+
+
+def build_final_report(summary: str, critical_issues: list[CriticalIssue]) -> str:
+    report_lines = ["## AI Code Review", summary.strip()]
+
+    if not critical_issues:
+        report_lines.extend(["", "**Result:** OK - no critical issues found."])
+        return "\n\n".join(report_lines)
+
+    report_lines.extend(["", "## Critical issues"])
+    for issue in critical_issues:
+        report_lines.extend([
+            "",
+            f"### `{issue.path}:{issue.line}`",
+            issue.message,
+        ])
+
+    return "\n".join(report_lines).strip()
+
+
+def get_commit_comments_url() -> str:
+    return f"{CI_API_V4_URL}/projects/{CI_PROJECT_ID}/repository/commits/{CI_COMMIT_SHA}/comments"
+
+
+def post_commit_comment(note: str, issue: Optional[CriticalIssue] = None) -> None:
+    payload = {"note": note}
+    if issue:
+        payload.update({"path": issue.path, "line": issue.line, "line_type": "new"})
+
+    response = requests.post(
+        get_commit_comments_url(),
+        headers={"PRIVATE-TOKEN": GITLAB_TOKEN},
+        data=payload,
+        timeout=60,
+    )
+    response.raise_for_status()
+
+
+def main() -> int:
+    require_environment()
+    started_at = time.perf_counter()
+    progress(f"Starting review for commit {CI_COMMIT_SHA}")
+    commit_sha, short_sha, author, subject = get_commit_metadata()
+    progress(f"Commit: {short_sha} ({commit_sha})")
+    progress(f"Author: {author}")
+    progress(f"Message: {subject}")
+    progress(f"Model: {OLLAMA_MODEL}")
+    progress(f"Ollama endpoint: {OLLAMA_URL}")
+
+    progress("Collecting Git diff...")
+    diff = get_git_diff()
+    if not diff.strip():
+        progress("No changes detected in diff. Skipping AI review.")
+        return 0
+
+    changed_paths = get_changed_paths()
+    progress(f"Changed files ({len(changed_paths)}):")
+    for path in changed_paths:
+        progress(f"  changed: {path}")
+    progress(f"Diff size: {len(diff.encode('utf-8', errors='replace'))} bytes")
+
+    context_paths = get_review_context_paths(changed_paths)
+    review_context = build_review_context(diff, context_paths)
+    progress("Sending diff and C/C++ file context to Ollama...")
+    model_started_at = time.perf_counter()
+    review_text = get_ai_review(review_context)
+    progress(f"Ollama response received in {time.perf_counter() - model_started_at:.1f}s")
+
+    progress("Parsing and validating review locations...")
+    try:
+        summary, critical_issues = parse_review(review_text, get_changed_new_lines(diff))
+    except ValueError:
+        progress("Ollama returned an invalid structured review. Raw response follows:")
+        print("===== Invalid Ollama Response =====", flush=True)
+        print(review_text, flush=True)
+        print("===== End Invalid Ollama Response =====", flush=True)
+        raise
+    final_report = build_final_report(summary, critical_issues)
+    progress(f"Review parsed: {len(critical_issues)} critical issue(s)")
+    print("\n===== AI Code Review (Markdown) =====", flush=True)
+    print(final_report, flush=True)
+    print("===== End AI Code Review =====\n", flush=True)
+
+    progress("Posting overall review comment to GitLab...")
+    post_commit_comment(final_report)
+    progress("Overall review comment posted.")
+    for issue in critical_issues:
+        mention = f"@{GITLAB_REVIEW_MENTION.lstrip('@')} " if GITLAB_REVIEW_MENTION else ""
+        note = (
+            f"{mention}### Critical AI Code Review\n\n"
+            f"**Location:** `{issue.path}:{issue.line}`\n\n"
+            f"{issue.message}"
+        )
+        progress(f"Posting inline comment for {issue.path}:{issue.line}...")
+        post_commit_comment(note, issue)
+        progress(f"Inline comment posted for {issue.path}:{issue.line}")
+
+    if critical_issues:
+        progress(
+            f"Critical issue found. Marking this allowed-to-fail job as a warning "
+            f"({time.perf_counter() - started_at:.1f}s total)."
+        )
+        return 1
+
+    progress(f"AI review complete: OK ({time.perf_counter() - started_at:.1f}s total)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

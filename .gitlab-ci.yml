@@ -12,7 +12,7 @@ variables:
   #
   QT_VERSION: "6.8.1"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v441"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v445"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v447"
   PGPASSWORD: "P2ssw0rd"
 
   CTEST_OUTPUT_ON_FAILURE: "1"
@@ -25,6 +25,7 @@ stages:
   - prepare
   - build
   - test
+  - review
 
 before_script:
   - cd
@@ -44,3 +45,6 @@ include:
   - local: 'CI/.gitlab-job-linux-cc.yml'
   - local: 'CI/.gitlab-job-linux-test.yml'
   - local: 'CI/.gitlab-job-windows-test.yml'
+
+# stage: review
+#  - local: 'CI/.gitlab-job-llm-code-review.yml'

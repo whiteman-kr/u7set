@@ -36,11 +36,15 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
-								  const MonitorConfigController& configController,
-								  const std::vector<AppSignalParam>& appSignals,
-								  const AppSignalLists::AppSignalListSet& appSignalListSet,
-								  QWidget* parent)
+MonitorTrendsWidget* MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
+												  const MonitorConfigController& configController,
+												  const std::vector<AppSignalParam>& appSignals,
+												  const AppSignalLists::AppSignalListSet& appSignalListSet,
+												  std::optional<E::TimeType> timeType,
+												  std::optional<int> laneCount,
+												  std::optional<E::TrendViewMode> viewMode,
+												  std::optional<E::TrendScaleType> scaleType,
+												  QWidget* parent)
 {
 	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, appSignalListSet, parent);
 
@@ -96,11 +100,30 @@ bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManag
 		}
 	}
 
+	if (timeType.has_value() == true)
+	{
+		window->setTimeType(timeType.value());
+	}
+
+	if (laneCount.has_value() == true)
+	{
+		window->setLaneCount(laneCount.value());
+	}
+
+	if (viewMode.has_value() == true)
+	{
+		window->setViewMode(viewMode.value());
+	}
+
+	if (scaleType.has_value() == true)
+	{
+		window->setScaleType(scaleType.value());
+	}
+
 	window->addSignals(trendSignals, true);
 
 	window->show();
-
-	return false;
+	return window;
 }
 
 void MonitorTrends::registerTrendWindow(MonitorTrendsWidget* window)
@@ -230,6 +253,66 @@ MonitorTrendsWidget::~MonitorTrendsWidget()
 
 	m_archiveDataProvider.clear();
 	m_realtimeDataProvider.clear();
+
+	return;
+}
+
+void MonitorTrendsWidget::addSignals(const std::vector<AppSignalParam>& appSignalParams, bool redraw)
+{
+	auto configuration = m_configController.configuration();
+	const auto& archiveServers = configuration.archiveServices;
+	const auto& appDataServers = configuration.appDataRealTimeServices;
+
+	for (const auto& appSignalParam : appSignalParams)
+	{
+		// Find the first suitable archive server
+		//
+		auto stdAppSignalId = appSignalParam.appSignalId().toStdString();
+
+		auto archServerIt = std::find_if(archiveServers.begin(),
+										 archiveServers.end(),
+										 [this, &stdAppSignalId](const SoftwareEndpoint::ArchiveService& as)
+										 {
+											 return m_signalManager.dataServiceHasSignal(as.appDataServiceId.toStdString(), stdAppSignalId);
+										 });
+
+		auto appDataServerIt = std::find_if(appDataServers.begin(),
+											appDataServers.end(),
+											[this, &stdAppSignalId](const SoftwareEndpoint::AppDataService& ads)
+											{
+												return m_signalManager.dataServiceHasSignal(ads.equipmentId.toStdString(), stdAppSignalId);
+											});
+
+		if (archServerIt != archiveServers.end())
+		{
+			const SoftwareEndpoint::ArchiveService& as = *archServerIt;
+			TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
+
+			TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+			addSignal(tsp, false);
+		}
+		else
+		{
+			qDebug() << "MonitorTrendsWidget::addSignals: Archive server for signal " << appSignalParam.appSignalId() << " is not found.";
+
+			// This situation is possible if archive service is not configured, but still realtime trends is possible, add it as is.
+			//
+			if (appDataServerIt != appDataServers.end())
+			{
+				const SoftwareEndpoint::AppDataService& ads = *appDataServerIt;
+
+				TrendLib::ArchiveServer trendArchiveServer{"", "", ads.equipmentId};
+				TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+
+				addSignal(tsp, false);
+			}
+		}
+	}
+
+	if (redraw == true)
+	{
+		updateWidget();
+	}
 
 	return;
 }
@@ -386,68 +469,29 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 		return;
 	}
 
-	auto archiveServers = m_configController.configuration().archiveServices;
-	auto appDataServers = m_configController.configuration().appDataRealTimeServices;
-
 	// Parse data
 	//
+	std::vector<AppSignalParam> appSignalParams;
+	appSignalParams.reserve(protoSetMessage.appsignal_size());
+
 	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 	{
 		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
 		AppSignalParam appSignalParam;
+
 		ok = appSignalParam.load(appSignalMessage);
-
-		if (ok == true)
+		if (ok == false)
 		{
-			// Find the first suitable archive server
-			//
-			auto archServerIt = std::find_if(archiveServers.begin(),
-											 archiveServers.end(),
-											 [&appSignalParam, this](const SoftwareEndpoint::ArchiveService& as)
-											 {
-												 return m_signalManager.dataServiceHasSignal(as.appDataServiceId.toStdString(),
-																							 appSignalParam.appSignalId().toStdString());
-											 });
-
-			auto appDataServerIt = std::find_if(appDataServers.begin(),
-												appDataServers.end(),
-												[&appSignalParam, this](const SoftwareEndpoint::AppDataService& ads)
-												{
-													return m_signalManager.dataServiceHasSignal(ads.equipmentId.toStdString(),
-																								appSignalParam.appSignalId().toStdString());
-												});
-
-			if (archServerIt != archiveServers.end())
-			{
-				const SoftwareEndpoint::ArchiveService& as = *archServerIt;
-				TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
-
-				TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
-				addSignal(tsp, false);
-			}
-			else
-			{
-				qDebug() << "MonitorTrendsWidget::dropEvent: Archive server for signal " << appSignalParam.appSignalId()
-						 << " is not found.";
-
-				// This situation is possible if archive service is not configured, but still realtime trends is possible, add it as is.
-				//
-				if (appDataServerIt != appDataServers.end())
-				{
-					const SoftwareEndpoint::AppDataService& ads = *appDataServerIt;
-
-					TrendLib::ArchiveServer trendArchiveServer{"", "", ads.equipmentId};
-					TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
-
-					addSignal(tsp, false);
-				}
-			}
+			continue;
 		}
+
+		appSignalParams.push_back(std::move(appSignalParam));
 	}
 
-	updateWidget();
-
+	// Add signals to trend
+	//
+	addSignals(appSignalParams, true);
 	return;
 }
 

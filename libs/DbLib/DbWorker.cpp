@@ -474,6 +474,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0444.sql", "Upgrade to version 444, Update for LM-SF41 LmDescription, New AFB mem_v10"},
 	{":/DatabaseUpgrade/Upgrade0445.sql", "Upgrade to version 445, LM-SF41 preset updating"},
 	{":/DatabaseUpgrade/Upgrade0446.sql", "Upgrade to version 446, RVDU preset updating (number of frames and temperature validity)"},
+	{":/DatabaseUpgrade/Upgrade0447.sql", "Upgrade to version 447, Updated LmDescription for LM-SF41, AFB math v105->v106"},
 };
 
 int DbWorker::counter = 0;

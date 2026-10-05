@@ -171,12 +171,12 @@ namespace
 
 		static VduFileString createUtf8(const QString& string, uint32_t stringRefOffset)
 		{
-			return VduFileString{.string = string.trimmed(), .stringRefOffset = stringRefOffset};
+			return VduFileString{.string = string, .stringRefOffset = stringRefOffset};
 		}
 
 		static VduFileString createUtf8(const QString& string, size_t stringRefOffset)
 		{
-			return VduFileString{.string = string.trimmed(), .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
+			return VduFileString{.string = string, .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
 		}
 	};
 
@@ -289,7 +289,7 @@ namespace
 
 			VduSchemaFileSchemaItemRect1 structRect{};
 
-			structRect.version = 1;
+			structRect.version = 2;
 			structRect.itemType = VduFileSchemaItemRectId; // ! Do not forget to set itemType.
 
 			using PosType = decltype(structRect.left);
@@ -334,11 +334,14 @@ namespace
 			structRect.fontIndex = fontIndex;
 			structRect.wordWrap = schemaItem.wordWrap();
 
-			structRect.text = VduFileString::stub;
+			//  Save text in UTF-8, this text is embedded to the structure, as it can be used in the script.
+			//
+			auto text = schemaItem.text().toUtf8();
+			text.truncate(sizeof(structRect.text) - 2);
 
-			auto text = VduFileString::createUtf8(schemaItem.text(),
-												  sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
-			addedStrings.push_back(std::move(text));
+			std::memcpy(structRect.text, text.constData(), text.size());
+			structRect.text[sizeof(structRect.text) - 1] = 0;
+			structRect.text[sizeof(structRect.text) - 2] = 0;
 
 			structRect.align = static_cast<int32_t>(schemaItem.horzAlign()) | static_cast<int32_t>(schemaItem.vertAlign());
 
@@ -692,7 +695,7 @@ namespace
 								 schemaItem.parentSchema()->schemaId(),
 								 schemaItem.label(),
 								 schemaItem.guid(),
-								 durations.size());
+								 static_cast<int>(durations.size()));
 
 				reset();
 				return false;
@@ -994,7 +997,7 @@ namespace
 		VduSchemaFileSchemaItem1 fileSchemaItem{};
 		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
 
-		fileSchemaItem.version = 1;
+		fileSchemaItem.version = 2;
 		fileSchemaItem.size = sizeof(fileSchemaItem);
 		// fileSchemaItem.itemType = filled in the end, when specific item data is saved.
 		// fileSchemaItem.totalItemSize = filled in the end, when specific item data is saved.
@@ -1006,6 +1009,13 @@ namespace
 
 			auto objectName = VduFileString::createUtf8(schemaItem.objectName(), offsetof(VduSchemaFileSchemaItem1, objectName));
 			addedStrings.push_back(std::move(objectName));
+		}
+
+		{
+			fileSchemaItem.label = VduFileString::stub;
+
+			auto label = VduFileString::createUtf8(schemaItem.label(), offsetof(VduSchemaFileSchemaItem1, label));
+			addedStrings.push_back(std::move(label));
 		}
 
 		// onClickScript

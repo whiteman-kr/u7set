@@ -373,6 +373,7 @@ namespace VFrame30
 
 		QSlider* control = new QLimitMouseWheelSlider{enableMouseWheel(), editMode, parent};
 		control->setObjectName(guid().toString());
+		control->setFocusPolicy(Qt::ClickFocus);
 
 		updateWidgetProperties(control, editMode);
 

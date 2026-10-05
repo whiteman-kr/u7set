@@ -150,7 +150,6 @@ void ArchiveTrendTcpClient::resetRequestCycle()
 	{
 		requestStart();
 	}
-	else {}
 
 	return;
 }
@@ -403,6 +402,11 @@ void ArchiveTrendTcpClient::slot_requestData(TrendLib::TrendSignalPlusServerId s
 											 TimeStamp hourToRequest,
 											 E::TimeType timeType)
 {
+	if (m_stopRequested.load() == true)
+	{
+		return;
+	}
+
 	RequestQueue request;
 
 	request.signalPlusServerId = signalPlusServerId;
@@ -482,4 +486,9 @@ void ArchiveTrendTcpClient::incStatReplyCount()
 	m_statMutex.unlock();
 
 	return;
+}
+
+void ArchiveTrendTcpClient::requestStop()
+{
+	m_stopRequested.store(true);
 }

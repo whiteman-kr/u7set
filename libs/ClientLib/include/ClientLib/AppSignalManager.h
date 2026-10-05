@@ -63,6 +63,7 @@ namespace ClientLib
 		void setSetpoints(const ComparatorSet& setpoints);
 
 		// IAppSignalManager implementation - AppSignals
+		// Bring getters by AppSignalId into scope
 		//
 		using ISignalManager::signalExists;
 		using ISignalManager::signalParam;
@@ -80,6 +81,10 @@ namespace ClientLib
 		bool signalsExist(const QStringList& signalIds) const override;
 
 		std::optional<AppSignalParam> signalParam(Hash signalHash) const override;
+
+		// Now this is just a member function, maybe we will make it a virtual one.
+		//
+		std::vector<std::optional<AppSignalParam>> signalParams(std::span<const Hash> appSignalHashes) const;
 
 		std::optional<AppSignalState> signalState(Hash signalHash) const override;
 		std::optional<AppSignalState> signalState(Hash signalHash, Hash dataServerHash) const override;

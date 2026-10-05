@@ -73,7 +73,8 @@ namespace
 									.arg(DateTimeToString::dateTimeSec(from))
 									.arg(DateTimeToString::timeSec(to.time()))
 									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
-								{textFont, Qt::AlignHCenter});
+								{textFont, Qt::AlignHCenter},
+								"" /*hint*/);
 		}
 
 
@@ -83,7 +84,8 @@ namespace
 									.arg(DateTimeToString::dateTimeSec(from))
 									.arg(DateTimeToString::dateTimeSec(to))
 									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
-								{textFont, Qt::AlignHCenter});
+								{textFont, Qt::AlignHCenter},
+								"" /*hint*/);
 		}
 
 		// Services and signals
@@ -96,14 +98,14 @@ namespace
 
 		for (const auto& [service, signalIds] : serviceToSignals)
 		{
-			mainSection.addText(QObject::tr("Archive Service: %1\n").arg(service), {textFont, Qt::AlignLeft});
+			mainSection.addText(QObject::tr("Archive Service: %1\n").arg(service), {textFont, Qt::AlignLeft}, "" /*hint*/);
 
 			QStringList signalList;
 			signalList.reserve(signalIds.size());
 			std::copy(signalIds.begin(), signalIds.end(), std::back_inserter(signalList));
 			std::sort(signalList.begin(), signalList.end());
 
-			mainSection.addText(QObject::tr("Signal(s): %1\n\n").arg(signalList.join(", ")), {textFont, Qt::AlignLeft});
+			mainSection.addText(QObject::tr("Signal(s): %1\n\n").arg(signalList.join(", ")), {textFont, Qt::AlignLeft}, "" /*hint*/);
 		}
 
 		return;

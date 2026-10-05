@@ -11,6 +11,7 @@ namespace Sim
 	{
 		Undefined = 0,
 		Configuration = 258,
+		VduConfiguration = 9218, // 0x2402
 		ApplicationLogic = 257,
 		Tuning = 260
 	};
