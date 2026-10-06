@@ -30,12 +30,7 @@ namespace VFrame30
 	{
 		removeAllProperties();
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::signalId,
-								 PropertyNames::commonCategory,
-								 true,
-								 ActuatorSignal::signalId,
-								 ActuatorSignal::setSignalId)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::signalId, PropertyNames::commonCategory, true, ActuatorSignal::signalId, ActuatorSignal::setSignalId)
 			->setDescription(tr("SignalID for the actuator type. Only alphanumeric characters and underscores are allowed."))
 			.setValidator("[A-Za-z0-9_]+")
 			.setEssential(true)
@@ -51,29 +46,13 @@ namespace VFrame30
 			.setCategory(PropertyNames::commonCategory)
 			.setViewOrder(3);
 
-		ADD_PROPERTY_GET_SET_CAT(E::SignalType,
-								 PropertyNames::signalType,
-								 PropertyNames::commonCategory,
-								 true,
-								 ActuatorSignal::signalType,
-								 ActuatorSignal::setSignalType)
-			->setViewOrder(4);
+		ADD_PROPERTY_GET_SET_CAT(E::SignalType, PropertyNames::signalType, PropertyNames::commonCategory, true, ActuatorSignal::signalType, ActuatorSignal::setSignalType)->setViewOrder(4);
 
-		ADD_PROPERTY_GET_SET_CAT(E::AnalogAppSignalFormat,
-								 PropertyNames::analogFormat,
-								 PropertyNames::commonCategory,
-								 true,
-								 ActuatorSignal::analogFormat,
-								 ActuatorSignal::setAnalogFormat)
+		ADD_PROPERTY_GET_SET_CAT(E::AnalogAppSignalFormat, PropertyNames::analogFormat, PropertyNames::commonCategory, true, ActuatorSignal::analogFormat, ActuatorSignal::setAnalogFormat)
 			->setDescription(tr("Analog signal format for the actuator type if applicable."))
 			.setViewOrder(5);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::busTypeId,
-								 PropertyNames::commonCategory,
-								 true,
-								 ActuatorSignal::busTypeId,
-								 ActuatorSignal::setBusTypeId)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::busTypeId, PropertyNames::commonCategory, true, ActuatorSignal::busTypeId, ActuatorSignal::setBusTypeId)
 			->setDescription(tr("BusTypeID for the actuator type if applicable."))
 			.setViewOrder(6);
 
@@ -152,78 +131,38 @@ namespace VFrame30
 	ActuatorHeader::ActuatorHeader(QObject* parent) :
 		PropertyObject(parent)
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::ActuatorTypeId,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::actuatorTypeId,
-								 ActuatorHeader::setActuatorTypeId)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::ActuatorTypeId, PropertyNames::actuatorCategory, true, ActuatorHeader::actuatorTypeId, ActuatorHeader::setActuatorTypeId)
 			->setDescription(tr("Unique identifier for the actuator type. Only alphanumeric characters and underscores are allowed."))
 			.setValidator("[A-Za-z0-9_]+")
 			.setViewOrder(1);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::caption,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::caption,
-								 ActuatorHeader::setCaption)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::caption, PropertyNames::actuatorCategory, true, ActuatorHeader::caption, ActuatorHeader::setCaption)
 			->setDescription(tr("Caption for the actuator type."))
 			.setViewOrder(2);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::description,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::description,
-								 ActuatorHeader::setDescription)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::description, PropertyNames::actuatorCategory, true, ActuatorHeader::description, ActuatorHeader::setDescription)
 			->setDescription(tr("Description for the actuator type."))
 			.setViewOrder(3);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::acmPreset,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::acmPresetName,
-								 ActuatorHeader::setAcmPresetName)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::acmPreset, PropertyNames::actuatorCategory, true, ActuatorHeader::acmPresetName, ActuatorHeader::setAcmPresetName)
 			->setDescription(tr("ACM preset name for the actuator type."))
 			.setViewOrder(4);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::descriptionFile,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::descriptionFile,
-								 ActuatorHeader::setDescriptionFile)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::descriptionFile, PropertyNames::actuatorCategory, true, ActuatorHeader::descriptionFile, ActuatorHeader::setDescriptionFile)
 			->setDescription(tr("Description file for the actuator type."))
 			.setViewOrder(5);
 
 		// Subsystem
 		//
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::subsystemId,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::subsystemId,
-								 ActuatorHeader::setSubsystemId)
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::subsystemId, PropertyNames::actuatorCategory, true, ActuatorHeader::subsystemId, ActuatorHeader::setSubsystemId)
 			->setDescription(tr("SubsystemID for the actuator type."))
 			.setViewOrder(6);
 
-		ADD_PROPERTY_GET_SET_CAT(int,
-								 PropertyNames::lmNumber,
-								 PropertyNames::actuatorCategory,
-								 true,
-								 ActuatorHeader::lmNumber,
-								 ActuatorHeader::setLmNumber)
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::lmNumber, PropertyNames::actuatorCategory, true, ActuatorHeader::lmNumber, ActuatorHeader::setLmNumber)
 			->setDescription(tr("LM number in subsystem for the actuator type."))
 			.setViewOrder(7);
 
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::excludeFromBuild,
-								 PropertyNames::commonCategory,
-								 true,
-								 ActuatorHeader::excludeFromBuild,
-								 ActuatorHeader::setExcludeFromBuild)
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::excludeFromBuild, PropertyNames::commonCategory, true, ActuatorHeader::excludeFromBuild, ActuatorHeader::setExcludeFromBuild)
 			->setDescription(tr("Exclude the actuator type from the build process."))
 			.setViewOrder(8);
 
@@ -454,12 +393,17 @@ namespace VFrame30
 
 	void ActuatorHeader::setLmNumber(int lmNumber)
 	{
-		int clampedLmNumber = std::clamp(lmNumber, 0, maxLmNumber());
+		int clampedLmNumber = std::clamp(lmNumber, minLmNumber(), maxLmNumber());
 		if (m_lmNumber != clampedLmNumber)
 		{
 			m_lmNumber = clampedLmNumber;
 			m_modified = true;
 		}
+	}
+
+	int ActuatorHeader::minLmNumber()
+	{
+		return Hardware::Subsystem::MinChannelValue;
 	}
 
 	int ActuatorHeader::maxLmNumber()
