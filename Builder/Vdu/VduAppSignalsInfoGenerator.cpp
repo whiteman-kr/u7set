@@ -720,6 +720,18 @@ namespace Builder
 		data.append(reinterpret_cast<const char*>(m_strings.data()),
 					m_strings.size());
 
+		// Align to 4 bytes after each string.
+		//
+		auto addPadding = [](auto& container, size_t padding)
+		{
+			while ((container.size() % padding) != 0)
+			{
+				container.push_back(char{0});
+			}
+		};
+
+		addPadding(data, 4);
+		
 		//
 
 		m_crc64Offset = data.size();

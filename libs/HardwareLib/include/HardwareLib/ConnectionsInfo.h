@@ -21,7 +21,8 @@ public:
 class ConnectionPortInfo
 {
 public:
-	int portNo = -1;
+	int portNo = -1;       // 1 or 2
+	int modulePortNo = -1; // 1-2/3/4 for LM, 1-8 for VDU
 	QString equipmentID;
 	QString moduleID;
 	QString lmID;
@@ -104,6 +105,7 @@ protected:
 	static const QString ATTR_DISABLE_DATA_ID_CONTROL;
 	static const QString ATTR_PORTS_COUNT;
 	static const QString ATTR_EQUIPMENT_ID;
+	static const QString ATTR_MODULE_PORT_NO;
 	static const QString ATTR_MODULE_ID;
 	static const QString ATTR_LM_ID;
 	static const QString ATTR_RX_WORDS_QUANTITY;

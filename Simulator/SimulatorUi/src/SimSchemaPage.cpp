@@ -1,7 +1,7 @@
 #include "SimSchemaPage.h"
 #include "SimSchemaView.h"
-#include <SimulatorUi/SimIdeSimulator.h>
 #include <SimulatorLib/SimControl.h>
+#include <SimulatorUi/SimIdeSimulator.h>
 
 #include <QGridLayout>
 
@@ -34,6 +34,7 @@ namespace SimUi
 		// --
 		//
 		connect(&simulator->control(), &Sim::Control::stateChanged, this, &SimSchemaPage::controlStateChanged);
+		connect(m_schemaWidget, &SimSchemaWidget::signal_newTrend, this, &SimSchemaPage::signal_newTrend);
 
 		SimSchemaPage::controlStateChanged(simulator->control().state()); // Slots catches only changes of state, so init the first time
 

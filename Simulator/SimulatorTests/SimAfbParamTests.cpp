@@ -1,30 +1,22 @@
-#include <memory>
-#include <limits>
-#include <cmath>
-#include <numbers>
 #include <QTest>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <numbers>
 
-#include "SimAfbParamTests.h"
-#include "../SimulatorLib/src/SimAfb.h"
+#include "../SimulatorLib/src/Modules/SimAfb.h"
 #include "../SimulatorLib/src/SimException.h"
+#include "SimAfbParamTests.h"
 
 #include <HardwareLib/LmDescription.h>
 
-void SimAfbParamTests::initTestCase()
-{
-}
+void SimAfbParamTests::initTestCase() {}
 
-void SimAfbParamTests::cleanupTestCase()
-{
-}
+void SimAfbParamTests::cleanupTestCase() {}
 
-void SimAfbParamTests::init()
-{
-}
+void SimAfbParamTests::init() {}
 
-void SimAfbParamTests::cleanup()
-{
-}
+void SimAfbParamTests::cleanup() {}
 
 void SimAfbParamTests::afbComponentConstruct()
 {
@@ -223,7 +215,7 @@ void SimAfbParamTests::mulFloatingPointTest()
 
 void SimAfbParamTests::divFloatingPointTest()
 {
-		Sim::AfbComponentParam p1;
+	Sim::AfbComponentParam p1;
 
 	// Regular
 	//
@@ -710,7 +702,7 @@ void SimAfbParamTests::mulSignedIntegerTest()
 	// Test regular + with overflow
 	//
 	{
-		constexpr qint32 value1 = std::numeric_limits<qint32>::max()  / 2;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::max() / 2;
 		constexpr qint32 value2 = 3;
 
 		p1.setSignedIntValue(value1);
@@ -753,7 +745,7 @@ void SimAfbParamTests::divSignedIntegerTest()
 		const qint32 value2 = 2;
 
 		p1.setSignedIntValue(value1);
-		p1.divSignedInteger(value2);
+		p1.divSignedIntegerBugVs104Vs105(value2);
 
 		QVERIFY(p1.signedIntValue() == value1 / value2);
 
@@ -769,7 +761,7 @@ void SimAfbParamTests::divSignedIntegerTest()
 		const qint32 value2 = 100;
 
 		p1.setSignedIntValue(value1);
-		p1.divSignedInteger(value2);
+		p1.divSignedIntegerBugVs104Vs105(value2);
 
 		QVERIFY(p1.signedIntValue() == value1 / value2);
 
@@ -781,11 +773,11 @@ void SimAfbParamTests::divSignedIntegerTest()
 	// Test div by zero
 	//
 	{
-		const qint32 value1 = 100;		//  X / 0 = -1
+		const qint32 value1 = 100; //  X / 0 = -1
 		const qint32 value2 = 0;
 
 		p1.setSignedIntValue(value1);
-		p1.divSignedInteger(value2);
+		p1.divSignedIntegerBugVs104Vs105(value2);
 
 		QVERIFY(p1.signedIntValue() == -1);
 
@@ -797,11 +789,11 @@ void SimAfbParamTests::divSignedIntegerTest()
 	// Test div by zero
 	//
 	{
-		const qint32 value1 = -100;		//  -X / 0 = 1
+		const qint32 value1 = -100; //  -X / 0 = 1
 		const qint32 value2 = 0;
 
 		p1.setSignedIntValue(value1);
-		p1.divSignedInteger(value2);
+		p1.divSignedIntegerBugVs104Vs105(value2);
 
 		QVERIFY(p1.signedIntValue() == 1);
 
@@ -813,11 +805,11 @@ void SimAfbParamTests::divSignedIntegerTest()
 	// Test div by zero
 	//
 	{
-		const qint32 value1 = 0;		//  0 / 0 = -1
+		const qint32 value1 = 0; //  0 / 0 = -1
 		const qint32 value2 = 0;
 
 		p1.setSignedIntValue(value1);
-		p1.divSignedInteger(value2);
+		p1.divSignedIntegerBugVs104Vs105(value2);
 
 		QVERIFY(p1.signedIntValue() == -1);
 
@@ -1181,13 +1173,13 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 		QCOMPARE(afbInst.paramExists(6), true);
 		QCOMPARE(afbInst.paramExists(7), true);
 		QCOMPARE(afbInst.paramExists(8), false);
-		QCOMPARE(afbInst.paramExists(10), false);	// not does not exist, will appear as versionOpIndex() later
+		QCOMPARE(afbInst.paramExists(10), false); // not does not exist, will appear as versionOpIndex() later
 		QCOMPARE(afbInst.paramExists(18), true);
 		QCOMPARE(afbInst.paramExists(9999), false);
 
 		// Test get param
 		//
-		auto verifyFunc = [](auto& afbInst,  quint16 opIndex, bool shouldExist)
+		auto verifyFunc = [](auto& afbInst, quint16 opIndex, bool shouldExist)
 		{
 			const Sim::AfbComponentParam* param = afbInst.param(opIndex);
 
@@ -1204,8 +1196,8 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 
 		verifyFunc(afbInst, 0, true);
 		verifyFunc(afbInst, 1, true);
-		verifyFunc(afbInst, 10, true);		// version should be created implicitly
-		verifyFunc(afbInst, 18, true);		// version should be created implicitly
+		verifyFunc(afbInst, 10, true); // version should be created implicitly
+		verifyFunc(afbInst, 18, true); // version should be created implicitly
 
 		// --
 		//
@@ -1290,7 +1282,6 @@ void SimAfbParamTests::modelComponent()
 
 		return;
 	}
-
 }
 
 void SimAfbParamTests::afbComponentSet()
@@ -1320,10 +1311,10 @@ void SimAfbParamTests::afbComponentSet()
 	ok = set.init(lmd);
 	QCOMPARE(ok, true);
 
-	Sim::AfbComponentInstance* afbLogic = set.componentInstance(1, 0);	// Afb Component LOGIC
+	Sim::AfbComponentInstance* afbLogic = set.componentInstance(1, 0); // Afb Component LOGIC
 	QVERIFY(afbLogic);
 
-	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);	// Afb Component TCT
+	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);  // Afb Component TCT
 	QVERIFY(afbTct);
 
 	Sim::AfbComponentParam param2{2, 0x1122};

@@ -7,6 +7,23 @@ module E {
 		TIME_LOCAL = 2
 	}
 
+	/// \brief Trend display mode.
+	///
+	/// Controls how multiple signal trends are drawn in the same chart area.
+	export const enum TrendViewMode{
+		Separated = 0,	/**< Separated = 0. Draw each signal trend in its own lane*/
+		Overlapped = 1	/**< Overlapped = 1. Draw all analog signal trends on the same lane*/
+	}
+
+	/// \brief Trend axis scaling type.
+	///
+	/// Selects how the trend value axis is scaled when drawing indicator data.
+	export const enum TrendScaleType {
+		Linear = 0,		/**< Linear = 0. Linear value scale*/
+		Log10 = 1,		/**< Log10 = 1. Base-10 logarithmic value scale*/
+		Period = 2		/**< Period = 2. Period-based scale*/
+	};
+
 	export enum Channel {
 		A = 0, /**< Channel A = 0*/
 		B = 1, /**< Channel B = 1*/

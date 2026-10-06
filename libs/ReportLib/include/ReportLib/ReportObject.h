@@ -121,10 +121,11 @@ namespace ReportLib
 			Schema
 		};
 
-		ReportObject(Type type);
+		ReportObject(Type type, const QString& hint);
 		virtual ~ReportObject() = default;
 
 		Type type() const;
+		const QString& hint() const;
 
 		virtual void renderText(QTextCursor& cursor,
 								double fontScaling,
@@ -135,6 +136,7 @@ namespace ReportLib
 
 	protected:
 		Type m_type;
+		QString m_hint;
 	};
 
 	//
@@ -159,12 +161,14 @@ namespace ReportLib
 		static std::shared_ptr<ReportSchema> create(const QString& caption,
 													const SchemaFormat& format,
 													std::shared_ptr<VFrame30::Schema> schema,
-													const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
+													const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+													const QString& hint);
 
 		ReportSchema(const QString& caption,
 					 const SchemaFormat& format,
 					 std::shared_ptr<VFrame30::Schema> schema,
-					 const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
+					 const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+					 const QString& hint);
 
 		// Schema functions
 
@@ -195,9 +199,9 @@ namespace ReportLib
 	class ReportTable : public ReportObject
 	{
 	public:
-		static std::shared_ptr<ReportTable> create(const TableFormat& format);
+		static std::shared_ptr<ReportTable> create(const TableFormat& format, const QString& hint);
 
-		ReportTable(const TableFormat& format);
+		ReportTable(const TableFormat& format, const QString& hint);
 
 		bool htmlEscaped() const;
 		void setHtmlEscaped(bool value);
@@ -230,8 +234,8 @@ namespace ReportLib
 	class ReportText : public ReportObject
 	{
 	public:
-		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat& format);
-		ReportText(const QString& text, const TextFormat& format);
+		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat& format, const QString& hint);
+		ReportText(const QString& text, const TextFormat& format, const QString& hint);
 
 		void renderText(QTextCursor& cursor,
 						double fontScaling,
@@ -271,10 +275,10 @@ namespace ReportLib
 
 		// Add object functions
 		//
-		std::shared_ptr<ReportText> addText(const QString& text, const TextFormat& format);
+		std::shared_ptr<ReportText> addText(const QString& text, const TextFormat& format, const QString& hint);
 		std::shared_ptr<ReportText> addText(std::shared_ptr<ReportText> object);
 
-		std::shared_ptr<ReportTable> addTable(const TableFormat& format);
+		std::shared_ptr<ReportTable> addTable(const TableFormat& format, const QString& hint);
 		std::shared_ptr<ReportTable> addTable(std::shared_ptr<ReportTable> object);
 
 		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);

@@ -20,6 +20,7 @@ enum class ReportType
 {
 	BySchemaID,
 	ByCaseID,
+	ByAlgorithm
 };
 
 class NumericDelegate;
@@ -65,6 +66,9 @@ private:
 	void fillFilters(QList<QString> filtersId = QList<QString>(), bool filterMatch = false);
 
 	void updateTable(const QList<QString>& filteredIds, FilterType sortType);
+
+	void swapRows(int row1, int row2);
+	void moveSelectedRows(int direction);
 
 	void showSoftwareConnection(const QString& caption,
 								const QString& nameFilter,
@@ -115,9 +119,9 @@ private:
 	QStringList m_tableHeaders;
 	QString m_comparatorsCSV;
 
+	int m_algorithmColumn = -1;
 	int m_criteriaColumn = -1;
 	
-	//QString m_listType;
 	FilterType m_filterType = FilterType::BySchemaID;
 
 	bool m_hasUnsavedChanges = false;

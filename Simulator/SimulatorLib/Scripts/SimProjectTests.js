@@ -3,8 +3,7 @@
 //
 // initTestCase() - will be called before the first test function is executed.
 //
-function initTestCase(sim)
-{
+function initTestCase(sim) {
 	console.log(sim.buildPath);
 
 	sim.unlockTimer = true;             // Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
@@ -17,20 +16,17 @@ function initTestCase(sim)
 
 // cleanupTestCase() - will be called after the last test function was executed.
 //
-function cleanupTestCase(sim)
-{
+function cleanupTestCase(sim) {
 }
 
 // init() - will be called before each test function is executed.
 //
-function init(sim)
-{
+function init(sim) {
 }
 
 // cleanup() - will be called after every test function.
 //
-function cleanup(sim)
-{
+function cleanup(sim) {
 	sim.reset();
 	sim.overridesReset();
 	sim.connectionsSetEnabled(true);
@@ -42,8 +38,7 @@ function cleanup(sim)
 // Test for AFB Not (OpCode 1)
 // Schema: TEST_NOT
 //
-function testAfbNot(sim)
-{
+function testAfbNot(sim) {
 	assert(sim.signalValue("#TEST_NOT_1") === 1);
 	assert(sim.signalValue("#TEST_NOT_2") === 0);
 	assert(sim.signalValue("#TEST_NOT_3") === 0);
@@ -51,17 +46,14 @@ function testAfbNot(sim)
 	// Test loopback 0101010...
 	//
 	let lastValue = sim.signalValue("#TEST_NOT_4");  // start value
-	for (let i = 0; i < 5; i++)
-	{
+	for (let i = 0; i < 5; i++) {
 		sim.startForMs(5);
 
 		let currentValue = sim.signalValue("#TEST_NOT_4");
-		if  (lastValue === 0)
-		{
+		if (lastValue === 0) {
 			assert(currentValue === 1);
 		}
-		else
-		{
+		else {
 			assert(currentValue === 0);
 		}
 
@@ -75,8 +67,7 @@ function testAfbNot(sim)
 // Test for AFB Logic (OpCode 1) for SR_05, there are logic instructions and compile time optimization involved
 // Schema: TEST_LOGIC_INSTRUCTIONS
 //
-function testLogicInstructions(sim)
-{
+function testLogicInstructions(sim) {
 	// Test compile time logic
 	//
 	assert(sim.signalValue("#TEST_LOGICINSTR_OR1") === 1);
@@ -93,13 +84,13 @@ function testLogicInstructions(sim)
 	//	
 	assert(sim.signalValue("#TEST_LOGICINSTR_AND2") === 0);
 	assert(sim.signalValue("#TEST_LOGICINSTR_AND3") === 0);
-	assert(sim.signalValue("#TEST_LOGICINSTR_AND4") === 1);	
+	assert(sim.signalValue("#TEST_LOGICINSTR_AND4") === 1);
 
 	// XOR
 	//	
 	assert(sim.signalValue("#TEST_LOGICINSTR_XOR2") === 0);
 	assert(sim.signalValue("#TEST_LOGICINSTR_XOR3") === 1);
-	assert(sim.signalValue("#TEST_LOGICINSTR_XOR4") === 1);		
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR4") === 1);
 	assert(sim.signalValue("#TEST_LOGICINSTR_XOR5") === 0);
 
 	// OR - instructions
@@ -118,7 +109,7 @@ function testLogicInstructions(sim)
 	//
 	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_1") === 1);
 	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_2") === 0);
-	
+
 	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_3") === 0);
 	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_20") === 1);
 
@@ -128,8 +119,7 @@ function testLogicInstructions(sim)
 // Test for AFB Logic (OpCode 1) for SR_05, there are logic instructions and compile time optimization involved
 // Schema: TEST_LOGIC_INSTRUCTIONS
 //
-function testLogicBusInstructions(sim)
-{
+function testLogicBusInstructions(sim) {
 	// Bus OR - AFB
 	//
 	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R1") === 1);
@@ -144,7 +134,7 @@ function testLogicBusInstructions(sim)
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R2") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R3") === 1);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R4") === 0);
-	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R5") === 1);	
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R5") === 1);
 
 	// Bus XOR - AFB
 	//
@@ -152,7 +142,7 @@ function testLogicBusInstructions(sim)
 	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R2") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R3") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R4") === 1);
-	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R5") === 0);		
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R5") === 0);
 
 	// Bus NOT - INSTRUCTION
 	//
@@ -160,7 +150,7 @@ function testLogicBusInstructions(sim)
 	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R2NOT") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R3NOT") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R4NOT") === 0);
-	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R5NOT") === 1);	
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R5NOT") === 1);
 
 	// Bus NOT - INSTRUCTION
 	//	
@@ -169,7 +159,7 @@ function testLogicBusInstructions(sim)
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R3NOT") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R4NOT") === 1);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R5NOT") === 0);
-	
+
 	// Bus NOT - INSTRUCTION, two 16bit words.
 	//	
 	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN00") === 1);
@@ -198,14 +188,13 @@ function testLogicBusInstructions(sim)
 	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN23") === 0);
 	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN24") === 1);
 
-	return;	
+	return;
 }
 
 // Test for AFB Logic (OpCode 1)
 // Schema: TEST_LOGIC
 //
-function testAfbLogic(sim)
-{
+function testAfbLogic(sim) {
 	// Test OR
 	//
 	assert(sim.signalValue("#TEST_LOGIC_OR1") === 1);
@@ -259,8 +248,7 @@ function testAfbLogic(sim)
 // Test for AFB TCT (OpCode 3), conf 1
 // Schema: TEST_TCT_V209_CONF1_ON
 //
-function testAfbTctV209Conf1(sim)
-{
+function testAfbTctV209Conf1(sim) {
 	// AFB tct_on,
 	// Label TEST_TCT_V209_CONF1_ON_8400
 	// time 200ms
@@ -282,8 +270,7 @@ function testAfbTctV209Conf1(sim)
 
 	// 200ms result must be in 0
 	//
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(resultSignalId)
@@ -347,8 +334,7 @@ function testAfbTctV209Conf1(sim)
 // Test for AFB TCT (OpCode 3), conf 2
 // Schema: TEST_TCT_V209_CONF2_OFF
 //
-function testAfbTctV209Conf2(sim)
-{
+function testAfbTctV209Conf2(sim) {
 	// AFB tct_off,
 	// Label TEST_TCT_V209_CONF2_OFF_8420
 	// time 200ms
@@ -371,8 +357,7 @@ function testAfbTctV209Conf2(sim)
 
 	// 200ms result must be in 0
 	//
-	for (let i = 0; i < 10; i++)
-	{
+	for (let i = 0; i < 10; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(resultSignalId)
@@ -381,8 +366,7 @@ function testAfbTctV209Conf2(sim)
 
 	sim.overrideSignalValue(initiatorSignalId, 0);
 
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(resultSignalId)
@@ -415,8 +399,7 @@ function testAfbTctV209Conf2(sim)
 	// 2.
 	//
 	sim.overrideSignalValue(initiatorSignalId, 0);
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(resultSignalId)
@@ -433,8 +416,7 @@ function testAfbTctV209Conf2(sim)
 // Test for AFB TCT (OpCode 3), conf 3
 // Schema: TEST_TCT_V209_CONF3_VIBR
 //
-function testAfbTctV209Conf3(sim)
-{
+function testAfbTctV209Conf3(sim) {
 	// AFB tct_off,
 	// Label TEST_TCT_V209_CONF3_VIBR_8421
 	// time 200ms
@@ -462,14 +444,12 @@ function testAfbTctV209Conf3(sim)
 
 	// 200ms result must be in 1
 	//
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 1);
 	}
 
-	for (let i = 0; i < 10; i++)
-	{
+	for (let i = 0; i < 10; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 0);
 	}
@@ -507,8 +487,7 @@ function testAfbTctV209Conf3(sim)
 		assert(sim.signalValue(resultSignalId) === 1);
 	}
 
-	for (let i = 0; i < 10; i++)
-	{
+	for (let i = 0; i < 10; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 0);
 	}
@@ -519,8 +498,7 @@ function testAfbTctV209Conf3(sim)
 // Test for AFB TCT (OpCode 3), conf 4
 // Schema: TEST_TCT_V209_CONF4_FILTER
 //
-function testAfbTctV209Conf4(sim)
-{
+function testAfbTctV209Conf4(sim) {
 	// AFB tct_filter,
 	// Label TEST_TCT_CONF4_FILTER_4009
 	// time 200ms
@@ -674,8 +652,7 @@ function testAfbTctV209Conf4(sim)
 // Test for AFB TCT (OpCode 3), conf 5
 // Schema: TEST_TCT_V209_CONF5_RVIBR
 //
-function testAfbTctV209Conf5(sim)
-{
+function testAfbTctV209Conf5(sim) {
 	// AFB tctc_rsv,
 	// Label TEST_TCT_V209_CONF5_RVIBR_8458
 	// time 200ms
@@ -704,8 +681,7 @@ function testAfbTctV209Conf5(sim)
 
 	// 200ms result must be in 1
 	//
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 1);
 	}
@@ -747,8 +723,7 @@ function testAfbTctV209Conf5(sim)
 
 	// 200ms result must be in 1
 	//
-	for (let i = 0; i < timerCounter; i++)
-	{
+	for (let i = 0; i < timerCounter; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 1);
 	}
@@ -768,8 +743,7 @@ function testAfbTctV209Conf5(sim)
 // Test for AFB TCT (OpCode 3), conf 6
 // Schema: TEST_TCT_V209_CONF6_RCFILTER
 //
-function testAfbTctV209Conf6(sim)
-{
+function testAfbTctV209Conf6(sim) {
 	// AFB tctc_rcfilter,
 	// Label TEST_TCT_V209_CONF6_RCFILTER_8469
 	// time 200ms
@@ -813,8 +787,7 @@ function testAfbTctV209Conf6(sim)
 
 	// 180ms result must be in 0
 	//
-	for (let i = 0; i < 180 / workcycle; i++)
-	{
+	for (let i = 0; i < 180 / workcycle; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 0);
 	}
@@ -856,8 +829,7 @@ function testAfbTctV209Conf6(sim)
 
 	// 180ms result must be in 0
 	//
-	for (let i = 0; i < 180 / workcycle; i++)
-	{
+	for (let i = 0; i < 180 / workcycle; i++) {
 		sim.startForMs(5);
 		assert(sim.signalValue(resultSignalId) === 1);
 	}
@@ -874,8 +846,7 @@ function testAfbTctV209Conf6(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 1
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf1(sim)
-{
+function testAfbFilpFlopV106Conf1(sim) {
 	// Conf 1, SR
 	//    Manual Tests:
 	//    Signals: #TEST_FF_V106_T1_SET, #TEST_FF_V106_T1_RESET
@@ -933,8 +904,7 @@ function testAfbFilpFlopV106Conf1(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 2 RS
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf2(sim)
-{
+function testAfbFilpFlopV106Conf2(sim) {
 	// Conf 2, RS
 	//    Manual Tests:
 	//    Signals: #TEST_FF_V106_T2_SET, #TEST_FF_V106_T2_RESET
@@ -1000,8 +970,7 @@ function testAfbFilpFlopV106Conf2(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 3 D ON FRONT
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf3(sim)
-{
+function testAfbFilpFlopV106Conf3(sim) {
 	// Conf 3, D ON FRONT
 	//    Manual Tests:
 	//    Signals: #TEST_FF_V106_T3_D, #TEST_FF_V106_T3_C
@@ -1073,8 +1042,7 @@ function testAfbFilpFlopV106Conf3(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 4 T ON FRONT
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf4(sim)
-{
+function testAfbFilpFlopV106Conf4(sim) {
 	// Conf 4, T ON FRONT
 	//    Manual Tests:
 	//    Signal: #TEST_FF_V106_T4_T
@@ -1131,8 +1099,7 @@ function testAfbFilpFlopV106Conf4(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 5, D ON DECAY
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf5(sim)
-{
+function testAfbFilpFlopV106Conf5(sim) {
 	// Conf 5, D ON DECAY
 	//    Manual Tests:
 	//    Signal: #TEST_FF_V106_T5_D, #TEST_FF_V106_T5_C
@@ -1205,8 +1172,7 @@ function testAfbFilpFlopV106Conf5(sim)
 // Test for AFB FLIPFLOP (OpCode 4), Conf 6 T ON DECAY
 // Schema: TEST_FLIPFLOP_V106
 //
-function testAfbFilpFlopV106Conf6(sim)
-{
+function testAfbFilpFlopV106Conf6(sim) {
 	// Conf 6, T ON DECAY
 	//    Manual Tests:
 	//    Signal: #TEST_FF_V106_T6_T
@@ -1271,8 +1237,7 @@ function testAfbFilpFlopV106Conf6(sim)
 // Test for AFB CTUP (OpCode 5)
 // Schema: TEST_CTUD_1
 //
-function testAfbCtud(sim)
-{
+function testAfbCtud(sim) {
 	// AFB cnt_up, cnt_dn
 	//
 	let counterSignal = "#TEST_CTUD_T1_CNT";        // 0, 1, 2, 3, 4, 5, ....
@@ -1282,8 +1247,7 @@ function testAfbCtud(sim)
 
 	sim.reset();
 
-	for (let i = 0; i < 10; i++)
-	{
+	for (let i = 0; i < 10; i++) {
 		sim.startForMs(5);
 
 		assert(sim.signalValue(counterSignal) === i + 1);
@@ -1307,8 +1271,7 @@ function testAfbCtud(sim)
 // Test for AFB MAJ (OpCode 6)
 // Schema: TEST_MAJ_V107
 //
-function testAfbMajV107(sim)
-{
+function testAfbMajV107(sim) {
 	assert(sim.signalValue("#TEST_MAJ_V107_T1_RES1") === 0);
 	assert(sim.signalValue("#TEST_MAJ_V107_T1_RES2") === 0);
 	assert(sim.signalValue("#TEST_MAJ_V107_T1_RES3") === 0);
@@ -1375,8 +1338,7 @@ function testAfbMajV107(sim)
 // Test for AFB SRSST (OpCode 8)
 // Schema: TEST_SRSST_V104
 //
-function testAfbSrsstV104(sim)
-{
+function testAfbSrsstV104(sim) {
 	//  Test steps:
 	//    1. Initial 0, 0 = 0
 	//    2. Set 1, 0 = 1
@@ -1507,8 +1469,7 @@ function testAfbSrsstV104(sim)
 // Test for AFB BCOD (OpCode 8), conf 1
 // Schema: TEST_BCOD_CONF1
 //
-function testAfbBCodConf1(sim)
-{
+function testAfbBCodConf1(sim) {
 	// Test 0s to cod
 	//
 	assert(sim.signalValue("#TEST_BCOD_T1R") === 0);
@@ -1560,8 +1521,7 @@ function testAfbBCodConf1(sim)
 // Test for AFB BCOD (OpCode 8), conf 2
 // Schema: TEST_BCOD_CONF2
 //
-function testAfbBCodConf2(sim)
-{
+function testAfbBCodConf2(sim) {
 	// Test 0s to cod_num
 	//
 	assert(sim.signalValue("#TEST_BCOD_CONF2_T1R") === 0);
@@ -1605,8 +1565,7 @@ function testAfbBCodConf2(sim)
 // Test for AFB BDEC (OpCode 9), conf 1
 // Schema: TEST_BDEC_CONF1
 //
-function testAfbBDecConf1(sim)
-{
+function testAfbBDecConf1(sim) {
 	// Test 0 to dec
 	//
 	assert(sim.signalValue("#TEST_BDEC_CONF1_T1R1") === 1);
@@ -1692,8 +1651,7 @@ function testAfbBDecConf1(sim)
 // Test for AFB BDEC (OpCode 9), conf 2
 // Schema: TEST_BDEC_CONF2
 //
-function testAfbBDecConf2(sim)
-{
+function testAfbBDecConf2(sim) {
 	// Test 0 to dec_num
 	//
 	assert(sim.signalValue("#TEST_BDEC_CONF2_T1R1") === 0);
@@ -1773,13 +1731,12 @@ function testAfbBDecConf2(sim)
 	assert(sim.signalValue("#TEST_BDEC_CONF2_T3R5") === 0);
 
 	return;
- }
+}
 
 // Test for AFB BCOMP (OpCode 10)
 // Schema: TEST_BCOMP_FP_1
 //
-function testAfbBCompFp(sim)
-{
+function testAfbBCompFp(sim) {
 	// cmpc_fp_ls
 	//
 	assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T1R") === 0);
@@ -1969,8 +1926,7 @@ function testAfbBCompFp(sim)
 // Test for AFB BCOMP (OpCode 10)
 // Schema: TEST_BCOMP_SI_1
 //
-function testAfbBCompSi(sim)
-{
+function testAfbBCompSi(sim) {
 	// cmpc_si_ls
 	//
 	assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T1R") === 0);
@@ -2080,8 +2036,7 @@ function testAfbBCompSi(sim)
 // Test for AFB DAMPER (OpCode 11)
 // Schema: TEST_DAMPER
 //
-function testAfbDamper(sim)
-{
+function testAfbDamper(sim) {
 	sim.reset();
 
 	sim.startForMs(5);
@@ -2128,8 +2083,7 @@ function testAfbDamper(sim)
 // Test for AFB MEDIAN (OpCode 12)
 // Schema: TEST_MEDIAN_V7
 //
-function testAfbMedianV7(sim)
-{
+function testAfbMedianV7(sim) {
 	// median_si -- Test for two valid inputs
 	//
 	assert(sim.signalValue("#TEST_MED_V7_T1_RMED") === 80);
@@ -2187,8 +2141,7 @@ function testAfbMedianV7(sim)
 // Test for AFB MATH (OpCode 13)
 // Schema: TEST_MATH_FP_1
 //
-function testAfbMathFp(sim)
-{
+function testAfbMathFp(sim) {
 	assert(sim.signalValue("#TEST_MATH_FP_ADD1") === 7);
 	assert(sim.signalValue("#TEST_MATH_FP_ADD2") === 0);
 	assert(sim.signalValue("#TEST_MATH_FP_ADD3") === 0);
@@ -2277,8 +2230,7 @@ function testAfbMathFp(sim)
 // Test for AFB MATH (OpCode 13)
 // Schema: TEST_MATH_SI_1
 //
-function testAfbMathSi(sim)
-{
+function testAfbMathSi(sim) {
 	assert(sim.signalValue("#TEST_MATH_SI_ADD1") === 7);
 	assert(sim.signalValue("#TEST_MATH_SI_ADD2") === 0);
 	assert(sim.signalValue("#TEST_MATH_SI_ADD3") === 0);
@@ -2330,14 +2282,27 @@ function testAfbMathSi(sim)
 	assert(sim.signalValue("#TEST_MATH_SI_DIV11") === 1);
 	assert(sim.signalValue("#TEST_MATH_SI_DIV12") === 0);
 
+	// Special case for division oveflow.
+	// AFB Math v104, v105 SI DIV will return -2147483648 for the case of -2147483648 / -1
+	//
+	assert(sim.signalValue("#TEST_MATH_SI_DIV20_1") === -2147483648);
+	assert(sim.signalValue("#TEST_MATH_SI_DIV20_2") === 0);
+	assert(sim.signalValue("#TEST_MATH_SI_DIV20_3") === 0);
+
+	// AFB Math v106 SI DIV will return 2147483647 for the case of -2147483648 / -1 and set the overflow flag
+	//
+	assert(sim.signalValue("#TEST_MATHV106_SI_DIV20_1") === 2147483647);
+	assert(sim.signalValue("#TEST_MATHV106_SI_DIV20_2") === 1);
+	assert(sim.signalValue("#TEST_MATHV106_SI_DIV20_3") === 0);
+	assert(sim.signalValue("#TEST_MATHV106_SI_DIV20_4") === 0);
+
 	return;
 }
 
 // Test for AFB SCALE (OpCode 14)
 // Schema: TEST_SCALE_SI_SI
 //
-function testAfbScaleSiSi(sim)
-{
+function testAfbScaleSiSi(sim) {
 	assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R1") === 1500);
 	assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R2") === 0);
 	assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R3") === 0);
@@ -2402,8 +2367,7 @@ function testAfbScaleSiSi(sim)
 // Test for AFB SCALE (OpCode 14)
 // Schema: TEST_SCALE_FP_FP
 //
-function testAfbScaleFpFp(sim)
-{
+function testAfbScaleFpFp(sim) {
 	assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R1") === 1500);
 	assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R2") === 0);
 	assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R3") === 0);
@@ -2434,8 +2398,7 @@ function testAfbScaleFpFp(sim)
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V3
 //
-function testAfbFuncV3(sim)
-{
+function testAfbFuncV3(sim) {
 	// 9 -> math_sqrt_fp
 	//
 	assert(sim.signalValue("#TEST_FUNC_V3_C1_T1_RESULT") === 3);
@@ -2541,8 +2504,7 @@ function testAfbFuncV3(sim)
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V5
 //
-function testAfbFuncV5(sim)
-{
+function testAfbFuncV5(sim) {
 	// V5 tested just added configurations 9 - 13
 	// math_sign_inv_fp
 	// math_sign_inv_si
@@ -2648,8 +2610,7 @@ function testAfbFuncV5(sim)
 // Test for AFB INT (OpCode 17)
 // Schema: TEST_INT_V6
 //
-function testAfbIntV6(sim)
-{
+function testAfbIntV6(sim) {
 	sim.reset();
 	sim.startForMs(5);
 
@@ -2714,8 +2675,7 @@ function testAfbIntV6(sim)
 // Test for AFB DPCOMP (OpCode 20)
 // Schema: TEST_DPCOMP_FP_1
 //
-function testAfbDpCompCompFp1(sim)
-{
+function testAfbDpCompCompFp1(sim) {
 	// cmp_fp_ls
 	//
 	assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T1R") === 0);
@@ -2992,8 +2952,7 @@ function testAfbDpCompCompFp1(sim)
 // Test for AFB DPCOMP (OpCode 20)
 // Schema: TEST_DPCOMP_SI_1
 //
-function testAfbDpCompCompSi1(sim)
-{
+function testAfbDpCompCompSi1(sim) {
 	// cmp_si_ls
 	//
 	assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T1R") === 0);
@@ -3102,8 +3061,7 @@ function testAfbDpCompCompSi1(sim)
 // Test for AFB MUX (OpCode 21)
 // Schema: TEST_MUX
 //
-function testAfbMux(sim)
-{
+function testAfbMux(sim) {
 	// switch_si
 	//
 	sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
@@ -3164,8 +3122,7 @@ function testAfbMux(sim)
 // Test for AFB LATCH, v4 (OpCode 22)
 // Schema: TEST_LATCH_V4
 //
-function testAfbLatchV4OnDecay(sim)
-{
+function testAfbLatchV4OnDecay(sim) {
 	// 1. Initial 0, 0 = 0
 	// 2. Set 1, 0 = 0
 	// 3. Set 0, 0 = 99
@@ -3217,8 +3174,7 @@ function testAfbLatchV4OnDecay(sim)
 // Test for AFB LATCH, v4 (OpCode 22)
 // Schema: TEST_LATCH_V4
 //
-function testAfbLatchV4OnFront(sim)
-{
+function testAfbLatchV4OnFront(sim) {
 	// 1.   Initial 0, 0 = 0
 	// 2.   Set 1, 0 = 99
 	// 3.   Set 0, 0 = 99
@@ -3287,8 +3243,7 @@ function testAfbLatchV4OnFront(sim)
 // Test for AFB LATCH, v4 (OpCode 22)
 // Schema: TEST_LATCH_V4
 //
-function testAfbLatchV4OnState(sim)
-{
+function testAfbLatchV4OnState(sim) {
 	//    1. Initial 0, 0 = 0
 	//    2. Set 1, 0 = 99
 	//    3. Set 0, 0 = 99
@@ -3356,8 +3311,7 @@ function testAfbLatchV4OnState(sim)
 // Test for AFB LATCH, v4 (OpCode 22)
 // Schema: TEST_LATCH_V4
 //
-function testAfbLatchV4DealyFor1Cycle(sim)
-{
+function testAfbLatchV4DealyFor1Cycle(sim) {
 	// Programm differs from schemas programm
 	//
 	let inSignal = "#TEST_LATCH_V4_T4_IN";
@@ -3392,8 +3346,7 @@ function testAfbLatchV4DealyFor1Cycle(sim)
 // Test for AFB LIM (OpCode 23)
 // Schema: TEST_LIM
 //
-function testAfbLimiter(sim)
-{
+function testAfbLimiter(sim) {
 	// limc_si
 	//
 	assert(sim.signalValue("#TEST_LIM_LIMC_T1R1") === 50);
@@ -3515,8 +3468,7 @@ function testAfbLimiter(sim)
 // Test for AFB POLY (OpCode 25)
 // Schema: TEST_POL_V3
 //
-function testAfbPolyV3(sim)
-{
+function testAfbPolyV3(sim) {
 	assert(sim.signalValue("#TEST_POL_V3_T1_RESULT") === 0);
 	assert(sim.signalValue("#TEST_POL_V3_T1_ROV") === 0);
 	assert(sim.signalValue("#TEST_POL_V3_T1_RUF") === 0);
@@ -3562,8 +3514,7 @@ function testAfbPolyV3(sim)
 // Test for AFB DER (OpCode 26)
 // Schema: TEST_DER_V5
 //
-function testAfbDerV5(sim)
-{
+function testAfbDerV5(sim) {
 	let inSignal = "#TEST_DER_V5_T1_IN";
 	let resetSignal = "#TEST_DER_V5_T1_RESET";
 	let pauseSignal = "#TEST_DER_V5_T1_PAUSE";
@@ -3652,8 +3603,7 @@ function testAfbDerV5(sim)
 // Test for AFB MISMATCH (OpCode 27)
 // Schema: TEST_MISMATCH_V4
 //
-function testAfbMismatchV4(sim)
-{
+function testAfbMismatchV4(sim) {
 	// mismatch_si
 	//
 	assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R1") === 0);
@@ -3765,8 +3715,7 @@ function testAfbMismatchV4(sim)
 // Test for AFB TCONV v0 (OpCode 28)
 // Schema: TEST_TCONV_V0
 //
-function testAfbTconvV0(sim)
-{
+function testAfbTconvV0(sim) {
 	assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RESULT") === 0);
 	assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_ROV") === 0);
 	assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RUF") === 0);
@@ -3807,8 +3756,7 @@ function testAfbTconvV0(sim)
 // Test for AFB INDIC (OpCode 29)
 // Schema: TEST_INDICATION_V1
 //
-function testAfbIndicationV1Stateless(sim)
-{
+function testAfbIndicationV1Stateless(sim) {
 	let inSignal = "#TEST_IND_V1_T1_IN";
 	let ackSignal = "#TEST_IND_V1_T1_ACK";
 	let testSignal = "#TEST_IND_V1_T1_TEST";
@@ -3896,8 +3844,7 @@ function testAfbIndicationV1Stateless(sim)
 // Test for AFB INDIC (OpCode 29)
 // Schema: TEST_INDICATION_V1
 //
-function testAfbIndicationV1Latch(sim)
-{
+function testAfbIndicationV1Latch(sim) {
 	let inSignal = "#TEST_IND_V1_T21_IN";
 	let ackSignal = "#TEST_IND_V1_T21_ACK";
 	let testSignal = "#TEST_IND_V1_T21_TEST";
@@ -3979,8 +3926,7 @@ function testAfbIndicationV1Latch(sim)
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
 //
-function testAfbPulseGenV0(sim)
-{
+function testAfbPulseGenV0(sim) {
 	// High 250
 	// Low 500
 	//
@@ -3994,13 +3940,11 @@ function testAfbPulseGenV0(sim)
 	let last = sim.signalValue(signalId)
 	let foundStart1 = false;
 
-	for (let i = 0; i < (high + low + 1); i++)
-	{
+	for (let i = 0; i < (high + low + 1); i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(signalId)
-		if (last === 0 && current === 1)
-		{
+		if (last === 0 && current === 1) {
 			foundStart1 = true;
 			break;
 		}
@@ -4012,8 +3956,7 @@ function testAfbPulseGenV0(sim)
 
 	// Now LogicModule started 1 phase, and it already took 5 ms
 	//
-	for (let i = 0; i < high - 1; i++)
-	{
+	for (let i = 0; i < high - 1; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(signalId)
@@ -4022,8 +3965,7 @@ function testAfbPulseGenV0(sim)
 
 	// Now LogicModule should start 0 phase
 	//
-	for (let i = 0; i < low; i++)
-	{
+	for (let i = 0; i < low; i++) {
 		sim.startForMs(5);
 
 		let current = sim.signalValue(signalId)
@@ -4041,8 +3983,7 @@ function testAfbPulseGenV0(sim)
 }
 
 
-function test3ChannelDicreteMajority(sim)
-{
+function test3ChannelDicreteMajority(sim) {
 	// Schema: TEST_3CHANNEL_INPUT
 	// Inputs:
 	//      #TEST_3CHV_T1_INA
@@ -4117,8 +4058,7 @@ function test3ChannelDicreteMajority(sim)
 }
 
 
-function testFlags(sim)
-{
+function testFlags(sim) {
 	// Schema: TEST_FLAGS
 	//
 	let state1 = sim.signalState("#TEST_FLAGS_R1");
@@ -4339,8 +4279,7 @@ function testFlags(sim)
 	return;
 }
 
-function testLogicModulePowerOff(sim)
-{
+function testLogicModulePowerOff(sim) {
 	sim.overridesReset();
 	sim.reset();
 
@@ -4392,8 +4331,7 @@ function testLogicModulePowerOff(sim)
 	return;
 }
 
-function testConnectionEnable(sim)
-{
+function testConnectionEnable(sim) {
 	sim.reset();
 
 	let validitySignal = "#PORT1_TO_PORT1_VALIDITY";
@@ -4428,8 +4366,7 @@ function testConnectionEnable(sim)
 	return;
 }
 
-function testBusses(sim)
-{
+function testBusses(sim) {
 	sim.startForMs(10);
 
 	// Test bus composer/extractor
@@ -4469,8 +4406,7 @@ function testBusses(sim)
 	return;
 }
 
-function testGetLogicModuleInfoTests(sim)
-{
+function testGetLogicModuleInfoTests(sim) {
 	let lm = sim.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
 
 	assert(lm.equipmentID === "SYSTEMID_RACKID_FSCC01_MD00");
@@ -4486,8 +4422,7 @@ function testGetLogicModuleInfoTests(sim)
 // Test for UFB
 // Schema: TEST_UFB_PARAM_1
 //
-function testUfbParam1(sim)
-{
+function testUfbParam1(sim) {
 	let inSignal = "#UFB_T1_SI_IN";
 	let outSignal1 = "#UFB_T1_R1";
 	let outSignal2 = "#UFB_T1_R2";
@@ -4554,8 +4489,7 @@ function testUfbParam1(sim)
 // Test for UFB
 // Schema: TEST_UFB_PARAM_2
 //
-function testUfbParam2(sim)
-{
+function testUfbParam2(sim) {
 	let inSignal1 = "#UFB_T2_SI_IN_1SF";
 	let inSignal2 = "#UFB_T2_SI_IN_2SF";
 	let inSignal3 = "#UFB_T2_SI_IN_3SF";
@@ -4688,8 +4622,7 @@ function testUfbParam2(sim)
 // Test for packed_or_in/out
 // Schema: TEST_PACKED_OR_AFB
 //
-function testPackedOrAfb(sim)
-{
+function testPackedOrAfb(sim) {
 	// PackedLogicId: OR_1_INPUT
 	//
 	assert(sim.signalValue("#TPOR_AFB_RESUL1") === 0);
@@ -4698,137 +4631,137 @@ function testPackedOrAfb(sim)
 	assert(sim.signalValue("#TPOR_AFB_RESUL1") === 1);
 	sim.overridesReset();
 	sim.startForMs(5);
-	
+
 	// PackedLogicId: OR_2_INPUT
 	//
 	let outSignal = "#TPOR_AFB_RESUL2"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T2_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T2_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T2_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: OR_3_INPUT
 	//
 	outSignal = "#TPOR_AFB_RESUL3"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T3_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T3_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T3_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_AFB_T3_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_AFB_T3_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: OR_16_INPUT
 	//
 	outSignal = "#TPOR_AFB_RESUL4"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN3", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_AFB_T4_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
+	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	// PackedLogicId: OR_17_INPUT
 	//
 	outSignal = "#TPOR_AFB_RESUL5"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN16", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);				
+	assert(sim.signalValue(outSignal) === 1);
 
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN16", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_AFB_T5_IN17", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1)
-	
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);		
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
 }
+
 
 // Test for packed_or_in/out
 // Schema: TEST_PACKED_OR_ACC
 //
-function testPackedOrAcc(sim)
-{
+function testPackedOrAcc(sim) {
 	// PackedLogicId: OR_1_INPUT
 	//
 	assert(sim.signalValue("#TPOR_ACC_RESUL1") === 0);
@@ -4837,137 +4770,136 @@ function testPackedOrAcc(sim)
 	assert(sim.signalValue("#TPOR_ACC_RESUL1") === 1);
 	sim.overridesReset();
 	sim.startForMs(5);
-	
+
 	// PackedLogicId: OR_2_INPUT
 	//
 	let outSignal = "#TPOR_ACC_RESUL2"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T2_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T2_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T2_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: OR_3_INPUT
 	//
 	outSignal = "#TPOR_ACC_RESUL3"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T3_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T3_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T3_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_ACC_T3_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_ACC_T3_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: OR_16_INPUT
 	//
 	outSignal = "#TPOR_ACC_RESUL4"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN3", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_ACC_T4_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
+	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	// PackedLogicId: OR_17_INPUT
 	//
 	outSignal = "#TPOR_ACC_RESUL5"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN1", 0);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN16", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);				
+	assert(sim.signalValue(outSignal) === 1);
 
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN16", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPOR_ACC_T5_IN17", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1)
-	
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);		
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
 }
 
 // Test for packed_and_in/out
 // Schema: TEST_PACKED_AND_AFB
 //
-function testPackedAndAfb(sim)
-{
+function testPackedAndAfb(sim) {
 	// PackedLogicId: AND_1_INPUT
 	//
 	assert(sim.signalValue("#TPAND_AFB_RESUL1") === 0);
@@ -4976,166 +4908,165 @@ function testPackedAndAfb(sim)
 	assert(sim.signalValue("#TPAND_AFB_RESUL1") === 1);
 	sim.overridesReset();
 	sim.startForMs(5);
-	
+
 	// PackedLogicId: AND_2_INPUT
 	//
 	let outSignal = "#TPAND_AFB_RESUL2"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T2_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T2_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_3_INPUT
 	//
 	outSignal = "#TPAND_AFB_RESUL3"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T3_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T3_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T3_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T3_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_16_INPUT
 	//
 	outSignal = "#TPAND_AFB_RESUL4"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T4_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T4_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 
 	sim.overrideSignalValue("#TPAND_AFB_T4_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T4_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPAND_AFB_T4_IN3", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
-	sim.overridesReset();
-	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);
-	
+
+	sim.overridesReset();
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_17_INPUT
 	//
 	outSignal = "#TPAND_AFB_RESUL5"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN3", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN5", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN6", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN7", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN8", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN9", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN10", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN11", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN12", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN13", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN14", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN15", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN16", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN17", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPAND_AFB_T5_IN1", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
+	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
 }
 
 // Test for packed_and_in/out
 // Schema: TEST_PACKED_AND_ACC
 //
-function testPackedAndAcc(sim)
-{
+function testPackedAndAcc(sim) {
 	// PackedLogicId: AND_1_INPUT
 	//
 	assert(sim.signalValue("#TPAND_ACC_RESUL1") === 0);
@@ -5144,157 +5075,157 @@ function testPackedAndAcc(sim)
 	assert(sim.signalValue("#TPAND_ACC_RESUL1") === 1);
 	sim.overridesReset();
 	sim.startForMs(5);
-	
+
 	// PackedLogicId: AND_2_INPUT
 	//
 	let outSignal = "#TPAND_ACC_RESUL2"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T2_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T2_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_3_INPUT
 	//
 	outSignal = "#TPAND_ACC_RESUL3"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T3_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T3_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T3_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 1);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T3_IN2", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_16_INPUT
 	//
 	outSignal = "#TPAND_ACC_RESUL4"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T4_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T4_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 
 	sim.overrideSignalValue("#TPAND_ACC_T4_IN3", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T4_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPAND_ACC_T4_IN3", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
-	sim.overridesReset();
-	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);
-	
+
+	sim.overridesReset();
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+
 	// PackedLogicId: AND_17_INPUT
 	//
 	outSignal = "#TPAND_ACC_RESUL5"
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN1", 1);
 	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
-	
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN2", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);		
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN3", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN4", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN5", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN6", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN7", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN8", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN9", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN10", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN11", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN12", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN13", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN14", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN15", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN16", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN17", 1);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 1);	
-	
+	assert(sim.signalValue(outSignal) === 1);
+
 	sim.overrideSignalValue("#TPAND_ACC_T5_IN1", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue(outSignal) === 0);	
-	
+	assert(sim.signalValue(outSignal) === 0);
+
 	sim.overridesReset();
-	sim.startForMs(5);	
+	sim.startForMs(5);
 	assert(sim.signalValue(outSignal) === 0);
 }

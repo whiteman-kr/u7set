@@ -197,6 +197,8 @@ PluginTO5MainWindow::~PluginTO5MainWindow()
 	QSettings().setValue("MainWindow/tableState", m_tableWidget->horizontalHeader()->saveState());
 
 	QSettings().setValue("MainWindow/filterType", static_cast<int>(m_filterType));
+
+	QSettings().setValue("MainWindow/comboBoxIndex", m_comboBox->currentIndex());
 }
 
 void PluginTO5MainWindow::showAppLog()
@@ -229,7 +231,7 @@ void PluginTO5MainWindow::onSettings()
 	QFormLayout* layout = new QFormLayout(&dialog);
 
 	QLineEdit* testSuiteId = new QLineEdit(&dialog);
-	layout->addRow(tr("TestSuite Id:"), testSuiteId);
+	layout->addRow(tr("Instance StrID:"), testSuiteId);
 
 	QLineEdit* ipAddress1 = new QLineEdit(&dialog);
 	layout->addRow(tr("Configurator IP Address 1:"), ipAddress1);
@@ -398,12 +400,12 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 	const QString value = item->text();
 	const int column = item->column();
 
-	if (column != m_criteriaColumn)
+	if ((column != m_criteriaColumn) && (column != m_algorithmColumn))
 	{
 		return;
 	}
 
-	m_tableWidget->setSortingEnabled(false);
+	//m_tableWidget->setSortingEnabled(false);
 
 	for (const QModelIndex& index : m_tableWidget->selectionModel()->selectedIndexes())
 	{
@@ -416,32 +418,44 @@ void PluginTO5MainWindow::onItemCriteriaChanged(QTableWidgetItem* item)
 			Hash cmpHash = changedItem->data(Qt::UserRole)
 							   .toULongLong();
 
-			bool ok = false;
-			double v = value.toDouble(&ok);
-			Q_ASSERT(ok);
-
-			if (ok == true)
+			if (column == m_criteriaColumn)
 			{
-				const auto& cd = m_comparatorsStorage.comparator(cmpHash, &ok);
+				bool ok = false;
+				double v = value.toDouble(&ok);
+				Q_ASSERT(ok);
+
 				if (ok == true)
 				{
-					v = QString::number(value.toDouble(), 'f', cd.precision).toDouble();
-					m_comparatorsStorage.setComparatorCriteria(cmpHash, v);
+					const auto& cd = m_comparatorsStorage.comparator(cmpHash, &ok);
+					if (ok == true)
+					{
+						v = QString::number(value.toDouble(), 'f', cd.precision).toDouble();
+						m_comparatorsStorage.setComparatorCriteria(cmpHash, v);
 
-					if (cd.isValueOverriden() == true)
-					{
-						changedItem->setBackground(Qt::yellow);
-					}
-					else
-					{
-						changedItem->setBackground(Qt::white);
+						if (cd.isValueOverriden() == true)
+						{
+							changedItem->setBackground(Qt::yellow);
+						}
+						else
+						{
+							changedItem->setBackground(Qt::white);
+						}
 					}
 				}
 			}
+			else if (column == m_algorithmColumn)
+			{
+				m_comparatorsStorage.setComparatorAlgorithm(cmpHash, value);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			
 		}
 	}
 
-	m_tableWidget->setSortingEnabled(true);
+	//m_tableWidget->setSortingEnabled(true);
 
 	m_hasUnsavedChanges = true;
 }
@@ -471,16 +485,28 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 	switch (reportType)
 	{
 	case ReportType::BySchemaID:
-		defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_BySchemaID.pdf";
-		reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/BySchemaID", defaultReportFile).toString());
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_BySchemaID.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/BySchemaID", defaultReportFile).toString());
+		}
 		break;
 	case ReportType::ByCaseID:
-		defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByCaseID.pdf";
-		reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByCaseID", defaultReportFile).toString());
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByCaseID.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByCaseID", defaultReportFile).toString());
+		}
+		break;
+	case ReportType::ByAlgorithm:
+		{
+			defaultReportFile = QCoreApplication::applicationDirPath() + QDir::separator() + "TO5_ByAlgorithm.pdf";
+			reportFile = QDir::toNativeSeparators(QSettings().value("reportFile/ByAlgorithm", defaultReportFile).toString());
+		}
 		break;
 	default:
-		Q_ASSERT(false);
-		return;
+		{
+			Q_ASSERT(false);
+			return;
+		}
 	}
 
 	reportFileEdit->setText(reportFile);
@@ -532,14 +558,25 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 				switch (reportType)
 				{
 				case ReportType::BySchemaID:
-					reportFilter = "testTO5BySchemaID";
+					{
+						reportFilter = "testTO5BySchemaID";
+					}
 					break;
 				case ReportType::ByCaseID:
-					reportFilter = "testTO5ByCaseID";
+					{
+						reportFilter = "testTO5ByCaseID";
+					}
+					break;
+				case ReportType::ByAlgorithm:
+					{
+						reportFilter = "testTO5ByAlgorithm";
+					}
 					break;
 				default:
-					Q_ASSERT(false);
-					return;
+					{
+						Q_ASSERT(false);
+						return;
+					}
 				}
 
 				QString destinationFile = tr("%1%2PluginTO5.csv")
@@ -558,7 +595,23 @@ void PluginTO5MainWindow::onReport(ReportType reportType)
 					}
 				}
 
-				if (m_comparatorsStorage.saveToFile(destinationFile) == false) 
+				// Get all visible hashes from the table
+				//
+				std::vector<Hash> filteredComparators;
+				int count = m_tableWidget->rowCount();
+				for (int i = 0; i < count; i++)
+				{
+					QTableWidgetItem* criteriaItem = m_tableWidget->item(i, m_criteriaColumn);
+					if (criteriaItem != nullptr)
+					{
+						Hash cmpHash = criteriaItem->data(Qt::UserRole).toULongLong();
+						filteredComparators.push_back(cmpHash);
+					}
+				}
+
+				// Save the comparators to the CSV file as input data for the report
+				//
+				if (m_comparatorsStorage.saveToFile(destinationFile, filteredComparators) == false) 
 				{
 					QMessageBox::critical(&dialog, qAppName(), tr("Failed to save comparators file to %1!").arg(destinationFile));
 					return;
@@ -726,6 +779,16 @@ void PluginTO5MainWindow::createMenu()
 			});
 	reportsMenu->addAction(reportBySchema);
 
+	QAction* reportByAlgorithm = new QAction(tr("Report by Algorithm"), this);
+	connect(reportByAlgorithm,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				onReport(ReportType::ByAlgorithm);
+			});
+	reportsMenu->addAction(reportByAlgorithm);
+
 	auto toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	QAction* import = new QAction(tr("Import..."), this);
@@ -785,6 +848,8 @@ void PluginTO5MainWindow::createFilterListWidget()
 						static_cast<int>(FilterType::BySchemaID));
 	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::ByCaseID)], 
 						static_cast<int>(FilterType::ByCaseID));
+	m_comboBox->addItem(m_comparatorsStorage.FilterTypeStr[static_cast<int>(FilterType::ByAlgorithm)], 
+		static_cast<int>(FilterType::ByAlgorithm));
 
 	m_comboBox->setCurrentIndex(QSettings().value("MainWindow/comboBoxIndex", 0).toInt());
 
@@ -803,7 +868,7 @@ void PluginTO5MainWindow::createFilterListWidget()
 
 	// Mask
 	//
-	layout->addWidget(new QLabel(tr("SchemaID/CaseID Mask")));
+	layout->addWidget(new QLabel(tr("SchemaID/CaseID/Algorithm Mask")));
 
 	// Mask field and type combo
 	{
@@ -826,12 +891,14 @@ void PluginTO5MainWindow::createFilterListWidget()
 void PluginTO5MainWindow::createTableWidget()
 {
 	m_tableHeaders.clear();
-	m_tableHeaders << tr("CaseID") << tr("SchemaID") << tr("InputAppSignalID") << tr("InputAppSignalCaption") << tr("OutputAppSignalID")
+	m_tableHeaders << tr("Algorithm") << tr("CaseID") << tr("SchemaID") << tr("InputAppSignalID") << tr("InputAppSignalCaption")
+				   << tr("OutputAppSignalID")
 				   << tr("OutputAppSignalCaption") << tr("Default") << tr("Criteria") << tr("Type") << tr("SetpointAppSignalID")
 				   << tr("SetpointAppSignalCaption");
 
+	m_algorithmColumn = m_tableHeaders.indexOf(tr("Algorithm"));
 	m_criteriaColumn = m_tableHeaders.indexOf(tr("Criteria"));
-	if (m_criteriaColumn == -1) 
+	if ((m_criteriaColumn == -1) || (m_algorithmColumn == -1))
 	{
 		Q_ASSERT(false);
 	}
@@ -844,9 +911,11 @@ void PluginTO5MainWindow::createTableWidget()
 
 	m_tableWidget->setSelectionBehavior(QAbstractItemView::SelectItems);
 	m_tableWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_tableWidget->installEventFilter(this);
 
 	m_tableWidget->setColumnCount(m_tableHeaders.size());
 	m_tableWidget->setHorizontalHeaderLabels(m_tableHeaders);
+	m_tableWidget->setSortingEnabled(false);
 
 	connect(m_tableWidget, &QTableWidget::itemChanged, this, &PluginTO5MainWindow::onItemCriteriaChanged);
 
@@ -1023,6 +1092,16 @@ void PluginTO5MainWindow::createUi()
 			});
 	layout->addWidget(btnReportBySchema);
 
+	QPushButton* btnReportByAlg = new QPushButton(tr("Report by Algorithm"), this);
+	connect(btnReportByAlg,
+			&QPushButton::pressed,
+			this,
+			[this]()
+			{
+				onReport(ReportType::ByAlgorithm);
+			});
+	layout->addWidget(btnReportByAlg);
+
 	createStatusBar();
 
 	mainLayout->addLayout(layout);
@@ -1104,6 +1183,10 @@ void PluginTO5MainWindow::fillFilters(QList<QString> filtersId, bool filterMatch
 		{
 			filteredIds = m_comparatorsStorage.caseIds();
 		}
+		else if (m_filterType == FilterType::ByAlgorithm)
+		{
+			filteredIds = m_comparatorsStorage.algorithms();
+		}
 		else
 		{
 			Q_ASSERT(false);
@@ -1143,7 +1226,7 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 	//
 	m_tableWidget->clearContents();
 
-	m_tableWidget->setSortingEnabled(false);
+	//m_tableWidget->setSortingEnabled(false);
 
 	std::vector<Hash> comparatorsVec;
 	if (filteredIds.isEmpty() == true)
@@ -1171,6 +1254,9 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 		}
 
 		int c = 0;
+		QTableWidgetItem* algorithmItem = createTableItem(data.algorithm, true);
+		algorithmItem->setData(Qt::UserRole, static_cast<qulonglong>(data.hash));
+		m_tableWidget->setItem(row, c++, algorithmItem);
 
 		m_tableWidget->setItem(row, c++, createTableItem(data.caseID, false));
 		m_tableWidget->setItem(row, c++, createTableItem(data.schemaID, false));
@@ -1185,7 +1271,7 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 
 		QTableWidgetItem* criteriaItem = createTableItem(QString::number(data.currentValue), true);
 		criteriaItem->setData(Qt::UserRole, static_cast<qulonglong>(data.hash));
-		if (data.isValueOverriden())
+		if (data.isValueOverriden() == true)
 		{
 			criteriaItem->setBackground(Qt::yellow);
 		}
@@ -1207,7 +1293,91 @@ void PluginTO5MainWindow::updateTable(const QList<QString>& filteredIds, FilterT
 		m_tableWidget->setItemDelegateForColumn(m_criteriaColumn, m_numericDelegate);
 	}
 
-	m_tableWidget->setSortingEnabled(true);
+	//m_tableWidget->setSortingEnabled(true);
+}
+
+void PluginTO5MainWindow::swapRows(int row1, int row2)
+{
+	if (row1 == row2)
+	{
+		return;
+	}
+
+	QList<QTableWidgetItem*> items;
+
+	for (int col = 0; col < m_tableWidget->columnCount(); ++col)
+	{
+		QTableWidgetItem* item = m_tableWidget->item(row1, col);
+
+		items.append(item ? item->clone() : nullptr);
+	}
+
+	m_tableWidget->removeRow(row1);
+	m_tableWidget->insertRow(row2);
+
+	for (int col = 0; col < items.size(); ++col)
+	{
+		m_tableWidget->setItem(row2, col, items[col]);
+	}
+}
+
+void PluginTO5MainWindow::moveSelectedRows(int direction)
+{
+	QModelIndexList indexes = m_tableWidget->selectionModel()->selectedRows();
+
+	if (indexes.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<int> rows;
+	for (const QModelIndex& index : indexes)
+	{
+		rows.push_back(index.row());
+	}
+
+	std::sort(rows.begin(), rows.end());
+
+	// UP
+	if (direction < 0)
+	{
+		if (rows.front() == 0)
+		{
+			return;
+		}
+
+		for (int row : rows)
+		{
+			QSignalBlocker blocker(m_tableWidget);
+			swapRows(row, row - 1);
+			m_comparatorsStorage.swapComparatorPlace(row, row - 1);
+		}
+	}
+	// DOWN
+	else
+	{
+		if (rows.back() == m_tableWidget->rowCount() - 1)
+		{
+			return;
+		}
+
+		for (auto it = rows.rbegin(); it != rows.rend(); ++it)
+		{
+			int row = *it;
+			QSignalBlocker blocker(m_tableWidget);
+			swapRows(row, row + 1);
+			m_comparatorsStorage.swapComparatorPlace(row, row + 1);
+		}
+	}
+
+	m_hasUnsavedChanges = true;
+
+	m_tableWidget->clearSelection();
+
+	for (int row : rows)
+	{
+		m_tableWidget->selectRow(row + direction);
+	}
 }
 
 void PluginTO5MainWindow::showSoftwareConnection(const QString& caption,
@@ -1276,6 +1446,24 @@ void PluginTO5MainWindow::showSoftwareConnection(const QString& caption,
 
 bool PluginTO5MainWindow::eventFilter(QObject* object, QEvent* event)
 {
+	if (object == m_tableWidget && event->type() == QEvent::KeyPress)
+	{
+		auto* keyEvent = static_cast<QKeyEvent*>(event);
+
+		if (keyEvent->modifiers() == Qt::ControlModifier)
+		{
+			if (keyEvent->key() == Qt::Key_Up)
+			{
+				moveSelectedRows(-1);
+			}
+
+			if (keyEvent->key() == Qt::Key_Down)
+			{
+				moveSelectedRows(1);
+			}
+		}
+	}
+
 	if (object == m_statusBarLogAlerts && m_statusBarLogAlerts->text().isEmpty() == false && event->type() == QEvent::MouseButtonPress)
 	{
 		showAppLog();

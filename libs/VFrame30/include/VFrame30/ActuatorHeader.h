@@ -98,6 +98,7 @@ namespace VFrame30
 		int lmNumber() const;
 		void setLmNumber(int lmNumber);
 
+		static int minLmNumber();
 		static int maxLmNumber();
 
 		QString subsystemId() const;
@@ -119,7 +120,7 @@ namespace VFrame30
 		QString m_acmPresetName;   // HardwareLib::DeviceObject::presetName()
 		QString m_descriptionFile; // HardwareLib::PropertyNames::lmDescriptionFile
 
-		int m_lmNumber = 0;
+		int m_lmNumber = 1;
 		QString m_subsystemId;
 
 		bool m_excludeFromBuild = false;

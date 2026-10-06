@@ -128,7 +128,6 @@ namespace SimUi
 		// TimeType, assume we have only simulated PlantTime
 		//
 		setTimeType(E::TimeType::Plant);
-		m_timeTypeCombo->setCurrentIndex(m_timeTypeCombo->findData(QVariant::fromValue(E::TimeType::Plant)));
 		m_timeTypeCombo->setEnabled(false);
 
 		// Set realtime mode, and hide Realtime button

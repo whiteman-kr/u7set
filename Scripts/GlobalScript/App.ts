@@ -9,9 +9,11 @@ module App {
 
 		// Archive and shapshot functions
 		//
-		showArchive(signalsList: Array<string>, startTime: Date, endTime: Date, timeType: E.ArchiveTimeType): void;
+		showArchive(signalList: Array<string>, startTime: Date, endTime: Date, timeType: E.ArchiveTimeType): void;
 
-		showSnapshot(signalsList: Array<string>): void;
+		showTrendArchive(signalList: Array<string>, startTime: Date, endTime: Date, timeType: E.ArchiveTimeType, laneCount: number, viewMode: E.TrendViewMode, scaleType: E.TrendScaleType): void;
+
+		showSnapshot(signalList: Array<string>): void;
 		showSnapshotByMask(masks: Array<string>): void;
 		showSnapshotByTag(tags: Array<string>): void;
 

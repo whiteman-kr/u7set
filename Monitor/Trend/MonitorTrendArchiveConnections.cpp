@@ -10,7 +10,7 @@ MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo&
 {
 	Q_ASSERT(m_logFile);
 	m_logFile->writeMessage(QString("TrendArchive::TrendArchive, server %1 (%2), address %3.")
-							.arg(server.equipmentId, server.shortenId, server.address.toString()));
+								.arg(server.equipmentId, server.shortenId, server.address.toString()));
 
 	// --
 	//
@@ -19,8 +19,10 @@ MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo&
 	m_archiveTcpClientThread = std::make_unique<SimpleThread>(m_archiveTcpClient);
 	m_archiveTcpClientThread->start();
 
-	connect(this, &MonitorTrendArchiveConnection::private_requestData,
-			m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData,
+	connect(this,
+			&MonitorTrendArchiveConnection::private_requestData,
+			m_archiveTcpClient,
+			&ArchiveTrendTcpClient::slot_requestData,
 			Qt::QueuedConnection);
 
 	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendArchiveConnection::dataReady);
@@ -33,7 +35,8 @@ MonitorTrendArchiveConnection::~MonitorTrendArchiveConnection()
 {
 	m_logFile->writeMessage(QString("TrendArchive %1 dtor.").arg(m_archiveServer.equipmentId));
 
-	m_archiveTcpClientThread->quitAndWait(10000);
+	m_archiveTcpClient->requestStop();
+	m_archiveTcpClientThread->quitAndWait(60000);
 
 	return;
 }
@@ -44,7 +47,7 @@ void MonitorTrendArchiveConnection::requestData(TrendLib::TrendSignalPlusServerI
 {
 	Q_ASSERT(signalPlusServerId.archiveServerId == m_archiveServer.equipmentId);
 
-	emit private_requestData(signalPlusServerId, hourToRequest, timeType);	// signal->slot passes requiest to the communication thread
+	emit private_requestData(signalPlusServerId, hourToRequest, timeType); // signal->slot passes request to the communication thread
 	return;
 }
 
@@ -144,16 +147,17 @@ void MonitorTrendArchiveConnections::requestData(TrendLib::TrendSignalPlusServer
 
 	QString archievServerId = signalPlusServerId.archiveServerId;
 
-	auto cit = std::find_if(m_connections.begin(), m_connections.end(),
-				[&archievServerId](const auto& connection)
-				{
-					return connection.archiveServer().equipmentId == archievServerId;
-				});
+	auto cit = std::find_if(m_connections.begin(),
+							m_connections.end(),
+							[&archievServerId](const auto& connection)
+							{
+								return connection.archiveServer().equipmentId == archievServerId;
+							});
 
 	if (cit == m_connections.end())
 	{
-		m_logFile->writeWarning(QString("Trend RequestData, archive server %1 for signal %2 not found.")
-								 .arg(archievServerId, signalPlusServerId.appSignalId));
+		m_logFile->writeWarning(
+			QString("Trend RequestData, archive server %1 for signal %2 not found.").arg(archievServerId, signalPlusServerId.appSignalId));
 		return;
 	}
 

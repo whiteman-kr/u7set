@@ -72,10 +72,6 @@ function cleanupTestCase(ctrl)
 {
     if (isTestSuite === true)
     {
-        // Write testing start time to the log, END_TIME is a report template tag
-        //
-        //const currentDate = new Date();
-        //log.writeMessage("Finished at: " + currentDate.toLocaleString(), "END_TIME");
     }
 }
 
@@ -101,8 +97,6 @@ function cleanup(ctrl)
     }
 
     log.writeMessage("Test function complete.");
-
-    //ctrl.overridesReset();                   // Remove all signal overrides.
 }
 
 // To give a custom name to the test function, declare a variable that has
@@ -131,87 +125,107 @@ function cmpByOutput(comparators, outputAppSignalId)
 	return undefined;	
 }
 
-function processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, id)
+function processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, id)
 {
+	let setpointMismatch = 0;
+	let outputMismatch = 0;
+
 	let comparators = ctrl.setpointsByInput(inputAppSignalID);
 		
 	let cmp = cmpByOutput(comparators, outputAppSignalID);
 	if (cmp === undefined)
 	{
 		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID} was not found!`);
-		return;
+		return [0,0];
 	}
 		
 	if (cmp.compare.isConst === false)
 	{
 		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID} is dynamic!`);
-		return;
+		return [0,0];
 	}
-		
-	let setpointValue = cmp.compare.constValue;
+	
+	// Check the static setpoint value matching
+	//
+	let setpointValue = Number(cmp.compare.constValue);
+	if (isNaN(setpointValue) === true)
+	{
+		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID} has wrong format!`);
+		return [0,0];				
+	}
 
+	setpointValue = Number(setpointValue.toFixed(precision));	
 	if (Math.abs(setpointValue - criteria) > tolerance)
 	{
-		setpointMismatch++;
-		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
+		log.writeWarning(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
 		correct = "Ні";
+		setpointMismatch++;
 	}
 	else
 	{
 		log.writeMessage(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} = OK `);
 		correct = "Так";
 	}
-		
+				
+	// Print the output value
+	//
 	let outputValue = ctrl.signalValue(cmp.output.appSignalId);	
 	if (isNaN(outputValue) === true)
 	{
 		outputValue = "???";
-		correct = " ";
-		log.writeMessage("Output: NAN");	
+		outputMismatch++;
 	}
 		
 	let record = `${outputAppSignalCaption};${cmp.output.appSignalId};${caseId};${outputValue};${criteria};${setpointValue};${correct};`;
 				
 	log.writeMessage(record, `TO_TABLE_${id}`);	
-	 
+	
+	return [setpointMismatch, outputMismatch];
 } 
 
-function processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, id)
+function processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, id)
 {
+	let setpointMismatch = 0;
+	let outputMismatch = 0;
+
 	let comparators = ctrl.setpointsByInput(inputAppSignalID);
 		
 	let cmp = cmpByOutput(comparators, outputAppSignalID);
 	if (cmp === undefined)
 	{
 		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID} was not found!`);
-		return;
+		return [0,0];
 	}
 		
 	if (cmp.compare.isConst === true)
 	{
 		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID} is static!`);
-		return;
+		return [0,0];
 	}
 		
 	if (cmp.compare.appSignalId !== setpointAppSignalId)
 	{
 		log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}, wrong  setpointAppSignalId!`);
-		return;
+		return [0,0];
 	}
 
-	let setpointValue = ctrl.signalValue(setpointAppSignalId);	
+	// Check the dynamic setpoint value matching
+	//
+	let setpointValue = ctrl.signalValue(setpointAppSignalId);
 	if (isNaN(setpointValue) === true)
 	{
 		setpointValue = "???";
-		log.writeMessage("Setpoint: NAN");	
+		correct = "???";
+		setpointMismatch++;
 	}
 	else
 	{
+		setpointValue = Number(setpointValue.toFixed(precision));	
 		if (Math.abs(setpointValue - criteria) > tolerance)
 		{
-			setpointMismatch++;
-			log.writeError(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
+			log.writeWarning(`Setpoint ${inputAppSignalID} -> ${outputAppSignalID}: ${setpointValue} expected: ${criteria}`);
 			correct = "Ні";
+			setpointMismatch++;
 		}
 		else
 		{
@@ -220,21 +234,56 @@ function processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, ou
 		}
 	}
 		
+	// Print the output value
+	//
 	let outputValue = ctrl.signalValue(cmp.output.appSignalId);	
 	if (isNaN(outputValue) === true)
 	{
 		outputValue = "???";
-		correct = " ";
-		log.writeMessage("Output: NAN");	
+		outputMismatch++;
 	}
 
 		
 	let record = `${outputAppSignalCaption};${cmp.output.appSignalId};${caseId};${outputValue};${criteria};${setpointValue};${correct};`;
 				
-				
 	log.writeMessage(record, `TO_TABLE_${id}`);	
+	
+	return [setpointMismatch, outputMismatch];
 	 
 } 
+
+function parseCsvLine(line, delimiter = ";") 
+{
+    const result = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+
+        if (c === '"') {
+            // Escaped quote ("")
+            if (inQuotes && line[i + 1] === '"') {
+                field += '"';
+                i++; // Skip the second quote
+            } else {
+                // Enter or leave quoted field
+                inQuotes = !inQuotes;
+            }
+        } else if (c === delimiter && !inQuotes) {
+            // End of current field
+            result.push(field);
+            field = "";
+        } else {
+            field += c;
+        }
+    }
+
+    // Add the last field
+    result.push(field);
+
+    return result;
+}
 
 // TO5 Report by SchemaID
 //
@@ -255,44 +304,46 @@ function testTO5BySchemaID(ctrl)
 	let csvStrings = result.strings;
 	log.writeMessage("Lines read: " + csvStrings.length);
 	
-	const setpointsData = csvStrings.map(row => row.split(";").slice(1));
+	let setpointsData = csvStrings.map(row => parseCsvLine(row).slice(1));
 	setpointsData.shift();
-	
 	
 	const schemaIDList = [];
 	for (const row of setpointsData) {
-		if (!schemaIDList.includes(row[1 /*SchemaID*/])) {
-			schemaIDList.push(row[1 /*SchemaID*/]);
+		if (!schemaIDList.includes(row[2 /*SchemaID*/])) {
+			schemaIDList.push(row[2 /*SchemaID*/]);
 		}
 	}
 	
-	const tolerance = 0.0001;
+	const tolerance = 0.000001;
 	
 	log.writeMessage(`${schemaIDList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
 
 	let setpointMismatch = 0;
+	let outputMismatch = 0;
 	let errorReadData = false;
 	let currentSchemaID = "";
+	let index = 0;
 	for (let i = 0; i < schemaIDList.length; i++)
 	{
 		for (const data of setpointsData)
 		{
-			if (schemaIDList[i] !== data[1 /*SchemaID*/])
+			if (schemaIDList[i] !== data[2 /*SchemaID*/])
 			{
 				continue;
 			}
 			
-			const caseId = data[0 /*CaseID*/];
-			const schemaID = data[1 /*SchemaID*/];
-			const inputAppSignalID = data[2 /*InputAppSignalID*/];
-			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
-			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/];
-			let criteria = data[9 /*Criteria*/];
-			const round = data[14 /*Precision*/];
-			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/];
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
+			criteria = Number(criteria.toFixed(precision));
 
 			if (outputAppSignalID === "")
 			{
+				log.writeError(`CSV outputAppSignalID is empty, index : ${index}`);
 				errorReadData = true;
 				continue;
 			}
@@ -305,38 +356,51 @@ function testTO5BySchemaID(ctrl)
 				currentSchemaID = schemaIDList[i];
 			}
 			
-			if (data[10 /*Type*/] === "S")
+			if (data[11 /*Type*/] === "S")
 			{
-				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
-			else if (data[10 /*Type*/] === "D")
+			else if (data[11 /*Type*/] === "D")
 			{
-				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
-				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
+				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
 			else
 			{
 				// CSV ERROR DATA
+				log.writeError(`CSV setpoint type unknown, index : ${index}`);
+				errorReadData = true;
 			}
 		}
 	}
 
 	if (errorReadData === true)
 	{
-		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
+		log.writeMessage("Помилка при читанні файлу уставок.", "TO_RESULT");
 	}
 	else
 	{
 		if (setpointMismatch === 0)
 		{
-			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+			log.writeMessage("Усі величини уставок відповідають карті уставок.", "TO_RESULT");
 		}
 		else
 		{
-			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+			log.writeMessage(`Уставок, що не відповідають карті уставок: ${setpointMismatch}.`, "TO_RESULT");
 		}
-	
-		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+		
+		if (outputMismatch === 0)
+		{
+			log.writeMessage("Поточні значення спрацювання уставок отримано.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Помилок отримання значень спрацювання уставок: ${outputMismatch}.`, "TO_RESULT");
+		}
 	}
 }
 
@@ -359,46 +423,50 @@ function testTO5ByCaseID(ctrl)
 	let csvStrings = result.strings;
 	log.writeMessage("Lines read: " + csvStrings.length);
 	
-	const setpointsData = csvStrings.map(row => row.split(";").slice(1));
+	let setpointsData = csvStrings.map(row => parseCsvLine(row).slice(1));
 	setpointsData.shift();
-	
 	
 	const caseIDList = [];
 	for (const row of setpointsData) {
-		if (!caseIDList.includes(row[0 /*CaseID*/])) {
-			caseIDList.push(row[0 /*CaseID*/]);
+		if (!caseIDList.includes(row[1 /*CaseID*/])) {
+			caseIDList.push(row[1 /*CaseID*/]);
 		}
 	}
 	
-	const tolerance = 0.0001;
+	const tolerance = 0.000001;
 	
 	log.writeMessage(`${caseIDList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
 
 	let setpointMismatch = 0;
+	let outputMismatch = 0;
 	let currentCaseID = "";
 	let errorReadData = false;
+	let index = 0;
 	for (let i = 0; i < caseIDList.length; i++)
 	{
 		for (const data of setpointsData)
 		{
-			if (caseIDList[i] !== data[0 /*CaseID*/])
+			if (caseIDList[i] !== data[1 /*CaseID*/])
 			{
 				continue;
 			}
 			
-			const caseId = data[0 /*CaseID*/];
-			const schemaID = data[1 /*SchemaID*/];
-			const inputAppSignalID = data[2 /*InputAppSignalID*/];
-			const outputAppSignalID = data[5 /*OutputAppSignalID*/];
-			const outputAppSignalCaption = data[7 /*OutputAppSignalCaption*/]
-			let criteria = data[9 /*Criteria*/];
-			const round = data[14 /*Precision*/];
-			criteria = math.floor(criteria * 10^round + 0.5) / 10^round;
+			index++;
+			
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
+			criteria = Number(criteria.toFixed(precision));
 
 			let correct = "";
 
 			if (outputAppSignalID === "")
 			{
+				log.writeError(`CSV outputAppSignalID is empty, index : ${index}`);
 				errorReadData = true;
 				continue;
 			}
@@ -409,102 +477,178 @@ function testTO5ByCaseID(ctrl)
 				currentCaseID = caseIDList[i];
 			}
 			
-			if (data[10 /*Type*/] === "S")
+			if (data[11 /*Type*/] === "S")
 			{
-				processStaticData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, correct, tolerance, i);
+				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
-			else if (data[10 /*Type*/] === "D")
+			else if (data[11 /*Type*/] === "D")
 			{
-				const setpointAppSignalId = data[11 /*SetpointAppSignalID*/]
-				processDynamicData(ctrl, setpointMismatch, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, correct, tolerance, i);
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
+				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
 			}
 			else
 			{
 				// CSV ERROR DATA
+				log.writeError(`CSV setpoint type unknown, index : ${index}`);
+				errorReadData = true;
 			}
 		}
 	}
+
+	log.writeMessage(`CSV total indexes : ${index}`);
 	
 	if (errorReadData === true)
 	{
-		log.writeMessage("Помилка при читанню файлу уставок", "TO_RESULT");
+		log.writeMessage("Помилка при читанні файлу уставок.", "TO_RESULT");
 	}
 	else
 	{
 		if (setpointMismatch === 0)
 		{
-			log.writeMessage("Величини уставок відповідають карті уставок.", "TO_RESULT");
+			log.writeMessage("Усі величини уставок відповідають карті уставок.", "TO_RESULT");
 		}
 		else
 		{
-			log.writeMessage(`Кількість уставок не відповідних до карти уставок: ${setpointMismatch}`, "TO_RESULT");
+			log.writeMessage(`Уставок, що не відповідають карті уставок: ${setpointMismatch}.`, "TO_RESULT");
 		}
-	
-		log.writeMessage("Поточні значення параметрів відповідають стану ПТК.", "TO_RESULT");
+		
+		if (outputMismatch === 0)
+		{
+			log.writeMessage("Поточні значення спрацювання уставок отримано.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Помилок отримання значень спрацювання уставок: ${outputMismatch}.`, "TO_RESULT");
+		}
 	}
 }
-	
-    /*
+
+
+// TO5 Report by Algorithm
+//
+function testTO5ByAlgorithm(ctrl)
 {
-    // Start simulation for N msecs:
-    //
-    if (isSimulator === true)
-    {
-        ctrl.startForMs(50);
-    }
+	// Read the contents of setpoints file
+	//
+    let csvFile = "%TEMP%\\PluginTO5.csv";
+    
+	let result = ctrl.loadTextFile(csvFile);
 
-    // Check signal value:
-    //
-    assert(ctrl.signalValue("#TEST_NOT_1") === 1);
+	if (result.ok === false) 
+	{
+		assert(false, "Failed to read file " + csvFile + "!");
+		return;
+	}
 
-    // Override signal value:
-    //
-    ctrl.overrideSignalValue("#TEST_NOT_1", 0);
+	let csvStrings = result.strings;
+	log.writeMessage("Lines read: " + csvStrings.length);
+	
+	let setpointsData = csvStrings.map(row => parseCsvLine(row).slice(1));
+	setpointsData.shift();
+	
+	const algorithmList = [];
+	for (const row of setpointsData) {
+		if (!algorithmList.includes(row[0 /*Algorithm*/])) {
+			algorithmList.push(row[0 /*Algorithm*/]);
+		}
+	}
+	
+	const tolerance = 0.000001;
+	
+	log.writeMessage(`${algorithmList.length}`, "SECTION_REPEAT_COUNT(to5)");	// Repeat section for schemaID
 
-    // Clear overriden signal list:
-    //
-    ctrl.overridesReset();
+	let setpointMismatch = 0;
+	let outputMismatch = 0;
+	let currentAlgorithm = "";
+	let errorReadData = false;
+	let index = 0;
+	for (let i = 0; i < algorithmList.length; i++)
+	{
+		for (const data of setpointsData)
+		{
+			if (algorithmList[i] !== data[0 /*Algorithm*/])
+			{
+				continue;
+			}
 
-    // Write message to console/test log:
-    //
-    log.writeMessage("Text");
-    log.writeWarning("Text");
-    log.writeError("Text");
+			index++;
 
-    // Log messages are used by the TestSuite for generated reports.
-    // To add log message to the report:
-    //
-    // 1. Edit ReportTemplates property of TestSuite preset in RPCT and
-    // specify same tags for Text, Table objects etc (Tag attribute).
-    //
-    // 2. Specify tag parameter in the log writing function (for example,
-    // "report_tab_tag1" or "report_text_tag1").
-    //
-    // 3. To use tables in reports, generated text should be divided to
-    // different columns using specified separator.
-    // By default, a semicolon is used and can be changed in ReportTemplates
-    // property. For example, if table has three columns, message text should
-    // look like "A;B;C", where A, B and C - text to be displayed in every
-    // column. See the example below.
-    //
-    // 4. Report can contain multiple records with same tag. By default, every
-    // message is added to the report. To display message only once,
-    // "$FIRST(tag)" and "$LAST(tag) tags descriptions are used in report
-    // templates. These descriptions specify to display only first
-    // or only last appearance of the tagged message. The example is testing
-    // start and end time.
+			const algorithm = data[0 /*Algorithm*/];
+			const caseId = data[1 /*CaseID*/];
+			const schemaID = data[2 /*SchemaID*/];
+			const inputAppSignalID = data[3 /*InputAppSignalID*/];
+			const outputAppSignalID = data[6 /*OutputAppSignalID*/];
+			const outputAppSignalCaption = data[8 /*OutputAppSignalCaption*/]
+			let criteria = Number(data[10 /*Criteria*/]);
+			const precision = data[15 /*Precision*/];
+			criteria = Number(criteria.toFixed(precision));
 
-    // Write message to log for generating reports by the TestSuite:
-    //
-    if (isTestSuite === true)
-    {
-        // Table message
-        log.writeMessage("Column 1 Value;Column 2 Value;Column 3 Value", "report_tab_tag1");
+			let correct = "";
 
-        log.writeWarning("Text", "report_text_tag1");   // Text message
-        log.writeError("Text", "report_text_tag2");     // Text message
-    }
+			if (outputAppSignalID === "")
+			{
+				log.writeError(`CSV outputAppSignalID is empty, index : ${index}`);
+				errorReadData = true;
+				continue;
+			}
+			
+			if (currentAlgorithm !== algorithmList[i])
+			{
+				log.writeMessage(`Алгоритм: ${algorithm}`, `TO_ALG_${i}`);
+				currentAlgorithm = algorithmList[i];
+			}
+			
+			if (data[11 /*Type*/] === "S")
+			{
+				const [setpointMismatch0, outputMismatch0] = processStaticData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
+			}
+			else if (data[11 /*Type*/] === "D")
+			{
+				const setpointAppSignalId = data[12 /*SetpointAppSignalID*/]
+				const [setpointMismatch0, outputMismatch0] = processDynamicData(ctrl, caseId, inputAppSignalID, outputAppSignalID, outputAppSignalCaption, setpointAppSignalId, criteria, precision, correct, tolerance, i);
+				setpointMismatch += setpointMismatch0;
+				outputMismatch += outputMismatch0;
+			}
+			else
+			{
+				// CSV ERROR DATA
+				log.writeError(`CSV setpoint type unknown, index : ${index}`);
+				errorReadData = true;
+			}
+		}
+	}
+	
+	log.writeMessage(`CSV total indexes : ${index}`);
+	
+	if (errorReadData === true)
+	{
+		log.writeMessage("Помилка при читанні файлу уставок.", "TO_RESULT");
+	}
+	else
+	{
+		if (setpointMismatch === 0)
+		{
+			log.writeMessage("Усі величини уставок відповідають карті уставок.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Уставок, що не відповідають карті уставок: ${setpointMismatch}.`, "TO_RESULT");
+		}
+		
+		if (outputMismatch === 0)
+		{
+			log.writeMessage("Поточні значення спрацювання уставок отримано.", "TO_RESULT");
+		}
+		else
+		{
+			log.writeMessage(`Помилок отримання значень спрацювання уставок: ${outputMismatch}.`, "TO_RESULT");
+		}
+	}
 }
-    */
-
 

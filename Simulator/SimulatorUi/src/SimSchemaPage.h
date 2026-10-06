@@ -40,6 +40,11 @@ namespace SimUi
 	protected slots:
 		void controlStateChanged(Sim::SimControlState state);
 
+	signals:
+		// Request to create new trend for the specified signals
+		//
+		void signal_newTrend(QStringList appSignalIds);
+
 	public:
 		SimSchemaWidget* simSchemaWidget();
 		const SimSchemaWidget* simSchemaWidget() const;

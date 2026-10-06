@@ -1,13 +1,14 @@
 #include "TrendImpl.h"
 #include "TrendScale.h"
-#include <CUtils.h>
 
+#include <QApplication>
 #include <QPainter>
 
 #include <ranges>
 
+
 #define EXPERIMENTAL_TREND_DRAW_WITH_BARS
-#define DEBUG_TIME
+// #define DEBUG_TIME
 
 namespace TrendLib
 {

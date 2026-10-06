@@ -150,7 +150,7 @@ namespace ReportLib
 							QString s = m_reportDataProvider.text(tagValue, &ok);
 							if (ok == true)
 							{
-								section.addText(s + "\n", t->format());
+								section.addText(s, t->format(), t->hint());
 							}
 						}
 						else
@@ -178,7 +178,7 @@ namespace ReportLib
 
 								if (tagFound == true)
 								{
-									section.addText(s + "\n", t->format());
+									section.addText(s, t->format(), t->hint());
 								}
 							}
 							else
@@ -193,7 +193,7 @@ namespace ReportLib
 									QString s = m_reportDataProvider.text(tag, &ok);
 									if (ok == true)
 									{
-										section.addText(s + "\n", t->format());
+										section.addText(s, t->format(), t->hint());
 									}
 								} while (ok == true);
 								//}
@@ -204,7 +204,7 @@ namespace ReportLib
 					{
 						QString s = t->text();
 						s.replace("\\n", "\n");
-						section.addText(s + "\n", t->format());
+						section.addText(s, t->format(), t->hint());
 					}
 				}
 				else if (object->type() == ReportObject::Type::Table)
@@ -220,7 +220,7 @@ namespace ReportLib
 					{
 						// Create table object
 
-						auto table = section.addTable(t->format());
+						auto table = section.addTable(t->format(), t->hint());
 
 						// Fill table with data
 						bool ok = false;

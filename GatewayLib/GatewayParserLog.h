@@ -12,8 +12,8 @@ namespace Gateway
 
 	struct LogRecord
 	{
-		int lineNo;
-		LogMsgType msgType;
+		int lineNo{};
+		LogMsgType msgType{LogMsgType::Nothing};
 		QString msg;
 	};
 

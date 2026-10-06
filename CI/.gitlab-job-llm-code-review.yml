@@ -1,0 +1,28 @@
+llm_code_review:
+  stage: review
+  #needs: ["project_backup_job", "windows_adsbridge_build", "windows_build_job", "windows_test_job"]
+  #needs:
+  #  - project_backup_job
+  #  - windows_adsbridge_build
+  #  - windows_build_job
+  #  - windows_test_job
+  allow_failure: true
+  
+  variables:
+    GIT_DEPTH: "0" # Fetch full git history to ensure commit diffs work
+    OLLAMA_URL: "http://127.0.0.1:11434"
+    OLLAMA_MODEL: "qwen2.5-coder:14b"
+    AI_REVIEW_MAX_FILE_BYTES: "40000"
+    AI_REVIEW_MAX_CONTEXT_BYTES: "120000"
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: always
+
+  tags:
+    - projectbackup
+
+  script:
+    - python --version
+    - python -m pip install --disable-pip-version-check -r CI/AiCodeReview/requirements.txt
+    - python CI/AiCodeReview/ai_review.py

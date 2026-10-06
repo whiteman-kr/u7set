@@ -14,7 +14,7 @@
 #include <span>
 #include <string>
 #include <syncstream>
-
+#include <optional>
 
 namespace
 {
@@ -37,6 +37,18 @@ namespace
 std::string g_currentUser = initialCurrentUser();
 
 
+void printCommandLineParameters() 
+{
+	std::cout << "Command line parameters:\n"
+			  << "  -address=<ip address> - specifies the gateway service IPv4 address for tuning, default value: 127.0.0.1\n"
+			  << "  Example: -address=192.168.0.1\n"
+			  << "  -port=<port> - specifies the gateway service port for tuning, default value: " << GatewayClientLib::TUNING_GW_PORT << "\n"
+			  << "  Example: -port=5576\n"
+			  << "  -id=<Client ID> - specifies the gateway service client ID address, default value: CLIENTID\n"
+			  << "  Example: -id=CLIENTID\n"
+			  << std::endl;
+}
+
 void printHelp()
 {
 	std::osyncstream(std::cout) << "Available commands:\n"
@@ -58,6 +70,59 @@ void printHelp()
 								<< "\n<Enter> - Repeat last command\n"
 								<< std::endl;
 	return;
+}
+
+struct AppParams
+{
+	std::string address;
+	uint16_t port = 0;
+	std::string clientID;
+};
+
+std::optional<AppParams> parseCommandLine(int argc, char* argv[])
+{
+	AppParams params = {.address = "127.0.0.1", .port = GatewayClientLib::TUNING_GW_PORT, .clientID = "CLIENTID"};
+
+	const std::string_view paramAddress = "-address=";
+	const std::string_view paramPort = "-port=";
+	const std::string_view paramClientID = "-id=";
+
+	for (int i = 1; i < argc; i++)
+	{
+		std::string_view arg(argv[i]);
+		if (arg.starts_with(paramAddress) == true)
+		{
+			params.address = arg.substr(paramAddress.length(), arg.length() - paramAddress.length());
+			if (params.address.empty() == true)
+			{
+				std::cout << "Error: specified address is empty." << std::endl;
+				return {};
+			}
+		} else if (arg.starts_with(paramPort) == true)
+		{
+			const auto [ptr, ec] = std::from_chars(arg.data() + paramPort.length(), arg.data() + arg.size(), params.port);
+			if (ec != std::errc())
+			{
+				std::cout << "Error: specified port is incorrect." << std::endl;
+				return {};
+			}
+		} else if (arg.starts_with(paramClientID) == true)
+		{
+			params.clientID = arg.substr(paramClientID.length(), arg.length() - paramClientID.length());
+			if (params.clientID.empty() == true)
+			{
+				std::cout << "Error: specified client ID is empty." << std::endl;
+				return {};
+			}
+		}
+		else
+		{
+			std::cout << "Error: unknown command line argument: " << arg << std::endl;
+			return {};
+		}
+	}
+
+	return params;
 }
 
 std::string activeTuningSourceId(std::span<const GatewayClientLib::GwTuningSourceState> tuningSources)
@@ -329,13 +394,19 @@ void handleWriteCommand(GatewayClientLib::TuningGwConnection& conn,
 	}
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-	std::cout << "Tuning Gateway Client Example\n";
+	std::cout << "Tuning Gateway Client Example\n\n";
+	
+	printCommandLineParameters();
+	
 	printHelp();
 
-	std::string_view address = "127.0.0.1";
-	uint16_t port = GatewayClientLib::TUNING_GW_PORT;
+	std::optional<AppParams> params = parseCommandLine(argc, argv);
+	if (params.has_value() == false)
+	{
+		return EXIT_FAILURE;
+	}
 
 	GatewayClientLib::TuningSignalManager signalManager;
 
@@ -344,11 +415,12 @@ int main()
 
 	{
 		std::cout << "Creating TCP connection...\n";
-		std::cout << "\t address: " << address << "\n";
-		std::cout << "\t port: " << port << "\n";
+		std::cout << "\t address: " << params->address << "\n";
+		std::cout << "\t port: " << params->port << "\n";
+		std::cout << "\t client ID: " << params->clientID << "\n";
 
 		GatewayClientLib::TuningGwConnection conn{signalManager, logger};
-		conn.connect(address, port, "CLIENTID");
+		conn.connect(params->address, params->port, params->clientID);
 
 		std::string lastLine;
 
@@ -532,5 +604,5 @@ int main()
 	}
 
 	std::cout << "Finished." << std::endl;
-	return 0;
+	return EXIT_SUCCESS;
 }

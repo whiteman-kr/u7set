@@ -59,6 +59,10 @@ namespace Sim
 
 		virtual std::optional<AppSignalParam> signalParam(Hash signalHash) const override;
 
+		// Now this is just a member function, maybe we will make it a virtual one.
+		//
+		std::vector<std::optional<AppSignalParam>> signalParams(std::span<const Hash> appSignalHashes) const;
+
 		virtual std::optional<AppSignalState> signalState(Hash signalHash) const override;
 		virtual std::optional<AppSignalState> signalState(Hash signalHash, Hash dataServerHash) const override;
 

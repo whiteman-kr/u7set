@@ -56,6 +56,8 @@ qt_add_library(${TARGET} STATIC
 	./src/SimSignalSnapshot.h
 	./src/SimTrends.cpp
 	./src/SimTrends.h
+	./src/SimVduModulePage.cpp
+	./src/SimVduModulePage.h
 	./src/SimWidget.cpp
 	./src/SimWidgetPrivate.cpp
 	./src/SimWidgetPrivate.h

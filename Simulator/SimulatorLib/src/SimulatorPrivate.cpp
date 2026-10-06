@@ -1,10 +1,14 @@
 #include "SimulatorPrivate.h"
+
+#include "./Subsystems/SimLmSubsystemImpl.h"
+#include "./Subsystems/SimVduSubsystemImpl.h"
 #include "SimScopedLog.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptSignal.h"
 
+#include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/LogicModulesInfo.h>
 #include <HardwareLib/ModuleFirmware.h>
 
@@ -49,6 +53,11 @@ namespace Sim
 	{
 		clear(); // Clear must be run in this thread
 
+		{
+			std::lock_guard locker{m_buildPathMutex};
+			m_buildPath = buildPath;
+		}
+
 		// Run load in separated thread, it'll allow to process messages, like timer events
 		// for displaying output log
 		//
@@ -66,12 +75,7 @@ namespace Sim
 
 		bool result = future.result();
 
-		if (result == true)
-		{
-			std::lock_guard locker{m_buildPathMutex};
-			m_buildPath = buildPath;
-		}
-		else
+		if (result == false)
 		{
 			clearImpl();
 		}
@@ -304,62 +308,132 @@ namespace Sim
 				return false;
 			}
 
-			// There are cases when subsystem does not have some UARTs (like BVB), then we cannot simulate such
-			// subsystems, but still want to simulate other LM's
-			//
-			if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
+			if (firmware.logicModulesInfo().empty() == true)
 			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no modules, skipping it.").arg(subsystemId));
 				continue;
 			}
 
-			if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
-			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
-				continue;
-			}
+			auto moduleFamily = static_cast<Hardware::DeviceModule::FamilyType>(firmware.logicModulesInfo().front().moduleFamily);
 
-			if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
-			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
-				continue;
-			}
-
-			// Create subsystem
+			// LogicModule subsystem.
 			//
-			if (m_subsystems.count(subsystemId) > 0)
+			if (moduleFamily == Hardware::DeviceModule::LM)
 			{
-				m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
-				return false;
-			}
-
-			auto subsystem = std::make_shared<Sim::SubsystemImpl>(subsystemId, this);
-			m_subsystems[subsystemId] = subsystem;
-
-			SubsystemImpl& ss = *subsystem.get();
-
-			// Get LogicModuleDescription
-			//
-			QString lmDescriptionFile = firmware.lmDescriptionFile();
-
-			auto lmit = m_lmDescriptions.find(lmDescriptionFile);
-			if (lmit == m_lmDescriptions.end())
-			{
-				m_log.writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
-				return false;
-			}
-
-			const LmDescription& lmDescription = *(lmit->second.get());
-
-			// Upload data to subsystem
-			//
-			ok = ss.load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
-			if (ok == false)
-			{
-				// Error must be reported in Subsystem::load
+				// There are cases when subsystem does not have some UARTs (like BVB), then we cannot simulate such
+				// subsystems, but still want to simulate other LM's
 				//
-				return false;
+				if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
+				{
+					m_log.writeError(QObject::tr("LM Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				// Create subsystem
+				//
+				if (m_subsystems.contains(subsystemId) == true)
+				{
+					m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+					return false;
+				}
+
+				auto subsystem = std::make_shared<Sim::LmSubsystemImpl>(subsystemId, this);
+				m_subsystems.emplace(subsystemId, subsystem);
+
+				// Get LogicModuleDescription
+				//
+				QString lmDescriptionFile = firmware.lmDescriptionFile();
+
+				auto lmit = m_lmDescriptions.find(lmDescriptionFile);
+				if (lmit == m_lmDescriptions.end())
+				{
+					m_log.writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
+					return false;
+				}
+
+				const LmDescription& lmDescription = *(lmit->second.get());
+
+				// Upload data to subsystem
+				//
+				ok = subsystem->load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
+				if (ok == false)
+				{
+					// Error must be reported in Subsystem::load
+					//
+					return false;
+				}
+
+				continue;
 			}
+
+			// VDUs
+			//
+			if (moduleFamily == Hardware::DeviceModule::VDU)
+			{
+				if (firmware.uartExists(static_cast<int>(UartId::VduConfiguration)) == false)
+				{
+					m_log.writeError(QObject::tr("VDU Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
+					return false;
+				}
+
+				// Create subsystem
+				//
+				if (m_subsystems.contains(subsystemId) == true)
+				{
+					m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+					return false;
+				}
+
+				auto subsystem = std::make_shared<Sim::VduSubsystemImpl>(subsystemId, this);
+				m_subsystems[subsystemId] = subsystem;
+
+				// Get LogicModuleDescription
+				//
+				QString lmDescriptionFile = firmware.lmDescriptionFile();
+
+				auto lmit = m_lmDescriptions.find(lmDescriptionFile);
+				if (lmit == m_lmDescriptions.end())
+				{
+					m_log.writeError(
+						QObject::tr("Cannot find description file %1 for VDU subsystem %2").arg(lmDescriptionFile).arg(subsystemId));
+					return false;
+				}
+
+				const LmDescription& lmDescription = *(lmit->second.get());
+
+				// Upload data to subsystem
+				//
+				ok = subsystem->load(firmware, lmDescription, m_connectionsImpl, logicModulesInfo);
+				if (ok == false)
+				{
+					// Error must be reported in Subsystem::load
+					//
+					return false;
+				}
+
+				continue;
+			}
+		}
+
+		// Set timeouts for connection ports, so they will be used in simulation.
+		// Timeout values are set depending on the port module.
+		//
+		ok = setConnectionPortsTimeouts();
+		if (ok == false)
+		{
+			return false;
 		}
 
 		// Load application signals
@@ -507,6 +581,57 @@ namespace Sim
 		return ok;
 	}
 
+	bool SimulatorPrivate::setConnectionPortsTimeouts()
+	{
+		// Set port timeouts depending on the simulated modules.
+		// VDU requires longer timeouts, because it is a separate process.
+		//
+		auto setPortTimeouts = [this](ConnectionPort& port)
+		{
+			for (const auto& [_, subsystem] : m_subsystems)
+			{
+				auto portModule = subsystem->module(port.lmId());
+				if (portModule == nullptr)
+				{
+					continue;
+				}
+
+				std::chrono::microseconds timeoutValue{};
+				if (subsystem->isLmSubsystem() == true)
+				{
+					timeoutValue = portModule->cycleDuration() * 2; // 10 ms for LM
+				}
+				else if (subsystem->isVduSubsystem() == true)
+				{
+					timeoutValue = std::chrono::milliseconds(1000); // 1 second for receiving from VDU
+				}
+				else
+				{
+					timeoutValue = portModule->cycleDuration() * 2; // fallback to 10 ms for unknown module type
+				}
+
+				port.setTimeoutValue(timeoutValue);
+				break;                                              // No more iterations needed, we found the module for this port
+			}
+
+			return;
+		};
+
+		for (ConnectionImplPtr& connection : m_connectionsImpl.connections())
+		{
+			for (const ConnectionPort& port : connection->ports())
+			{
+				auto portPtr = connection->portForLmRawPtr(port.lmIdHash());
+				if (portPtr != nullptr)
+				{
+					setPortTimeouts(*portPtr);
+				}
+			}
+		}
+
+		return true;
+	}
+
 	bool SimulatorPrivate::loadAppSignals(QString buildPath)
 	{
 		QString fileName = QDir::fromNativeSeparators(buildPath);
@@ -601,10 +726,76 @@ namespace Sim
 		std::vector<std::shared_ptr<SubsystemImpl>> result;
 		result.reserve(m_subsystems.size());
 
-		for (const auto& [key, ss] : m_subsystems)
+		std::transform(m_subsystems.begin(),
+					   m_subsystems.end(),
+					   std::back_inserter(result),
+					   [](const auto& item)
+					   {
+						   return item.second;
+					   });
+
+		return result;
+	}
+
+	std::vector<std::shared_ptr<LmSubsystemImpl>> SimulatorPrivate::lmSubsystems() const
+	{
+		std::vector<std::shared_ptr<LmSubsystemImpl>> result;
+		result.reserve(m_subsystems.size());
+
+		for (const auto& [_, ss] : m_subsystems)
 		{
-			Q_UNUSED(key)
-			result.push_back(ss);
+			if (ss->isLmSubsystem() == false)
+			{
+				continue;
+			}
+
+			result.push_back(std::static_pointer_cast<LmSubsystemImpl>(ss));
+		}
+
+		return result;
+	}
+
+	std::vector<std::shared_ptr<VduSubsystemImpl>> SimulatorPrivate::vduSubsystems() const
+	{
+		std::vector<std::shared_ptr<VduSubsystemImpl>> result;
+		result.reserve(m_subsystems.size());
+
+		for (const auto& [_, ss] : m_subsystems)
+		{
+			if (ss->isVduSubsystem() == false)
+			{
+				continue;
+			}
+
+			result.push_back(std::static_pointer_cast<VduSubsystemImpl>(ss));
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<BaseModuleImpl> SimulatorPrivate::module(QString equipmentId) const
+	{
+		for (const auto& [_, ss] : m_subsystems)
+		{
+			auto module = ss->module(equipmentId); // This will log error if module not found in subsystem
+			if (module != nullptr)
+			{
+				return module;
+			}
+		}
+
+		return {};
+	}
+
+	std::vector<std::shared_ptr<BaseModuleImpl>> SimulatorPrivate::modules() const
+	{
+		std::vector<std::shared_ptr<BaseModuleImpl>> result;
+		result.reserve(m_subsystems.size() * 10); // Just some random number
+
+		for (const auto& [_, ss] : m_subsystems)
+		{
+			auto subsystemModules = ss->modules();
+			std::ranges::move(subsystemModules, std::back_inserter(result));
 		}
 
 		return result;
@@ -612,11 +803,9 @@ namespace Sim
 
 	std::shared_ptr<LogicModuleImpl> SimulatorPrivate::logicModule(QString equipmentId) const
 	{
-		for (const auto& [key, ss] : m_subsystems)
+		for (const auto& ss : lmSubsystems())
 		{
-			Q_UNUSED(key);
-
-			std::shared_ptr<LogicModuleImpl> lm = ss->logicModule(equipmentId);
+			auto lm = ss->logicModule(equipmentId);
 			if (lm != nullptr)
 			{
 				return lm;
@@ -629,13 +818,39 @@ namespace Sim
 	std::vector<std::shared_ptr<LogicModuleImpl>> SimulatorPrivate::logicModules() const
 	{
 		std::vector<std::shared_ptr<LogicModuleImpl>> result;
-		result.reserve(m_subsystems.size() * 10); // Just some number
+		result.reserve(m_subsystems.size() * 10); // Just some random number
 
-		for (const auto& [key, ss] : m_subsystems)
+		for (const auto& ss : lmSubsystems())
 		{
-			Q_UNUSED(key);
+			auto subsystemModules = ss->logicModules();
+			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
+		}
 
-			std::vector<std::shared_ptr<LogicModuleImpl>> subsystemModules = ss->logicModules();
+		return result;
+	}
+
+	std::shared_ptr<VduModuleImpl> SimulatorPrivate::vduModule(QString equipmentId) const
+	{
+		for (const auto& ss : vduSubsystems())
+		{
+			auto vdu = ss->vduModule(equipmentId);
+			if (vdu != nullptr)
+			{
+				return vdu;
+			}
+		}
+
+		return {};
+	}
+
+	std::vector<std::shared_ptr<VduModuleImpl>> SimulatorPrivate::vduModules() const
+	{
+		std::vector<std::shared_ptr<VduModuleImpl>> result;
+		result.reserve(m_subsystems.size() * 10); // Just some random number
+
+		for (const auto& ss : vduSubsystems())
+		{
+			auto subsystemModules = ss->vduModules();
 			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
 		}
 

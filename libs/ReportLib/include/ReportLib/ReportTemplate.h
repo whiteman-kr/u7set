@@ -23,11 +23,14 @@ namespace ReportLib
 
 		const QString& text() const;
 		const QString& tag() const;
+		const QString& hint() const;
 
 	private:
 		ReportObject::Type m_type{ReportObject::Type::Undefined};
 		QString m_text; // Static text
 		QString m_tag;  // Tag to take text dynamically
+		QString m_hint;  // Tag to take text dynamically
+
 	};
 
 

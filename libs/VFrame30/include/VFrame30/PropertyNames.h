@@ -95,6 +95,7 @@ namespace VFrame30
 		inline static const QString description = QStringLiteral("Description");
 		inline static const QString maxLength = QStringLiteral("MaxLength");
 		inline static const QString multiLine = QStringLiteral("MultiLine");
+		inline static const QString isStatic = QStringLiteral("Static");
 
 		inline static const QString allowScale = QStringLiteral("AllowScale");
 		inline static const QString keepAspectRatio = QStringLiteral("KeepAspectRatio");

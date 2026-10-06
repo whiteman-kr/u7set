@@ -35,7 +35,7 @@ public slots:
 	const TIME_SYSTEM = 1;
 	const TIME_LOCAL =  2;
 
-	let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+	let signalList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
 
 	// Check if signals database is loaded
 	//
@@ -48,7 +48,7 @@ public slots:
 	let startTime = new Date(2021, 11, 25, 1, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
 	let endTime = new Date();							// Current date and time
 
-	app.showArchive(signalsList, startTime, endTime, TIME_PLANT);
+	app.showArchive(signalList, startTime, endTime, TIME_PLANT);
 	\endcode
 	<br>
 
@@ -59,7 +59,7 @@ public slots:
 	const TIME_SYSTEM = 1;
 	const TIME_LOCAL =  2;
 
-	let signalsList = ["#ANALOG_004", "#ANALOG_040"];
+	let signalList = ["#ANALOG_004", "#ANALOG_040"];
 
 	// Check if signals database is loaded
 	//
@@ -79,23 +79,101 @@ public slots:
 	// One more alternative way to subtract one day from current time
 	// let startTime = new Date(endTime - (1000 * 60 * 60 * 24));
 
-	app.showArchive(signalsList, startTime, endTime, TIME_LOCAL);
+	app.showArchive(signalList, startTime, endTime, TIME_LOCAL);
 
 	\endcode
 
 	*/
-	void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+	void showArchive(QStringList signalList, QDateTime startTime, QDateTime endTime, int timeType);
+
+	/// \brief Shows trend archive for specified signals list, time period, time type, lane count, view mode and scale type
+	/*!
+	Shows trend archive for specified signals list, time period, time type, lane count, view mode and scale type
+	\warning Month number is 0-based in JavaScript!
+	<br>
+
+	\code
+	// Show trend archive from specified time to current time
+	//
+	const TIME_PLANT =  0;
+	const TIME_SYSTEM = 1;
+	const TIME_LOCAL =  2;
+
+	const TREND_SEPARATED = 0;
+	const TREND_OVERLAPPED = 1;
+
+	const SCALE_LINEAR = 0;
+	const SCALE_LOG10 =  1;
+	const SCALE_PERIOD = 2;
+
+	let signalList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+
+	// Check if signals database is loaded
+	//
+	if (signals.signalsCount() == 0)
+	{
+		view.errorMessageBox("Signal database is not loaded!");
+		return;
+	}
+
+	let startTime = new Date(2021, 11, 25, 1, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
+	let endTime = new Date();							// Current date and time
+
+	app.showTrendArchive(signalList, startTime, endTime, TIME_PLANT, 1, TREND_SEPARATED, SCALE_LINEAR);
+	\endcode
+	<br>
+
+	\code
+	// Show trend archive for last day, each signal in its own lane, with a linear scale
+	//
+	const TIME_PLANT =  0;
+	const TIME_SYSTEM = 1;
+	const TIME_LOCAL =  2;
+
+	const TREND_SEPARATED = 0;
+	const TREND_OVERLAPPED = 1;
+
+	const SCALE_LINEAR = 0;
+	const SCALE_LOG10 =  1;
+	const SCALE_PERIOD = 2;
+
+	let signalList = ["#ANALOG_004", "#ANALOG_040"];
+
+	// Check if signals database is loaded
+	//
+	if (signals.signalsCount() == 0)
+	{
+		view.errorMessageBox("Signal database is not loaded!");
+		return;
+	}
+
+	let startTime = new Date(new Date() - (1000 * 60 * 60 * 24));// Subtract one day from current time
+	let endTime = new Date();
+
+	app.showTrendArchive(signalList, startTime, endTime, TIME_LOCAL, 1, TREND_SEPARATED, SCALE_LINEAR);
+
+	\endcode
+
+	*/
+	void showTrendArchive(QStringList appSignalIds,
+						  QDateTime startTime,
+						  QDateTime endTime,
+						  E::TimeType timeType,
+						  int laneCount,
+						  E::TrendViewMode viewMode,
+						  E::TrendScaleType scaleType);
+
 	/// \brief Show snapshot for signals specified by list of Application Signal IDs
 	/*!
 	Show snapshot for signals specified by list of Application Signal IDs
 
 	\code
-	let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
-	app.showSnapshot(signalsList);
+	let signalList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+	app.showSnapshot(signalList);
 	\endcode
 
 	*/
-	void showSnapshot(QStringList signalsList);
+	void showSnapshot(QStringList signalList);
 
 	/// \brief Show snapshot for signals specified by mask or by text fragment.
 	/*!
@@ -159,9 +237,17 @@ public slots:
 	bool start(QString program, QString arguments = QString(), QString workDir = QString());
 
 signals:
-	void signal_showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+	void signal_showArchive(QStringList signalList, QDateTime startTime, QDateTime endTime, int timeType);
 
-	void signal_showSnapshot(QStringList signalsList);
+	void signal_showTrendArchive(QStringList signalList,
+								 QDateTime startTime,
+								 QDateTime endTime,
+								 E::TimeType timeType,
+								 int laneCount,
+								 E::TrendViewMode viewMode,
+								 E::TrendScaleType scaleType);
+
+	void signal_showSnapshot(QStringList signalList);
 	void signal_showSnapshotByMask(QStringList masks);
 	void signal_showSnapshotByTag(QStringList tags);
 
@@ -183,5 +269,3 @@ public:
 private:
 	MonitorMainWindow* m_mainWindow = nullptr;
 };
-
-

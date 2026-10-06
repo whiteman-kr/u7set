@@ -12,6 +12,7 @@
 #include <SimulatorLib/SimService.h>
 #include <SimulatorLib/SimSoftware.h>
 
+#include "./Subsystems/SimSubsystemImpl.h"
 #include "SimAppSignalManagerImpl.h"
 #include "SimConnectionsImpl.h"
 #include "SimControlImpl.h"
@@ -19,7 +20,6 @@
 #include "SimScopedLog.h"
 #include "SimScriptSimulator.h"
 #include "SimSoftwareImpl.h"
-#include "SimSubsystemImpl.h"
 #include "SimTuningSignalManager.h"
 
 
@@ -76,6 +76,7 @@ namespace Sim
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
 		bool loadConnectionsInfo(QString buildPath);
+		bool setConnectionPortsTimeouts();
 		bool loadAppSignals(QString buildPath);
 		bool loadComparatorSet(QString buildPath);
 
@@ -103,8 +104,17 @@ namespace Sim
 		[[nodiscard]] Sim::Connections& connectionsPublic();
 
 		[[nodiscard]] std::vector<std::shared_ptr<SubsystemImpl>> subsystems() const;
+		[[nodiscard]] std::vector<std::shared_ptr<LmSubsystemImpl>> lmSubsystems() const;
+		[[nodiscard]] std::vector<std::shared_ptr<VduSubsystemImpl>> vduSubsystems() const;
+
+		[[nodiscard]] std::shared_ptr<BaseModuleImpl> module(QString equipmentId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<BaseModuleImpl>> modules() const;
+
 		[[nodiscard]] std::shared_ptr<LogicModuleImpl> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<std::shared_ptr<LogicModuleImpl>> logicModules() const;
+
+		[[nodiscard]] std::shared_ptr<VduModuleImpl> vduModule(QString equipmentId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<VduModuleImpl>> vduModules() const;
 
 		[[nodiscard]] Sim::AppSignalManagerImpl& appSignalManager();
 		[[nodiscard]] const Sim::AppSignalManagerImpl& appSignalManager() const;

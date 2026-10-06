@@ -120,7 +120,19 @@ void UiTools::ensureVisible(QWidget* widget)
 		(intersectRect.width() < widget->size().width() ||
 		 intersectRect.height() < widget->size().height()))
 	{
-		widget->move(screenRect.topLeft());
+		// Move the window to the nearest corner
+		//
+		QRect windowRect = widget->frameGeometry();
+		
+		int left = qAbs(windowRect.left() - screenRect.left());
+		int right = qAbs(windowRect.right() - screenRect.right());
+		int top = qAbs(windowRect.top() - screenRect.top());
+		int bottom = qAbs(windowRect.bottom() - screenRect.bottom());
+
+		int x = (left < right) ? screenRect.left() : screenRect.right() - windowRect.width() + 1;
+		int y = (top < bottom) ? screenRect.top() : screenRect.bottom() - windowRect.height() + 1;
+
+		widget->move(x, y);
 	}
 
 	if (widget->isMaximized() == false &&

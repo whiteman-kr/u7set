@@ -1018,9 +1018,7 @@ TEST_F(TuningGatewayTests, GptReadSignalStatesReturnsKnownHashesInRequestOrder)
 	}
 	catch(const std::exception& e)
 	{
-		std::string err = e.what();
-
-		int a = 0;
+		[[maybe_unused]] std::string err = e.what();
 	}
 	
 

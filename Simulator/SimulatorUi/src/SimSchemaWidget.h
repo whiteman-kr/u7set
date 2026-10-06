@@ -45,9 +45,10 @@ namespace SimUi
 	protected:
 		SimWidgetPrivate* simWidget();
 
-		// Signals
-		//
 	signals:
+		// Request to create new trend for the specified signals
+		//
+		void signal_newTrend(QStringList appSignalIds);
 
 		// Slots
 		//

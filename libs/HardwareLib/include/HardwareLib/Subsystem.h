@@ -47,6 +47,7 @@ namespace Hardware
 
 	public:
 		static const int MaxSsKeyValue = 63;   // 4 bit CRC + 6 bit SSKey, + 6 bit Channel
+		static const int MinChannelValue = 1;  //
 		static const int MaxChannelValue = 63; //
 
 	private:

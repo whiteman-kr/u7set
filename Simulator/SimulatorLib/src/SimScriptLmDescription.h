@@ -1,9 +1,9 @@
 #pragma once
 
-#include <HardwareLib/LmDescription.h>
-
-#include "SimLogicModuleImpl.h"
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimScriptRamAddress.h"
+
+#include <HardwareLib/LmDescription.h>
 
 namespace Sim
 {
@@ -42,9 +42,9 @@ namespace Sim
 		int optoPortDataSize() const;
 
 	private:
-		LmDescription m_lmDesc;
-		::LogicModuleInfo m_lmInfo;
+		LmDescription m_lmDesc{};
+		::LogicModuleInfo m_lmInfo{};
 	};
-}
+} // namespace Sim
 
 Q_DECLARE_METATYPE(Sim::ScriptLmDescription);

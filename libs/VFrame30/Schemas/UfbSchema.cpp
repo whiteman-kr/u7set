@@ -56,7 +56,9 @@ namespace VFrame30
 		setDocWidth(mm2in(297));
 		setDocHeight(mm2in(210));
 
-		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription) //
+			->setViewOrder(11); // ViewOrders same as for property Caption in class Schema
+
 		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version);
 		ADD_PROPERTY_GETTER_SETTER(QString,
 								   PropertyNames::lmDescriptionFile,

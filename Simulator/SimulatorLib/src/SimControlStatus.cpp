@@ -1,6 +1,7 @@
 #include <SimulatorLib/SimControlStatus.h>
+
+#include "./Modules/SimLogicModuleImpl.h"
 #include "SimControlImpl.h"
-#include "SimLogicModuleImpl.h"
 
 namespace Sim
 {
@@ -10,11 +11,11 @@ namespace Sim
 		m_duration(cd.m_currentTime - cd.m_startTime),
 		m_state(cd.m_state)
 	{
-		m_lmDeviceModes.reserve(cd.m_lms.size());
+		m_lmDeviceModes.reserve(cd.m_modules.size());
 
-		for (const SimControlRunStruct& lm : cd.m_lms)
+		for (const SimControlRunStruct& lm : cd.m_modules)
 		{
-			m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
+			m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm->deviceState()});
 		}
 	}
 } // namespace Sim

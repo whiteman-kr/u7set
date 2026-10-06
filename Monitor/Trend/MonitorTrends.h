@@ -16,13 +16,20 @@ class QLabel;
 class MonitorTrends
 {
 public:
+	MonitorTrends() = delete;
+
 	static std::vector<MonitorTrendsWidget*> getTrendsList();
 	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
-	static bool startTrendApp(const ClientLib::AppSignalManager& signalManager,
-							  const MonitorConfigController& configController,
-							  const std::vector<AppSignalParam>& appSignals,
-							  const AppSignalLists::AppSignalListSet& appSignalListSet,
-							  QWidget* parent);
+
+	static MonitorTrendsWidget* startTrendApp(const ClientLib::AppSignalManager& signalManager,
+											  const MonitorConfigController& configController,
+											  const std::vector<AppSignalParam>& appSignals,
+											  const AppSignalLists::AppSignalListSet& appSignalListSet,
+											  std::optional<E::TimeType> timeType,
+											  std::optional<int> laneCount,
+											  std::optional<E::TrendViewMode> viewMode,
+											  std::optional<E::TrendScaleType> scaleType,
+											  QWidget* parent);
 
 	static void registerTrendWindow(MonitorTrendsWidget* window);
 	static void unregisterTrendWindow(const MonitorTrendsWidget* window);
@@ -43,6 +50,10 @@ public:
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
+public:
+	using TrendLib::TrendMainWindow::addSignals;
+	void addSignals(const std::vector<AppSignalParam>& appSignalParams, bool redraw);
+
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
@@ -56,12 +67,14 @@ private:
 	void setRealtimeParams();
 
 public:
-
 	// Slots
 	//
 protected slots:
 	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
-	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId,
+								  TimeStamp requestedHour,
+								  E::TimeType timeType,
+								  std::shared_ptr<TrendLib::OneHourData> data);
 
 	void slot_realtimeDataReceived(QString sourceEquipmentId,
 								   std::shared_ptr<TrendLib::RealtimeData> data,
@@ -83,7 +96,7 @@ private:
 
 	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
-	enum  StatusBarColumns
+	enum StatusBarColumns
 	{
 		SB_Text,
 		SB_QueueSize,

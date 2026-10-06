@@ -58,7 +58,7 @@ namespace
 		report.addMarginItem({"%PAGE%", -1, -1, {marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
 		ReportLib::ReportFont textFont{"Arial", 12};
-		mainSection.addText(" \n", {textFont, Qt::AlignLeft});
+		mainSection.addText(" \n", {textFont, Qt::AlignLeft}, "" /*hint*/);
 	}
 } // namespace
 

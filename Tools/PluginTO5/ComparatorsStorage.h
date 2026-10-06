@@ -14,13 +14,16 @@ enum class FilterType
 {
 	BySchemaID = 0,
 	ByCaseID = 1,
-	Count = 2
+	ByAlgorithm = 2,
+	Count = 3
 };
 
 
 struct ComparatorData
 {
 	Hash hash = UNDEFINED_HASH;
+
+	QString algorithm;
 
 	QString schemaID;
 
@@ -72,6 +75,7 @@ public:
 	//
 	bool loadFromFile(const QString& fileName, QString* errorMsg);
 	bool saveToFile(const QString& fileName);
+	bool saveToFile(const QString& fileName, const std::vector<Hash>& comparators);
 
 	// Import
 	//
@@ -86,12 +90,15 @@ public:
 
 	QList<QString> schemaIds() const;
 	QList<QString> caseIds() const;
+	QList<QString> algorithms() const;
 
 	// Update comparator
 	//
 	void setComparatorCriteria(Hash hash, double criteria);
+	void setComparatorAlgorithm(Hash hash, const QString& algorithm);
+	void swapComparatorPlace(int index1, int index2);
 
-	QString FilterTypeStr[static_cast<int>(FilterType::Count)] = {QObject::tr("Schema ID"), QObject::tr("Case ID")};
+	QString FilterTypeStr[static_cast<int>(FilterType::Count)] = {QObject::tr("Schema ID"), QObject::tr("Case ID"), QObject::tr("Algorithm")};
 
 private:
 	bool loadComparators(const QString& comparatorsFile, ComparatorSet& comparatorSet) const;

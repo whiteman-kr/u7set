@@ -211,6 +211,30 @@ namespace AppSignalStdLib
 			}
 		}
 
+		std::vector<std::optional<SignalParamType>> signalParams(std::span<const Hash> appSignalHashes) const
+		{
+			std::vector<std::optional<SignalParamType>> result;
+			result.reserve(appSignalHashes.size());
+
+			std::shared_lock rl{m_paramsLocker};
+
+			for (const Hash signalHash : appSignalHashes)
+			{
+				auto it = m_signalParams.find(signalHash);
+
+				if (it != m_signalParams.end())
+				{
+					result.push_back(it->second);
+				}
+				else
+				{
+					result.push_back(std::nullopt);
+				}
+			}
+
+			return result;
+		}
+
 		std::optional<SignalStateType> signalState(Hash signalHash, Hash dataServerHash) const
 		{
 			if (signalHash == UNDEFINED_HASH)
