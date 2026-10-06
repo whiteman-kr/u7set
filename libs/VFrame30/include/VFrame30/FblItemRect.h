@@ -23,6 +23,7 @@ namespace VFrame30
 	class SchemaItemLoopback;
 	class SchemaItemLoopbackSource;
 	class SchemaItemLoopbackTarget;
+	class SchemaItemActuator;
 }
 
 namespace VFrame30
@@ -107,6 +108,7 @@ namespace VFrame30
 		bool isBusExtractorElement() const;
 		bool isLoopbackSourceElement() const;
 		bool isLoopbackTargetElement() const;
+		bool isActuatorElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -146,6 +148,9 @@ namespace VFrame30
 
 		VFrame30::SchemaItemLoopbackTarget* toLoopbackTargetElement();
 		const VFrame30::SchemaItemLoopbackTarget* toLoopbackTargetElement() const;
+
+		VFrame30::SchemaItemActuator* toActuatorElement();
+		const VFrame30::SchemaItemActuator* toActuatorElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

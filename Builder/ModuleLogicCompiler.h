@@ -340,6 +340,7 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
+		bool createUalSignalsFromActuatorOuts(UalItem* ualItem);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const SchemaPin& outPin, UalSignal* ualSignal);
@@ -349,6 +350,7 @@ namespace Builder
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkActuator(UalItem* actuator, QUuid inPinUuid, UalSignal* ualSignal);
 
 		bool checkLoopbacks();
 		bool linkLoopbackTargets();
@@ -744,6 +746,8 @@ namespace Builder
 
 		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
 		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem, UalSignal* inputBusSignal);
+
+		bool generateActuatorCode(CodeSnippet* code, const UalItem* ualItem);
 
 		bool generateFrombusConversionCode(CodeSnippet* code,
 										   const UalSignal* inputBusSignal,

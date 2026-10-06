@@ -1484,6 +1484,7 @@ namespace Builder
 					t.toType<VFrame30::SchemaItemReceiver>(ali.m_fblItem.get());
 					t.toType<VFrame30::SchemaItemLoopback>(ali.m_fblItem.get());
 					t.toType<VFrame30::SchemaItemBus>(ali.m_fblItem.get());
+					t.toType<VFrame30::SchemaItemActuator>(ali.m_fblItem.get());
 
 					if (found == false)
 					{

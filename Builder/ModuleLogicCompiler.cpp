@@ -1603,6 +1603,10 @@ namespace Builder
 				result &= createUalSignalsFromAfbOuts(ualItem);
 				break;
 
+			case E::UalItemType::Actuator:
+				result &= createUalSignalsFromActuatorOuts(ualItem);
+				break;
+
 			case E::UalItemType::BusExtractor:
 				result &= linkUalSignalsFromBusExtractor(ualItem);
 				break;
@@ -1775,6 +1779,15 @@ namespace Builder
 					itemStr += QString(", loopbackID=%1").arg(l->loopbackId());
 				}
 				break;
+
+			case E::UalItemType::Actuator:
+				{
+					const SchemaActuator* a = ualItem->schemaActuator();
+					TEST_PTR_CONTINUE(a);
+					itemStr += QString(", %1").arg(a->actuatorTypeId());
+				}
+				break;
+
 
 			default:
 				Q_ASSERT(false);
@@ -3216,6 +3229,12 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::createUalSignalsFromActuatorOuts(UalItem* ualItem)
+	{
+		// Actuator TO DO
+		return true;
+	}
+
 	bool ModuleLogicCompiler::linkUalSignalsFromBusExtractor(UalItem* ualItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
@@ -3348,6 +3367,10 @@ namespace Builder
 
 			case E::UalItemType::LoopbackSource:
 				result &= linkLoopbackSource(destUalItem, inPinUuid, ualSignal);
+				break;
+
+			case E::UalItemType::Actuator:
+				result &= linkActuator(destUalItem, inPinUuid, ualSignal);
 				break;
 
 			case E::UalItemType::Terminator:
@@ -3706,6 +3729,12 @@ namespace Builder
 
 		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
 
+		return true;
+	}
+
+	bool ModuleLogicCompiler::linkActuator(UalItem* actuator, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		// Actuator TO DO
 		return true;
 	}
 
@@ -10140,6 +10169,10 @@ namespace Builder
 				result &= generateBusExtractorCode(code, ualItem);
 				break;
 
+			case E::UalItemType::Actuator:
+				result &= generateActuatorCode(code, ualItem);
+				break;
+
 			// UalItems that is not required code generation
 			//
 			case E::UalItemType::Signal:
@@ -13791,6 +13824,12 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::generateActuatorCode(CodeSnippet* code, const UalItem* ualItem)
+	{
+		// Actuator TO DO
+		return true;
 	}
 
 	bool ModuleLogicCompiler::generateFrombusConversionCode(CodeSnippet* code,

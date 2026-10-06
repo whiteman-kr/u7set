@@ -514,6 +514,13 @@ namespace Builder
 			return m_type;
 		}
 
+		if (m_appLogicItem.m_fblItem->isActuatorElement() == true)
+		{
+			m_type = E::UalItemType::Actuator;
+			return m_type;
+		}
+
+
 		assert(false);
 
 		m_type = E::UalItemType::Unknown;
@@ -599,6 +606,14 @@ namespace Builder
 		Q_ASSERT(ptr != nullptr);
 		return ptr;
 	}
+
+	const SchemaActuator* UalItem::schemaActuator() const
+	{
+		const SchemaActuator* ptr = m_appLogicItem.m_fblItem->toActuatorElement	();
+		Q_ASSERT(ptr != nullptr);
+		return ptr;
+	}
+
 
 	QString UalItem::schemaID() const
 	{

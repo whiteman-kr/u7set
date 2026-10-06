@@ -8,6 +8,7 @@
 #include <VFrame30/SchemaItemLoopback.h>
 #include <VFrame30/SchemaItemSignal.h>
 #include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/Settings.h>
 
@@ -1003,6 +1004,12 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemLoopbackTarget*>(this) != nullptr;
 	}
 
+	bool FblItemRect::isActuatorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemActuator*>(this) != nullptr;
+	}
+
+
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
@@ -1131,6 +1138,16 @@ namespace VFrame30
 	const VFrame30::SchemaItemLoopbackTarget* FblItemRect::toLoopbackTargetElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemLoopbackTarget*>(this);
+	}
+
+	VFrame30::SchemaItemActuator* FblItemRect::toActuatorElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemActuator*>(this);
+	}
+
+	const VFrame30::SchemaItemActuator* FblItemRect::toActuatorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemActuator*>(this);
 	}
 
 	// Weight propertie

@@ -644,7 +644,8 @@ public:
 		BusComposer,
 		BusExtractor,
 		LoopbackSource,
-		LoopbackTarget
+		LoopbackTarget,
+		Actuator
 	};
 	Q_ENUM(UalItemType)
 

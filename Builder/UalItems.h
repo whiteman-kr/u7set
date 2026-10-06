@@ -10,6 +10,7 @@
 #include <VFrame30/SchemaItemConnection.h>
 #include <VFrame30/SchemaItemConst.h>
 #include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemActuator.h>
 #include <VFrame30/SchemaItemSignal.h>
 
 #include "Busses.h"
@@ -36,6 +37,7 @@ namespace Builder
 
 	using SchemaLoopbackSource = VFrame30::SchemaItemLoopbackSource;
 	using SchemaLoopbackTarget =  VFrame30::SchemaItemLoopbackTarget;
+	using SchemaActuator = VFrame30::SchemaItemActuator;
 
 	using AfbSignal = Afb::AfbSignal;							// signal associated with AFB inputs/outputs
 	using AfbParam = Afb::AfbParam;
@@ -171,6 +173,7 @@ namespace Builder
 		const SchemaBusExtractor* schemaBusExtractor() const;
 		const SchemaLoopbackSource* schemaLoopbackSource() const;
 		const SchemaLoopbackTarget* schemaLoopbackTarget() const;
+		const SchemaActuator* schemaActuator() const;
 
 		const Afb::AfbElement& afb() const { return m_appLogicItem.afbElement(); }
 		std::shared_ptr<Afb::AfbComponent> afbComponent() const { return m_appLogicItem.afbComponent(); }
