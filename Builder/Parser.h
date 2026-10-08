@@ -143,7 +143,7 @@ namespace Builder
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 
-		QUuid m_groupId; // SchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
+		QUuid m_groupId; // SchemaItemUfb, SchemaItemActuator are expanded to the group of items, all these expanded items have the same m_groupId
 						 // This id is empty if item is not in group
 
 		// Methods
@@ -291,6 +291,8 @@ namespace Builder
 		bool expandUfbsForAppLogic();
 		bool expandUfbsForActuatorLogic();
 		bool expandUfbs(std::vector<std::shared_ptr<AppLogicModule>> modules);
+
+		bool splitActuatorItems();
 
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 

@@ -2719,6 +2719,133 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicData::splitActuatorItems()
+	{
+		for (std::shared_ptr<AppLogicModule> module : m_modules)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			UuidGenerator uuidGenerator{};
+			uuidGenerator.init(module->equipmentId() + "ActuatorItemSplit");
+
+			std::list<AppLogicItem> splittedActuatorItems;
+
+			for (const auto& [_, appLogicItem] : module->fblItemsAcc())
+			{
+				assert(appLogicItem.m_fblItem != nullptr);
+
+				if (appLogicItem.m_fblItem->isType<VFrame30::SchemaItemActuator>() == false)
+				{
+					continue;
+				}
+
+				auto actuatorItem = appLogicItem.m_fblItem->toType<VFrame30::SchemaItemActuator>();
+				auto groupId = actuatorItem->guid(); // Same as original item's id.
+
+				AppLogicItem ali = appLogicItem;
+				ali.m_groupId = groupId;
+
+				QByteArray buffer;
+				actuatorItem->saveToByteArray(&buffer);
+
+				if (actuatorItem->hasOutputs() == true)
+				{
+					// []-- This is an INPUT part
+					//
+					ali.m_fblItem = std::dynamic_pointer_cast<VFrame30::FblItemRect>(VFrame30::SchemaItem::Create(buffer));
+					assert(ali.m_fblItem);
+
+					ali.m_fblItem->setLabel(actuatorItem->label() + "_INPUTPART");
+					ali.m_fblItem->setGuid(uuidGenerator.next());
+
+					// Remove all input pins.
+					//
+					ali.m_fblItem->mutableInputs()->clear();
+
+					splittedActuatorItems.push_back(ali);
+				}
+
+				if (actuatorItem->hasInputs() == true)
+				{
+					// --[] This is an OUTPUT part
+					//
+					ali.m_fblItem = std::dynamic_pointer_cast<VFrame30::FblItemRect>(VFrame30::SchemaItem::Create(buffer));
+					assert(ali.m_fblItem);
+
+					ali.m_fblItem->setLabel(actuatorItem->label() + "_OUTPUTPART");
+					ali.m_fblItem->setGuid(uuidGenerator.next());
+
+					// Remove all output pins.
+					//
+					ali.m_fblItem->mutableOutputs()->clear();
+
+					splittedActuatorItems.push_back(ali);
+				}
+			}
+
+			// Remove expanded VFrame30::SchemaItemActuator by its guid.
+			//
+			static_assert(std::is_lvalue_reference_v<decltype(module->fblItemsAcc())> && //
+						  std::is_const_v<std::remove_reference_t<decltype(module->fblItemsAcc())>> == false);
+
+			for (const auto& ali : splittedActuatorItems)
+			{
+				// m_groupId is the same as original actuator item's guid.
+				//
+				module->fblItemsAcc().erase(ali.m_groupId);
+			}
+
+			// Check if any SchemaItemActuator left
+			//
+			bool someActuatorsLeft = std::any_of(module->fblItemsAcc().begin(),
+												 module->fblItemsAcc().end(),
+												 [this](const auto& pair)
+												 {
+													 const auto& [itemuuid, item] = pair;
+
+													 if (item.m_fblItem->isType<VFrame30::SchemaItemActuator>() == true)
+													 {
+														 m_log.errINT1001(QString("After splitting Actuator items, there is SchemaItemActuator left %1").arg(item.m_fblItem->label()),
+																		  item.m_schema->schemaId(),
+																		  item.m_fblItem->guid());
+														 return true;
+													 }
+
+													 return false;
+												 });
+			if (someActuatorsLeft == true)
+			{
+				return false;
+			}
+
+			// Inject splitted actuator items.
+			//
+			for (const auto& ali : splittedActuatorItems)
+			{
+				auto [_, inserted] = module->fblItemsAcc().insert(std::make_pair(ali.m_fblItem->guid(), ali));
+				if (inserted == false)
+				{
+					m_log.errINT1001(
+						QString{"Error inserting splitted actuator item %1 with guid %2 to module %3"}.arg(ali.m_fblItem->label()).arg(ali.m_fblItem->guid().toString()).arg(module->equipmentId()),
+						ali.m_schema->schemaId(),
+						ali.m_groupId);                                      // m_groupId is the same as original actuator item's guid.
+					return false;
+				}
+			}
+
+			if (bool checkResult = module->checkItemsRelationsConsistency(); //
+				checkResult == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool AppLogicData::bindTwoPins(VFrame30::AfbPin& outPint, VFrame30::AfbPin& inputPin)
 	{
 		// Function binds two pins to each other, it is done by setting association vector
@@ -3810,6 +3937,14 @@ namespace Builder
 		{
 			// Return here to avoid further internal errors.
 			//
+			return false;
+		}
+
+		// Split SchemaItemActuator to Input and Output parts
+		//
+		ok = m_applicationData->splitActuatorItems();
+		if (ok == false)
+		{
 			return false;
 		}
 
