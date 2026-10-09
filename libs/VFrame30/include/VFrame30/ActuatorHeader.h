@@ -43,6 +43,8 @@ namespace VFrame30
 		[[nodiscard]] E::AnalogAppSignalFormat analogFormat() const;
 		void setAnalogFormat(E::AnalogAppSignalFormat analogFormat);
 
+		[[nodiscard]] E::DataFormat dataFormat() const;
+
 		[[nodiscard]] QString busTypeId() const;
 		void setBusTypeId(const QString& busTypeId);
 
@@ -109,6 +111,9 @@ namespace VFrame30
 
 		PropertyVector<ActuatorSignal> inputs() const;
 		PropertyVector<ActuatorSignal> outputs() const;
+
+		std::shared_ptr<ActuatorSignal> getInputActuatorSignal(const QString& signalId) const;
+		std::shared_ptr<ActuatorSignal> getOutputActuatorSignal(const QString& signalId) const;
 
 		[[nodiscard]] int version() const;
 

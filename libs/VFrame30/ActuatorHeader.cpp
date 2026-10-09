@@ -115,6 +115,36 @@ namespace VFrame30
 		m_data.analogFormat = analogFormat;
 	}
 
+	E::DataFormat ActuatorSignal::dataFormat() const
+	{
+		switch (m_data.signalType) 
+		{
+		case E::SignalType::Analog:
+			{
+				switch (m_data.analogFormat)
+				{
+				case E::AnalogAppSignalFormat::SignedInt32:
+					return E::DataFormat::SignedInt;
+
+				case E::AnalogAppSignalFormat::Float32:
+					return E::DataFormat::Float;
+				default:
+					Q_ASSERT(false);
+				}
+			}
+			break;
+
+		case E::SignalType::Discrete:
+		case E::SignalType::Bus:
+			return E::DataFormat::UnsignedInt;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return E::DataFormat::UnsignedInt;
+	}
+
 	QString ActuatorSignal::busTypeId() const
 	{
 		return m_data.busTypeId;
@@ -443,6 +473,44 @@ namespace VFrame30
 	PropertyVector<ActuatorSignal> ActuatorHeader::outputs() const
 	{
 		return m_outputs;
+	}
+
+	std::shared_ptr<ActuatorSignal> ActuatorHeader::getInputActuatorSignal(const QString& signalId) const
+	{
+		for (const auto& signal : m_inputs)
+		{
+			if (signal == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (signal->signalId() == signalId)
+			{
+				return signal;
+			}
+		}
+
+		return nullptr;
+	}
+
+	std::shared_ptr<ActuatorSignal> ActuatorHeader::getOutputActuatorSignal(const QString& signalId) const
+	{
+		for (const auto& signal : m_outputs)
+		{
+			if (signal == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (signal->signalId() == signalId)
+			{
+				return signal;
+			}
+		}
+
+		return nullptr;
 	}
 
 	int ActuatorHeader::version() const

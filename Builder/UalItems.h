@@ -38,6 +38,8 @@ namespace Builder
 	using SchemaLoopbackSource = VFrame30::SchemaItemLoopbackSource;
 	using SchemaLoopbackTarget =  VFrame30::SchemaItemLoopbackTarget;
 	using SchemaActuator = VFrame30::SchemaItemActuator;
+	using ActuatorHeader = VFrame30::ActuatorHeader;
+	using ActuatorSignal = std::shared_ptr<VFrame30::ActuatorSignal>;
 
 	using AfbSignal = Afb::AfbSignal;							// signal associated with AFB inputs/outputs
 	using AfbParam = Afb::AfbParam;
@@ -135,6 +137,7 @@ namespace Builder
 		bool isBusExtractor() const { return type() == E::UalItemType::BusExtractor; }
 		bool isLoopbackSource() const { return type() == E::UalItemType::LoopbackSource; }
 		bool isLoopbackTarget() const { return type() == E::UalItemType::LoopbackTarget; }
+		bool isActuator() const { return type() == E::UalItemType::Actuator; }
 		bool isSetFlagsItem() const;
 		bool isSimLockItem() const;
 		bool isMismatchItem() const;

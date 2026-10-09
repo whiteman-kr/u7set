@@ -3232,7 +3232,142 @@ namespace Builder
 	bool ModuleLogicCompiler::createUalSignalsFromActuatorOuts(UalItem* ualItem)
 	{
 		// Actuator TO DO
-		return true;
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const SchemaActuator* actuatorItem = ualItem->schemaActuator();
+
+		if (actuatorItem == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const QString& actuatorTypeID = actuatorItem->actuatorTypeId();
+
+		if (actuatorTypeID.isEmpty())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const BuildActuatorType& actuatorType = getBuildActuatorType(actuatorTypeID);
+
+		if (actuatorType.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const ActuatorHeader& actuatorHeader = actuatorType.actuatorHeader;
+
+		bool result = true;
+
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
+
+		for (const SchemaPin& outPin : outputs)
+		{
+			bool connectedToTerminatorOnly = isConnectedToTerminatorOnly(outPin);
+
+			if (connectedToTerminatorOnly == true)
+			{
+				continue; // not needed to create signal
+			}
+
+			QString pinCaption = outPin.caption();
+
+			ActuatorSignal actuatorSignal = actuatorHeader.getOutputActuatorSignal(pinCaption);
+
+			AfbSignal outAfbSignal;
+
+			outAfbSignal.setType(actuatorSignal->signalType());
+			outAfbSignal.setDataFormat(actuatorSignal->dataFormat());
+			outAfbSignal.setByteOrder(E::ByteOrder::BigEndian);
+
+			QString outBusTypeID;
+			BusShared bus;
+
+			switch (actuatorSignal->signalType())
+			{
+			case E::SignalType::Analog:
+				Q_ASSERT(actuatorSignal->analogFormat() == E::AnalogAppSignalFormat::SignedInt32 || 
+					actuatorSignal->analogFormat() == E::AnalogAppSignalFormat::Float32);
+				outAfbSignal.setSize(SIZE_32BIT);
+				break;
+
+			case E::SignalType::Discrete:
+				outAfbSignal.setSize(SIZE_1BIT);
+				break;
+
+			case E::SignalType::Bus:
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			if (actuatorSignal->signalType() == E::SignalType::Bus)
+			{
+				outBusTypeID = actuatorSignal->busTypeId();
+				bus = m_signals->getBus(outBusTypeID);
+
+				if (bus == nullptr)
+				{
+					// Bus type ID '%1' is undefined (Logic schema '%2').
+					//
+					m_log->errALC5100(outBusTypeID, ualItem->guid(), ualItem->schemaID());
+					return false;
+				}
+			}
+
+			UalSignal* ualSignal = nullptr;
+
+			AppSignal* connectedSignal = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
+
+			switch (outAfbSignal.type())
+			{
+			case E::SignalType::Analog:
+			case E::SignalType::Discrete:
+				if (connectedSignal == nullptr)
+				{
+					std::optional<int> expectedReadCount;	//					= getOutPinExpectedReadCount(outPin);
+
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, expectedReadCount);
+				}
+				else
+				{
+					ualSignal = m_ualSignals.createSignal(connectedSignal, ualItem, outPin.guid());
+				}
+				break;
+
+			case E::SignalType::Bus:
+				{
+					std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
+
+					if (lm == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					ualSignal = m_ualSignals.createBusParentSignal(connectedSignal, bus, ualItem, outPin.guid(), outAfbSignal.caption());
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+
+			if (ualSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			result &= linkConnectedItems(ualItem, outPin, ualSignal);
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::linkUalSignalsFromBusExtractor(UalItem* ualItem)
