@@ -106,6 +106,20 @@ namespace Builder
 
 	private:
 
+		class ExtEquipmentSet
+		{
+		public:
+			explicit ExtEquipmentSet(Hardware::EquipmentSet* equipmentSet);
+
+			std::shared_ptr<Hardware::DeviceObject> deviceObject(const QString& equipmentID);
+
+			bool appendDeviceObject(std::shared_ptr<Hardware::DeviceObject> devObject);
+
+		private:
+			Hardware::EquipmentSet* m_equipmentSet = nullptr;
+			std::unordered_map<QString, std::shared_ptr<Hardware::DeviceObject>> m_extDeviceObjects; // key == equipmentID, value == pointer to DeviceObject
+		};
+
 		struct FbConv
 		{
 			QString caption;
@@ -288,7 +302,10 @@ namespace Builder
 		//
 		bool loadLMSettings();
 		bool loadModulesSettings();
-
+		bool collectActuatorsUsedInUal();
+		bool createActuatorsAppAndDeviceSignals();
+		bool createActuatorInOutAppSignals(const QString& acmEquipmentID, const QString& acmTypeID, int acmChannel,
+											const std::vector<ActuatorSignal>& acmSignals, E::SignalInOutType acmSignalInOutType);
 		bool createModuleSignalsMap();
 
 		bool createUalItemsMaps();
@@ -321,6 +338,7 @@ namespace Builder
 
 		bool createUalItemSignalsList();
 
+		bool createUalSignalsFromAcmSignals();
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 		bool createUalSignalsForNonPlatformModules();
 
@@ -340,7 +358,7 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
-		bool createUalSignalsFromActuatorOuts(UalItem* ualItem);
+		bool linkUalSignalsFromActuatorOuts(UalItem* ualItem);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const SchemaPin& outPin, UalSignal* ualSignal);
@@ -471,6 +489,8 @@ namespace Builder
 		bool calculateIoSignalsAddresses();
 		bool getIoSignalModule(const AppSignal& ioSignal, Module* module,
 							   Hardware::DeviceAppSignal** deviceAppSignal) const;
+
+		bool setActuatorsSignalsUalAddresses();
 
 		bool disposeTunableSignalsUalAddresses();
 
@@ -999,6 +1019,14 @@ namespace Builder
 						const QStringList& analogs, const QStringList& busses, const QStringList& discretes);
 		void acmGetAppUalSignals(const QString& appSignalID, const AppSignal** appSignal, const UalSignal** ualSignal);
 
+		QString acmMakeCustomAppSignalID(const QString acmEquipmentID, const QString& actuatorTypeID, const QString& signalID) const;
+		QString acmMakeAppSignalID(const QString acmEquipmentID, const QString& actuatorTypeID, const QString& signalID) const;
+
+		int acmGetChannel(DeviceModuleShared lm) const;
+		int acmGetChannel(int lmPlace) const;
+
+		bool acmGetSwInOutSignalIoBufAddr(const QString& signalID, Address16* ioBufAddr) const;
+
 	public:
 		static const int MIN_AFB_OPCODE = 1;
 		static const int MAX_AFB_OPCODE = 63;
@@ -1013,11 +1041,12 @@ namespace Builder
 
 		DeviceModuleShared m_lm;
 
-		Hardware::EquipmentSet* m_equipmentSet = nullptr;
+		std::unique_ptr<ExtEquipmentSet> m_equipmentSet;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Builder::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
+		std::unordered_set<QString> m_acmSignals;
 
 		// Actuators processing
 		//
@@ -1040,11 +1069,15 @@ namespace Builder
 		std::vector<QStringList> m_acmSwOutDiscretes {2};
 		const UalAfb* m_acmCmpSiNeAfb = nullptr;
 
+		std::unordered_map<QString, Address16> m_swInOutSignalAddrs;	// SignalID => ioBufAddr
+
 		std::unordered_map<QString, std::pair<Address16, Address16>> m_acmSwInOutSignalAddrs;
 
 		quint32 m_acmSwInOutID = 0;
 		int m_acmInBufSize = 0;
 		int m_acmOutBufSize = 0;
+
+		std::unordered_map<QString, QString> m_acmUsedInUal;		// equipmentIDs of actuator modules used in UAL => ActuatorTypeID
 
 		//
 

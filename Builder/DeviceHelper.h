@@ -15,8 +15,8 @@ class DeviceHelper : public QObject
 {
 	Q_OBJECT
 public:
-	static constexpr int LM_PLACE1 = 0;
-	static constexpr int LM_PLACE2 = 15;
+	static constexpr int LM1_PLACE = 0;
+	static constexpr int LM2_PLACE = 15;
 
 	static constexpr int BVB_PLACE1 = 0;
 	static constexpr int BVB_PLACE2 = 13;

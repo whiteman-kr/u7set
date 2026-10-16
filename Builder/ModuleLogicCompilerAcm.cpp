@@ -448,6 +448,8 @@ namespace Builder
 
 					if (bus == nullptr)
 					{
+						delete appSignal;
+
 						// Bus type ID %1 of signal %2 is undefined.
 						//
 						m_log->errALC5092(as.busTypeId(), signalID);
@@ -485,6 +487,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::acmCreateInternalSignals()
 	{
+		bool result = true;
+
 		for (const UalItem* item : m_ualItems)
 		{
 			TEST_PTR_CONTINUE(item);
@@ -518,6 +522,8 @@ namespace Builder
 			{
 				Q_ASSERT(false);
 				delete appSignal;
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
 				continue;
 			}
 
@@ -530,7 +536,7 @@ namespace Builder
 			m_actuatorSignals->append(appSignal, m_lm);
 		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::acmCalculateIoSignalsAddresses()
@@ -877,6 +883,9 @@ namespace Builder
 			Address16 ualAddr = addr;
 
 			appSignal->setIoBufAddr(addr);
+
+			m_swInOutSignalAddrs.emplace(appSignal->appSignalID(), addr);
+
 			addr.addBit(appSignal->dataSize());
 
 			if ((appSignal->dataSize() % SIZE_16BIT) != 0)
@@ -940,6 +949,9 @@ namespace Builder
 			Address16 ualAddr = addr;
 
 			appSignal->setIoBufAddr(addr);
+
+			m_swInOutSignalAddrs.emplace(appSignal->appSignalID(), addr);
+
 			addr.addBit(appSignal->dataSize());
 
 			//
@@ -1837,5 +1849,50 @@ namespace Builder
 		*appSignal = m_actuatorSignals->getSignal(appSignalID);
 		*ualSignal = m_ualSignals.get(appSignalID);
 	}
+
+	QString ModuleLogicCompiler::acmMakeCustomAppSignalID(const QString acmEquipmentID, const QString& actuatorTypeID, const QString& signalID) const
+	{
+		return QString("%1_%2_%3").arg(acmEquipmentID).arg(actuatorTypeID).arg(signalID);
+	}
+
+	QString ModuleLogicCompiler::acmMakeAppSignalID(const QString acmEquipmentID, const QString& actuatorTypeID, const QString& signalID) const
+	{
+		return QString("#%1").arg(acmMakeCustomAppSignalID(acmEquipmentID, actuatorTypeID, signalID));
+	}
+
+	int ModuleLogicCompiler::acmGetChannel(DeviceModuleShared lm) const
+	{
+		TEST_PTR_RETURN_VALUE(lm, 0);
+		return acmGetChannel(lm->place());
+	}
+
+	int ModuleLogicCompiler::acmGetChannel(int lmPlace) const
+	{
+		int acmChannel = 1;
+
+		if (lmPlace != DeviceHelper::LM1_PLACE)
+		{
+			acmChannel = 2;
+		}
+
+		return acmChannel;
+	}
+
+	bool ModuleLogicCompiler::acmGetSwInOutSignalIoBufAddr(const QString& signalID, Address16* ioBufAddr) const
+	{
+		TEST_PTR_RETURN_FALSE(ioBufAddr);
+
+		auto it = m_swInOutSignalAddrs.find(signalID);
+
+		if (it == m_swInOutSignalAddrs.end())
+		{
+			return false;
+		}
+
+		*ioBufAddr = it->second;
+
+		return true;	
+	}
+
 
 } // namespace Builder

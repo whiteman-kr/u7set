@@ -34,6 +34,7 @@ namespace VFrame30
 		[[nodiscard]] QString signalId() const;
 		[[nodiscard]] QString signalIdChannel1() const;
 		[[nodiscard]] QString signalIdChannel2() const;
+		[[nodiscard]] QString signalIdChannel(int acmChannel) const;
 
 		void setSignalId(const QString& signalId);
 

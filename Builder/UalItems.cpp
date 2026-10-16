@@ -2953,6 +2953,11 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_NULLPTR(appSignal);
 
+		if (appSignal->appSignalID() == "#SYSTEMID_RACKID_CH02_MD02_MOTOR_OUT_FP1:1")
+		{
+			DEBUG_STOP;
+		}
+
 		switch(appSignal->signalType())
 		{
 		case E::SignalType::Discrete:

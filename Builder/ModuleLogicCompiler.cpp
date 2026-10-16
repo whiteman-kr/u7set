@@ -20,6 +20,53 @@
 
 namespace Builder
 {
+
+	// ---------------------------------------------------------------------------------
+	//
+	//	ModuleLogicCompiler::ExtEquipmentSet class implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	ModuleLogicCompiler::ExtEquipmentSet::ExtEquipmentSet(Hardware::EquipmentSet* equipmentSet) :
+		m_equipmentSet(equipmentSet)
+	{
+	}
+
+	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::ExtEquipmentSet::deviceObject(const QString& equipmentID)
+	{
+		std::shared_ptr<Hardware::DeviceObject> devObject = m_equipmentSet->deviceObject(equipmentID);
+
+		if (devObject != nullptr)
+		{
+			return devObject;
+		}
+
+		auto it = m_extDeviceObjects.find(equipmentID);
+
+		if (it != m_extDeviceObjects.end())
+		{
+			return it->second;
+		}
+
+		return nullptr;
+	}
+
+	bool ModuleLogicCompiler::ExtEquipmentSet::appendDeviceObject(std::shared_ptr<Hardware::DeviceObject> devObject)
+	{
+		if (devObject == nullptr)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		Q_ASSERT(devObject->equipmentIdTemplate().isEmpty() == false);
+		Q_ASSERT(deviceObject(devObject->equipmentIdTemplate()) == nullptr);
+
+		m_extDeviceObjects[devObject->equipmentIdTemplate()] = devObject;
+
+		return true;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler::BusFilling class implementation
@@ -188,6 +235,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::init()
 	{
+		m_log = m_appLogicCompiler.log();
+
 		// Check that either LM is defined in the project or actuator type is defined, but not both
 		//
 		if ((m_lm == nullptr && m_actuatorTypeID.isEmpty()) || 
@@ -197,8 +246,21 @@ namespace Builder
 			return false;
 		}
 
-		m_equipmentSet = m_appLogicCompiler.equipmentSet();
-		m_deviceRoot = m_equipmentSet->root().get();
+		//
+
+		Hardware::EquipmentSet* equipmentSet = m_appLogicCompiler.equipmentSet();
+
+		if (equipmentSet == nullptr)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		m_equipmentSet = std::make_unique<ExtEquipmentSet>(equipmentSet);
+		m_deviceRoot = equipmentSet->root().get();
+
+		//
 
 		m_appLogicData = m_appLogicCompiler.appLogicData();
 
@@ -248,7 +310,6 @@ namespace Builder
 		}
 
 		m_resultWriter = m_appLogicCompiler.buildResultWriter();
-		m_log = m_appLogicCompiler.log();
 
 		m_connections = m_appLogicCompiler.connectionStorage();
 		m_optoModuleStorage = m_appLogicCompiler.opticModuleStorage();
@@ -473,10 +534,10 @@ namespace Builder
 
 		Q_ASSERT(start != end && start != srcCode.end());
 
-		CodeSnippetConstIterator prev = start - 1;
-
-		if (prev != srcCode.end())
+		if (start != srcCode.begin())
 		{
+			CodeSnippetConstIterator prev = start - 1;
+
 			if (prev->isNewLine() == false)
 			{
 				optimizedCode << CodeItem();
@@ -635,6 +696,8 @@ namespace Builder
 		std::vector<ProcToCall> procs = {
 			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
 			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
+			PROC_TO_CALL(ModuleLogicCompiler::collectActuatorsUsedInUal),
+			PROC_TO_CALL(ModuleLogicCompiler::createActuatorsAppAndDeviceSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
@@ -945,11 +1008,11 @@ namespace Builder
 
 		if (m_lm->isLogicModule())
 		{
-			if (m.place != DeviceHelper::LM_PLACE1)
+			if (m.place != DeviceHelper::LM1_PLACE)
 			{
 				// Module %1 should be installed on place %2.
 				//
-				m_log->errEQP6012(m_lm->equipmentIdTemplate(), DeviceHelper::LM_PLACE1);
+				m_log->errEQP6012(m_lm->equipmentIdTemplate(), DeviceHelper::LM1_PLACE);
 				return false;
 			}
 		}
@@ -1038,7 +1101,7 @@ namespace Builder
 				continue;
 			}
 
-			if ((module->isLogicModule() &&module->place() == DeviceHelper::LM_PLACE1) ||
+			if ((module->isLogicModule() &&module->place() == DeviceHelper::LM1_PLACE) ||
 					//
 				(module->isBvb() && (module->place() == DeviceHelper::BVB_PLACE1 ||
 									 module->place() == DeviceHelper::BVB_PLACE2)) ||
@@ -1203,6 +1266,237 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::collectActuatorsUsedInUal()
+	{
+		if (m_moduleLogic == nullptr)
+		{
+			return true;
+		}
+
+		for (const AppLogicItem& logicItem : m_moduleLogic->items())
+		{
+			const std::shared_ptr<VFrame30::FblItemRect> item = logicItem.m_fblItem;
+
+			TEST_PTR_CONTINUE(item);
+
+			if (item->isActuatorElement() == false)
+			{
+				continue;
+			}
+
+			const SchemaActuator* actuator = item->toActuatorElement();
+
+			TEST_PTR_CONTINUE(actuator);
+
+			m_acmUsedInUal.emplace(actuator->acmEquipmentId(), actuator->actuatorTypeId());
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createActuatorsAppAndDeviceSignals()
+	{
+		int acmChannel = acmGetChannel(m_lm);
+
+		bool result = true;
+
+		for (const auto& [plase, module] : m_modules)
+		{
+			if (module.isAcmModule() == false)
+			{
+				continue;
+			}
+
+			if (module.device == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Module on place %1 is null").arg(plase));
+				return false;
+			}
+
+			const QString acmEquipmentID = module.device->equipmentIdTemplate();
+
+			auto it = m_acmUsedInUal.find(acmEquipmentID);
+			
+			if (it == m_acmUsedInUal.end())
+			{
+				continue;	// actuator is not used in UAL, its OK, no need to create AppSignals for it
+			}
+	
+			const QString acmTypeID = it->second;
+
+			const BuildActuatorType& actuatorType = getBuildActuatorType(acmTypeID);
+
+			if (actuatorType.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			const ActuatorHeader& acmHeader = actuatorType.actuatorHeader;
+
+			result &= createActuatorInOutAppSignals(acmEquipmentID, acmTypeID, acmChannel, acmHeader.inputs(), E::SignalInOutType::Input);
+			result &= createActuatorInOutAppSignals(acmEquipmentID, acmTypeID, acmChannel, acmHeader.outputs(), E::SignalInOutType::Output);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createActuatorInOutAppSignals(const QString& acmEquipmentID,
+															const QString& acmTypeID,
+															int acmChannel,
+															const std::vector<ActuatorSignal>& acmSignals,
+															E::SignalInOutType acmSignalInOutType)
+	{
+		if (acmSignalInOutType != E::SignalInOutType::Input && acmSignalInOutType != E::SignalInOutType::Output)
+		{
+			Q_ASSERT(false);
+			return false;
+		}	
+
+		if (acmChannel != 1 && acmChannel != 2)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool result = true;
+
+		// create Output AppSignals for actuator Inputs and Input AppSignals for actuator Outputs
+
+		E::SignalInOutType appSignalInOutType = acmSignalInOutType == E::SignalInOutType::Input ? E::SignalInOutType::Output : E::SignalInOutType::Input;
+
+		std::shared_ptr<ModuleLogicCompiler> acmCompiler = m_context->m_actuatorsLogicCompilers[acmTypeID];
+
+		if (acmCompiler == nullptr)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		int devSignalPlace = 1;
+
+		for (const ActuatorSignal& acmSignal : acmSignals)
+		{
+			QString acmSignalID;
+			
+			if (acmChannel == 1)
+			{
+				acmSignalID = acmSignal->signalIdChannel1();
+			}
+			else
+			{
+				acmSignalID = acmSignal->signalIdChannel2();
+			}
+			
+			AppSignal* appSignal = new AppSignal;
+
+			appSignal->setAppSignalID(acmMakeAppSignalID(acmEquipmentID, acmTypeID, acmSignalID));
+
+			QString customID = acmMakeCustomAppSignalID(acmEquipmentID, acmTypeID, acmSignalID);
+
+			appSignal->setCustomAppSignalID(customID);
+			appSignal->setEquipmentID(customID);
+			
+			appSignal->setInOutType(appSignalInOutType);
+			appSignal->setSignalType(acmSignal->signalType());
+			appSignal->setAcquire(false);
+
+			Address16 ioBufAddr;
+
+			bool res = acmCompiler->acmGetSwInOutSignalIoBufAddr(acmSignalID, &ioBufAddr);
+
+			if (res == false)
+			{
+				delete appSignal;
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<Hardware::DeviceObject> deviceObject = m_equipmentSet->deviceObject(acmEquipmentID);
+
+			if (deviceObject == nullptr)
+			{
+				delete appSignal;
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			int acmPlace = deviceObject->place() - 1;
+
+			//int moduleDataOffset = m_lmDescription->memory().m_moduleDataOffset + acmPlace * m_lmDescription->memory().m_moduleDataSize;
+
+			//ioBufAddr.addWord(moduleDataOffset);
+
+			//appSignal->setIoBufAddr(ioBufAddr);
+
+			E::DataFormat devSignalFormat = E::DataFormat::UnsignedInt;
+			int dataSize = 0;
+
+			switch (acmSignal->signalType())
+			{
+			case E::SignalType::Analog:
+
+				switch (acmSignal->analogFormat())
+				{
+				case E::AnalogAppSignalFormat::SignedInt32:
+					devSignalFormat = E::DataFormat::SignedInt;
+					break;
+
+				case E::AnalogAppSignalFormat::Float32:
+					devSignalFormat = E::DataFormat::Float;
+					break;
+
+				default:
+					Q_ASSERT(false);
+				}
+
+				Q_ASSERT(acmSignal->analogFormat() == E::AnalogAppSignalFormat::SignedInt32 || acmSignal->analogFormat() == E::AnalogAppSignalFormat::Float32);
+				dataSize = SIZE_32BIT;
+				appSignal->setDataSize(dataSize);
+				appSignal->setAnalogSignalFormat(acmSignal->analogFormat());
+				break;
+
+			case E::SignalType::Discrete:
+				dataSize = SIZE_1BIT;
+				appSignal->setDataSize(dataSize);
+				break;
+
+			case E::SignalType::Bus:
+				appSignal->setBusTypeID(acmSignal->busTypeId());
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			m_signals->append(appSignal, m_lm);
+			m_acmSignals.insert(appSignal->appSignalID());
+
+			// create DeviceAppSignal for actuator Input or Output	
+
+			std::shared_ptr<Hardware::DeviceAppSignal> deviceSignal = std::make_shared<Hardware::DeviceAppSignal>(false, nullptr);
+
+			deviceSignal->setEquipmentIdTemplate(customID);
+			deviceSignal->setSignalType(acmSignal->signalType());
+			deviceSignal->setFunction(appSignalInOutType == E::SignalInOutType::Input ? E::SignalFunction::Input : E::SignalFunction::Output);
+			deviceSignal->setByteOrder(E::ByteOrder::BigEndian);
+			deviceSignal->setFormat(devSignalFormat);
+			deviceSignal->setMemoryArea(E::MemoryArea::ApplicationData);
+			deviceSignal->setSize(dataSize);
+			deviceSignal->setValueOffset(ioBufAddr.offset());
+			deviceSignal->setValueBit(ioBufAddr.bit());
+
+			m_equipmentSet->appendDeviceObject(deviceSignal);
+		}
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::createModuleSignalsMap()
 	{
 		bool result = true;
@@ -1218,6 +1512,11 @@ namespace Builder
 			if (sg->equipmentID().isEmpty() == true)
 			{
 				continue;
+			}
+
+			if (sg->appSignalID() == "SYSTEMID_RACKID_CH02_MD02_MOTOR_OUT_DS16:1")
+			{
+				DEBUG_STOP;
 			}
 
 			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
@@ -1245,15 +1544,34 @@ namespace Builder
 
 					if (!(deviceModule->isLogicModule() ||
 						  deviceModule->isVdu() ||
-						  deviceModule->isNonPlatformAppDataSourceModule()))
+						  deviceModule->isNonPlatformAppDataSourceModule() || 
+						  deviceModule->isAcm()))
 					{
-						assert(false); // signal must be associated with LM or non-platform app data module
+						assert(false); // signal must be associated with LM, VDU, ACM or non-platform app data module
 						continue;
 					}
 
-					if (deviceModule->equipmentIdTemplate() != lmEquipmentID())
+					if (deviceModule->isAcm())
 					{
-						continue;
+						 const Hardware::DeviceModule* acmLm = DeviceHelper::getAssociatedLm(deviceModule);
+
+						 if (acmLm == nullptr)
+						 {
+							 assert(false);
+							 continue;
+						 }
+
+						 if (acmLm->equipmentIdTemplate() != lmEquipmentID())
+						 {
+							 continue;
+						 }
+					}
+					else
+					{
+						if (deviceModule->equipmentIdTemplate() != lmEquipmentID())
+						{
+							continue;
+						}
 					}
 
 					// signal is associated with current LM
@@ -1568,6 +1886,9 @@ namespace Builder
 
 		// primarily created signals
 		//
+
+//		result &= createUalSignalsFromAcmSignals(); DEBUG_STOP
+
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
 		result &= createUalSignalsForNonPlatformModules();
 		result &= createUalSignalsFromBusComposers();
@@ -1604,7 +1925,7 @@ namespace Builder
 				break;
 
 			case E::UalItemType::Actuator:
-				result &= createUalSignalsFromActuatorOuts(ualItem);
+				result &= linkUalSignalsFromActuatorOuts(ualItem);
 				break;
 
 			case E::UalItemType::BusExtractor:
@@ -2200,6 +2521,26 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalsFromAcmSignals()
+	{
+		bool result = true;
+
+		for (const QString& signalID : m_acmSignals)
+		{
+			AppSignal* appSignal = m_signals->getSignal(signalID);
+
+			if (appSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			m_ualSignals.createSignal(appSignal);
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
@@ -3229,9 +3570,8 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalsFromActuatorOuts(UalItem* ualItem)
+	bool ModuleLogicCompiler::linkUalSignalsFromActuatorOuts(UalItem* ualItem)
 	{
-		// Actuator TO DO
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		const SchemaActuator* actuatorItem = ualItem->schemaActuator();
@@ -3242,7 +3582,12 @@ namespace Builder
 			return false;
 		}
 
-		const QString& actuatorTypeID = actuatorItem->actuatorTypeId();
+		if (actuatorItem->hasOutputs() == false)
+		{
+			return true; // actuator has no outputs, nothing to link, it is Ok
+		}
+
+		const QString actuatorTypeID = actuatorItem->actuatorTypeId();
 
 		if (actuatorTypeID.isEmpty())
 		{
@@ -3259,6 +3604,8 @@ namespace Builder
 		}
 
 		const ActuatorHeader& actuatorHeader = actuatorType.actuatorHeader;
+
+		int acmChannel = acmGetChannel(m_lm);
 
 		bool result = true;
 
@@ -3277,85 +3624,9 @@ namespace Builder
 
 			ActuatorSignal actuatorSignal = actuatorHeader.getOutputActuatorSignal(pinCaption);
 
-			AfbSignal outAfbSignal;
+			QString appSignalID = acmMakeAppSignalID(actuatorItem->acmEquipmentId(), actuatorTypeID, actuatorSignal->signalIdChannel(acmGetChannel(m_lm)));
 
-			outAfbSignal.setType(actuatorSignal->signalType());
-			outAfbSignal.setDataFormat(actuatorSignal->dataFormat());
-			outAfbSignal.setByteOrder(E::ByteOrder::BigEndian);
-
-			QString outBusTypeID;
-			BusShared bus;
-
-			switch (actuatorSignal->signalType())
-			{
-			case E::SignalType::Analog:
-				Q_ASSERT(actuatorSignal->analogFormat() == E::AnalogAppSignalFormat::SignedInt32 || 
-					actuatorSignal->analogFormat() == E::AnalogAppSignalFormat::Float32);
-				outAfbSignal.setSize(SIZE_32BIT);
-				break;
-
-			case E::SignalType::Discrete:
-				outAfbSignal.setSize(SIZE_1BIT);
-				break;
-
-			case E::SignalType::Bus:
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
-
-			if (actuatorSignal->signalType() == E::SignalType::Bus)
-			{
-				outBusTypeID = actuatorSignal->busTypeId();
-				bus = m_signals->getBus(outBusTypeID);
-
-				if (bus == nullptr)
-				{
-					// Bus type ID '%1' is undefined (Logic schema '%2').
-					//
-					m_log->errALC5100(outBusTypeID, ualItem->guid(), ualItem->schemaID());
-					return false;
-				}
-			}
-
-			UalSignal* ualSignal = nullptr;
-
-			AppSignal* connectedSignal = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
-
-			switch (outAfbSignal.type())
-			{
-			case E::SignalType::Analog:
-			case E::SignalType::Discrete:
-				if (connectedSignal == nullptr)
-				{
-					std::optional<int> expectedReadCount;	//					= getOutPinExpectedReadCount(outPin);
-
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, expectedReadCount);
-				}
-				else
-				{
-					ualSignal = m_ualSignals.createSignal(connectedSignal, ualItem, outPin.guid());
-				}
-				break;
-
-			case E::SignalType::Bus:
-				{
-					std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
-
-					if (lm == nullptr)
-					{
-						LOG_INTERNAL_ERROR(m_log);
-						return false;
-					}
-
-					ualSignal = m_ualSignals.createBusParentSignal(connectedSignal, bus, ualItem, outPin.guid(), outAfbSignal.caption());
-				}
-				break;
-
-			default:
-				assert(false);
-			}
+			UalSignal* ualSignal = m_ualSignals.get(appSignalID);
 
 			if (ualSignal == nullptr)
 			{
@@ -6892,6 +7163,8 @@ namespace Builder
 				//
 				if (calculateIoSignalsAddresses() == false) break;
 
+				if (setActuatorsSignalsUalAddresses() == false) break;
+
 				if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
 
 				if (disposeTunableSignalsUalAddresses() == false) break;
@@ -7087,6 +7360,38 @@ namespace Builder
 		*module = it->second;
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::setActuatorsSignalsUalAddresses() 
+	{
+		bool result = true;
+
+		for (const QString& signalID : m_acmSignals)
+		{
+			AppSignal* appSignal = m_signals->getSignal(signalID);
+
+			if (appSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(signalID);
+
+			if (ualSignal == nullptr)
+			{
+				// int OK
+				continue;
+			}
+
+			qDebug() << "setActuatorsSignalsUalAddresses: signalID = " << signalID << ", ualAddr = " << appSignal->ioBufAddr().toString();
+
+			ualSignal->setUalAddr(appSignal->ioBufAddr());
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::disposeTunableSignalsUalAddresses()
@@ -7543,6 +7848,17 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			//
+
+			std::shared_ptr<Hardware::DeviceObject> deviceObject = m_equipmentSet->deviceObject(s->equipmentID());
+
+			if (deviceObject->isAppSignal() == false)
+			{
+				continue;			// ACM input signals is not connected to DeviceAppSignals, conversion is not required
+			}
+
+			//
 
 			UalItem appItem;
 
@@ -10189,6 +10505,17 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			//
+
+			std::shared_ptr<Hardware::DeviceObject> deviceObject = m_equipmentSet->deviceObject(s->equipmentID());
+
+			if (deviceObject->isAppSignal() == false)
+			{
+				continue; // ACM input signals is not connected to DeviceAppSignals, conversion is not required
+			}
+
+			//
 
 			assert(s->isAnalog() == true);
 			assert(s->isInput() == true);
@@ -19730,7 +20057,7 @@ namespace Builder
 				quint32 constValue32 = constValue;
 
 				constValue32 <<= 16;
-				constValue32 &= constValue;
+				constValue32 |= constValue;
 
 				cmd.movConstUInt32(addrFrom, constValue32);
 			}

@@ -347,8 +347,8 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = (Hardware::DeviceModule*)device;
 
-			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != DeviceHelper::LM_PLACE1 &&
-				module->place() != DeviceHelper::LM_PLACE2)
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != DeviceHelper::LM1_PLACE &&
+				module->place() != DeviceHelper::LM2_PLACE)
 			{
 				m_log.errEQP6009(module->equipmentIdTemplate(), module->uuid());
 				ok = false;

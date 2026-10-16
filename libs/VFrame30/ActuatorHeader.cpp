@@ -90,6 +90,27 @@ namespace VFrame30
 		return m_data.signalId + ":2";
 	}
 
+	QString ActuatorSignal::signalIdChannel(int acmChannel) const
+	{
+		QString id;
+
+		switch (acmChannel)
+		{
+		case 1:
+			id = signalIdChannel1();
+			break;
+
+		case 2:
+			id = signalIdChannel2();
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return id;
+	}
+
 	void ActuatorSignal::setSignalId(const QString& signalId)
 	{
 		m_data.signalId = signalId;

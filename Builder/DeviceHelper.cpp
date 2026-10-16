@@ -720,7 +720,7 @@ const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis*
 
 		if (module->isLogicModule() == true)
 		{
-			if (module->place() == LM_PLACE1)
+			if (module->place() == LM1_PLACE)
 			{
 				return 	module;
 			}

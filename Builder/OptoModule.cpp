@@ -2038,7 +2038,7 @@ namespace Hardware
 		{
 			if (module->isLogicModule() == true)
 			{
-				Q_ASSERT(m_place == DeviceHelper::LM_PLACE1);
+				Q_ASSERT(m_place == DeviceHelper::LM1_PLACE);
 			}
 
 			if (module->isBvb() == true)
